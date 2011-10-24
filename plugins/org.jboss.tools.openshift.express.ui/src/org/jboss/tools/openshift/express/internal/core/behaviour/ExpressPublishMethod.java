@@ -15,7 +15,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
 import org.jboss.ide.eclipse.as.core.server.xpl.PublishCopyUtil.IPublishCopyCallbackHandler;
-import org.jboss.ide.eclipse.as.egit.core.EGitUtils;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
