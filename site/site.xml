@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+	<description>To install these features, point Eclipse at this site.</description>
+	<!-- JBoss Tools as Nightly Build Update Site -->
+	<category-def label="JBoss Tools OpenShift Nightly Build Update Site" name="JBoss Tools OpenShift Nightly Build Update Site">
+		<description>JBoss Tools OpenShift Nightly Build Update Site: contains all features in this build.</description>
+	</category-def>
+	<feature url="features/org.jboss.tools.openshift.egit.integration.feature_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+	<feature url="features/org.jboss.tools.openshift.egit.integration.source.feature_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.source.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+
+	<feature url="features/org.jboss.tools.openshift.express.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+	<feature url="features/org.jboss.tools.openshift.express.source.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.source.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+</site>
