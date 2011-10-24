@@ -1,0 +1,31 @@
+<project
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.tools</groupId>
+		<artifactId>org.jboss.tools.parent.pom</artifactId>
+		<version>0.0.3-SNAPSHOT</version>
+		<relativePath>../build/parent/pom.xml</relativePath>
+	</parent>
+	<groupId>org.jboss.tools</groupId>
+	<artifactId>openshift</artifactId>
+	<name>openshift.all</name>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<modules>
+		<module>plugins</module>
+		<module>tests</module>
+		<module>features</module>
+		<module>site</module>
+	</modules>
+	<!-- no longer needed (https://issues.jboss.org/browse/JBIDE-9585) <repositories>
+		<repository>
+			<id>egit11</id>
+			<url>http://download.jboss.org/jbosstools/updates/requirements/egit/1.1.0.201108230343/</url>
+			<layout>p2</layout>
+			<snapshots><enabled>true</enabled></snapshots>
+			<releases><enabled>true</enabled></releases>
+		</repository>
+	</repositories> -->
+</project>
+	

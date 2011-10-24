@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
+            name="OpenShift">
+      </category>
+      <wizard
+            category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.ImportProjectWizard"
+            icon="icons/openshift-logo-white-icon.png"
+            id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.NewServerAdapter"
+            name="OpenShift Express Application">
+      </wizard>
+   </extension>
+   <extension
+         point="org.jboss.ide.eclipse.as.core.behaviourExtension">
+      <behaviour
+            behaviourDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBehaviourDelegate"
+            launchDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressLaunchDelegate"
+            name="OpenShift Express"
+            publishMethod="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressPublishMethod"
+            serverTypes="org.jboss.ide.eclipse.as.70,org.jboss.ide.eclipse.as.eap.60"
+            typeId="openshift">
+      </behaviour>
+   </extension>
+   <extension
+         point="org.jboss.ide.eclipse.as.ui.DeployMethodUI">
+      <ui
+            class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftDeployUI"
+            deployMethodId="openshift">
+      </ui>
+   </extension>
+</plugin>

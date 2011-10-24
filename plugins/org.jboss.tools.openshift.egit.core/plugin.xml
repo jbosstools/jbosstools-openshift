@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.wst.server.core.moduleTypes">
+      <moduleType
+            id="jbt.egit"
+            name="Egit">
+      </moduleType>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.wst.server.core.moduleFactories">
+      <moduleFactory
+            class="org.jboss.ide.eclipse.as.egit.core.module.GitProjectModuleFactoryDelegate"
+            id="org.jboss.ide.eclipse.as.egit.core.module.gitProjectModuleFactory"
+            projects="true">
+         <moduleType
+               types="jbt.egit"
+               versions="1.0">
+         </moduleType>
+      </moduleFactory>
+   </extension>
+   <extension
+         point="org.jboss.ide.eclipse.as.core.publishMethod">
+      <publishMethod
+            class="org.jboss.ide.eclipse.as.egit.core.EgitPublishMethod"
+            id="egit"
+            name="Egit Publish Method"
+            serverTypes="org.jboss.ide.eclipse.as.systemCopyServer">
+      </publishMethod>
+   </extension>
+      <extension
+         point="org.jboss.ide.eclipse.as.core.behaviourExtension">
+      <behaviour
+            behaviourDelegate="org.jboss.ide.eclipse.as.egit.core.EgitBehaviourDelegate"
+            name="%EGitMethodName"
+            publishMethod="org.jboss.ide.eclipse.as.egit.core.EgitPublishMethod"
+            serverTypes="%ServerTypesJBoss7"
+            typeId="egit">
+      </behaviour>
+   </extension>
+   -->
+</plugin>

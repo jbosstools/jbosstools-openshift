@@ -1,0 +1,114 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+package org.jboss.tools.openshift.express.internal.ui.wizard;
+
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+
+/**
+ * @author André Dietisheim
+ */
+public abstract class AbstractOpenShiftWizardPage extends WizardPage {
+
+	private DataBindingContext dbc;
+
+	protected AbstractOpenShiftWizardPage(String title, String description, String pageName, IWizard wizard) {
+		super(pageName);
+		setWizard(wizard);
+		setTitle(title);
+		setDescription(description);
+		setImageDescriptor(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+	}
+
+	@Override
+	public void createControl(Composite parent) {
+		this.dbc = new DataBindingContext();
+		setupWizardPageSupport(dbc);
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(6,6).applyTo(container);
+		Composite child = new Composite(container, SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(child);
+		setControl(container);
+		initPageChangedListener();
+		doCreateControls(child, dbc);
+	}
+
+	protected void setupWizardPageSupport(DataBindingContext dbc) {
+		ParametrizableWizardPageSupport.create(
+				IStatus.ERROR | IStatus.INFO | IStatus.WARNING | IStatus.CANCEL, this,
+				dbc);
+	}
+
+	protected void initPageChangedListener() {
+		IWizardContainer wizardContainer = getContainer();
+		if (wizardContainer instanceof WizardDialog) {
+			((WizardDialog) getContainer()).addPageChangedListener(new IPageChangedListener() {
+
+				@Override
+				public void pageChanged(PageChangedEvent event) {
+					if (event.getSelectedPage() == AbstractOpenShiftWizardPage.this) {
+						onPageActivated(dbc);
+					} else {
+						onPageDeactivated(dbc);
+					}
+				}
+			});
+			((WizardDialog) getContainer()).addPageChangingListener(new IPageChangingListener() {
+
+				@Override
+				public void handlePageChanging(PageChangingEvent event) {
+					if (event.getTargetPage() == AbstractOpenShiftWizardPage.this) {
+						onPageWillGetActivated(event, dbc);
+					} else {
+						onPageWillGetDeactivated(event, dbc);
+					}
+				}
+			});
+		}
+	}
+
+	protected DataBindingContext getDatabindingContext() {
+		return dbc;
+	}
+
+	protected void onPageActivated(DataBindingContext dbc) {
+	}
+	
+	protected void onPageDeactivated(DataBindingContext dbc) {
+	}
+
+	protected void onPageWillGetActivated(PageChangingEvent event, DataBindingContext dbc) {
+	}
+	
+	protected void onPageWillGetDeactivated(PageChangingEvent event, DataBindingContext dbc) {
+	}
+
+	protected abstract void doCreateControls(Composite parent, DataBindingContext dbc);
+
+	protected DataBindingContext getDataBindingContext() {
+		return dbc;
+	}
+
+}
