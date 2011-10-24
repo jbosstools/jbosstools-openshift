@@ -10,7 +10,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>openshift</artifactId>
 	<name>openshift.all</name>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>2.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>plugins</module>
@@ -18,14 +18,5 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<module>features</module>
 		<module>site</module>
 	</modules>
-	<!-- no longer needed (https://issues.jboss.org/browse/JBIDE-9585) <repositories>
-		<repository>
-			<id>egit11</id>
-			<url>http://download.jboss.org/jbosstools/updates/requirements/egit/1.1.0.201108230343/</url>
-			<layout>p2</layout>
-			<snapshots><enabled>true</enabled></snapshots>
-			<releases><enabled>true</enabled></releases>
-		</repository>
-	</repositories> -->
 </project>
 	

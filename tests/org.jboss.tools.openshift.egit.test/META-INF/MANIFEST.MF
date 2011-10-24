@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: EGit Tests
-Bundle-SymbolicName: org.jboss.ide.eclipse.as.egit.test
+Bundle-SymbolicName: org.jboss.tools.openshift.egit.test
 Bundle-Version: 2.3.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.egit.internal.test.EGitTestActivator
 Bundle-Vendor: JBoss by Red Hat

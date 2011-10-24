@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenShift Core Plugin
 Bundle-SymbolicName: org.jboss.tools.openshift.express.client 
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 2.3.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.express.internal.client.OpenShiftCoreActivator
 Bundle-Vendor: JBoss by Red Hat
 Require-Bundle: org.eclipse.core.runtime,
