@@ -519,7 +519,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		boolean canCreateServer = serverTypeToCreate != null;
 		serverAdapterCheckbox.setEnabled(canCreateServer);
 		// serverAdapterCheckbox.setSelection(canCreateServer);
-		serverAdapterCheckboxObservable.setValue(true);
+		serverAdapterCheckboxObservable.setValue(canCreateServer);
 		enableServerWidgets(canCreateServer);
 		refreshValidRuntimes();
 		model.getParentModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
