@@ -323,7 +323,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		Label domainLabel = new Label(c, SWT.NONE);
 		domainLabel.setText("Host");
 		domainValueLabel = new Label(c, SWT.NONE);
-		DataBindingContext dbc = getDatabindingContext();
+		DataBindingContext dbc = getDataBindingContext();
 		ValueBindingBuilder
 				.bind(WidgetProperties.text().observe(domainValueLabel))
 				.notUpdating(BeanProperties.value(AdapterWizardPageModel.PROPERTY_APPLICATION_URL).observe(model))

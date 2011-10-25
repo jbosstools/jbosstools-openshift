@@ -208,7 +208,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 										"Could not rename domain", e);
 							}
 						}
-					}, getContainer(), getDatabindingContext());
+					}, getContainer(), getDataBindingContext());
 		} catch (Exception ex) {
 			// ignore
 		}
@@ -363,7 +363,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 					}
 				}
 
-			}, getContainer(), getDatabindingContext());
+			}, getContainer(), getDataBindingContext());
 
 		} catch (Exception ex) {
 			// ignore
