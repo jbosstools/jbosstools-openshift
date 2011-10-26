@@ -82,12 +82,13 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		Display.getDefault().syncExec(new Runnable() { 
 			public void run() {
 				MessageBox messageBox = new MessageBox(new Shell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		        messageBox.setMessage(message);
-		        messageBox.setText(title);
-		        int response = messageBox.open();
-		        if (response == SWT.YES)
-		        	b[0] = true;
-		        b[1] = false;
+			        messageBox.setMessage(message);
+			        messageBox.setText(title);
+			        int response = messageBox.open();
+			        if (response == SWT.YES)
+			        	b[0] = true;
+				else
+				        b[0] = false;
 			}
 		});
 		return b[0];
