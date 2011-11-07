@@ -20,7 +20,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -33,10 +32,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
  */
 public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
-	protected enum WizardProgressDirection {
-		BACKWARD, FORWARD
-	}
-	
 	private DataBindingContext dbc;
 
 	protected AbstractOpenShiftWizardPage(String title, String description, String pageName, IWizard wizard) {
@@ -85,34 +80,17 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 				@Override
 				public void handlePageChanging(PageChangingEvent event) {
 					if (event.getTargetPage() == AbstractOpenShiftWizardPage.this) {
-						onPageWillGetActivated(getActivationDirection(event), event, dbc);
-					} else if (event.getCurrentPage() == AbstractOpenShiftWizardPage.this){
-						onPageWillGetDeactivated(getDeactivationDirection(event), event, dbc);
+						onPageWillGetActivated(event, dbc);
+					} else {
+						onPageWillGetDeactivated(event, dbc);
 					}
 				}
-
 			});
 		}
 	}
 
-	private WizardProgressDirection getActivationDirection(PageChangingEvent event) {
-		IWizardPage previousPage = getPreviousPage();
-		if (previousPage == null
-				|| previousPage.equals(event.getCurrentPage())) {
-			return WizardProgressDirection.BACKWARD;
-		} else {
-			return WizardProgressDirection.FORWARD;
-		}
-	}
-
-	private WizardProgressDirection getDeactivationDirection(PageChangingEvent event) {
-		IWizardPage previousPage = getPreviousPage();
-		if (previousPage == null
-				|| previousPage.equals(event.getTargetPage())) {
-			return WizardProgressDirection.BACKWARD;
-		} else {
-			return WizardProgressDirection.FORWARD;
-		}
+	protected DataBindingContext getDatabindingContext() {
+		return dbc;
 	}
 
 	protected void onPageActivated(DataBindingContext dbc) {
@@ -121,10 +99,10 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	protected void onPageDeactivated(DataBindingContext dbc) {
 	}
 
-	protected void onPageWillGetActivated(WizardProgressDirection direction, PageChangingEvent event, DataBindingContext dbc) {
+	protected void onPageWillGetActivated(PageChangingEvent event, DataBindingContext dbc) {
 	}
 	
-	protected void onPageWillGetDeactivated(WizardProgressDirection direction, PageChangingEvent event, DataBindingContext dbc) {
+	protected void onPageWillGetDeactivated(PageChangingEvent event, DataBindingContext dbc) {
 	}
 
 	protected abstract void doCreateControls(Composite parent, DataBindingContext dbc);
@@ -132,4 +110,5 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	protected DataBindingContext getDataBindingContext() {
 		return dbc;
 	}
+
 }

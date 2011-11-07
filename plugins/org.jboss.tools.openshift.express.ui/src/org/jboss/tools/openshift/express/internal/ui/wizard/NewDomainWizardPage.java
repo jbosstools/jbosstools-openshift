@@ -26,6 +26,7 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
@@ -93,6 +94,16 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 						"You have to select a ssh public key")),
 				new UpdateValueStrategy().setAfterGetValidator(new SSHKeyValidator()));
 		ControlDecorationSupport.create(sshKeyTextBinding, SWT.TOP | SWT.LEFT);
+		try {
+			model.initSshKey();
+		} catch (OpenShiftException ex) {
+			IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+					"Could check your ssh keys", ex);
+			OpenShiftUIActivator.log(status);
+			ErrorDialog.openError(getShell(),
+					"Error checking your ssh keys",
+					"Could not check your ssh keys", status);
+		}
 
 		Button browseButton = new Button(container, SWT.PUSH);
 		browseButton.setText("Browse");
@@ -113,7 +124,6 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs());
-
 	}
 
 	private SelectionListener onNew() {
@@ -122,26 +132,35 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				InputDialog dialog = new PassphraseDialog(getShell());
-				if (Dialog.OK == dialog.open()) {
-					try {
-						String passPhrase = dialog.getValue();
-						model.createSShKeyPair(passPhrase);
-					} catch (FileNotFoundException ex) {
-						IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								"Could not read the ssh key folder", ex);
-						OpenShiftUIActivator.log(status);
-						ErrorDialog.openError(getShell(),
-								"Error creating a new ssh key pair",
-								"Could not create a new ssh key pair", status);
-					} catch (OpenShiftException ex) {
-						IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								"Could not create an ssh key pair", ex);
-						OpenShiftUIActivator.log(status);
-						ErrorDialog.openError(getShell(),
-								"Error creating a new ssh key pair",
-								"Could not create a new ssh key pair", status);
+				try {
+					if (model.libraPublicKeyExists()) {
+						MessageDialog.openInformation(getShell(), 
+								"Libra Key already present", 
+								"You already have a key at \"" + model.getLibraPublicKey() + "\". Please move it or use it.");
+						return;
+					} 
+
+					InputDialog dialog = new PassphraseDialog(getShell());
+					if (Dialog.OK == dialog.open()) {
+						try {
+							String passPhrase = dialog.getValue();
+							model.createLibraKeyPair(passPhrase);
+						} catch (FileNotFoundException ex) {
+							IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+									"Could not read the ssh key folder", ex);
+							OpenShiftUIActivator.log(status);
+							ErrorDialog.openError(getShell(),
+									"Error creating a new ssh key pair",
+									"Could not create a new ssh key pair", status);
+						}
 					}
+				} catch (OpenShiftException ex) {
+					IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+							"Could not create an ssh key pair", ex);
+					OpenShiftUIActivator.log(status);
+					ErrorDialog.openError(getShell(),
+							"Error creating a new ssh key pair",
+							"Could not create a new ssh key pair", status);
 				}
 			}
 		};
@@ -177,7 +196,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 				SshPrivateKeysPreferences.openPreferencesPage(getShell());
 				// refresh warning about key 
 				// (since user may have changed SSH2 prefs)
-				getDataBindingContext().updateTargets();
+				getDatabindingContext().updateTargets();
 			}
 		};
 	}

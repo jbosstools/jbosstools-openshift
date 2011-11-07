@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jsch.internal.core.IConstants;
+import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.client.IDomain;
 import org.jboss.tools.openshift.express.client.ISSHPublicKey;
 import org.jboss.tools.openshift.express.client.IUser;
@@ -29,7 +31,7 @@ import org.jboss.tools.openshift.express.internal.ui.common.FileUtils;
  */
 public class NewDomainWizardPageModel extends ObservableUIPojo {
 
-	private static final String OPENSHIFT_KEY_PREFIX = "openshift_id_rsa_";
+	public static final String LIBRA_KEY = "libra_id_rsa";
 	private static final String PUBLIC_KEY_SUFFIX = ".pub";
 
 	public static final String PROPERTY_NAMESPACE = "namespace";
@@ -46,6 +48,40 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		this.user = user;
 	}
 
+	public void initSshKey() throws OpenShiftException {
+		if (!libraPublicKeyExists()) {
+			return;
+		}
+		File libraPublicKey = getLibraPublicKey();
+		setSshKey(libraPublicKey.getAbsolutePath());
+	}
+
+	/**
+	 * Returns the file of the libra public key. It is not checking if the file exists.
+	 *  
+	 * @return the libra public key 
+	 * @throws OpenShiftException 
+	 */
+	public File getLibraPublicKey() throws OpenShiftException {
+		File libraPrivateKey = getLibraPrivateKey();
+		return new File(libraPrivateKey.getParent(), getPublicKeyPath(libraPrivateKey.getName()));
+	}
+
+	private String getPublicKeyPath(String privateKeyPath) {
+		return privateKeyPath + PUBLIC_KEY_SUFFIX;
+	}
+
+	public File getLibraPrivateKey() throws OpenShiftException {
+		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
+		String ssh2Home = preferences.getString(IConstants.KEY_SSH2HOME);
+		if (ssh2Home == null 
+				|| ssh2Home.trim().length() == 0) {
+			throw new OpenShiftException("Could not determine your ssh2 home directory");
+		}
+		
+		return new File(ssh2Home, LIBRA_KEY);
+	}
+
 	public String getNamespace() {
 		return this.namespace;
 	}
@@ -58,34 +94,37 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	public String getSshKey() {
 		return sshKey;
 	}
+	
+	public boolean libraPublicKeyExists() throws OpenShiftException {
+		return FileUtils.canRead(getLibraPublicKey());
+	}
 
-	public void createSShKeyPair(String passPhrase) throws FileNotFoundException, OpenShiftException {
-		String sshKeysDirectory = SshPrivateKeysPreferences.getSshKeyDirectory();
-		SSHKeyPair keyPair = createSshKeyPair(passPhrase, sshKeysDirectory);
-		SshPrivateKeysPreferences.add(keyPair.getPrivateKeyPath());
+	public void createLibraKeyPair(String passPhrase) throws FileNotFoundException, OpenShiftException {
+		File libraPublicKey = getLibraPublicKey();
+		if (libraPublicKey.canRead()) {
+			// key already exists
+			return;
+		}
+		File libraPrivateKey = getLibraPrivateKey();
+		SSHKeyPair keyPair = SSHKeyPair.create(passPhrase, libraPrivateKey.getAbsolutePath(), libraPublicKey.getAbsolutePath());
+		addToPrivateKeysPreferences(keyPair);
 		setSshKey(keyPair.getPublicKeyPath());
 	}
 	
-	private SSHKeyPair createSshKeyPair(String passPhrase, String sshKeysDirectory) throws OpenShiftException {
-		String privateKeyPath = getKeyPairFileName(sshKeysDirectory);
-		String publicKeyPath = getPublicKeyPath(privateKeyPath);
-		return SSHKeyPair.create(passPhrase, privateKeyPath, publicKeyPath);
-	}
-	
-	private String getKeyPairFileName(String sshKeysDirectory) {
-		int i = 0;
-		File privateKey = null;
-		while (FileUtils.canRead(privateKey = new File(sshKeysDirectory, OPENSHIFT_KEY_PREFIX + i))
-				|| FileUtils.canRead(new File(sshKeysDirectory, getPublicKeyPath(privateKey.getName())))) {
-			i++;
+	private void addToPrivateKeysPreferences(SSHKeyPair keyPair) {
+		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
+		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
+		if (privateKeys != null 
+				&& privateKeys.trim().length() > 0) {
+			privateKeys = privateKeys + ","	+ keyPair.getPrivateKeyPath();
+		} else {
+			privateKeys = keyPair.getPrivateKeyPath();
 		}
-		return privateKey.getAbsolutePath();
+		preferences.setValue(IConstants.KEY_PRIVATEKEY, privateKeys);
+	    JSchCorePlugin.getPlugin().setNeedToLoadKeys(true);
+	    JSchCorePlugin.getPlugin().savePluginPreferences();
 	}
-
-	private String getPublicKeyPath(String privateKeyPath) {
-		return privateKeyPath + PUBLIC_KEY_SUFFIX;
-	}
-
+		
 	public void setSshKey(String sshKey) {
 		firePropertyChange(PROPERTY_SSHKEY, this.sshKey, this.sshKey = sshKey);
 	}

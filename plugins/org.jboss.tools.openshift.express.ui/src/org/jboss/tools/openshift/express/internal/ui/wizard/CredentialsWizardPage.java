@@ -146,9 +146,8 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	@Override
-	protected void onPageWillGetDeactivated(WizardProgressDirection direction, PageChangingEvent event, DataBindingContext dbc) {
-		if (!model.areCredentialsValidated()
-				&& direction == WizardProgressDirection.FORWARD) {
+	protected void onPageWillGetDeactivated(PageChangingEvent event, DataBindingContext dbc) {
+		if (!model.areCredentialsValidated()) {
 			try {
 				final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);
 				WizardUtils.runInWizard(
@@ -160,7 +159,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 								queue.offer(status);
 								return Status.OK_STATUS;
 							}
-						}, getContainer(), getDataBindingContext());
+						}, getContainer(), getDatabindingContext());
 				queue.poll(10, TimeUnit.SECONDS);
 				event.doit = model.areCredentialsValid();
 			} catch (Exception ex) {
