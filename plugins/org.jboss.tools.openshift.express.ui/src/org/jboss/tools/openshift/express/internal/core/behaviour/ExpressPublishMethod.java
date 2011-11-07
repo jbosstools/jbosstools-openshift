@@ -8,10 +8,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.internal.ui.wizards.ConfigureProjectWizard;
 import org.eclipse.ui.PlatformUI;
@@ -120,17 +119,21 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		final boolean[] b = new boolean[1];
 		Display.getDefault().syncExec(new Runnable() { 
 			public void run() {
-				MessageBox messageBox = new MessageBox(new Shell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-			        messageBox.setMessage(message);
-			        messageBox.setText(title);
-			        int response = messageBox.open();
-			        if (response == SWT.YES)
-			        	b[0] = true;
-				else
-				        b[0] = false;
+		        b[0] = MessageDialog.openQuestion(getActiveShell(), title, message);
 			}
 		});
 		return b[0];
+	}
+	
+	private static Shell getActiveShell() {
+		Display display = Display.getDefault();
+		final Shell[] ret = new Shell[1];
+		display.syncExec(new Runnable() {
+			public void run() {
+				ret[0] = Display.getCurrent().getActiveShell();
+			}
+		});
+		return ret[0];
 	}
 	
 	@Override
