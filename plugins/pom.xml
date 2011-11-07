@@ -13,8 +13,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<modules>
 		<module>org.jboss.tools.openshift.egit.core</module>
 		<module>org.jboss.tools.openshift.egit.ui</module>
-		<!-- JBIDE-10068
-		<module>org.jboss.tools.openshift.express.client</module> -->
+		<module>org.jboss.tools.openshift.express.client</module>
 		<module>org.jboss.tools.openshift.express.ui</module>
 	</modules>
 </project>
