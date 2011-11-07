@@ -10,3 +10,4 @@ Bundle-ClassPath: .,
  org.jboss.tools.openshift.express.client-2.3.0-SNAPSHOT.jar
 Export-Package: org.jboss.tools.openshift.express.client,
  org.jboss.tools.openshift.express.client.utils
+Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44"
