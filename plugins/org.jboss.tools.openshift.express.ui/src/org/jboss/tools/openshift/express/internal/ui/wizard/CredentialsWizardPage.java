@@ -146,7 +146,11 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	@Override
-	protected void onPageWillGetDeactivated(PageChangingEvent event, DataBindingContext dbc) {
+	protected void onPageWillGetDeactivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
+		if (direction == Direction.BACKWARDS) {
+			return;
+		}
+		
 		if (!model.areCredentialsValidated()) {
 			try {
 				final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);

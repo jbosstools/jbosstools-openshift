@@ -32,6 +32,10 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
  */
 public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
+	protected enum Direction {
+		FORWARDS, BACKWARDS
+	}
+	
 	private DataBindingContext dbc;
 
 	protected AbstractOpenShiftWizardPage(String title, String description, String pageName, IWizard wizard) {
@@ -80,9 +84,19 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 				@Override
 				public void handlePageChanging(PageChangingEvent event) {
 					if (event.getTargetPage() == AbstractOpenShiftWizardPage.this) {
-						onPageWillGetActivated(event, dbc);
-					} else {
-						onPageWillGetDeactivated(event, dbc);
+						if (event.getCurrentPage() == null
+								|| event.getCurrentPage().equals(getPreviousPage())) {
+							onPageWillGetActivated(Direction.FORWARDS, event, dbc);
+						} else {
+							onPageWillGetActivated(Direction.BACKWARDS, event, dbc);
+						}
+					} else if (event.getCurrentPage() == AbstractOpenShiftWizardPage.this){
+						if (event.getTargetPage() == null
+								|| event.getTargetPage().equals(getNextPage())) {
+							onPageWillGetDeactivated(Direction.FORWARDS, event, dbc);							
+						} else {
+							onPageWillGetDeactivated(Direction.BACKWARDS, event, dbc);
+						}
 					}
 				}
 			});
@@ -99,10 +113,17 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	protected void onPageDeactivated(DataBindingContext dbc) {
 	}
 
-	protected void onPageWillGetActivated(PageChangingEvent event, DataBindingContext dbc) {
+	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
 	}
 	
-	protected void onPageWillGetDeactivated(PageChangingEvent event, DataBindingContext dbc) {
+	/**
+	 * Callback that gets called when this page is going to be deactivated.
+	 *  
+	 * @param progress the direction that the wizard is moving: backwards/forwards
+	 * @param event the page changing event that may be use to veto the change 
+	 * @param dbc the current data binding context
+	 */
+	protected void onPageWillGetDeactivated(Direction progress, PageChangingEvent event, DataBindingContext dbc) {
 	}
 
 	protected abstract void doCreateControls(Composite parent, DataBindingContext dbc);
