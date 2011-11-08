@@ -71,7 +71,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 	private ImportProjectWizardModel wizardModel;
 
 	protected ApplicationWizardPage(IWizard wizard, ImportProjectWizardModel wizardModel) {
-		super("Application selection", "Please select an OpenShift Express application",
+		super("Application selection", "Please select an application to start with, or create a new one.",
 				"Application selection", wizard);
 		this.wizardModel = wizardModel;
 		this.model = new ApplicationWizardPageModel(wizardModel);
@@ -140,7 +140,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 							return ValidationStatus.ok();
 						}
 						else {
-							return ValidationStatus.info("You have to select an application...");
+							return ValidationStatus.info("Please select an application to start with, or create a new one");
 						}
 					}
 				}),

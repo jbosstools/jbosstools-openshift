@@ -62,7 +62,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(container);
 
 		Link signupLink = new Link(container, SWT.WRAP);
-		signupLink.setText("If you have no user account on OpenShift Express yet, please sign up <a>here</a>.");
+		signupLink.setText("If you dont have an account on OpenShift, please sign up <a>here</a>.");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).hint(SWT.DEFAULT, 30).applyTo(signupLink);
 		signupLink.addSelectionListener(onSignupLinkClicked());
 

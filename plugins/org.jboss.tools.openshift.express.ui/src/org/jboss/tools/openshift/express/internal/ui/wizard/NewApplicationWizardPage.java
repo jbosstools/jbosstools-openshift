@@ -70,7 +70,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(nameBinding, SWT.LEFT | SWT.TOP);
 
 		Label cartridgeLabel = new Label(parent, SWT.WRAP);
-		cartridgeLabel.setText("&Cartridge");
+		cartridgeLabel.setText("&Application Type");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(cartridgeLabel);
 		Combo cartridgesCombo = new Combo(parent, SWT.BORDER |
 				SWT.READ_ONLY);
