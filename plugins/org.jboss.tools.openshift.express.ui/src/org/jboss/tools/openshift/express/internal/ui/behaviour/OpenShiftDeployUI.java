@@ -31,6 +31,9 @@ public class OpenShiftDeployUI implements IDeploymentTypeUI {
 	private Text userText, passText;
 	private Combo modeCombo;
 	
+	private String safeString(String s) {
+		return s == null ? "" : s;
+	}
 	private void createWidgets(Composite parent, IServerModeUICallback callback) {
 		// TODO Auto-generated method stub
 		parent.setLayout(new FillLayout());
@@ -52,8 +55,8 @@ public class OpenShiftDeployUI implements IDeploymentTypeUI {
 		Label modeLabel = new Label(composite, SWT.NONE);
 		modeLabel.setText("Mode: " + ExpressServerUtils.getExpressModeAsString(callback.getServer()));
 		
-		userText.setText(ExpressServerUtils.getExpressUsername(callback.getServer()));
-		passText.setText(ExpressServerUtils.getExpressPassword(callback.getServer()));
+		userText.setText(safeString(ExpressServerUtils.getExpressUsername(callback.getServer())));
+		passText.setText(safeString(ExpressServerUtils.getExpressPassword(callback.getServer())));
 		userText.setEnabled(false);
 		passText.setEnabled(false);
 		// Maybe just make this a label ??
