@@ -27,7 +27,9 @@ Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="2.3.0",
  org.eclipse.m2e.core.ui;bundle-version="1.0.100",
  org.eclipse.wst.common.modulecore;bundle-version="1.2.100",
  org.eclipse.team.ui;bundle-version="3.6.100",
- org.jboss.tools.openshift.egit.core;bundle-version="2.3.0"
+ org.jboss.tools.openshift.egit.core;bundle-version="2.3.0",
+ org.eclipse.jdt.launching;bundle-version="3.6.0",
+ org.eclipse.debug.ui;bundle-version="3.7.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.jboss.tools.common.databinding,
@@ -35,5 +37,5 @@ Import-Package: org.jboss.tools.common.databinding,
  org.jboss.tools.common.ui.databinding,
  org.jboss.tools.common.ui.preferencevalue,
  org.jboss.tools.common.ui.ssh
-Bundle-Vendor: JBoss by Red Hat
+Bundle-Vendor: %Bundle-Vendor.0
 

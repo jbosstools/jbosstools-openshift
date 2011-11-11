@@ -78,18 +78,12 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	private Text gitUriValueText;
 
 	private AdapterWizardPageModel model;
-	private Combo suitableRuntimesCombo;
 	private IServerType serverTypeToCreate;
-	private IRuntime runtimeDelegate;
 	private Label domainValueLabel;
 	private Label modeValueLabel;
-	private Link addRuntimeLink;
-	private Label runtimeLabel;
 	private Button serverAdapterCheckbox;
 
 	private IObservableValue serverAdapterCheckboxObservable;
-	private IObservableValue selectedRuntimeObservable;
-	private IObservableList suitableRuntimesObservable;
 
 	public AdapterWizardPage(ImportProjectWizard wizard, ImportProjectWizardModel model) {
 		super(
@@ -128,7 +122,6 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 
 		gitUriValueText = new Text(cloneGroup, SWT.BORDER);
 		gitUriValueText.setEditable(false);
-		// gitUriValueText.setBackground(cloneGroup.getBackground());
 		GridDataFactory
 				.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gitUriValueText);
 		ValueBindingBuilder
@@ -289,9 +282,6 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	}
 
 	protected void enableServerWidgets(boolean enabled) {
-		suitableRuntimesCombo.setEnabled(enabled);
-		runtimeLabel.setEnabled(enabled);
-		addRuntimeLink.setEnabled(enabled);
 		domainValueLabel.setEnabled(enabled);
 		modeValueLabel.setEnabled(enabled);
 	}
@@ -313,13 +303,6 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 			}
 		});
 
-		runtimeLabel = new Label(c, SWT.NONE);
-		runtimeLabel.setText("Local Runtime");
-
-		suitableRuntimesCombo = new Combo(c, SWT.READ_ONLY);
-		addRuntimeLink = new Link(c, SWT.NONE);
-		addRuntimeLink.setText("<a>" + Messages.addRuntime + "</a>");
-
 		Label domainLabel = new Label(c, SWT.NONE);
 		domainLabel.setText("Host");
 		domainValueLabel = new Label(c, SWT.NONE);
@@ -333,115 +316,34 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		modeLabel.setText("Mode");
 		modeValueLabel = new Label(c, SWT.NONE);
 
-		suitableRuntimesCombo.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				updateSelectedRuntimeDelegate();
-			}
-		});
-		addRuntimeLink.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				IRuntimeType type = getValidRuntimeType();
-				if (type != null)
-					showRuntimeWizard(type);
-			}
-		});
-
-		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(serverAdapterCheckbox);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(runtimeLabel);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(runtimeLabel);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(suitableRuntimesCombo);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(domainLabel);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(domainValueLabel);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(modeLabel);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(modeValueLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(domainLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(modeLabel);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER)
+						.grab(true, false).applyTo(domainValueLabel);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER)
+						.grab(true, false).applyTo(serverAdapterCheckbox);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER)
+						.grab(true, false).applyTo(modeValueLabel);
 
 		model.getParentModel().setProperty(AdapterWizardPageModel.CREATE_SERVER,
 				serverAdapterCheckbox.getSelection());
-
-		this.selectedRuntimeObservable =
-				WidgetProperties.singleSelectionIndex().observe(suitableRuntimesCombo);
-		this.suitableRuntimesObservable =
-				WidgetProperties.items().observe(suitableRuntimesCombo);
 		this.serverAdapterCheckboxObservable =
 				WidgetProperties.selection().observe(serverAdapterCheckbox);
 
 		SelectedRuntimeValidator selectedRuntimeValidator = new SelectedRuntimeValidator();
 		dbc.addValidationStatusProvider(selectedRuntimeValidator);
-
-		// ControlDecorationSupport.create(selectedRuntimeValidator, SWT.TOP |
-		// SWT.LEFT);
-	}
-
-	private void updateSelectedRuntimeDelegate() {
-		if (!(new Integer(-1).equals(selectedRuntimeObservable.getValue()))) {
-			String selectedRuntimeName = (String) suitableRuntimesObservable.get((Integer) selectedRuntimeObservable
-					.getValue());
-			runtimeDelegate = ServerCore.findRuntime(selectedRuntimeName);
-		} else {
-			runtimeDelegate = null;
-		}
-		model.getParentModel().setProperty(AdapterWizardPageModel.RUNTIME_DELEGATE, runtimeDelegate);
-	}
-
-	private IRuntimeType getValidRuntimeType() {
-		String cartridgeName = model.getParentModel().getApplicationCartridgeName();
-		if (ICartridge.JBOSSAS_7.getName().equals(cartridgeName)) {
-			return ServerCore.findRuntimeType(IJBossToolingConstants.AS_70);
-		}
-		return null;
 	}
 
 	private IServerType getServerTypeToCreate() {
-		String cartridgeName = model.getParentModel().getApplicationCartridgeName();
-		if (ICartridge.JBOSSAS_7.getName().equals(cartridgeName)) {
-			return ServerCore.findServerType(IJBossToolingConstants.SERVER_AS_70);
-		}
-		return null;
-	}
-
-	private IRuntime[] getRuntimesOfType(String type) {
-		ArrayList<IRuntime> validRuntimes = new ArrayList<IRuntime>();
-		IRuntime[] allRuntimes = ServerCore.getRuntimes();
-		for (int i = 0; i < allRuntimes.length; i++) {
-			if (allRuntimes[i].getRuntimeType().getId().equals(type))
-				validRuntimes.add(allRuntimes[i]);
-		}
-		return validRuntimes.toArray(new IRuntime[validRuntimes.size()]);
-	}
-
-	private void fillRuntimeCombo(IRuntime[] runtimes) {
-		suitableRuntimesObservable.clear();
-		String[] names = new String[runtimes.length];
-		for (int i = 0; i < runtimes.length; i++) {
-			names[i] = runtimes[i].getName();
-			suitableRuntimesObservable.add(runtimes[i].getName());
-		}
+		return ServerCore.findServerType("org.jboss.tools.openshift.express.openshift.server.type");
 	}
 
 	protected void onPageActivated(DataBindingContext dbc) {
 		model.resetRepositoryPath();
-
 		serverTypeToCreate = getServerTypeToCreate();
 		model.getParentModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
-		refreshValidRuntimes();
-		if (suitableRuntimesObservable.size() > 0) {
-			selectedRuntimeObservable.setValue(0);
-			updateSelectedRuntimeDelegate();
-		}
-
-		IRuntimeType type = getValidRuntimeType();
-		addRuntimeLink.setEnabled(type != null);
 		modeValueLabel.setText("Source");
 		model.getParentModel().setProperty(AdapterWizardPageModel.MODE, AdapterWizardPageModel.MODE_SOURCE);
-
 		onPageActivatedBackground(dbc);
 	}
 
@@ -459,52 +361,6 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		}.schedule();
 	}
 
-	protected void refreshValidRuntimes() {
-		IRuntimeType type = getValidRuntimeType();
-		if (type != null) {
-			IRuntime[] runtimes = getRuntimesOfType(type.getId());
-			fillRuntimeCombo(runtimes);
-		} else {
-			// suitableRuntimesCombo.setItems(new String[0]);
-			selectedRuntimeObservable.setValue(0);
-		}
-	}
-
-	/* Stolen from NewManualServerComposite */
-	protected int showRuntimeWizard(IRuntimeType runtimeType) {
-		WizardFragment fragment = null;
-		TaskModel taskModel = new TaskModel();
-		final WizardFragment fragment2 = ServerUIPlugin.getWizardFragment(runtimeType.getId());
-		if (fragment2 == null)
-			return Window.CANCEL;
-
-		try {
-			IRuntimeWorkingCopy runtimeWorkingCopy = runtimeType.createRuntime(null, null);
-			taskModel.putObject(TaskModel.TASK_RUNTIME, runtimeWorkingCopy);
-		} catch (CoreException ce) {
-			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
-			return Window.CANCEL;
-		}
-		fragment = new WizardFragment() {
-			protected void createChildFragments(List<WizardFragment> list) {
-				list.add(fragment2);
-				list.add(WizardTaskUtil.SaveRuntimeFragment);
-			}
-		};
-		TaskWizard wizard2 = new TaskWizard(Messages.wizNewRuntimeWizardTitle, fragment, taskModel);
-		wizard2.setForcePreviousAndNextButtons(true);
-		WizardDialog dialog = new WizardDialog(getShell(), wizard2);
-		int returnValue = dialog.open();
-		refreshValidRuntimes();
-		if (returnValue != Window.CANCEL) {
-			IRuntime rt = (IRuntime) taskModel.getObject(TaskModel.TASK_RUNTIME);
-			if (rt != null && rt.getName() != null && suitableRuntimesCombo.indexOf(rt.getName()) != -1) {
-				suitableRuntimesCombo.select(suitableRuntimesCombo.indexOf(rt.getName()));
-			}
-		}
-		return returnValue;
-	}
-
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (ImportProjectWizardModel.APPLICATION.equals(evt.getPropertyName())) {
@@ -518,10 +374,8 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		serverTypeToCreate = getServerTypeToCreate();
 		boolean canCreateServer = serverTypeToCreate != null;
 		serverAdapterCheckbox.setEnabled(canCreateServer);
-		// serverAdapterCheckbox.setSelection(canCreateServer);
 		serverAdapterCheckboxObservable.setValue(canCreateServer);
 		enableServerWidgets(canCreateServer);
-		refreshValidRuntimes();
 		model.getParentModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
 		model.getParentModel().setProperty(AdapterWizardPageModel.CREATE_SERVER, canCreateServer);
 	}
@@ -538,12 +392,6 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 			 */
 			if (Boolean.FALSE.equals(serverAdapterCheckboxObservable.getValue())) {
 				return ValidationStatus.ok();
-			}
-			if (new Integer(-1).equals(selectedRuntimeObservable.getValue())) {
-				if (suitableRuntimesObservable.size() == 0) {
-					return ValidationStatus.error("Please add a new valid runtime.");
-				}
-				return ValidationStatus.error("Please select a runtime");
 			}
 			return ValidationStatus.ok();
 		}
