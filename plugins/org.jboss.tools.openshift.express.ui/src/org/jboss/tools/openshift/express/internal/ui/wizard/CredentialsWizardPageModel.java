@@ -10,16 +10,20 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.io.IOException;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
-import org.jboss.tools.openshift.express.client.IOpenShiftService;
 import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.NotFoundOpenShiftException;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.client.User;
-import org.jboss.tools.openshift.express.client.UserConfiguration;
+import org.jboss.tools.openshift.express.client.configuration.DefaultConfiguration;
+import org.jboss.tools.openshift.express.client.configuration.SystemConfiguration;
+import org.jboss.tools.openshift.express.client.configuration.SystemProperties;
+import org.jboss.tools.openshift.express.client.configuration.UserConfiguration;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
@@ -37,7 +41,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_PASSWORD = "password";
 	public static final String PROPERTY_CREDENTIALS_VALIDITY = "credentialsValidity";
 
-	private String serverUrl;
 	private String rhLogin;
 	private String password;
 	private IStatus credentialsValidity;
@@ -48,7 +51,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 
 	public CredentialsWizardPageModel(ImportProjectWizardModel model) {
 		this.wizardModel = model;
-		this.serverUrl = IOpenShiftService.BASE_URL;
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.rhLogin = initRhLogin();
 		resetCredentialsStatus();
@@ -67,19 +69,14 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	protected String getUserConfiguration() {
 		String configuredUsername = null;
 		try {
-			configuredUsername = new UserConfiguration().getRhlogin();
+			configuredUsername = new SystemProperties(
+					new UserConfiguration(
+							new SystemConfiguration(
+									new DefaultConfiguration()))).getRhlogin();
 		} catch (Exception e) {
 			// do nothing
 		}
 		return configuredUsername;
-	}
-
-	public String getServerUrl() {
-		return serverUrl;
-	}
-
-	public void setServerUrl(String serverUrl) {
-		firePropertyChange(PROPERTY_SERVER_URL, this.serverUrl, this.serverUrl = serverUrl);
 	}
 
 	public String getRhLogin() {
@@ -119,7 +116,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	public IStatus getCredentialsValidity() {
 		return credentialsValidity;
 	}
-	
+
 	public boolean areCredentialsValid() {
 		IStatus validationStatus = getCredentialsValidity();
 		return validationStatus != null
@@ -141,6 +138,8 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			// valid user without domain
 			status = Status.OK_STATUS;
 		} catch (OpenShiftException e) {
+			this.user = null;
+		} catch (IOException e) {
 			this.user = null;
 		}
 		wizardModel.setUser(user);
