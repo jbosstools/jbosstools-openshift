@@ -32,7 +32,10 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -59,7 +62,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	private NewApplicationWizardPageModel model;
-	private TableViewer viewer;
+	private CheckboxTableViewer viewer;
 
 	public NewApplicationWizardPage(NewApplicationWizardPageModel model, IWizard wizard) {
 		super("Create new OpenShift Express application", "Create new OpenShift Express application",
@@ -158,15 +161,31 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 		Composite tableContainer = new Composite(embedGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
+		viewer.addCheckStateListener(onEmbeddableCartridgeSelected());
 	}
 
-	protected TableViewer createTable(Composite tableContainer) {
+	private ICheckStateListener onEmbeddableCartridgeSelected() {
+		return new ICheckStateListener() {
+			
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
+				if (event.getChecked()) {
+					model.getSeleEmbeddableCartridges().add(cartridge);
+				} else {
+					model.getSeleEmbeddableCartridges().remove(cartridge);
+				}
+			}
+		};
+	}
+
+	protected CheckboxTableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setLinesVisible(true);
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
-		TableViewer viewer = new TableViewer(table);
+		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
 		viewer.setContentProvider(new ArrayContentProvider());
 
 		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
@@ -214,10 +233,10 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						setViewerInput(model.loadEmbeddableCartridges());
+						setCartridgesViewerInput(model.loadEmbeddableCartridges());
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						clearViewer();
+						clearCartridgesViewer();
 						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 								"Could not load embeddable cartridges", e);
 					}
@@ -230,11 +249,11 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	}
 
-	private void clearViewer() {
-		setViewerInput(new ArrayList<IEmbeddableCartridge>());
+	private void clearCartridgesViewer() {
+		setCartridgesViewerInput(new ArrayList<IEmbeddableCartridge>());
 	}
 
-	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
+	private void setCartridgesViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override

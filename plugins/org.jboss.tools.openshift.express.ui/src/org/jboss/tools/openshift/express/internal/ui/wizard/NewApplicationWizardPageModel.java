@@ -42,7 +42,8 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 	private StringPreferenceValue selectedCartridgePreference;
 
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
-
+	private List<IEmbeddableCartridge> selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
+	
 	public NewApplicationWizardPageModel(IUser user) {
 		this.user = user;
 		this.selectedCartridgePreference = new StringPreferenceValue(
@@ -125,6 +126,10 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 		return embeddableCartridges;
 	}
 
+	public List<IEmbeddableCartridge> getSeleEmbeddableCartridges() {
+		return selectedEmbeddableCartridges;
+	}
+	
 	public void createApplication() throws OpenShiftException {
 		IApplication application = user.createApplication(name, selectedCartridge);
 		setApplication(application);
