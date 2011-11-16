@@ -17,6 +17,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
+import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -29,6 +30,7 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_APPLICATION = "application";
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
+	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 
 	private IUser user;
@@ -38,6 +40,8 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private ICartridge selectedCartridge;
 	private StringPreferenceValue selectedCartridgePreference;
+
+	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 
 	public NewApplicationWizardPageModel(IUser user) {
 		this.user = user;
@@ -106,6 +110,21 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 		return matchingCartridge;
 	}
 
+	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
+		List<IEmbeddableCartridge> cartridges = user.getEmbeddableCartridges();
+		setEmbeddableCartridges(cartridges);
+		return cartridges;
+	}
+
+	public void setEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
+		firePropertyChange(
+				PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges, this.embeddableCartridges = cartridges);
+	}
+
+	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
+		return embeddableCartridges;
+	}
+
 	public void createApplication() throws OpenShiftException {
 		IApplication application = user.createApplication(name, selectedCartridge);
 		setApplication(application);
@@ -114,7 +133,7 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 	public void setApplication(IApplication application) {
 		firePropertyChange(PROPERTY_APPLICATION, this.application, this.application = application);
 	}
-	
+
 	public IApplication getApplication() {
 		return application;
 	}

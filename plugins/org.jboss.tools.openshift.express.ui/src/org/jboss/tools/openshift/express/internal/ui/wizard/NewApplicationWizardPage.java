@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
@@ -26,16 +29,27 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.client.Cartridge;
 import org.jboss.tools.openshift.express.client.ICartridge;
+import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -45,6 +59,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	private NewApplicationWizardPageModel model;
+	private TableViewer viewer;
 
 	public NewApplicationWizardPage(NewApplicationWizardPageModel model, IWizard wizard) {
 		super("Create new OpenShift Express application", "Create new OpenShift Express application",
@@ -93,7 +108,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 				WidgetProperties.selection().observe(cartridgesCombo)
 				, BeanProperties.value(NewApplicationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(model)
 				, new UpdateValueStrategy().setConverter(new Converter(String.class, ICartridge.class) {
-					
+
 					@Override
 					public Object convert(Object fromObject) {
 						if (fromObject instanceof String
@@ -116,16 +131,62 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 							}
 						})
 				, new UpdateValueStrategy().setConverter(new Converter(ICartridge.class, String.class) {
-							
-							@Override
-							public Object convert(Object fromObject) {
-								if (fromObject instanceof ICartridge) {
-									return ((ICartridge) fromObject).getName();
-								}
-								return null;
-							}
-						}));
+
+					@Override
+					public Object convert(Object fromObject) {
+						if (fromObject instanceof ICartridge) {
+							return ((ICartridge) fromObject).getName();
+						}
+						return null;
+					}
+				}));
 		ControlDecorationSupport.create(comboSelectionBinding, SWT.LEFT | SWT.TOP);
+
+		createEmbedGroup(parent);
+	}
+
+	private void createEmbedGroup(Composite parent) {
+		Group embedGroup = new Group(parent, SWT.NONE);
+		embedGroup.setText("Embeddable Cartridges");
+		GridDataFactory.fillDefaults()
+				.hint(300, 150).align(SWT.FILL, SWT.FILL).span(2, 1).grab(true, true)
+				.applyTo(embedGroup);
+		FillLayout fillLayout = new FillLayout();
+		fillLayout.marginHeight = 6;
+		fillLayout.marginWidth = 6;
+		embedGroup.setLayout(fillLayout);
+
+		Composite tableContainer = new Composite(embedGroup, SWT.NONE);
+		this.viewer = createTable(tableContainer);
+	}
+
+	protected TableViewer createTable(Composite tableContainer) {
+		Table table =
+				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
+		table.setLinesVisible(true);
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		tableContainer.setLayout(tableLayout);
+		TableViewer viewer = new TableViewer(table);
+		viewer.setContentProvider(new ArrayContentProvider());
+
+		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
+
+			@Override
+			public void update(ViewerCell cell) {
+				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) cell.getElement();
+				cell.setText(cartridge.getName());
+			}
+		}, viewer, tableLayout);
+		return viewer;
+	}
+
+	private void createTableColumn(String name, int weight, CellLabelProvider cellLabelProvider, TableViewer viewer,
+			TableColumnLayout layout) {
+		TableViewerColumn column = new TableViewerColumn(viewer, SWT.LEFT);
+		column.getColumn().setText(name);
+		column.setLabelProvider(cellLabelProvider);
+
+		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
 	@Override
@@ -146,6 +207,41 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		} catch (Exception e) {
 			// ignore
 		}
+
+		try {
+			WizardUtils.runInWizard(new Job("Loading embeddable cartridges...") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						setViewerInput(model.loadEmbeddableCartridges());
+						return Status.OK_STATUS;
+					} catch (Exception e) {
+						clearViewer();
+						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+								"Could not load embeddable cartridges", e);
+					}
+				}
+
+			}, getContainer(), getDataBindingContext());
+		} catch (Exception e) {
+			// ignore
+		}
+
+	}
+
+	private void clearViewer() {
+		setViewerInput(new ArrayList<IEmbeddableCartridge>());
+	}
+
+	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				viewer.setInput(cartridges);
+			}
+		});
 	}
 
 	private class ApplicationNameValidator implements IValidator {
@@ -162,4 +258,5 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 			return ValidationStatus.ok();
 		}
 	}
+
 }
