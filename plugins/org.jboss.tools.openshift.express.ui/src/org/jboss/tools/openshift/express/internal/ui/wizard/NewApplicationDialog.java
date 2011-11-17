@@ -30,10 +30,10 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
  */
 public class NewApplicationDialog extends Wizard {
 
-	private NewApplicationWizardPageModel newApplicationModel;
+	private NewApplicationWizardModel newApplicationWizardModel;
 
 	public NewApplicationDialog(IUser user) {
-		this.newApplicationModel = new NewApplicationWizardPageModel(user);
+		this.newApplicationWizardModel = new NewApplicationWizardModel(user);
 		setNeedsProgressMonitor(true);
 	}
 
@@ -46,12 +46,12 @@ public class NewApplicationDialog extends Wizard {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						newApplicationModel.createApplication();
+						newApplicationWizardModel.createApplication();
 						queue.offer(true);
 					} catch (OpenShiftException e) {
 						queue.offer(false);
 						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								NLS.bind("Could not create application \"{0}\"", newApplicationModel.getName()), e);
+								NLS.bind("Could not create application \"{0}\"", newApplicationWizardModel.getName()), e);
 					}
 					return Status.OK_STATUS;
 				}
@@ -64,10 +64,11 @@ public class NewApplicationDialog extends Wizard {
 
 	@Override
 	public void addPages() {
-		addPage(new NewApplicationWizardPage(newApplicationModel, this));
+		addPage(new NewApplicationWizardPage(newApplicationWizardModel, this));
+		addPage(new EmbedCartridgeWizardPage(newApplicationWizardModel, this));
 	}
 	
 	public IApplication getApplication() {
-		return newApplicationModel.getApplication();
+		return newApplicationWizardModel.getApplication();
 	}
 }
