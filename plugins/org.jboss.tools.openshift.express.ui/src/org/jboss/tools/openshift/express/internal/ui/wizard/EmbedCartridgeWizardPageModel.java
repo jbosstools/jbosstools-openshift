@@ -30,12 +30,12 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 
-	private NewApplicationWizardModel wizardModel;
+	private ApplicationWizardModel wizardModel;
 
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 	private List<IEmbeddableCartridge> selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 	
-	public EmbedCartridgeWizardPageModel(NewApplicationWizardModel wizardModel) {
+	public EmbedCartridgeWizardPageModel(ApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
 

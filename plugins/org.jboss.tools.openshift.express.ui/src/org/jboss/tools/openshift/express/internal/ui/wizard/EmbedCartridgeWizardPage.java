@@ -49,7 +49,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 	private EmbedCartridgeWizardPageModel model;
 	private CheckboxTableViewer viewer;
 
-	public EmbedCartridgeWizardPage(NewApplicationWizardModel wizardModel, IWizard wizard) {
+	public EmbedCartridgeWizardPage(ApplicationWizardModel wizardModel, IWizard wizard) {
 		super("Embed Cartridges", "Please select the cartridges to embed into your application",
 				"EmbedCartridgePage", wizard);
 		this.model = new EmbedCartridgeWizardPageModel(wizardModel);

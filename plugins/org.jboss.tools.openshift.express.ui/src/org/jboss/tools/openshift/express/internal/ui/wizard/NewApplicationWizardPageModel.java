@@ -29,13 +29,13 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 
-	private NewApplicationWizardModel wizardModel;
+	private ApplicationWizardModel wizardModel;
 
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private ICartridge selectedCartridge;
 	private StringPreferenceValue selectedCartridgePreference;
 
-	public NewApplicationWizardPageModel(NewApplicationWizardModel wizardModel) {
+	public NewApplicationWizardPageModel(ApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		this.selectedCartridgePreference = new StringPreferenceValue(
 				"org.jboss.tools.openshift.express.internal.ui.wizard.NewApplicationWizard.selectedCartridge",

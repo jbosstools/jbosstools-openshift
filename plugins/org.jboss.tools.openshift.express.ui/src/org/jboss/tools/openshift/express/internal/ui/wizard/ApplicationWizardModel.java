@@ -15,28 +15,27 @@ import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
  * @author André Dietisheim
  */
-public class NewApplicationWizardModel extends ObservableUIPojo {
+public class ApplicationWizardModel extends ObservableUIPojo {
+
+	public static final String PROPERTY_APPLICATION = "application";
 
 	private IUser user;
-
+	private IApplication application;
 	private String name;
 	private ICartridge cartridge;
-	
-	private IApplication application;
 
-	public NewApplicationWizardModel(IUser user) {
+	public ApplicationWizardModel(IUser user) {
 		this.user = user;
 	}
 
 	public IUser getUser() {
 		return user;
 	}
-
+	
 	public String getName() {
 		return name;
 	}
@@ -45,34 +44,26 @@ public class NewApplicationWizardModel extends ObservableUIPojo {
 		return this.name = name;
 	}
 	
-	public ICartridge getCartridge() {
-		return cartridge;
-	}
-
 	public void setCartridge(ICartridge cartridge) {
 		this.cartridge = cartridge;
 	}
 
-	public void setApplication(IApplication application) {
-		this.application = application;
+	public void createApplication() throws OpenShiftException {
+		createApplication(name, cartridge);
 	}
 
-	public void createApplication() throws OpenShiftException {
-		IApplication application = user.createApplication(name, cartridge);
-		setApplication(application);
+
+	public void setApplication(IApplication application) {
+		firePropertyChange(PROPERTY_APPLICATION, this.application, this.application = application);
 	}
 
 	public IApplication getApplication() {
 		return application;
 	}
-
-	public boolean hasApplication(String name) {
-		try {
-			return user.getApplicationByName(name) != null;
-		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(
-					OpenShiftUIActivator.createErrorStatus("Could not get application by name", e));
-			return false;
-		}
+	
+	public void createApplication(String name, ICartridge cartridge) throws OpenShiftException {
+		IApplication application = getUser().createApplication(name, cartridge);
+		setApplication(application);
 	}
+
 }

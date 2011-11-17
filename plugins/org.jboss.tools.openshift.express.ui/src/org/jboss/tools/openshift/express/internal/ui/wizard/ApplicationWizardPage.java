@@ -90,7 +90,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		domainGroup.setText("Domain");
 		GridDataFactory.fillDefaults()
 				.grab(true, false).align(SWT.FILL, SWT.TOP).span(3, 1).applyTo(domainGroup);
-		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(3).applyTo(domainGroup);
+		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(4).applyTo(domainGroup);
 		Label namespaceLabel = new Label(domainGroup, SWT.NONE);
 		namespaceLabel.setText("&Domain name");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
@@ -123,11 +123,11 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		applicationGroup.setText("Available Applications");
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).hint(400, 260).span(3, 1)
 				.applyTo(applicationGroup);
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(applicationGroup);
+		GridLayoutFactory.fillDefaults().numColumns(4).margins(6, 6).applyTo(applicationGroup);
 
 		Composite tableContainer = new Composite(applicationGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		viewer.addDoubleClickListener(onApplicationDoubleClick());
 		Binding selectedApplicationBinding = dbc.bindValue(
 				ViewerProperties.singleSelection().observe(viewer),
@@ -140,7 +140,8 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 							return ValidationStatus.ok();
 						}
 						else {
-							return ValidationStatus.info("Please select an application to start with, or create a new one");
+							return ValidationStatus
+									.info("Please select an application to start with, or create a new one");
 						}
 					}
 				}),
@@ -156,6 +157,12 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(80, SWT.DEFAULT).applyTo(deleteButton);
 		DataBindingUtils.bindEnablementToValidationStatus(deleteButton, IStatus.OK, dbc, selectedApplicationBinding);
 		deleteButton.addSelectionListener(onDelete(dbc));
+
+		Button embedButton = new Button(applicationGroup, SWT.PUSH);
+		embedButton.setText("E&mbed");
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(80, SWT.DEFAULT).applyTo(embedButton);
+		DataBindingUtils.bindEnablementToValidationStatus(embedButton, IStatus.OK, dbc, selectedApplicationBinding);
+		embedButton.addSelectionListener(onEmbed(dbc));
 
 		Button detailsButton = new Button(applicationGroup, SWT.PUSH);
 		detailsButton.setText("De&tails");
@@ -305,11 +312,21 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Shell shell = getContainer().getShell();
-				NewApplicationDialog applicationDialog = new NewApplicationDialog(model.getUser());
+				NewApplicationWizard applicationDialog = new NewApplicationWizard(model.getUser());
 				if (WizardUtils.openWizardDialog(applicationDialog, shell) == Dialog.OK) {
 					viewer.refresh();
 					model.setSelectedApplication(applicationDialog.getApplication());
 				}
+			}
+		};
+	}
+
+	private SelectionAdapter onEmbed(final DataBindingContext dbc) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WizardUtils.openWizardDialog(new EmbedCartridgeWizard(model.getUser()), getShell());
 			}
 		};
 	}

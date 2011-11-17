@@ -46,9 +46,9 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	private NewApplicationWizardPageModel model;
-	private NewApplicationWizardModel wizardModel;
+	private ApplicationWizardModel wizardModel;
 
-	public NewApplicationWizardPage(NewApplicationWizardModel wizardModel, IWizard wizard) {
+	public NewApplicationWizardPage(ApplicationWizardModel wizardModel, IWizard wizard) {
 		super("Create new OpenShift Express application", "Create new OpenShift Express application",
 				"Create new OpenShift Express application", wizard);
 		this.wizardModel = wizardModel;
@@ -154,9 +154,8 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void onPageWillGetDeactivated(Direction progress, final PageChangingEvent event, DataBindingContext dbc) {
-		final String name = wizardModel.getName();
 		try {
-			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"...", name)) {
+			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"...", wizardModel.getName())) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -164,7 +163,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 						wizardModel.createApplication();
 					} catch (OpenShiftException e) {
 						event.doit = false;
-						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", e, name);
+						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", e, wizardModel.getName());
 					}
 					return Status.OK_STATUS;
 				}
