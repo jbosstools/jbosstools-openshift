@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -36,10 +39,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.common.StringUtils;
 
 /**
  * @author André Dietisheim
@@ -103,10 +109,10 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
-	
+
 	private ICheckStateListener onEmbeddableCartridgeChecked() {
 		return new ICheckStateListener() {
-			
+
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
@@ -125,12 +131,39 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void addJenkinsCartridge(IEmbeddableCartridge cartridge) {
-		model.getSelectedEmbeddableCartridges().add(cartridge);		
+		if (model.hasApplication(ICartridge.JENKINS_14)) {
+			model.getSelectedEmbeddableCartridges().add(cartridge);		
+		} else {
+			final JenkinsApplicationDialog dialog = new JenkinsApplicationDialog(getShell());
+			if (dialog.open() == Dialog.OK) {
+				try {
+					WizardUtils.runInWizard(new Job("Loading embeddable cartridges...") {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								model.createJenkinsApplication(dialog.getValue());
+								return Status.OK_STATUS;
+							} catch (Exception e) {
+								clearCartridgesViewer();
+								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+										"Could not load embeddable cartridges", e);
+							}
+						}
+
+					}, getContainer(), getDataBindingContext());
+					model.getSelectedEmbeddableCartridges().add(cartridge);		
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+		}
 	}
 
 	private void addPhpMyACartridge(IEmbeddableCartridge cartridge) {
-		MessageDialog.openQuestion(getShell(), "Enable MySQL cartridge", "To embed PhpMyAdmin, you'd also have to embed MySql. ");
-		model.getSelectedEmbeddableCartridges().add(cartridge);		
+		MessageDialog.openQuestion(getShell(), "Enable MySQL cartridge",
+				"To embed PhpMyAdmin, you'd also have to embed MySql. ");
+		model.getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
 	@Override
@@ -154,7 +187,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		} catch (Exception e) {
 			// ignore
 		}
-
 	}
 
 	private void clearCartridgesViewer() {
@@ -170,4 +202,33 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 	}
+
+	private static class JenkinsApplicationDialog extends InputDialog {
+
+		public JenkinsApplicationDialog(Shell shell) {
+			super(shell
+					, "New Jenkins application"
+					, "To embed jenkins into your application you'd first have to create a jenkins application. "
+					+ "Please provide it's name"
+					, null
+					, new JenkinsNameValidator());
+		}
+
+		protected int getInputTextStyle() {
+			return SWT.SINGLE | SWT.BORDER | SWT.PASSWORD;
+		}
+
+		private static class JenkinsNameValidator implements IInputValidator {
+
+			@Override
+			public String isValid(String input) {
+				if (StringUtils.isEmpty(input)) {
+					return "You have to provide a name for the jenkins application";
+				}
+				return null;
+			}
+		}
+	}
+
+	
 }

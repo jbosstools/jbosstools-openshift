@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
@@ -66,5 +67,9 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 					OpenShiftUIActivator.createErrorStatus("Could not get application by cartridge", e));
 			return false;
 		}
+	}
+
+	public void createJenkinsApplication(String name) throws OpenShiftException {
+		IApplication application = wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
 	}
 }

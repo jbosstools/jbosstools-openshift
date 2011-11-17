@@ -283,21 +283,24 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 											"You're up to delete all data within an application. The data may not be recovered. "
 													+ "Are you sure that you want to delete application {0}?",
 											model.getSelectedApplication().getName()))) {
-						WizardUtils.runInWizard(new Job("Deleting application") {
+						WizardUtils.runInWizard(
+								new Job(NLS.bind("Deleting application \"{0}\"...",
+										model.getSelectedApplication().getName())) {
 
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								try {
-									model.destroyCurrentApplication();
-									refreshViewer();
-									return Status.OK_STATUS;
-								} catch (OpenShiftException e) {
-									return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
-											"Could not delete application \"{0}\"",
-											model.getSelectedApplication().getName()));
-								}
-							}
-						}, getContainer(), dbc);
+									@Override
+									protected IStatus run(IProgressMonitor monitor) {
+										try {
+											model.destroyCurrentApplication();
+											refreshViewer();
+											return Status.OK_STATUS;
+										} catch (OpenShiftException e) {
+											return OpenShiftUIActivator.createErrorStatus(
+													NLS.bind("Could not delete application \"{0}\"",
+															model.getSelectedApplication().getName())
+													, e);
+										}
+									}
+								}, getContainer(), dbc);
 					}
 				} catch (Exception ex) {
 					// ignore
