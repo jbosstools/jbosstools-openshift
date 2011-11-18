@@ -42,7 +42,7 @@ public class EmbedCartridgeWizard extends Wizard {
 		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
 		try {
 			WizardUtils.runInWizard(
-					new Job(NLS.bind("Embedding cartridges to application \"{0}\"...",
+					new Job(NLS.bind("Adding/Removing embedded cartridges for application {0}...",
 							wizardModel.getApplication().getName())) {
 
 						@Override
@@ -53,7 +53,7 @@ public class EmbedCartridgeWizard extends Wizard {
 							} catch (OpenShiftException e) {
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-										NLS.bind("Could not embed cartridges to application \"{0}\"",
+										NLS.bind("Could not embed cartridges to application {0}",
 												wizardModel.getApplication().getName()), e);
 							}
 							return Status.OK_STATUS;

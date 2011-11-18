@@ -140,7 +140,11 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 						addCartridge(cartridge);
 					}
 				} else {
-					model.getSelectedEmbeddableCartridges().remove(cartridge);
+					if (IEmbeddableCartridge.MYSQL_51.equals(cartridge)) {
+						removeMySQLCartridge(cartridge);
+					} else {
+						removeCartridge(cartridge);
+					}
 				}
 			}
 		};
@@ -188,11 +192,11 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 	private void addPhpMyAdminCartridge(IEmbeddableCartridge cartridge) {
 		if (!viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
-			if (MessageDialog.openQuestion(getShell(), "Enable MySQL cartridge",
-					"To embed PhpMyAdmin, you'd also have to embed MySql. ")) {
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
+			if (MessageDialog.openQuestion(getShell(), "Embed mysql cartridge",
+					"To embed phpmyadmin, you'd also have to embed mysql.")) {
 				model.getSelectedEmbeddableCartridges().add(IEmbeddableCartridge.MYSQL_51);
 				model.getSelectedEmbeddableCartridges().add(cartridge);
+				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
 			} else {
 				viewer.setChecked(cartridge, false);
 			}
@@ -203,6 +207,25 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 	private void addCartridge(IEmbeddableCartridge cartridge) {
 		model.getSelectedEmbeddableCartridges().add(cartridge);
+	}
+
+	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) {
+		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
+			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
+					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
+				model.getSelectedEmbeddableCartridges().remove(IEmbeddableCartridge.PHPMYADMIN_34);
+				model.getSelectedEmbeddableCartridges().remove(cartridge);
+				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
+			} else {
+				viewer.setChecked(cartridge, true);
+			}
+		} else {
+			model.getSelectedEmbeddableCartridges().add(cartridge);
+		}
+	}
+
+	private void removeCartridge(IEmbeddableCartridge cartridge) {
+		model.getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
 	private SelectionListener onCheckAll() {
