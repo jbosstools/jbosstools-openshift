@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +31,7 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -103,6 +103,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
 		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
+		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
 
 		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
@@ -262,21 +263,10 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 						setViewerInput(model.loadEmbeddableCartridges());
 						model.initSelectedEmbeddableCartridges();
 						getShell().getDisplay().syncExec(new Runnable() {
-							
+
 							@Override
 							public void run() {
-								viewer.setCheckedElements(
-										getViewerInstances(model.getSelectedEmbeddableCartridges()));
-							}
-
-							private Object[] getViewerInstances(List<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-								List<IEmbeddableCartridge> viewerInstances = new ArrayList<IEmbeddableCartridge>();
-								for (IEmbeddableCartridge cartridge : model.getEmbeddableCartridges()) {
-									if (selectedEmbeddableCartridges.contains(cartridge)) {
-										viewerInstances.add(cartridge);
-									}
-								}
-								return viewerInstances.toArray();
+								viewer.setCheckedElements(model.getSelectedEmbeddableCartridges().toArray());
 							}
 						});
 						return Status.OK_STATUS;
@@ -291,7 +281,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			// ignore
 		}
 	}
-	
+
 	private void clearViewer() {
 		setViewerInput(new ArrayList<IEmbeddableCartridge>());
 	}
@@ -326,6 +316,36 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				return null;
 			}
 		}
+	}
+
+	/**
+	 * Viewer element comparer based on #equals(). The default implementation in
+	 * CheckboxTableViewer compares elements based on instance identity.
+	 * <p>
+	 * We need this since the available cartridges (item listed in the viewer)
+	 * are not the same instance as the ones in the embedded application (items
+	 * to check in the viewer).
+	 */
+	private static class EqualityComparer implements IElementComparer {
+
+		@Override
+		public boolean equals(Object thisObject, Object thatObject) {
+			if (thisObject == null) {
+				return thatObject != null;
+			}
+
+			if (thatObject == null) {
+				return false;
+			}
+
+			return thisObject.equals(thatObject);
+		}
+
+		@Override
+		public int hashCode(Object element) {
+			return element.hashCode();
+		}
+
 	}
 
 }
