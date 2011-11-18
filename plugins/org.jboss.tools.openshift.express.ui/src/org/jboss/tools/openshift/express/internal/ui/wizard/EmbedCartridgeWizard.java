@@ -32,8 +32,8 @@ public class EmbedCartridgeWizard extends Wizard {
 
 	private ApplicationWizardModel wizardModel;
 
-	public EmbedCartridgeWizard(IUser user) {
-		this.wizardModel = new ApplicationWizardModel(user);
+	public EmbedCartridgeWizard(IApplication application, IUser user) {
+		this.wizardModel = new ApplicationWizardModel(application, user);
 		setNeedsProgressMonitor(true);
 	}
 
@@ -41,21 +41,24 @@ public class EmbedCartridgeWizard extends Wizard {
 	public boolean performFinish() {
 		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
 		try {
-			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"...", wizardModel.getName())) {
+			WizardUtils.runInWizard(
+					new Job(NLS.bind("Embedding cartridges to application \"{0}\"...",
+							wizardModel.getApplication().getName())) {
 
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						wizardModel.createApplication();
-						queue.offer(true);
-					} catch (OpenShiftException e) {
-						queue.offer(false);
-						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								NLS.bind("Could not create application \"{0}\"", wizardModel.getName()), e);
-					}
-					return Status.OK_STATUS;
-				}
-			}, getContainer());
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								wizardModel.embedCartridges();
+								queue.offer(true);
+							} catch (OpenShiftException e) {
+								queue.offer(false);
+								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+										NLS.bind("Could not embed cartridges to application \"{0}\"",
+												wizardModel.getApplication().getName()), e);
+							}
+							return Status.OK_STATUS;
+						}
+					}, getContainer());
 			return queue.poll(10, TimeUnit.SECONDS);
 		} catch (Exception e) {
 			return false;

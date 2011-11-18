@@ -133,9 +133,11 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
 				if (event.getChecked()) {
 					if (IEmbeddableCartridge.PHPMYADMIN_34.equals(cartridge)) {
-						addPhpMyACartridge(cartridge);
+						addPhpMyAdminCartridge(cartridge);
 					} else if (IEmbeddableCartridge.JENKINS_14.equals(cartridge)) {
 						addJenkinsCartridge(cartridge);
+					} else {
+						addCartridge(cartridge);
 					}
 				} else {
 					model.getSelectedEmbeddableCartridges().remove(cartridge);
@@ -159,6 +161,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
 								model.createJenkinsApplication(name);
+								model.getSelectedEmbeddableCartridges().add(cartridge);
 								return Status.OK_STATUS;
 							} catch (Exception e) {
 								getShell().getDisplay().syncExec(new Runnable() {
@@ -183,17 +186,23 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void addPhpMyACartridge(IEmbeddableCartridge cartridge) {
-		if (MessageDialog.openQuestion(getShell(), "Enable MySQL cartridge",
-				"To embed PhpMyAdmin, you'd also have to embed MySql. ")) {
-			List<IEmbeddableCartridge> selectedCartriges = model.getSelectedEmbeddableCartridges();
-			viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
-			selectedCartriges.add(IEmbeddableCartridge.MYSQL_51);
-			selectedCartriges.add(cartridge);
+	private void addPhpMyAdminCartridge(IEmbeddableCartridge cartridge) {
+		if (!viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
+			if (MessageDialog.openQuestion(getShell(), "Enable MySQL cartridge",
+					"To embed PhpMyAdmin, you'd also have to embed MySql. ")) {
+				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
+				model.getSelectedEmbeddableCartridges().add(IEmbeddableCartridge.MYSQL_51);
+				model.getSelectedEmbeddableCartridges().add(cartridge);
+			} else {
+				viewer.setChecked(cartridge, false);
+			}
 		} else {
-			viewer.setChecked(cartridge, false);
+			model.getSelectedEmbeddableCartridges().add(cartridge);
 		}
-		refreshViewer();
+	}
+
+	private void addCartridge(IEmbeddableCartridge cartridge) {
+		model.getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
 	private SelectionListener onCheckAll() {
@@ -228,6 +237,25 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						setViewerInput(model.loadEmbeddableCartridges());
+						model.initSelectedEmbeddableCartridges();
+						getShell().getDisplay().syncExec(new Runnable() {
+							
+							@Override
+							public void run() {
+								viewer.setCheckedElements(
+										getViewerInstances(model.getSelectedEmbeddableCartridges()));
+							}
+
+							private Object[] getViewerInstances(List<IEmbeddableCartridge> selectedEmbeddableCartridges) {
+								List<IEmbeddableCartridge> viewerInstances = new ArrayList<IEmbeddableCartridge>();
+								for (IEmbeddableCartridge cartridge : model.getEmbeddableCartridges()) {
+									if (selectedEmbeddableCartridges.contains(cartridge)) {
+										viewerInstances.add(cartridge);
+									}
+								}
+								return viewerInstances.toArray();
+							}
+						});
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						clearViewer();
@@ -240,7 +268,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			// ignore
 		}
 	}
-
+	
 	private void clearViewer() {
 		setViewerInput(new ArrayList<IEmbeddableCartridge>());
 	}
@@ -251,16 +279,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void run() {
 				viewer.setInput(cartridges);
-			}
-		});
-	}
-
-	private void refreshViewer() {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.refresh(true, true);
 			}
 		});
 	}

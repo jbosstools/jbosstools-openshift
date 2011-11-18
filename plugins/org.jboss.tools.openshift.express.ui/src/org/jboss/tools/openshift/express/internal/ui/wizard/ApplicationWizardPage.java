@@ -329,7 +329,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WizardUtils.openWizardDialog(new EmbedCartridgeWizard(model.getUser()), getShell());
+				WizardUtils.openWizardDialog(new EmbedCartridgeWizard(model.getSelectedApplication(), model.getUser()), getShell());
 			}
 		};
 	}

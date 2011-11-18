@@ -38,6 +38,17 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	
 	public EmbedCartridgeWizardPageModel(ApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
+		wizardModel.setSelectedCartridges(selectedEmbeddableCartridges);
+	}
+
+	public void initSelectedEmbeddableCartridges() throws OpenShiftException {
+		IApplication application = wizardModel.getApplication();
+		if (application == null 
+				|| application.getEmbeddedCartridges() == null) {
+			return;
+		}
+		List<IEmbeddableCartridge> embeddedCartridges = application.getEmbeddedCartridges();
+		getSelectedEmbeddableCartridges().addAll(embeddedCartridges);
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
@@ -58,7 +69,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		return selectedEmbeddableCartridges;
 	}
-	
+		
 	public boolean hasApplication(ICartridge cartridge) {
 		try {
 			return wizardModel.getUser().hasApplication(cartridge);
@@ -70,6 +81,6 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void createJenkinsApplication(String name) throws OpenShiftException {
-		IApplication application = wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
+		wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
 	}
 }
