@@ -32,14 +32,16 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ICheckable;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
@@ -66,22 +68,32 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(parent);
+		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
 		Group embedGroup = new Group(parent, SWT.NONE);
 		embedGroup.setText("Embeddable Cartridges");
 		GridDataFactory.fillDefaults()
-				.hint(200, 150).align(SWT.FILL, SWT.FILL).span(2, 1).grab(true, true)
-				.applyTo(embedGroup);
-		FillLayout fillLayout = new FillLayout();
-		fillLayout.marginHeight = 6;
-		fillLayout.marginWidth = 6;
-		embedGroup.setLayout(fillLayout);
+				.hint(200, 150).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(embedGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(3).margins(6, 6).applyTo(embedGroup);
 
 		Composite tableContainer = new Composite(embedGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		viewer.addCheckStateListener(onEmbeddableCartridgeChecked());
+		GridDataFactory.fillDefaults()
+				.span(3, 1).hint(200, 150).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		viewer.addCheckStateListener(onCartridgeChecked());
 
+		Button checkAllButton = new Button(embedGroup, SWT.PUSH);
+		checkAllButton.setText("Embed A&ll");
+		GridDataFactory.fillDefaults()
+				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(checkAllButton);
+		checkAllButton.addSelectionListener(onCheckAll());
+
+		Button uncheckAllButton = new Button(embedGroup, SWT.PUSH);
+		uncheckAllButton.setText("Embed N&one");
+		GridDataFactory.fillDefaults()
+				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(uncheckAllButton);
+		uncheckAllButton.addSelectionListener(onUncheckAll());
 	}
 
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
@@ -113,7 +125,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-	private ICheckStateListener onEmbeddableCartridgeChecked() {
+	private ICheckStateListener onCartridgeChecked() {
 		return new ICheckStateListener() {
 
 			@Override
@@ -121,9 +133,9 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
 				if (event.getChecked()) {
 					if (IEmbeddableCartridge.PHPMYADMIN_34.equals(cartridge)) {
-						addPhpMyACartridge(cartridge, event.getCheckable());
+						addPhpMyACartridge(cartridge);
 					} else if (IEmbeddableCartridge.JENKINS_14.equals(cartridge)) {
-						addJenkinsCartridge(cartridge, event.getCheckable());
+						addJenkinsCartridge(cartridge);
 					}
 				} else {
 					model.getSelectedEmbeddableCartridges().remove(cartridge);
@@ -132,7 +144,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge, final ICheckable checkable) {
+	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) {
 		if (model.hasApplication(ICartridge.JENKINS_14)) {
 			model.getSelectedEmbeddableCartridges().add(cartridge);
 		} else {
@@ -152,7 +164,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 								getShell().getDisplay().syncExec(new Runnable() {
 									@Override
 									public void run() {
-										checkable.setChecked(cartridge, false);
+										viewer.setChecked(cartridge, false);
 									}
 								});
 								return OpenShiftUIActivator
@@ -165,11 +177,13 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				} catch (Exception e) {
 					// ignore
 				}
+			} else {
+				viewer.setChecked(cartridge, false);
 			}
 		}
 	}
 
-	private void addPhpMyACartridge(IEmbeddableCartridge cartridge, ICheckable checkable) {
+	private void addPhpMyACartridge(IEmbeddableCartridge cartridge) {
 		if (MessageDialog.openQuestion(getShell(), "Enable MySQL cartridge",
 				"To embed PhpMyAdmin, you'd also have to embed MySql. ")) {
 			List<IEmbeddableCartridge> selectedCartriges = model.getSelectedEmbeddableCartridges();
@@ -177,9 +191,32 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			selectedCartriges.add(IEmbeddableCartridge.MYSQL_51);
 			selectedCartriges.add(cartridge);
 		} else {
-			checkable.setChecked(cartridge, false);
+			viewer.setChecked(cartridge, false);
 		}
 		refreshViewer();
+	}
+
+	private SelectionListener onCheckAll() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				viewer.setAllChecked(true);
+				addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
+			}
+
+		};
+	}
+
+	private SelectionListener onUncheckAll() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				viewer.setAllChecked(false);
+			}
+
+		};
 	}
 
 	@Override
