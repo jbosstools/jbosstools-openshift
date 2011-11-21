@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
@@ -49,8 +51,8 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 	private ApplicationWizardModel wizardModel;
 
 	public NewApplicationWizardPage(ApplicationWizardModel wizardModel, IWizard wizard) {
-		super("Create new OpenShift Express application", "Create new OpenShift Express application",
-				"Create new OpenShift Express application", wizard);
+		super("New OpenShift Express Application", "Select a name and an type for your new OpenShift Express application",
+				"NewOpenShiftExpressApplication", wizard);
 		this.wizardModel = wizardModel;
 		this.model = new NewApplicationWizardPageModel(wizardModel);
 	}
@@ -151,9 +153,16 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-
 	@Override
 	protected void onPageWillGetDeactivated(Direction progress, final PageChangingEvent event, DataBindingContext dbc) {
+		boolean applicationCreated = createApplication();
+		if (!applicationCreated) {
+			event.doit = false;
+		}
+	}
+
+	public boolean createApplication() {
+		final ArrayBlockingQueue<Boolean> applicationCreated = new ArrayBlockingQueue<Boolean>(1);
 		try {
 			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"...", wizardModel.getName())) {
 
@@ -161,16 +170,19 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						wizardModel.createApplication();
+						applicationCreated.offer(true);
+						return Status.OK_STATUS;
 					} catch (OpenShiftException e) {
-						event.doit = false;
-						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", e, wizardModel.getName());
+						applicationCreated.offer(false);
+						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", e,
+								wizardModel.getName());
 					}
-					return Status.OK_STATUS;
 				}
 			}, getContainer());
 		} catch (Exception e) {
 			// ignore
 		}
+		return applicationCreated.poll();
 	}
 
 	private class ApplicationNameValidator implements IValidator {

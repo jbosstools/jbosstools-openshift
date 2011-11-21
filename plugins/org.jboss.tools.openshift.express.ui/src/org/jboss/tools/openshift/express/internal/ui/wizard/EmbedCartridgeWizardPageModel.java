@@ -11,8 +11,14 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.core.databinding.observable.Diffs;
+import org.eclipse.core.databinding.observable.list.ListDiff;
+import org.eclipse.core.databinding.observable.list.ListDiffEntry;
+import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
@@ -34,21 +40,21 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	private ApplicationWizardModel wizardModel;
 
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
-	private List<IEmbeddableCartridge> selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
+	private List<IEmbeddableCartridge> selectedCartridges;
 	
 	public EmbedCartridgeWizardPageModel(ApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
-		wizardModel.setSelectedCartridges(selectedEmbeddableCartridges);
 	}
 
-	public void initSelectedEmbeddableCartridges() throws OpenShiftException {
+	public void loadSelectedEmbeddableCartridges() throws OpenShiftException {
+		selectedCartridges = new ArrayList<IEmbeddableCartridge>();
 		IApplication application = wizardModel.getApplication();
 		if (application == null 
 				|| application.getEmbeddedCartridges() == null) {
 			return;
 		}
 		List<IEmbeddableCartridge> embeddedCartridges = application.getEmbeddedCartridges();
-		getSelectedEmbeddableCartridges().addAll(embeddedCartridges);
+		selectedCartridges.addAll(embeddedCartridges);
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
@@ -66,8 +72,11 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 		return embeddableCartridges;
 	}
 
-	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
-		return selectedEmbeddableCartridges;
+	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
+		if (selectedCartridges == null) {
+			loadSelectedEmbeddableCartridges();
+		}
+		return selectedCartridges;
 	}
 		
 	public boolean hasApplication(ICartridge cartridge) {
@@ -80,7 +89,66 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
+	public IApplication getApplication() {
+			return wizardModel.getApplication();
+	}
+
 	public void createJenkinsApplication(String name) throws OpenShiftException {
 		wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
 	}
+	
+	public void embedCartridges() throws OpenShiftException {
+		if (selectedCartridges == null) {
+			return;
+		}
+		List<IEmbeddableCartridge> addedCartridges = new ArrayList<IEmbeddableCartridge>();
+		List<IEmbeddableCartridge> removedCartridges = new ArrayList<IEmbeddableCartridge>();
+		computeAdditionsAndRemovals(addedCartridges, removedCartridges, selectedCartridges);
+		addEmbeddedCartridges(addedCartridges);
+		removeEmbeddedCartridges(removedCartridges);
+	}
+
+	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> removedCartridges) throws OpenShiftException {
+		if (removedCartridges.isEmpty()) {
+			return;
+		}
+		Collections.sort(removedCartridges, new CartridgeComparator());
+		getApplication().removeEmbbedCartridges(removedCartridges);
+	}
+
+	private void addEmbeddedCartridges(List<IEmbeddableCartridge> addedCartridges) throws OpenShiftException {
+		if (addedCartridges.isEmpty()) {
+			return;
+		}
+		Collections.sort(addedCartridges, new CartridgeComparator());
+		getApplication().addEmbbedCartridges(addedCartridges);
+	}
+
+	private void computeAdditionsAndRemovals(List<IEmbeddableCartridge> addedCartridges,
+			List<IEmbeddableCartridge> removedCartridges, List<IEmbeddableCartridge> selectedCartridges)
+			throws OpenShiftException {
+		ListDiff listDiff = Diffs.computeListDiff(getApplication().getEmbeddedCartridges(), selectedCartridges);
+		for (ListDiffEntry entry : listDiff.getDifferences()) {
+			if (entry.isAddition()) {
+				addedCartridges.add((IEmbeddableCartridge) entry.getElement());
+			} else {
+				removedCartridges.add((IEmbeddableCartridge) entry.getElement());
+			}
+		}
+	}
+
+	private static class CartridgeComparator implements Comparator<IEmbeddableCartridge> {
+
+		@Override
+		public int compare(IEmbeddableCartridge thisCartridge, IEmbeddableCartridge thatCartridge) {
+			// mysql has to be added/removed before phpmyadmin
+			if (thisCartridge.equals(IEmbeddableCartridge.MYSQL_51)) {
+				return -1;
+			} else if (thatCartridge.equals(IEmbeddableCartridge.MYSQL_51)) {
+				return 1;
+			}
+			return 0;
+		}
+	}
+
 }

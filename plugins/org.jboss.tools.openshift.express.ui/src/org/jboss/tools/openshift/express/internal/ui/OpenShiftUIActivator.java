@@ -61,7 +61,11 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, e.getMessage(), e));
+		log(e.getMessage(), e);
+	}
+
+	public static void log(String message, Throwable e) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, e));
 	}
 
 	public static IStatus createErrorStatus(String message, Throwable throwable) {
