@@ -29,9 +29,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.openshift.express.client.IApplication;
+import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.client.utils.RFC822DateUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.common.StringUtils;
 
 /**
  * @author André Dietisheim
@@ -47,7 +49,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 
 	@Override
 	protected Control createContents(Composite parent) {
-		Control control =  super.createContents(parent);
+		Control control = super.createContents(parent);
 		setupDialog(parent);
 		return control;
 	}
@@ -56,28 +58,43 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(container);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).spacing(14, 4).applyTo(container);
 
 		Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(separator);
 
-		createDetails("Name", application.getName(), container);
-		createDetails("Type", application.getCartridge().getName(), container);
-		createDetails("Creation Time", new ErrorMessageCallable<String>("Creation Time") {
+		createDetails("Name:", application.getName(), container);
+		createDetails("Type:", application.getCartridge().getName(), container);
+		createDetails("Embedded Cartridges:", new ErrorMessageCallable<String>("Embedded Cartridges") {
+
+			@Override
+			public String call() throws Exception {
+				return StringUtils.toString(application.getEmbeddedCartridges(),
+						new StringUtils.ToStringConverter<IEmbeddableCartridge>() {
+
+							@Override
+							public String toString(IEmbeddableCartridge cartridge) {
+								return cartridge.getName();
+							}
+						});
+			}
+
+		}.get(), container);
+		createDetails("Creation Time:", new ErrorMessageCallable<String>("Creation Time") {
 
 			@Override
 			public String call() throws Exception {
 				return RFC822DateUtils.getString(application.getCreationTime());
 			}
 		}.get(), container);
-		createDetails("UUID", new ErrorMessageCallable<String>("UUID") {
+		createDetails("UUID:", new ErrorMessageCallable<String>("UUID") {
 
 			@Override
 			public String call() throws Exception {
 				return application.getUUID();
 			}
 		}.get(), container);
-		createDetails("Git URL", new ErrorMessageCallable<String>("Git URL") {
+		createDetails("Git URL:", new ErrorMessageCallable<String>("Git URL") {
 
 			@Override
 			public String call() throws Exception {
@@ -86,7 +103,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		}.get(), container);
 
 		Label publicUrlLabel = new Label(container, SWT.NONE);
-		publicUrlLabel.setText("Public URL");
+		publicUrlLabel.setText("Public URL:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(publicUrlLabel);
 		Link publicUrlLink = new Link(container, SWT.WRAP);
 		String applicationUrl = new ErrorMessageCallable<String>("Public URL") {
@@ -115,7 +132,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
 				true);
 	}
-	
+
 	private SelectionAdapter onPublicUrl(final String applicationUrl) {
 		return new SelectionAdapter() {
 

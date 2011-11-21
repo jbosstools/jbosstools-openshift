@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.common;
 
+import java.util.List;
+
 /**
  * @author André Dietisheim
  */
@@ -27,4 +29,20 @@ public class StringUtils {
 				|| value.length() == 0;
 	}
 
+	public static <T> String toString(List<T> elements, ToStringConverter<T> converter) {
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < elements.size(); i++) {
+			converter.toString(elements.get(i));
+			builder.append(converter.toString(elements.get(i)));
+			if (i + 1 < elements.size()) {
+				builder.append(", ");
+			}
+		}
+		return builder.toString();
+	}
+	
+	public static interface ToStringConverter<T> {
+		public String toString(T object);
+	}
+	
 }
