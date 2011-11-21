@@ -188,7 +188,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 						}
 
 					}, getContainer(), getDataBindingContext());
-					model.getSelectedEmbeddableCartridges().add(cartridge);
 				} catch (Exception e) {
 					// ignore
 				}
