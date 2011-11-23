@@ -16,6 +16,8 @@ import java.util.List;
  * @author André Dietisheim
  */
 public class StringUtils {
+	
+	private static final String LINE_SEPARATOR_KEY = "line.separator";
 
 	public static String null2emptyString(String value) {
 		if (value != null) {
@@ -44,5 +46,10 @@ public class StringUtils {
 	public static interface ToStringConverter<T> {
 		public String toString(T object);
 	}
+	
+	public static String getLineSeparator() {
+		return System.getProperty(LINE_SEPARATOR_KEY);
+	}
+
 	
 }

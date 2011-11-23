@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -49,11 +50,13 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.common.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 
 /**
  * @author André Dietisheim
@@ -164,36 +167,42 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		} else {
 			final JenkinsApplicationDialog dialog = new JenkinsApplicationDialog(getShell());
 			if (dialog.open() == Dialog.OK) {
-				try {
-					final String name = dialog.getValue();
-					WizardUtils.runInWizard(new Job(
-							NLS.bind("Creating jenkins application \"{0}\"...", name)) {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							try {
-								model.createJenkinsApplication(name);
-								model.getSelectedEmbeddableCartridges().add(cartridge);
-								return Status.OK_STATUS;
-							} catch (Exception e) {
-								getShell().getDisplay().syncExec(new Runnable() {
-									@Override
-									public void run() {
-										viewer.setChecked(cartridge, false);
-									}
-								});
-								return OpenShiftUIActivator
-										.createErrorStatus("Could not load embeddable cartridges", e);
-							}
-						}
-
-					}, getContainer(), getDataBindingContext());
-				} catch (Exception e) {
-					// ignore
-				}
+				createJenkinsApplication(cartridge, dialog.getValue());
 			} else {
 				viewer.setChecked(cartridge, false);
 			}
+		}
+	}
+
+	private void createJenkinsApplication(final IEmbeddableCartridge cartridge, final String name) {
+		try {
+			WizardUtils.runInWizard(new Job(
+					NLS.bind("Creating jenkins application \"{0}\"...", name)) {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						IApplication jenkinsApplication = model.createJenkinsApplication(name);
+						model.getSelectedEmbeddableCartridges().add(cartridge);
+
+						openLogDialog(jenkinsApplication);
+
+						return Status.OK_STATUS;
+					} catch (Exception e) {
+						getShell().getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								viewer.setChecked(cartridge, false);
+							}
+						});
+						return OpenShiftUIActivator
+								.createErrorStatus("Could not load embeddable cartridges", e);
+					}
+				}
+
+			}, getContainer(), getDataBindingContext());
+		} catch (Exception e) {
+			// ignore
 		}
 	}
 
@@ -217,17 +226,18 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
+		List<IEmbeddableCartridge> checkedCartridges = model.getSelectedEmbeddableCartridges();
 		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
 					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
-				model.getSelectedEmbeddableCartridges().remove(IEmbeddableCartridge.PHPMYADMIN_34);
-				model.getSelectedEmbeddableCartridges().remove(cartridge);
+				checkedCartridges.remove(IEmbeddableCartridge.PHPMYADMIN_34);
+				checkedCartridges.remove(cartridge);
 				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
 			} else {
 				viewer.setChecked(cartridge, true);
 			}
 		} else {
-			model.getSelectedEmbeddableCartridges().add(cartridge);
+			checkedCartridges.remove(cartridge);
 		}
 	}
 
@@ -331,6 +341,66 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
+	public boolean processCartridges() {
+		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
+		try {
+			WizardUtils.runInWizard(
+					new Job(NLS.bind("Adding/Removing embedded cartridges for application {0}...",
+							model.getApplication().getName())) {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								List<IEmbeddableCartridge> addedCartridges = model.embedCartridges();
+								openLogDialog(addedCartridges);
+								queue.offer(true);
+							} catch (OpenShiftException e) {
+								queue.offer(false);
+								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+										NLS.bind("Could not embed cartridges to application {0}",
+												model.getApplication().getName()), e);
+							}
+							return Status.OK_STATUS;
+						}
+					}, getContainer());
+			return queue.poll(10, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	private void openLogDialog(final List<IEmbeddableCartridge> cartridges) {
+		if (cartridges.size() == 0) {
+			return;
+		}
+		
+		final ArrayList<LogEntry> logEntries = new ArrayList<LogEntry>();
+		for (IEmbeddableCartridge cartridge : cartridges) {
+			logEntries.add(new LogEntry(cartridge.getName(), cartridge.getCreationLog()));
+		}
+
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				new CreationLogDialog(getShell(),
+						logEntries.toArray(new LogEntry[logEntries.size()])).open();
+
+			}
+		});
+	}
+
+	private void openLogDialog(final IApplication application) {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				new CreationLogDialog(getShell(),
+						new LogEntry(application.getName(), application.getCreationLog())).open();
+			}
+		});
+	}
+
 	/**
 	 * Viewer element comparer based on #equals(). The default implementation in
 	 * CheckboxTableViewer compares elements based on instance identity.
@@ -360,32 +430,4 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 
 	}
-
-	public boolean processCartridges() {
-		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
-		try {
-			WizardUtils.runInWizard(
-					new Job(NLS.bind("Adding/Removing embedded cartridges for application {0}...",
-							model.getApplication().getName())) {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							try {
-								model.embedCartridges();
-								queue.offer(true);
-							} catch (OpenShiftException e) {
-								queue.offer(false);
-								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-										NLS.bind("Could not embed cartridges to application {0}",
-												model.getApplication().getName()), e);
-							}
-							return Status.OK_STATUS;
-						}
-					}, getContainer());
-			return queue.poll(10, TimeUnit.SECONDS);
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
 }

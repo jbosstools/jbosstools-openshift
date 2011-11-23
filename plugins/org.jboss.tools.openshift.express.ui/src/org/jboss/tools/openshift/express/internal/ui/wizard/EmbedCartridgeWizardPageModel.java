@@ -40,7 +40,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 	private List<IEmbeddableCartridge> selectedCartridges;
-	
+
 	public EmbedCartridgeWizardPageModel(ApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
@@ -48,7 +48,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	public void loadSelectedEmbeddableCartridges() throws OpenShiftException {
 		selectedCartridges = new ArrayList<IEmbeddableCartridge>();
 		IApplication application = wizardModel.getApplication();
-		if (application == null 
+		if (application == null
 				|| application.getEmbeddedCartridges() == null) {
 			return;
 		}
@@ -77,7 +77,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 		}
 		return selectedCartridges;
 	}
-		
+
 	public boolean hasApplication(ICartridge cartridge) {
 		try {
 			return wizardModel.getUser().hasApplication(cartridge);
@@ -89,22 +89,31 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IApplication getApplication() {
-			return wizardModel.getApplication();
+		return wizardModel.getApplication();
 	}
 
-	public void createJenkinsApplication(String name) throws OpenShiftException {
-		wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
+	public IApplication createJenkinsApplication(String name) throws OpenShiftException {
+		IApplication application = wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
+		return application;
 	}
-	
-	public void embedCartridges() throws OpenShiftException {
+
+	/**
+	 * Embeds/removes the cartridges that were added/removed in this wizard
+	 * page.
+	 * 
+	 * @return the cartridges that were added.
+	 * @throws OpenShiftException
+	 */
+	public List<IEmbeddableCartridge> embedCartridges() throws OpenShiftException {
 		if (selectedCartridges == null) {
-			return;
+			return Collections.emptyList();
 		}
 		List<IEmbeddableCartridge> addedCartridges = new ArrayList<IEmbeddableCartridge>();
 		List<IEmbeddableCartridge> removedCartridges = new ArrayList<IEmbeddableCartridge>();
 		computeAdditionsAndRemovals(addedCartridges, removedCartridges, selectedCartridges);
 		addEmbeddedCartridges(addedCartridges);
 		removeEmbeddedCartridges(removedCartridges);
+		return addedCartridges;
 	}
 
 	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> removedCartridges) throws OpenShiftException {
