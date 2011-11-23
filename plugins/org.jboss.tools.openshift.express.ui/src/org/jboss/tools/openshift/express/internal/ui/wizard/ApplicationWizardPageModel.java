@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.client.IApplication;
@@ -75,7 +75,7 @@ public class ApplicationWizardPageModel extends ObservableUIPojo {
 		setDomain(getUser().getDomain());
 	}
 
-	public Collection<IApplication> loadApplications() throws OpenShiftException {
+	public List<IApplication> loadApplications() throws OpenShiftException {
 		IUser user = getUser();
 		if (user == null) {
 			return Collections.emptyList();

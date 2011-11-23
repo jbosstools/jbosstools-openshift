@@ -37,9 +37,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.client.Cartridge;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
+import org.jboss.tools.openshift.express.internal.client.Cartridge;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
