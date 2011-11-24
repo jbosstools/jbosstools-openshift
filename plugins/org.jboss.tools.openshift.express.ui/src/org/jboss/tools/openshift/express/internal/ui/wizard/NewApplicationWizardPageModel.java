@@ -106,7 +106,7 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 
 	public boolean hasApplication(String name) {
 		try {
-			return wizardModel.getUser().getApplicationByName(name) != null;
+			return wizardModel.hasApplication(name);
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log(
 					OpenShiftUIActivator.createErrorStatus("Could not get application by name", e));

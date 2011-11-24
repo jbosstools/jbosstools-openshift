@@ -75,7 +75,7 @@ public class ApplicationWizardPageModel extends ObservableUIPojo {
 		setDomain(getUser().getDomain());
 	}
 
-	public List<IApplication> loadApplications() throws OpenShiftException {
+	public List<IApplication> getApplications() throws OpenShiftException {
 		IUser user = getUser();
 		if (user == null) {
 			return Collections.emptyList();

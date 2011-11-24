@@ -69,4 +69,8 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	public IApplication createApplication(String name, ICartridge cartridge) throws OpenShiftException {
 		return getUser().createApplication(name, cartridge);
 	}
+	
+	public boolean hasApplication(String name) throws OpenShiftException {
+		return user.hasApplication(name);
+	}
 }

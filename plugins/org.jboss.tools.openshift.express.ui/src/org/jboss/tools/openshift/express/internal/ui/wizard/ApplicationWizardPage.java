@@ -357,7 +357,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						model.loadDomain();
-						final Collection<IApplication> applications = model.loadApplications();
+						final Collection<IApplication> applications = model.getApplications();
 						setViewerInput(applications);
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
