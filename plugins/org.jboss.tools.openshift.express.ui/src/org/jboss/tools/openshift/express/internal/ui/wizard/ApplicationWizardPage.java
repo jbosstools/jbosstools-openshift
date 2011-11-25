@@ -60,6 +60,7 @@ import org.jboss.tools.openshift.express.client.IDomain;
 import org.jboss.tools.openshift.express.client.NotFoundOpenShiftException;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.utils.Logger;
 
 /**
  * @author André Dietisheim
@@ -291,7 +292,8 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 									protected IStatus run(IProgressMonitor monitor) {
 										try {
 											model.destroyCurrentApplication();
-											refreshViewer();
+											final Collection<IApplication> applications = model.getApplications();
+											setViewerInput(applications);
 											return Status.OK_STATUS;
 										} catch (OpenShiftException e) {
 											return OpenShiftUIActivator.createErrorStatus(
@@ -317,8 +319,14 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 				Shell shell = getContainer().getShell();
 				NewApplicationWizard applicationDialog = new NewApplicationWizard(model.getUser());
 				if (WizardUtils.openWizardDialog(applicationDialog, shell) == Dialog.OK) {
-					viewer.refresh();
-					model.setSelectedApplication(applicationDialog.getApplication());
+					try {
+						final Collection<IApplication> applications = model.getApplications();
+						setViewerInput(applications);
+						model.setSelectedApplication(applicationDialog.getApplication());
+					} catch (OpenShiftException ex) {
+						Logger.error(NLS.bind("Could not delete application \"{0}\"",
+								model.getSelectedApplication().getName()), ex);
+					}
 				}
 			}
 		};
@@ -378,17 +386,8 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void refreshViewer() {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.refresh();
-			}
-		});
-	}
-
 	private void clearViewer() {
+		Logger.debug("Clearing applications list in viewer");
 		setViewerInput(new ArrayList<IApplication>());
 	}
 
@@ -397,6 +396,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void run() {
+				Logger.debug("Setting {} application(s) in the viewer", applications.size());
 				viewer.setInput(applications);
 			}
 		});

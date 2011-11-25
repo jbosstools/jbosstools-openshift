@@ -1,0 +1,2 @@
+# This file enables runtime tracing
+org.jboss.tools.openshift.express.ui/debug=true
