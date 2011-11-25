@@ -81,4 +81,16 @@ public class ExpressBehaviourDelegate implements IJBossBehaviourDelegate {
 
 	}
 
+	@Override
+	public void onServerStarted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onServerStopped() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
