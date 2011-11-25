@@ -71,4 +71,16 @@ public class EgitBehaviourDelegate implements IJBossBehaviourDelegate {
 		// do nothing
 	}
 
+	@Override
+	public void onServerStarted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onServerStopped() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
