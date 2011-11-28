@@ -174,7 +174,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 						return Status.OK_STATUS;
 					} catch (OpenShiftException e) {
 						applicationCreated.offer(false);
-						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", e,
+						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", (Throwable)e,
 								wizardModel.getName());
 					}
 				}
