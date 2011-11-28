@@ -53,7 +53,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	private CredentialsWizardPageModel model;
 
 	public CredentialsWizardPage(IWizard wizard, ImportProjectWizardModel wizardModel) {
-		super("Server connetion", "Please provide the credentails of your user account on OpenShift Express",
+		super("Server connection", "Please provide the credentails of your user account on OpenShift Express",
 				"Server Connection", wizard);
 		this.model = new CredentialsWizardPageModel(wizardModel);
 	}
