@@ -107,10 +107,21 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		}
 		File libraPrivateKey = getLibraPrivateKey();
 		SSHKeyPair keyPair = SSHKeyPair.create(passPhrase, libraPrivateKey.getAbsolutePath(), libraPublicKey.getAbsolutePath());
+		setFilePermissions(libraPrivateKey);
 		addToPrivateKeysPreferences(keyPair);
 		setSshKey(keyPair.getPublicKeyPath());
 	}
 	
+	private void setFilePermissions(File file) {
+		// set f permission to correspond to 'chmod 0600' read/write only for user
+		// First clear all permissions for both user and others
+		file.setReadable(false, false);
+		file.setWritable(false, false);
+		// Enable only readable for user
+		file.setReadable(true, true); 
+		file.setWritable(true, true);
+	}
+
 	private void addToPrivateKeysPreferences(SSHKeyPair keyPair) {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
 		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
