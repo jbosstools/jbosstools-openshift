@@ -84,6 +84,7 @@ public class NewApplicationWizardPageModel extends ObservableUIPojo {
 	public ICartridge getSelectedCartridge() {
 		return selectedCartridge;
 	}
+	
 
 	public void setSelectedCartridge(ICartridge cartridge) {
 		wizardModel.setCartridge(cartridge);
