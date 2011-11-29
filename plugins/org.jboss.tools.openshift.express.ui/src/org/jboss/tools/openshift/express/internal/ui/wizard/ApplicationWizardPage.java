@@ -337,7 +337,14 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WizardUtils.openWizardDialog(new EmbedCartridgeWizard(model.getSelectedApplication(), model.getUser()), getShell());
+				WizardUtils.openWizardDialog(
+						new EmbedCartridgeWizard(model.getSelectedApplication(), model.getUser()), getShell());
+				try {
+					final Collection<IApplication> applications = model.getApplications();
+					setViewerInput(applications);
+				} catch (OpenShiftException ex) {
+					Logger.error(NLS.bind("Could not load the availabel applications", ex));
+				}
 			}
 		};
 	}
