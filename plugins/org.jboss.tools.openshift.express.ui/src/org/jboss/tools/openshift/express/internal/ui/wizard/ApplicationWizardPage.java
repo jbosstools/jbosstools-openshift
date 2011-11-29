@@ -160,7 +160,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 		deleteButton.addSelectionListener(onDelete(dbc));
 
 		Button embedButton = new Button(applicationGroup, SWT.PUSH);
-		embedButton.setText("E&mbed");
+		embedButton.setText("E&dit");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(80, SWT.DEFAULT).applyTo(embedButton);
 		DataBindingUtils.bindEnablementToValidationStatus(embedButton, IStatus.OK, dbc, selectedApplicationBinding);
 		embedButton.addSelectionListener(onEmbed(dbc));
