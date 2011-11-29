@@ -324,7 +324,8 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		public JenkinsApplicationDialog(Shell shell) {
 			super(shell
 					, "New Jenkins application"
-					, "To embed jenkins into your application, you'd first have to create a jenkins application."
+					, "To embed jenkins into your application, you'd first have to create a jenkins application.\n" 
+							+ "Please provide a name for your jenkins application:"
 					, null
 					, new JenkinsNameValidator());
 		}
