@@ -66,7 +66,7 @@ public class ExpressBehaviourDelegate implements IJBossBehaviourDelegate {
 
 	@Override
 	public IStatus canChangeState(String launchMode) {
-		return Status.OK_STATUS;
+		return Status.CANCEL_STATUS;
 	}
 
 	@Override
