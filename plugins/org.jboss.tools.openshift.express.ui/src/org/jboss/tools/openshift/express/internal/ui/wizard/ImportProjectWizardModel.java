@@ -146,14 +146,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 				try {
-					MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(projectFolder);
-					List<IProject> importedProjects = Collections.emptyList();
-					if (mavenImport.isMavenProject()) {
-						importedProjects = mavenImport.importToWorkspace(monitor);
-					} else {
-						importedProjects = new GeneralProjectImportOperation(projectFolder).importToWorkspace(monitor);
-					}
-
+					List<IProject> importedProjects = importMavenProject(projectFolder, monitor);
 					connectToGitRepo(importedProjects, projectFolder, monitor);
 					createServerAdapterIfRequired(importedProjects, monitor);
 					return Status.OK_STATUS;
@@ -163,6 +156,18 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 					OpenShiftUIActivator.log(status);
 					return status;
 				}
+			}
+
+			private List<IProject> importMavenProject(final File projectFolder, IProgressMonitor monitor)
+					throws CoreException, InterruptedException {
+				MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(projectFolder);
+				List<IProject> importedProjects = Collections.emptyList();
+				if (mavenImport.isMavenProject()) {
+					importedProjects = mavenImport.importToWorkspace(monitor);
+				} else {
+					importedProjects = new GeneralProjectImportOperation(projectFolder).importToWorkspace(monitor);
+				}
+				return importedProjects;
 			}
 		}.schedule();
 	}
