@@ -158,20 +158,21 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 				}
 			}
 
-			private List<IProject> importMavenProject(final File projectFolder, IProgressMonitor monitor)
-					throws CoreException, InterruptedException {
-				MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(projectFolder);
-				List<IProject> importedProjects = Collections.emptyList();
-				if (mavenImport.isMavenProject()) {
-					importedProjects = mavenImport.importToWorkspace(monitor);
-				} else {
-					importedProjects = new GeneralProjectImportOperation(projectFolder).importToWorkspace(monitor);
-				}
-				return importedProjects;
-			}
 		}.schedule();
 	}
 
+	private List<IProject> importMavenProject(final File projectFolder, IProgressMonitor monitor)
+			throws CoreException, InterruptedException {
+		MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(projectFolder);
+		List<IProject> importedProjects = Collections.emptyList();
+		if (mavenImport.isMavenProject()) {
+			importedProjects = mavenImport.importToWorkspace(monitor);
+		} else {
+			importedProjects = new GeneralProjectImportOperation(projectFolder).importToWorkspace(monitor);
+		}
+		return importedProjects;
+	}
+	
 	private void connectToGitRepo(List<IProject> projects, File projectFolder, IProgressMonitor monitor)
 			throws CoreException {
 		File gitFolder = new File(projectFolder, Constants.DOT_GIT);
