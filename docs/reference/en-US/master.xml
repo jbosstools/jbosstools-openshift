@@ -4,6 +4,7 @@
 
 [<!ENTITY  Preface SYSTEM "Preface.xml">
 <!ENTITY Introduction SYSTEM "Introduction.xml">
+<!ENTITY Creating_Express_Application SYSTEM "Creating_an_OpenShift_Express_Application.xml">
 <!ENTITY Revision_History SYSTEM "Revision_History.xml">
 ]>
 
@@ -48,6 +49,7 @@
     <toc/> 
  <!--   &Preface; -->
     &Introduction; 
+    &Creating_Express_Application;
     &Revision_History;
 
 </book> 

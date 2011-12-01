@@ -4,7 +4,7 @@
 <bookinfo id="book-OpenShift_Tools_Reference_Guide-OpenShift_Tools_Reference_Guide">
   <title>OpenShift Tools Reference Guide</title> 
   <subtitle>
-    Provides information about the use of the <application>JBoss Developer Studio</application> from a beginners level.
+	  Provides information about the use of the <application>JBoss Developer Studio</application> with the Red Hat <application>OpenShift</application> service.
   </subtitle>
    
   <productname>JBoss Developer Studio</productname>
@@ -17,7 +17,7 @@
    
   <abstract>
     <para>
-      The Beginners Guide brings all concepts pertaining to the <application>JBoss Developer Studio</application> &nbsp; back to basics. It is intended for individuals who may be new to application servers and the creation of applications for deployment.
+		The OpenShift Tools Reference Guide explains how to create a connection and utilize the <application>OpenShift</application> service from within <application>JBoss Developer Studio</application>.
     </para>
   </abstract>
    
