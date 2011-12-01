@@ -40,6 +40,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.utils.UIUtils;
 
 /**
  * @author André Dietisheim
@@ -71,14 +72,16 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
 		Text rhLoginText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(rhLoginText);
+		UIUtils.selectAllOnFocus(rhLoginText);
 		DataBindingUtils.bindMandatoryTextField(
 				rhLoginText, "Username", CredentialsWizardPageModel.PROPERTY_RHLOGIN, model, dbc);
-
+		
 		Label passwordLabel = new Label(container, SWT.NONE);
 		passwordLabel.setText("&Password");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
 		Text passwordText = new Text(container, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(passwordText);
+		UIUtils.selectAllOnFocus(passwordText);
 		DataBindingUtils.bindMandatoryTextField(
 				passwordText, "Password", CredentialsWizardPageModel.PROPERTY_PASSWORD, model, dbc);
 
