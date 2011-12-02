@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.client.ICartridge;
+import org.jboss.tools.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.client.Cartridge;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -172,6 +173,10 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 						wizardModel.createApplication();
 						applicationCreated.offer(true);
 						return Status.OK_STATUS;
+					} catch (OpenShiftApplicationNotAvailableException e) {
+						applicationCreated.offer(false);
+						return OpenShiftUIActivator.createErrorStatus(e.getMessage(), e,
+								wizardModel.getName());
 					} catch (OpenShiftException e) {
 						applicationCreated.offer(false);
 						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", (Throwable)e,

@@ -60,7 +60,7 @@ public class OpenShiftDeployUI implements IDeploymentTypeUI {
 		Label domainLabel = new Label(composite, SWT.NONE);
 		domainLabel.setText("Domain: " + ExpressServerUtils.getExpressDomain(callback.getServer()));
 		Label appLabel = new Label(composite, SWT.NONE);
-		appLabel.setText("App: " + ExpressServerUtils.getExpressApplication(callback.getServer()));
+		appLabel.setText("App: " + ExpressServerUtils.getExpressApplicationName(callback.getServer()));
 		
 		Label modeLabel = new Label(composite, SWT.NONE);
 		modeLabel.setText("Mode: " + ExpressServerUtils.getExpressModeAsString(callback.getServer()));

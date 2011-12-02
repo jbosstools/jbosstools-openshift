@@ -143,4 +143,48 @@
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
     </extension>
+    
+    <!-- Extensions to Server View to provide 'tail' of the remote server.log file -->
+    
+    <!-- disabled for now
+	<extension point="org.eclipse.ui.navigator.navigatorContent">
+		<actionProvider
+				class="org.jboss.tools.openshift.express.internal.ui.console.TailServerLogActionProvider"
+				id="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider">
+			<enablement>
+      <and>
+         <instanceof
+               value="org.eclipse.wst.server.core.IServer">
+         </instanceof>
+         <test
+               forcePluginActivation="true"
+               property="org.jboss.tools.openshift.express.isOpenShiftServer">
+         </test>
+      </and>
+			</enablement>
+		</actionProvider>
+    </extension>
+	
+	<extension point="org.eclipse.ui.navigator.viewer">
+		<viewerContentBinding viewerId="org.eclipse.wst.server.ui.ServersView">
+		</viewerContentBinding>
+    	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
+       <includes>
+          <actionExtension
+                pattern="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider"/>
+       </includes>
+    </viewerActionBinding>
+	</extension>
+	
+    <extension
+       point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+          class="org.jboss.tools.openshift.express.internal.ui.console.ServerTypePropertyTester"
+          id="org.jboss.tools.openshift.express.ui.serverTypePropertyTester"
+          namespace="org.jboss.tools.openshift.express"
+          properties="isOpenShiftServer"
+          type="org.eclipse.wst.server.core.IServer">
+      </propertyTester>
+    </extension>
+    -->
 </plugin>

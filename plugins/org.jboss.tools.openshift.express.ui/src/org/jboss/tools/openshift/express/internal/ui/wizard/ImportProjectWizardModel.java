@@ -271,7 +271,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		IServer server = ExpressServerUtils.createServer(rt, type, serverName);
 		ExpressServerUtils.fillServerWithOpenShiftDetails(server, getApplication().getApplicationUrl(), 
 				getUser().getRhlogin(), getUser().getPassword(), 
-				getUser().getDomain().getNamespace(), getApplication().getName(), mode);
+				getUser().getDomain().getNamespace(), getApplication().getName(), getApplication().getUUID(), mode);
 		return server;
 	}
 

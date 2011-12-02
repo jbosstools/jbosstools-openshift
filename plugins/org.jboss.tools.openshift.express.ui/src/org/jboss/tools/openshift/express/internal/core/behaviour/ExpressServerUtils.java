@@ -23,6 +23,7 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
  * This class holds the attribute names whose values will be
@@ -35,10 +36,14 @@ public class ExpressServerUtils {
 	public static final String ATTRIBUTE_EXPRESS_MODE = "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressMode";
 	public static final String EXPRESS_BINARY_MODE =  "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBinaryMode";
 	public static final String EXPRESS_SOURCE_MODE =  "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressSourceMode";
-	public static final String ATTRIBUTE_APPLICATION =  "org.jboss.tools.openshift.express.internal.core.behaviour.Application";
+	public static final String ATTRIBUTE_APPLICATION_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";
+	public static final String ATTRIBUTE_APPLICATION_ID =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
 	public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
+	
+	/** the OpensHift Server Type as defined in the plugin.xml.*/
+	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";
 	
 	public static String getExpressMode(IServerAttributes attributes ) {
 		return attributes.getAttribute(ATTRIBUTE_EXPRESS_MODE, EXPRESS_SOURCE_MODE);
@@ -57,13 +62,17 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 	
-	public static String getExpressApplication(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_APPLICATION, (String)null);
+	public static String getExpressApplicationName(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String)null);
+	}
+	
+	public static String getExpressApplicationId(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String)null);
 	}
 	
 	public static IServer setExpressApplication(IServer server, String val) throws CoreException {
 		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_APPLICATION, val);
+		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, val);
 		return wc.save(false, new NullProgressMonitor());
 	}
 
@@ -108,7 +117,7 @@ public class ExpressServerUtils {
 	 * @param username
 	 * @param password
 	 * @param domain
-	 * @param app
+	 * @param appName
 	 * @param sourceOrBinary
 	 * @param localRuntimeHomeDir
 	 * @return
@@ -116,13 +125,13 @@ public class ExpressServerUtils {
 	 */
 	public static IServer createAS7OpenShiftServer(
 			String host, String username, String password, 
-			String domain, String app,
+			String domain, String appName, String appId,
 			String sourceOrBinary,
 			String localRuntimeHomeDir) throws CoreException {
 		IServer server = createServerAndRuntime(IJBossToolingConstants.AS_70,
 				IJBossToolingConstants.SERVER_AS_70, 
 				localRuntimeHomeDir, /* irrelevant */ "default");
-		return fillServerWithOpenShiftDetails(server, host, username, password, domain, app, sourceOrBinary);
+		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary);
 	}
 	
 	/**
@@ -133,7 +142,7 @@ public class ExpressServerUtils {
 	 * @param username
 	 * @param password
 	 * @param domain
-	 * @param app
+	 * @param appName
 	 * @param sourceOrBinary
 	 * @param runtime
 	 * @return
@@ -141,10 +150,10 @@ public class ExpressServerUtils {
 	 */
 	public static IServer createAS7OpenShiftServer(
 			String host, String username, String password, 
-			String domain, String app, String sourceOrBinary,
+			String domain, String appName, String appId, String sourceOrBinary,
 			IRuntime runtime) throws CoreException {
 		IServer server = createServer(runtime, IJBossToolingConstants.SERVER_AS_70);
-		return fillServerWithOpenShiftDetails(server, host, username, password, domain, app, sourceOrBinary);
+		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary);
 	}
 	
 	/**
@@ -155,13 +164,14 @@ public class ExpressServerUtils {
 	 * @param username
 	 * @param password
 	 * @param domain
-	 * @param app
+	 * @param appName
 	 * @param sourceOrBinary
 	 * @return
 	 * @throws CoreException
 	 */
+	@SuppressWarnings("restriction")
 	public static IServer fillServerWithOpenShiftDetails(IServer server,
-			String host, String username, String password, String domain, String app,
+			String host, String username, String password, String domain, String appName, String appId,
 			String mode) throws CoreException {
 		if( host.indexOf("://") != -1)
 			host = host.substring(host.indexOf("://") + 3);
@@ -173,7 +183,8 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		wc.setAttribute(ATTRIBUTE_PASSWORD, password);
 		wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
-		wc.setAttribute(ATTRIBUTE_APPLICATION, app);
+		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
+		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
 		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
@@ -195,6 +206,16 @@ public class ExpressServerUtils {
 	
 	public static IServer createServer(IRuntime runtime, IServerType serverType, String serverName) throws CoreException {
 		return ServerCreationUtils.createServer2(runtime, serverType, serverName, "openshift");
+	}
+	
+	/**
+	 * Returns true if the given server is an OpenShift one, false otherwise.
+	 * @param server the server to check
+	 * @return true or false
+	 */
+	public static boolean isOpenShiftRuntime(IServer server) {
+		final String serverTypeId = server.getServerType().getId();
+		return (OPENSHIFT_SERVER_TYPE.equals(serverTypeId));
 	}
 
 }
