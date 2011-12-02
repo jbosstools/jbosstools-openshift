@@ -146,7 +146,7 @@
     
     <!-- Extensions to Server View to provide 'tail' of the remote server.log file -->
     
-    <!-- disabled for now
+    <!-- disabled for now 
 	<extension point="org.eclipse.ui.navigator.navigatorContent">
 		<actionProvider
 				class="org.jboss.tools.openshift.express.internal.ui.console.TailServerLogActionProvider"
@@ -186,5 +186,6 @@
           type="org.eclipse.wst.server.core.IServer">
       </propertyTester>
     </extension>
+    
     -->
 </plugin>

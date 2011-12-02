@@ -5,18 +5,16 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteSession;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
-import org.eclipse.jsch.core.IJSchService;
-import org.eclipse.jsch.internal.core.JSchLocation;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
@@ -27,18 +25,12 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.openshift.express.internal.client.utils.Base64Encoder;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker.MyLogger;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.utils.Logger;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 
 public class TailServerLogAction extends Action implements ISelectionChangedListener {
 
@@ -72,8 +64,8 @@ public class TailServerLogAction extends Action implements ISelectionChangedList
 			if (!tailRunners.containsKey(serverId)) {
 				TailServerLogWorker tailServerLogRunner;
 				try {
-					final Channel channel = initSshChannel(server); 
-					tailServerLogRunner = new TailServerLogWorker(server, console, channel);
+					final Process process = startTailProcess(server); 
+					tailServerLogRunner = new TailServerLogWorker(server, console, process);
 					tailRunners.put(serverId, tailServerLogRunner);
 					Thread thread = new Thread(tailServerLogRunner);
 					thread.start();
@@ -85,7 +77,7 @@ public class TailServerLogAction extends Action implements ISelectionChangedList
 		}
 	}
 
-	private Channel initSshChannel(IServer server) throws JSchException, IOException {
+	private Process startTailProcess(IServer server) throws JSchException, IOException {
 		final String host = server.getHost();
 		final String appId = ExpressServerUtils.getExpressApplicationId(server);
 		final String appName = ExpressServerUtils.getExpressApplicationName(server);
@@ -95,29 +87,15 @@ public class TailServerLogAction extends Action implements ISelectionChangedList
 		
 		JSch.setLogger(new MyLogger());
 		final SshSessionFactory sshSessionFactory = SshSessionFactory.getInstance();
-		final URIish uri = new URIish();
-		uri.setHost(host);
-		uri.setUser(appId);
-		final FS local = FS.detect();
-		final RemoteSession remoteSession = sshSessionFactory.getSession(uri, null, local, 100000);
+		final URIish uri = new URIish().setHost(host).setUser(appId);
+		final RemoteSession remoteSession = sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED, 100000);
 		
-		//BundleContext context = OpenShiftUIActivator.getDefault().getBundle().getBundleContext();
-		//final ServiceReference<IJSchService> ssh = context.getServiceReference(IJSchService.class);
-		//final IJSchService jschService = context.getService(ssh);
-		// when the createSession method below take a null UserInfo param, it creates a new one that can't be initialized here (not a public class)
-		//final Session session = jschService.createSession(new JSchLocation(appId, host), null);
-		//jschService.connect(session, 0, new NullProgressMonitor());
-
 		// the rhc-tail-files command template
 		// ssh_cmd =
 		// "ssh -t #{app_uuid}@#{app}-#{namespace}.#{rhc_domain} 'tail#{opt['opts'] ? ' --opts ' + Base64::encode64(opt['opts']).chomp : ''} #{file_glob}'"
 		final String command = buildCommand(logFilePath, options);
 		Process process = remoteSession.exec(command, 0);
-		//final Channel channel = session.openChannel("exec");
-		//((ChannelExec) channel).setCommand(command);
-		//channel.connect();
-		//return channel;
-		return null;
+		return process;
 	}
 
 	private String buildCommand(final String filePath, final String options) throws UnsupportedEncodingException {

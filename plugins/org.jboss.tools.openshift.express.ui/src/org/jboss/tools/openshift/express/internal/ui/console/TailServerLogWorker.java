@@ -7,60 +7,41 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.client.utils.Base64Encoder;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Logger;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UserInfo;
 
 public class TailServerLogWorker implements Runnable {
 
 	private final IServer server;
 
-	private final Session session;
-
-	private final Channel channel;
+	private final Process process;
 
 	private final MessageConsole console;
 
-	public TailServerLogWorker(final IServer server, final MessageConsole console, final Channel channel) throws UnsupportedEncodingException,
+	public TailServerLogWorker(final IServer server, final MessageConsole console, final Process process) throws UnsupportedEncodingException,
 			JSchException {
 		this.server = server;
 		this.console = console;
-		this.channel = channel;
-		this.session = channel.getSession();
+		this.process = process;
 	}
 
 	@Override
 	public void run() {
 		try {
 			// get I/O streams for remote tail
-			final InputStream in = channel.getInputStream();
+			final InputStream in = process.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			String line;
 			// Read File Line By Line
 			while ((line = reader.readLine()) != null) {
 				console.newMessageStream().println(line);
 			}
-			if (!session.isConnected()) {
-				org.jboss.tools.openshift.express.internal.utils.Logger.warn("Session closed");
-
-			}
-			if (channel.isClosed()) {
-				org.jboss.tools.openshift.express.internal.utils.Logger.warn("Channel closed with exit status "
-						+ channel.getExitStatus());
-			}
 		} catch (Throwable e) {
 			org.jboss.tools.openshift.express.internal.utils.Logger.error(
 					"Error while receiving the remote server log", e);
 		} finally {
-			org.jboss.tools.openshift.express.internal.utils.Logger.warn("Disconnecting from the remote server log");
-			session.disconnect();
+			
 
 		}
 	}
