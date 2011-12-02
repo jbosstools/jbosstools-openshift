@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+   <chapter id="chap-OpenSift_Tools_Reference_Guide-Creating_an_OpenShift_Express_Application">
+	<title>Creating an OpenShift Express Application</title>
+	<para>
+		From the workbench go to <menuchoice><guimenuitem>File</guimenuitem><guimenuitem>New</guimenuitem><guimenuitem>Other</guimenuitem></menuchoice>. 
+	</para>
+	<figure id="application_creation_01">
+		<title>Selecting the OpenShift Express Application wizard</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_01.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Wizard selection screen with the OpenShift Express Application wizard selected.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		In the wizard, go to and select <menuchoice><guimenuitem>OpenShift</guimenuitem><guimenuitem>OpenShift Express Application</guimenuitem></menuchoice>. With the wizard choice selected, click on the <guibutton>Next</guibutton> button.
+	</para>
+	<figure id="application_creation_02">
+		<title>Validating OpenShift credentials</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_02.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Sever connection screen where you will validate your username and password for OpenShift or you can sign up for an account.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		If you have already signed up for an OpenShift Express account then you can input your <guilabel>Username</guilabel> and <guilabel>Password</guilabel> here and click <guilabel>Validate</guilabel>. If validation is successful you will see the button is now unavailable and no error was presented. 
+	</para>
+	<para>
+		If you do not have an OpenShift Express account, you can create one through the link at the top of the wizard screen. This will open the OpenShift sign-up page within your workbench. Once you have created an account you will need to relaunch the <guilabel>OpenShift Express Application</guilabel> wizard and input your new username and password.
+	</para>
+	<para>
+		Click the <guibutton>Next</guibutton> button to proceed. 
+	</para>
+	<figure id="application_creation_03">
+		<title>Setting the domain name</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_03.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Creating a domain name or inserting one that already exists for your OpenShift account.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		If you already have a domain name then you can type this into the <guilabel>Domain name</guilabel> field.
+	</para>
+	<para>
+		If you need to create a domain, type the name you wish to have into the <guilabel>Domain name</guilabel> field and click the <guibutton>Create</guibutton> button. After clicking <guibutton>Create</guibutton>, you will need to provide your public SSH key. You will need to ensure that the paired private key is listed within the SSH2 Preferences. If you are unsure, click the <guilabel>SSH2 Preferences</guilabel> link in the window. Click <guibutton>Finish</guibutton> to complete domain creation.
+	</para>
+	<figure id="application_creation_04">
+		<title>Creating a domain name</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_04.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Going through the process of creating a domain name.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<note>
+		<para>
+			If you ever wish to rename your domain, you can do so by changing the name as it appears in the <guilabel>Domain name</guilabel> field and then click <guibutton>Rename</guibutton>.
+		</para>
+	</note>
+	<para>
+		Click the <guibutton>New</guibutton> in the <guilabel>Available Applications</guilabel> section of the wizard to begin creating your first OpenShift application for the specified domain.
+	</para>
+	<figure id="application_creation_05">
+		<title>Creating a new OpenShift Express application</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_05.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Specifying the name and cartridge for the new OpenShift Express application.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		You will need to specify a name for the application and the platform to deploy for, from the <guilabel>Cartdige</guilabel> drop-down list. Click <guibutton>Finish</guibutton> to create the application.
+	</para>
+	<note>
+		<para>
+			No underscores or special characters are allowed in the application name.
+		</para>
+	</note>
+	<figure id="application_creation_06">
+		<title>Created application availability</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_06.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The created application is now available in the Available Applications section.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		You can select an available application by clicking on it in the <guilabel>Available Applications</guilabel> section of the window. Having selected an application, you can now <guibutton>Delete</guibutton> or view the details of the application by clicking the <guibutton>Details</guibutton>; try that now. 
+	</para>
+	<figure id="application_creation_07">
+		<title>Application details</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_07.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The details screen for the application.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The <guilabel>Application Details</guilabel> will provide you with all the information available concenring the application. To close this window and return to the previous window, click <guibutton>OK</guibutton>.
+	</para>
+	<figure id="application_creation_06b">
+		<title>Application availability</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_06.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Having returned to the previous screen, we can see that the application is still available.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		Click the <guibutton>Next</guibutton> to proceed to the next screen.
+	</para>
+	<figure id="application_creation_08">
+		<title>Importing the project</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_08.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Cloning the project from the Git repository and creating the JBoss Server adapter.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The final screen of the <guilabel>OpenShift application wizard</guilabel> specifies <guilabel>Git clone</guilabel> settings and <guilabel>JBoss Server adapter</guilabel> options. 
+	</para>
+	<para>
+		In the <guilabel>Git clone</guilabel> section of the window sets the properties for creating a local copy of your application for you to work with. The location of your application in the Git repository of your domain is present in the <guilabel>Cloning From</guilabel> field. The <guilabel>Destination</guilabel> and <guilabel>Remote name</guilabel> options will be set to default automatically, however you are able to change these by deselecting the <property>default</property> option and specifying custom settings in the fields provided.  
+	</para>
+	<para>
+		The <guilabel>JBoss Server adapter</guilabel> section of the window will have the option to <property>Create a JBoss server adapter</property> selected automatically. Creating a JBoss server adapter will allow you to publish changes you make to your application, back to your OpenShift Express domain.
+	</para>
+	<para>
+		Click the <guibutton>Finish</guibutton> to begin the cloning of the Git repository.
+	</para>
+	<!--Figure-->
+</chapter>
+
