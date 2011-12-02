@@ -32,7 +32,8 @@ Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="2.3.0",
  org.eclipse.debug.ui;bundle-version="3.7.0",
  com.jcraft.jsch.source;bundle-version="0.1.44";resolution:=optional,
  org.eclipse.ui.navigator;bundle-version="3.5.100",
- org.apache.commons.io;bundle-version="1.4.0"
+ org.eclipse.ui.console;bundle-version="3.5.100",
+ org.eclipse.core.expressions;bundle-version="3.4.300"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.jboss.tools.common.databinding,
