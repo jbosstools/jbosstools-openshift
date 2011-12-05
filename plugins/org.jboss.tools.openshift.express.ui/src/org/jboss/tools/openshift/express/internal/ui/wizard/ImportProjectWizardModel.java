@@ -42,6 +42,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.client.IApplication;
@@ -284,6 +285,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		IModule[] add = modules.toArray(new IModule[modules.size()]);
 		wc.modifyModules(add, new IModule[0], new NullProgressMonitor());
 		server = wc.save(true, monitor);
+		((Server)server).setModulePublishState(add, IServer.PUBLISH_STATE_NONE);
 	}
 
 	private List<IModule> getModules(List<IProject> importedProjects) {
