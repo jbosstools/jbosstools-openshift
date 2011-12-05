@@ -10,10 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.egit.core;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -24,24 +29,36 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.EclipseGitProgressTransformer;
 import org.eclipse.egit.core.IteratorService;
+import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.CommitOperation;
+import org.eclipse.egit.core.op.ConnectProviderOperation;
+import org.eclipse.egit.core.op.FetchOperation;
+import org.eclipse.egit.core.op.MergeOperation;
 import org.eclipse.egit.core.op.PushOperation;
 import org.eclipse.egit.core.op.PushOperationSpecification;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.egit.ui.UIText;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.InitCommand;
+import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
+import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.team.core.RepositoryProvider;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
 
 /**
@@ -56,26 +73,230 @@ public class EGitUtils {
 
 	private static final int PUSH_TIMEOUT = 10 * 1024;
 
+	private static final String EGIT_TEAM_PROVIDER_ID =
+			"org.eclipse.egit.core·GitProvider";
+
+	private EGitUtils() {
+		// inhibit instantiation
+	}
+
 	/**
-	 * Commits the given project to it's configured repository.
+	 * Returns <code>true</code> if the given project is associated to any team
+	 * provider (git, svn, cvs, etc.). Returns <code>false</code> otherwise.
 	 * 
 	 * @param project
-	 *            the project
-	 * @param monitor
-	 *            the monitor
-	 * @throws CoreException
-	 *             the core exception
+	 *            the project to check
+	 * @return <code>true</code> if the project is associated with any team
+	 *         provider.
 	 */
-	public static void commit(IProject project, String commitMessage, IProgressMonitor monitor) throws CoreException {
-		Assert.isLegal(project != null, "Cannot commit project. No project provided");
+	public static boolean isShared(IProject project) {
+		return RepositoryProvider.getProvider(project) != null;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given project is associated to the egit
+	 * team provider. Returns <code>false</code> otherwise.
+	 * 
+	 * @param project
+	 *            the project to check
+	 * @return <code>true</code> if the project is associated with the git team
+	 *         provider.
+	 */
+	public static boolean isSharedWithGit(IProject project) {
+		return EGIT_TEAM_PROVIDER_ID.equals(RepositoryProvider.getProvider(project));
+	}
+
+	/**
+	 * Shares the given project. A repository is created within the given
+	 * project and the project is connected to the freshly created repository.
+	 * 
+	 * @param project
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 */
+	public static Repository share(IProject project, IProgressMonitor monitor) throws CoreException {
+		Repository repository = createRepository(project, monitor);
+		connect(project, repository, monitor);
+		addToRepository(project, repository, monitor);
+		commit(project, monitor);
+		// checkout("master", repository);
+		return repository;
+	}
+
+	/**
+	 * Creates a repository for the given project. The repository is created in
+	 * the .git directory within the given project. The project is not connected
+	 * with the new repository
+	 * 
+	 * @param project
+	 *            the project to create the repository for.
+	 * @param monitor
+	 *            the monitor to report the progress to
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see #connect(IProject, Repository, IProgressMonitor)
+	 */
+	public static Repository createRepository(IProject project, IProgressMonitor monitor) throws CoreException {
+		try {
+			InitCommand init = Git.init();
+			init.setBare(false).setDirectory(project.getLocation().toFile());
+			Git git = init.call();
+			return git.getRepository();
+		} catch (JGitInternalException e) {
+			throw new CoreException(EGitCoreActivator.createErrorStatus(
+					NLS.bind("Could not initialize a git repository at {0}: {1}",
+							getRepositoryPathFor(project),
+							e.getMessage()), e));
+		}
+	}
+
+	public static File getRepositoryPathFor(IProject project) {
+		return new File(project.getLocationURI().getPath(), Constants.DOT_GIT);
+	}
+
+	public static void addToRepository(IProject project, Repository repository, IProgressMonitor monitor)
+			throws CoreException {
+		AddToIndexOperation add = new AddToIndexOperation(Collections.singletonList(project));
+		add.execute(monitor);
+	}
+
+	/**
+	 * Connects the given project to the repository within it.
+	 * 
+	 * @param project
+	 *            the project to connect
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @throws CoreException
+	 */
+	public static void connect(IProject project, IProgressMonitor monitor) throws CoreException {
+		connect(project, getRepositoryPathFor(project), monitor);
+	}
+
+	/**
+	 * Connects the given project to the given repository.
+	 * 
+	 * @param project
+	 *            the project to connect
+	 * @param repository
+	 *            the repository to connect the project to
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @throws CoreException
+	 */
+	private static void connect(IProject project, Repository repository, IProgressMonitor monitor) throws CoreException {
+		connect(project, repository.getDirectory(), monitor);
+	}
+
+	private static void connect(IProject project, File repositoryFolder, IProgressMonitor monitor) throws CoreException {
+		new ConnectProviderOperation(project, repositoryFolder).execute(monitor);
+	}
+
+	/**
+	 * Merges the given uri to HEAD in the given repository. The given branch is
+	 * the branch in the local repo the fetched HEAD is fetched to.
+	 * 
+	 * @param branch
+	 * @param uri
+	 * @param repository
+	 * @param monitor
+	 * @throws CoreException
+	 * @throws InvocationTargetException
+	 */
+	public static void mergeWithRemote(URIish uri, String branch, Repository repository, IProgressMonitor monitor)
+			throws CoreException, InvocationTargetException {
+		RefSpec ref = new RefSpec().setSource(Constants.HEAD).setDestination(branch);
+		fetch(uri, Collections.singletonList(ref), repository, monitor);
+		merge(branch, repository, monitor);
+	}
+
+	/**
+	 * Merges current master with the given branch. The strategy used is Resolve
+	 * since egit does still not support the Recusive stragety.
+	 * 
+	 * @param branch
+	 *            the branch to merge
+	 * @param repository
+	 *            the repository the branch is in
+	 * @param monitor
+	 *            the monitor to report the progress to
+	 * @return the result of the merge
+	 * @throws CoreException
+	 * 
+	 * @see MergeStrategy#RESOLVE
+	 * @link 
+	 *       http://www.eclipse.org/forums/index.php/mv/msg/261278/753913/#msg_753913
+	 * @link https://bugs.eclipse.org/bugs/show_bug.cgi?id=354099
+	 * @link https://bugs.eclipse.org/bugs/show_bug.cgi?id=359951
+	 */
+	private static MergeResult merge(String branch, Repository repository, IProgressMonitor monitor)
+			throws CoreException {
+		MergeOperation merge = new MergeOperation(repository, branch, MergeStrategy.RESOLVE.getName());
+		merge.execute(monitor);
+		return merge.getResult();
+	}
+
+	/**
+	 * Fetches the source ref(s) (from the given ref spec(s)) from the given uri
+	 * to the given destination(s) (in the given ref spec(s)) to the given
+	 * repository.
+	 * 
+	 * @param uri
+	 *            the uri to fetch from
+	 * @param fetchRefsRefSpecs
+	 *            the references with the sources and destinations
+	 * @param repository
+	 *            the repository to fetch to
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws CoreException
+	 */
+	private static Collection<Ref> fetch(URIish uri, List<RefSpec> fetchRefsRefSpecs, Repository repository,
+			IProgressMonitor monitor)
+			throws InvocationTargetException, CoreException {
+		FetchOperation fetch = new FetchOperation(repository, uri, fetchRefsRefSpecs, 10 * 1024, false);
+		fetch.run(monitor);
+		FetchResult result = fetch.getOperationResult();
+		return result.getAdvertisedRefs();
+	}
+
+	/**
+	 * Commits the changes within the given project to it's configured
+	 * repository. The project has to be connected to a repository.
+	 * 
+	 * @param project
+	 *            the project whose changes shall be committed
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @throws CoreException
+	 * 
+	 * @see #connect(IProject, Repository)
+	 */
+	private static void commit(IProject project, String commitMessage, IProgressMonitor monitor) throws CoreException {
+		Repository repository = getRepository(project);
+		Assert.isLegal(repository != null, "Cannot commit project to repository. ");
+		commit(project, commitMessage, repository, monitor);
+	}
+
+	public static void commit(IProject project, IProgressMonitor monitor) throws CoreException {
+		commit(project, "Commit from JBoss Tools", monitor);
+	}
+
+	private static void commit(IProject project, String commitMessage, Repository repository, IProgressMonitor monitor)
+			throws CoreException {
+		Assert.isLegal(project != null, "Could not commit project. No project provided");
+		Assert.isLegal(
+				repository != null,
+				MessageFormat
+						.format("Could not commit. Project \"{0}\" is not connected to a repository (call #connect(project, repository) first)",
+								project.getName()));
 		/**
 		 * TODO: add capability to commit selectively
 		 */
-		Repository repository = getRepository(project);
-		if (repository == null) {
-			throw new CoreException(createStatus(null,
-					"Could not commit. Project \"{0}\" is not attached to a git repo", project.getName()));
-		}
 		UserConfig userConfig = getUserConfig(repository);
 		CommitOperation op = new CommitOperation(
 				null,
@@ -89,10 +310,6 @@ public class EGitUtils {
 		op.execute(monitor);
 	}
 
-	public static void commit(IProject project, IProgressMonitor monitor) throws CoreException {
-		commit(project, "Commit from JBoss Tools", monitor);
-	}
-	
 	/**
 	 * Pushes the given repository to the remote repository it's current branch
 	 * originates from.
@@ -449,26 +666,26 @@ public class EGitUtils {
 		}
 		return status;
 	}
-	
+
 	public static int countCommitableChanges(IProject project, IProgressMonitor monitor) {
 		try {
 			Repository repo = getRepository(project);
-			
+
 			EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
 			IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
 					IteratorService.createInitialIterator(repo));
 			indexDiff.diff(jgitMonitor, 0, 0, NLS.bind(
 					UIText.CommitActionHandler_repository, repo.getDirectory().getPath()));
-//			System.out.println(indexDiff.getAdded().size());
-//			System.out.println(indexDiff.getChanged().size());
-//			System.out.println(indexDiff.getConflicting().size());
-//			System.out.println(indexDiff.getMissing().size());
-//			System.out.println(indexDiff.getModified().size());
-//			System.out.println(indexDiff.getRemoved().size());
-//			System.out.println(indexDiff.getUntracked().size());
-			
+			// System.out.println(indexDiff.getAdded().size());
+			// System.out.println(indexDiff.getChanged().size());
+			// System.out.println(indexDiff.getConflicting().size());
+			// System.out.println(indexDiff.getMissing().size());
+			// System.out.println(indexDiff.getModified().size());
+			// System.out.println(indexDiff.getRemoved().size());
+			// System.out.println(indexDiff.getUntracked().size());
+
 			return indexDiff.getModified().size();
-		} catch( IOException ioe ) {
+		} catch (IOException ioe) {
 		}
 		return -1;
 	}

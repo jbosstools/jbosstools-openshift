@@ -27,13 +27,19 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
@@ -48,6 +54,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPageModel.GitUri;
 
 /**
  * @author André Dietisheim
@@ -55,13 +62,13 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
  * 
  */
 public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IWizardPage, PropertyChangeListener {
-	private Text gitUriValueText;
 
 	private AdapterWizardPageModel model;
-	private IServerType serverTypeToCreate;
+	private Text cloneUriValueText;
 	private Label domainValueLabel;
 	private Label modeValueLabel;
 	private Button serverAdapterCheckbox;
+	private IServerType serverTypeToCreate;
 
 	private IObservableValue serverAdapterCheckboxObservable;
 
@@ -80,13 +87,55 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 
-		Group projectGroup = createCloneGroup(parent, dbc);
+		Group mergeGroup = createMergeGroup(parent, dbc);
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectGroup);
+				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(mergeGroup);
+
+		Group cloneGroup = createCloneGroup(parent, dbc);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(cloneGroup);
 
 		Group serverAdapterGroup = createAdapterGroup(parent, dbc);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serverAdapterGroup);
+	}
+
+	private Group createMergeGroup(Composite parent, DataBindingContext dbc) {
+		Group mergeGroup = new Group(parent, SWT.BORDER);
+		mergeGroup.setText("Git Merge");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(mergeGroup);
+		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(mergeGroup);
+
+		Button mergeEnabledButton = new Button(mergeGroup, SWT.CHECK);
+		mergeEnabledButton.setText("merge with Git URI");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(mergeEnabledButton);
+		IObservableValue mergeEnabledButtonSelection = WidgetProperties.selection().observe(mergeEnabledButton);
+		mergeEnabledButtonSelection.setValue(false);
+
+		Combo mergeUriCombo = new Combo(mergeGroup, SWT.NONE);
+		ComboViewer mergeUriComboViewer = new ComboViewer(mergeUriCombo);
+		GridDataFactory
+				.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(mergeUriCombo);
+		mergeUriComboViewer.setContentProvider(new ArrayContentProvider());
+		mergeUriComboViewer.setLabelProvider(new GitUriLabelProvider());
+		mergeUriComboViewer.setInput(model.getMergeUris());
+//		ValueBindingBuilder
+//				.bind(WidgetProperties.text().observe(mergeUriCombo))
+//				.validatingAfterGet(new MergeUriValidator())
+//				.to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_MERGE_URI).observe(model))
+//				.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.text().observe(mergeUriCombo))
+			.to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_PROJECT_NAME).observe(model))
+			.in(dbc);
+		ValueBindingBuilder
+				.bind(mergeEnabledButtonSelection)
+				.to(WidgetProperties.enabled().observe(mergeUriCombo))
+				.in(dbc);
+
+		return mergeGroup;
 	}
 
 	private Group createCloneGroup(Composite parent, DataBindingContext dbc) {
@@ -100,16 +149,16 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		gitUriLabel.setText("Cloning From");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(gitUriLabel);
 
-		gitUriValueText = new Text(cloneGroup, SWT.BORDER);
-		gitUriValueText.setEditable(false);
+		cloneUriValueText = new Text(cloneGroup, SWT.BORDER);
+		cloneUriValueText.setEditable(false);
 		GridDataFactory
-				.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gitUriValueText);
+				.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(cloneUriValueText);
 		ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(gitUriValueText))
-				.notUpdating(BeanProperties.value(AdapterWizardPageModel.PROPERTY_GIT_URI).observe(model))
+				.bind(WidgetProperties.text(SWT.Modify).observe(cloneUriValueText))
+				.notUpdating(BeanProperties.value(AdapterWizardPageModel.PROPERTY_CLONE_URI).observe(model))
 				.in(dbc);
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(gitUriValueText))
+				.bind(WidgetProperties.enabled().observe(cloneUriValueText))
 				.notUpdating(BeanProperties.value(AdapterWizardPageModel.PROPERTY_LOADING).observe(model))
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
@@ -274,7 +323,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		serverAdapterCheckbox.setText("Create a JBoss server adapter");
 		serverAdapterCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				model.getParentModel().setProperty(AdapterWizardPageModel.CREATE_SERVER,
+				model.getWizardModel().setProperty(AdapterWizardPageModel.CREATE_SERVER,
 						serverAdapterCheckbox.getSelection());
 				enableServerWidgets(serverAdapterCheckbox.getSelection());
 			}
@@ -299,13 +348,13 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(domainLabel);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(modeLabel);
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER)
-						.grab(true, false).applyTo(domainValueLabel);
+				.grab(true, false).applyTo(domainValueLabel);
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER)
-						.grab(true, false).applyTo(serverAdapterCheckbox);
+				.grab(true, false).applyTo(serverAdapterCheckbox);
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER)
-						.grab(true, false).applyTo(modeValueLabel);
+				.grab(true, false).applyTo(modeValueLabel);
 
-		model.getParentModel().setProperty(AdapterWizardPageModel.CREATE_SERVER,
+		model.getWizardModel().setProperty(AdapterWizardPageModel.CREATE_SERVER,
 				serverAdapterCheckbox.getSelection());
 		this.serverAdapterCheckboxObservable =
 				WidgetProperties.selection().observe(serverAdapterCheckbox);
@@ -321,9 +370,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	protected void onPageActivated(DataBindingContext dbc) {
 		model.resetRepositoryPath();
 		serverTypeToCreate = getServerTypeToCreate();
-		model.getParentModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
+		model.getWizardModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
 		modeValueLabel.setText("Source");
-		model.getParentModel().setProperty(AdapterWizardPageModel.MODE, AdapterWizardPageModel.MODE_SOURCE);
+		model.getWizardModel().setProperty(AdapterWizardPageModel.MODE, AdapterWizardPageModel.MODE_SOURCE);
 		onPageActivatedBackground(dbc);
 	}
 
@@ -356,8 +405,8 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		serverAdapterCheckbox.setEnabled(canCreateServer);
 		serverAdapterCheckboxObservable.setValue(canCreateServer);
 		enableServerWidgets(canCreateServer);
-		model.getParentModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
-		model.getParentModel().setProperty(AdapterWizardPageModel.CREATE_SERVER, canCreateServer);
+		model.getWizardModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
+		model.getWizardModel().setProperty(AdapterWizardPageModel.CREATE_SERVER, canCreateServer);
 	}
 
 	private class SelectedRuntimeValidator extends MultiValidator {
@@ -376,4 +425,60 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 			return ValidationStatus.ok();
 		}
 	}
+
+	private static class GitUriLabelProvider implements ILabelProvider {
+
+		@Override
+		public void addListener(ILabelProviderListener listener) {
+		}
+
+		@Override
+		public void dispose() {
+		}
+
+		@Override
+		public boolean isLabelProperty(Object element, String property) {
+			return true;
+		}
+
+		@Override
+		public void removeListener(ILabelProviderListener listener) {
+		}
+
+		@Override
+		public Image getImage(Object element) {
+			return null;
+		}
+
+		@Override
+		public String getText(Object element) {
+			if (!(element instanceof GitUri)) {
+				return null;
+			}
+			return ((GitUri) element).getLabel();
+		}
+	}
+
+//	private class MergeUriValidator implements IValidator {
+//
+//		@Override
+//		public IStatus validate(Object value) {
+//			String mergeUri = (String) value;
+//			if (mergeUri == null
+//					|| mergeUri.length() == 0) {
+//				return ValidationStatus
+//						.warning("You have to provide a git uri to merge with");
+//			} 
+//			GitUri gitUri = model.getKnownMergeUri(mergeUri);
+//			if (gitUri == null) {
+//				return ValidationStatus
+//						.warning("You are not merging with an official example. Things may go wrong");
+//			} 
+//			if (!model.isCompatibleToApplicationCartridge(gitUri.getCartridge())) {
+//				return ValidationStatus
+//						.warning("The example you've chosen is not compatible to your application");
+//			}
+//			return ValidationStatus.ok();
+//		}
+//	}
 }

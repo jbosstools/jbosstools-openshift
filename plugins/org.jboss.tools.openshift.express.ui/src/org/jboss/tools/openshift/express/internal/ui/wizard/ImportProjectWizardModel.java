@@ -11,7 +11,9 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,9 +32,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.op.CloneOperation;
-import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.ui.Activator;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
@@ -45,12 +48,14 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.common.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.projectimport.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.express.internal.ui.wizard.projectimport.MavenProjectImportOperation;
 
@@ -67,11 +72,14 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	public static final String APPLICATION = "application";
 	public static final String REMOTE_NAME = "remoteName";
 	public static final String REPOSITORY_PATH = "repositoryPath";
+	public static final String PROJECT_NAME = "projectName";
+	public static final String MERGE_URI = "mergeUri";
 
-	public void setProperty(String key, Object value) {
+	public Object setProperty(String key, Object value) {
 		Object oldVal = dataModel.get(key);
 		dataModel.put(key, value);
 		firePropertyChange(key, oldVal, value);
+		return value;
 	}
 
 	public Object getProperty(String key) {
@@ -83,7 +91,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	}
 
 	public IUser getUser() {
-		return (IUser)getProperty(USER);
+		return (IUser) getProperty(USER);
 	}
 
 	public IApplication getApplication() {
@@ -116,7 +124,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		}
 		return cartridgeName;
 	}
-	
+
 	public void setApplication(IApplication application) {
 		setProperty(APPLICATION, application);
 	}
@@ -131,29 +139,92 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	}
 
 	public String setRepositoryPath(String repositoryPath) {
-		setProperty(REPOSITORY_PATH, repositoryPath);
-		return repositoryPath;
+		return (String) setProperty(REPOSITORY_PATH, repositoryPath);
 	}
 
 	public String getRepositoryPath() {
 		return (String) getProperty(REPOSITORY_PATH);
 	}
 
-	public void importProject(final File projectFolder, IProgressMonitor monitor) throws OpenShiftException,
+	public String setProjectName(String projectName) {
+		return (String) setProperty(PROJECT_NAME, projectName);
+	}
+
+	public String getProjectName() {
+		return (String) getProperty(PROJECT_NAME);
+	}
+
+	public String setMergeUri(String mergeUri) {
+		return (String) setProperty(MERGE_URI, mergeUri);
+	}
+
+	public String getMergeUri() {
+		return (String) getProperty(MERGE_URI);
+	}
+
+	/**
+	 * Shares (git enables) the user provided project.
+	 * 
+	 * @param monitor
+	 *            the monitor to report progress to.
+	 * @return
+	 * @throws CoreException
+	 */
+	public void shareProject(IProgressMonitor monitor) throws CoreException {
+		monitor.subTask(NLS.bind("Sharing project {0}...", getProjectName()));
+		shareProject(getProjectName(), monitor);
+	}
+
+	private Repository shareProject(String projectName, IProgressMonitor monitor) throws CoreException {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		if (project == null) {
+			throw new CoreException(
+					OpenShiftUIActivator.createErrorStatus("Could not find project {0} in your workspace."));
+		}
+		return EGitUtils.share(project, monitor);
+	}
+
+	public void copyOpenshiftConfiguration(final File sourceFolder, IProgressMonitor monitor)
+			throws OpenShiftException, IOException {
+		IProject project = getProject();
+		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", getProjectName()));
+		FileUtils.copy(new File(sourceFolder, ".git"), project.getLocation().toFile(), false);
+		FileUtils.copy(new File(sourceFolder, ".openshift"), project.getLocation().toFile(), false);
+		FileUtils.copy(new File(sourceFolder, "deployments"), project.getLocation().toFile(), false);
+		FileUtils.copy(new File(sourceFolder, "pom.xml"), project.getLocation().toFile(), false);
+	}
+
+	/**
+	 * Returns the user provided project.
+	 * 
+	 * @throws OpenShiftException
+	 * 
+	 * @see #getProjectName
+	 */
+	private IProject getProject() throws OpenShiftException {
+		IProject project = getProject(getProjectName());
+		if (project == null
+				|| !project.exists()) {
+			throw new OpenShiftException("Could not find project {0} in your workspace.", getProjectName());
+		}
+		return project;
+	}
+
+	public void importProject(final File gitProjectFolder, IProgressMonitor monitor) throws OpenShiftException,
 			CoreException,
 			InterruptedException {
-		new WorkspaceJob(NLS.bind("Importing projects from {0}", projectFolder.getAbsolutePath())) {
+		new WorkspaceJob(NLS.bind("Importing projects from {0}", gitProjectFolder.getAbsolutePath())) {
 
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 				try {
-					List<IProject> importedProjects = importMavenProject(projectFolder, monitor);
-					connectToGitRepo(importedProjects, projectFolder, monitor);
+					List<IProject> importedProjects = importMavenProject(gitProjectFolder, monitor);
+					connectToGitRepo(importedProjects, gitProjectFolder, monitor);
 					createServerAdapterIfRequired(importedProjects, monitor);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-							NLS.bind("Could not import projects from {0}", projectFolder.getAbsolutePath()), e);
+							NLS.bind("Could not import projects from {0}", gitProjectFolder.getAbsolutePath()), e);
 					OpenShiftUIActivator.log(status);
 					return status;
 				}
@@ -162,36 +233,69 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		}.schedule();
 	}
 
-	private List<IProject> importMavenProject(final File projectFolder, IProgressMonitor monitor)
+	public void mergeWithApplicationRepository(Repository repository, IProgressMonitor monitor)
+			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException,
+			InvocationTargetException {
+		String uri = getApplication().getGitUri();
+		EGitUtils.addRemoteTo("openshift", new URIish(uri), repository);
+		EGitUtils.mergeWithRemote(new URIish(uri), "refs/remotes/openshift/HEAD", repository, monitor);
+	}
+
+	private IProject getProject(String projectName) {
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+	}
+
+	public boolean projectExists(final File gitProjectFolder) {
+		String projectName = gitProjectFolder.getName();
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		return project.exists();
+	}
+
+	public void removeProject(String name) {
+
+	}
+
+	private List<IProject> importMavenProject(final File gitProjectFolder, IProgressMonitor monitor)
 			throws CoreException, InterruptedException {
-		MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(projectFolder);
+		MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(gitProjectFolder);
 		List<IProject> importedProjects = Collections.emptyList();
 		if (mavenImport.isMavenProject()) {
 			importedProjects = mavenImport.importToWorkspace(monitor);
 		} else {
-			importedProjects = new GeneralProjectImportOperation(projectFolder).importToWorkspace(monitor);
+			importedProjects = new GeneralProjectImportOperation(gitProjectFolder).importToWorkspace(monitor);
 		}
 		return importedProjects;
 	}
-	
+
 	private void connectToGitRepo(List<IProject> projects, File projectFolder, IProgressMonitor monitor)
 			throws CoreException {
-		File gitFolder = new File(projectFolder, Constants.DOT_GIT);
 		for (IProject project : projects) {
 			if (project != null) {
-				connectToGitRepo(project, gitFolder, monitor);
+				EGitUtils.connect(project, monitor);
 			}
 		}
 	}
 
-	private void connectToGitRepo(IProject project, File gitFolder, IProgressMonitor monitor) throws CoreException {
-		new ConnectProviderOperation(project, gitFolder).execute(monitor);
-	}
-
+	/**
+	 * Clones the repository of the selected OpenShift application to the user
+	 * provided path
+	 * 
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws OpenShiftException
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 * 
+	 * @see ImportProjectWizardModel#getApplication()
+	 * @see #getRepositoryPath()
+	 */
 	public File cloneRepository(IProgressMonitor monitor) throws URISyntaxException, OpenShiftException,
 			InvocationTargetException,
 			InterruptedException {
 		IApplication application = getApplication();
+		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
 		File destination = new File(getRepositoryPath(), application.getName());
 		cloneRepository(application.getGitUri(), destination, monitor);
 		return destination;
@@ -232,6 +336,18 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 */
 	private void ensureEgitUIIsStarted() {
 		Activator.getDefault();
+	}
+
+	/**
+	 * creates an OpenShift server adapter for the user chosen project.
+	 * 
+	 * @param monitor
+	 *            the monitor to report progress to.
+	 * @throws OpenShiftException
+	 */
+	public void createServerAdapterIfRequired(IProgressMonitor monitor) throws OpenShiftException {
+		monitor.subTask(NLS.bind("Creating server adapter for project {0}", getProjectName()));
+		createServerAdapterIfRequired(Collections.singletonList(getProject()), monitor);
 	}
 
 	private void createServerAdapterIfRequired(List<IProject> importedProjects, IProgressMonitor monitor) {
@@ -291,10 +407,10 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	private List<IModule> getModules(List<IProject> importedProjects) {
 		Iterator<IProject> i = importedProjects.iterator();
 		ArrayList<IModule> toAdd = new ArrayList<IModule>();
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			IProject p = i.next();
 			IModule[] m = ServerUtil.getModules(p);
-			if( m != null && m.length > 0 ) {
+			if (m != null && m.length > 0) {
 				toAdd.addAll(Arrays.asList(m));
 			}
 		}

@@ -10,6 +10,8 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.egit.core.internal;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -33,5 +35,17 @@ public class EGitCoreActivator implements BundleActivator {
 
 	public void stop(BundleContext bundleContext) throws Exception {
 		EGitCoreActivator.context = null;
+	}
+	
+	public static IStatus createErrorStatus(String message, Throwable throwable) {
+		return createStatus(IStatus.ERROR, message, throwable);
+	}
+	
+	public static IStatus createStatus(int severity, String message, Throwable throwable) {
+		if (throwable == null) {
+			return new Status(severity, PLUGIN_ID, message);
+		} else {
+			return new Status(severity, PLUGIN_ID, message, throwable);
+		}
 	}
 }
