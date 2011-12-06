@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -54,13 +55,29 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			shareProjects(projects);
 			projectsLackingGitRepo = null;
 		}
-		return 0;
-	}
+        IModule[] modules = behaviour.getServer().getModules();
+        boolean allpublished= true;
+        for (int i = 0; i < modules.length; i++) {
+        	if(behaviour.getServer().getModulePublishState(new IModule[]{modules[i]})!=IServer.PUBLISH_STATE_NONE)
+                allpublished=false;
+        }
+        return allpublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
+    }
 
 	@Override
 	public int publishModule(DeployableServerBehavior behaviour, int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
+		
+		// If this action is not user-initiated, bail!
+		IAdaptable a = ((ExpressBehaviour)behaviour).getPublishAdaptableInfo();
+		if( a == null )
+			return -1;
+		String s = (String)a.getAdapter(String.class);
+		if( s == null || !s.equals("user"))
+			return -1;
+		
+		
 		int state = behaviour.getServer().getModulePublishState(module);
 		IProject p = module[module.length-1].getProject();
 		
@@ -75,20 +92,18 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 		}
 		
-		if((kind == IServer.PUBLISH_FULL || state == IServer.PUBLISH_STATE_FULL)) {
-			int changed = EGitUtils.countCommitableChanges(p, new NullProgressMonitor() );
-			if( changed != 0 && requestCommitAndPushApproval(module, changed)) {
-				monitor.beginTask("Publishing " + p.getName(), 200);
-				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
-				EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
-				monitor.done();
-				return IServer.PUBLISH_STATE_NONE;
-			} else if( changed == 0 && requestPushApproval(module)) {
-				monitor.beginTask("Publishing " + p.getName(), 100);
-				EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
-				monitor.done();
-				return IServer.PUBLISH_STATE_NONE;
-			}
+		int changed = EGitUtils.countCommitableChanges(p, new NullProgressMonitor() );
+		if( changed != 0 && requestCommitAndPushApproval(module, changed)) {
+			monitor.beginTask("Publishing " + p.getName(), 200);
+			EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
+			EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
+			monitor.done();
+			return IServer.PUBLISH_STATE_NONE;
+		} else if( changed == 0 && requestPushApproval(module)) {
+			monitor.beginTask("Publishing " + p.getName(), 100);
+			EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
+			monitor.done();
+			return IServer.PUBLISH_STATE_NONE;
 		}
 		return state;
 	}
