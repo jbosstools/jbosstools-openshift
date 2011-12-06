@@ -62,7 +62,7 @@
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
-            behaviourClass="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBehaviour"
+            behaviourClass="org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior"
             class="org.jboss.ide.eclipse.as.core.server.internal.JBossServer"
             name="%openshift.express.name"
             description="%openshift.express.description"
@@ -212,5 +212,31 @@
           type="org.eclipse.ui.console.MessageConsole">
       </propertyTester>
     </extension>
-    
+  
+    <extension  point="org.eclipse.ui.editors.templates">    
+        <template id="org.jboss.tools.maven.editor.xml.templates.profiles.openshift"
+         contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.profiles"
+         name="OpenShift Express profile" 
+         description="OpenShift Express profile">
+         <pattern>             &lt;profile&gt;
+  &lt;!-- When built in OpenShift the &#39;openshift&#39; profile will be used when invoking mvn. --&gt;
+  &lt;!-- Use this profile for any OpenShift specific customization your app will need. --&gt;
+  &lt;!-- By default that is to put the resulting archive into the &#39;deployments&#39; folder. --&gt;
+  &lt;!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html --&gt;
+  &lt;id&gt;openshift&lt;/id&gt;
+    &lt;build&gt;
+      &lt;plugins&gt;
+        &lt;plugin&gt;
+          &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;
+          &lt;version&gt;2.1.1&lt;/version&gt;
+          &lt;configuration&gt;
+            &lt;outputDirectory&gt;deployments&lt;/outputDirectory&gt;
+            &lt;warName&gt;ROOT&lt;/warName&gt;
+          &lt;/configuration&gt;
+        &lt;/plugin&gt;
+      &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/profile&gt;</pattern>
+       </template>
+    </extension>      
 </plugin>
