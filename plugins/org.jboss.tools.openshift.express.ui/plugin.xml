@@ -146,21 +146,20 @@
     
     <!-- Extensions to Server View to provide 'tail' of the remote server.log file -->
     
-    <!-- disabled for now 
 	<extension point="org.eclipse.ui.navigator.navigatorContent">
 		<actionProvider
 				class="org.jboss.tools.openshift.express.internal.ui.console.TailServerLogActionProvider"
 				id="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider">
 			<enablement>
-      <and>
-         <instanceof
-               value="org.eclipse.wst.server.core.IServer">
-         </instanceof>
-         <test
-               forcePluginActivation="true"
-               property="org.jboss.tools.openshift.express.isOpenShiftServer">
-         </test>
-      </and>
+		      <and>
+		         <instanceof
+		               value="org.eclipse.wst.server.core.IServer">
+		         </instanceof>
+		         <test
+		               forcePluginActivation="true"
+		               property="org.jboss.tools.openshift.express.isOpenShiftServer">
+		         </test>
+		      </and>
 			</enablement>
 		</actionProvider>
     </extension>
@@ -177,6 +176,26 @@
 	</extension>
 	
     <extension
+          point="org.eclipse.ui.console.consolePageParticipants">
+       <consolePageParticipant
+             class="org.jboss.tools.openshift.express.internal.ui.console.TailConsolePageParticipant"
+             id="org.jboss.tools.openshift.express.ui.tailConsolePageParticipant">
+          <enablement>
+          		<and>
+		         <instanceof
+		               value="org.eclipse.ui.console.MessageConsole">
+		         </instanceof>
+		         <test
+		               forcePluginActivation="true"
+		               property="org.jboss.tools.openshift.express.isOpenShiftConsole">
+		         </test>
+		      </and>
+          </enablement>
+       </consolePageParticipant>
+    </extension>
+    
+    
+    <extension
        point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
           class="org.jboss.tools.openshift.express.internal.ui.console.ServerTypePropertyTester"
@@ -185,7 +204,13 @@
           properties="isOpenShiftServer"
           type="org.eclipse.wst.server.core.IServer">
       </propertyTester>
+      <propertyTester
+          class="org.jboss.tools.openshift.express.internal.ui.console.ConsoleTypePropertyTester"
+          id="org.jboss.tools.openshift.express.ui.consoleTypePropertyTester"
+          namespace="org.jboss.tools.openshift.express"
+          properties="isOpenShiftConsole"
+          type="org.eclipse.ui.console.MessageConsole">
+      </propertyTester>
     </extension>
     
-    -->
 </plugin>
