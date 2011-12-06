@@ -142,7 +142,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 		dbc.addValidationStatusProvider(
-				new EnableProjectValidator(newProjectObservable, newProjectNameObservable));
+				new NewProjectValidator(newProjectObservable, newProjectNameObservable));
 
 		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
 		browseProjectsButton.setText("Browse");
@@ -451,15 +451,15 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	 * A multi validator that validates the state of the project that shall be
 	 * (OpenShift) enabled
 	 */
-	private class EnableProjectValidator extends MultiValidator {
+	private class NewProjectValidator extends MultiValidator {
 
-		private IObservableValue enableProjectObservable;
-		private IObservableValue enabledProjectNameObservable;
+		private IObservableValue newProjectObservable;
+		private IObservableValue newProjectNameObservable;
 
-		public EnableProjectValidator(IObservableValue enableProjectObservable,
-				IObservableValue enabledProjectNameObservable) {
-			this.enableProjectObservable = enableProjectObservable;
-			this.enabledProjectNameObservable = enabledProjectNameObservable;
+		public NewProjectValidator(IObservableValue newProjectObservable,
+				IObservableValue newProjectNameObservable) {
+			this.newProjectObservable = newProjectObservable;
+			this.newProjectNameObservable = newProjectNameObservable;
 		}
 
 		@Override
@@ -470,13 +470,12 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 			 * is tracking what observables are read to know when he has to
 			 * recalculate it's state.
 			 */
-			if (Boolean.FALSE.equals(enableProjectObservable.getValue())) {
+			if (Boolean.TRUE.equals(newProjectObservable.getValue())) {
 				return ValidationStatus.ok();
-			}
-
-			if (enabledProjectNameObservable != null
-					&& enabledProjectNameObservable.getValue() != null
-					&& (!((String) enabledProjectNameObservable.getValue()).isEmpty())) {
+			} 
+			
+			if (newProjectNameObservable.getValue() != null
+					&& (!((String) newProjectNameObservable.getValue()).isEmpty())) {
 				return ValidationStatus.ok();
 			} else {
 				return ValidationStatus.error(
