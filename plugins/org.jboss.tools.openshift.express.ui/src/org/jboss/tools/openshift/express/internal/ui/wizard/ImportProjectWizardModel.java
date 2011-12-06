@@ -251,7 +251,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * @see #shareProject
 	 * @see #createServerAdapterIfRequired
 	 */
-	public void enableProject(IProgressMonitor monitor)
+	public void addToExistingProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
 		// File repositoryFile =

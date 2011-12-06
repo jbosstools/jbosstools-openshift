@@ -71,7 +71,7 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 								if (!model.isNewProject()) {
 									model.importProject(monitor);
 								} else {
-									model.enableProject(monitor);
+									model.addToExistingProject(monitor);
 								}
 								return Status.OK_STATUS;
 							} catch (IOException e) {
