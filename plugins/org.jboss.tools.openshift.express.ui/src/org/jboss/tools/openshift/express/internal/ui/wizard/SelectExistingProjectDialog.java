@@ -27,9 +27,9 @@ import org.jboss.tools.openshift.express.internal.utils.JavaProjectUtils;
 /**
  * @author André Dietisheim
  */
-public class SelectEnablableProjectDialog extends ElementListSelectionDialog {
+public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
-	public SelectEnablableProjectDialog(Shell shell) {
+	public SelectExistingProjectDialog(Shell shell) {
 		super(shell, new ProjectLabelProvider());
 		setTitle("Project Selection");
 		setMessage("Please select the project that shall be pushed to OpenShift");

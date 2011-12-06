@@ -276,7 +276,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SelectEnablableProjectDialog dialog = new SelectEnablableProjectDialog(getShell());
+				SelectExistingProjectDialog dialog = new SelectExistingProjectDialog(getShell());
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
 					if (selectedProject instanceof IProject) {
