@@ -68,7 +68,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 
 	private HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	public static final String ENABLE_PROJECT = "enableProject";
+	public static final String NEw_PROJECT = "enableProject";
 	public static final String USER = "user";
 	public static final String APPLICATION = "application";
 	public static final String REMOTE_NAME = "remoteName";
@@ -77,7 +77,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	public static final String MERGE_URI = "mergeUri";
 
 	public ImportProjectWizardModel() {
-		dataModel.put(ENABLE_PROJECT, false);
+		dataModel.put(NEw_PROJECT, false);
 	}
 
 	public Object setProperty(String key, Object value) {
@@ -151,12 +151,12 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		return (String) getProperty(REPOSITORY_PATH);
 	}
 
-	public boolean isEnableProject() {
-		return (Boolean) getProperty(ENABLE_PROJECT);
+	public boolean isNewProject() {
+		return (Boolean) getProperty(NEw_PROJECT);
 	}
 
-	public Boolean setEnableProject(boolean enableProject) {
-		return (Boolean) setProperty(ENABLE_PROJECT, enableProject);
+	public Boolean setNewProject(boolean newProject) {
+		return (Boolean) setProperty(NEw_PROJECT, newProject);
 	}
 
 	public String setProjectName(String projectName) {
@@ -283,10 +283,6 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		String projectName = gitProjectFolder.getName();
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		return project.exists();
-	}
-
-	public void removeProject(String name) {
-
 	}
 
 	private List<IProject> importMavenProject(final File gitProjectFolder, IProgressMonitor monitor)

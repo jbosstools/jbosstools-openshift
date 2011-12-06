@@ -24,7 +24,7 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 
 	private static final String REMOTE_NAME_DEFAULT = "origin";
 
-	public static final String PROPERTY_ENABLE_PROJECT = "enableProject";
+	public static final String PROPERTY_NEW_PROJECT = "newProject";
 	public static final String PROPERTY_CLONE_URI = "cloneUri";
 //	public static final String PROPERTY_MERGE_URI = "mergeUri";
 	public static final String PROPERTY_PROJECT_NAME = "projectName";
@@ -46,14 +46,15 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 	public AdapterWizardPageModel(ImportProjectWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setRemoteName(REMOTE_NAME_DEFAULT);
+		setNewProject(false);
 	}
 
-	public void setEnableProject(boolean enableProject) {
-		firePropertyChange(PROPERTY_ENABLE_PROJECT, wizardModel.isEnableProject(), wizardModel.setEnableProject(enableProject));
+	public void setNewProject(boolean enableProject) {
+		firePropertyChange(PROPERTY_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(enableProject));
 	}
 
-	public boolean isEnableProject() {
-		return wizardModel.isEnableProject();
+	public boolean isNewProject() {
+		return wizardModel.isNewProject();
 	}
 	
 	public void setProjectName(String projectName) {
@@ -162,6 +163,14 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 			return null;
 		}
 		return application.getApplicationUrl();
+	}
+
+	public String getApplicationName() {
+		IApplication application = wizardModel.getApplication();
+		if (application == null) {
+			return null;
+		}
+		return application.getName();
 	}
 
 	public boolean isJBossAS7Application() {

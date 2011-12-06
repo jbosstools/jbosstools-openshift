@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -54,13 +53,12 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 		try {
 			final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);
 			WizardUtils.runInWizard(
-					new WorkspaceJob("") {
+					new WorkspaceJob("Importing project to workspace...") {
 
 						@Override
 						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 							IStatus status = Status.OK_STATUS;
 							status = performOperations(monitor, status);
-
 							if (!status.isOK()) {
 								OpenShiftUIActivator.log(status);
 							}
@@ -70,10 +68,10 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 						private IStatus performOperations(IProgressMonitor monitor, IStatus status) {
 							try {
-								if (model.isEnableProject()) {
-									model.enableProject(monitor);
-								} else {
+								if (model.isNewProject()) {
 									model.importProject(monitor);
+								} else {
+									model.enableProject(monitor);
 								}
 								return Status.OK_STATUS;
 							} catch (IOException e) {
