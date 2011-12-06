@@ -68,7 +68,7 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 						private IStatus performOperations(IProgressMonitor monitor, IStatus status) {
 							try {
-								if (model.isNewProject()) {
+								if (!model.isNewProject()) {
 									model.importProject(monitor);
 								} else {
 									model.enableProject(monitor);
