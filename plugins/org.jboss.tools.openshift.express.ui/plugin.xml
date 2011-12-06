@@ -62,7 +62,7 @@
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
-            behaviourClass="org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior"
+            behaviourClass="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBehaviour"
             class="org.jboss.ide.eclipse.as.core.server.internal.JBossServer"
             name="%openshift.express.name"
             description="%openshift.express.description"
