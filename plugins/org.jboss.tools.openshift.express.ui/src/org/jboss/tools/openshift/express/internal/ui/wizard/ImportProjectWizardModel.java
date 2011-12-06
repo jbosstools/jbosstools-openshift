@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -183,22 +183,13 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * @return
 	 * @throws CoreException
 	 */
-	public void shareProject(IProgressMonitor monitor) throws CoreException {
+	private void shareProject(IProgressMonitor monitor) throws CoreException {
 		monitor.subTask(NLS.bind("Sharing project {0}...", getProjectName()));
-		shareProject(getProjectName(), monitor);
+		EGitUtils.share(getProject(), monitor);
 	}
 
-	private Repository shareProject(String projectName, IProgressMonitor monitor) throws CoreException {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		if (project == null) {
-			throw new CoreException(
-					OpenShiftUIActivator.createErrorStatus("Could not find project {0} in your workspace."));
-		}
-		return EGitUtils.share(project, monitor);
-	}
-
-	public void copyOpenshiftConfiguration(final File sourceFolder, IProgressMonitor monitor)
-			throws OpenShiftException, IOException {
+	private void copyOpenshiftConfiguration(final File sourceFolder, IProgressMonitor monitor)
+			throws IOException {
 		IProject project = getProject();
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", getProjectName()));
 		FileUtils.copy(new File(sourceFolder, ".git"), project.getLocation().toFile(), false);
@@ -214,36 +205,66 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * 
 	 * @see #getProjectName
 	 */
-	private IProject getProject() throws OpenShiftException {
-		IProject project = getProject(getProjectName());
-		if (project == null
-				|| !project.exists()) {
-			throw new OpenShiftException("Could not find project {0} in your workspace.", getProjectName());
-		}
+	private IProject getProject() {
+		String projectName = getProjectName();
+		IProject project = getProject(projectName);
+		Assert.isTrue(project != null && project.exists(),
+				NLS.bind("Could not find project {0} in your workspace.", projectName));
 		return project;
 	}
 
-	public void importProject(final File gitProjectFolder, IProgressMonitor monitor) throws OpenShiftException,
-			CoreException,
-			InterruptedException {
-		new WorkspaceJob(NLS.bind("Importing projects from {0}", gitProjectFolder.getAbsolutePath())) {
+	public void importProject(IProgressMonitor monitor)
+			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
+			InvocationTargetException {
+		File repositoryFolder = cloneRepository(monitor);
+		List<IProject> importedProjects = importMavenProject(repositoryFolder, monitor);
+		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+		createServerAdapterIfRequired(importedProjects, monitor);
+	}
 
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-				try {
-					List<IProject> importedProjects = importMavenProject(gitProjectFolder, monitor);
-					connectToGitRepo(importedProjects, gitProjectFolder, monitor);
-					createServerAdapterIfRequired(importedProjects, monitor);
-					return Status.OK_STATUS;
-				} catch (Exception e) {
-					IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-							NLS.bind("Could not import projects from {0}", gitProjectFolder.getAbsolutePath()), e);
-					OpenShiftUIActivator.log(status);
-					return status;
-				}
-			}
-
-		}.schedule();
+	/**
+	 * Enables the user chosen project to be used on the chosen OpenShift
+	 * application. Clones the application git repository, copies the
+	 * configuration files to the user project (in the workspace), shares the
+	 * user project with git and creates the server adapter.
+	 * 
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @throws URISyntaxException
+	 *             The OpenShift application repository could not be cloned,
+	 *             because the uri it is located at is not a valid git uri
+	 * @throws OpenShiftException
+	 * 
+	 * @throws InvocationTargetException
+	 *             The OpenShift application repository could not be cloned, the
+	 *             clone operation failed.
+	 * @throws InterruptedException
+	 *             The OpenShift application repository could not be cloned, the
+	 *             clone operation was interrupted.
+	 * @throws IOException
+	 *             The configuration files could not be copied from the git
+	 *             clone to the user project
+	 * @throws CoreException The user project could not be shared with the git 
+	 * 
+	 * @see #cloneRepository
+	 * @see #copyOpenshiftConfiguration
+	 * @see #shareProject
+	 * @see #createServerAdapterIfRequired
+	 */
+	public void enableProject(IProgressMonitor monitor)
+			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
+			URISyntaxException {
+		// File repositoryFile =
+		// model.cloneRepository(monitor);
+		// model.importProject(repositoryFile, monitor);
+		// Repository repository =
+		// model.shareProject(monitor);
+		// model.mergeWithApplicationRepository(repository,
+		// monitor);
+		File repositoryFile = cloneRepository(monitor);
+		copyOpenshiftConfiguration(repositoryFile, monitor);
+		shareProject(monitor);
+		createServerAdapterIfRequired(monitor);
 	}
 
 	public void mergeWithApplicationRepository(Repository repository, IProgressMonitor monitor)
@@ -304,9 +325,8 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * @see ImportProjectWizardModel#getApplication()
 	 * @see #getRepositoryPath()
 	 */
-	public File cloneRepository(IProgressMonitor monitor) throws URISyntaxException, OpenShiftException,
-			InvocationTargetException,
-			InterruptedException {
+	private File cloneRepository(IProgressMonitor monitor)
+			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		IApplication application = getApplication();
 		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
 		File destination = new File(getRepositoryPath(), application.getName());
@@ -314,10 +334,8 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		return destination;
 	}
 
-	private void cloneRepository(String uri, File destination, IProgressMonitor monitor) throws URISyntaxException,
-			OpenShiftException,
-			InvocationTargetException,
-			InterruptedException {
+	private void cloneRepository(String uri, File destination, IProgressMonitor monitor)
+			throws OpenShiftException, URISyntaxException, InvocationTargetException, InterruptedException {
 		if (destination.exists()) {
 			FileUtil.completeDelete(destination);
 		}
@@ -358,22 +376,23 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 *            the monitor to report progress to.
 	 * @throws OpenShiftException
 	 */
-	public void createServerAdapterIfRequired(IProgressMonitor monitor) throws OpenShiftException {
+	private void createServerAdapterIfRequired(IProgressMonitor monitor) throws OpenShiftException {
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", getProjectName()));
 		createServerAdapterIfRequired(Collections.singletonList(getProject()), monitor);
 	}
 
 	private void createServerAdapterIfRequired(List<IProject> importedProjects, IProgressMonitor monitor) {
-		Boolean b = (Boolean)getProperty(AdapterWizardPageModel.CREATE_SERVER);
-		if( b != null && b.booleanValue() ) {
+		Boolean b = (Boolean) getProperty(AdapterWizardPageModel.CREATE_SERVER);
+		if (b != null && b.booleanValue()) {
 			try {
 				renameWebContextRoot(importedProjects);
 				IServer server = createServerAdapter();
 				addModules(getModules(importedProjects), server, monitor);
-			} catch(CoreException ce) {
+			} catch (CoreException ce) {
 				OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
-			} catch(OpenShiftException ose) {
-				IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Cannot create openshift server adapter", ose);
+			} catch (OpenShiftException ose) {
+				IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"Cannot create openshift server adapter", ose);
 				OpenShiftUIActivator.getDefault().getLog().log(s);
 			}
 		}
@@ -391,16 +410,16 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 
 	private IServer createServerAdapter() throws CoreException,
 			OpenShiftException {
-		IServerType type = (IServerType)getProperty(AdapterWizardPageModel.SERVER_TYPE);
-		IRuntime rt = (IRuntime)getProperty(AdapterWizardPageModel.RUNTIME_DELEGATE);
-		String mode = (String)getProperty(AdapterWizardPageModel.MODE);
+		IServerType type = (IServerType) getProperty(AdapterWizardPageModel.SERVER_TYPE);
+		IRuntime rt = (IRuntime) getProperty(AdapterWizardPageModel.RUNTIME_DELEGATE);
+		String mode = (String) getProperty(AdapterWizardPageModel.MODE);
 
 		String serverNameBase = getApplication().getName() + " OpenShift Server";
 		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);
-		
+
 		IServer server = ExpressServerUtils.createServer(rt, type, serverName);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(server, getApplication().getApplicationUrl(), 
-				getUser().getRhlogin(), getUser().getPassword(), 
+		ExpressServerUtils.fillServerWithOpenShiftDetails(server, getApplication().getApplicationUrl(),
+				getUser().getRhlogin(), getUser().getPassword(),
 				getUser().getDomain().getNamespace(), getApplication().getName(), getApplication().getUUID(), mode);
 		return server;
 	}
@@ -414,7 +433,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		IModule[] add = modules.toArray(new IModule[modules.size()]);
 		wc.modifyModules(add, new IModule[0], new NullProgressMonitor());
 		server = wc.save(true, monitor);
-		((Server)server).setModulePublishState(add, IServer.PUBLISH_STATE_NONE);
+		((Server) server).setModulePublishState(add, IServer.PUBLISH_STATE_NONE);
 	}
 
 	private List<IModule> getModules(List<IProject> importedProjects) {

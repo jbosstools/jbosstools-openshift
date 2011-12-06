@@ -70,17 +70,11 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 						private IStatus performOperations(IProgressMonitor monitor, IStatus status) {
 							try {
-								// File repositoryFile =
-								// model.cloneRepository(monitor);
-								// model.importProject(repositoryFile, monitor);
-								// Repository repository =
-								// model.shareProject(monitor);
-								// model.mergeWithApplicationRepository(repository,
-								// monitor);
-								File repositoryFile = model.cloneRepository(monitor);
-								model.copyOpenshiftConfiguration(repositoryFile, monitor);
-								model.shareProject(monitor);
-								model.createServerAdapterIfRequired(monitor);
+								if (model.isEnableProject()) {
+									model.enableProject(monitor);
+								} else {
+									model.importProject(monitor);
+								}
 								return Status.OK_STATUS;
 							} catch (IOException e) {
 								status = OpenShiftUIActivator.createErrorStatus(
