@@ -164,6 +164,14 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 		return application.getApplicationUrl();
 	}
 
+	public boolean isJBossAS7Application() {
+		IApplication application = wizardModel.getApplication();
+		if (application == null) {
+			return false;
+		}
+		return ICartridge.JBOSSAS_7.equals(application.getCartridge());
+	}
+
 	public void setApplicationUrl(String applicationUrl) {
 		firePropertyChange(PROPERTY_APPLICATION_URL, null, applicationUrl);
 	}

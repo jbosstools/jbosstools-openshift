@@ -66,12 +66,13 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	private IServerType serverTypeToCreate;
 
 	private IObservableValue serverAdapterCheckboxObservable;
-
+	private IObservableValue enableProjectChecboxIsEnabled;
+	
 	public AdapterWizardPage(ImportProjectWizard wizard, ImportProjectWizardModel model) {
 		super(
 				"Import Project",
 				"Select the project to enable, the Git clone destination, the branch to clone"
-				+ " and configure your server adapter ",
+						+ " and configure your server adapter ",
 				"Server Adapter",
 				wizard);
 		this.model = new AdapterWizardPageModel(model);
@@ -102,17 +103,19 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(mergeGroup);
 		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(3).applyTo(mergeGroup);
 
-		Button mergeEnabledButton = new Button(mergeGroup, SWT.CHECK);
-		mergeEnabledButton.setText("Enable existing project");
+		Button enableProjectButton = new Button(mergeGroup, SWT.CHECK);
+		enableProjectButton.setText("Enable existing project");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(mergeEnabledButton);
+				.align(SWT.LEFT, SWT.CENTER).applyTo(enableProjectButton);
 		IObservableValue enableProjectObservable =
 				BeanProperties.value(AdapterWizardPageModel.PROPERTY_ENABLE_PROJECT).observe(model);
 		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(mergeEnabledButton))
+				.bind(WidgetProperties.selection().observe(enableProjectButton))
 				.to(enableProjectObservable)
 				.in(dbc);
 
+		this.enableProjectChecboxIsEnabled = WidgetProperties.enabled().observe(enableProjectButton); 
+		
 		Text enabledProjectText = new Text(mergeGroup, SWT.BORDER);
 		enabledProjectText.setEditable(false);
 		GridDataFactory
@@ -137,11 +140,12 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.bind(WidgetProperties.text().observe(enabledProjectText))
 				.to(enabledProjectNameObservable)
 				.in(dbc);
-
 		ValueBindingBuilder
 				.bind(enableProjectObservable)
 				.to(WidgetProperties.enabled().observe(enabledProjectText))
 				.in(dbc);
+		dbc.addValidationStatusProvider(
+				new EnableProjectValidator(enableProjectObservable, enabledProjectNameObservable));
 
 		Button browseProjectsButton = new Button(mergeGroup, SWT.NONE);
 		browseProjectsButton.setText("Browse");
@@ -154,10 +158,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.in(dbc);
 
 		enableProjectObservable.setValue(false);
-
-		dbc.addValidationStatusProvider(new EnableProjectValidator(enableProjectObservable,
-				enabledProjectNameObservable));
-
+		
 		return mergeGroup;
 	}
 
@@ -405,6 +406,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	}
 
 	protected void onPageActivated(DataBindingContext dbc) {
+		// allow to enable a proj only for as7 openshift applications
+		enableProjectChecboxIsEnabled.setValue(model.isJBossAS7Application());
+		
 		model.resetRepositoryPath();
 		serverTypeToCreate = getServerTypeToCreate();
 		model.getWizardModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
