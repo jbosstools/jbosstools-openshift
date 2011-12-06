@@ -118,7 +118,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.bind(WidgetProperties.selection().observe(newProjectCheckbox))
 				.to(newProjectObservable)
 				.in(dbc);
-		
+
 		this.newProjectCheckboxIsEnabled = WidgetProperties.enabled().observe(newProjectCheckbox);
 
 		Label existingProjectLabel = new Label(projectGroup, SWT.NONE);
@@ -276,7 +276,8 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SelectExistingProjectDialog dialog = new SelectExistingProjectDialog(getShell());
+				SelectExistingProjectDialog dialog =
+						new SelectExistingProjectDialog(model.getApplicationName(), getShell());
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
 					if (selectedProject instanceof IProject) {
@@ -335,7 +336,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 
 	private Group createAdapterGroup(Composite parent, DataBindingContext dbc) {
 		Group serverAdapterGroup = new Group(parent, SWT.BORDER);
-		serverAdapterGroup.setText("JBoss Server adapter");
+		serverAdapterGroup.setText("OpenShift JBoss Server adapter");
 		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(serverAdapterGroup);
 
 		Composite c = new Composite(serverAdapterGroup, SWT.NONE);
@@ -380,7 +381,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				model.getWizardModel().setProperty(
-						AdapterWizardPageModel.CREATE_SERVER,serverAdapterCheckbox.getSelection());
+						AdapterWizardPageModel.CREATE_SERVER, serverAdapterCheckbox.getSelection());
 				enableServerWidgets(serverAdapterCheckbox.getSelection());
 			}
 		};
@@ -400,7 +401,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		setTitle(NLS.bind("Import OpenShift application {0}", model.getApplicationName()));
 
 		newProjectCheckboxIsEnabled.setValue(model.isJBossAS7Application());
-		
+
 		model.resetRepositoryPath();
 		serverTypeToCreate = getServerTypeToCreate();
 		model.getWizardModel().setProperty(AdapterWizardPageModel.SERVER_TYPE, serverTypeToCreate);
