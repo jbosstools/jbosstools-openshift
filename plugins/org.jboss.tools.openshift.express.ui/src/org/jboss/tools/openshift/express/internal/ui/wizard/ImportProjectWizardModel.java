@@ -68,12 +68,17 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 
 	private HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
+	public static final String ENABLE_PROJECT = "enableProject";
 	public static final String USER = "user";
 	public static final String APPLICATION = "application";
 	public static final String REMOTE_NAME = "remoteName";
 	public static final String REPOSITORY_PATH = "repositoryPath";
 	public static final String PROJECT_NAME = "projectName";
 	public static final String MERGE_URI = "mergeUri";
+
+	public ImportProjectWizardModel() {
+		dataModel.put(ENABLE_PROJECT, false);
+	}
 
 	public Object setProperty(String key, Object value) {
 		Object oldVal = dataModel.get(key);
@@ -144,6 +149,14 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 
 	public String getRepositoryPath() {
 		return (String) getProperty(REPOSITORY_PATH);
+	}
+
+	public boolean isEnableProject() {
+		return (Boolean) getProperty(ENABLE_PROJECT);
+	}
+
+	public Boolean setEnableProject(boolean enableProject) {
+		return (Boolean) setProperty(ENABLE_PROJECT, enableProject);
 	}
 
 	public String setProjectName(String projectName) {

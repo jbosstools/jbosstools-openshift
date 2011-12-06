@@ -10,17 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
-import org.jboss.tools.openshift.express.internal.client.Cartridge;
 
 /**
  * @author André Dietisheim
@@ -30,6 +24,7 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 
 	private static final String REMOTE_NAME_DEFAULT = "origin";
 
+	public static final String PROPERTY_ENABLE_PROJECT = "enableProject";
 	public static final String PROPERTY_CLONE_URI = "cloneUri";
 //	public static final String PROPERTY_MERGE_URI = "mergeUri";
 	public static final String PROPERTY_PROJECT_NAME = "projectName";
@@ -53,6 +48,14 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 		setRemoteName(REMOTE_NAME_DEFAULT);
 	}
 
+	public void setEnableProject(boolean enableProject) {
+		firePropertyChange(PROPERTY_ENABLE_PROJECT, wizardModel.isEnableProject(), wizardModel.setEnableProject(enableProject));
+	}
+
+	public boolean isEnableProject() {
+		return wizardModel.isEnableProject();
+	}
+	
 	public void setProjectName(String projectName) {
 		firePropertyChange(PROPERTY_PROJECT_NAME, wizardModel.getProjectName(), wizardModel.setProjectName(projectName));
 	}
@@ -69,63 +72,63 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 //		return wizardModel.getMergeUri();
 //	}
 
-	public GitUri getKnownMergeUri(String uriOrLabel) {
-		GitUri gitUri = null;
-		if (isGitUri(uriOrLabel)) {
-			gitUri = getKnownMergeUriByUri(uriOrLabel);
-		} else {
-			gitUri = getKnownMergeUriByLabel(uriOrLabel);
-		}
-		return gitUri;
-	}
+//	public GitUri getKnownMergeUri(String uriOrLabel) {
+//		GitUri gitUri = null;
+//		if (isGitUri(uriOrLabel)) {
+//			gitUri = getKnownMergeUriByUri(uriOrLabel);
+//		} else {
+//			gitUri = getKnownMergeUriByLabel(uriOrLabel);
+//		}
+//		return gitUri;
+//	}
 
-	private boolean isGitUri(String gitUriString) {
-		try {
-			URIish uriish = new URIish(gitUriString);
-			return uriish.isRemote();
-		} catch (URISyntaxException e) {
-			return false;
-		}
-	}
+//	private boolean isGitUri(String gitUriString) {
+//		try {
+//			URIish uriish = new URIish(gitUriString);
+//			return uriish.isRemote();
+//		} catch (URISyntaxException e) {
+//			return false;
+//		}
+//	}
 
-	private GitUri getKnownMergeUriByUri(String gitUriString) {
-		GitUri matchingGitUri = null;
-		for (GitUri gitUri : getMergeUris()) {
-			if (gitUri.getGitUri().equals(gitUriString)) {
-				matchingGitUri = gitUri;
-				break;
-			}
-		}
-		return matchingGitUri;
-	}
+//	private GitUri getKnownMergeUriByUri(String gitUriString) {
+//		GitUri matchingGitUri = null;
+//		for (GitUri gitUri : getMergeUris()) {
+//			if (gitUri.getGitUri().equals(gitUriString)) {
+//				matchingGitUri = gitUri;
+//				break;
+//			}
+//		}
+//		return matchingGitUri;
+//	}
 
-	private GitUri getKnownMergeUriByLabel(String label) {
-		GitUri matchingGitUri = null;
-		for (GitUri gitUri : getMergeUris()) {
-			if (gitUri.getLabel().equals(label)) {
-				matchingGitUri = gitUri;
-				break;
-			}
-		}
-		return matchingGitUri;
-	}
+//	private GitUri getKnownMergeUriByLabel(String label) {
+//		GitUri matchingGitUri = null;
+//		for (GitUri gitUri : getMergeUris()) {
+//			if (gitUri.getLabel().equals(label)) {
+//				matchingGitUri = gitUri;
+//				break;
+//			}
+//		}
+//		return matchingGitUri;
+//	}
 
-	public List<GitUri> getMergeUris() {
-		ArrayList<GitUri> mergeUris = new ArrayList<GitUri>();
-		mergeUris.add(new GitUri(
-				"seambooking-example", "git://github.com/openshift/seambooking-example.git",
-				ICartridge.JBOSSAS_7));
-		mergeUris.add(new GitUri(
-				"tweetstream-example", "git://github.com/openshift/tweetstream-example.git",
-				ICartridge.JBOSSAS_7));
-		mergeUris.add(new GitUri(
-				"sinatra-example", "git://github.com/openshift/sinatra-example.git",
-				new Cartridge("rack-1.1")));
-		mergeUris.add(new GitUri(
-				"sugarcrm-example", "git://github.com/openshift/sugarcrm-example.git",
-				new Cartridge("php-5.3")));
-		return mergeUris;
-	}
+//	public List<GitUri> getMergeUris() {
+//		ArrayList<GitUri> mergeUris = new ArrayList<GitUri>();
+//		mergeUris.add(new GitUri(
+//				"seambooking-example", "git://github.com/openshift/seambooking-example.git",
+//				ICartridge.JBOSSAS_7));
+//		mergeUris.add(new GitUri(
+//				"tweetstream-example", "git://github.com/openshift/tweetstream-example.git",
+//				ICartridge.JBOSSAS_7));
+//		mergeUris.add(new GitUri(
+//				"sinatra-example", "git://github.com/openshift/sinatra-example.git",
+//				new Cartridge("rack-1.1")));
+//		mergeUris.add(new GitUri(
+//				"sugarcrm-example", "git://github.com/openshift/sugarcrm-example.git",
+//				new Cartridge("php-5.3")));
+//		return mergeUris;
+//	}
 
 	public void loadGitUri() throws OpenShiftException {
 		setLoading(true);

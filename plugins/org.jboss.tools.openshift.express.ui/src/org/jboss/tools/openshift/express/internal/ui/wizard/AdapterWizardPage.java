@@ -20,26 +20,22 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
@@ -54,7 +50,6 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPageModel.GitUri;
 
 /**
  * @author André Dietisheim
@@ -102,38 +97,61 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 
 	private Group createMergeGroup(Composite parent, DataBindingContext dbc) {
 		Group mergeGroup = new Group(parent, SWT.BORDER);
-		mergeGroup.setText("Git Merge");
+		mergeGroup.setText("Enable Project");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(mergeGroup);
-		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(mergeGroup);
+		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(3).applyTo(mergeGroup);
 
 		Button mergeEnabledButton = new Button(mergeGroup, SWT.CHECK);
-		mergeEnabledButton.setText("merge with Git URI");
+		mergeEnabledButton.setText("Enable existing project");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(mergeEnabledButton);
-		IObservableValue mergeEnabledButtonSelection = WidgetProperties.selection().observe(mergeEnabledButton);
-		mergeEnabledButtonSelection.setValue(false);
-
-		Combo mergeUriCombo = new Combo(mergeGroup, SWT.NONE);
-		ComboViewer mergeUriComboViewer = new ComboViewer(mergeUriCombo);
-		GridDataFactory
-				.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(mergeUriCombo);
-		mergeUriComboViewer.setContentProvider(new ArrayContentProvider());
-		mergeUriComboViewer.setLabelProvider(new GitUriLabelProvider());
-		mergeUriComboViewer.setInput(model.getMergeUris());
-//		ValueBindingBuilder
-//				.bind(WidgetProperties.text().observe(mergeUriCombo))
-//				.validatingAfterGet(new MergeUriValidator())
-//				.to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_MERGE_URI).observe(model))
-//				.in(dbc);
+				.align(SWT.LEFT, SWT.CENTER).applyTo(mergeEnabledButton);
+		IObservableValue enableProjectObservable =
+				BeanProperties.value(AdapterWizardPageModel.PROPERTY_ENABLE_PROJECT).observe(model);
 		ValueBindingBuilder
-			.bind(WidgetProperties.text().observe(mergeUriCombo))
-			.to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_PROJECT_NAME).observe(model))
-			.in(dbc);
-		ValueBindingBuilder
-				.bind(mergeEnabledButtonSelection)
-				.to(WidgetProperties.enabled().observe(mergeUriCombo))
+				.bind(WidgetProperties.selection().observe(mergeEnabledButton))
+				.to(enableProjectObservable)
 				.in(dbc);
+
+		Text enabledProjText = new Text(mergeGroup, SWT.BORDER);
+		enabledProjText.setEditable(false);
+		GridDataFactory
+				.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(enabledProjText);
+		// mergeUriComboViewer.setContentProvider(new ArrayContentProvider());
+		// mergeUriComboViewer.setLabelProvider(new GitUriLabelProvider());
+		// mergeUriComboViewer.setInput(model.getMergeUris());
+		// ValueBindingBuilder
+		// .bind(WidgetProperties.text().observe(mergeUriCombo))
+		// .validatingAfterGet(new MergeUriValidator())
+		// .to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_MERGE_URI).observe(model))
+		// .in(dbc);
+
+		// ValueBindingBuilder
+		// .bind(mergeEnabledButtonSelection)
+		// .to(WidgetProperties.enabled().observe(mergeUriCombo))
+		// .in(dbc);
+
+		ValueBindingBuilder
+				.bind(WidgetProperties.text().observe(enabledProjText))
+				.to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_PROJECT_NAME).observe(model))
+				.in(dbc);
+
+		ValueBindingBuilder
+				.bind(enableProjectObservable)
+				.to(WidgetProperties.enabled().observe(enabledProjText))
+				.in(dbc);
+
+		Button browseProjectsButton = new Button(mergeGroup, SWT.NONE);
+		browseProjectsButton.setText("Browse");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseProjectsButton);
+		browseProjectsButton.addSelectionListener(onBrowseProjects());
+		ValueBindingBuilder
+				.bind(enableProjectObservable)
+				.to(WidgetProperties.enabled().observe(browseProjectsButton))
+				.in(dbc);
+
+		enableProjectObservable.setValue(false);
 
 		return mergeGroup;
 	}
@@ -251,6 +269,23 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		sshPrefsLink.addSelectionListener(onSshPrefs());
 
 		return cloneGroup;
+	}
+
+	private SelectionListener onBrowseProjects() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SelectEnablableProjectDialog dialog = new SelectEnablableProjectDialog(getShell());
+				if (dialog.open() == Dialog.OK) {
+					Object selectedProject = dialog.getFirstResult();
+					if (selectedProject instanceof IProject) {
+						model.setProjectName(((IProject) selectedProject).getName());
+					}
+				}
+			}
+
+		};
 	}
 
 	private SelectionListener onDefaultRepoPath() {
@@ -426,59 +461,59 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		}
 	}
 
-	private static class GitUriLabelProvider implements ILabelProvider {
+	// private static class GitUriLabelProvider implements ILabelProvider {
+	//
+	// @Override
+	// public void addListener(ILabelProviderListener listener) {
+	// }
+	//
+	// @Override
+	// public void dispose() {
+	// }
+	//
+	// @Override
+	// public boolean isLabelProperty(Object element, String property) {
+	// return true;
+	// }
+	//
+	// @Override
+	// public void removeListener(ILabelProviderListener listener) {
+	// }
+	//
+	// @Override
+	// public Image getImage(Object element) {
+	// return null;
+	// }
+	//
+	// @Override
+	// public String getText(Object element) {
+	// if (!(element instanceof GitUri)) {
+	// return null;
+	// }
+	// return ((GitUri) element).getLabel();
+	// }
+	// }
 
-		@Override
-		public void addListener(ILabelProviderListener listener) {
-		}
-
-		@Override
-		public void dispose() {
-		}
-
-		@Override
-		public boolean isLabelProperty(Object element, String property) {
-			return true;
-		}
-
-		@Override
-		public void removeListener(ILabelProviderListener listener) {
-		}
-
-		@Override
-		public Image getImage(Object element) {
-			return null;
-		}
-
-		@Override
-		public String getText(Object element) {
-			if (!(element instanceof GitUri)) {
-				return null;
-			}
-			return ((GitUri) element).getLabel();
-		}
-	}
-
-//	private class MergeUriValidator implements IValidator {
-//
-//		@Override
-//		public IStatus validate(Object value) {
-//			String mergeUri = (String) value;
-//			if (mergeUri == null
-//					|| mergeUri.length() == 0) {
-//				return ValidationStatus
-//						.warning("You have to provide a git uri to merge with");
-//			} 
-//			GitUri gitUri = model.getKnownMergeUri(mergeUri);
-//			if (gitUri == null) {
-//				return ValidationStatus
-//						.warning("You are not merging with an official example. Things may go wrong");
-//			} 
-//			if (!model.isCompatibleToApplicationCartridge(gitUri.getCartridge())) {
-//				return ValidationStatus
-//						.warning("The example you've chosen is not compatible to your application");
-//			}
-//			return ValidationStatus.ok();
-//		}
-//	}
+	// private class MergeUriValidator implements IValidator {
+	//
+	// @Override
+	// public IStatus validate(Object value) {
+	// String mergeUri = (String) value;
+	// if (mergeUri == null
+	// || mergeUri.length() == 0) {
+	// return ValidationStatus
+	// .warning("You have to provide a git uri to merge with");
+	// }
+	// GitUri gitUri = model.getKnownMergeUri(mergeUri);
+	// if (gitUri == null) {
+	// return ValidationStatus
+	// .warning("You are not merging with an official example. Things may go wrong");
+	// }
+	// if (!model.isCompatibleToApplicationCartridge(gitUri.getCartridge())) {
+	// return ValidationStatus
+	// .warning("The example you've chosen is not compatible to your application");
+	// }
+	// return ValidationStatus.ok();
+	// }
+	// }
 }

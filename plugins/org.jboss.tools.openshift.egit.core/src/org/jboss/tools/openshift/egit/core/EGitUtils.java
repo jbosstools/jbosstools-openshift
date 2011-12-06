@@ -107,6 +107,21 @@ public class EGitUtils {
 	}
 
 	/**
+	 * Returns <code>true</code> if the given project exists and has a .git
+	 * folder in it.
+	 * 
+	 * @param project
+	 * @return
+	 */
+	public static boolean hasDotGitFolder(IProject project) {
+		if (project == null
+				|| !project.exists()) {
+			return false;
+		}
+		return new File(project.getLocation().toOSString(), Constants.DOT_GIT).exists();
+	}
+
+	/**
 	 * Shares the given project. A repository is created within the given
 	 * project and the project is connected to the freshly created repository.
 	 * 
