@@ -66,7 +66,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	private IServerType serverTypeToCreate;
 
 	private IObservableValue serverAdapterCheckboxObservable;
-	private IObservableValue newProjectChecboxIsEnabled;
+	private IObservableValue newProjectCheckboxIsEnabled;
 
 	public AdapterWizardPage(ImportProjectWizard wizard, ImportProjectWizardModel model) {
 		super(
@@ -119,7 +119,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.to(newProjectObservable)
 				.in(dbc);
 		
-		this.newProjectChecboxIsEnabled = WidgetProperties.enabled().observe(newProjectCheckbox);
+		this.newProjectCheckboxIsEnabled = WidgetProperties.enabled().observe(newProjectCheckbox);
 
 		Label existingProjectLabel = new Label(projectGroup, SWT.NONE);
 		existingProjectLabel.setText("Existing Project");
@@ -137,9 +137,8 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.to(newProjectNameObservable)
 				.in(dbc);
 		ValueBindingBuilder
-				.bind(newProjectObservable)
-				.to(WidgetProperties.enabled().observe(newProjectText))
-				.converting(new InvertingBooleanConverter())
+				.bind(WidgetProperties.enabled().observe(newProjectText))
+				.notUpdating(newProjectObservable)
 				.in(dbc);
 		dbc.addValidationStatusProvider(
 				new EnableProjectValidator(newProjectObservable, newProjectNameObservable));
@@ -150,12 +149,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects());
 		ValueBindingBuilder
-				.bind(newProjectObservable)
-				.to(WidgetProperties.enabled().observe(browseProjectsButton))
-				.converting(new InvertingBooleanConverter())
+				.bind(WidgetProperties.enabled().observe(browseProjectsButton))
+				.notUpdating(newProjectObservable)
 				.in(dbc);
-
-//		model.setNewProject(false);
 
 		return projectGroup;
 	}
@@ -381,14 +377,11 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	}
 
 	private SelectionListener onCreateAdapter() {
-		return new SelectionListener() {
+		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				model.getWizardModel().setProperty(AdapterWizardPageModel.CREATE_SERVER,
-						serverAdapterCheckbox.getSelection());
+				model.getWizardModel().setProperty(
+						AdapterWizardPageModel.CREATE_SERVER,serverAdapterCheckbox.getSelection());
 				enableServerWidgets(serverAdapterCheckbox.getSelection());
-			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		};
 	}
@@ -406,7 +399,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		// allow to enable a proj only for as7 openshift applications
 		setTitle(NLS.bind("Import OpenShift application {0}", model.getApplicationName()));
 
-		newProjectChecboxIsEnabled.setValue(model.isJBossAS7Application());
+		newProjectCheckboxIsEnabled.setValue(model.isJBossAS7Application());
 		
 		model.resetRepositoryPath();
 		serverTypeToCreate = getServerTypeToCreate();
@@ -423,7 +416,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 					model.loadGitUri();
 					model.loadApplicationUrl();
 				} catch (OpenShiftException e) {
-					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
+					IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+					OpenShiftUIActivator.log(status);
+					return status;
 				}
 				return Status.OK_STATUS;
 			}
