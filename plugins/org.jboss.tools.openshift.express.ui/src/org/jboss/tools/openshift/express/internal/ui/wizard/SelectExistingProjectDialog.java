@@ -15,24 +15,28 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.ide.IDE.SharedImages;
+import org.eclipse.wst.common.componentcore.internal.util.IModuleConstants;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.utils.JavaProjectUtils;
 
 /**
  * @author André Dietisheim
  */
 public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
-	public SelectExistingProjectDialog(Shell shell) {
+	public SelectExistingProjectDialog(String openShiftAppName, Shell shell) {
 		super(shell, new ProjectLabelProvider());
 		setTitle("Project Selection");
-		setMessage("Please select the project that shall be pushed to OpenShift");
+		setMessage(NLS.bind(
+				"Select an existing project for {0}.\nOnly java projects which are not Team shared can be used.",
+				openShiftAppName));
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
 		setElements(getProjects());
@@ -57,11 +61,19 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 			return false;
 		}
 
-		if (!JavaProjectUtils.isJavaProject(project)) {
+		if (!hasModuleNature(project)) {
 			return false;
 		}
 
 		return true;
+	}
+
+	private boolean hasModuleNature(IProject project) {
+		try {
+			return project.hasNature(IModuleConstants.MODULE_NATURE_ID);
+		} catch(CoreException e) {
+			return false;
+		}
 	}
 
 	private static class ProjectLabelProvider extends LabelProvider {
