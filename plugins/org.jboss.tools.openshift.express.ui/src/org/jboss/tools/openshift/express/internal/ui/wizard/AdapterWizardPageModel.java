@@ -49,8 +49,8 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 		setNewProject(false);
 	}
 
-	public void setNewProject(boolean enableProject) {
-		firePropertyChange(PROPERTY_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(enableProject));
+	public void setNewProject(boolean newProject) {
+		firePropertyChange(PROPERTY_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(newProject));
 	}
 
 	public boolean isNewProject() {
