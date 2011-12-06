@@ -70,8 +70,8 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	public AdapterWizardPage(ImportProjectWizard wizard, ImportProjectWizardModel model) {
 		super(
 				"Import Project",
-				"Select the Git clone destination, the branch to clone "
-						+ "and configure your server adapter ",
+				"Select the project to enable, the Git clone destination, the branch to clone"
+				+ " and configure your server adapter ",
 				"Server Adapter",
 				wizard);
 		this.model = new AdapterWizardPageModel(model);
@@ -113,10 +113,10 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.to(enableProjectObservable)
 				.in(dbc);
 
-		Text enabledProjText = new Text(mergeGroup, SWT.BORDER);
-		enabledProjText.setEditable(false);
+		Text enabledProjectText = new Text(mergeGroup, SWT.BORDER);
+		enabledProjectText.setEditable(false);
 		GridDataFactory
-				.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(enabledProjText);
+				.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(enabledProjectText);
 		// mergeUriComboViewer.setContentProvider(new ArrayContentProvider());
 		// mergeUriComboViewer.setLabelProvider(new GitUriLabelProvider());
 		// mergeUriComboViewer.setInput(model.getMergeUris());
@@ -131,14 +131,16 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		// .to(WidgetProperties.enabled().observe(mergeUriCombo))
 		// .in(dbc);
 
+		IObservableValue enabledProjectNameObservable =
+				BeanProperties.value(AdapterWizardPageModel.PROPERTY_PROJECT_NAME).observe(model);
 		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(enabledProjText))
-				.to(BeanProperties.value(AdapterWizardPageModel.PROPERTY_PROJECT_NAME).observe(model))
+				.bind(WidgetProperties.text().observe(enabledProjectText))
+				.to(enabledProjectNameObservable)
 				.in(dbc);
 
 		ValueBindingBuilder
 				.bind(enableProjectObservable)
-				.to(WidgetProperties.enabled().observe(enabledProjText))
+				.to(WidgetProperties.enabled().observe(enabledProjectText))
 				.in(dbc);
 
 		Button browseProjectsButton = new Button(mergeGroup, SWT.NONE);
@@ -152,6 +154,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.in(dbc);
 
 		enableProjectObservable.setValue(false);
+
+		dbc.addValidationStatusProvider(new EnableProjectValidator(enableProjectObservable,
+				enabledProjectNameObservable));
 
 		return mergeGroup;
 	}
@@ -393,9 +398,6 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				serverAdapterCheckbox.getSelection());
 		this.serverAdapterCheckboxObservable =
 				WidgetProperties.selection().observe(serverAdapterCheckbox);
-
-		SelectedRuntimeValidator selectedRuntimeValidator = new SelectedRuntimeValidator();
-		dbc.addValidationStatusProvider(selectedRuntimeValidator);
 	}
 
 	private IServerType getServerTypeToCreate() {
@@ -444,7 +446,20 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		model.getWizardModel().setProperty(AdapterWizardPageModel.CREATE_SERVER, canCreateServer);
 	}
 
-	private class SelectedRuntimeValidator extends MultiValidator {
+	/**
+	 * A multi validator that validates the state of the project that shall be
+	 * (OpenShift) enabled
+	 */
+	private class EnableProjectValidator extends MultiValidator {
+
+		private IObservableValue enableProjectObservable;
+		private IObservableValue enabledProjectNameObservable;
+
+		public EnableProjectValidator(IObservableValue enableProjectObservable,
+				IObservableValue enabledProjectNameObservable) {
+			this.enableProjectObservable = enableProjectObservable;
+			this.enabledProjectNameObservable = enabledProjectNameObservable;
+		}
 
 		@Override
 		protected IStatus validate() {
@@ -454,10 +469,18 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 			 * is tracking what observables are read to know when he has to
 			 * recalculate it's state.
 			 */
-			if (Boolean.FALSE.equals(serverAdapterCheckboxObservable.getValue())) {
+			if (Boolean.FALSE.equals(enableProjectObservable.getValue())) {
 				return ValidationStatus.ok();
 			}
-			return ValidationStatus.ok();
+
+			if (enabledProjectNameObservable != null
+					&& enabledProjectNameObservable.getValue() != null
+					&& (!((String) enabledProjectNameObservable.getValue()).isEmpty())) {
+				return ValidationStatus.ok();
+			} else {
+				return ValidationStatus.error(
+						"You have to select a project that shall be enabled for OpenShift");
+			}
 		}
 	}
 
