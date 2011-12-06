@@ -139,6 +139,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(newProjectText))
 				.notUpdating(newProjectObservable)
+				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 		dbc.addValidationStatusProvider(
 				new EnableProjectValidator(newProjectObservable, newProjectNameObservable));
@@ -151,6 +152,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(browseProjectsButton))
 				.notUpdating(newProjectObservable)
+				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 
 		return projectGroup;

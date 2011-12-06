@@ -46,7 +46,7 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 	public AdapterWizardPageModel(ImportProjectWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setRemoteName(REMOTE_NAME_DEFAULT);
-		setNewProject(false);
+		setNewProject(true);
 	}
 
 	public void setNewProject(boolean newProject) {
