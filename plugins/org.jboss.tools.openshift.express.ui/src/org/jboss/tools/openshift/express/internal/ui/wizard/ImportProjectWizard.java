@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -71,6 +72,9 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 								if (!model.isNewProject()) {
 									model.importProject(monitor);
 								} else {
+									if (!askForConfirmation()) {
+										return Status.CANCEL_STATUS;
+									}
 									model.addToExistingProject(monitor);
 								}
 								return Status.OK_STATUS;
@@ -113,6 +117,20 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 							"An exception occurred while creating local git repository.", e));
 			return false;
 		}
+	}
+
+	private boolean askForConfirmation() {
+		final boolean[] confirmed = new boolean[1]; 
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				confirmed[0] = MessageDialog.openConfirm(getShell(), 
+						"Confirm project modification", 
+						"This will copy OpenShit configuration files to your project.\n" +
+						"Are you sure that you want to allow this?");
+			}});
+		return confirmed[0]; 
 	}
 
 	@Override
