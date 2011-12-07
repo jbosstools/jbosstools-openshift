@@ -20,8 +20,19 @@ public class UrlUtils {
 
 	private static final int HTTP_SCHEME_MAX_LENGTH = 8;
 	private static final char HTTP_SCHEME_START_CHAR = 'h';
-	private static final Pattern HTTP_SCHEME_REGEX = Pattern.compile("http?://");
-	
+	private static final Pattern HTTP_SCHEME_REGEX = Pattern.compile("http[s]{0,1}://");
+
+	/**
+	 * Returns an url that was found in the given text. It starts looking
+	 * backwards from the given offset within the given string. Returns
+	 * <code>null</code> if none was found.
+	 * 
+	 * @param offset
+	 *            starting point to look back in the given text.
+	 * @param text
+	 *            the text to search for an url
+	 * @return the url that was found in the text
+	 */
 	public static String getUrl(int offset, String text) {
 		int start = getUrlStart(offset, text);
 		if (start == -1) {
@@ -34,11 +45,19 @@ public class UrlUtils {
 		return text.substring(start, stop);
 
 	}
-	
+
+	/**
+	 * Steps back in the given text until the beginning of the text or an
+	 * occurrence of http(s):// is found.
+	 * 
+	 * @param offset the offset to start with stepping backwards 
+	 * @param text the text to search
+	 * @return the index at which http(s):// was found
+	 */
 	private static int getUrlStart(int offset, String text) {
 		for (int i = offset; i > 0; --i) {
-			if (text.charAt(i) == HTTP_SCHEME_START_CHAR 
-					&& (i + HTTP_SCHEME_MAX_LENGTH < text.length())) { 
+			if (text.charAt(i) == HTTP_SCHEME_START_CHAR
+					&& (i + HTTP_SCHEME_MAX_LENGTH < text.length())) {
 				Matcher matcher = HTTP_SCHEME_REGEX.matcher(text.substring(i, i + HTTP_SCHEME_MAX_LENGTH));
 				if (matcher.find()) {
 					return i;
