@@ -204,6 +204,9 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	/**
 	 * Creates the git ignore file with a predefined set of entries. An existing
 	 * .gitignore file is not overwritten, we then just dont do anything.
+	 * <p>
+	 * TODO: merge existing .gitignore
+	 * (https://issues.jboss.org/browse/JBIDE-10391)
 	 * 
 	 * @param projectFolder
 	 * @throws IOException
