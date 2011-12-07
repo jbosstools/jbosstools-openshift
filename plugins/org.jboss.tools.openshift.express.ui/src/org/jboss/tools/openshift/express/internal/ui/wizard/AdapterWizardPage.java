@@ -125,6 +125,11 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		existingProjectLabel.setText("Existing Project");
 		GridDataFactory
 				.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(existingProjectLabel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(existingProjectLabel))
+				.notUpdating(newProjectObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 		Text newProjectText = new Text(projectGroup, SWT.BORDER);
 		newProjectText.setEditable(false);
 		GridDataFactory.fillDefaults()
@@ -472,8 +477,8 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 			 */
 			if (Boolean.TRUE.equals(newProjectObservable.getValue())) {
 				return ValidationStatus.ok();
-			} 
-			
+			}
+
 			if (newProjectNameObservable.getValue() != null
 					&& (!((String) newProjectNameObservable.getValue()).isEmpty())) {
 				return ValidationStatus.ok();
