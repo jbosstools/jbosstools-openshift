@@ -343,7 +343,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 
 	private Group createAdapterGroup(Composite parent, DataBindingContext dbc) {
 		Group serverAdapterGroup = new Group(parent, SWT.BORDER);
-		serverAdapterGroup.setText("OpenShift JBoss Server adapter");
+		serverAdapterGroup.setText("Server Adapter");
 		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(serverAdapterGroup);
 
 		Composite c = new Composite(serverAdapterGroup, SWT.NONE);
@@ -352,7 +352,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		GridLayoutFactory.fillDefaults().numColumns(3).spacing(12, 8).applyTo(c);
 
 		serverAdapterCheckbox = new Button(c, SWT.CHECK);
-		serverAdapterCheckbox.setText("Create a JBoss server adapter");
+		serverAdapterCheckbox.setText("Create OpenShift Server Adapter");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER)
 				.grab(true, false).applyTo(serverAdapterCheckbox);
 		serverAdapterCheckbox.addSelectionListener(onCreateAdapter());
