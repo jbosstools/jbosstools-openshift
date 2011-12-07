@@ -52,6 +52,16 @@ public class FileUtils {
 				&& file.isDirectory();
 	}
 
+	public static File getSystemTmpFolder() {
+		String tmpFolder = System.getProperty("java.io.tmpdir");
+		return new File(tmpFolder);
+	}
+	
+	public static File getRandomTmpFolder() {
+		String randomName = String.valueOf(System.currentTimeMillis());
+		return new File(getSystemTmpFolder(), randomName);
+	}
+	
 	/**
 	 * Copies the ginve source to the given destination recursively. Overwrites
 	 * existing files/directory on the destination path if told so.

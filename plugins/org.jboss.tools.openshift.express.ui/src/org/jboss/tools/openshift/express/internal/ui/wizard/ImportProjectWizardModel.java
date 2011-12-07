@@ -287,11 +287,15 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		// model.shareProject(monitor);
 		// model.mergeWithApplicationRepository(repository,
 		// monitor);
-		File repositoryFile = cloneRepository(monitor);
+		File tmpFolder = FileUtils.getRandomTmpFolder();
+		File repositoryFile = cloneRepository(tmpFolder, monitor);
+		tmpFolder.delete();
+
 		copyOpenshiftConfiguration(repositoryFile, monitor);
 		shareProject(monitor);
 		createServerAdapterIfRequired(monitor);
 	}
+	
 
 	public void mergeWithApplicationRepository(Repository repository, IProgressMonitor monitor)
 			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException,
@@ -350,8 +354,14 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	private File cloneRepository(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		IApplication application = getApplication();
-		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
 		File destination = new File(getRepositoryPath(), application.getName());
+		return cloneRepository(destination, monitor);
+	}
+
+	private File cloneRepository(File destination, IProgressMonitor monitor)
+			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+		IApplication application = getApplication();
+		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
 		cloneRepository(application.getGitUri(), destination, monitor);
 		return destination;
 	}
