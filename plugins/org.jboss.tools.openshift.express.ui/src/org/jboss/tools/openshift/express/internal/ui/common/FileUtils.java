@@ -139,9 +139,15 @@ public class FileUtils {
 		Assert.isLegal(destination != null);
 
 		InputStream in = null;
+		writeTo(new BufferedInputStream(new FileInputStream(source)), destination);
+	}
+
+	private static final void writeTo(InputStream in, File destination) throws IOException {
+		Assert.isLegal(in != null);
+		Assert.isLegal(destination != null);
+
 		OutputStream out = null;
 		try {
-			in = new BufferedInputStream(new FileInputStream(source));
 			out = new BufferedOutputStream(new FileOutputStream(destination));
 			for (int read = -1; (read = in.read(buffer)) != -1; ) {
 				out.write(buffer, 0, read);

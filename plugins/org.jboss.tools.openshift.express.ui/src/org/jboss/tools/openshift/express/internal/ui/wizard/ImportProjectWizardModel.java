@@ -49,6 +49,7 @@ import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.IUser;
@@ -191,11 +192,33 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	private void copyOpenshiftConfiguration(final File sourceFolder, IProgressMonitor monitor)
 			throws IOException {
 		IProject project = getProject();
+		File projectFolder = project.getLocation().toFile();
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", getProjectName()));
-		FileUtils.copy(new File(sourceFolder, ".git"), project.getLocation().toFile(), false);
-		FileUtils.copy(new File(sourceFolder, ".openshift"), project.getLocation().toFile(), false);
-		FileUtils.copy(new File(sourceFolder, "deployments"), project.getLocation().toFile(), false);
-		FileUtils.copy(new File(sourceFolder, "pom.xml"), project.getLocation().toFile(), false);
+		FileUtils.copy(new File(sourceFolder, ".git"), projectFolder, false);
+		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
+		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
+		FileUtils.copy(new File(sourceFolder, "pom.xml"), projectFolder, false);
+		createGitIgnore(projectFolder);
+	}
+
+	/**
+	 * Creates the git ignore file with a predefined set of entries. An existing
+	 * .gitignore file is not overwritten, we then just dont do anything.
+	 * 
+	 * @param projectFolder
+	 * @throws IOException
+	 */
+	private void createGitIgnore(File projectFolder) throws IOException {
+		GitIgnore gitIgnore = new GitIgnore(projectFolder);
+		if (gitIgnore.exists()) {
+			return;
+		}
+		gitIgnore.add("target")
+				.add(".settings")
+				.add(".project")
+				.add(".classpath")
+				.add(".factorypath");
+		gitIgnore.write(false);
 	}
 
 	/**
@@ -244,7 +267,8 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * @throws IOException
 	 *             The configuration files could not be copied from the git
 	 *             clone to the user project
-	 * @throws CoreException The user project could not be shared with the git 
+	 * @throws CoreException
+	 *             The user project could not be shared with the git
 	 * 
 	 * @see #cloneRepository
 	 * @see #copyOpenshiftConfiguration
