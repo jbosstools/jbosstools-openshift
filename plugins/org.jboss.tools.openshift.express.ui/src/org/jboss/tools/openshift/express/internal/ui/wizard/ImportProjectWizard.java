@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -72,7 +73,7 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 								if (model.isNewProject()) {
 									model.importProject(monitor);
 								} else {
-									if (!askForConfirmation()) {
+									if (!askForConfirmation(model.getApplicationName(), model.getProjectName())) {
 										return Status.CANCEL_STATUS;
 									}
 									model.addToExistingProject(monitor);
@@ -119,16 +120,18 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 		}
 	}
 
-	private boolean askForConfirmation() {
+	private boolean askForConfirmation(final String applicationName, final String projectName) {
 		final boolean[] confirmed = new boolean[1]; 
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				confirmed[0] = MessageDialog.openConfirm(getShell(), 
-						"Confirm project modification", 
-						"This will copy OpenShit configuration files to your project.\n" +
-						"Are you sure that you want to allow this?");
+						NLS.bind("Import OpenShift Application ", applicationName), 
+						NLS.bind(
+								"OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
+								"configuration and enable Git for the project.\n " +
+						"This cannot be undone. Do you wish to continue ?", applicationName, projectName));
 			}});
 		return confirmed[0]; 
 	}

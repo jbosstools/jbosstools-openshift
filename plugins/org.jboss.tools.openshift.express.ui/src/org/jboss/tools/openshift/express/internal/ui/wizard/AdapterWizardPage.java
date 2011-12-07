@@ -71,8 +71,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	public AdapterWizardPage(ImportProjectWizard wizard, ImportProjectWizardModel model) {
 		super(
 				"Import OpenShift application",
-				"Select the project to enable, the Git clone destination, the branch to clone"
-						+ " and configure your server adapter ",
+				"Choose to create a new/use existing project, " +
+						"the GITbranch and clone destination, "
+						+ "and configure your server adapter ",
 				"Server Adapter",
 				wizard);
 		this.model = new AdapterWizardPageModel(model);
@@ -484,7 +485,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				return ValidationStatus.ok();
 			} else {
 				return ValidationStatus.error(
-						"You have to select a project that shall be enabled for OpenShift");
+						"Select an existing project to use with OpenShift");
 			}
 		}
 	}

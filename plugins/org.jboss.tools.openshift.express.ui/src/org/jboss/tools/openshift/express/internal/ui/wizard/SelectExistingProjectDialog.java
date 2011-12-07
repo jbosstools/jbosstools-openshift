@@ -33,7 +33,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
 	public SelectExistingProjectDialog(String openShiftAppName, Shell shell) {
 		super(shell, new ProjectLabelProvider());
-		setTitle("Project Selection");
+		setTitle("Select Existing Project");
 		setMessage(NLS.bind(
 				"Select an existing project for {0}.\nOnly java projects which are not Team shared can be used.",
 				openShiftAppName));
