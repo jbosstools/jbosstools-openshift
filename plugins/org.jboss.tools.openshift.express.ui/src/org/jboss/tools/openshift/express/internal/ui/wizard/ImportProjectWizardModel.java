@@ -289,9 +289,8 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		// monitor);
 		File tmpFolder = FileUtils.getRandomTmpFolder();
 		File repositoryFile = cloneRepository(tmpFolder, monitor);
-		tmpFolder.delete();
-
 		copyOpenshiftConfiguration(repositoryFile, monitor);
+		FileUtil.safeDelete(tmpFolder);
 		shareProject(monitor);
 		createServerAdapterIfRequired(monitor);
 	}
