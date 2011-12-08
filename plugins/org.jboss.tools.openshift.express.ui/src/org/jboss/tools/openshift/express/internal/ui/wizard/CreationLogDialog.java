@@ -33,20 +33,21 @@ import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.common.StringUtils;
-import org.jboss.tools.openshift.express.internal.utils.UrlUtils;
 
 /**
  * @author André Dietisheim
  */
 public class CreationLogDialog extends TitleAreaDialog {
 
-	private static final Pattern HTTP_LINK_REGEX = Pattern.compile("http[^ |\n]+");
-	
+	private static final Pattern HTTP_LINK_REGEX = Pattern.compile("(http[^ |\n]+)");
+
 	private LogEntry[] logEntries;
+	private List<LinkSubstring> linkSubstrings;
 
 	public CreationLogDialog(Shell parentShell, LogEntry... logEntries) {
 		super(parentShell);
 		this.logEntries = logEntries;
+		this.linkSubstrings = new ArrayList<LinkSubstring>();
 	}
 
 	@Override
@@ -84,8 +85,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 			public void handleEvent(Event event) {
 				try {
 					String url = getUrl(logText, event);
-					if (url != null
-							&& url.length() > 0) {
+					if (url != null && url.length() > 0) {
 						BrowserUtil.checkedCreateExternalBrowser(
 								url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 					}
@@ -97,14 +97,12 @@ public class CreationLogDialog extends TitleAreaDialog {
 			private String getUrl(StyledText logText, Event event) {
 				int offset = logText.getOffsetAtLocation(new Point(event.x, event.y));
 				StyleRange style = logText.getStyleRangeAtOffset(offset);
-				if (style == null
+				if (style == null 
 						|| !style.underline) {
 					return null;
 				}
-				return UrlUtils.getUrl(offset, logText.getText());
+				return CreationLogDialog.this.getUrl(offset);
 			}
-
-
 		};
 	}
 
@@ -132,18 +130,26 @@ public class CreationLogDialog extends TitleAreaDialog {
 		appendLog(logEntry, builder, styles);
 	}
 
-	private void appendLog(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
+	private void appendLog(LogEntry logEntry, StringBuilder builder,
+			List<StyleRange> styles) {
 		String log = logEntry.getLog();
-		createLinkStyles(log, builder.length(), styles);
+		createLinks(log, builder.length(), styles);
 		builder.append(log);
 		builder.append(StringUtils.getLineSeparator());
 	}
 
-	private void createLinkStyles(String log, int baseIndex, List<StyleRange> styles) {
+	private void createLinks(String log, int baseIndex, List<StyleRange> styles) {
 		Matcher matcher = HTTP_LINK_REGEX.matcher(log);
-		while (matcher.find()) {
-			StyleRange linkStyle = createLinkStyleRange(matcher.start() + baseIndex, matcher.end() + baseIndex);
+		while (matcher.find() 
+				&& matcher.groupCount() == 1) {
+			int linkStart = matcher.start() + baseIndex;
+			int linkStop = matcher.end() + baseIndex;
+			StyleRange linkStyle = createLinkStyleRange(linkStart, linkStop);
 			styles.add(linkStyle);
+			String url = matcher.group(1);
+			LinkSubstring linkEntry = 
+					new LinkSubstring(linkStart, linkStop, url);
+			linkSubstrings.add(linkEntry);
 		}
 	}
 
@@ -201,6 +207,56 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 		public String getLog() {
 			return log;
+		}
+	}
+
+	/**
+	 * Gets the url at the given index within the log. Returns <code>null</code>
+	 * if none was found. Looks through the links that were found when parsing
+	 * the log.
+	 * 
+	 * @param offset
+	 * @return the link
+	 * 
+	 * @see #createLinks
+	 */
+	private String getUrl(int offset) {
+		String url = null;
+		for (LinkSubstring linkSubstring : linkSubstrings) {
+			if (offset < linkSubstring.getStopOffset()
+					&& offset > linkSubstring.getStartOffset()) {
+				url = linkSubstring.getUrl();
+				break;
+			}
+		}
+		return url;
+	}
+
+	/**
+	 * A link within the log text.
+	 */
+	private static class LinkSubstring {
+
+		private int startOffset;
+		private int stopOffset;
+		private String url;
+
+		public LinkSubstring(int startOffset, int stopOffset, String url) {
+			this.startOffset = startOffset;
+			this.stopOffset = stopOffset;
+			this.url = url;
+		}
+
+		private int getStartOffset() {
+			return startOffset;
+		}
+
+		private int getStopOffset() {
+			return stopOffset;
+		}
+
+		private String getUrl() {
+			return url;
 		}
 	}
 
