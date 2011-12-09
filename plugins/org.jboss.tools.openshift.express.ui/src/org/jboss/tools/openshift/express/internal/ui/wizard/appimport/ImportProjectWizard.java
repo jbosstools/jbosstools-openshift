@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard;
+package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -33,8 +33,11 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.common.MavenImportFailedException;
+import org.jboss.tools.openshift.express.internal.ui.common.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.common.WontOverwriteException;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
 
 /**
  * @author André Dietisheim
@@ -84,7 +87,7 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 							} catch (final WontOverwriteException e) {
 								openWarning("Project already present", e.getMessage());
 								return Status.CANCEL_STATUS;
-							} catch (final MavenImportFailedException e) {
+							} catch (final ImportFailedException e) {
 								return OpenShiftUIActivator.createErrorStatus(
 										"Could not import maven project {0}.", e,
 										model.getProjectName());
@@ -112,7 +115,7 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 								}
 							} catch (Exception e) {
 								return OpenShiftUIActivator.createErrorStatus(
-										"Could int import project to the workspace.", e);
+										"Could not import project to the workspace.", e);
 							}
 						}
 					}, getContainer());

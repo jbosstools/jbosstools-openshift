@@ -40,6 +40,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 import org.jboss.tools.openshift.express.internal.utils.UIUtils;
 
 /**

@@ -60,6 +60,7 @@ import org.jboss.tools.openshift.express.client.IDomain;
 import org.jboss.tools.openshift.express.client.NotFoundOpenShiftException;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 import org.jboss.tools.openshift.express.internal.utils.Logger;
 
 /**
@@ -71,7 +72,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 	private ApplicationWizardPageModel model;
 	private ImportProjectWizardModel wizardModel;
 
-	protected ApplicationWizardPage(IWizard wizard, ImportProjectWizardModel wizardModel) {
+	public ApplicationWizardPage(IWizard wizard, ImportProjectWizardModel wizardModel) {
 		super("Application selection", "Please select an application to start with, or create a new one.",
 				"Application selection", wizard);
 		this.wizardModel = wizardModel;

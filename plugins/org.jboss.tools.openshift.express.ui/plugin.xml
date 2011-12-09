@@ -14,7 +14,7 @@
       </category>
       <wizard
             category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.ImportProjectWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.ImportProjectNewWizard"
             name="OpenShift Express Application">

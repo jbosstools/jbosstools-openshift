@@ -8,28 +8,20 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.projectimport;
+package org.jboss.tools.openshift.express.internal.ui.common;
 
-import java.io.File;
+import org.jboss.tools.openshift.express.client.OpenShiftException;
 
-/**
- * @author André Dietisheim <adietish@redhat.com>
- */
-public class AbstractProjectImportOperation {
+public class OpenShiftUIException extends OpenShiftException {
 
-	private File projectFolder;
+	private static final long serialVersionUID = 1L;
 
-	public AbstractProjectImportOperation(File projectDirectory) {
-		this.projectFolder = projectDirectory;
+	public OpenShiftUIException(String message, Object... arguments) {
+		super(message, arguments);
 	}
 
-	protected File getProjectDirectory() {
-		return projectFolder;
+	public OpenShiftUIException(Throwable cause, String message, Object... arguments) {
+		super(cause, message, arguments);
 	}
 
-	protected boolean isReadable(File destination) {
-		return destination != null
-				&& destination.exists()
-				&& destination.canRead();
-	}
 }

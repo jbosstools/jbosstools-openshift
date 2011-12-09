@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.express.client.configuration.SystemConfiguratio
 import org.jboss.tools.openshift.express.client.configuration.SystemProperties;
 import org.jboss.tools.openshift.express.client.configuration.UserConfiguration;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 
 /**
  * @author André Dietisheim

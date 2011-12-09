@@ -15,6 +15,7 @@ import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.ICartridge;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
+import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 
 /**
  * @author André Dietisheim
@@ -37,7 +38,6 @@ public class AdapterWizardPageModel extends ObservableUIPojo {
 	public static final String MODE = "serverMode";
 	public static final String MODE_SOURCE = "serverModeSource";
 	public static final String MODE_BINARY = "serverModeBinary";
-	public static final String RUNTIME_DELEGATE = "runtimeDelegate";
 	public static final String SERVER_TYPE = "serverType";
 
 	private ImportProjectWizardModel wizardModel;
