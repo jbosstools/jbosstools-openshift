@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Control;
@@ -34,8 +33,8 @@ public class ValidationStatusControlDecoration {
 		this.validationStatus = provider.getValidationStatus();
 	}
 
-	public void showFor(Control control) {
-		ControlDecoration decoration = createDecoration(control);
+	public void showFor(Control control, int position) {
+		ControlDecoration decoration = createDecoration(control, position);
 		IValueChangeListener validationStatusListener = onValidationStatusChanged(decoration);
 		
 		validationStatus.addValueChangeListener(validationStatusListener);
@@ -43,8 +42,8 @@ public class ValidationStatusControlDecoration {
 
 	}
 	
-	private ControlDecoration createDecoration(Control control) {
-		ControlDecoration controlDecoration = new ControlDecoration(control, SWT.LEFT | SWT.TOP);
+	private ControlDecoration createDecoration(Control control, int position) {
+		ControlDecoration controlDecoration = new ControlDecoration(control, position);
 		FieldDecoration fieldDecoration =
 				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
 		controlDecoration.setImage(fieldDecoration.getImage());
