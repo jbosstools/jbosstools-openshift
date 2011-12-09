@@ -153,7 +153,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.in(dbc);
 		MultiValidator newProjectValidator = new NewProjectValidator(newProjectObservable, newProjectNameObservable);
 		dbc.addValidationStatusProvider(newProjectValidator);
-		new ValidationStatusControlDecoration(newProjectValidator).showFor(newProjectText);
+		new ValidationStatusControlDecoration(newProjectValidator).showFor(newProjectText, SWT.TOP | SWT.LEFT);
 
 		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
 		browseProjectsButton.setText("Browse");
