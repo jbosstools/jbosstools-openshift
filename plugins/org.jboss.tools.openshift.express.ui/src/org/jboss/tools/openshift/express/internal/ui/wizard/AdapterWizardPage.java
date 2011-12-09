@@ -50,6 +50,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ValidationStatusControlDecoration;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 
@@ -109,7 +110,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		projectGroup.setText("Project");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(projectGroup);
-		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(3).applyTo(projectGroup);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(projectGroup);
 
 		Button newProjectCheckbox = new Button(projectGroup, SWT.CHECK);
 		newProjectCheckbox.setText("Create new Project");
@@ -133,6 +134,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.notUpdating(newProjectObservable)
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
+
 		Text newProjectText = new Text(projectGroup, SWT.BORDER);
 		newProjectText.setEditable(false);
 		GridDataFactory.fillDefaults()
@@ -149,8 +151,9 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 				.notUpdating(newProjectObservable)
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
-		dbc.addValidationStatusProvider(
-				new NewProjectValidator(newProjectObservable, newProjectNameObservable));
+		MultiValidator newProjectValidator = new NewProjectValidator(newProjectObservable, newProjectNameObservable);
+		dbc.addValidationStatusProvider(newProjectValidator);
+		new ValidationStatusControlDecoration(newProjectValidator).showFor(newProjectText);
 
 		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
 		browseProjectsButton.setText("Browse");
@@ -547,4 +550,5 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 	// return ValidationStatus.ok();
 	// }
 	// }
+
 }
