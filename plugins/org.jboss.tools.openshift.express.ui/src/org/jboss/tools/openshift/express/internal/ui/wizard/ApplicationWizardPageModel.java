@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.IDomain;
 import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
+import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 
 /**
  * @author André Dietisheim
