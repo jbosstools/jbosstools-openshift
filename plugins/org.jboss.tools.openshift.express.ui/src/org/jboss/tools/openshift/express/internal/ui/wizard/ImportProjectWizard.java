@@ -33,6 +33,8 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.common.MavenImportFailedException;
+import org.jboss.tools.openshift.express.internal.ui.common.WontOverwriteException;
 
 /**
  * @author André Dietisheim
@@ -79,34 +81,39 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 									model.addToExistingProject(monitor);
 								}
 								return Status.OK_STATUS;
+							} catch (final WontOverwriteException e) {
+								openWarning("Project already present", e.getMessage());
+								return Status.CANCEL_STATUS;
+							} catch (final MavenImportFailedException e) {
+								return OpenShiftUIActivator.createErrorStatus(
+										"Could not import maven project {0}.", e,
+										model.getProjectName());
 							} catch (IOException e) {
-								status = OpenShiftUIActivator.createErrorStatus(
+								return OpenShiftUIActivator.createErrorStatus(
 										"Could not copy openshift configuration files to project {0}", e,
 										model.getProjectName());
-								return status;
 							} catch (OpenShiftException e) {
-								status = OpenShiftUIActivator.createErrorStatus(
+								return OpenShiftUIActivator.createErrorStatus(
 										"Could not import project to the workspace.", e);
 							} catch (URISyntaxException e) {
-								status = OpenShiftUIActivator.createErrorStatus(
+								return OpenShiftUIActivator.createErrorStatus(
 										"The url of the remote git repository is not valid", e);
 							} catch (InvocationTargetException e) {
 								if (isTransportException(e)) {
 									TransportException te = getTransportException(e);
-									status = OpenShiftUIActivator
+									return OpenShiftUIActivator
 											.createErrorStatus(
 													"Could not clone the repository. Authentication failed.\n"
 															+ " Please make sure that you added your private key to the ssh preferences.",
 													te);
 								} else {
-									status = OpenShiftUIActivator.createErrorStatus(
+									return OpenShiftUIActivator.createErrorStatus(
 											"An exception occurred while creating local git repository.", e);
 								}
 							} catch (Exception e) {
-								status = OpenShiftUIActivator.createErrorStatus(
+								return OpenShiftUIActivator.createErrorStatus(
 										"Could int import project to the workspace.", e);
 							}
-							return status;
 						}
 					}, getContainer());
 			IStatus status = queue.poll(10, TimeUnit.SECONDS);
@@ -134,6 +141,16 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 						"This cannot be undone. Do you wish to continue ?", applicationName, projectName));
 			}});
 		return confirmed[0]; 
+	}
+
+	private void openWarning(final String title, final String message) {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				MessageDialog.openWarning(getShell(), title, message);
+			}
+		});
 	}
 
 	@Override
