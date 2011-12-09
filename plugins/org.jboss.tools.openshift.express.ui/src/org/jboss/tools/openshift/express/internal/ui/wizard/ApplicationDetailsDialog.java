@@ -33,7 +33,7 @@ import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
 import org.jboss.tools.openshift.express.client.utils.RFC822DateUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.common.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author André Dietisheim

@@ -31,7 +31,7 @@ import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.client.IApplication;
 import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
-import org.jboss.tools.openshift.express.internal.ui.common.FileUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>

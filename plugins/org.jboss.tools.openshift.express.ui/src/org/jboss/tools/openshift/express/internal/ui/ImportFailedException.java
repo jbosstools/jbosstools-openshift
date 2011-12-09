@@ -8,26 +8,13 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.utils;
+package org.jboss.tools.openshift.express.internal.ui;
 
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.widgets.Text;
+public class ImportFailedException extends OpenShiftUIException {
 
-/**
- * @author André Dietisheim
- */
-public class UIUtils {
+	private static final long serialVersionUID = 1L;
 
-	public static void selectAllOnFocus(final Text text) {
-		text.addFocusListener(new FocusAdapter() {
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				text.selectAll();
-			}
-		});
-
+	public ImportFailedException(String message, Object... arguments) {
+		super(message, arguments);
 	}
-	
 }

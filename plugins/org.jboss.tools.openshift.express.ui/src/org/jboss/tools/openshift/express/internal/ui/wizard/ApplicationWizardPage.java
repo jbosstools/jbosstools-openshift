@@ -60,8 +60,8 @@ import org.jboss.tools.openshift.express.client.IDomain;
 import org.jboss.tools.openshift.express.client.NotFoundOpenShiftException;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
-import org.jboss.tools.openshift.express.internal.utils.Logger;
 
 /**
  * @author André Dietisheim

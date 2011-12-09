@@ -22,7 +22,7 @@ import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
-import org.jboss.tools.openshift.express.internal.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 /**
  * A utility class to manager the message consoles creations and retrivals

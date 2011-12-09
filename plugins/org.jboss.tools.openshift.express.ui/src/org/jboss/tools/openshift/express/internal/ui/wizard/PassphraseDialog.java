@@ -14,7 +14,7 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.ui.common.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 public class PassphraseDialog extends InputDialog {
 

@@ -9,7 +9,7 @@
  * Xavier Coulon - Initial API and implementation 
  ******************************************************************************/
 
-package org.jboss.tools.openshift.express.internal.utils;
+package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

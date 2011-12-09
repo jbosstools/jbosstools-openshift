@@ -54,7 +54,7 @@ public class TailServerLogWorker implements Runnable {
 				console.newMessageStream().println(line);
 			}
 		} catch (Throwable e) {
-			org.jboss.tools.openshift.express.internal.utils.Logger.error(
+			org.jboss.tools.openshift.express.internal.ui.utils.Logger.error(
 					"Error while receiving the remote server log", e);
 		} finally {
 
@@ -99,14 +99,14 @@ public class TailServerLogWorker implements Runnable {
 			switch (level) {
 			case DEBUG:
 			case INFO:
-				org.jboss.tools.openshift.express.internal.utils.Logger.debug(message);
+				org.jboss.tools.openshift.express.internal.ui.utils.Logger.debug(message);
 				break;
 			case WARN:
-				org.jboss.tools.openshift.express.internal.utils.Logger.warn(message);
+				org.jboss.tools.openshift.express.internal.ui.utils.Logger.warn(message);
 				break;
 			case ERROR:
 			case FATAL:
-				org.jboss.tools.openshift.express.internal.utils.Logger.error(message);
+				org.jboss.tools.openshift.express.internal.ui.utils.Logger.error(message);
 				break;
 			}
 		}

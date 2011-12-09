@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.jboss.tools.openshift.express.internal.ui.common.ImageRepository;
+import org.jboss.tools.openshift.express.internal.ui.utils.ImageRepository;
 
 public class OpenShiftImages {
 

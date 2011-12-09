@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.express.client.IUser;
 import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.client.SSHKeyPair;
 import org.jboss.tools.openshift.express.client.SSHPublicKey;
-import org.jboss.tools.openshift.express.internal.ui.common.FileUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 
 /**
  * @author André Dietisheim
