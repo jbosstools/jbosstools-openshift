@@ -27,13 +27,14 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.MavenProjectImportOperation;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>

@@ -25,7 +25,6 @@ import org.eclipse.ui.views.IViewDescriptor;
 import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
-import org.jboss.tools.openshift.express.internal.client.utils.Base64Encoder;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker.JschToEclipseLogger;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
@@ -33,6 +32,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.openshift.express.client.utils.Base64Encoder;
 
 /**
  * The action associated with the "Show In>Remote Console" menu item.

@@ -18,13 +18,14 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jsch.internal.core.IConstants;
 import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.client.IDomain;
-import org.jboss.tools.openshift.express.client.ISSHPublicKey;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
-import org.jboss.tools.openshift.express.client.SSHKeyPair;
-import org.jboss.tools.openshift.express.client.SSHPublicKey;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+
+import com.openshift.express.client.IDomain;
+import com.openshift.express.client.ISSHPublicKey;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
+import com.openshift.express.client.SSHKeyPair;
+import com.openshift.express.client.SSHPublicKey;
 
 /**
  * @author André Dietisheim

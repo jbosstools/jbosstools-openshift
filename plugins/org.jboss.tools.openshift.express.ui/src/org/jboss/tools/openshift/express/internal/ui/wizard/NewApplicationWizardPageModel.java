@@ -15,9 +15,10 @@ import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
-import org.jboss.tools.openshift.express.client.ICartridge;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+
+import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

@@ -28,12 +28,13 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.BrowserUtil;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
-import org.jboss.tools.openshift.express.client.utils.RFC822DateUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.utils.RFC822DateUtils;
 
 /**
  * @author André Dietisheim

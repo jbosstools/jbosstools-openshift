@@ -55,13 +55,14 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IDomain;
-import org.jboss.tools.openshift.express.client.NotFoundOpenShiftException;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IDomain;
+import com.openshift.express.client.NotFoundOpenShiftException;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

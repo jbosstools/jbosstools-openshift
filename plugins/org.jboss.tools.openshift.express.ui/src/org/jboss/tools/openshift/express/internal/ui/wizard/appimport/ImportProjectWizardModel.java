@@ -21,11 +21,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.ICartridge;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPageModel;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>

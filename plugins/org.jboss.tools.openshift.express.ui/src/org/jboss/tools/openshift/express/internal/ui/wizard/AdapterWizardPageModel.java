@@ -12,10 +12,11 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.ICartridge;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

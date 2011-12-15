@@ -10,8 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
-import org.jboss.tools.openshift.express.client.OpenShiftException;
+import com.openshift.express.client.OpenShiftException;
 
+/**
+ * @author Andre Dietisheim
+ */
 public class OpenShiftUIException extends OpenShiftException {
 
 	private static final long serialVersionUID = 1L;

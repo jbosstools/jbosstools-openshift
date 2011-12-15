@@ -50,13 +50,14 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.ICartridge;
-import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

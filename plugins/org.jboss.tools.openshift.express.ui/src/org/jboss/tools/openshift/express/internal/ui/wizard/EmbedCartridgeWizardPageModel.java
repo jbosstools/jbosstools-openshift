@@ -19,11 +19,12 @@ import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffEntry;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.ICartridge;
-import org.jboss.tools.openshift.express.client.IEmbeddableCartridge;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

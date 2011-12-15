@@ -28,10 +28,11 @@ import org.eclipse.wst.server.core.IServerType;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>

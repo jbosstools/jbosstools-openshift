@@ -42,11 +42,12 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>

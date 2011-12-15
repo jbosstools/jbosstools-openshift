@@ -14,11 +14,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IDomain;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IDomain;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

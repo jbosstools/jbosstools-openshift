@@ -16,16 +16,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
-import org.jboss.tools.openshift.express.client.IUser;
-import org.jboss.tools.openshift.express.client.NotFoundOpenShiftException;
-import org.jboss.tools.openshift.express.client.OpenShiftException;
-import org.jboss.tools.openshift.express.client.User;
-import org.jboss.tools.openshift.express.client.configuration.DefaultConfiguration;
-import org.jboss.tools.openshift.express.client.configuration.SystemConfiguration;
-import org.jboss.tools.openshift.express.client.configuration.SystemProperties;
-import org.jboss.tools.openshift.express.client.configuration.UserConfiguration;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
+
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.NotFoundOpenShiftException;
+import com.openshift.express.client.OpenShiftException;
+import com.openshift.express.client.User;
+import com.openshift.express.client.configuration.DefaultConfiguration;
+import com.openshift.express.client.configuration.SystemConfiguration;
+import com.openshift.express.client.configuration.SystemProperties;
+import com.openshift.express.client.configuration.UserConfiguration;
 
 /**
  * @author André Dietisheim
@@ -70,10 +71,11 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	protected String getUserConfiguration() {
 		String configuredUsername = null;
 		try {
-			configuredUsername = new SystemProperties(
-					new UserConfiguration(
-							new SystemConfiguration(
-									new DefaultConfiguration()))).getRhlogin();
+			configuredUsername =
+					new SystemProperties(
+							new UserConfiguration(
+									new SystemConfiguration(
+											new DefaultConfiguration()))).getRhlogin();
 		} catch (Exception e) {
 			// do nothing
 		}

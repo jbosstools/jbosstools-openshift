@@ -11,8 +11,9 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.express.client.IApplication;
-import org.jboss.tools.openshift.express.client.IUser;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
 
 /**
  * @author André Dietisheim
