@@ -142,7 +142,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			status = Status.OK_STATUS;
 		} catch (OpenShiftException e) {
 			this.user = null;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			this.user = null;
 		}
 		wizardModel.setUser(user);
