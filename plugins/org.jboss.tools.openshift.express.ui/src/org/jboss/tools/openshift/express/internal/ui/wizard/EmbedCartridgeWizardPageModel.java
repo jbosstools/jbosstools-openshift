@@ -94,10 +94,9 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IApplication createJenkinsApplication(String name) throws OpenShiftException {
-		IApplication application = wizardModel.getUser().createApplication(name, ICartridge.JENKINS_14);
-		return application;
+		return wizardModel.createApplication(name, ICartridge.JENKINS_14);
 	}
-
+	
 	/**
 	 * Embeds/removes the cartridges that were added/removed in this wizard
 	 * page.

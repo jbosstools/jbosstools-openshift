@@ -65,14 +65,7 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 
 	public void createApplication() throws OpenShiftException {
 		IApplication application = createApplication(name, cartridge);
-		final boolean isApplicationAvailable = application.waitForAccessible(APP_CREATION_TIMEOUT * 1000);
-		if (isApplicationAvailable) {
-			setApplication(application);
-		} else {
-			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
-					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING,
-					application.getApplicationUrl()));
-		}
+		setApplication(application);
 	}
 
 	public void setApplication(IApplication application) {
@@ -84,10 +77,21 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	}
 
 	public IApplication createApplication(String name, ICartridge cartridge) throws OpenShiftException {
-		return getUser().createApplication(name, cartridge);
+		IApplication application = getUser().createApplication(name, cartridge);
+		waitForAccessible(application);
+		return application;
 	}
 
 	public boolean hasApplication(String name) throws OpenShiftException {
 		return user.hasApplication(name);
 	}
+
+	private void waitForAccessible(IApplication application) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+		if (!application.waitForAccessible(APP_CREATION_TIMEOUT * 1000)) {
+			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
+					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING,
+					application.getApplicationUrl()));
+		}
+	}
+
 }
