@@ -228,10 +228,6 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	public String getMode() {
 		return (String) getProperty(AdapterWizardPageModel.MODE);
 	}
-
-	public void setCreateServer() {
-		
-	}
 	
 	public boolean isCreateServer() {
 		Boolean isCreateServer = (Boolean) getProperty(CREATE_SERVER);
