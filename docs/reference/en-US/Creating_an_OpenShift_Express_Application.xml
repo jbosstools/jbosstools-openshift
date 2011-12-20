@@ -97,13 +97,34 @@
 		</mediaobject>
 	</figure>
 	<para>
-		You will need to specify a name for the application and the platform to deploy for, from the <guilabel>Cartdige</guilabel> drop-down list. Click <guibutton>Finish</guibutton> to create the application.
+		You will need to specify a name for the application and the platform to deploy for, from the <guilabel>Cartdige</guilabel> drop-down list. Click the <guibutton>Next</guibutton> to embedd cartridges or click <guibutton>Finish</guibutton> to create the application.
 	</para>
 	<note>
 		<para>
 			No underscores or special characters are allowed in the application name.
 		</para>
 	</note>
+	<para>
+		If you clicked <guibutton>Next</guibutton>, you will now see the <guilabel>Embed Cartridges</guilabel> screen. From here you can choose to embed any numbe rof cartridges, or none. Once you have finished your selection click <guibutton>Finish</guibutton>.
+	</para>
+	<note>
+		<para>
+			The <guilabel>Embed Cartridges</guilabel> screen can also be access by highlighting a project in the <guilabel>Available Applications</guilabel> section of the <guilabel>Application Selection</guilabel> screen and clicking on the <guibutton>Edit</guibutton> button. To embed your application with a cartridge is to grant the capability to your application. For example, embedding the <guilabel>mysql</guilabel> cartridge will grant your application the capability to use a MySQL database.
+		</para>
+	</note>
+	<figure id="application_creation_05a">
+		<title>Embed Cartridges</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_05a.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Choosing which cartridges to embed within the application.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
 	<figure id="application_creation_06">
 		<title>Created application availability</title>
 		<mediaobject>
