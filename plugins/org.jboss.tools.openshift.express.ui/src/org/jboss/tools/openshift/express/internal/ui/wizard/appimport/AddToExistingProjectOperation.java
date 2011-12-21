@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -23,8 +25,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.wst.server.core.IRuntime;
-import org.eclipse.wst.server.core.IServerType;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
@@ -37,12 +37,11 @@ import com.openshift.express.client.OpenShiftException;
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class AddToExistingProjectStrategy extends AbstractImportApplicationStrategy {
+public class AddToExistingProjectOperation extends AbstractImportApplicationOperation {
 
-	public AddToExistingProjectStrategy(String projectName, IApplication application, String remoteName,
-			boolean isCreateServer, IServerType serverType, IRuntime runtime, String mode,
+	public AddToExistingProjectOperation(String projectName, IApplication application, String remoteName,
 			IUser user) {
-		super(projectName, application, remoteName, isCreateServer, serverType, runtime, mode, user);
+		super(projectName, application, remoteName, user);
 	}
 
 	/**
@@ -53,6 +52,7 @@ public class AddToExistingProjectStrategy extends AbstractImportApplicationStrat
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return
 	 * @throws URISyntaxException
 	 *             The OpenShift application repository could not be cloned,
 	 *             because the uri it is located at is not a valid git uri
@@ -76,7 +76,7 @@ public class AddToExistingProjectStrategy extends AbstractImportApplicationStrat
 	 * @see #createServerAdapterIfRequired
 	 */
 	@Override
-	public void execute(IProgressMonitor monitor)
+	public List<IProject> execute(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
 		// File repositoryFile =
@@ -93,10 +93,7 @@ public class AddToExistingProjectStrategy extends AbstractImportApplicationStrat
 		FileUtil.safeDelete(tmpFolder);
 
 		shareProject(project, monitor);
-		if (isCreateServer()) {
-			createServerAdapter(
-					project, getServerType(), getRuntime(), getMode(), getApplication(), getUser(), monitor);
-		}
+		return Collections.singletonList(project);
 	}
 
 	private void shareProject(IProject project, IProgressMonitor monitor) throws CoreException {
@@ -149,7 +146,7 @@ public class AddToExistingProjectStrategy extends AbstractImportApplicationStrat
 				.add(".factorypath");
 		gitIgnore.write(false);
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void mergeWithApplicationRepository(Repository repository, IApplication application,
 			IProgressMonitor monitor)

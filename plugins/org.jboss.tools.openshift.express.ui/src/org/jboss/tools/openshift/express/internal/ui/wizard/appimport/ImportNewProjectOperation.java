@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.wst.server.core.IRuntime;
-import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -39,14 +37,13 @@ import com.openshift.express.client.OpenShiftException;
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class ImportNewProjectStrategy extends AbstractImportApplicationStrategy {
+public class ImportNewProjectOperation extends AbstractImportApplicationOperation {
 
 	private File cloneDestination;
 
-	public ImportNewProjectStrategy(String projectName, IApplication application, String remoteName,
-			File cloneDestination, boolean isCreateServer, IServerType serverType, IRuntime runtime, String mode,
-			IUser user) {
-		super(projectName, application, remoteName, isCreateServer, serverType, runtime, mode, user);
+	public ImportNewProjectOperation(String projectName, IApplication application, String remoteName,
+			File cloneDestination, IUser user) {
+		super(projectName, application, remoteName, user);
 		this.cloneDestination = cloneDestination;
 	}
 
@@ -61,7 +58,7 @@ public class ImportNewProjectStrategy extends AbstractImportApplicationStrategy 
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
 	 */
-	public void execute(IProgressMonitor monitor)
+	public List<IProject> execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException {
 		if (cloneDestinationExists()) {
@@ -84,10 +81,7 @@ public class ImportNewProjectStrategy extends AbstractImportApplicationStrategy 
 		}
 
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
-		if (isCreateServer()) {
-			createServerAdapter(importedProjects, getServerType(), getRuntime(), getMode(), getApplication(),
-					getUser(), monitor);
-		}
+		return importedProjects;
 	}
 
 	@SuppressWarnings("unused")

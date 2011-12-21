@@ -15,7 +15,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
@@ -62,15 +65,12 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 */
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException {
-		new ImportNewProjectStrategy(getProjectName()
+		List<IProject> importedProjects = new ImportNewProjectOperation(getProjectName()
 				, getApplication()
 				, getRemoteName()
 				, getRepositoryFile()
-				, isCreateServer()
-				, getServerType()
-				, getRuntime()
-				, getMode()
 				, getUser()).execute(monitor);
+		createServerAdapter(monitor, importedProjects);
 	}
 
 	/**
@@ -101,16 +101,20 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	public void addToExistingProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		new AddToExistingProjectStrategy(
+		List<IProject> importedProjects = new AddToExistingProjectOperation(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, isCreateServer()
-				, getServerType()
-				, getRuntime()
-				, getMode()
 				, getUser())
 				.execute(monitor);
+		createServerAdapter(monitor, importedProjects);
+	}
+
+	private void createServerAdapter(IProgressMonitor monitor, List<IProject> importedProjects)
+			throws OpenShiftException {
+		Assert.isTrue(importedProjects.size() > 0);
+		IProject project = importedProjects.get(0);
+		new ServerAdapterFactory().create(project, getServerType(), getRuntime(), getMode(), getApplication(), getUser(), monitor);
 	}
 
 	public File getRepositoryFile() {
