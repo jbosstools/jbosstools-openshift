@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
@@ -63,8 +64,8 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		this.cartridge = cartridge;
 	}
 
-	public void createApplication() throws OpenShiftException {
-		IApplication application = createApplication(name, cartridge);
+	public void createApplication(IProgressMonitor monitor) throws OpenShiftException {
+		IApplication application = createApplication(name, cartridge, monitor);
 		setApplication(application);
 	}
 
@@ -76,9 +77,10 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		return application;
 	}
 
-	public IApplication createApplication(String name, ICartridge cartridge) throws OpenShiftException {
+	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftException {
+		monitor.subTask("Creating application...");
 		IApplication application = getUser().createApplication(name, cartridge);
-		waitForAccessible(application);
+		waitForAccessible(application, monitor);
 		return application;
 	}
 
@@ -86,7 +88,8 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		return user.hasApplication(name);
 	}
 
-	private void waitForAccessible(IApplication application) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+	private void waitForAccessible(IApplication application, IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+		monitor.subTask("Waiting for application to become accessible...");
 		if (!application.waitForAccessible(APP_CREATION_TIMEOUT * 1000)) {
 			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
 					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING,

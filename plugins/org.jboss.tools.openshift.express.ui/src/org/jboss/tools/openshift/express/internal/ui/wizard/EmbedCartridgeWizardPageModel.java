@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffEntry;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -93,8 +94,8 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getApplication();
 	}
 
-	public IApplication createJenkinsApplication(String name) throws OpenShiftException {
-		return wizardModel.createApplication(name, ICartridge.JENKINS_14);
+	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
+		return wizardModel.createApplication(name, ICartridge.JENKINS_14, monitor);
 	}
 	
 	/**

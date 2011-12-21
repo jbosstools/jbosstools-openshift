@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -53,7 +54,8 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 	private ApplicationWizardModel wizardModel;
 
 	public NewApplicationWizardPage(ApplicationWizardModel wizardModel, IWizard wizard) {
-		super("New OpenShift Express Application", "Select a name and an type for your new OpenShift Express application",
+		super("New OpenShift Express Application",
+				"Select a name and an type for your new OpenShift Express application",
 				"NewOpenShiftExpressApplication", wizard);
 		this.wizardModel = wizardModel;
 		this.model = new NewApplicationWizardPageModel(wizardModel);
@@ -165,27 +167,31 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	public boolean createApplication() {
 		final ArrayBlockingQueue<Boolean> applicationCreated = new ArrayBlockingQueue<Boolean>(1);
+		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 		try {
-			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"...", wizardModel.getName())) {
+			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"", wizardModel.getName())) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
+					delegatingMonitor.add(monitor);
 					try {
-						wizardModel.createApplication();
+						wizardModel.createApplication(delegatingMonitor);
 						applicationCreated.offer(true);
 						return Status.OK_STATUS;
 					} catch (OpenShiftApplicationNotAvailableException e) {
 						applicationCreated.offer(false);
-						return OpenShiftUIActivator.createErrorStatus(e.getMessage(), e,
-								wizardModel.getName());
+						return OpenShiftUIActivator.createErrorStatus(
+								e.getMessage(), e, wizardModel.getName());
 					} catch (OpenShiftException e) {
 						applicationCreated.offer(false);
-						return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"", (Throwable)e,
-								wizardModel.getName());
+						return OpenShiftUIActivator.createErrorStatus(
+								"Could not create application \"{0}\"",
+								(Throwable) e, wizardModel.getName());
 					}
 				}
-			}, getContainer());
+			}, delegatingMonitor, getContainer());
 		} catch (Exception e) {
+			e.printStackTrace();
 			// ignore
 		}
 		return applicationCreated.poll();

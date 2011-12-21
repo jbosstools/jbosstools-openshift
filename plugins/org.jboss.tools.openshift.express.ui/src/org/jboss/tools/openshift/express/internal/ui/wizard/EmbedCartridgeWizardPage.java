@@ -183,7 +183,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						IApplication jenkinsApplication = model.createJenkinsApplication(name);
+						IApplication jenkinsApplication = model.createJenkinsApplication(name, monitor);
 						model.getSelectedEmbeddableCartridges().add(cartridge);
 
 						openLogDialog(jenkinsApplication);
