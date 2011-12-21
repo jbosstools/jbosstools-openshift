@@ -104,14 +104,6 @@
 			No underscores or special characters are allowed in the application name.
 		</para>
 	</note>
-	<para>
-		If you clicked <guibutton>Next</guibutton>, you will now see the <guilabel>Embed Cartridges</guilabel> screen. From here you can choose to embed any numbe rof cartridges, or none. Once you have finished your selection click <guibutton>Finish</guibutton>.
-	</para>
-	<note>
-		<para>
-			The <guilabel>Embed Cartridges</guilabel> screen can also be access by highlighting a project in the <guilabel>Available Applications</guilabel> section of the <guilabel>Application Selection</guilabel> screen and clicking on the <guibutton>Edit</guibutton> button. To embed your application with a cartridge is to grant the capability to your application. For example, embedding the <guilabel>mysql</guilabel> cartridge will grant your application the capability to use a MySQL database.
-		</para>
-	</note>
 	<figure id="application_creation_05a">
 		<title>Embed Cartridges</title>
 		<mediaobject>
@@ -125,6 +117,14 @@
 			</textobject>
 		</mediaobject>
 	</figure>
+	<para>
+		If you clicked <guibutton>Next</guibutton>, you will now see the <guilabel>Embed Cartridges</guilabel> screen. From here you can choose to embed any numbe rof cartridges, or none. Once you have finished your selection click <guibutton>Finish</guibutton>.
+	</para>
+	<note>
+		<para>
+			The <guilabel>Embed Cartridges</guilabel> screen can also be access by highlighting a project in the <guilabel>Available Applications</guilabel> section of the <guilabel>Application Selection</guilabel> screen and clicking on the <guibutton>Edit</guibutton> button. To embed your application with a cartridge is to grant the capability to your application. For example, embedding the <guilabel>mysql</guilabel> cartridge will grant your application the capability to use a MySQL database.
+		</para>
+	</note>
 	<figure id="application_creation_06">
 		<title>Created application availability</title>
 		<mediaobject>
