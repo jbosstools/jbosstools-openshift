@@ -26,7 +26,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.op.BranchOperation;
@@ -146,7 +145,7 @@ public class TestRepository {
 		File file = new File(repoPath, "dummy");
 		if (!file.exists())
 			FileUtils.createNewFile(file);
-		track(file);
+		add(file);
 		return commit(message);
 	}
 
@@ -199,17 +198,13 @@ public class TestRepository {
 	 */
 	public RevCommit addAndCommit(IProject project, File file, String commitMessage)
 			throws Exception {
-		track(file);
-		addToIndex(project, file);
-
+		add(file);
 		return commit(commitMessage);
 	}
 
 	public RevCommit addAndCommit(File file, String commitMessage)
 			throws Exception {
-		track(file);
-		addToIndex(file);
-
+		add(file);
 		return commit(commitMessage);
 	}
 
@@ -244,8 +239,8 @@ public class TestRepository {
 	public RevCommit appendContentAndCommit(IProject project, File file,
 			String content, String commitMessage) throws Exception {
 		appendFileContent(file, content);
-		track(file);
-		addToIndex(project, file);
+		add(file);
+		add(project, file);
 
 		return commit(commitMessage);
 	}
@@ -276,8 +271,8 @@ public class TestRepository {
 		return commitCommand.call();
 	}
 
-	public void track(IFile file) throws IOException {
-		track(new File(file.getLocation().toOSString()));
+	public void add(IFile file) throws IOException {
+		add(new File(file.getLocation().toOSString()));
 	}
 
 	/**
@@ -286,9 +281,9 @@ public class TestRepository {
 	 * @param file
 	 * @throws IOException
 	 */
-	public void track(File file) throws IOException {
-		String repoPath = getRepoRelativePath(
-				new Path(file.getPath()).toString());
+	public void add(File file) throws IOException {
+		String repoPath = 
+				getRepoRelativePath(file.getAbsolutePath());
 		try {
 			new Git(repository).add().addFilepattern(repoPath).call();
 		} catch (NoFilepatternException e) {
@@ -353,34 +348,9 @@ public class TestRepository {
 	 * @param file
 	 * @throws Exception
 	 */
-	public void addToIndex(IProject project, File file) throws Exception {
-		IFile iFile = getIFile(project, file);
-		addToIndex(iFile);
-	}
-
-	/**
-	 * Adds the given file to the index
-	 * 
-	 * @param file
-	 * @throws CoreException
-	 * @throws IOException
-	 */
-	public void addToIndex(IFile file) throws CoreException, IOException {
-		String repoPath = getRepoRelativePath(file.getLocation().toOSString());
-		try {
-			new Git(repository).add().addFilepattern(repoPath).call();
-		} catch (NoFilepatternException e) {
-			throw new IOException(e.getMessage());
-		}
-	}
-
-	public void addToIndex(File file) throws CoreException, IOException {
-		String repoPath = getRepoRelativePath(file.getAbsolutePath());
-		try {
-			new Git(repository).add().addFilepattern(repoPath).call();
-		} catch (NoFilepatternException e) {
-			throw new IOException(e.getMessage());
-		}
+	public void add(IProject project, File file) throws Exception {
+		IFile iFile = getFile(project, file);
+		add(iFile);
 	}
 
 	/**
@@ -504,7 +474,7 @@ public class TestRepository {
 		return null;
 	}
 
-	public IFile getIFile(IProject project, File file) throws CoreException {
+	public IFile getFile(IProject project, File file) throws CoreException {
 		String relativePath = getRepoRelativePath(file.getAbsolutePath());
 
 		String quotedProjectName = Pattern.quote(project.getName());
@@ -589,7 +559,7 @@ public class TestRepository {
 		SystemReader.setInstance(mockSystemReader);
 		mockSystemReader.setProperty(Constants.GIT_CEILING_DIRECTORIES_KEY, ceilingPath.toOSString());
 	}
-	
+
 	public File getGitDir() {
 		return gitDir;
 	}

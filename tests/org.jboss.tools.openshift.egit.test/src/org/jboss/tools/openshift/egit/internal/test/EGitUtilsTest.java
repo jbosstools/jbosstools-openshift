@@ -79,7 +79,7 @@ public class EGitUtilsTest {
 				testProject.getProject(),
 				fileName,
 				fileContent);
-		testRepository.track(file);
+		testRepository.add(file);
 
 		EGitUtils.commit(testProject.getProject(), null);
 
@@ -131,7 +131,7 @@ public class EGitUtilsTest {
 				testProject2.getProject(),
 				fileName,
 				fileContent);
-		testRepository2.track(fileInRepo2);
+		testRepository2.add(fileInRepo2);
 
 		File fileInClone = clonedTestRepository.createFile(fileName, fileContent);
 		clonedTestRepository.addAndCommit(fileInClone, "adding a file");
