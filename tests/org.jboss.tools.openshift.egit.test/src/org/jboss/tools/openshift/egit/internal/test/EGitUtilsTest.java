@@ -87,7 +87,7 @@ public class EGitUtilsTest {
 				testRepository.getRepository(),
 				new String[] { testUtils.getPathInRepository(file), fileContent });
 	}
-
+	
 	@Test
 	public void fileAddedToCloneIsInOriginAfterPush() throws Exception {
 		String fileName = "b.txt";
@@ -100,7 +100,7 @@ public class EGitUtilsTest {
 
 		// does origin contain file added to clone?
 		testUtils.assertRepositoryContainsFilesWithContent(
-				clonedTestRepository.getRepository(),
+				testRepository.getRepository(),
 				fileName,
 				fileContent);
 	}
