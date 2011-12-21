@@ -114,7 +114,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 			throws OpenShiftException {
 		Assert.isTrue(importedProjects.size() > 0);
 		IProject project = importedProjects.get(0);
-		new ServerAdapterFactory().create(project, getServerType(), getRuntime(), getMode(), getApplication(), getUser(), monitor);
+		new ServerAdapterFactory().create(project, this, monitor);
 	}
 
 	public File getRepositoryFile() {

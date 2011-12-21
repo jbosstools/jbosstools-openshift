@@ -47,9 +47,14 @@ class ServerAdapterFactory {
 	public ServerAdapterFactory() {
 	}
 
+	public void create(IProject project, ImportProjectWizardModel model, IProgressMonitor monitor) throws OpenShiftException {
+		createServerAdapter(project, model.getServerType(), model.getRuntime(), model.getMode(), 
+				model.getApplication(), model.getUser(), model.getRemoteName(), monitor);
+	}
+
 	public void create(IProject project, IServerType serverType, IRuntime runtime, String mode,
 			IApplication application, IUser user, IProgressMonitor monitor) throws OpenShiftException {
-		createServerAdapter(project, serverType, runtime, mode, application, user, monitor);
+		createServerAdapter(project, serverType, runtime, mode, application, user, null, monitor);
 	}
 
 	/**
@@ -60,18 +65,18 @@ class ServerAdapterFactory {
 	 * @throws OpenShiftException
 	 */
 	protected void createServerAdapter(IProject project, IServerType serverType, IRuntime runtime, String mode,
-			IApplication application, IUser user, IProgressMonitor monitor) throws OpenShiftException {
+			IApplication application, IUser user, String remoteName, IProgressMonitor monitor) throws OpenShiftException {
 		String name = project.getName();
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", name));
-		createServerAdapter(Collections.singletonList(project), serverType, runtime, mode, application, user,
-				monitor);
+		createServerAdapter(Collections.singletonList(project), serverType, runtime, 
+				mode, application, user, remoteName, monitor);
 	}
 
 	protected void createServerAdapter(List<IProject> importedProjects, IServerType serverType,
-			IRuntime runtime, String mode, IApplication application, IUser user, IProgressMonitor monitor) {
+			IRuntime runtime, String mode, IApplication application, IUser user, String remoteName, IProgressMonitor monitor) {
 		try {
 			renameWebContextRoot(importedProjects);
-			IServer server = doCreateServerAdapter(serverType, runtime, mode, application, user);
+			IServer server = doCreateServerAdapter(serverType, runtime, mode, application, user, remoteName);
 			addModules(getModules(importedProjects), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
@@ -88,8 +93,8 @@ class ServerAdapterFactory {
 		}
 	}
 
-	private IServer doCreateServerAdapter(IServerType serverType, IRuntime rt, String mode, IApplication application,
-			IUser user) throws CoreException,
+	private IServer doCreateServerAdapter(IServerType serverType, IRuntime rt, String mode,
+			IApplication application, IUser user, String remoteName) throws CoreException,
 			OpenShiftException {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(mode != null);
@@ -101,8 +106,8 @@ class ServerAdapterFactory {
 
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
 		ExpressServerUtils.fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
-				user.getRhlogin(), user.getPassword(),
-				user.getDomain().getNamespace(), application.getName(), application.getUUID(), mode);
+				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
+				application.getName(), application.getUUID(), mode, remoteName);
 		return server;
 	}
 

@@ -23,7 +23,6 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
  * This class holds the attribute names whose values will be
@@ -41,6 +40,8 @@ public class ExpressServerUtils {
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
 	public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
+	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
+	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT =  "origin";
 	
 	/** the OpensHift Server Type as defined in the plugin.xml.*/
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";
@@ -126,12 +127,12 @@ public class ExpressServerUtils {
 	public static IServer createAS7OpenShiftServer(
 			String host, String username, String password, 
 			String domain, String appName, String appId,
-			String sourceOrBinary,
+			String sourceOrBinary, String remoteName,
 			String localRuntimeHomeDir) throws CoreException {
 		IServer server = createServerAndRuntime(IJBossToolingConstants.AS_70,
 				IJBossToolingConstants.SERVER_AS_70, 
 				localRuntimeHomeDir, /* irrelevant */ "default");
-		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary);
+		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary, remoteName);
 	}
 	
 	/**
@@ -150,10 +151,10 @@ public class ExpressServerUtils {
 	 */
 	public static IServer createAS7OpenShiftServer(
 			String host, String username, String password, 
-			String domain, String appName, String appId, String sourceOrBinary,
+			String domain, String appName, String appId, String sourceOrBinary, String remoteName,
 			IRuntime runtime) throws CoreException {
 		IServer server = createServer(runtime, IJBossToolingConstants.SERVER_AS_70);
-		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary);
+		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary, remoteName);
 	}
 	
 	/**
@@ -170,9 +171,9 @@ public class ExpressServerUtils {
 	 * @throws CoreException
 	 */
 	@SuppressWarnings("restriction")
-	public static IServer fillServerWithOpenShiftDetails(IServer server,
-			String host, String username, String password, String domain, String appName, String appId,
-			String mode) throws CoreException {
+	public static IServer fillServerWithOpenShiftDetails(IServer server, String host, 
+			String username, String password, String domain, String appName, String appId,
+			String mode, String remoteName) throws CoreException {
 		if( host.indexOf("://") != -1)
 			host = host.substring(host.indexOf("://") + 3);
 		if( host.endsWith("/"))
@@ -186,6 +187,7 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
+		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remoteName);
 		wc.setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
 		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT, 80);

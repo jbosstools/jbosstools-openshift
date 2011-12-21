@@ -102,11 +102,9 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_NONE;
 		} else if( changed == 0 && requestPushApproval(module)) {
 			monitor.beginTask("Publishing " + p.getName(), 100);
-// TODO: use the following instead of the current:
-//			EGitUtils.push("<remote name configured in AdapterWizardPageModel#getRemoteName>"
-//					, EGitUtils.getRepository(p)
-//					, new SubProgressMonitor(monitor, 100));
-			EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
+			String remoteName = behaviour.getServer().getAttribute(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, 
+					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+			EGitUtils.push(remoteName, EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
 			monitor.done();
 			return IServer.PUBLISH_STATE_NONE;
 		}
