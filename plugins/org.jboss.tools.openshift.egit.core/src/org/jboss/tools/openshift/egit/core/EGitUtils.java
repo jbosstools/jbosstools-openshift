@@ -326,8 +326,8 @@ public class EGitUtils {
 	}
 
 	/**
-	 * Pushes the given repository to the remote repository it's current branch
-	 * originates from.
+	 * Pushes the current branch of the given repository to the remote
+	 * repository that it originates from.
 	 * 
 	 * @param repository
 	 *            the repository that shall be pushed
@@ -338,19 +338,7 @@ public class EGitUtils {
 	 */
 	public static void push(Repository repository, IProgressMonitor monitor)
 			throws CoreException {
-		try {
-			RemoteConfig remoteConfig = getRemoteConfig(repository);
-			if (remoteConfig == null) {
-				throw new CoreException(createStatus(null, "Repository \"{0}\" has no remote repository configured",
-						repository.toString()));
-			}
-			PushOperation pushOperation = createPushOperation(remoteConfig, repository);
-			pushOperation.run(monitor);
-		} catch (CoreException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
-		}
+		push(repository, getRemoteConfig(repository), monitor);
 	}
 
 	/**
@@ -382,7 +370,22 @@ public class EGitUtils {
 		}
 	}
 
-	//
+
+	private static void push(Repository repository, RemoteConfig remoteConfig, IProgressMonitor monitor)
+			throws CoreException {
+		try {
+			if (remoteConfig == null) {
+				throw new CoreException(createStatus(null, "Repository \"{0}\" has no remote repository configured",
+						repository.toString()));
+			}
+			createPushOperation(remoteConfig, repository).run(monitor);
+		} catch (CoreException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
+		}
+	}
+//
 	// only available in EGit 1.1
 	//
 	// private static PushOperation createPushOperation(String remoteName,
@@ -514,7 +517,7 @@ public class EGitUtils {
 
 	/**
 	 * Returns the configuration of the remote repository that is set to the
-	 * given repository. Returns
+	 * given repository.
 	 * <code>null</null> if none was configured or if there's no remote repo configured.
 	 * 
 	 * @param repository
@@ -618,9 +621,9 @@ public class EGitUtils {
 	}
 
 	/**
-	 * Returns the name of the remote repository of the given branch. If there's
-	 * no current branch or no remote configured to it, the default remote is
-	 * returned ("origin").
+	 * Returns the name of the remote repository for the given branch. If
+	 * there's no current branch or no remote configured to it, the default
+	 * remote is returned ("origin").
 	 * 
 	 * @param branch
 	 *            the branch
@@ -636,10 +639,9 @@ public class EGitUtils {
 			remoteName = repository.getConfig().getString(
 					ConfigConstants.CONFIG_BRANCH_SECTION, branch,
 					ConfigConstants.CONFIG_REMOTE_SECTION);
-		}
-
-		if (remoteName == null) {
-			remoteName = Constants.DEFAULT_REMOTE_NAME;
+			if (remoteName == null) {
+				remoteName = Constants.DEFAULT_REMOTE_NAME;
+			}
 		}
 
 		return remoteName;
