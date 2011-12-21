@@ -35,6 +35,8 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
+	private ArrayList<IProject> projectsLackingGitRepo = null;
+
 	public ExpressPublishMethod() {
 		// TODO Auto-generated constructor stub
 	}
@@ -46,7 +48,6 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 	}
 
-	private ArrayList<IProject> projectsLackingGitRepo = null;
 	@Override
 	public int publishFinish(DeployableServerBehavior behaviour,
 			IProgressMonitor monitor) throws CoreException {
@@ -101,6 +102,10 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_NONE;
 		} else if( changed == 0 && requestPushApproval(module)) {
 			monitor.beginTask("Publishing " + p.getName(), 100);
+// TODO: use the following instead of the current:
+//			EGitUtils.push("<remote name configured in AdapterWizardPageModel#getRemoteName>"
+//					, EGitUtils.getRepository(p)
+//					, new SubProgressMonitor(monitor, 100));
 			EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
 			monitor.done();
 			return IServer.PUBLISH_STATE_NONE;
