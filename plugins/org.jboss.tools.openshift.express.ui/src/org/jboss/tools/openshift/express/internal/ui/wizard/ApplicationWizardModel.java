@@ -78,7 +78,7 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	}
 
 	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftException {
-		monitor.subTask("Creating application...");
+		monitor.subTask("creating application...");
 		IApplication application = getUser().createApplication(name, cartridge);
 		waitForAccessible(application, monitor);
 		return application;
@@ -89,7 +89,7 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	}
 
 	private void waitForAccessible(IApplication application, IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		monitor.subTask("Waiting for application to become accessible...");
+		monitor.subTask("waiting for application to become accessible...");
 		if (!application.waitForAccessible(APP_CREATION_TIMEOUT * 1000)) {
 			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
 					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING,
