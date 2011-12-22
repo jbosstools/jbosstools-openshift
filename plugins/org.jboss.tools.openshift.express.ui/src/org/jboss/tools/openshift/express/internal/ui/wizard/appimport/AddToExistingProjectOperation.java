@@ -41,7 +41,7 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 
 	public AddToExistingProjectOperation(String projectName, IApplication application, String remoteName,
 			IUser user) {
-		super(projectName, application, remoteName, user);
+		super(projectName, application, remoteName);
 	}
 
 	/**

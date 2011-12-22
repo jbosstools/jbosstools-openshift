@@ -27,7 +27,6 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -40,14 +39,11 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	private String projectName;
 	private IApplication application;
 	private String remoteName;
-	private IUser user;
 
-	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName,
-			IUser user) {
+	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName) {
 		this.projectName = projectName;
 		this.application = application;
 		this.remoteName = remoteName;
-		this.user = user;
 	}
 
 	/**

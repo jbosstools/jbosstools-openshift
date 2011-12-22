@@ -31,7 +31,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.Ge
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.MavenProjectImportOperation;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -42,8 +41,8 @@ public class ImportNewProjectOperation extends AbstractImportApplicationOperatio
 	private File cloneDestination;
 
 	public ImportNewProjectOperation(String projectName, IApplication application, String remoteName,
-			File cloneDestination, IUser user) {
-		super(projectName, application, remoteName, user);
+			File cloneDestination) {
+		super(projectName, application, remoteName);
 		this.cloneDestination = cloneDestination;
 	}
 

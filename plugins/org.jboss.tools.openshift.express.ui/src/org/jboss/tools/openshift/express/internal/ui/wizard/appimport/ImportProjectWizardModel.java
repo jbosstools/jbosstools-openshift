@@ -68,8 +68,8 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 		List<IProject> importedProjects = new ImportNewProjectOperation(getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, getRepositoryFile()
-				, getUser()).execute(monitor);
+				, getRepositoryFile())
+				.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
 
@@ -232,7 +232,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	public String getMode() {
 		return (String) getProperty(AdapterWizardPageModel.MODE);
 	}
-	
+
 	public boolean isCreateServer() {
 		Boolean isCreateServer = (Boolean) getProperty(CREATE_SERVER);
 		return isCreateServer != null
