@@ -19,7 +19,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -59,6 +61,7 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
 
 /**
@@ -684,26 +687,70 @@ public class EGitUtils {
 		return status;
 	}
 
-	public static int countCommitableChanges(IProject project, IProgressMonitor monitor) {
+	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) {
 		try {
-			Repository repo = getRepository(project);
-
-			EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
-			IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
-					IteratorService.createInitialIterator(repo));
-			indexDiff.diff(jgitMonitor, 0, 0, NLS.bind(
-					UIText.CommitActionHandler_repository, repo.getDirectory().getPath()));
-			// System.out.println(indexDiff.getAdded().size());
-			// System.out.println(indexDiff.getChanged().size());
-			// System.out.println(indexDiff.getConflicting().size());
-			// System.out.println(indexDiff.getMissing().size());
-			// System.out.println(indexDiff.getModified().size());
-			// System.out.println(indexDiff.getRemoved().size());
-			// System.out.println(indexDiff.getUntracked().size());
-
-			return indexDiff.getModified().size();
+			Set<String> commitable = getCommitableChanges(project, server, monitor);
+			return commitable.size();
 		} catch (IOException ioe) {
 		}
 		return -1;
 	}
+
+	private static Set<String> getCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) throws IOException {
+		Repository repo = getRepository(project);
+
+		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
+		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
+				IteratorService.createInitialIterator(repo));
+		indexDiff.diff(jgitMonitor, 0, 0, NLS.bind(
+				UIText.CommitActionHandler_repository, repo.getDirectory().getPath()));
+		Set<String> set = new HashSet<String>();
+		if( commitAddedResources(server))
+			set.addAll(indexDiff.getAdded());
+		if( commitChangedResources(server))
+			set.addAll(indexDiff.getChanged());
+		if( commitConflictingResources(server))
+			set.addAll(indexDiff.getConflicting());
+		if( commitMissingResources(server))
+			set.addAll(indexDiff.getMissing());
+		if( commitModifiedResources(server))
+			set.addAll(indexDiff.getModified());
+		if( commitRemovedResources(server))
+			set.addAll(indexDiff.getRemoved());
+		if( commitUntrackedResources(server))
+			set.addAll(indexDiff.getUntracked());
+
+		return set;
+	}
+
+	/*
+	 * Current behaviour is to commit only:
+	 *   added, changed, modified, removed
+	 *   
+	 *   These can be customized as properties on the server one day, if we wish,
+	 *   such that each server can have custom settings, or, they can be global settings
+	 */
+	public static boolean commitAddedResources(IServer server) {
+		return true;
+	}
+	public static boolean commitChangedResources(IServer server) {
+		return true;
+	}
+	public static boolean commitConflictingResources(IServer server) {
+		return false;
+	}
+	public static boolean commitMissingResources(IServer server) {
+		return false;
+	}
+	public static boolean commitModifiedResources(IServer server) {
+		return true;
+	}
+	public static boolean commitRemovedResources(IServer server) {
+		return true;
+	}
+	public static boolean commitUntrackedResources(IServer server) {
+		return false;
+	}
+
+
 }

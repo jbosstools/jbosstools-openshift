@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.internal.ui.wizards.ConfigureProjectWizard;
@@ -93,7 +94,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 		}
 		
-		int changed = EGitUtils.countCommitableChanges(p, new NullProgressMonitor() );
+		int changed = EGitUtils.countCommitableChanges(p, behaviour.getServer(), new NullProgressMonitor() );
 		if( changed != 0 && requestCommitAndPushApproval(module, changed)) {
 			monitor.beginTask("Publishing " + p.getName(), 200);
 			EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
@@ -129,17 +130,15 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	
 	private boolean requestCommitAndPushApproval(final IModule[] module, int changed) {
 		String projName = module[module.length-1].getProject().getName();
-		String msg = "There are " + changed + " local changes in \"" + projName + "\". " +
-				"Do you want to publish to OpenShift by commiting the changes and pushing its Git repository?";
-		String title = "Publish " + projName + "?";
+		String msg = NLS.bind(ExpressMessages.requestCommitAndPushMsg, changed, projName);
+		String title = NLS.bind(ExpressMessages.requestCommitAndPushTitle, projName);
 		return requestApproval(msg, title);
 	}
 
 	private boolean requestPushApproval(final IModule[] module) {
 		String projName = module[module.length-1].getProject().getName();
-		String msg = "The are no local changes in \"" + projName + "\". " +
-				"Do you want to publish to OpenShift by pushing its Git repository?";
-		String title = "Publish " + projName + "?";
+		String msg = NLS.bind(ExpressMessages.requestPushMsg, projName);
+		String title = NLS.bind(ExpressMessages.requestPushTitle, projName);
 		return requestApproval(msg, title);
 	}
 
