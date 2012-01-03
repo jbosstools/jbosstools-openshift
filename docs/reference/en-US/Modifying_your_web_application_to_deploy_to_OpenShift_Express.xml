@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
    <chapter id="chap-OpenSift_Tools_Reference_Guide-Modifying_your_web_application_to_deploy_to_OpenShift_Express">
-	   <title>Modifying your web application to deploy to OpenShift Express</title>
+	   <title>Modifying your Maven web application to deploy to OpenShift Express</title>
 	<para>
 		Open the <filename>pom.xml</filename> file of your web application in the editor by double-clicking on the file in your <guilabel>Project Explorer</guilabel> and selecting the <guilabel>pom.xml</guilabel> tab in your workbench.
 	</para>
