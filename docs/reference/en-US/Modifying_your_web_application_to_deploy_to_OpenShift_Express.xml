@@ -9,7 +9,7 @@
 		Create <code>profiles</code> tags within the <code>project</code> tags of the <filename>pom.xml</filename> file. Within the <code>profiles</code> tags, press <keycap>Ctrl</keycap> and <keysym>Spacebar</keysym> together to trigger auto-completion.
 	</para>
 	<para>
-		From the context menu of the auto-completion, select <guimenuitem>OpenShift Express profile - OpenShift Express profile</guimenuitem>. Doing so will insert the profile information necessary to connect to OpenShift Express.
+		From the auto-completion menu, select <guimenuitem>OpenShift Express profile</guimenuitem>. The profile information to connect to OpenShift Express will be inserted.
 	</para>
 	<figure id="openshift_express_profile_01">
 		<title>Selecting the OpenShift Express Profile</title>
