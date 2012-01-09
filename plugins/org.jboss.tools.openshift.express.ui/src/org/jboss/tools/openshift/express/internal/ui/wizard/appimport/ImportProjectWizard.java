@@ -93,16 +93,6 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 		return confirmed[0];
 	}
 
-	private void openWarning(final String title, final String message) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				MessageDialog.openWarning(getShell(), title, message);
-			}
-		});
-	}
-
 	@Override
 	public void addPages() {
 		this.model = new ImportProjectWizardModel();
@@ -152,7 +142,7 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 				return Status.OK_STATUS;
 			} catch (final WontOverwriteException e) {
-				openWarning("Project already present", e.getMessage());
+				openError("Project already present", e.getMessage());
 				return Status.CANCEL_STATUS;
 			} catch (final ImportFailedException e) {
 				return OpenShiftUIActivator.createErrorStatus(
@@ -188,4 +178,15 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 			}
 		}
 	}
+
+	private void openError(final String title, final String message) {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				MessageDialog.openError(getShell(), title, message);
+			}
+		});
+	}
+
 }
