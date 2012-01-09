@@ -89,7 +89,7 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 		File tmpFolder = FileUtils.getRandomTmpFolder();
 		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, monitor);
 		IProject project = getProject(getProjectName());
-		copyOpenshiftConfiguration(repositoryFile, project, monitor);
+		copyOpenshiftConfigurations(repositoryFile, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
 
 		shareProject(project, monitor);
@@ -120,7 +120,7 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 	 *            the monitor to report progress to
 	 * @throws IOException
 	 */
-	private void copyOpenshiftConfiguration(final File sourceFolder, IProject project, IProgressMonitor monitor)
+	private void copyOpenshiftConfigurations(final File sourceFolder, IProject project, IProgressMonitor monitor)
 			throws IOException {
 		Assert.isLegal(project != null);
 		File projectFolder = project.getLocation().toFile();
