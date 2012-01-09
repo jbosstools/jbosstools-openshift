@@ -103,7 +103,14 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 
 	/**
 	 * Copies the openshift configuration from the given source folder to the
-	 * given project.
+	 * given project. Copies
+	 * <ul>
+	 * <li>.git</li>
+	 * <li>.openshift</li>
+	 * <li>deployments</li>
+	 * <li>pom.xml</li>
+	 * </ul>
+	 * to the project in the workspace
 	 * 
 	 * @param sourceFolder
 	 *            the source to copy the openshift config from
