@@ -65,7 +65,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 */
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException {
-		List<IProject> importedProjects = new ImportNewProjectOperation(getProjectName()
+		List<IProject> importedProjects = new ImportNewProject(getProjectName()
 				, getApplication()
 				, getRemoteName()
 				, getRepositoryFile())
@@ -101,7 +101,7 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	public void addToExistingProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		List<IProject> importedProjects = new AddToExistingProjectOperation(
+		List<IProject> importedProjects = new ConfigureUnsharedProject(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()

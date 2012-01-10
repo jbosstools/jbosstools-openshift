@@ -169,7 +169,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	public boolean createApplication() {
 		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-		Job job = new Job(NLS.bind("New application {0}", wizardModel.getName())) {
+		Job job = new Job(NLS.bind("Creating new application {0}", wizardModel.getName())) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -184,6 +184,8 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 					return OpenShiftUIActivator.createErrorStatus(
 							"Could not create application \"{0}\"",
 							(Throwable) e, wizardModel.getName());
+				} finally {
+					delegatingMonitor.done();
 				}
 			}
 		};
@@ -191,6 +193,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 			Future<IStatus> jobResult = WizardUtils.runInWizard(job, delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
 		} catch (Exception e) {
+			OpenShiftUIActivator.log(e);
 			return false;
 		}
 	}

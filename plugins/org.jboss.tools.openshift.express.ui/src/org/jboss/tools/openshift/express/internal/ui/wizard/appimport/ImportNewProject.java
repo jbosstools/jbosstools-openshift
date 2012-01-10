@@ -36,11 +36,11 @@ import com.openshift.express.client.OpenShiftException;
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class ImportNewProjectOperation extends AbstractImportApplicationOperation {
+public class ImportNewProject extends AbstractImportApplicationOperation {
 
 	private File cloneDestination;
 
-	public ImportNewProjectOperation(String projectName, IApplication application, String remoteName,
+	public ImportNewProject(String projectName, IApplication application, String remoteName,
 			File cloneDestination) {
 		super(projectName, application, remoteName);
 		this.cloneDestination = cloneDestination;

@@ -37,9 +37,9 @@ import com.openshift.express.client.OpenShiftException;
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class AddToExistingProjectOperation extends AbstractImportApplicationOperation {
+public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
 
-	public AddToExistingProjectOperation(String projectName, IApplication application, String remoteName,
+	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
 			IUser user) {
 		super(projectName, application, remoteName);
 	}
@@ -79,33 +79,21 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 	public List<IProject> execute(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		// File repositoryFile =
-		// model.cloneRepository(monitor);
-		// model.importProject(repositoryFile, monitor);
-		// Repository repository =
-		// model.shareProject(monitor);
-		// model.mergeWithApplicationRepository(repository,
-		// monitor);
+		IProject project = getProject(getProjectName());
+		Assert.isTrue(EGitUtils.isSharedWithGit(project));
+
 		File tmpFolder = FileUtils.getRandomTmpFolder();
 		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, monitor);
-		IProject project = getProject(getProjectName());
 		copyOpenshiftConfigurations(repositoryFile, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
 
-		shareProject(project, monitor);
 		return Collections.singletonList(project);
-	}
-
-	private void shareProject(IProject project, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask(NLS.bind("Sharing project {0}...", project.getName()));
-		EGitUtils.share(project, monitor);
 	}
 
 	/**
 	 * Copies the openshift configuration from the given source folder to the
 	 * given project. Copies
 	 * <ul>
-	 * <li>.git</li>
 	 * <li>.openshift</li>
 	 * <li>deployments</li>
 	 * <li>pom.xml</li>
@@ -125,10 +113,8 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 		Assert.isLegal(project != null);
 		File projectFolder = project.getLocation().toFile();
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
-		FileUtils.copy(new File(sourceFolder, ".git"), projectFolder, false);
 		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
 		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
-		FileUtils.copy(new File(sourceFolder, "pom.xml"), projectFolder, false);
 		createGitIgnore(projectFolder);
 	}
 
@@ -152,15 +138,5 @@ public class AddToExistingProjectOperation extends AbstractImportApplicationOper
 				.add(".classpath")
 				.add(".factorypath");
 		gitIgnore.write(false);
-	}
-
-	@SuppressWarnings("unused")
-	private void mergeWithApplicationRepository(Repository repository, IApplication application,
-			IProgressMonitor monitor)
-			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException,
-			InvocationTargetException {
-		URIish uri = new URIish(application.getGitUri());
-		EGitUtils.addRemoteTo("openshift", uri, repository);
-		EGitUtils.mergeWithRemote(uri, "refs/remotes/openshift/HEAD", repository, monitor);
 	}
 }
