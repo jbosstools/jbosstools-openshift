@@ -14,10 +14,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -148,8 +150,13 @@ public class FileUtils {
 		Assert.isLegal(source != null);
 		Assert.isLegal(destination != null);
 
-		InputStream in = null;
 		writeTo(new BufferedInputStream(new FileInputStream(source)), destination);
+	}
+
+	public static final void writeTo(String content, File destination) throws FileNotFoundException {
+		PrintWriter writer = new PrintWriter(destination);
+		writer.flush();
+		writer.close();
 	}
 
 	private static final void writeTo(InputStream in, File destination) throws IOException {
