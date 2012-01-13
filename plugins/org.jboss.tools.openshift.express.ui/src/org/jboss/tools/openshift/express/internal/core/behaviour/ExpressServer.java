@@ -10,17 +10,21 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.net.URL;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.model.ServerDelegate;
+import org.eclipse.wst.server.core.model.IURLProvider;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
+import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
-public class ExpressServer extends ServerDelegate {
+public class ExpressServer extends ServerDelegate implements IURLProvider {
 	public void setDefaults(IProgressMonitor monitor) {
 		super.setDefaults(monitor);
 		setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
@@ -33,6 +37,9 @@ public class ExpressServer extends ServerDelegate {
 		
 		// Can only add a module if the server has zero, and even then, can only add 1. 
 		IModule[] mods = getServer().getModules();
+		if( mods.length == 1 && add.length == 1 && add[0].equals(mods[0]))
+			return Status.OK_STATUS;
+		
 		boolean canModify = mods.length == 0 && add.length == 1;
 		canModify &= remove.length == 0;
 		return canModify ? Status.OK_STATUS : new Status(IStatus.ERROR, 
@@ -57,4 +64,8 @@ public class ExpressServer extends ServerDelegate {
 			IProgressMonitor monitor) throws CoreException {
 	}
 
+	@Override
+	public URL getModuleRootURL(IModule module) {
+		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80);
+	}
 }
