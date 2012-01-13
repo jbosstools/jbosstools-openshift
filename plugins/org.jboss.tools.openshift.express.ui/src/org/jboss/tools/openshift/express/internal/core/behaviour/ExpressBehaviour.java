@@ -32,4 +32,10 @@ public class ExpressBehaviour extends DelegatingServerBehavior {
 	public IAdaptable getPublishAdaptableInfo() {
 		return publishAdaptableInfo;
 	}
+	
+	@Override
+	public boolean canRestartModule(IModule[] module){
+		return false;
+	}
+
 }

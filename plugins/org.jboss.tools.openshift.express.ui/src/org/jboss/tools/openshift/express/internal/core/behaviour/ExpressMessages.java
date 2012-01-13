@@ -13,5 +13,8 @@ public class ExpressMessages extends NLS {
 	public static String requestCommitAndPushMsg;
 	public static String requestPushTitle;
 	public static String requestPushMsg;
+	public static String cannotModifyModules;
+	public static String shareProjectTitle;
+	public static String shareProjectMessage;	
 	
 }

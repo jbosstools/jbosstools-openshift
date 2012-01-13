@@ -10,11 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.console;
 
-import org.eclipse.ui.IWorkbenchPage;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.eclipse.egit.core.op.PushOperationResult;
+import org.eclipse.egit.ui.UIText;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.URIish;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
@@ -22,6 +28,9 @@ import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.ui.UIUtil;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 /**
@@ -89,28 +98,98 @@ public class ConsoleUtils {
 	 * @param console the console to display
 	 */
 	public static void displayConsoleView(IConsole console) {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window != null) {
-			IWorkbenchPage page = window.getActivePage();
-			if (page != null) {
-				IWorkbenchPart part = page.findView(IConsoleConstants.ID_CONSOLE_VIEW);
-				if (part == null) {
-					try {
-						part = page.showView(IConsoleConstants.ID_CONSOLE_VIEW);
-					} catch (PartInitException e) {
-						Logger.warn("Could not open console view", e);
-					}
-				}
-				if (part != null) {
-					page.activate(part);
-					IConsoleView view = (IConsoleView) part.getAdapter(IConsoleView.class);
-					if (view != null) {
-						view.setFocus();
-						view.display(console);
-					}
-				}
+		IWorkbenchPart part = null;
+		try {
+			part = UIUtil.bringViewToFront(IConsoleConstants.ID_CONSOLE_VIEW);
+		} catch (PartInitException e) {
+			Logger.warn("Could not open console view", e);
+		}
+
+		if (part != null) {
+			IConsoleView view = (IConsoleView) part.getAdapter(IConsoleView.class);
+			if (view != null) {
+				view.display(console);
 			}
 		}
 	}
+	
+	public static void appendGitPushToConsole(IServer server, PushOperationResult result) {
+		appendToConsole(server, getPushResultAsString(result));
+	}
+	
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1
+	private static final String SPACE = " "; //$NON-NLS-1$
+	private static final String NL = "\n";//$NON-NLS-1$
+	
+	private static String getPushResultAsString(PushOperationResult pushOperationResult) {
+		StringBuilder result = new StringBuilder(EMPTY_STRING);
+		result.append(getPushErrors(pushOperationResult));
+		result.append(NL);
+		Set<URIish> uris = pushOperationResult.getURIs();
+		Iterator<URIish> i = uris.iterator();
+		while(i.hasNext()) {
+			URIish uri = i.next();
+			for (RemoteRefUpdate update : pushOperationResult.getPushResult(uri).getRemoteUpdates()) {
+				result.append(getOneResultAsString(pushOperationResult, uri, update));
+			}
+		}
+		return result.toString();
+	}
+	
+	private static String getOneResultAsString(PushOperationResult pushOperationResult, 
+			URIish uri, RemoteRefUpdate update) {
+		StringBuilder result = new StringBuilder(EMPTY_STRING);
+		result.append(UIText.PushResultTable_repository);
+		result.append(SPACE);
+		result.append(uri.toString());
+		result.append(Text.DELIMITER);
+		result.append(Text.DELIMITER);
+		String message = update.getMessage();
+		if (message != null)
+			result.append(message).append(Text.DELIMITER);
+		StringBuilder messagesBuffer = new StringBuilder(pushOperationResult
+				.getPushResult(uri).getMessages());
+		trim(messagesBuffer);
+		if (messagesBuffer.length() > 0)
+			result.append(messagesBuffer).append(Text.DELIMITER);
+		trim(result);
+		return result.toString();
+	}
 
+	private static void trim(StringBuilder s) {
+		// remove leading line breaks
+		while (s.length() > 0 && (s.charAt(0) == '\n' || s.charAt(0) == '\r'))
+			s.deleteCharAt(0);
+		// remove trailing line breaks
+		while (s.length() > 0
+				&& (s.charAt(s.length() - 1) == '\n' || s
+						.charAt(s.length() - 1) == '\r'))
+			s.deleteCharAt(s.length() - 1);
+	}
+
+	private static String getPushErrors(PushOperationResult result) {
+		StringBuilder messages = new StringBuilder();
+		for (URIish uri : result.getURIs()) {
+			String errorMessage = result.getErrorMessage(uri);
+			if (errorMessage != null && errorMessage.length() > 0) {
+				if (messages.length() > 0)
+					messages.append(System.getProperty("line.separator")); //$NON-NLS-1$
+				messages.append(errorMessage);
+			}
+		}
+		return messages.toString();
+	}
+
+	
+	public static void appendToConsole(IServer server, String message ) {
+		if (ExpressServerUtils.isOpenShiftRuntime(server)) {
+			final MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
+			console.newMessageStream().print(message);
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					ConsoleUtils.displayConsoleView(console);
+				}
+			});
+		}
+	}
 }

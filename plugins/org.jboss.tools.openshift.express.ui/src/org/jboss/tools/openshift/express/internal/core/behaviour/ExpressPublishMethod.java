@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -26,13 +27,16 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.internal.ui.wizards.ConfigureProjectWizard;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.navigator.filters.CoreExpressionFilter;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
+import org.jboss.ide.eclipse.as.core.server.IServerAlreadyStartedHandler;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
 import org.jboss.ide.eclipse.as.core.server.xpl.PublishCopyUtil.IPublishCopyCallbackHandler;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
@@ -95,29 +99,47 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		}
 		
 		int changed = EGitUtils.countCommitableChanges(p, behaviour.getServer(), new NullProgressMonitor() );
-		if( changed != 0 && requestCommitAndPushApproval(module, changed)) {
-			monitor.beginTask("Publishing " + p.getName(), 200);
-			EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
-			EGitUtils.push(EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
-			monitor.done();
-			return IServer.PUBLISH_STATE_NONE;
-		} else if( changed == 0 && requestPushApproval(module)) {
-			monitor.beginTask("Publishing " + p.getName(), 100);
-			String remoteName = behaviour.getServer().getAttribute(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, 
-					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
-			EGitUtils.push(remoteName, EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
-			monitor.done();
-			return IServer.PUBLISH_STATE_NONE;
+		String remoteName = behaviour.getServer().getAttribute(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, 
+				ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+		PushOperationResult result = null;
+		boolean committed = false;
+		try {
+			if( changed != 0 && requestCommitAndPushApproval(module, changed)) {
+				monitor.beginTask("Publishing " + p.getName(), 300);
+				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
+				committed = true;
+			} 
+			
+			if( committed || (changed == 0 && requestPushApproval(module))) {
+				if( !committed )
+					monitor.beginTask("Publishing " + p.getName(), 200);
+				result = EGitUtils.push(remoteName, EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
+				monitor.done();
+			}
+		} catch(CoreException ce) {
+			// Comes if either commit or push has failed
+			try {
+				result = EGitUtils.pushForce(remoteName, repository, new SubProgressMonitor(monitor, 100));
+				monitor.done();
+			} catch(CoreException ce2) {
+				// even the push force failed, and we don't have a valid result to check :( 
+				// can only throw it i guess
+				throw ce2;  
+			}
 		}
-		return state;
+		
+		if( result != null ) {
+			ConsoleUtils.appendGitPushToConsole(behaviour.getServer(), result);
+		}
+		
+		return IServer.PUBLISH_STATE_NONE;
 	}
 
 	private void shareProjects(final IProject[] projects) {
 		Display.getDefault().asyncExec(new Runnable() { 
 			public void run() {
-				String msg = "There are " + projects.length + " projects that are not connected to any git repository. " +
-						"Would you like to share them now?";
-				String title = "Share projects?";
+				String msg = ExpressMessages.bind(ExpressMessages.shareProjectMessage, projects.length);
+				String title = ExpressMessages.shareProjectTitle;
 				boolean approved = requestApproval(msg, title);
 				if( approved ) {
 					ConfigureProjectWizard.shareProjects(

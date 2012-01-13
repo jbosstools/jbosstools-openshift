@@ -37,6 +37,7 @@ import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.op.FetchOperation;
 import org.eclipse.egit.core.op.MergeOperation;
 import org.eclipse.egit.core.op.PushOperation;
+import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.egit.core.op.PushOperationSpecification;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.egit.ui.UIText;
@@ -54,6 +55,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
@@ -294,17 +296,17 @@ public class EGitUtils {
 	 * 
 	 * @see #connect(IProject, Repository)
 	 */
-	private static void commit(IProject project, String commitMessage, IProgressMonitor monitor) throws CoreException {
+	private static RevCommit commit(IProject project, String commitMessage, IProgressMonitor monitor) throws CoreException {
 		Repository repository = getRepository(project);
 		Assert.isLegal(repository != null, "Cannot commit project to repository. ");
-		commit(project, commitMessage, repository, monitor);
+		return commit(project, commitMessage, repository, monitor);
 	}
 
-	public static void commit(IProject project, IProgressMonitor monitor) throws CoreException {
-		commit(project, "Commit from JBoss Tools", monitor);
+	public static RevCommit commit(IProject project, IProgressMonitor monitor) throws CoreException {
+		return commit(project, "Commit from JBoss Tools", monitor);
 	}
 
-	private static void commit(IProject project, String commitMessage, Repository repository, IProgressMonitor monitor)
+	private static RevCommit commit(IProject project, String commitMessage, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
 		Assert.isLegal(project != null, "Could not commit project. No project provided");
 		Assert.isLegal(
@@ -326,6 +328,7 @@ public class EGitUtils {
 		op.setCommitAll(true);
 		op.setRepository(repository);
 		op.execute(monitor);
+		return op.getCommit();
 	}
 
 	/**
@@ -339,9 +342,9 @@ public class EGitUtils {
 	 * @throws CoreException
 	 *             core exception is thrown if the push could not be executed
 	 */
-	public static void push(Repository repository, IProgressMonitor monitor)
+	public static PushOperationResult push(Repository repository, IProgressMonitor monitor)
 			throws CoreException {
-		push(repository, getRemoteConfig(repository), monitor);
+		return push(repository, getRemoteConfig(repository), false, monitor);
 	}
 
 	/**
@@ -356,32 +359,30 @@ public class EGitUtils {
 	 * @see #getAllRemoteConfigs(Repository)
 	 * @see RemoteConfig#getName()
 	 */
-	public static void push(String remote, Repository repository, IProgressMonitor monitor)
+	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
-		try {
-			RemoteConfig remoteConfig = getRemoteConfig(remote, repository);
-			if (remoteConfig == null) {
-				throw new CoreException(createStatus(null,
-						"Repository \"{0}\" has no remote repository with the name \"{1}\"",
-						repository.toString(), remote));
-			}
-			createPushOperation(remoteConfig, repository).run(monitor);
-		} catch (CoreException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
-		}
+		RemoteConfig remoteConfig = getRemoteConfig(remote, repository);
+		return push(repository, remoteConfig, false, monitor);
 	}
 
 
-	private static void push(Repository repository, RemoteConfig remoteConfig, IProgressMonitor monitor)
+	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
+		RemoteConfig remoteConfig = getRemoteConfig(remote, repository);
+		return push(repository, remoteConfig, true, monitor);
+	}
+
+	private static PushOperationResult push(Repository repository, RemoteConfig remoteConfig, 
+			boolean force, IProgressMonitor monitor) throws CoreException {
 		try {
 			if (remoteConfig == null) {
 				throw new CoreException(createStatus(null, "Repository \"{0}\" has no remote repository configured",
 						repository.toString()));
 			}
-			createPushOperation(remoteConfig, repository).run(monitor);
+			PushOperation op = createPushOperation(remoteConfig, repository, force);
+			op.run(monitor);
+			PushOperationResult result = op.getOperationResult();
+			return result;
 		} catch (CoreException e) {
 			throw e;
 		} catch (Exception e) {
@@ -398,7 +399,12 @@ public class EGitUtils {
 
 	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository)
 			throws CoreException {
-
+		return createPushOperation(remoteConfig, repository, false);
+	}
+	
+	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force)
+			throws CoreException {
+		
 		PushOperationSpecification spec = new PushOperationSpecification();
 		List<URIish> pushToUris = getPushURIs(remoteConfig);
 		List<RefSpec> pushRefSpecs = getPushRefSpecs(remoteConfig);
@@ -407,6 +413,8 @@ public class EGitUtils {
 		// return new PushOperation(repository, spec, false, PUSH_TIMEOUT);
 		// TODO: fix pushoperation to really use the spec (currently seems like
 		// it does not work so we push everything to the remote)
+		
+		// TODO ensure the 'force' is respected
 		return new PushOperation(repository, remoteConfig.getName(), false, PUSH_TIMEOUT);
 	}
 
