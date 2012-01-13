@@ -24,11 +24,11 @@ public class EGitUtilsTest {
 	
 	protected final TestUtils testUtils = new TestUtils();
 
-	private TestRepository testRepository;
-	private TestRepository testRepository2;
 	private TestProject testProject;
+	private TestRepository testRepository;
+	private TestRepository testRepositoryClone;
 	private TestProject testProject2;
-	private TestRepository clonedTestRepository;
+	private TestRepository testRepository2;
 
 	@Before
 	public void setUp() throws Exception {
@@ -47,8 +47,8 @@ public class EGitUtilsTest {
 		testRepository2.setUserAndEmail(GIT_USER, GIT_EMAIL);
 		testRepository2.connect(testProject2.getProject());
 		
-		this.clonedTestRepository = cloneRepository(testRepository);
-		clonedTestRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+		this.testRepositoryClone = cloneRepository(testRepository);
+		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 	}
 
 	private TestRepository cloneRepository(TestRepository repository) throws URISyntaxException,
@@ -62,7 +62,7 @@ public class EGitUtilsTest {
 	@After
 	public void tearDown() throws Exception {
 		testRepository.dispose();
-		clonedTestRepository.dispose();
+		testRepositoryClone.dispose();
 		testRepository2.dispose();
 		Activator.getDefault().getRepositoryCache().clear();
 		
@@ -93,10 +93,10 @@ public class EGitUtilsTest {
 		String fileName = "b.txt";
 		String fileContent = "adietish@redhat.com";
 
-		File file = clonedTestRepository.createFile(fileName, fileContent);
-		clonedTestRepository.addAndCommit(file, "adding a file");
+		File file = testRepositoryClone.createFile(fileName, fileContent);
+		testRepositoryClone.addAndCommit(file, "adding a file");
 
-		EGitUtils.push(clonedTestRepository.getRepository(), null);
+		EGitUtils.push(testRepositoryClone.getRepository(), null);
 
 		// does origin contain file added to clone?
 		testUtils.assertRepositoryContainsFilesWithContent(
@@ -110,10 +110,10 @@ public class EGitUtilsTest {
 		String fileName = "c.txt";
 		String fileContent = "adietish@redhat.com";
 
-		File file = clonedTestRepository.createFile(fileName, fileContent);
-		clonedTestRepository.addAndCommit(file, "adding a file");
+		File file = testRepositoryClone.createFile(fileName, fileContent);
+		testRepositoryClone.addAndCommit(file, "adding a file");
 
-		EGitUtils.push(REPO2_REMOTE_NAME, clonedTestRepository.getRepository(), null);
+		EGitUtils.push(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
 
 		// does origin contain file added to clone?
 		testUtils.assertRepositoryContainsFilesWithContent(
@@ -133,14 +133,14 @@ public class EGitUtilsTest {
 				fileContent);
 		testRepository2.add(fileInRepo2);
 
-		File fileInClone = clonedTestRepository.createFile(fileName, fileContent);
-		clonedTestRepository.addAndCommit(fileInClone, "adding a file");
+		File fileInClone = testRepositoryClone.createFile(fileName, fileContent);
+		testRepositoryClone.addAndCommit(fileInClone, "adding a file");
 
-		EGitUtils.push(REPO2_REMOTE_NAME, clonedTestRepository.getRepository(), null);
+		EGitUtils.push(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
 
 		// does origin contain file added to clone?
 		testUtils.assertRepositoryContainsFilesWithContent(
-				clonedTestRepository.getRepository(),
+				testRepositoryClone.getRepository(),
 				fileName,
 				fileContent);
 	}
