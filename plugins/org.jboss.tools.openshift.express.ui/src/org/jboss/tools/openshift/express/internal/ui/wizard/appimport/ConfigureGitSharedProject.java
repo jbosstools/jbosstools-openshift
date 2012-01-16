@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
@@ -22,8 +21,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
@@ -113,9 +110,11 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		Assert.isLegal(project != null);
 		File projectFolder = project.getLocation().toFile();
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
+		
 		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
 		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
-		createGitIgnore(projectFolder);
+		
+		createGitIgnore(project);
 	}
 
 	/**
@@ -125,8 +124,8 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 * @param projectFolder
 	 * @throws IOException
 	 */
-	private void createGitIgnore(File projectFolder) throws IOException {
-		GitIgnore gitIgnore = new GitIgnore(projectFolder);
+	private void createGitIgnore(IProject project) throws IOException {
+		GitIgnore gitIgnore = new GitIgnore(project);
 		// TODO: merge existing .gitignore
 		// (https://issues.jboss.org/browse/JBIDE-10391)
 		if (gitIgnore.exists()) {

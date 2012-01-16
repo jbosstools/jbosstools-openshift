@@ -73,13 +73,11 @@ import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
  */
 public class EGitUtils {
 
-	private static final RefSpec DEFAULT_PUSH_REF_SPEC =
-			new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
-
+	//	private static final RefSpec DEFAULT_PUSH_REF_SPEC = new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
+	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD
+	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS + Constants.MASTER; // refs/heads/master
 	private static final int PUSH_TIMEOUT = 10 * 1024;
-
-	private static final String EGIT_TEAM_PROVIDER_ID =
-			"org.eclipse.egit.core·GitProvider";
+	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core·GitProvider";
 
 	private EGitUtils() {
 		// inhibit instantiation
@@ -296,7 +294,8 @@ public class EGitUtils {
 	 * 
 	 * @see #connect(IProject, Repository)
 	 */
-	private static RevCommit commit(IProject project, String commitMessage, IProgressMonitor monitor) throws CoreException {
+	private static RevCommit commit(IProject project, String commitMessage, IProgressMonitor monitor)
+			throws CoreException {
 		Repository repository = getRepository(project);
 		Assert.isLegal(repository != null, "Cannot commit project to repository. ");
 		return commit(project, commitMessage, repository, monitor);
@@ -306,7 +305,8 @@ public class EGitUtils {
 		return commit(project, "Commit from JBoss Tools", monitor);
 	}
 
-	private static RevCommit commit(IProject project, String commitMessage, Repository repository, IProgressMonitor monitor)
+	private static RevCommit commit(IProject project, String commitMessage, Repository repository,
+			IProgressMonitor monitor)
 			throws CoreException {
 		Assert.isLegal(project != null, "Could not commit project. No project provided");
 		Assert.isLegal(
@@ -365,14 +365,13 @@ public class EGitUtils {
 		return push(repository, remoteConfig, false, monitor);
 	}
 
-
 	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
 		RemoteConfig remoteConfig = getRemoteConfig(remote, repository);
 		return push(repository, remoteConfig, true, monitor);
 	}
 
-	private static PushOperationResult push(Repository repository, RemoteConfig remoteConfig, 
+	private static PushOperationResult push(Repository repository, RemoteConfig remoteConfig,
 			boolean force, IProgressMonitor monitor) throws CoreException {
 		try {
 			if (remoteConfig == null) {
@@ -381,30 +380,21 @@ public class EGitUtils {
 			}
 			PushOperation op = createPushOperation(remoteConfig, repository, force);
 			op.run(monitor);
-			PushOperationResult result = op.getOperationResult();
-			return result;
+			return op.getOperationResult();
 		} catch (CoreException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
 		}
 	}
-//
-	// only available in EGit 1.1
-	//
-	// private static PushOperation createPushOperation(String remoteName,
-	// Repository repository) { return new PushOperation(repository, remoteName,
-	// false, PUSH_TIMEOUT); }
-	//
 
-	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository)
-			throws CoreException {
-		return createPushOperation(remoteConfig, repository, false);
+	private static PushOperation createPushOperation(String remoteName, Repository repository) {
+		return new PushOperation(repository, remoteName, false, PUSH_TIMEOUT);
 	}
-	
+
 	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force)
 			throws CoreException {
-		
+
 		PushOperationSpecification spec = new PushOperationSpecification();
 		List<URIish> pushToUris = getPushURIs(remoteConfig);
 		List<RefSpec> pushRefSpecs = getPushRefSpecs(remoteConfig);
@@ -413,7 +403,7 @@ public class EGitUtils {
 		// return new PushOperation(repository, spec, false, PUSH_TIMEOUT);
 		// TODO: fix pushoperation to really use the spec (currently seems like
 		// it does not work so we push everything to the remote)
-		
+
 		// TODO ensure the 'force' is respected
 		return new PushOperation(repository, remoteConfig.getName(), false, PUSH_TIMEOUT);
 	}
@@ -474,10 +464,13 @@ public class EGitUtils {
 	 */
 	private static List<RefSpec> getPushRefSpecs(RemoteConfig config) {
 		List<RefSpec> pushRefSpecs = new ArrayList<RefSpec>();
-		pushRefSpecs.addAll(config.getPushRefSpecs());
-		if (pushRefSpecs.isEmpty()) {
-			// default push to all branches
-			pushRefSpecs.add(DEFAULT_PUSH_REF_SPEC);
+		List<RefSpec> remoteConfigPushRefSpecs = config.getPushRefSpecs();
+		if (!remoteConfigPushRefSpecs.isEmpty()) {
+			pushRefSpecs.addAll(remoteConfigPushRefSpecs);
+		} else {
+			// default is to push current HEAD to remote MASTER
+			pushRefSpecs.add(new RefSpec()
+					.setSource(DEFAULT_REFSPEC_SOURCE).setDestination(DEFAULT_REFSPEC_DESTINATION));
 		}
 		return pushRefSpecs;
 	}
@@ -704,7 +697,8 @@ public class EGitUtils {
 		return -1;
 	}
 
-	private static Set<String> getCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) throws IOException {
+	private static Set<String> getCommitableChanges(IProject project, IServer server, IProgressMonitor monitor)
+			throws IOException {
 		Repository repo = getRepository(project);
 
 		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
@@ -713,52 +707,57 @@ public class EGitUtils {
 		indexDiff.diff(jgitMonitor, 0, 0, NLS.bind(
 				UIText.CommitActionHandler_repository, repo.getDirectory().getPath()));
 		Set<String> set = new HashSet<String>();
-		if( commitAddedResources(server))
+		if (commitAddedResources(server))
 			set.addAll(indexDiff.getAdded());
-		if( commitChangedResources(server))
+		if (commitChangedResources(server))
 			set.addAll(indexDiff.getChanged());
-		if( commitConflictingResources(server))
+		if (commitConflictingResources(server))
 			set.addAll(indexDiff.getConflicting());
-		if( commitMissingResources(server))
+		if (commitMissingResources(server))
 			set.addAll(indexDiff.getMissing());
-		if( commitModifiedResources(server))
+		if (commitModifiedResources(server))
 			set.addAll(indexDiff.getModified());
-		if( commitRemovedResources(server))
+		if (commitRemovedResources(server))
 			set.addAll(indexDiff.getRemoved());
-		if( commitUntrackedResources(server))
+		if (commitUntrackedResources(server))
 			set.addAll(indexDiff.getUntracked());
 
 		return set;
 	}
 
 	/*
-	 * Current behaviour is to commit only:
-	 *   added, changed, modified, removed
-	 *   
-	 *   These can be customized as properties on the server one day, if we wish,
-	 *   such that each server can have custom settings, or, they can be global settings
+	 * Current behaviour is to commit only: added, changed, modified, removed
+	 * 
+	 * These can be customized as properties on the server one day, if we wish,
+	 * such that each server can have custom settings, or, they can be global
+	 * settings
 	 */
 	public static boolean commitAddedResources(IServer server) {
 		return true;
 	}
+
 	public static boolean commitChangedResources(IServer server) {
 		return true;
 	}
+
 	public static boolean commitConflictingResources(IServer server) {
 		return false;
 	}
+
 	public static boolean commitMissingResources(IServer server) {
 		return false;
 	}
+
 	public static boolean commitModifiedResources(IServer server) {
 		return true;
 	}
+
 	public static boolean commitRemovedResources(IServer server) {
 		return true;
 	}
+
 	public static boolean commitUntrackedResources(IServer server) {
 		return false;
 	}
-
 
 }
