@@ -8,8 +8,5 @@
 	</parent>
 	<groupId>org.jboss.tools.openshift.tests</groupId>
 	<artifactId>org.jboss.tools.openshift.egit.test</artifactId> 
-	<!-- TODO: if this plugin gets actual tests (rather than framework plugins on which other tests depend) 
-	     then change this to packaging=eclipse-test-plugin to make Tycho RUN the tests rather than just 
-	     compiling sources -->
-	<packaging>eclipse-plugin</packaging>
+	<packaging>eclipse-test-plugin</packaging>
 </project>
