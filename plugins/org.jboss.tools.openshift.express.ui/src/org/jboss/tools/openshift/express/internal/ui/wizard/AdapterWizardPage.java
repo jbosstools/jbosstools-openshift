@@ -76,7 +76,7 @@ public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IW
 		super(
 				"Import OpenShift application",
 				"Choose to create a new/use existing project, " +
-						"the GITbranch and clone destination, "
+						"the GIT branch and clone destination, "
 						+ "and configure your server adapter ",
 				"Server Adapter",
 				wizard);
