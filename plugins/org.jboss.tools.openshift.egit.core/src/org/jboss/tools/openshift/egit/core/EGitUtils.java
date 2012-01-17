@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.EclipseGitProgressTransformer;
 import org.eclipse.egit.core.IteratorService;
 import org.eclipse.egit.core.op.AddToIndexOperation;
+import org.eclipse.egit.core.op.CloneOperation;
+import org.eclipse.egit.core.op.CloneOperation.PostCloneTask;
 import org.eclipse.egit.core.op.CommitOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.op.FetchOperation;
@@ -40,7 +42,6 @@ import org.eclipse.egit.core.op.PushOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.egit.core.op.PushOperationSpecification;
 import org.eclipse.egit.core.project.RepositoryMapping;
-import org.eclipse.egit.ui.UIText;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
@@ -73,11 +74,12 @@ import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
  */
 public class EGitUtils {
 
+	private static final int CLONE_TIMEOUT = 10 * 1024;
+	private static final int PUSH_TIMEOUT = 10 * 1024;
 	//	private static final RefSpec DEFAULT_PUSH_REF_SPEC = new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
 	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD
 	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS + Constants.MASTER; // refs/heads/master
-	private static final int PUSH_TIMEOUT = 10 * 1024;
-	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core·GitProvider";
+	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
 
 	private EGitUtils() {
 		// inhibit instantiation
@@ -106,7 +108,9 @@ public class EGitUtils {
 	 *         provider.
 	 */
 	public static boolean isSharedWithGit(IProject project) {
-		return EGIT_TEAM_PROVIDER_ID.equals(RepositoryProvider.getProvider(project));
+		RepositoryProvider provider = RepositoryProvider.getProvider(project);
+		return provider != null
+				&& EGIT_TEAM_PROVIDER_ID.equals(provider.getID());
 	}
 
 	/**
@@ -210,6 +214,27 @@ public class EGitUtils {
 
 	private static void connect(IProject project, File repositoryFolder, IProgressMonitor monitor) throws CoreException {
 		new ConnectProviderOperation(project, repositoryFolder).execute(monitor);
+	}
+
+	public static void cloneRepository(String uri, String remoteName, File destination, IProgressMonitor monitor)
+			throws URISyntaxException, InvocationTargetException, InterruptedException {
+
+	}
+
+	public static void cloneRepository(String uri, String remoteName, File destination, PostCloneTask postCloneTask,
+			IProgressMonitor monitor)
+			throws URISyntaxException, InvocationTargetException, InterruptedException {
+		URIish gitUri = new URIish(uri);
+		CloneOperation cloneOperation =
+				new CloneOperation(gitUri, true, null, destination, Constants.HEAD, remoteName, CLONE_TIMEOUT);
+		if (postCloneTask != null) {
+			cloneOperation.addPostCloneTask(postCloneTask);
+		}
+		cloneOperation.run(monitor);
+		// RepositoryUtil repositoryUtil =
+		// Activator.getDefault().getRepositoryUtil();
+		// repositoryUtil.addConfiguredRepository(new File(destination,
+		// Constants.DOT_GIT));
 	}
 
 	/**
@@ -386,10 +411,6 @@ public class EGitUtils {
 		} catch (Exception e) {
 			throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
 		}
-	}
-
-	private static PushOperation createPushOperation(String remoteName, Repository repository) {
-		return new PushOperation(repository, remoteName, false, PUSH_TIMEOUT);
 	}
 
 	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force)
@@ -651,6 +672,11 @@ public class EGitUtils {
 		return remoteName;
 	}
 
+	public static void addRemoteTo(String remoteName, String uri, Repository repository)
+			throws MalformedURLException, URISyntaxException, IOException {
+		addRemoteTo(remoteName, new URIish(uri), repository);
+	}
+
 	/**
 	 * Adds the given uri of a remote repository to the given repository by the
 	 * given name.
@@ -704,8 +730,8 @@ public class EGitUtils {
 		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
 		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
 				IteratorService.createInitialIterator(repo));
-		indexDiff.diff(jgitMonitor, 0, 0, NLS.bind(
-				UIText.CommitActionHandler_repository, repo.getDirectory().getPath()));
+		indexDiff.diff(jgitMonitor, 0, 0,
+				NLS.bind("Repository: {0}", repo.getDirectory().getPath()));
 		Set<String> set = new HashSet<String>();
 		if (commitAddedResources(server))
 			set.addAll(indexDiff.getAdded());
