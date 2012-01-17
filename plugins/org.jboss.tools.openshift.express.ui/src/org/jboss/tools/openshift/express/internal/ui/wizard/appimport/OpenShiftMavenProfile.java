@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.text.MessageFormat;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -142,7 +143,8 @@ public class OpenShiftMavenProfile {
 		}
 	}
 
-	private Element createOpenShiftProfileElement(String finalName) throws ParserConfigurationException, SAXException, IOException {
+	private Element createOpenShiftProfileElement(String finalName) throws ParserConfigurationException, SAXException,
+			IOException {
 		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		String openShiftProfile = MessageFormat.format(OPENSHIFT_PROFILE, finalName);
 		Document document = documentBuilder.parse(new ByteArrayInputStream(openShiftProfile.getBytes()));
@@ -282,6 +284,7 @@ public class OpenShiftMavenProfile {
 	}
 
 	public void savePom() throws CoreException {
+		Writer writer = null;
 		try {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			transformerFactory.setAttribute("indent-number", new Integer(4));
@@ -291,9 +294,8 @@ public class OpenShiftMavenProfile {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
-			Result out =
-					new StreamResult(
-							new OutputStreamWriter(new FileOutputStream(pomFile.getLocation().toString()), "UTF-8"));
+			writer = new OutputStreamWriter(new FileOutputStream(pomFile.getLocation().toString()), "UTF-8");
+			Result out = new StreamResult(writer);
 			transformer.transform(new DOMSource(getDocument()), out);
 		} catch (TransformerConfigurationException e) {
 			throw new CoreException(createStatus(e));
@@ -303,6 +305,20 @@ public class OpenShiftMavenProfile {
 			throw new CoreException(createStatus(e));
 		} catch (FileNotFoundException e) {
 			throw new CoreException(createStatus(e));
+		} finally {
+			safeClose(writer);
+		}
+	}
+
+	private void safeClose(Writer writer) {
+		if (writer == null) {
+			return;
+		}
+		try {
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			// ignore;
 		}
 	}
 	
