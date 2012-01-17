@@ -169,11 +169,8 @@ public class EGitUtilsTest {
 
 		StoredConfig config = repository.getConfig();
 		Set<String> subsections = config.getSubsections(ConfigConstants.CONFIG_REMOTE_SECTION);
-		assertEquals(1, subsections.size()); // origin and redhat
+		assertEquals(1, subsections.size());
 		assertTrue(subsections.contains(remoteName));
 		assertEquals(gitUri, config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remoteName, ConfigConstants.CONFIG_KEY_URL));
 	}
-
-	
-
 }
