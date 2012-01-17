@@ -13,7 +13,10 @@ package org.jboss.tools.openshift.express.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -54,7 +57,7 @@ public class OpenShiftMavenProfileTests {
 					+ "<!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->\n"
 					+ "<id>openshift</id>\n"
 					+ "<build>\n"
-					+ "  <finalName>as22</finalName>\n"
+					+ "  <finalName>{0}</finalName>\n"
 					+ "  <plugins>\n"
 					+ "    <plugin>\n"
 					+ "      <artifactId>maven-war-plugin</artifactId>\n"
@@ -325,13 +328,23 @@ public class OpenShiftMavenProfileTests {
 	}
 
 	@Test
-	public void canAddOpenShiftProfileToComplexPom() throws CoreException {
+	public void canAddOpenShiftProfileToComplexPom() throws CoreException, IOException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
 		boolean added = profile.addToPom(complexNonOpenShiftProject.getName());
 		assertTrue(added);
 		profile.savePom();
 		profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
 		assertTrue(profile.existsInPom());
+	}
+
+	@Test
+	public void addedOpenShiftProfileIsCorrect() throws CoreException, IOException {
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
+		boolean added = profile.addToPom(complexNonOpenShiftProject.getName());
+		assertTrue(added);
+		profile.savePom();
+		String pomContent = toString(complexNonOpenShiftProject.getFile(POM_FILENAME));
+		assertTrue(pomContent.indexOf("<id>openshift</id>") >= 0);
 	}
 
 	@Test
@@ -403,5 +416,14 @@ public class OpenShiftMavenProfileTests {
 		};
 		project.getWorkspace().run(runnable, new NullProgressMonitor());
 		return project;
+	}
+	
+	private String toString(IFile file) throws CoreException, IOException {
+		StringBuilder builder = new StringBuilder();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(file.getContents()));
+		for(String line = null; (line = reader.readLine()) != null; ) {
+			builder.append(line);
+		}
+		return builder.toString();
 	}
 }
