@@ -16,7 +16,6 @@ import org.eclipse.egit.core.Activator;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
-import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.internal.test.util.TestProject;
 import org.jboss.tools.openshift.egit.internal.test.util.TestRepository;
@@ -165,7 +164,7 @@ public class EGitUtilsTest {
 	public void canAddRemoteRepo() throws Exception {
 		Repository repository = testRepository.getRepository();
 		String remoteName = "redhat";
-		String gitUri = "http://www.redhat.com";
+		String gitUri = "www.redhat.com";
 		EGitUtils.addRemoteTo(remoteName, gitUri, repository);
 
 		StoredConfig config = repository.getConfig();
