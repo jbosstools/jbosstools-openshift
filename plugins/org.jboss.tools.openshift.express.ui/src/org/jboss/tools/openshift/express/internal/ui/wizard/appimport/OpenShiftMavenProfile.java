@@ -11,11 +11,8 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.text.MessageFormat;
 
@@ -23,7 +20,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -34,6 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -278,16 +275,12 @@ public class OpenShiftMavenProfile {
 	public void savePom() throws CoreException {
 		Writer writer = null;
 		try {
-			writer = new OutputStreamWriter(new FileOutputStream(pomFile.getLocation().toString()), "UTF-8");
-			Result out = new StreamResult(writer);
-			createTransformer().transform(new DOMSource(getDocument()), out);
+			writer = new StringWriter();
+			createTransformer().transform(new DOMSource(getDocument()), new StreamResult(writer));
+			pomFile.setContents(new ByteArrayInputStream(writer.toString().getBytes()), IResource.FORCE, null);
 		} catch (TransformerConfigurationException e) {
 			throw new CoreException(createStatus(e));
-		} catch (UnsupportedEncodingException e) {
-			throw new CoreException(createStatus(e));
 		} catch (TransformerException e) {
-			throw new CoreException(createStatus(e));
-		} catch (FileNotFoundException e) {
 			throw new CoreException(createStatus(e));
 		} finally {
 			safeClose(writer);
