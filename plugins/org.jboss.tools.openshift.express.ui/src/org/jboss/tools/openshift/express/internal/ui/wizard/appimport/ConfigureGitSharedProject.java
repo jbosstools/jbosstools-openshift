@@ -25,6 +25,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 
 import com.openshift.express.client.IApplication;
@@ -32,6 +33,9 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
+ * Strategy that enables the given git shared project to be used on the chosen
+ * OpenShift application.
+ * 
  * @author André Dietisheim <adietish@redhat.com>
  */
 public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
@@ -43,9 +47,12 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 
 	/**
 	 * Enables the user chosen project to be used on the chosen OpenShift
-	 * application. Clones the application git repository, copies the
-	 * configuration files to the user project (in the workspace), shares the
-	 * user project with git and creates the server adapter.
+	 * application. 
+	 * <ul>
+	 * <li>clones the application git repository</li>
+	 * <li>copies the configuration files to the user project (in the workspace)</li>
+	 * <li>adds the appication git repo as remote</li>
+	 * </ul>
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
@@ -76,15 +83,36 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	public List<IProject> execute(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		IProject project = getProject(getProjectName());
+		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
 		File tmpFolder = FileUtils.getRandomTmpFolder();
-		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, monitor);
+		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
+
 		copyOpenshiftConfigurations(repositoryFile, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
 
+		setupGitIgnore(project);
+
+		EGitUtils.addRemoteTo(
+				getRemoteName(),
+				getApplication().getGitUri(),
+				EGitUtils.getRepository(project));
+
+		setupOpenShiftMavenProfile(project);
+
 		return Collections.singletonList(project);
+	}
+
+	private void setupOpenShiftMavenProfile(IProject project) throws CoreException {
+		Assert.isLegal(OpenShiftMavenProfile.isMavenProject(project));
+
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, OpenShiftUIActivator.PLUGIN_ID);
+		if (profile.existsInPom()) {
+			return;
+		}
+		profile.addToPom(project.getName());
+		profile.savePom();
 	}
 
 	/**
@@ -110,27 +138,21 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		Assert.isLegal(project != null);
 		File projectFolder = project.getLocation().toFile();
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
-		
+
 		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
 		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
-		
-		createGitIgnore(project);
 	}
 
 	/**
-	 * Creates the git ignore file with a predefined set of entries. An existing
-	 * .gitignore file is not overwritten, we then just dont do anything.
+	 * Adds a predefined set of entries to the gitignore file in (root of) the
+	 * given project. If no .gitignore exists yet, a fresh one is created.
 	 * 
-	 * @param projectFolder
+	 * @param project
+	 *            the project to which the .gitignore shall be configured
 	 * @throws IOException
 	 */
-	private void createGitIgnore(IProject project) throws IOException {
+	private void setupGitIgnore(IProject project) throws IOException {
 		GitIgnore gitIgnore = new GitIgnore(project);
-		// TODO: merge existing .gitignore
-		// (https://issues.jboss.org/browse/JBIDE-10391)
-		if (gitIgnore.exists()) {
-			return;
-		}
 		gitIgnore.add("target")
 				.add(".settings")
 				.add(".project")

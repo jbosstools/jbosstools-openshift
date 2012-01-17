@@ -18,12 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPageModel;
 
 import com.openshift.express.client.IApplication;
@@ -74,8 +76,8 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	}
 
 	/**
-	 * Enables the user chosen project to be used on the chosen OpenShift
-	 * application. Clones the application git repository, copies the
+	 * Enables the user chosen, unshared project to be used on the chosen
+	 * OpenShift application. Clones the application git repository, copies the
 	 * configuration files to the user project (in the workspace), shares the
 	 * user project with git and creates the server adapter.
 	 * 
@@ -98,10 +100,47 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
 	 */
-	public void addToExistingProject(IProgressMonitor monitor)
+	public void configureUnsharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
 		List<IProject> importedProjects = new ConfigureUnsharedProject(
+				getProjectName()
+				, getApplication()
+				, getRemoteName()
+				, getUser())
+				.execute(monitor);
+		createServerAdapter(monitor, importedProjects);
+	}
+
+	/**
+	 * Enables the user chosen, unshared project to be used on the chosen
+	 * OpenShift application. Clones the application git repository, copies the
+	 * configuration files to the user project (in the workspace), adds the
+	 * appication git repo as remote and creates the server adapter.
+	 * 
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @throws URISyntaxException
+	 *             The OpenShift application repository could not be cloned,
+	 *             because the uri it is located at is not a valid git uri
+	 * @throws OpenShiftException
+	 * 
+	 * @throws InvocationTargetException
+	 *             The OpenShift application repository could not be cloned, the
+	 *             clone operation failed.
+	 * @throws InterruptedException
+	 *             The OpenShift application repository could not be cloned, the
+	 *             clone operation was interrupted.
+	 * @throws IOException
+	 *             The configuration files could not be copied from the git
+	 *             clone to the user project
+	 * @throws CoreException
+	 *             The user project could not be shared with the git
+	 */
+	public void configureGitSharedProject(IProgressMonitor monitor)
+			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
+			URISyntaxException {
+		List<IProject> importedProjects = new ConfigureGitSharedProject(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
@@ -199,6 +238,14 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 
 	public boolean isNewProject() {
 		return (Boolean) getProperty(NEW_PROJECT);
+	}
+
+	public boolean isGitSharedProject() {
+		return EGitUtils.isSharedWithGit(getProject());
+	}
+
+	private IProject getProject() {
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
 	}
 
 	public Boolean setNewProject(boolean newProject) {

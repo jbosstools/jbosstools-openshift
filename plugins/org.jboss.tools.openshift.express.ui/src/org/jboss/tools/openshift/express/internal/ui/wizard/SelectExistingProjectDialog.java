@@ -54,11 +54,9 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
 	private boolean isValid(IProject project) {
 		if (EGitUtils.isShared(project)) {
-			return false;
-		}
-
-		if (EGitUtils.hasDotGitFolder(project)) {
-			return false;
+			if (!EGitUtils.isSharedWithGit(project)) {
+				return false;
+			}
 		}
 
 		if (!hasModuleNature(project)) {
@@ -71,7 +69,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 	private boolean hasModuleNature(IProject project) {
 		try {
 			return project.hasNature(IModuleConstants.MODULE_NATURE_ID);
-		} catch(CoreException e) {
+		} catch (CoreException e) {
 			return false;
 		}
 	}

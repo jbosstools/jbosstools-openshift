@@ -32,6 +32,9 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
+ * Strategy that enables the given git shared project to be used on the chosen
+ * OpenShift application.
+ * 
  * @author André Dietisheim <adietish@redhat.com>
  */
 public class ConfigureUnsharedProject extends AbstractImportApplicationOperation {
@@ -43,9 +46,12 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 
 	/**
 	 * Enables the user chosen project to be used on the chosen OpenShift
-	 * application. Clones the application git repository, copies the
-	 * configuration files to the user project (in the workspace), shares the
-	 * user project with git and creates the server adapter.
+	 * application. *
+	 * <ul>
+	 * <li>clones the application git repository</li>
+	 * <li>copies the configuration files to the user project (in the workspace)</li>
+	 * <li>shares the given project with git</li>
+	 * </ul>
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
@@ -84,10 +90,14 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		// model.mergeWithApplicationRepository(repository,
 		// monitor);
 		File tmpFolder = FileUtils.getRandomTmpFolder();
-		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, monitor);
-		IProject project = getProject(getProjectName());
+		IProject project = getProject();
+
+		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
+
 		copyOpenshiftConfigurations(repositoryFile, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
+
+		createGitIgnore(project);
 
 		shareProject(project, monitor);
 		return Collections.singletonList(project);
@@ -126,23 +136,18 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
 		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
 		FileUtils.copy(new File(sourceFolder, "pom.xml"), projectFolder, false);
-		createGitIgnore(projectFolder);
 	}
 
 	/**
-	 * Creates the git ignore file with a predefined set of entries. An existing
-	 * .gitignore file is not overwritten, we then just dont do anything.
+	 * Adds a predefined set of entries to the gitignore file in (root of) the
+	 * given project. If no .gitignore exists yet, a fresh one is created.
 	 * 
-	 * @param projectFolder
+	 * @param project
+	 *            the project to which the .gitignore shall be configured
 	 * @throws IOException
 	 */
-	private void createGitIgnore(File projectFolder) throws IOException {
-		GitIgnore gitIgnore = new GitIgnore(projectFolder);
-		// TODO: merge existing .gitignore
-		// (https://issues.jboss.org/browse/JBIDE-10391)
-		if (gitIgnore.exists()) {
-			return;
-		}
+	private void createGitIgnore(IProject project) throws IOException {
+		GitIgnore gitIgnore = new GitIgnore(project);
 		gitIgnore.add("target")
 				.add(".settings")
 				.add(".project")
@@ -151,12 +156,15 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		gitIgnore.write(false);
 	}
 
-//	private void mergeWithApplicationRepository(Repository repository, IApplication application,
-//			IProgressMonitor monitor)
-//			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException,
-//			InvocationTargetException {
-//		URIish uri = new URIish(application.getGitUri());
-//		EGitUtils.addRemoteTo("openshift", uri, repository);
-//		EGitUtils.mergeWithRemote(uri, "refs/remotes/openshift/HEAD", repository, monitor);
-//	}
+	// private void mergeWithApplicationRepository(Repository repository,
+	// IApplication application,
+	// IProgressMonitor monitor)
+	// throws MalformedURLException, URISyntaxException, IOException,
+	// OpenShiftException, CoreException,
+	// InvocationTargetException {
+	// URIish uri = new URIish(application.getGitUri());
+	// EGitUtils.addRemoteTo("openshift", uri, repository);
+	// EGitUtils.mergeWithRemote(uri, "refs/remotes/openshift/HEAD", repository,
+	// monitor);
+	// }
 }

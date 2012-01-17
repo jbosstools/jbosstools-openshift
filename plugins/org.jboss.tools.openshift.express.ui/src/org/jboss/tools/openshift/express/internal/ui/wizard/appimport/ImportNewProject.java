@@ -68,7 +68,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		}
 
 		File repositoryFolder =
-				cloneRepository(getApplication(), getRemoteName(), cloneDestination, monitor);
+				cloneRepository(getApplication(), getRemoteName(), cloneDestination, true, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, monitor);
 		if (importedProjects.size() == 0) {
 			throw new ImportFailedException(

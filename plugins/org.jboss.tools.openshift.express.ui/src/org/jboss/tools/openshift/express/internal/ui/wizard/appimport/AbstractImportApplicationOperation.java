@@ -18,13 +18,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.egit.core.RepositoryUtil;
-import org.eclipse.egit.core.op.CloneOperation;
-import org.eclipse.egit.ui.Activator;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.transport.JschConfigSessionFactory;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.OpenShiftException;
@@ -33,8 +29,6 @@ import com.openshift.express.client.OpenShiftException;
  * @author André Dietisheim <adietish@redhat.com>
  */
 abstract class AbstractImportApplicationOperation implements IImportApplicationStrategy {
-
-	private static final int CLONE_TIMEOUT = 10 * 1024;
 
 	private String projectName;
 	private IApplication application;
@@ -48,56 +42,42 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 
 	/**
 	 * Clones the repository of the selected OpenShift application to the user
-	 * provided path
+	 * provided path.
 	 * 
+	 * @param application
+	 *            the application to clone
+	 * @param remoteName
+	 *            the name of the remote repo to clone
+	 * @param destination
+	 *            the destination to clone to
+	 * @param addToRepoView
+	 *            if true, the clone repo will get added to the (egit)
+	 *            repositories view
 	 * @param monitor
 	 *            the monitor to report progress to
-	 * @return
-	 * @throws URISyntaxException
+	 * 
+	 * @return the location of the cloned repository
 	 * @throws OpenShiftException
 	 * @throws InvocationTargetException
 	 * @throws InterruptedException
+	 * @throws URISyntaxException
 	 * 
 	 * @see AbstractImportApplicationOperation#getApplication()
 	 * @see #getRepositoryPath()
 	 */
-	protected File cloneRepository(IApplication application, String remoteName, File destination, IProgressMonitor monitor)
+	protected File cloneRepository(IApplication application, String remoteName, File destination,
+			boolean addToRepoView, IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
-		cloneRepository(application.getGitUri(), remoteName, destination, monitor);
+		EGitUIUtils.ensureEgitUIIsStarted();
+		if (addToRepoView) {
+			EGitUtils.cloneRepository(
+					application.getGitUri(), remoteName, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+		} else {
+			EGitUtils.cloneRepository(
+					application.getGitUri(), remoteName, destination, monitor);
+		}
 		return destination;
-	}
-
-	private void cloneRepository(String uri, String remoteName, File destination, IProgressMonitor monitor)
-			throws OpenShiftException, URISyntaxException, InvocationTargetException, InterruptedException {
-		ensureEgitUIIsStarted();
-		URIish gitUri = new URIish(uri);
-		CloneOperation cloneOperation =
-				new CloneOperation(gitUri, true, null, destination, Constants.HEAD, remoteName, CLONE_TIMEOUT);
-		cloneOperation.run(monitor);
-		RepositoryUtil repositoryUtil = Activator.getDefault().getRepositoryUtil();
-		repositoryUtil.addConfiguredRepository(new File(destination, Constants.DOT_GIT));
-	}
-
-	/**
-	 * The EGit UI plugin initializes the ssh factory to present the user a
-	 * passphrase prompt if the ssh key was not read yet. If this initialization
-	 * is not executed, the ssh connection to the git repo would just fail with
-	 * an authentication error. We therefore have to make sure that the EGit UI
-	 * plugin is started and initializes the JSchConfigSessionFactory.
-	 * <p>
-	 * EGit initializes the SshSessionFactory with the EclipseSshSessionFactory.
-	 * The EclipseSshSessionFactory overrides JschConfigSessionFactory#configure
-	 * to present a UserInfoPrompter if the key passphrase was not entered
-	 * before.
-	 * 
-	 * @see Activator#start(org.osgi.framework.BundleContext)
-	 * @see Activator#setupSSH
-	 * @see JschConfigSessionFactory#configure
-	 * @see EclipseSshSessionFactory#configure
-	 */
-	private void ensureEgitUIIsStarted() {
-		Activator.getDefault();
 	}
 
 	protected String getProjectName() {
@@ -112,11 +92,15 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 *            the project name
 	 * @return the project with the given name
 	 */
-	protected IProject getProject(String name) {
+	private IProject getProject(String name) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 		Assert.isTrue(project != null && project.exists(),
 				NLS.bind("Could not find project {0} in your workspace.", name));
 		return project;
+	}
+
+	protected IProject getProject() {
+		return getProject(getProjectName());
 	}
 
 	protected IApplication getApplication() {

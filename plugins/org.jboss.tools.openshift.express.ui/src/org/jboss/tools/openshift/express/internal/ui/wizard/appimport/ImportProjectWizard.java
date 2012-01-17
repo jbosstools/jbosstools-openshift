@@ -75,19 +75,16 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 		}
 	}
 
-	private boolean askForConfirmation(final String applicationName, final String projectName) {
+	private boolean askForConfirmation(final String message, final String applicationName) {
 		final boolean[] confirmed = new boolean[1];
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				confirmed[0] = MessageDialog.openConfirm(getShell(),
+				confirmed[0] = MessageDialog.openConfirm(
+						getShell(),
 						NLS.bind("Import OpenShift Application ", applicationName),
-						NLS.bind(
-								"OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
-										"configuration and enable Git for the project.\n " +
-										"This cannot be undone. Do you wish to continue ?", applicationName,
-								projectName));
+						message);
 			}
 		});
 		return confirmed[0];
@@ -133,11 +130,26 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 				if (model.isNewProject()) {
 					model.importProject(delegatingMonitor);
-				} else {
-					if (!askForConfirmation(model.getApplicationName(), model.getProjectName())) {
+				} else if (!model.isGitSharedProject()) {
+					if (!askForConfirmation(
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by " +
+									"copying OpenShift configuration and enabling Git for the project.\n " +
+									"This cannot be undone. Do you wish to continue ?",
+									model.getApplicationName(), model.getProjectName()),
+							model.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
-					model.addToExistingProject(delegatingMonitor);
+					model.configureUnsharedProject(delegatingMonitor);
+				} else {
+					if (!askForConfirmation(
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
+									"configuration and adding the OpenShift git repo as remote.\n " +
+									"This cannot be undone. Do you wish to continue ?",
+									model.getApplicationName(), model.getProjectName()),
+							model.getApplicationName())) {
+						return Status.CANCEL_STATUS;
+					}
+					model.configureGitSharedProject(delegatingMonitor);					
 				}
 
 				return Status.OK_STATUS;
