@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -29,6 +28,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -248,18 +248,10 @@ public class OpenShiftMavenProfile {
 	}
 
 	private Document getDocument() throws CoreException {
-		return getDocument(pomFile);
-	}
-
-	private Document getDocument(IFile file) throws CoreException {
-		return getDocument(file.getContents());
-	}
-
-	private Document getDocument(InputStream inputStream) throws CoreException {
 		try {
 			if (document == null) {
 				DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				this.document = documentBuilder.parse(inputStream);
+				this.document = documentBuilder.parse(pomFile.getContents());
 			}
 			return document;
 		} catch (ParserConfigurationException e) {
@@ -286,17 +278,9 @@ public class OpenShiftMavenProfile {
 	public void savePom() throws CoreException {
 		Writer writer = null;
 		try {
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			transformerFactory.setAttribute("indent-number", new Integer(4));
-
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
 			writer = new OutputStreamWriter(new FileOutputStream(pomFile.getLocation().toString()), "UTF-8");
 			Result out = new StreamResult(writer);
-			transformer.transform(new DOMSource(getDocument()), out);
+			createTransformer().transform(new DOMSource(getDocument()), out);
 		} catch (TransformerConfigurationException e) {
 			throw new CoreException(createStatus(e));
 		} catch (UnsupportedEncodingException e) {
@@ -310,6 +294,18 @@ public class OpenShiftMavenProfile {
 		}
 	}
 
+	private Transformer createTransformer()
+			throws TransformerFactoryConfigurationError, TransformerConfigurationException {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		transformerFactory.setAttribute("indent-number", new Integer(4));
+
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		return transformer;
+	}
+
 	private void safeClose(Writer writer) {
 		if (writer == null) {
 			return;
@@ -321,7 +317,7 @@ public class OpenShiftMavenProfile {
 			// ignore;
 		}
 	}
-	
+
 	public static boolean isMavenProject(IProject project) {
 		return project.getFile(POM_FILENAME).exists();
 	}
