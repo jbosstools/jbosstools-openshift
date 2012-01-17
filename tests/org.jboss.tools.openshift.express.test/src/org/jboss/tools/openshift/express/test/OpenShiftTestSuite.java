@@ -16,7 +16,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-		OpenShiftProfileTests.class
+		OpenShiftMavenProfileTests.class
 })
 /**
  * @author Andre Dietisheim

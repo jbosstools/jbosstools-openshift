@@ -32,6 +32,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,7 +46,9 @@ import org.xml.sax.SAXException;
 /**
  * @author André Dietisheim
  */
-public class OpenShiftProfile {
+public class OpenShiftMavenProfile {
+
+	private static final String POM_FILENAME = "pom.xml";
 
 	private static final String ID_OPENSHIFT = "openshift";
 	private static final String ELEMENT_PROJECT = "project";
@@ -79,6 +82,10 @@ public class OpenShiftProfile {
 	private String pluginId;
 	private Document document;
 
+	public OpenShiftMavenProfile(IProject project, String pluginId) {
+		this(project.getFile(POM_FILENAME), pluginId);
+	}
+
 	/**
 	 * Creates an openshift profile that will allow you to deal with the
 	 * openshift profile in a given pom.
@@ -86,7 +93,7 @@ public class OpenShiftProfile {
 	 * @param pomFile
 	 * @param pluginId
 	 */
-	public OpenShiftProfile(IFile pomFile, String pluginId) {
+	public OpenShiftMavenProfile(IFile pomFile, String pluginId) {
 		this.pomFile = pomFile;
 		this.pluginId = pluginId;
 	}
@@ -297,5 +304,9 @@ public class OpenShiftProfile {
 		} catch (FileNotFoundException e) {
 			throw new CoreException(createStatus(e));
 		}
+	}
+	
+	public static boolean isMavenProject(IProject project) {
+		return project.getFile(POM_FILENAME).exists();
 	}
 }
