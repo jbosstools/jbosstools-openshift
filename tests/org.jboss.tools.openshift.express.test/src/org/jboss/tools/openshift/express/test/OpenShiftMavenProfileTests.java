@@ -88,7 +88,7 @@ public class OpenShiftMavenProfileTests {
 					+ " </profiles>\n"
 					+ "</project>\n";
 
-	private static final String POM_COMPLEX_WITHOUT_OPENSHIFT = 
+	private static final String POM_WITH_PROFILES_WITHOUT_OPENSHIFT = 
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 					+"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
 					+"    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
@@ -281,7 +281,7 @@ public class OpenShiftMavenProfileTests {
 	
 	private IProject nonOpenShiftProject;
 	private IFile pomWithoutOpenShiftProfile;
-	private IProject complexNonOpenShiftProject;
+	private IProject nonOpenShiftProfilesProject;
 	private IProject openShiftProject;
 	private IFile pomWithOpenShiftProfile;
 
@@ -307,7 +307,7 @@ public class OpenShiftMavenProfileTests {
 
 	@Test
 	public void canDetectOpenShiftProfileInComplexPom() throws CoreException {
-		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
 		assertFalse(profile.existsInPom());
 	}
 	
@@ -329,21 +329,21 @@ public class OpenShiftMavenProfileTests {
 
 	@Test
 	public void canAddOpenShiftProfileToComplexPom() throws CoreException, IOException {
-		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
-		boolean added = profile.addToPom(complexNonOpenShiftProject.getName());
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
+		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName());
 		assertTrue(added);
 		profile.savePom();
-		profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
+		profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
 		assertTrue(profile.existsInPom());
 	}
 
 	@Test
 	public void addedOpenShiftProfileIsCorrect() throws CoreException, IOException {
-		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(complexNonOpenShiftProject, PLUGIN_ID);
-		boolean added = profile.addToPom(complexNonOpenShiftProject.getName());
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
+		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName());
 		assertTrue(added);
 		profile.savePom();
-		String pomContent = toString(complexNonOpenShiftProject.getFile(POM_FILENAME));
+		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
 		assertTrue(pomContent.indexOf("<id>openshift</id>") >= 0);
 	}
 
@@ -358,8 +358,8 @@ public class OpenShiftMavenProfileTests {
 	public void setUp() throws CoreException {
 		this.openShiftProject = createTmpProject();
 		this.pomWithOpenShiftProfile = createPomFile(POM_WITH_OPENSHIFT, openShiftProject);
-		this.complexNonOpenShiftProject = createTmpProject();
-		createPomFile(POM_COMPLEX_WITHOUT_OPENSHIFT, complexNonOpenShiftProject);
+		this.nonOpenShiftProfilesProject = createTmpProject();
+		createPomFile(POM_WITH_PROFILES_WITHOUT_OPENSHIFT, nonOpenShiftProfilesProject);
 		this.nonOpenShiftProject = createTmpProject();
 		this.pomWithoutOpenShiftProfile = createPomFile(POM_WITHOUT_OPENSHIFT, nonOpenShiftProject);
 	}
@@ -368,7 +368,7 @@ public class OpenShiftMavenProfileTests {
 	public void tearDown() throws CoreException {
 		deleteProject(openShiftProject);
 		deleteProject(nonOpenShiftProject);
-		deleteProject(complexNonOpenShiftProject);
+		deleteProject(nonOpenShiftProfilesProject);
 	}
 
 	private void deleteProject(final IProject project) throws CoreException {
