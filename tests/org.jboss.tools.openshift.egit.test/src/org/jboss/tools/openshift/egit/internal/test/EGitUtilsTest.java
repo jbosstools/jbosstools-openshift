@@ -1,13 +1,22 @@
 package org.jboss.tools.openshift.egit.internal.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.internal.test.util.TestProject;
 import org.jboss.tools.openshift.egit.internal.test.util.TestRepository;
@@ -144,5 +153,28 @@ public class EGitUtilsTest {
 				fileName,
 				fileContent);
 	}
+	
+	@Test
+	public void canGetRepoForProject() throws Exception {
+		Repository repository = EGitUtils.getRepository(testProject.getProject());
+		assertNotNull(repository);
+		assertEquals(testRepository.getRepository(), repository);
+	}
+
+	@Test
+	public void canAddRemoteRepo() throws Exception {
+		Repository repository = testRepository.getRepository();
+		String remoteName = "redhat";
+		String gitUri = "http://www.redhat.com";
+		EGitUtils.addRemoteTo(remoteName, gitUri, repository);
+
+		StoredConfig config = repository.getConfig();
+		Set<String> subsections = config.getSubsections(ConfigConstants.CONFIG_REMOTE_SECTION);
+		assertEquals(1, subsections.size()); // origin and redhat
+		assertTrue(subsections.contains(remoteName));
+		assertEquals(gitUri, config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remoteName, ConfigConstants.CONFIG_KEY_URL));
+	}
+
+	
 
 }
