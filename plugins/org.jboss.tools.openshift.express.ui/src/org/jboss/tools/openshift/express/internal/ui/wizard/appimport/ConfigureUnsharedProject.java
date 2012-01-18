@@ -89,17 +89,12 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		// model.shareProject(monitor);
 		// model.mergeWithApplicationRepository(repository,
 		// monitor);
-		File tmpFolder = FileUtils.getRandomTmpFolder();
 		IProject project = getProject();
 
-		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
-
-		copyOpenshiftConfigurations(repositoryFile, project, monitor);
-		FileUtil.safeDelete(tmpFolder);
-
+		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
 		createGitIgnore(project);
-
 		shareProject(project, monitor);
+
 		return Collections.singletonList(project);
 	}
 
@@ -126,16 +121,27 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * @param monitor
 	 *            the monitor to report progress to
 	 * @throws IOException
+	 * @throws URISyntaxException 
+	 * @throws InterruptedException 
+	 * @throws InvocationTargetException 
+	 * @throws OpenShiftException 
 	 */
-	private void copyOpenshiftConfigurations(final File sourceFolder, IProject project, IProgressMonitor monitor)
-			throws IOException {
+	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
+			throws IOException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		Assert.isLegal(project != null);
 		File projectFolder = project.getLocation().toFile();
+
+		File tmpFolder = FileUtils.getRandomTmpFolder();
+		cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
+
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
-		FileUtils.copy(new File(sourceFolder, ".git"), projectFolder, false);
-		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
-		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
-		FileUtils.copy(new File(sourceFolder, "pom.xml"), projectFolder, false);
+		FileUtils.copy(new File(tmpFolder, ".git"), projectFolder, false);
+		FileUtils.copy(new File(tmpFolder, ".openshift"), projectFolder, false);
+		FileUtils.copy(new File(tmpFolder, "deployments"), projectFolder, false);
+		FileUtils.copy(new File(tmpFolder, "pom.xml"), projectFolder, false);
+
+		FileUtil.safeDelete(tmpFolder);
+
 	}
 
 	/**

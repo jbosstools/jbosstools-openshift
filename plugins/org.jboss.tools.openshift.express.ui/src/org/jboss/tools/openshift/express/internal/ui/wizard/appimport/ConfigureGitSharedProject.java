@@ -14,13 +14,18 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
@@ -40,17 +45,21 @@ import com.openshift.express.client.OpenShiftException;
  */
 public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
 
+	private ArrayList<IResource> modifiedResources;
+
 	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
 			IUser user) {
 		super(projectName, application, remoteName);
+		this.modifiedResources = new ArrayList<IResource>();
 	}
 
 	/**
 	 * Enables the user chosen project to be used on the chosen OpenShift
-	 * application. 
+	 * application.
 	 * <ul>
 	 * <li>clones the application git repository</li>
-	 * <li>copies the configuration files to the user project (in the workspace)</li>
+	 * <li>copies the configuration files to the user project (in the workspace)
+	 * </li>
 	 * <li>adds the appication git repo as remote</li>
 	 * </ul>
 	 * 
@@ -86,22 +95,24 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
-		File tmpFolder = FileUtils.getRandomTmpFolder();
-		File repositoryFile = cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
-
-		copyOpenshiftConfigurations(repositoryFile, project, monitor);
-		FileUtil.safeDelete(tmpFolder);
+		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
 
 		setupGitIgnore(project);
+		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 
 		EGitUtils.addRemoteTo(
 				getRemoteName(),
 				getApplication().getGitUri(),
 				EGitUtils.getRepository(project));
-
 		setupOpenShiftMavenProfile(project);
+		addAndCommitModifiedResource(project, monitor);
 
 		return Collections.singletonList(project);
+	}
+
+	private void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException {
+		new AddToIndexOperation(modifiedResources).execute(monitor);
+		EGitUtils.commit(project, monitor);
 	}
 
 	private void setupOpenShiftMavenProfile(IProject project) throws CoreException {
@@ -112,7 +123,8 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 			return;
 		}
 		profile.addToPom(project.getName());
-		profile.savePom();
+		IFile pomFile = profile.savePom();
+		modifiedResources.add(pomFile);
 	}
 
 	/**
@@ -131,16 +143,49 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 *            the project to copy the configuration to.
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return
 	 * @throws IOException
+	 * @throws CoreException
+	 * @throws URISyntaxException 
+	 * @throws InterruptedException 
+	 * @throws InvocationTargetException 
+	 * @throws OpenShiftException 
 	 */
-	private void copyOpenshiftConfigurations(final File sourceFolder, IProject project, IProgressMonitor monitor)
-			throws IOException {
+	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
+			throws IOException, CoreException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		Assert.isLegal(project != null);
-		File projectFolder = project.getLocation().toFile();
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
 
-		FileUtils.copy(new File(sourceFolder, ".openshift"), projectFolder, false);
-		FileUtils.copy(new File(sourceFolder, "deployments"), projectFolder, false);
+		File tmpFolder = FileUtils.getRandomTmpFolder();
+		cloneRepository(application, remoteName, tmpFolder, false, monitor);
+
+		Collection<IResource> copiedResources =
+				copyResources(tmpFolder, new String[] { ".openshift", "deployments" }, project);
+		modifiedResources.addAll(copiedResources);
+		FileUtil.safeDelete(tmpFolder);
+	}
+
+	private Collection<IResource> copyResources(File sourceFolder, String[] sourcePaths, IProject project)
+			throws IOException {
+		List<IResource> resources = new ArrayList<IResource>();
+		File projectFolder = project.getLocation().toFile();
+
+		for (String sourcePath : sourcePaths) {
+			File source = new File(sourceFolder, sourcePath);
+
+			if (!FileUtils.canRead(source)) {
+				continue;
+			}
+
+			FileUtils.copy(source, projectFolder, false);
+
+			if (source.isDirectory()) {
+				resources.add(project.getFolder(sourcePath));
+			} else {
+				resources.add(project.getFile(sourcePath));
+			}
+		}
+		return resources;
 	}
 
 	/**
@@ -158,6 +203,8 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 				.add(".project")
 				.add(".classpath")
 				.add(".factorypath");
-		gitIgnore.write(false);
+		File file = gitIgnore.write(false);
+		IFile gitIgnoreFile = project.getFile(file.getName());
+		modifiedResources.add(gitIgnoreFile);
 	}
 }

@@ -272,12 +272,13 @@ public class OpenShiftMavenProfile {
 		return new Status(IStatus.ERROR, pluginId, message);
 	}
 
-	public void savePom() throws CoreException {
+	public IFile savePom() throws CoreException {
 		Writer writer = null;
 		try {
 			writer = new StringWriter();
 			createTransformer().transform(new DOMSource(getDocument()), new StreamResult(writer));
 			pomFile.setContents(new ByteArrayInputStream(writer.toString().getBytes()), IResource.FORCE, null);
+			return pomFile;
 		} catch (TransformerConfigurationException e) {
 			throw new CoreException(createStatus(e));
 		} catch (TransformerException e) {
