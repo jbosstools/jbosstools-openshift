@@ -218,7 +218,7 @@ public class EGitUtils {
 
 	public static void cloneRepository(String uri, String remoteName, File destination, IProgressMonitor monitor)
 			throws URISyntaxException, InvocationTargetException, InterruptedException {
-
+		cloneRepository(uri, remoteName, destination, null, monitor);
 	}
 
 	public static void cloneRepository(String uri, String remoteName, File destination, PostCloneTask postCloneTask,
