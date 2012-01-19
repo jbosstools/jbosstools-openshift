@@ -12,11 +12,14 @@ package org.jboss.tools.openshift.egit.internal.test;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jgit.lib.Constants;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.junit.Test;
@@ -27,19 +30,22 @@ import org.junit.Test;
 public class GitIgnoreTest {
 
 	public static final String NL = System.getProperty("line.separator");
-			
-	private File gitIgnoreFile;
 
-	public void setUp() throws IOException {
-		this.gitIgnoreFile = createGitFile("");
+	private IFile gitIgnoreFile;
+
+	private IProject project;
+
+	public void setUp() throws CoreException {
+		this.project = createRandomProject();
+		this.gitIgnoreFile = createGitFile(project, "");
 	}
 
 	public void tearDown() {
-		gitIgnoreFile.delete();
+		silentlyDelete(project);
 	}
 
 	@Test
-	public void canAddEntries() throws IOException {
+	public void canAddEntries() throws CoreException, IOException {
 		GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
 		assertTrue(gitIgnore.size() == 0);
 		String entry = "dummy";
@@ -49,62 +55,68 @@ public class GitIgnoreTest {
 	}
 
 	@Test
-	public void canParseExistingEntries() throws IOException {
-		File gitIgnoreFile = null;
+	public void canParseExistingEntries() throws CoreException, IOException {
+		IFile gitIgnoreFile = null;
+		IProject project = null;
 		try {
-			gitIgnoreFile = createGitFile("redhat", "jboss", "tools");
+			project = createRandomProject();
+			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
 			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
 			assertTrue(gitIgnore.size() == 3);
 			assertTrue(gitIgnore.contains("redhat"));
 			assertTrue(gitIgnore.contains("jboss"));
 			assertTrue(gitIgnore.contains("tools"));
 		} finally {
-			if (gitIgnoreFile != null) {
-				gitIgnoreFile.delete();
-			}
+			silentlyDelete(project);
 		}
 	}
 
 	@Test
-	public void entryIsNotAddedTwice() throws IOException {
-		File gitIgnoreFile = null;
+	public void entryIsNotAddedTwice() throws CoreException, IOException {
+		IFile gitIgnoreFile = null;
+		IProject project = null;
 		try {
-			gitIgnoreFile = createGitFile("redhat");
+			project = createRandomProject();
+			gitIgnoreFile = createGitFile(project, "redhat");
 			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
 			assertTrue(gitIgnore.size() == 1);
 			assertTrue(gitIgnore.contains("redhat"));
 			gitIgnore.add("redhat");
 			assertTrue(gitIgnore.size() == 1);
 		} finally {
-			gitIgnoreFile.delete();
+			silentlyDelete(project);
 		}
 	}
 
-	private File createTmpFolder() throws IOException {
-		String tmpFolder = System.getProperty("java.io.tmpdir");
-		String currentTime = String.valueOf(System.currentTimeMillis());
-		File randomTmpFolder = new File(tmpFolder, currentTime);
-		randomTmpFolder.mkdir();
-		return randomTmpFolder;
-
-	}
-
-	private File createGitFile(String... gitIgnoreEntries) throws IOException {
-		File gitFile = new File(createTmpFolder(), Constants.GITIGNORE_FILENAME);
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter(new FileWriter(gitFile));
-			for (String entry : gitIgnoreEntries) {
-				writer.write(entry);
-				writer.write(NL);
-			}
-			writer.flush();
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
+	private IFile createGitFile(IProject project, String... gitIgnoreEntries) throws CoreException {
+		IFile gitFile = project.getFile(Constants.GITIGNORE_FILENAME);
+		StringBuilder builder = new StringBuilder();
+		for (String entry : gitIgnoreEntries) {
+			builder.append(entry);
+			builder.append(NL);
 		}
-
+		gitFile.create(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, null);
 		return gitFile;
+	}
+
+	private IProject createRandomProject() throws CoreException {
+		String projectName = String.valueOf(System.currentTimeMillis());
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		project.create(null);
+		project.open(null);
+		return project;
+	}
+
+	private void silentlyDelete(IProject project) {
+		if (project == null
+				|| !project.isAccessible()) {
+			return;
+		}
+		try {
+			project.close(null);
+			project.delete(true, null);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 	}
 }

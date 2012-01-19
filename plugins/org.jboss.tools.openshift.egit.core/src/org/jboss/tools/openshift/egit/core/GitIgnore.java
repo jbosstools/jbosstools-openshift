@@ -11,16 +11,18 @@
 package org.jboss.tools.openshift.egit.core;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.lib.Constants;
 
 /**
@@ -29,28 +31,29 @@ import org.eclipse.jgit.lib.Constants;
 public class GitIgnore {
 
 	public static final String NL = System.getProperty("line.separator");
-			
-	private Set<String> entries;
-	private File file;
 
-	public GitIgnore(IProject project) throws IOException {
-		this(new File(project.getLocation().toFile(), Constants.GITIGNORE_FILENAME));
+	private Set<String> entries;
+	private IFile file;
+
+	public GitIgnore(IProject project) throws IOException, CoreException {
+		this(project.getFile(Constants.GITIGNORE_FILENAME));
 	}
 
-	public GitIgnore(File gitIgnoreFile) throws IOException {
+	public GitIgnore(IFile gitIgnoreFile) throws IOException, CoreException {
 		this.file = gitIgnoreFile;
 		initEntries(gitIgnoreFile);
 	}
 
-	private void initEntries(File gitIgnore) throws IOException {
+	private void initEntries(IFile gitIgnore) throws IOException, CoreException {
 		this.entries = new HashSet<String>();
 		if (gitIgnore == null
-				|| !gitIgnore.canRead()) {
+				|| !gitIgnore.isAccessible()) {
 			return;
 		}
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new FileReader(gitIgnore));
+
+			reader = new BufferedReader(new InputStreamReader(gitIgnore.getContents()));
 			for (String line = null; (line = reader.readLine()) != null;) {
 				if (line != null) {
 					entries.add(line);
@@ -69,33 +72,26 @@ public class GitIgnore {
 	public boolean contains(String entry) {
 		return entries.contains(entry);
 	}
-	
+
 	public int size() {
 		return entries.size();
 	}
 
 	/**
 	 * Writes the entries in this instance to the .gitignore file. Overwrites
-	 * and existing file if the given overwrite is set to <code>true</code>,
-	 * appends otherwise.
+	 * and existing file
 	 * 
-	 * @param overwrite
-	 *            overwrites an existing file if <code>true</code>, appends
-	 *            otherwise
 	 * @throws IOException
+	 * @throws CoreException
 	 */
-	public File write(boolean overwrite) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(file, !overwrite));
-		try {
-			for (String entry : entries) {
-				writer.write(entry);
-				writer.write(NL);
-			}
-			writer.flush();
-			return file;
-		} finally {
-			writer.close();
+	public IFile write(IProgressMonitor monitor) throws CoreException {
+		StringBuilder builder = new StringBuilder();
+		for (String entry : entries) {
+			builder.append(entry);
+			builder.append(NL);
 		}
+		file.setContents(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
+		return file;
 	}
 
 	public boolean exists() {
