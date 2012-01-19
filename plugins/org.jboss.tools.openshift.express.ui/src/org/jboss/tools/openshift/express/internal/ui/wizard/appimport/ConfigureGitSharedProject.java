@@ -96,7 +96,6 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
-		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		addToModified(setupGitIgnore(project, monitor));
 		addToModified(setupOpenShiftMavenProfile(project));
 
@@ -104,6 +103,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 				getRemoteName(),
 				getApplication().getGitUri(),
 				EGitUtils.getRepository(project));
+		
 		addAndCommitModifiedResource(project, monitor);
 
 		return Collections.singletonList(project);
@@ -126,14 +126,14 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	}
 
 	/**
-	 * Copies the openshift configuration from the given source folder to the
-	 * given project. Copies
+	 * Copies the openshift configuration from the given application to the
+	 * given project. Clones the application to a tmp-folder, copies
 	 * <ul>
 	 * <li>.openshift</li>
 	 * <li>deployments</li>
-	 * <li>pom.xml</li>
 	 * </ul>
-	 * to the project in the workspace
+	 * to the project in the workspace. Deployments and .openshift and kept
+	 * as-is if they already exist in the project.
 	 * 
 	 * @param sourceFolder
 	 *            the source to copy the openshift config from
@@ -141,17 +141,19 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 *            the project to copy the configuration to.
 	 * @param monitor
 	 *            the monitor to report progress to
-	 * @return 
+	 * @return
 	 * @return
 	 * @throws IOException
 	 * @throws CoreException
-	 * @throws URISyntaxException 
-	 * @throws InterruptedException 
-	 * @throws InvocationTargetException 
-	 * @throws OpenShiftException 
+	 * @throws URISyntaxException
+	 * @throws InterruptedException
+	 * @throws InvocationTargetException
+	 * @throws OpenShiftException
 	 */
-	private Collection<IResource> copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
-			throws IOException, CoreException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+	private Collection<IResource> copyOpenshiftConfigurations(IApplication application, String remoteName,
+			IProject project, IProgressMonitor monitor)
+			throws IOException, CoreException, OpenShiftException, InvocationTargetException, InterruptedException,
+			URISyntaxException {
 		Assert.isLegal(project != null);
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
 
@@ -161,6 +163,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		Collection<IResource> copiedResources =
 				copyResources(tmpFolder, new String[] { ".openshift", "deployments" }, project);
 		FileUtil.safeDelete(tmpFolder);
+		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		return copiedResources;
 	}
 
@@ -193,9 +196,9 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 * 
 	 * @param project
 	 *            the project to which the .gitignore shall be configured
-	 * @return 
+	 * @return
 	 * @throws IOException
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private IFile setupGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
 		GitIgnore gitIgnore = new GitIgnore(project);
