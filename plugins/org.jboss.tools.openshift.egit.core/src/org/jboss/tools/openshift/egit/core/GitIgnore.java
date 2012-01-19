@@ -84,7 +84,7 @@ public class GitIgnore {
 	 *            otherwise
 	 * @throws IOException
 	 */
-	public void write(boolean overwrite) throws IOException {
+	public File write(boolean overwrite) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file, !overwrite));
 		try {
 			for (String entry : entries) {
@@ -92,6 +92,7 @@ public class GitIgnore {
 				writer.write(NL);
 			}
 			writer.flush();
+			return file;
 		} finally {
 			writer.close();
 		}
