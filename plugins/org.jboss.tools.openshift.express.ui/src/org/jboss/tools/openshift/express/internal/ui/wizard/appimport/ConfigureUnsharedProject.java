@@ -92,7 +92,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		IProject project = getProject();
 
 		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
-		createGitIgnore(project);
+		createGitIgnore(project, monitor);
 		shareProject(project, monitor);
 
 		return Collections.singletonList(project);
@@ -151,15 +151,16 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * @param project
 	 *            the project to which the .gitignore shall be configured
 	 * @throws IOException
+	 * @throws CoreException 
 	 */
-	private void createGitIgnore(IProject project) throws IOException {
+	private void createGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
 		GitIgnore gitIgnore = new GitIgnore(project);
 		gitIgnore.add("target")
 				.add(".settings")
 				.add(".project")
 				.add(".classpath")
 				.add(".factorypath");
-		gitIgnore.write(false);
+		gitIgnore.write(monitor);
 	}
 
 	// private void mergeWithApplicationRepository(Repository repository,

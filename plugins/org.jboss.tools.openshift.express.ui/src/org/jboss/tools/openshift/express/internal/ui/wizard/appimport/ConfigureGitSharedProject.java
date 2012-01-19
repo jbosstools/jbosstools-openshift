@@ -95,16 +95,15 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
-		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
-
-		setupGitIgnore(project);
+		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+		addToModified(setupGitIgnore(project, monitor));
+		addToModified(setupOpenShiftMavenProfile(project));
 
 		EGitUtils.addRemoteTo(
 				getRemoteName(),
 				getApplication().getGitUri(),
 				EGitUtils.getRepository(project));
-		setupOpenShiftMavenProfile(project);
 		addAndCommitModifiedResource(project, monitor);
 
 		return Collections.singletonList(project);
@@ -115,16 +114,15 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		EGitUtils.commit(project, monitor);
 	}
 
-	private void setupOpenShiftMavenProfile(IProject project) throws CoreException {
+	private IResource setupOpenShiftMavenProfile(IProject project) throws CoreException {
 		Assert.isLegal(OpenShiftMavenProfile.isMavenProject(project));
 
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, OpenShiftUIActivator.PLUGIN_ID);
 		if (profile.existsInPom()) {
-			return;
+			return null;
 		}
 		profile.addToPom(project.getName());
-		IFile pomFile = profile.savePom();
-		modifiedResources.add(pomFile);
+		return profile.savePom();
 	}
 
 	/**
@@ -143,6 +141,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 *            the project to copy the configuration to.
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return 
 	 * @return
 	 * @throws IOException
 	 * @throws CoreException
@@ -151,7 +150,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 * @throws InvocationTargetException 
 	 * @throws OpenShiftException 
 	 */
-	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
+	private Collection<IResource> copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
 			throws IOException, CoreException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		Assert.isLegal(project != null);
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
@@ -161,8 +160,8 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 
 		Collection<IResource> copiedResources =
 				copyResources(tmpFolder, new String[] { ".openshift", "deployments" }, project);
-		modifiedResources.addAll(copiedResources);
 		FileUtil.safeDelete(tmpFolder);
+		return copiedResources;
 	}
 
 	private Collection<IResource> copyResources(File sourceFolder, String[] sourcePaths, IProject project)
@@ -194,17 +193,32 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 * 
 	 * @param project
 	 *            the project to which the .gitignore shall be configured
+	 * @return 
 	 * @throws IOException
+	 * @throws CoreException 
 	 */
-	private void setupGitIgnore(IProject project) throws IOException {
+	private IFile setupGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
 		GitIgnore gitIgnore = new GitIgnore(project);
 		gitIgnore.add("target")
 				.add(".settings")
 				.add(".project")
 				.add(".classpath")
 				.add(".factorypath");
-		File file = gitIgnore.write(false);
-		IFile gitIgnoreFile = project.getFile(file.getName());
-		modifiedResources.add(gitIgnoreFile);
+		return gitIgnore.write(monitor);
 	}
+
+	private void addToModified(Collection<IResource> resources) {
+		if (resources == null) {
+			return;
+		}
+		modifiedResources.addAll(resources);
+	}
+
+	private void addToModified(IResource resource) {
+		if (resource == null) {
+			return;
+		}
+		modifiedResources.add(resource);
+	}
+
 }
