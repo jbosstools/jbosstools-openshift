@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -161,36 +162,13 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		cloneRepository(application, remoteName, tmpFolder, false, monitor);
 
 		Collection<IResource> copiedResources =
-				copyResources(tmpFolder, new String[] { 
+				ResourceUtils.copy(tmpFolder, new String[] { 
 						".openshift", 
 						"deployments", 
 						"pom.xml" }, project);
 		FileUtil.safeDelete(tmpFolder);
 		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		return copiedResources;
-	}
-
-	private Collection<IResource> copyResources(File sourceFolder, String[] sourcePaths, IProject project)
-			throws IOException {
-		List<IResource> resources = new ArrayList<IResource>();
-		File projectFolder = project.getLocation().toFile();
-
-		for (String sourcePath : sourcePaths) {
-			File source = new File(sourceFolder, sourcePath);
-
-			if (!FileUtils.canRead(source)) {
-				continue;
-			}
-
-			FileUtils.copy(source, projectFolder, false);
-
-			if (source.isDirectory()) {
-				resources.add(project.getFolder(sourcePath));
-			} else {
-				resources.add(project.getFile(sourcePath));
-			}
-		}
-		return resources;
 	}
 
 	/**
