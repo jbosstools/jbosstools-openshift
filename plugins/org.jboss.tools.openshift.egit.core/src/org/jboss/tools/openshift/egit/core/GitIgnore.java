@@ -90,7 +90,11 @@ public class GitIgnore {
 			builder.append(entry);
 			builder.append(NL);
 		}
-		file.setContents(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
+		if (!file.exists()) {
+			file.create(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
+		} else {
+			file.setContents(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
+		}
 		return file;
 	}
 
