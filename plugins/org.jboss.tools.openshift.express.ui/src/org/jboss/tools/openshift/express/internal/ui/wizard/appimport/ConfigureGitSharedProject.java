@@ -167,7 +167,6 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 						"deployments", 
 						"pom.xml" }, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
-		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		return copiedResources;
 	}
 
