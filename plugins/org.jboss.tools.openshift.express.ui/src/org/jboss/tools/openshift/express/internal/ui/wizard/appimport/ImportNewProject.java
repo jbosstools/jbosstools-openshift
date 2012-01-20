@@ -80,9 +80,11 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		}
 
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+		
+		
 		return importedProjects;
 	}
-
+	
 	@SuppressWarnings("unused")
 	private void mergeWithApplicationRepository(Repository repository, IApplication application,
 			IProgressMonitor monitor)

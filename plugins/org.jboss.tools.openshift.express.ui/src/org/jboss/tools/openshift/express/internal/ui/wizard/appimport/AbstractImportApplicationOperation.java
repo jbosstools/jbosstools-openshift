@@ -11,13 +11,17 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
@@ -65,7 +69,8 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 * @see AbstractImportApplicationOperation#getApplication()
 	 * @see #getRepositoryPath()
 	 */
-	protected File cloneRepository(IApplication application, String remoteName, File destination, boolean addToRepoView,
+	protected File cloneRepository(IApplication application, String remoteName, File destination,
+			boolean addToRepoView,
 			IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
@@ -78,6 +83,28 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 					application.getGitUri(), remoteName, destination, monitor);
 		}
 		return destination;
+	}
+
+	/**
+	 * Adds the given remote repo (at the given git uri) with the given name to
+	 * the given repository. The remote is not added if the remoteName to use is
+	 * "origin".
+	 * 
+	 * @param remoteName
+	 *            the name to store the remote repo with
+	 * @param gitUri
+	 *            the git uri at which the remote repo is reachable
+	 * @param repository
+	 *            the local repo to add the remote to
+	 * @throws MalformedURLException
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 */
+	protected void addRemoteRepo(String remoteName, String gitUri, Repository repository) throws MalformedURLException,
+			URISyntaxException, IOException {
+		if (remoteName != Constants.DEFAULT_REMOTE_NAME) {
+			EGitUtils.addRemoteTo(remoteName, gitUri, repository);
+		}
 	}
 
 	protected String getProjectName() {
