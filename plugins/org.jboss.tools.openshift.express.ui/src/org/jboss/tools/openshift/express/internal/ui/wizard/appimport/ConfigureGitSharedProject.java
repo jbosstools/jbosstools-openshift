@@ -31,6 +31,7 @@ import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
@@ -96,6 +97,11 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
+		if (EGitUtils.isDirty(EGitUtils.getRepository(project))) {
+			throw new UnCommittedChangesException(
+					"The project {0} has uncommitted changes. Please commit those changes first.", project.getName());
+		}
+
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		addToModified(setupGitIgnore(project, monitor));
 		addToModified(setupOpenShiftMavenProfile(project, monitor));
@@ -104,7 +110,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 				getRemoteName(),
 				getApplication().getGitUri(),
 				EGitUtils.getRepository(project));
-		
+
 		addAndCommitModifiedResource(project, monitor);
 
 		return Collections.singletonList(project);
@@ -162,9 +168,9 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		cloneRepository(application, remoteName, tmpFolder, false, monitor);
 
 		Collection<IResource> copiedResources =
-				ResourceUtils.copy(tmpFolder, new String[] { 
-						".openshift", 
-						"deployments", 
+				ResourceUtils.copy(tmpFolder, new String[] {
+						".openshift",
+						"deployments",
 						"pom.xml" }, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
 		return copiedResources;
