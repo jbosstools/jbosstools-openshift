@@ -139,11 +139,12 @@ public class ResourceUtils {
 			return IResource.NONE;
 		}
 	}
-	
+
 	/**
 	 * Copies the given paths in the given sourceFolder (which may be located
 	 * outside of the workspace - we're using java.io.File) to the given
-	 * project.
+	 * project. The copy operation is not using eclipse resource API, but it
+	 * refreshes the project folder afterwards.
 	 * 
 	 * @param sourceFolder
 	 *            the sourceFolder that contains the given path that shall be
@@ -154,9 +155,10 @@ public class ResourceUtils {
 	 *            the project that the sources shall be copied to.
 	 * @return the freshly created resources.
 	 * @throws IOException
+	 * @throws CoreException 
 	 */
-	public static Collection<IResource> copy(File sourceFolder, String[] sourcePaths, IProject project)
-			throws IOException {
+	public static Collection<IResource> copy(File sourceFolder, String[] sourcePaths, IProject project,
+			IProgressMonitor monitor) throws IOException, CoreException {
 		List<IResource> resources = new ArrayList<IResource>();
 		File projectFolder = project.getLocation().toFile();
 
@@ -175,6 +177,7 @@ public class ResourceUtils {
 				resources.add(project.getFile(sourcePath));
 			}
 		}
+		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		return resources;
 	}
 }

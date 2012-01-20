@@ -26,6 +26,7 @@ import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -49,7 +50,8 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * application. *
 	 * <ul>
 	 * <li>clones the application git repository</li>
-	 * <li>copies the configuration files to the user project (in the workspace)</li>
+	 * <li>copies the configuration files to the user project (in the workspace)
+	 * </li>
 	 * <li>shares the given project with git</li>
 	 * </ul>
 	 * 
@@ -121,25 +123,26 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * @param monitor
 	 *            the monitor to report progress to
 	 * @throws IOException
-	 * @throws URISyntaxException 
-	 * @throws InterruptedException 
-	 * @throws InvocationTargetException 
-	 * @throws OpenShiftException 
+	 * @throws URISyntaxException
+	 * @throws InterruptedException
+	 * @throws InvocationTargetException
+	 * @throws OpenShiftException
+	 * @throws CoreException 
 	 */
-	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
-			throws IOException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project,
+			IProgressMonitor monitor)
+			throws IOException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException, CoreException {
 		Assert.isLegal(project != null);
-		File projectFolder = project.getLocation().toFile();
-
-		File tmpFolder = FileUtils.getRandomTmpFolder();
-		cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
 
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
-		FileUtils.copy(new File(tmpFolder, ".git"), projectFolder, false);
-		FileUtils.copy(new File(tmpFolder, ".openshift"), projectFolder, false);
-		FileUtils.copy(new File(tmpFolder, "deployments"), projectFolder, false);
-		FileUtils.copy(new File(tmpFolder, "pom.xml"), projectFolder, false);
-
+		File tmpFolder = FileUtils.getRandomTmpFolder();
+		cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
+		ResourceUtils.copy(tmpFolder, new String[] {
+				".git",
+				".openshift",
+				"deployments",
+				"pom.xml" }, project, monitor);
+		
 		FileUtil.safeDelete(tmpFolder);
 
 	}
@@ -151,7 +154,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * @param project
 	 *            the project to which the .gitignore shall be configured
 	 * @throws IOException
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private void createGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
 		GitIgnore gitIgnore = new GitIgnore(project);

@@ -165,7 +165,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 				ResourceUtils.copy(tmpFolder, new String[] { 
 						".openshift", 
 						"deployments", 
-						"pom.xml" }, project);
+						"pom.xml" }, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
 		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		return copiedResources;
