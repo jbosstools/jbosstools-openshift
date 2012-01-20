@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +22,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
@@ -97,7 +100,15 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		createGitIgnore(project, monitor);
 		shareProject(project, monitor);
 
+		addRemoteRepo(getRemoteName(), getApplication().getGitUri(), EGitUtils.getRepository(project));
+
 		return Collections.singletonList(project);
+	}
+
+	private void addRemoteRepo(String remoteName, String gitUri, Repository repository) throws MalformedURLException, URISyntaxException, IOException {
+		if (remoteName != Constants.DEFAULT_REMOTE_NAME) {
+			EGitUtils.addRemoteTo(remoteName, gitUri, repository);
+		}
 	}
 
 	private void shareProject(IProject project, IProgressMonitor monitor) throws CoreException {
@@ -127,11 +138,12 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * @throws InterruptedException
 	 * @throws InvocationTargetException
 	 * @throws OpenShiftException
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project,
 			IProgressMonitor monitor)
-			throws IOException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException, CoreException {
+			throws IOException, OpenShiftException, InvocationTargetException, InterruptedException,
+			URISyntaxException, CoreException {
 		Assert.isLegal(project != null);
 
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
@@ -142,7 +154,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 				".openshift",
 				"deployments",
 				"pom.xml" }, project, monitor);
-		
+
 		FileUtil.safeDelete(tmpFolder);
 
 	}
