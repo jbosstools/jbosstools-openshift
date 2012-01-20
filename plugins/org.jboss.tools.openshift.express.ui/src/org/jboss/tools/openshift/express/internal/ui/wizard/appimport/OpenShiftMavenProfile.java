@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
@@ -272,12 +273,13 @@ public class OpenShiftMavenProfile {
 		return new Status(IStatus.ERROR, pluginId, message);
 	}
 
-	public IFile savePom() throws CoreException {
+	public IFile savePom(IProgressMonitor monitor) throws CoreException {
 		Writer writer = null;
 		try {
 			writer = new StringWriter();
 			createTransformer().transform(new DOMSource(getDocument()), new StreamResult(writer));
-			pomFile.setContents(new ByteArrayInputStream(writer.toString().getBytes()), IResource.FORCE, null);
+			pomFile.setContents(
+					new ByteArrayInputStream(writer.toString().getBytes()), IResource.FORCE, monitor);
 			return pomFile;
 		} catch (TransformerConfigurationException e) {
 			throw new CoreException(createStatus(e));

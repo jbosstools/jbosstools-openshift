@@ -97,7 +97,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		addToModified(setupGitIgnore(project, monitor));
-		addToModified(setupOpenShiftMavenProfile(project));
+		addToModified(setupOpenShiftMavenProfile(project, monitor));
 
 		EGitUtils.addRemoteTo(
 				getRemoteName(),
@@ -114,7 +114,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		EGitUtils.commit(project, monitor);
 	}
 
-	private IResource setupOpenShiftMavenProfile(IProject project) throws CoreException {
+	private IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
 		Assert.isLegal(OpenShiftMavenProfile.isMavenProject(project));
 
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, OpenShiftUIActivator.PLUGIN_ID);
@@ -122,7 +122,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 			return null;
 		}
 		profile.addToPom(project.getName());
-		return profile.savePom();
+		return profile.savePom(monitor);
 	}
 
 	/**
