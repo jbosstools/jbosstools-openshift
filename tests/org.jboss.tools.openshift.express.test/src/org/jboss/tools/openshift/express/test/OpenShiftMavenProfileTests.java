@@ -322,7 +322,7 @@ public class OpenShiftMavenProfileTests {
 	public void pomHasOpenShiftProfileAfterAdd() throws CoreException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(pomWithoutOpenShiftProfile, PLUGIN_ID);
 		profile.addToPom(nonOpenShiftProject.getName());
-		profile.savePom();
+		profile.savePom(new NullProgressMonitor());
 		profile = new OpenShiftMavenProfile(pomWithoutOpenShiftProfile, PLUGIN_ID);
 		assertTrue(profile.existsInPom());
 	}
@@ -332,7 +332,7 @@ public class OpenShiftMavenProfileTests {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
 		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName());
 		assertTrue(added);
-		profile.savePom();
+		profile.savePom(new NullProgressMonitor());
 		profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
 		assertTrue(profile.existsInPom());
 	}
@@ -342,7 +342,7 @@ public class OpenShiftMavenProfileTests {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
 		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName());
 		assertTrue(added);
-		profile.savePom();
+		profile.savePom(new NullProgressMonitor());
 		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
 		assertTrue(pomContent.indexOf("<id>openshift</id>") >= 0);
 	}
