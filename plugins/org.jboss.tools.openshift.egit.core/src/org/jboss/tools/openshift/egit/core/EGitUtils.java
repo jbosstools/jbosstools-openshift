@@ -46,6 +46,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -712,6 +713,25 @@ public class EGitUtils {
 			status = new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, NLS.bind(message, arguments), e);
 		}
 		return status;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given repository has uncommitted
+	 * changes.
+	 * 
+	 * @param repository the repository to check for uncommitted changes
+	 * @return
+	 * @throws IOException 
+	 * @throws NoWorkTreeException 
+	 */
+	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException {
+		boolean hasChanges = false;
+		org.eclipse.jgit.api.Status repoStatus = new Git(repository).status().call();
+		hasChanges |= !repoStatus.getAdded().isEmpty();
+		hasChanges |= !repoStatus.getChanged().isEmpty();
+		hasChanges |= !repoStatus.getModified().isEmpty();
+		hasChanges |= repoStatus.getRemoved().isEmpty();
+		return hasChanges;
 	}
 
 	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) {
