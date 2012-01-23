@@ -57,7 +57,7 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	public NewApplicationWizardPage(ApplicationWizardModel wizardModel, IWizard wizard) {
 		super("New OpenShift Express Application",
-				"Select a name and an type for your new OpenShift Express application",
+				"Enter a name and select a type for your new OpenShift Express application",
 				"NewOpenShiftExpressApplication", wizard);
 		this.wizardModel = wizardModel;
 		this.model = new NewApplicationWizardPageModel(wizardModel);
