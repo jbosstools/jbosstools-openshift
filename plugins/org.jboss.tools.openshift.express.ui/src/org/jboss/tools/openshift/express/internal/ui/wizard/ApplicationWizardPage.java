@@ -74,7 +74,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 	private ImportProjectWizardModel wizardModel;
 
 	public ApplicationWizardPage(IWizard wizard, ImportProjectWizardModel wizardModel) {
-		super("Application selection", "Please select an application to start with, or create a new one.",
+		super("Application selection", "Please select an application to start with or create a new one.",
 				"Application selection", wizard);
 		this.wizardModel = wizardModel;
 		this.model = new ApplicationWizardPageModel(wizardModel);
