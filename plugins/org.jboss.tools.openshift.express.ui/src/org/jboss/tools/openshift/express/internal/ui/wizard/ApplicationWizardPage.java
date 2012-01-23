@@ -283,8 +283,8 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 									getShell(),
 									"Delete Application",
 									NLS.bind(
-											"You're up to delete all data within an application. The data may not be recovered. "
-													+ "Are you sure that you want to delete application {0}?",
+											"This action will permanently remove the application and all of its data. The data cannot be recovered. "
+													+ "Are you sure that you want to delete application '{0}' ?",
 											model.getSelectedApplication().getName()))) {
 						WizardUtils.runInWizard(
 								new Job(NLS.bind("Deleting application \"{0}\"...",
