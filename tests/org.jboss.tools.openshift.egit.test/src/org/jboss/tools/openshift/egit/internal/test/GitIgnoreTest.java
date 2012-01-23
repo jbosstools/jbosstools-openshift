@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.egit.internal.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +23,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jgit.lib.Constants;
+import org.jboss.tools.common.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.junit.Test;
 
@@ -83,6 +86,64 @@ public class GitIgnoreTest {
 			assertTrue(gitIgnore.contains("redhat"));
 			gitIgnore.add("redhat");
 			assertTrue(gitIgnore.size() == 1);
+		} finally {
+			silentlyDelete(project);
+		}
+	}
+	
+	@Test
+	public void writingDoesNotAlterOrdering() throws CoreException, IOException {
+		IFile gitIgnoreFile = null;
+		IProject project = null;
+		try {
+			project = createRandomProject();
+			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+			String entries = FileUtil.readStream(gitIgnoreFile);
+			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+			gitIgnore.write(null);
+
+			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
+			assertEquals(entries, entriesAfterWrite);
+			
+		} finally {
+			silentlyDelete(project);
+		}
+	}
+
+	@Test
+	public void newEntriesAreAddedToTheEnd() throws CoreException, IOException {
+		IFile gitIgnoreFile = null;
+		IProject project = null;
+		try {
+			project = createRandomProject();
+			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+			String entries = FileUtil.readStream(gitIgnoreFile);
+			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+			gitIgnore.add("adietish");
+			gitIgnore.write(null);
+
+			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
+			assertFalse(entries.equals(entriesAfterWrite));
+			assertTrue(entriesAfterWrite.indexOf(entries) == 0);
+		} finally {
+			silentlyDelete(project);
+		}
+	}
+
+	@Test
+	public void addingExistingEntryDoesNotMoveItToTheEnd() throws CoreException, IOException {
+		IFile gitIgnoreFile = null;
+		IProject project = null;
+		try {
+			project = createRandomProject();
+			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+			String entries = FileUtil.readStream(gitIgnoreFile);
+			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+			gitIgnore.add("jboss");
+			gitIgnore.write(null);
+
+			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
+			assertEquals(entries, entriesAfterWrite);
 		} finally {
 			silentlyDelete(project);
 		}

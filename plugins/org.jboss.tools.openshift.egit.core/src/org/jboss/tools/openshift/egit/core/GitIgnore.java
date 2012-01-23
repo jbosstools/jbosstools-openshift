@@ -15,7 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -45,7 +45,7 @@ public class GitIgnore {
 	}
 
 	private void initEntries(IFile gitIgnore) throws IOException, CoreException {
-		this.entries = new HashSet<String>();
+		this.entries = new LinkedHashSet<String>();
 		if (gitIgnore == null
 				|| !gitIgnore.isAccessible()) {
 			return;
