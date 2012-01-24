@@ -61,6 +61,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
@@ -417,47 +418,43 @@ public class EGitUtils {
 	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force)
 			throws CoreException {
 
-		PushOperationSpecification spec = new PushOperationSpecification();
-		List<URIish> pushToUris = getPushURIs(remoteConfig);
-		List<RefSpec> pushRefSpecs = getPushRefSpecs(remoteConfig);
-		addURIRefToPushSpecification(pushToUris, pushRefSpecs, repository, spec);
-
-		// return new PushOperation(repository, spec, false, PUSH_TIMEOUT);
-		// TODO: fix pushoperation to really use the spec (currently seems like
-		// it does not work so we push everything to the remote)
-
-		// TODO ensure the 'force' is respected
-		return new PushOperation(repository, remoteConfig.getName(), false, PUSH_TIMEOUT);
+		Collection<URIish> pushURIs = getPushURIs(remoteConfig);
+		Collection<RefSpec> pushRefSpecs = createForceRefSpecs(force, getPushRefSpecs(remoteConfig));
+		PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, repository);
+		return new PushOperation(repository, pushSpec, false, PUSH_TIMEOUT);
 	}
 
 	/**
-	 * Adds the given push uris to the given push operation specification.
+	 * Creates a push operation specification for the given push uris to the
+	 * given push operation specification.
 	 * 
-	 * @param urisToPush
-	 *            the uris to push
+	 * @param pushURIs
+	 *            the push uri's
 	 * @param pushRefSpecs
 	 *            the push ref specs
 	 * @param repository
 	 *            the repository
-	 * @param spec
-	 *            the spec
+	 * @return the push operation specification
 	 * @throws CoreException
 	 *             the core exception
 	 */
-	private static void addURIRefToPushSpecification(List<URIish> urisToPush, List<RefSpec> pushRefSpecs,
-			Repository repository, PushOperationSpecification spec) throws CoreException {
-		for (URIish uri : urisToPush) {
-			try {
-				spec.addURIRefUpdates(uri,
-						Transport.open(repository, uri).findRemoteRefUpdatesFor(pushRefSpecs));
-			} catch (NotSupportedException e) {
-				throw new CoreException(createStatus(e, "Could not connect repository \"{0}\" to a remote",
-						repository.toString()));
-			} catch (IOException e) {
-				throw new CoreException(createStatus(e,
-						"Could not convert remote specifications for repository \"{0}\" to a remote",
-						repository.toString()));
+	private static PushOperationSpecification createPushSpec(Collection<URIish> pushURIs, Collection<RefSpec> pushRefSpecs,
+			Repository repository) throws CoreException {
+		try {
+			PushOperationSpecification pushSpec = new PushOperationSpecification();
+			for (URIish uri : pushURIs) {
+				Collection<RemoteRefUpdate> remoteRefUpdates =
+						Transport.open(repository, uri).findRemoteRefUpdatesFor(pushRefSpecs);
+				pushSpec.addURIRefUpdates(uri, remoteRefUpdates);
 			}
+			return pushSpec;
+		} catch (NotSupportedException e) {
+			throw new CoreException(createStatus(e, "Could not connect repository \"{0}\" to a remote",
+					repository.toString()));
+		} catch (IOException e) {
+			throw new CoreException(createStatus(e,
+					"Could not convert remote specifications for repository \"{0}\" to a remote",
+					repository.toString()));
 		}
 	}
 
@@ -468,21 +465,26 @@ public class EGitUtils {
 	 *            the remote config
 	 * @return the push ur is
 	 */
-	private static List<URIish> getPushURIs(RemoteConfig remoteConfig) {
-		List<URIish> urisToPush = new ArrayList<URIish>();
-		for (URIish uri : remoteConfig.getPushURIs())
-			urisToPush.add(uri);
-		if (urisToPush.isEmpty() && !remoteConfig.getURIs().isEmpty())
-			urisToPush.add(remoteConfig.getURIs().get(0));
-		return urisToPush;
+	private static Collection<URIish> getPushURIs(RemoteConfig remoteConfig) {
+		List<URIish> pushURIs = new ArrayList<URIish>();
+		for (URIish uri : remoteConfig.getPushURIs()) {
+			pushURIs.add(uri);
+		}
+		if (pushURIs.isEmpty()
+				&& !remoteConfig.getURIs().isEmpty()) {
+			pushURIs.add(remoteConfig.getURIs().get(0));
+		}
+		return pushURIs;
 	}
 
 	/**
-	 * Gets the push RefSpecs from the given remote configuration.
+	 * Gets the push RefSpecs from the given remote configuration. If none is
+	 * defined, a default refspec is returned with
+	 * {@link #DEFAULT_REFSPEC_SOURCE} and {@link #DEFAULT_REFSPEC_DESTINATION}.
 	 * 
 	 * @param config
-	 *            the config
-	 * @return the push ref specs
+	 *            the remote config to get the push specs from
+	 * @return the push specs to use for the given remote configuration.
 	 */
 	private static List<RefSpec> getPushRefSpecs(RemoteConfig config) {
 		List<RefSpec> pushRefSpecs = new ArrayList<RefSpec>();
@@ -497,6 +499,14 @@ public class EGitUtils {
 		return pushRefSpecs;
 	}
 
+	private static Collection<RefSpec> createForceRefSpecs(boolean forceUpdate, Collection<RefSpec> refSpecs) {
+		List<RefSpec> newRefSpecs = new ArrayList<RefSpec>();
+		for (RefSpec refSpec : refSpecs) {
+			newRefSpecs.add(refSpec.setForceUpdate(forceUpdate));
+		}
+		return newRefSpecs;
+	}
+	
 	/**
 	 * Gets the repository that is configured to the given project.
 	 * 
@@ -719,10 +729,11 @@ public class EGitUtils {
 	 * Returns <code>true</code> if the given repository has uncommitted
 	 * changes.
 	 * 
-	 * @param repository the repository to check for uncommitted changes
+	 * @param repository
+	 *            the repository to check for uncommitted changes
 	 * @return
-	 * @throws IOException 
-	 * @throws NoWorkTreeException 
+	 * @throws IOException
+	 * @throws NoWorkTreeException
 	 */
 	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException {
 		boolean hasChanges = false;

@@ -13,6 +13,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -22,6 +23,7 @@ import org.jboss.tools.openshift.egit.internal.test.util.TestRepository;
 import org.jboss.tools.openshift.egit.internal.test.util.TestUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EGitUtilsTest {
@@ -56,7 +58,7 @@ public class EGitUtilsTest {
 		testRepository2.connect(testProject2.getProject());
 		
 		this.testRepositoryClone = cloneRepository(testRepository);
-		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+//		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 	}
 
 	private TestRepository cloneRepository(TestRepository repository) throws URISyntaxException,
@@ -117,13 +119,13 @@ public class EGitUtilsTest {
 	public void fileAddedToCloneIsInRemoteAfterPush() throws Exception {
 		String fileName = "c.txt";
 		String fileContent = "adietish@redhat.com";
-
 		File file = testRepositoryClone.createFile(fileName, fileContent);
 		testRepositoryClone.addAndCommit(file, "adding a file");
 
+		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 		EGitUtils.push(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
 
-		// does origin contain file added to clone?
+		// repo2 must contain file added to clone
 		testUtils.assertRepositoryContainsFilesWithContent(
 				testRepository2.getRepository(),
 				fileName,
@@ -132,27 +134,54 @@ public class EGitUtilsTest {
 
 	@Test
 	public void forcedPushRemovesFileInRemote() throws Exception {
-		String fileName = "c.txt";
+		String fileName = "a.txt";
 		String fileContent = "adietish@redhat.com";
+		File file = testRepository.createFile(fileName, fileContent);
+		testRepository.addAndCommit(file, "adding a file");
 
-		IFile fileInRepo2 = testUtils.addFileToProject(
-				testProject2.getProject(),
-				fileName,
-				fileContent);
-		testRepository2.add(fileInRepo2);
+		File file2 = testRepository2.createFile("b.txt", "bingobongo");
+		testRepository2.addAndCommit(file2, "adding a file");
+		
+		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+		EGitUtils.pushForce(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
 
-		File fileInClone = testRepositoryClone.createFile(fileName, fileContent);
-		testRepositoryClone.addAndCommit(fileInClone, "adding a file");
-
-		EGitUtils.push(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
-
-		// does origin contain file added to clone?
+		// repo2 mustn't contain "b.txt"
+		testUtils.assertRepositoryMisses(
+				testRepository2.getRepository(),
+				file2.getName());
+		// repo2 must contain "a.txt"
 		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepositoryClone.getRepository(),
+				testRepository2.getRepository(),
 				fileName,
 				fileContent);
 	}
 	
+
+	@Ignore
+	@Test
+	public void pushFailsOnNonFastForward() throws Exception {
+		String fileName = "a.txt";
+		String fileContent = "adietish@redhat.com";
+		File file = testRepository.createFile(fileName, fileContent);
+		testRepository.addAndCommit(file, "adding a file");
+
+		File file2 = testRepository2.createFile("b.txt", "bingobongo");
+		testRepository2.addAndCommit(file2, "adding a file");
+		
+		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+		PushOperationResult result = EGitUtils.push(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
+
+		// repo2 mustn't contain "b.txt"
+		testUtils.assertRepositoryMisses(
+				testRepository2.getRepository(),
+				file2.getName());
+		// repo2 must contain "a.txt"
+		testUtils.assertRepositoryContainsFilesWithContent(
+				testRepository2.getRepository(),
+				fileName,
+				fileContent);
+	}
+
 	@Test
 	public void canGetRepoForProject() throws Exception {
 		Repository repository = EGitUtils.getRepository(testProject.getProject());

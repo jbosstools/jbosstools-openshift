@@ -17,9 +17,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -46,7 +49,7 @@ public class TestUtils {
 
 	/**
 	 * Create a "temporary" directory
-	 *
+	 * 
 	 * @param name
 	 *            the name of the directory
 	 * @return a directory as child of a "temporary" folder in the user home
@@ -68,7 +71,7 @@ public class TestUtils {
 
 	/**
 	 * Cleanup: delete the "temporary" folder and all children
-	 *
+	 * 
 	 * @throws IOException
 	 */
 	public void deleteTempDirs() throws IOException {
@@ -80,7 +83,7 @@ public class TestUtils {
 
 	/**
 	 * Read the stream into a String
-	 *
+	 * 
 	 * @param inputStream
 	 * @return the contents of the stream
 	 * @throws IOException
@@ -100,7 +103,7 @@ public class TestUtils {
 
 	/**
 	 * Add a file to an existing project
-	 *
+	 * 
 	 * @param project
 	 *            the project
 	 * @param path
@@ -132,7 +135,7 @@ public class TestUtils {
 
 	/**
 	 * Change the content of a file
-	 *
+	 * 
 	 * @param project
 	 * @param file
 	 * @param newContent
@@ -148,7 +151,7 @@ public class TestUtils {
 
 	/**
 	 * Create a project in the local file system
-	 *
+	 * 
 	 * @param parentFile
 	 *            the parent
 	 * @param projectName
@@ -177,43 +180,113 @@ public class TestUtils {
 
 	/**
 	 * verifies that repository contains exactly the given files.
+	 * 
 	 * @param repository
 	 * @param paths
 	 * @throws Exception
 	 */
-	public void assertRepositoryContainsFiles(Repository repository,
-			String[] paths) throws Exception {
-		Set<String> expectedfiles = new HashSet<String>();
-		for (String path : paths)
-			expectedfiles.add(path);
+	public void assertRepositoryExactlyContains(Repository repository, String... paths) throws Exception {
+		RepoDiff repoDiff = createRepoDiff(repository, paths);
+		if (repoDiff.hasUnexpected()) {
+			fail(repoDiff.getUnexpectedFiles());
+		}
+		if (repoDiff.hasMissing()) {
+			fail(repoDiff.getUnexpectedFiles());
+		}
+	}
+
+	public void assertRepositoryMisses(Repository repository, String... paths) throws Exception {
+		RepoDiff repoDiff = createRepoDiff(repository, paths);
+		for (String missingPath : paths) {
+			assertTrue(repoDiff.getMissing().contains(missingPath));
+		}
+	}
+
+	/**
+	 * verifies that repository contains exactly the given files.
+	 * 
+	 * @param repository
+	 * @param paths
+	 * @throws Exception
+	 */
+	private RepoDiff createRepoDiff(Repository repository, String... expectedPaths) throws Exception {
+		RepoDiff repoDiff = new RepoDiff();
+		Set<String> expectedFiles = new HashSet<String>(Arrays.asList(expectedPaths));
+
 		TreeWalk treeWalk = new TreeWalk(repository);
 		treeWalk.addTree(repository.resolve("HEAD^{tree}"));
 		treeWalk.setRecursive(true);
+
 		while (treeWalk.next()) {
 			String path = treeWalk.getPathString();
-			if (!expectedfiles.contains(path))
-				fail("Repository contains unexpected expected file " + path);
-			expectedfiles.remove(path);
-		}
-		if (expectedfiles.size() > 0) {
-			StringBuilder message = new StringBuilder(
-					"Repository does not contain expected files: ");
-			for (String path : expectedfiles) {
-				message.append(path);
-				message.append(" ");
+			if (!expectedFiles.contains(path)) {
+				repoDiff.addUnexpected(path);
 			}
-			fail(message.toString());
+			expectedFiles.remove(path);
+		}
+		repoDiff.addAllMissing(expectedFiles);
+		return repoDiff;
+	}
+
+	public class RepoDiff {
+
+		private List<String> unexpected = new ArrayList<String>();
+		private List<String> missing = new ArrayList<String>();
+
+		public void addMissing(String path) {
+			missing.add(path);
+		}
+
+		public void addAllMissing(Collection<String> paths) {
+			missing.addAll(paths);
+		}
+
+		public List<String> getMissing() {
+			return missing;
+		}
+
+		public boolean hasMissing() {
+			return !missing.isEmpty();
+		}
+
+		public String getMissingFiles() {
+			StringBuilder builder = new StringBuilder("Repository is nissing files: ");
+			for (String missingPath : getMissing()) {
+				builder.append(missingPath).append(',');
+			}
+			return builder.toString();
+		}
+
+		public void addUnexpected(String path) {
+			unexpected.add(path);
+		}
+
+		public List<String> getUnexpected() {
+			return unexpected;
+		}
+
+		public boolean hasUnexpected() {
+			return !unexpected.isEmpty();
+		}
+
+		public String getUnexpectedFiles() {
+			StringBuilder builder = new StringBuilder("Repository contains unexpected expected files: ");
+			for (String unexpectedPath : getUnexpected()) {
+				builder.append(unexpectedPath).append(',');
+			}
+			return builder.toString();
 		}
 	}
 
 	/**
 	 * verifies that repository contains exactly the given files with the given
 	 * content. Usage example:<br>
-	 *
+	 * 
 	 * <code>
 	 * assertRepositoryContainsFiles(repository, "foo/a.txt", "content of A",
 	 *                                           "foo/b.txt", "content of B")
 	 * </code>
+	 * 
 	 * @param repository
 	 * @param args
 	 * @throws Exception
@@ -255,11 +328,11 @@ public class TestUtils {
 			throw new IllegalArgumentException("needs to be pairs");
 		HashMap<String, String> map = new HashMap<String, String>();
 		for (int i = 0; i < args.length; i += 2) {
-			map.put(args[i], args[i+1]);
+			map.put(args[i], args[i + 1]);
 		}
 		return map;
 	}
-	
+
 	public String getPathInRepository(IResource resource) {
 		RepositoryMapping mapping = RepositoryMapping.getMapping(resource);
 		if (mapping == null) {
