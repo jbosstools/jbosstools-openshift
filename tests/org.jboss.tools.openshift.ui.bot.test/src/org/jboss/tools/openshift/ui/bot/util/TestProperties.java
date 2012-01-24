@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
  * @author sbunciak
  *
  */
-public class OpenShiftTestProperties {
+public class TestProperties {
 
     public static Properties props = new Properties();
 
@@ -24,10 +24,10 @@ public class OpenShiftTestProperties {
                     "resources/openshift.ui.bot.test.properties"));
 
         } catch (FileNotFoundException e) {
-            Logger.getLogger(OpenShiftTestProperties.class).error(
+            Logger.getLogger(TestProperties.class).error(
                     "Property file not found !", e);
         } catch (IOException e) {
-            Logger.getLogger(OpenShiftTestProperties.class).error(
+            Logger.getLogger(TestProperties.class).error(
                     "IO Exception !", e);
         }
 

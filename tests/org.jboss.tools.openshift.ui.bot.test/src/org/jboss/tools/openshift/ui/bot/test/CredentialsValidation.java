@@ -4,10 +4,11 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
-import org.jboss.tools.openshift.ui.bot.util.OpenShiftTestProperties;
+import org.jboss.tools.openshift.ui.bot.util.TestProperties;
 import org.jboss.tools.ui.bot.ext.SWTTestExt;
 import org.jboss.tools.ui.bot.ext.config.Annotations.Require;
 import org.jboss.tools.ui.bot.ext.gen.ActionItem;
+import org.jboss.tools.ui.bot.ext.types.IDELabel;
 import org.junit.Test;
 
 @Require(clearWorkspace = true)
@@ -25,16 +26,14 @@ public class CredentialsValidation extends SWTTestExt {
                 validateButton.isEnabled());
 
         // set wrong user credentials
-        wiz.text(0).setText(
-                OpenShiftTestProperties.getProperty("openshift.user.name"));
-        wiz.text(1).setText(
-                OpenShiftTestProperties.getProperty("openshift.user.wrongpwd"));
+        wiz.text(0).setText(TestProperties.getProperty("openshift.user.name"));
+        wiz.text(1).setText(TestProperties.getProperty("openshift.user.wrongpwd"));
 
         assertTrue(
                 "Validation button should be enabled to check the user credentials.",
                 validateButton.isEnabled());
 
-        SWTBotButton nextButton = wiz.button("Next >");
+        SWTBotButton nextButton = wiz.button(IDELabel.Button.NEXT);
         // try to move forward
         nextButton.click();
 
@@ -46,12 +45,9 @@ public class CredentialsValidation extends SWTTestExt {
         assertFalse("Next > button shouldn't be enabled to move forward.",
                 nextButton.isEnabled());
 
-        // test on changed credentials
         // set correct user credentials
-        wiz.text(0).setText(
-                OpenShiftTestProperties.getProperty("openshift.user.name"));
-        wiz.text(1).setText(
-                OpenShiftTestProperties.getProperty("openshift.user.pwd"));
+        wiz.text(0).setText(TestProperties.getProperty("openshift.user.name"));
+        wiz.text(1).setText(TestProperties.getProperty("openshift.user.pwd"));
 
         assertTrue(
                 "Validation button should be enabled again, user credentials has been changed.",
