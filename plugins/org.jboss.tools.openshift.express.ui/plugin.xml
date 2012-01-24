@@ -238,5 +238,15 @@
     &lt;/build&gt;
 &lt;/profile&gt;</pattern>
        </template>
+    </extension>
+    <extension
+          point="org.eclipse.wst.server.ui.editorPageSections">
+       <section
+             class="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressDetailsSection"
+             id="org.jboss.tools.openshift.express.ui.behaviour.details.section"
+             insertionId="org.eclipse.wst.server.editor.overview.left"
+             order="10"
+             typeIds="org.jboss.tools.openshift.express.openshift.server.type">
+       </section>
     </extension>      
 </plugin>

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import static org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants.SERVER_PASSWORD;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
@@ -23,6 +25,7 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
+import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 
 /**
  * This class holds the attribute names whose values will be
@@ -39,6 +42,7 @@ public class ExpressServerUtils {
 	public static final String ATTRIBUTE_APPLICATION_ID =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
+	// Legacy, not to be used
 	public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT =  "origin";
@@ -88,6 +92,16 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
+	public static String getExpressRemoteName(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, (String)null);
+	}
+
+	public static IServer setExpressRemoteName(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+
 	public static String getExpressUsername(IServerAttributes attributes ) {
 		return attributes.getAttribute(ATTRIBUTE_USERNAME, (String)null);
 	}
@@ -99,14 +113,20 @@ public class ExpressServerUtils {
 	}
 
 	// TODO Must secure this!!! 
-	public static String getExpressPassword(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_PASSWORD, (String)null);
+	public static String getExpressPassword(IServerWorkingCopy server ) {
+		return getExpressApplicationId(server.getOriginal());
+	}
+	
+	public static String getExpressPassword(IServer server ) {
+		String s = ServerUtil.getFromSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD);
+		if( s == null )
+			return server.getAttribute(ExpressServerUtils.ATTRIBUTE_PASSWORD, (String)null);
+		return s;
 	}
 	
 	public static IServer setExpressPassword(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_PASSWORD, val);
-		return wc.save(false, new NullProgressMonitor());
+		ServerUtil.storeInSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD, val);
+		return server;
 	}
 	
 	
@@ -182,7 +202,6 @@ public class ExpressServerUtils {
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, "openshift");
 		wc.setAttribute(ATTRIBUTE_USERNAME, username);
-		wc.setAttribute(ATTRIBUTE_PASSWORD, password);
 		wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
@@ -192,7 +211,9 @@ public class ExpressServerUtils {
 		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
-		return wc.save(true, new NullProgressMonitor());
+		IServer saved = wc.save(true, new NullProgressMonitor());
+		ExpressServerUtils.setExpressPassword(wc, password);
+		return saved;
 	}
 	
 	
