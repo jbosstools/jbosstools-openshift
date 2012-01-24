@@ -8,11 +8,13 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
+package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,47 +39,144 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreateNewApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ImportExistingApplicationWizard;
 
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IEmbeddableCartridge;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr√© Dietisheim
- * @Deprecated: see the {@link CreateNewApplicationWizard} and the {@link ImportExistingApplicationWizard}
+ * @author André Dietisheim
+ * @author Xavier Coulon
  */
-@Deprecated
-public class ImportProjectWizard extends Wizard implements INewWizard {
+public class CreateNewApplicationWizard extends Wizard implements INewWizard {
 
-	private ImportProjectWizardModel model;
+	private CreateNewApplicationWizardModel wizardModel;
 
-	public ImportProjectWizard() {
-	}
-
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle("OpenShift application wizard");
+	public CreateNewApplicationWizard() {
+		this.wizardModel = new CreateNewApplicationWizardModel();
 		setNeedsProgressMonitor(true);
 	}
 
 	@Override
+	public void addPages() {
+		this.wizardModel = new CreateNewApplicationWizardModel();
+		addPage(new CredentialsWizardPage(this, wizardModel));
+		addPage(new ApplicationConfigurationWizardPage(this, wizardModel));
+		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, wizardModel));
+		addPage(new GitCloningSettingsWizardPage(this, wizardModel));
+	}
+
+	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public boolean performFinish() {
+		boolean successfull = true;
+		if (wizardModel.getApplication() == null) {
+			successfull = processApplicationCreation();
+
+		}
+		if (successfull) {
+			successfull = processCartridges();
+		}
+		if(successfull) {
+			try {
+				final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
+				Future<IStatus> jobResult =
+						WizardUtils.runInWizard(
+								new ImportJob(delegatingMonitor),
+								delegatingMonitor, getContainer());
+				return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
+			} catch (Exception e) {
+				ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
+						new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+								"An exception occurred while creating local git repository.", e));
+				return false;
+			}
+		}
+		return successfull;
+	}
+
+	private boolean processApplicationCreation() {
+		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
 		try {
-			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			Future<IStatus> jobResult =
-					WizardUtils.runInWizard(
-							new ImportJob(delegatingMonitor),
-							delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
+			WizardUtils.runInWizard(
+					new Job(NLS.bind("Creating application \"{0}\"...", wizardModel.getApplicationName())) {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								wizardModel.createApplication(monitor);
+								queue.offer(true);
+								return Status.OK_STATUS;
+							} catch (Exception e) {
+								queue.offer(false);
+								return OpenShiftUIActivator.createErrorStatus("Could not create application", e);
+							}
+						}
+
+					}, getContainer());
+			return queue.poll(10, TimeUnit.SECONDS);
 		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
-					new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-							"An exception occurred while creating local git repository.", e));
 			return false;
 		}
+	}
+
+	private boolean processCartridges() {
+		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
+		try {
+			WizardUtils.runInWizard(
+					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", wizardModel
+							.getApplication().getName())) {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+
+								List<IEmbeddableCartridge> selectedCartridges = wizardModel
+										.getSelectedEmbeddableCartridges();
+								final IApplication application = wizardModel.getApplication();
+								if (selectedCartridges != null && !selectedCartridges.isEmpty()) {
+									application.addEmbbedCartridges(selectedCartridges);
+								}
+								queue.offer(true);
+							} catch (OpenShiftException e) {
+								queue.offer(false);
+								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
+										"Could not embed cartridges to application {0}", wizardModel.getApplication()
+												.getName()), e);
+							}
+							return Status.OK_STATUS;
+						}
+					}, getContainer());
+			return queue.poll(10, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	private boolean isTransportException(InvocationTargetException e) {
+		return e.getTargetException() instanceof JGitInternalException
+				&& e.getTargetException().getCause() instanceof TransportException;
+	}
+
+	private TransportException getTransportException(InvocationTargetException e) {
+		if (isTransportException(e)) {
+			return (TransportException) ((JGitInternalException) e.getTargetException()).getCause();
+		}
+		return null;
+	}
+	
+	private void openError(final String title, final String message) {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				MessageDialog.openError(getShell(), title, message);
+			}
+		});
 	}
 
 	private boolean askForConfirmation(final String message, final String applicationName) {
@@ -92,26 +192,6 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 			}
 		});
 		return confirmed[0];
-	}
-
-	@Override
-	public void addPages() {
-		this.model = new ImportProjectWizardModel();
-		//addPage(new CredentialsWizardPage(this, model));
-		addPage(new ApplicationWizardPage(this, model));
-		addPage(new AdapterWizardPage(this, model));
-	}
-
-	private boolean isTransportException(InvocationTargetException e) {
-		return e.getTargetException() instanceof JGitInternalException
-				&& e.getTargetException().getCause() instanceof TransportException;
-	}
-
-	private TransportException getTransportException(InvocationTargetException e) {
-		if (isTransportException(e)) {
-			return (TransportException) ((JGitInternalException) e.getTargetException()).getCause();
-		}
-		return null;
 	}
 
 	/**
@@ -132,28 +212,28 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 			try {
 				delegatingMonitor.add(monitor);
 
-				if (model.isNewProject()) {
-					model.importProject(delegatingMonitor);
-				} else if (!model.isGitSharedProject()) {
+				if (wizardModel.isNewProject()) {
+					wizardModel.importProject(delegatingMonitor);
+				} else if (!wizardModel.isGitSharedProject()) {
 					if (!askForConfirmation(
 							NLS.bind("OpenShift application {0} will be enabled on project {1} by " +
 									"copying OpenShift configuration and enabling Git for the project.\n " +
 									"This cannot be undone. Do you wish to continue ?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
+									wizardModel.getApplicationName(), wizardModel.getProjectName()),
+							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
-					model.configureUnsharedProject(delegatingMonitor);
+					wizardModel.configureUnsharedProject(delegatingMonitor);
 				} else {
 					if (!askForConfirmation(
 							NLS.bind("OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
 									"configuration and adding the OpenShift git repo as remote.\n " +
 									"This cannot be undone. Do you wish to continue ?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
+									wizardModel.getApplicationName(), wizardModel.getProjectName()),
+							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
-					model.configureGitSharedProject(delegatingMonitor);					
+					wizardModel.configureGitSharedProject(delegatingMonitor);					
 				}
 
 				return Status.OK_STATUS;
@@ -163,11 +243,11 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 			} catch (final ImportFailedException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not import maven project {0}.", e,
-						model.getProjectName());
+						wizardModel.getProjectName());
 			} catch (IOException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not copy openshift configuration files to project {0}", e,
-						model.getProjectName());
+						wizardModel.getProjectName());
 			} catch (OpenShiftException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not import project to the workspace.", e);
@@ -193,16 +273,6 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 				delegatingMonitor.done();
 			}
 		}
-	}
-
-	private void openError(final String title, final String message) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				MessageDialog.openError(getShell(), title, message);
-			}
-		});
 	}
 
 }

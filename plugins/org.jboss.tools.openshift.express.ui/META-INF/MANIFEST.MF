@@ -37,7 +37,7 @@ Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="2.3.0",
  org.eclipse.core.expressions;bundle-version="3.4.300",
  org.eclipse.wst.common.modulecore;bundle-version="1.2.101",
  org.jboss.ide.eclipse.as.wtp.core;bundle-version="2.3.0",
- org.eclipse.ui.forms;bundle-version="3.5.101"
+ org.eclipse.ui.forms;bundle-version="3.5.100"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.jboss.tools.common.databinding,

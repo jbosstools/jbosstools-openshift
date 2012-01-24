@@ -10,14 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.io.IOException;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
 
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
@@ -29,29 +26,30 @@ import com.openshift.express.client.configuration.SystemProperties;
 import com.openshift.express.client.configuration.UserConfiguration;
 
 /**
- * @author Andr√© Dietisheim
+ * @author André Dietisheim
+ * @author Xavier Coulon
  */
 public class CredentialsWizardPageModel extends ObservableUIPojo {
 
-	private static final String ID = OpenShiftUIActivator.PLUGIN_ID
-			+ OpenShiftUIActivator.getDefault().getBundle().getVersion();
+	private static final String CLIENT_ID = OpenShiftUIActivator.PLUGIN_ID
+			+ " " + OpenShiftUIActivator.getDefault().getBundle().getVersion();
 
 	private static final String RHLOGIN_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN";
 
 	public static final String PROPERTY_SERVER_URL = "serverUrl";
 	public static final String PROPERTY_RHLOGIN = "rhLogin";
 	public static final String PROPERTY_PASSWORD = "password";
-	public static final String PROPERTY_CREDENTIALS_VALIDITY = "credentialsValidity";
+	public static final String PROPERTY_CREDENTIALS_STATUS = "credentialsStatus";
 
 	private String rhLogin;
 	private String password;
-	private IStatus credentialsValidity;
+	private IStatus credentialsStatus;
 	private IUser user;
 	private StringPreferenceValue rhLoginPreferenceValue;
 
-	private ImportProjectWizardModel wizardModel;
+	private AbstractOpenShiftApplicationWizardModel wizardModel;
 
-	public CredentialsWizardPageModel(ImportProjectWizardModel model) {
+	public CredentialsWizardPageModel(AbstractOpenShiftApplicationWizardModel model) {
 		this.wizardModel = model;
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.rhLogin = initRhLogin();
@@ -112,28 +110,30 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void setCredentialsStatus(IStatus status) {
-		firePropertyChange(PROPERTY_CREDENTIALS_VALIDITY, this.credentialsValidity,
-				this.credentialsValidity = status);
+		firePropertyChange(PROPERTY_CREDENTIALS_STATUS, this.credentialsStatus,
+				this.credentialsStatus = status);
 	}
 
-	public IStatus getCredentialsValidity() {
-		return credentialsValidity;
+	public IStatus getCredentialsStatus() {
+		return credentialsStatus;
 	}
 
 	public boolean areCredentialsValid() {
-		IStatus validationStatus = getCredentialsValidity();
+		IStatus validationStatus = getCredentialsStatus();
 		return validationStatus != null
 				&& validationStatus.isOK();
 	}
 
 	public boolean areCredentialsValidated() {
-		return credentialsValidity != null;
+		return credentialsStatus != null;// && credentialsValidity.isOK();
 	}
 
 	public IStatus validateCredentials() {
 		IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Your credentails are not valid.");
 		try {
-			this.user = new User(getRhLogin(), getPassword(), ID);
+			// reset without notifying
+			//this.credentialsValidity = null;
+			this.user = new User(getRhLogin(), getPassword(), CLIENT_ID);
 			if (user.isValid()) {
 				status = Status.OK_STATUS;
 			}

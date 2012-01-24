@@ -19,8 +19,9 @@ import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr√© Dietisheim
+ * @author André Dietisheim
  * @author Rob Stryker
+ * @author Xavier Coulon
  */
 public class AdapterWizardPageModel extends ObservableUIPojo {
 

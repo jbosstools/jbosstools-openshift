@@ -34,6 +34,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftApplicationWizardModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -42,14 +43,14 @@ import com.openshift.express.client.OpenShiftException;
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-class ServerAdapterFactory {
+public class ServerAdapterFactory {
 
 	public ServerAdapterFactory() {
 	}
 
-	public void create(IProject project, ImportProjectWizardModel model, IProgressMonitor monitor) throws OpenShiftException {
-		createServerAdapter(project, model.getServerType(), model.getRuntime(), model.getMode(), 
-				model.getApplication(), model.getUser(), model.getRemoteName(), monitor);
+	public void create(IProject project, AbstractOpenShiftApplicationWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
+		createServerAdapter(project, wizardModel.getServerType(), wizardModel.getRuntime(), wizardModel.getMode(), 
+				wizardModel.getApplication(), wizardModel.getUser(), wizardModel.getRemoteName(), monitor);
 	}
 
 	public void create(IProject project, IServerType serverType, IRuntime runtime, String mode,

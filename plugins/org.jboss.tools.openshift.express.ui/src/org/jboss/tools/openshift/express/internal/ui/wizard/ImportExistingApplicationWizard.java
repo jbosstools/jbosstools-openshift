@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
+package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -28,7 +28,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
@@ -36,24 +36,18 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreateNewApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ImportExistingApplicationWizard;
 
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr√© Dietisheim
- * @Deprecated: see the {@link CreateNewApplicationWizard} and the {@link ImportExistingApplicationWizard}
+ * @author André Dietisheim
+ * @author Xavier Coulon
  */
-@Deprecated
-public class ImportProjectWizard extends Wizard implements INewWizard {
+public class ImportExistingApplicationWizard extends Wizard implements IImportWizard {
 
-	private ImportProjectWizardModel model;
+	private ImportExistingApplicationWizardModel model;
 
-	public ImportProjectWizard() {
+	public ImportExistingApplicationWizard() {
 	}
 
 	@Override
@@ -79,16 +73,19 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 		}
 	}
 
-	private boolean askForConfirmation(final String message, final String applicationName) {
+	private boolean askForConfirmation(final String applicationName, final String projectName) {
 		final boolean[] confirmed = new boolean[1];
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				confirmed[0] = MessageDialog.openConfirm(
-						getShell(),
+				confirmed[0] = MessageDialog.openConfirm(getShell(),
 						NLS.bind("Import OpenShift Application ", applicationName),
-						message);
+						NLS.bind(
+								"OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
+										"configuration and enable Git for the project.\n " +
+										"This cannot be undone. Do you wish to continue ?", applicationName,
+								projectName));
 			}
 		});
 		return confirmed[0];
@@ -96,10 +93,11 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 	@Override
 	public void addPages() {
-		this.model = new ImportProjectWizardModel();
-		//addPage(new CredentialsWizardPage(this, model));
-		addPage(new ApplicationWizardPage(this, model));
-		addPage(new AdapterWizardPage(this, model));
+		this.model = new ImportExistingApplicationWizardModel();
+		addPage(new CredentialsWizardPage(this, model));
+		addPage(new ApplicationSelectionWizardPage(this, model));
+		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));
+		addPage(new GitCloningSettingsWizardPage(this, model));
 	}
 
 	private boolean isTransportException(InvocationTargetException e) {
@@ -134,26 +132,11 @@ public class ImportProjectWizard extends Wizard implements INewWizard {
 
 				if (model.isNewProject()) {
 					model.importProject(delegatingMonitor);
-				} else if (!model.isGitSharedProject()) {
-					if (!askForConfirmation(
-							NLS.bind("OpenShift application {0} will be enabled on project {1} by " +
-									"copying OpenShift configuration and enabling Git for the project.\n " +
-									"This cannot be undone. Do you wish to continue ?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
+				} else {
+					if (!askForConfirmation(model.getApplicationName(), model.getProjectName())) {
 						return Status.CANCEL_STATUS;
 					}
 					model.configureUnsharedProject(delegatingMonitor);
-				} else {
-					if (!askForConfirmation(
-							NLS.bind("OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
-									"configuration and adding the OpenShift git repo as remote.\n " +
-									"This cannot be undone. Do you wish to continue ?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
-						return Status.CANCEL_STATUS;
-					}
-					model.configureGitSharedProject(delegatingMonitor);					
 				}
 
 				return Status.OK_STATUS;

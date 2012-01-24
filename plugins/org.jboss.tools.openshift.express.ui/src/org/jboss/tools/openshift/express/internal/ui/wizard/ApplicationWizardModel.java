@@ -64,10 +64,6 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		this.cartridge = cartridge;
 	}
 
-	public void createApplication(IProgressMonitor monitor) throws OpenShiftException {
-		IApplication application = createApplication(name, cartridge, monitor);
-		setApplication(application);
-	}
 
 	public void setApplication(IApplication application) {
 		firePropertyChange(PROPERTY_APPLICATION, this.application, this.application = application);
@@ -77,6 +73,10 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		return application;
 	}
 
+	public void createApplication(IProgressMonitor monitor) throws OpenShiftException {
+		IApplication application = createApplication(name, cartridge, monitor);
+		setApplication(application);
+	}
 	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftException {
 //		monitor.subTask("creating application...");
 		IApplication application = getUser().createApplication(name, cartridge);
