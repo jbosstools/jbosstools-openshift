@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -83,12 +82,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	private CheckboxTableViewer viewer;
 	private ApplicationConfigurationWizardPageModel pageModel;
-	private CreateNewApplicationWizardModel wizardModel;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, CreateNewApplicationWizardModel wizardModel) {
 		super("Application Configuration", "Configure the application you want to create.",
 				"Application configuration", wizard);
-		this.wizardModel = wizardModel;
 		this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
 	}
 
@@ -341,23 +338,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	private void clearViewer() {
-		setViewerInput(new ArrayList<IEmbeddableCartridge>());
-	}
-
-	private void setViewerCheckedElements(final Collection<IEmbeddableCartridge> cartridges) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.setCheckedElements(cartridges.toArray());
-			}
-		});
-	}
-
 	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
-
 			@Override
 			public void run() {
 				viewer.setInput(cartridges);
@@ -457,6 +439,22 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
 		try {
+			WizardUtils.runInWizard(new Job("Loading existing applications...") {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							pageModel.loadExistingApplications();
+							return Status.OK_STATUS;
+						} catch (NotFoundOpenShiftException e) {
+							return Status.OK_STATUS;
+						} catch (Exception e) {
+							return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not load applications",
+									e);
+						}
+					}
+
+				}, getContainer(), getDataBindingContext());
+
 			WizardUtils.runInWizard(new Job("Loading application cartridges...") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -464,11 +462,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						pageModel.loadCartridges();
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
-						// no domain and therefore no applications present
-						clearViewer();
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						clearViewer();
 						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 								"Could not load application cartridges", e);
 					}
@@ -481,11 +476,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						setViewerInput(pageModel.loadEmbeddableCartridges());
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
-						// no domain and therefore no applications present
-						clearViewer();
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						clearViewer();
 						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 								"Could not load embeddable cartridges", e);
 					}

@@ -60,6 +60,7 @@ import com.openshift.express.client.OpenShiftException;
  * @author Rob Stryker
  * 
  */
+@Deprecated
 public class AdapterWizardPage extends AbstractOpenShiftWizardPage implements IWizardPage, PropertyChangeListener {
 
 	private AdapterWizardPageModel model;

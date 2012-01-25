@@ -175,7 +175,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public String getApplicationName() {
 		IApplication application = wizardModel.getApplication();
 		if (application == null) {
-			return null;
+			return wizardModel.getApplicationName();
 		}
 		return application.getName();
 	}
@@ -302,13 +302,19 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		// skip the validation if the user wants to create a new project. The name and state of the existing project do
 		// not matter...
+		final IPath repoPath = new Path(getRepositoryPath());
 		if (!isUseDefaultRepoPath()) {
-			IPath repoPath = new Path(getRepositoryPath());
 			if (repoPath.isEmpty() || !repoPath.isAbsolute() || !repoPath.toFile().canWrite()) {
 				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 						"The path does not exist or is not writeable.");
 			}
 		}
+		final IPath applicationPath = repoPath.append(new Path(getApplicationName()));
+		if (applicationPath.toFile().exists()) {
+			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+					"The location '" + repoPath.toOSString() + "' already contains a folder named '"+ getApplicationName() +"'.");
+		}
+	
 		setCustomRepoPathValidity(status);
 		return status;
 	}

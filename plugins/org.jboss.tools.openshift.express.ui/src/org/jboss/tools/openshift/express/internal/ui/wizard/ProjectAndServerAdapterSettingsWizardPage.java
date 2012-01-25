@@ -55,9 +55,9 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
  */
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
-	 public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
-     
-	 private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
+	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
+
+	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 
 	private Text existingProjectNameText = null;
 
@@ -75,8 +75,6 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		createServerAdapterGroup(container, dbc);
 		createWorkingSetGroup(container, dbc);
 	}
-	
-	
 
 	private Composite createProjectGroup(Composite parent, DataBindingContext dbc) {
 		Composite projectGroup = new Composite(parent, SWT.NONE);
@@ -139,11 +137,10 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		dec.setImage(contentProposalFieldIndicator.getImage());
 		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
 		dec.setShowOnlyOnFocus(true);
-		
-		AutoCompleteField adapter = new AutoCompleteField(
-				existingProjectNameText, new TextContentAdapter(), 
-				new String [] {});
-		
+
+		AutoCompleteField adapter = new AutoCompleteField(existingProjectNameText, new TextContentAdapter(),
+				new String[] {});
+
 		adapter.setProposals(getOpenProjectsInWorkspace());
 
 		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
@@ -166,8 +163,8 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 	private String[] getOpenProjectsInWorkspace() {
 		List<String> projects = new ArrayList<String>();
-		for(IProject project: ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if(project.exists() && project.isOpen()) {
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			if (project.exists() && project.isOpen()) {
 				projects.add(project.getName());
 			}
 		}
@@ -220,11 +217,10 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		ValueBindingBuilder.bind(serverAdapterCheckboxObservable).to(serverAdapterModelObservable).in(dbc);
 		return serverAdapterGroup;
 	}
-	
+
 	private IServerType getServerTypeToCreate() {
 		return ServerCore.findServerType("org.jboss.tools.openshift.express.openshift.server.type");
 	}
-
 
 	private WorkingSetGroup createWorkingSetGroup(Composite container, DataBindingContext dbc) {
 		return new WorkingSetGroup(container, null, new String[] { "org.eclipse.ui.resourceWorkingSetPage", //$NON-NLS-1$
@@ -296,14 +292,17 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
-			//targets.add(existingProjectNameTextObservable);
+			// targets.add(existingProjectNameTextObservable);
 			return targets;
 		}
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage#onPageActivated(org.eclipse.core.databinding.DataBindingContext)
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage#onPageActivated(org.eclipse.
+	 * core.databinding.DataBindingContext)
 	 */
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {

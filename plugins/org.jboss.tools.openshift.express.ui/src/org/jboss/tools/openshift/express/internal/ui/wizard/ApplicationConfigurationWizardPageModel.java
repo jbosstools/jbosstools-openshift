@@ -40,7 +40,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	private CreateNewApplicationWizardModel wizardModel;
 
-	List<ICartridge> cartridges = new ArrayList<ICartridge>();
+	private List<IApplication> existingApplications = new ArrayList<IApplication>();
+	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String applicationName;
 	private IStatus applicationNameStatus;
@@ -49,9 +50,30 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public ApplicationConfigurationWizardPageModel(CreateNewApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
-
+	
 	public IUser getUser() {
 		return wizardModel.getUser();
+	}
+
+	public void loadExistingApplications() throws OpenShiftException {
+		IUser user = getUser();
+		if (user != null) {
+			setExistingApplications(user.getApplications());
+		}
+	}
+	
+	/**
+	 * @return the existingApplications
+	 */
+	public List<IApplication> getExistingApplications() {
+		return existingApplications;
+	}
+
+	/**
+	 * @param existingApplications the existingApplications to set
+	 */
+	public void setExistingApplications(List<IApplication> existingApplications) {
+		this.existingApplications = existingApplications;
 	}
 
 	public void loadCartridges() throws OpenShiftException {
@@ -107,6 +129,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		if (!applicationName.matches("\\S+")) {
 			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 					"The application name must not contain spaces.");
+		}
+		for(IApplication application : getExistingApplications()) {
+			if(application.getName().equalsIgnoreCase(applicationName)) {
+				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"An application with the same name already exists on OpenShift.");
+			}
 		}
 		setApplicationNameStatus(status);
 		return status;

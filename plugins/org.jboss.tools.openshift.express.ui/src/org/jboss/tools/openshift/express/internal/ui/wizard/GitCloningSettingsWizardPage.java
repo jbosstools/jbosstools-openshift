@@ -57,6 +57,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
 				"Cloning settings", wizard);
 		this.pageModel = new GitCloningSettingsWizardPageModel(model);
+		setPageComplete(false);
 	}
 	
 	public GitCloningSettingsWizardPage(ImportExistingApplicationWizard wizard, AbstractOpenShiftApplicationWizardModel model) {
@@ -65,6 +66,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
 				"Cloning settings", wizard);
 		this.pageModel = new GitCloningSettingsWizardPageModel(model);
+		setPageComplete(false);
 	}
 
 	@Override

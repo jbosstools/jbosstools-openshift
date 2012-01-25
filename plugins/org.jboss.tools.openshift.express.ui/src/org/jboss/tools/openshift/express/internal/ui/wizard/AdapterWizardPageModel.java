@@ -23,6 +23,7 @@ import com.openshift.express.client.OpenShiftException;
  * @author Rob Stryker
  * @author Xavier Coulon
  */
+@Deprecated
 public class AdapterWizardPageModel extends ObservableUIPojo {
 
 	private static final String REMOTE_NAME_DEFAULT = "origin";
