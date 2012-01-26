@@ -13,8 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -36,7 +34,7 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Xavier Coulon
  */
 public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicationWizard<ImportExistingApplicationWizardModel> implements IImportWizard {
@@ -55,11 +53,11 @@ public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicatio
 	public boolean performFinish() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			Future<IStatus> jobResult =
+			IStatus jobResult =
 					WizardUtils.runInWizard(
 							new ImportJob(delegatingMonitor),
 							delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
+			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
 					new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,

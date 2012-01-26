@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,7 +33,7 @@ import com.openshift.express.client.IEmbeddableCartridge;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Xavier Coulon
  */
 public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWizard<CreateNewApplicationWizardModel> implements INewWizard {
@@ -70,11 +69,11 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 		if(successfull) {
 			try {
 				final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-				Future<IStatus> jobResult =
+				IStatus jobResult =
 						WizardUtils.runInWizard(
 								new ImportJob(delegatingMonitor),
 								delegatingMonitor, getContainer());
-				return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
+				return JobUtils.isOk(jobResult);
 			} catch (Exception e) {
 				ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
 						new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,

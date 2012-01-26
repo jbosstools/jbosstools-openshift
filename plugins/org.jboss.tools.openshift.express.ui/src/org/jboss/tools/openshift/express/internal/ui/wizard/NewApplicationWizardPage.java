@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
@@ -190,8 +187,8 @@ public class NewApplicationWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		};
 		try {
-			Future<IStatus> jobResult = WizardUtils.runInWizard(job, delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
+			IStatus jobResult = WizardUtils.runInWizard(job, delegatingMonitor, getContainer());
+			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			OpenShiftUIActivator.log(e);
 			return false;

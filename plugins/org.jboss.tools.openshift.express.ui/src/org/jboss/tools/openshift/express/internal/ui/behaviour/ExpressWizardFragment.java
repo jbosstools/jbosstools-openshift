@@ -165,7 +165,7 @@ public class ExpressWizardFragment extends WizardFragment {
 		};
 		IWizardContainer container = ((WizardPage)handle).getWizard().getContainer();
 		try {
-			WizardUtils.runInWizardSynchronous(j, null, container);
+			WizardUtils.runInWizard(j, null, container);
 			postLongRunningValidate();
 		} catch(Exception e) {
 			
