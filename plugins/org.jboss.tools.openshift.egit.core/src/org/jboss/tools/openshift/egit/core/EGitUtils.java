@@ -59,6 +59,7 @@ import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.FetchResult;
+import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
@@ -407,12 +408,30 @@ public class EGitUtils {
 			}
 			PushOperation op = createPushOperation(remoteConfig, repository, force);
 			op.run(monitor);
-			return op.getOperationResult();
+			PushOperationResult pushResult = op.getOperationResult();
+			if (hasFailedEntries(pushResult)) {
+				throw new CoreException(
+						EGitCoreActivator.createErrorStatus(
+								NLS.bind("Could not push repository {0}: {1}",
+										repository.toString(), getErrors(pushResult))
+								, null));
+			}
+			return pushResult;
 		} catch (CoreException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
 		}
+	}
+
+	private static String getErrors(PushOperationResult pushResult) {
+		StringBuilder builder = new StringBuilder();
+		for(RemoteRefUpdate failedUpdate : getFailedUpdates(pushResult)) {
+			builder.append(MessageFormat.format(
+					"push from {0} to {1} was {2}", failedUpdate.getSrcRef(), failedUpdate.getRemoteName(), failedUpdate.getStatus()));
+		}
+		return builder.toString();
+		
 	}
 
 	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force)
@@ -438,7 +457,8 @@ public class EGitUtils {
 	 * @throws CoreException
 	 *             the core exception
 	 */
-	private static PushOperationSpecification createPushSpec(Collection<URIish> pushURIs, Collection<RefSpec> pushRefSpecs,
+	private static PushOperationSpecification createPushSpec(Collection<URIish> pushURIs,
+			Collection<RefSpec> pushRefSpecs,
 			Repository repository) throws CoreException {
 		try {
 			PushOperationSpecification pushSpec = new PushOperationSpecification();
@@ -506,7 +526,34 @@ public class EGitUtils {
 		}
 		return newRefSpecs;
 	}
-	
+
+	public static boolean hasFailedEntries(PushOperationResult pushOperationResult) {
+		return !getFailedUpdates(pushOperationResult).isEmpty();
+	}
+
+	public static Collection<RemoteRefUpdate> getFailedUpdates(PushOperationResult pushOperationResult) {
+		List<RemoteRefUpdate> allFailedRefUpdates = new ArrayList<RemoteRefUpdate>();
+		for (URIish uri : pushOperationResult.getURIs()) {
+			allFailedRefUpdates.addAll(getFailedUpdates(uri, pushOperationResult));
+		}
+		return allFailedRefUpdates;
+	}
+
+	public static Collection<RemoteRefUpdate> getFailedUpdates(URIish uri, PushOperationResult pushOperationResult) {
+		return getFailedUpdates(pushOperationResult.getPushResult(uri));
+	}
+
+	private static Collection<RemoteRefUpdate> getFailedUpdates(PushResult pushResult) {
+		List<RemoteRefUpdate> failedRefUpdates = new ArrayList<RemoteRefUpdate>();
+		for (RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
+			if (org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK
+				!= update.getStatus()) {
+				failedRefUpdates.add(update);
+			}
+		}
+		return failedRefUpdates;
+	}
+
 	/**
 	 * Gets the repository that is configured to the given project.
 	 * 

@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.egit.core.Activator;
-import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -23,7 +23,6 @@ import org.jboss.tools.openshift.egit.internal.test.util.TestRepository;
 import org.jboss.tools.openshift.egit.internal.test.util.TestUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class EGitUtilsTest {
@@ -157,8 +156,7 @@ public class EGitUtilsTest {
 	}
 	
 
-	@Ignore
-	@Test
+	@Test(expected=CoreException.class)
 	public void pushFailsOnNonFastForward() throws Exception {
 		String fileName = "a.txt";
 		String fileContent = "adietish@redhat.com";
@@ -169,17 +167,7 @@ public class EGitUtilsTest {
 		testRepository2.addAndCommit(file2, "adding a file");
 		
 		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
-		PushOperationResult result = EGitUtils.push(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
-
-		// repo2 mustn't contain "b.txt"
-		testUtils.assertRepositoryMisses(
-				testRepository2.getRepository(),
-				file2.getName());
-		// repo2 must contain "a.txt"
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository2.getRepository(),
-				fileName,
-				fileContent);
+		EGitUtils.push(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
 	}
 
 	@Test
