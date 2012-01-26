@@ -31,7 +31,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -47,7 +46,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import com.openshift.express.client.IApplication;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Xavier Coulon
  */
 public class ApplicationDetailsDialog extends TitleAreaDialog {
@@ -69,21 +68,25 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Label titleSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
 
-		Composite treeTableContainer = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1).grab(true, true).minSize(SWT.DEFAULT, 250)
-				.applyTo(treeTableContainer);
-		GridLayoutFactory.fillDefaults().margins(6, 6).spacing(14, 4).applyTo(treeTableContainer);
-		TreeViewer viewer = createApplicationDetailsTable(treeTableContainer);
+		Composite dialogArea = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
+		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(dialogArea);
+		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
 		fillApplicationDetailsTable(viewer);
-
+		
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
 
 		// createDetails("Name:", application.getName(), treeTableContainer);
-		// createDetails("Type:", application.getCartridge().getName(), treeTableContainer);
-		// createDetails("Embedded Cartridges:", new ErrorMessageCallable<String>("Embedded Cartridges") {
+		// createDetails("Type:", application.getCartridge().getName(),
+		// treeTableContainer);
+		// createDetails("Embedded Cartridges:", new
+		// ErrorMessageCallable<String>("Embedded Cartridges") {
 		//
 		// @Override
 		// public String call() throws Exception {
@@ -98,7 +101,8 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		// }
 		//
 		// }.get(), treeTableContainer);
-		// createDetails("Creation Time:", new ErrorMessageCallable<String>("Creation Time") {
+		// createDetails("Creation Time:", new
+		// ErrorMessageCallable<String>("Creation Time") {
 		//
 		// @Override
 		// public String call() throws Exception {
@@ -112,7 +116,8 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		// return application.getUUID();
 		// }
 		// }.get(), treeTableContainer);
-		// createDetails("Git URL:", new ErrorMessageCallable<String>("Git URL") {
+		// createDetails("Git URL:", new ErrorMessageCallable<String>("Git URL")
+		// {
 		//
 		// @Override
 		// public String call() throws Exception {
@@ -122,9 +127,11 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		//
 		// Label publicUrlLabel = new Label(treeTableContainer, SWT.NONE);
 		// publicUrlLabel.setText("Public URL:");
-		// GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(publicUrlLabel);
+		// GridDataFactory.fillDefaults().align(SWT.LEFT,
+		// SWT.CENTER).applyTo(publicUrlLabel);
 		// Link publicUrlLink = new Link(treeTableContainer, SWT.WRAP);
-		// String applicationUrl = new ErrorMessageCallable<String>("Public URL") {
+		// String applicationUrl = new
+		// ErrorMessageCallable<String>("Public URL") {
 		//
 		// @Override
 		// public String call() throws Exception {
@@ -132,10 +139,11 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		// }
 		// }.get();
 		// publicUrlLink.setText("<a>" + applicationUrl + "</a>");
-		// GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(publicUrlLink);
+		// GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true,
+		// false).applyTo(publicUrlLink);
 		// publicUrlLink.addSelectionListener(onPublicUrl(applicationUrl));
 
-		return treeTableContainer;
+		return dialogArea;
 	}
 
 	private void fillApplicationDetailsTable(final TreeViewer viewer) {
@@ -144,19 +152,18 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		viewer.expandToLevel(2);
 	}
 
-	private TreeViewer createApplicationDetailsTable(Composite tableContainer) {
-		Tree tree = new Tree(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		int desiredHeight = tree.getItemHeight() * 10 + tree.getHeaderHeight();
-		GridLayoutFactory.fillDefaults().margins(6, 6).spacing(14, 4).applyTo(tree);
-		GridDataFactory.fillDefaults().grab(true, true).minSize(SWT.DEFAULT, desiredHeight).applyTo(tree);
-		tree.setLinesVisible(true);
-		tree.setHeaderVisible(true);
-
+	private TreeViewer createApplicationDetailsTable(Composite parent) {
+		Composite tableContainer = new Composite(parent, SWT.NONE);
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		tableContainer.setLayout(treeLayout);
+		
+		Tree tree = new Tree(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		tree.setLinesVisible(true);
+		tree.setHeaderVisible(true);
+//		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, tree.getItemHeight() * 10).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+
 		TreeViewer viewer = new TreeViewer(tree);
-		// sure ?
-		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
 		createTreeColumn("Property", 1, new CellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
@@ -172,7 +179,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 			}
 		}, viewer, treeLayout);
 
-		createTreeColumn("Value", 1, new StyledCellLabelProvider() {
+		createTreeColumn("Value", 3, new StyledCellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
 				if (cell.getElement() instanceof ApplicationDetailsContentProvider.SimpleElement) {
@@ -191,7 +198,8 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 						StyledString styledString = new StyledString(cell.getText(), style);
 						cell.setStyleRanges(styledString.getStyleRanges());
 						cell.setText(styledString.getString());
-						//cell.setCursor(new Cursor(Display.getCurrent(), SWT.CURSOR_HAND));
+						// cell.setCursor(new Cursor(Display.getCurrent(),
+						// SWT.CURSOR_HAND));
 					}
 				}
 			}
@@ -208,7 +216,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		column.setText(name);
 		column.setResizable(true);
 		viewerColumn.setLabelProvider(cellLabelProvider);
-		layout.setColumnData(column, new ColumnWeightData(weight, true));
+		layout.setColumnData(column, new ColumnWeightData(weight, weight * 200, true));
 	}
 
 	private void setupDialog(Composite parent) {
