@@ -157,7 +157,7 @@ public class ExpressWizardFragment extends WizardFragment {
 		setComplete(false);
 		handle.update();
 		final Runnable runnable = getVerifyingCredentialsJob(model);
-		Job j = new Job("Verify Pressed") {
+		Job j = new Job("Verifying Credentials and Application") {
 			protected IStatus run(IProgressMonitor monitor) {
 				runnable.run();
 				return Status.OK_STATUS;
