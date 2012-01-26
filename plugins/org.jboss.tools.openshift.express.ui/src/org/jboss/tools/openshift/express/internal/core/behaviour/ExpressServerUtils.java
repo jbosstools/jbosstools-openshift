@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
-import static org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants.SERVER_PASSWORD;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
@@ -27,6 +25,10 @@ import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
+
 /**
  * This class holds the attribute names whose values will be
  * stored inside a server object, as well as the utility methods
@@ -36,8 +38,8 @@ import org.jboss.ide.eclipse.as.core.util.ServerUtil;
  */
 public class ExpressServerUtils {
 	public static final String ATTRIBUTE_EXPRESS_MODE = "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressMode";
-	public static final String EXPRESS_BINARY_MODE =  "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBinaryMode";
-	public static final String EXPRESS_SOURCE_MODE =  "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressSourceMode";
+	public static final String EXPRESS_BINARY_MODE =  "publishBinary";
+	public static final String EXPRESS_SOURCE_MODE =  "publishSource";
 	public static final String ATTRIBUTE_APPLICATION_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";
 	public static final String ATTRIBUTE_APPLICATION_ID =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
@@ -176,7 +178,22 @@ public class ExpressServerUtils {
 		IServer server = createServer(runtime, IJBossToolingConstants.SERVER_AS_70);
 		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary, remoteName);
 	}
+
 	
+	public static IServer fillServerWithOpenShiftDetails(IServer server, IApplication application, 
+			IUser user, String mode, String remoteName) throws CoreException, OpenShiftException {
+		return fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
+				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
+				application.getName(), application.getUUID(), mode, remoteName);
+	}
+	
+	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
+			IUser user, String mode, String remoteName) throws CoreException, OpenShiftException {
+		fillServerWithOpenShiftDetails(wc, application.getApplicationUrl(),
+				user.getRhlogin(), user.getDomain().getNamespace(), 
+				application.getName(), application.getUUID(), mode, remoteName);
+	}
+
 	/**
 	 * Fills an already-created server with the proper openshift details. 
 	 * 
@@ -194,11 +211,21 @@ public class ExpressServerUtils {
 	public static IServer fillServerWithOpenShiftDetails(IServer server, String host, 
 			String username, String password, String domain, String appName, String appId,
 			String mode, String remoteName) throws CoreException {
+		ServerWorkingCopy wc = (ServerWorkingCopy)server.createWorkingCopy();
+		fillServerWithOpenShiftDetails(wc, host, username, domain, appName, appId, mode, remoteName);
+		IServer saved = wc.save(true, new NullProgressMonitor());
+		ExpressServerUtils.setExpressPassword(wc, password);
+		return saved;
+	}
+	
+	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host, 
+			String username, String domain, String appName, String appId,
+			String mode, String remoteName) throws CoreException {
+
 		if( host.indexOf("://") != -1)
 			host = host.substring(host.indexOf("://") + 3);
 		if( host.endsWith("/"))
 			host = host.substring(0, host.length()-1);
-		ServerWorkingCopy wc = (ServerWorkingCopy)server.createWorkingCopy();
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, "openshift");
 		wc.setAttribute(ATTRIBUTE_USERNAME, username);
@@ -207,13 +234,10 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remoteName);
-		wc.setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
+		((ServerWorkingCopy)wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
 		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
-		IServer saved = wc.save(true, new NullProgressMonitor());
-		ExpressServerUtils.setExpressPassword(wc, password);
-		return saved;
 	}
 	
 	

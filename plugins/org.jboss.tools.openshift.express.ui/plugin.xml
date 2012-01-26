@@ -262,5 +262,13 @@
              order="10"
              typeIds="org.jboss.tools.openshift.express.openshift.server.type">
        </section>
+    </extension>
+    <extension
+          point="org.eclipse.wst.server.ui.wizardFragments">
+       <fragment
+             class="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressWizardFragment"
+             id="org.jboss.tools.openshift.express.ui.server.fragment"
+             typeIds="org.jboss.tools.openshift.express.openshift.server.type">
+       </fragment>
     </extension>      
 </plugin>

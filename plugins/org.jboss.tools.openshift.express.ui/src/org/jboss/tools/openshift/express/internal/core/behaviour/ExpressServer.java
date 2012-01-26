@@ -16,9 +16,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
-import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.eclipse.wst.server.core.model.IURLProvider;
+import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
@@ -40,10 +41,20 @@ public class ExpressServer extends ServerDelegate implements IURLProvider {
 		if( mods.length == 1 && add.length == 1 && add[0].equals(mods[0]))
 			return Status.OK_STATUS;
 		
+		
 		boolean canModify = mods.length == 0 && add.length == 1;
 		canModify &= remove.length == 0;
-		return canModify ? Status.OK_STATUS : new Status(IStatus.ERROR, 
-				OpenShiftUIActivator.PLUGIN_ID, ExpressMessages.cannotModifyModules);
+		
+		if(!canModify ) 
+			return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, ExpressMessages.cannotModifyModules);
+		
+		// Make sure if there's a requried mod, the one being added matches it
+		String requiredMod = getAttribute(ExpressServerUtils.ATTRIBUTE_APPLICATION_NAME, (String)null);
+		if( requiredMod != null && !requiredMod.equals(add[0].getName())) {
+			return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
+					NLS.bind(ExpressMessages.additionNotRequiredModule, requiredMod));
+		}
+		return Status.OK_STATUS;
 	}
 
     public IModule[] getRootModules(IModule module) throws CoreException {

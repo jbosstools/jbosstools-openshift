@@ -18,6 +18,7 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
@@ -42,8 +43,8 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 
 	public static final String CREATE_SERVER_ADAPTER = "createServerAdapter";
 	public static final String PUBLICATION_MODE = "serverMode";
-	public static final String PUBLISH_SOURCE = "publishSource";
-	public static final String PUBLISH_BINARY = "publishBinary";
+	public static final String PUBLISH_SOURCE = ExpressServerUtils.EXPRESS_SOURCE_MODE;
+	public static final String PUBLISH_BINARY = ExpressServerUtils.EXPRESS_BINARY_MODE;
 	public static final String SERVER_TYPE = "serverType";
 
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";

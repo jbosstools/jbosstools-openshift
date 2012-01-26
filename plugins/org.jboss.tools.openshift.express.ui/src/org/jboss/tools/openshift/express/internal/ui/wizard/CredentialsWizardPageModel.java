@@ -145,7 +145,8 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		} catch (Exception e) {
 			this.user = null;
 		}
-		wizardModel.setUser(user);
+		if( wizardModel != null )
+			wizardModel.setUser(user);
 		setCredentialsStatus(status);
 		return status;
 	}
