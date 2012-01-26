@@ -1,87 +1,84 @@
-/*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
- * Distributed under license by Red Hat, Inc. All rights reserved.
- * This program is made available under the terms of the
- * Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Red Hat, Inc. - initial API and implementation
- ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
-import org.eclipse.ui.IImportWizard;
-import org.eclipse.ui.IWorkbench;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
-import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
 import com.openshift.express.client.OpenShiftException;
 
-/**
- * @author André Dietisheim
- * @author Xavier Coulon
- */
-public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicationWizard<ImportExistingApplicationWizardModel> implements IImportWizard {
+public abstract class AbstractOpenShiftApplicationWizard<T extends AbstractOpenShiftApplicationWizardModel> extends Wizard {
 
-	public ImportExistingApplicationWizard() {
+	private T wizardModel;
+
+	public AbstractOpenShiftApplicationWizard() {
 		super();
 	}
-
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle("OpenShift application wizard");
-		setNeedsProgressMonitor(true);
+	
+	void setWizardModel(T wizardModel) {
+		this.wizardModel = wizardModel;
+	}
+	
+	T getWizardModel() {
+		return wizardModel;
 	}
 
-	@Override
-	public boolean performFinish() {
-		try {
-			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			Future<IStatus> jobResult =
-					WizardUtils.runInWizard(
-							new ImportJob(delegatingMonitor),
-							delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult.get(10, TimeUnit.SECONDS));
-		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
-					new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-							"An exception occurred while creating local git repository.", e));
-			return false;
+	protected boolean isTransportException(InvocationTargetException e) {
+		return e.getTargetException() instanceof JGitInternalException
+				&& e.getTargetException().getCause() instanceof TransportException;
+	}
+
+	protected TransportException getTransportException(InvocationTargetException e) {
+		if (isTransportException(e)) {
+			return (TransportException) ((JGitInternalException) e.getTargetException()).getCause();
 		}
+		return null;
 	}
 
-	@Override
-	public void addPages() {
-		setWizardModel(new ImportExistingApplicationWizardModel());
-		addPage(new CredentialsWizardPage(this, getWizardModel()));
-		addPage(new ApplicationSelectionWizardPage(this, getWizardModel()));
-		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
-		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
+	protected void openError(final String title, final String message) {
+		getShell().getDisplay().syncExec(new Runnable() {
+	
+			@Override
+			public void run() {
+				MessageDialog.openError(getShell(), title, message);
+			}
+		});
 	}
 
+	protected boolean askForConfirmation(final String message, final String applicationName) {
+		final boolean[] confirmed = new boolean[1];
+		getShell().getDisplay().syncExec(new Runnable() {
+	
+			@Override
+			public void run() {
+				confirmed[0] = MessageDialog.openConfirm(
+						getShell(),
+						NLS.bind("Import OpenShift Application ", applicationName),
+						message);
+			}
+		});
+		return confirmed[0];
+	}
+	
 	/**
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
 	 */
-	private class ImportJob extends WorkspaceJob {
+	class ImportJob extends WorkspaceJob {
 
 		private DelegatingProgressMonitor delegatingMonitor;
 
@@ -95,13 +92,28 @@ public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicatio
 			try {
 				delegatingMonitor.add(monitor);
 
-				if (getWizardModel().isNewProject()) {
-					getWizardModel().importProject(delegatingMonitor);
-				} else {
-					if (!askForConfirmation(getWizardModel().getApplicationName(), getWizardModel().getProjectName())) {
+				if (wizardModel.isNewProject()) {
+					wizardModel.importProject(delegatingMonitor);
+				} else if (!wizardModel.isGitSharedProject()) {
+					if (!askForConfirmation(
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by " +
+									"copying OpenShift configuration and enabling Git for the project.\n " +
+									"This cannot be undone. Do you wish to continue ?",
+									wizardModel.getApplicationName(), wizardModel.getProjectName()),
+							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
-					getWizardModel().configureUnsharedProject(delegatingMonitor);
+					wizardModel.configureUnsharedProject(delegatingMonitor);
+				} else {
+					if (!askForConfirmation(
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
+									"configuration and adding the OpenShift git repo as remote.\n " +
+									"This cannot be undone. Do you wish to continue ?",
+									wizardModel.getApplicationName(), wizardModel.getProjectName()),
+							wizardModel.getApplicationName())) {
+						return Status.CANCEL_STATUS;
+					}
+					wizardModel.configureGitSharedProject(delegatingMonitor);					
 				}
 
 				return Status.OK_STATUS;
@@ -111,11 +123,11 @@ public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicatio
 			} catch (final ImportFailedException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not import maven project {0}.", e,
-						getWizardModel().getProjectName());
+						wizardModel.getProjectName());
 			} catch (IOException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not copy openshift configuration files to project {0}", e,
-						getWizardModel().getProjectName());
+						wizardModel.getProjectName());
 			} catch (OpenShiftException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not import project to the workspace.", e);

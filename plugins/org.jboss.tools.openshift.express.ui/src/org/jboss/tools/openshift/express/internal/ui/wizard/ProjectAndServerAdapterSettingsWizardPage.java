@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -44,8 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WorkingSetGroup;
-import org.eclipse.wst.server.core.IServerType;
-import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 
@@ -154,7 +150,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		final IObservableValue existingProjectValidityObservable = BeanProperties.value(
 				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_EXISTING_PROJECT_VALIDITY).observe(pageModel);
 		final UseExistingOpenProjectValidator existingProjectValidator = new UseExistingOpenProjectValidator(
-				existingProjectValidityObservable, existingProjectNameTextObservable);
+				existingProjectValidityObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
@@ -218,10 +214,6 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		return serverAdapterGroup;
 	}
 
-	private IServerType getServerTypeToCreate() {
-		return ServerCore.findServerType("org.jboss.tools.openshift.express.openshift.server.type");
-	}
-
 	private WorkingSetGroup createWorkingSetGroup(Composite container, DataBindingContext dbc) {
 		return new WorkingSetGroup(container, null, new String[] { "org.eclipse.ui.resourceWorkingSetPage", //$NON-NLS-1$
 				"org.eclipse.jdt.ui.JavaWorkingSetPage" /* JavaWorkingSetUpdater.ID */});
@@ -266,12 +258,8 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 		private final IObservableValue existingProjectValidityObservable;
 
-		private final IObservableValue existingProjectNameTextObservable;
-
-		public UseExistingOpenProjectValidator(IObservableValue existingProjectValidityObservable,
-				IObservableValue existingProjectNameTextObservable) {
+		public UseExistingOpenProjectValidator(IObservableValue existingProjectValidityObservable) {
 			this.existingProjectValidityObservable = existingProjectValidityObservable;
-			this.existingProjectNameTextObservable = existingProjectNameTextObservable;
 		}
 
 		@Override
@@ -283,17 +271,6 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 				return existingProjectValidity;
 			}
 			return ValidationStatus.ok();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
-		 */
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			// targets.add(existingProjectNameTextObservable);
-			return targets;
 		}
 
 	}
