@@ -39,6 +39,7 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftApplicationWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 
 import com.openshift.express.client.IApplication;
@@ -71,7 +72,7 @@ public class ExpressWizardFragment extends WizardFragment {
 		Composite composite = createWidgets(parent);
 		addListeners();
 		setComplete(false);
-		handle.update();
+		widgetsUpdated();
 		return composite;
 	}
 	
@@ -97,6 +98,7 @@ public class ExpressWizardFragment extends WizardFragment {
 		appNameLabel.setText("Application Name: ");
 		remoteLabel.setText("Remote: ");
 		verifyButton.setText("Verify...");
+		remoteText.setText(AbstractOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		return composite;
 	}
 	
