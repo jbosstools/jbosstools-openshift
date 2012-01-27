@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.utils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -53,14 +52,14 @@ public class TreeUtils {
 	}
 
 	/**
-	 * Initializes a given table editor for a given viewer cell with a given (editor-)control.
+	 * Initializes a given tree editor for a given viewer cell with a given (editor-)control.
 	 * 
-	 * @param treeEditor the table editor
-	 * @param control the control
-	 * @param cellText the cell text
-	 * @param cell the cell
+	 * @param treeEditor the tree editor that shall get initialized
+	 * @param control the control that shall be positioned by the tree editor
+	 * @param cellText the text that will get displayed in the cell (only used to make sure, the cell has the required size)
+	 * @param cell the cell the table editor shall be positioned to.
 	 * 
-	 * @see TableEditor
+	 * @see TreeEditor
 	 * @see ViewerCell
 	 */
 	public static void initializeTreeEditor( TreeEditor treeEditor, Control control, String cellText, ViewerCell cell )
