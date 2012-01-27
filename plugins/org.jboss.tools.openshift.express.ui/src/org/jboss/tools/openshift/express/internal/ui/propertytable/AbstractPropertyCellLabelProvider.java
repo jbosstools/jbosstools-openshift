@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.propertytable;
 
-import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 
 /**
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public abstract class AbstractPropertyCellLabelProvider extends CellLabelProvider {
+public abstract class AbstractPropertyCellLabelProvider extends StyledCellLabelProvider {
 
 	@Override
 	public void update(ViewerCell cell) {

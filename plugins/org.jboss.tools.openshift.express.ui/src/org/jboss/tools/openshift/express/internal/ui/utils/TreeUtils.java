@@ -66,12 +66,12 @@ public class TreeUtils {
 	{
 		treeEditor.grabHorizontal = true;
 		treeEditor.grabVertical = true;
-		treeEditor.horizontalAlignment = SWT.CENTER;
-		treeEditor.verticalAlignment = SWT.CENTER;
+		treeEditor.horizontalAlignment = SWT.FILL;
+		treeEditor.verticalAlignment = SWT.FILL;
 		TreeItem treeItem = ( TreeItem ) cell.getItem();
 		treeEditor.setEditor( control, treeItem, cell.getColumnIndex() );
 		// ensure cell is as large as space needed for link
-		cell.setText( "  " + cellText + "  ");
+		//cell.setText( " " + cellText + " ");
 	}
 
 	/**
