@@ -221,8 +221,8 @@ public class ExpressWizardFragment extends WizardFragment {
 					} catch(OpenShiftException ose) {
 						error = "Application \"" + app + "\" not found: " + ose.getMessage();
 					}
-					ExpressWizardFragment.this.error = error;
 				}
+				ExpressWizardFragment.this.error = error;
 			}
 		};
 	}
