@@ -47,7 +47,7 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 		link.setText(property.getValue());
 		link.setBackground(cell.getBackground());
 		link.addMouseListener(onLinkClicked(property.getValue()));
-		
+
 		TreeUtils.createTreeEditor(link, property.getValue(), cell);
 	}
 
@@ -69,8 +69,10 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 
 			@Override
 			public void mouseUp(MouseEvent e) {
-				BrowserUtil.checkedCreateExternalBrowser(
-						url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				if (e.button == 1) { // left button only
+					BrowserUtil.checkedCreateExternalBrowser(
+							url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				}
 			}
 		};
 	}
