@@ -15,8 +15,16 @@ public class StringElement extends ContainerElement {
 	private final String value;
 	private final boolean isLink;
 
+	public StringElement(String property, String value) {
+		this(property, value, false, null);
+	}
+	
 	public StringElement(String property, String value, ContainerElement parent) {
 		this(property, value, false, parent);
+	}
+
+	public StringElement(String property, String value, boolean isLink) {
+		this(property, value, isLink, null);
 	}
 
 	public StringElement(String property, String value, boolean isLink, ContainerElement parent) {
