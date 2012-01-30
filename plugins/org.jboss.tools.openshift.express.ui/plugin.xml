@@ -274,8 +274,8 @@
 	<extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.jboss.tools.openshift.express.internal.ui.CopyCommand"
-            name="New Bookmarks Folder">
+            id="org.jboss.tools.openshift.express.internal.ui.commands.CopyPropertyCommand"
+            name="Copy property command">
       </command>
     </extension>
     <extension
@@ -283,11 +283,18 @@
       <menuContribution
             locationURI="popup:org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationDetailsDialog">
          <command
-               commandId="org.jboss.tools.openshift.express.internal.ui.CopyCommand"
+               commandId="org.jboss.tools.openshift.express.internal.ui.commands.CopyPropertyCommand"
                icon="icons/copy_edit_co.gif"
                label="Copy"
                style="push">
          </command>
      </menuContribution>
-   </extension>     
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+	      <handler
+	            class="org.jboss.tools.openshift.express.internal.ui.commands.CopyPropertyCommandHandler"
+	            commandId="org.jboss.tools.openshift.express.internal.ui.commands.CopyPropertyCommand">
+	      </handler>
+   </extension>
 </plugin>

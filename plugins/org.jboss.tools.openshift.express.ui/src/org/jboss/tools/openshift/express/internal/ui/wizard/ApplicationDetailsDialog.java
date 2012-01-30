@@ -41,7 +41,8 @@ import com.openshift.express.client.IApplication;
  */
 public class ApplicationDetailsDialog extends TitleAreaDialog {
 
-	private static final String CONTEXT_MENU = "popup:org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationDetailsDialog";
+	private static final String CONTEXT_MENU_ID = "popup:org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationDetailsDialog";
+
 	private IApplication application;
 
 	public ApplicationDetailsDialog(IApplication application, Shell parentShell) {
@@ -68,14 +69,18 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
 		fillApplicationDetailsTable(viewer);
-		IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getControl());
-		UIUtils.registerContributionManager(CONTEXT_MENU, contextMenu, viewer.getControl());
+		createContextMenu(viewer);
 		
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
 
 		return dialogArea;
+	}
+
+	private void createContextMenu(TreeViewer viewer) {
+		IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getControl());
+		UIUtils.registerContributionManager(CONTEXT_MENU_ID, contextMenu, viewer.getControl());
 	}
 
 	private void fillApplicationDetailsTable(final TreeViewer viewer) {
