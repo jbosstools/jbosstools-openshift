@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -30,6 +31,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyNameCellLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyValueCellLabelProvider;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.express.client.IApplication;
 
@@ -39,6 +41,7 @@ import com.openshift.express.client.IApplication;
  */
 public class ApplicationDetailsDialog extends TitleAreaDialog {
 
+	private static final String CONTEXT_MENU = "popup:org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationDetailsDialog";
 	private IApplication application;
 
 	public ApplicationDetailsDialog(IApplication application, Shell parentShell) {
@@ -65,7 +68,9 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
 		fillApplicationDetailsTable(viewer);
-
+		IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getControl());
+		UIUtils.registerContributionManager(CONTEXT_MENU, contextMenu, viewer.getControl());
+		
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
