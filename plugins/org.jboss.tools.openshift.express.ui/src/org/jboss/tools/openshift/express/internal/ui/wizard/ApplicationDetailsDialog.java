@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.express.internal.ui.propertytable.CopyPropertyAction;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyNameCellLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyValueCellLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -40,8 +41,6 @@ import com.openshift.express.client.IApplication;
  * @author Xavier Coulon
  */
 public class ApplicationDetailsDialog extends TitleAreaDialog {
-
-	private static final String CONTEXT_MENU_ID = "popup:org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationDetailsDialog";
 
 	private IApplication application;
 
@@ -70,7 +69,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
 		fillApplicationDetailsTable(viewer);
 		createContextMenu(viewer);
-		
+
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
@@ -80,7 +79,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 
 	private void createContextMenu(TreeViewer viewer) {
 		IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getControl());
-		UIUtils.registerContributionManager(CONTEXT_MENU_ID, contextMenu, viewer.getControl());
+		contextMenu.add(new CopyPropertyAction(viewer));
 	}
 
 	private void fillApplicationDetailsTable(final TreeViewer viewer) {
@@ -128,4 +127,6 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 	}
+
+
 }
