@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jgit.errors.TransportException;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
@@ -34,7 +35,7 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr� Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicationWizard<ImportExistingApplicationWizardModel> implements IImportWizard {
@@ -92,16 +93,32 @@ public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicatio
 		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 			try {
 				delegatingMonitor.add(monitor);
-
-				if (getWizardModel().isNewProject()) {
-					getWizardModel().importProject(delegatingMonitor);
-				} else {
-					if (!askForConfirmation(getWizardModel().getApplicationName(), getWizardModel().getProjectName())) {
+				ImportExistingApplicationWizardModel wizardModel = getWizardModel();
+				if (wizardModel.isNewProject()) {
+					wizardModel.importProject(delegatingMonitor);
+				} else if (!wizardModel.isGitSharedProject()) {
+					if (!askForConfirmation(
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by " +
+							"copying OpenShift configuration and enabling Git for the project.\n " +
+							"This cannot be undone. Do you wish to continue ?"
+							, wizardModel.getApplicationName()
+							, wizardModel.getProjectName()),
+							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
 					getWizardModel().configureUnsharedProject(delegatingMonitor);
+				} else {
+					if (!askForConfirmation(
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by copying OpenShift " +
+									"configuration and adding the OpenShift git repo as remote.\n " +
+									"This cannot be undone. Do you wish to continue ?"
+									, wizardModel.getApplicationName()
+									, wizardModel.getProjectName())
+									, wizardModel.getApplicationName())) {
+						return Status.CANCEL_STATUS;
+					}
+					wizardModel.configureGitSharedProject(delegatingMonitor);					
 				}
-
 				return Status.OK_STATUS;
 			} catch (final WontOverwriteException e) {
 				openError("Project already present", e.getMessage());

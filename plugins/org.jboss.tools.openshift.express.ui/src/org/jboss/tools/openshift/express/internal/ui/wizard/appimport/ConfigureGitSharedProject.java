@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
@@ -105,15 +107,25 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		addToModified(setupGitIgnore(project, monitor));
 		addToModified(setupOpenShiftMavenProfile(project, monitor));
-
-		EGitUtils.addRemoteTo(
-				getRemoteName(),
-				getApplication().getGitUri(),
-				EGitUtils.getRepository(project));
+		addRemote(getRemoteName(), getApplication().getUUID(), project);
 
 		addAndCommitModifiedResource(project, monitor);
 
 		return Collections.singletonList(project);
+	}
+
+	private void addRemote(String remoteName, String uuid, IProject project) throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException {
+		Repository repository = EGitUtils.getRepository(project);
+		Assert.isTrue(repository != null);
+		
+		if (EGitUtils.hasRemote("rhcloud.com", repository)) {
+			return;
+		}
+		
+		EGitUtils.addRemoteTo(
+				getRemoteName(),
+				getApplication().getGitUri(),
+				repository);
 	}
 
 	private void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException {
