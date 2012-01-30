@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -685,6 +687,22 @@ public class EGitUtils {
 					repository.toString()));
 		}
 	}
+	
+	public static boolean hasRemote(String regex, Repository repository) throws CoreException {
+		return hasRemote(Pattern.compile(regex), repository);
+	}
+	
+	public static boolean hasRemote(Pattern pattern, Repository repository) throws CoreException {
+		for (RemoteConfig config : getAllRemoteConfigs(repository)) {
+			for(URIish uri : config.getURIs()) {
+				Matcher matcher = pattern.matcher(uri.toString());
+				if (matcher.find()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Returns <code>true</code> if the given repository has several configured
@@ -774,7 +792,13 @@ public class EGitUtils {
 
 	/**
 	 * Returns <code>true</code> if the given repository has uncommitted
-	 * changes.
+	 * changes. Uncommitted changes taken into account are
+	 * <ul>
+	 * <li>freshly added (but uncommitted resources)</li>
+	 * <li>changed (but uncommitted)</li>
+	 * <li>modified (but uncommitted resources)</li>
+	 * <li>removed (but uncommitted resources)</li>
+	 * </ul>
 	 * 
 	 * @param repository
 	 *            the repository to check for uncommitted changes
@@ -788,7 +812,9 @@ public class EGitUtils {
 		hasChanges |= !repoStatus.getAdded().isEmpty();
 		hasChanges |= !repoStatus.getChanged().isEmpty();
 		hasChanges |= !repoStatus.getModified().isEmpty();
-		hasChanges |= repoStatus.getRemoved().isEmpty();
+		hasChanges |= !repoStatus.getRemoved().isEmpty();
+		hasChanges |= !repoStatus.getConflicting().isEmpty();
+		hasChanges |= !repoStatus.getMissing().isEmpty();
 		return hasChanges;
 	}
 

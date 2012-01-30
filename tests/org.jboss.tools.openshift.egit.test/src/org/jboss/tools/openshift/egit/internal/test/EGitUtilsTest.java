@@ -3,6 +3,7 @@ package org.jboss.tools.openshift.egit.internal.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import org.eclipse.egit.core.Activator;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.jboss.tools.common.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.internal.test.util.TestProject;
 import org.jboss.tools.openshift.egit.internal.test.util.TestRepository;
@@ -190,4 +192,43 @@ public class EGitUtilsTest {
 		assertTrue(subsections.contains(remoteName));
 		assertEquals(gitUri, config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remoteName, ConfigConstants.CONFIG_KEY_URL));
 	}
+	
+	@Test
+	public void addedButNotCommittedIsDirty() throws IOException {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		File file = testRepository.createFile("a.txt", "protoculture");
+		testRepository.add(file);
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+	}
+	
+	@Test
+	public void changedButNotCommittedIsDirty() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		File file = testRepository.createFile("a.txt", "ethnica");
+		testRepository.addAndCommit(file, "commit-by-junit-tests");
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		FileUtil.writeFileDefault(file, "depeche-mode");
+		testRepository.add(file);
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+	}
+
+	@Test
+	public void modifiedButNotCommittedIsDirty() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		File file = testRepository.createFile("a.txt", "protonica");
+		testRepository.addAndCommit(file, "commit-by-junit-tests");
+		FileUtil.writeFileDefault(file, "atrix");
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+	}
+
+	@Test
+	public void removedButNotCommittedIsDirty() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		File file = testRepository.createFile("a.txt", "protonica");
+		testRepository.addAndCommit(file, "commit-by-junit-tests");
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		file.delete();
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+	}
+
 }
