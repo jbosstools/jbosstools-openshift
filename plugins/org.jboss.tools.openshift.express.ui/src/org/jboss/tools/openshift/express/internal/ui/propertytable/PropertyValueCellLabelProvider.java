@@ -10,14 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.propertytable;
 
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TreeUtils;
@@ -39,8 +41,10 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 	}
 
 	protected void createLink(IProperty property, final ViewerCell cell) {
-		Link link = new Link((Tree) cell.getControl(), SWT.NONE);
-		link.setText("<a>" + property.getValue() + "</a>");
+		final Hyperlink link = new Hyperlink((Tree) cell.getControl(), SWT.TRANSPARENT);
+		link.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
+		link.setUnderlined(true);
+		link.setText(property.getValue());
 		link.setBackground(cell.getBackground());
 		link.addMouseListener(onLinkClicked(property.getValue()));
 		
