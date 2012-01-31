@@ -75,7 +75,7 @@ import com.openshift.express.client.NotFoundOpenShiftException;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
@@ -117,11 +117,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		Label applicationTypeLabel = new Label(container, SWT.NONE);
 		applicationTypeLabel.setText("Type:");
-		GridDataFactory.fillDefaults().grab(false, false).align(SWT.FILL, SWT.CENTER).span(1, 1)
-				.applyTo(applicationTypeLabel);
+		GridDataFactory.fillDefaults()
+				.grab(false, false).align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
 		Combo cartridgesCombo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
-				.applyTo(cartridgesCombo);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(cartridgesCombo);
 		fillCartridgesCombo(dbc, cartridgesCombo);
 		final ISWTObservableValue cartridgesComboObservable = WidgetProperties.selection().observe(cartridgesCombo);
 		final IObservableValue selectedCartridgeModelObservable = BeanProperties.value(
@@ -129,8 +129,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindValue(cartridgesComboObservable, selectedCartridgeModelObservable,
 				new UpdateValueStrategy().setConverter(new StringToCartridgeConverter()),
 				new UpdateValueStrategy().setConverter(new CartridgeToStringConverter()));
-		final ApplicationInputValidator applicationInputValidator = new ApplicationInputValidator(
-				applicationNameTextObservable, cartridgesComboObservable);
+		final ApplicationInputValidator applicationInputValidator =
+				new ApplicationInputValidator(applicationNameTextObservable, cartridgesComboObservable);
 		dbc.addValidationStatusProvider(applicationInputValidator);
 		final ApplicationNameValidator applicationNameValidator = new ApplicationNameValidator(
 				applicationNameStatusObservable, applicationNameTextObservable);
@@ -144,23 +144,24 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(cartridgesGroup);
 
 		Composite tableContainer = new Composite(cartridgesGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(SWT.DEFAULT, 250)
-				.applyTo(tableContainer);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(SWT.DEFAULT, 250).applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
 		Button checkAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");
-		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP)
-				.applyTo(checkAllButton);
+		GridDataFactory.fillDefaults()
+				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(checkAllButton);
 		checkAllButton.addSelectionListener(onCheckAll());
 
 		Button uncheckAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		uncheckAllButton.setText("&Deselect All");
-		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP)
-				.applyTo(uncheckAllButton);
+		GridDataFactory.fillDefaults().
+				hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
 		// bottom filler
 		Composite spacer = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
+		GridDataFactory.fillDefaults()
+				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
 
 	}
 
@@ -395,7 +396,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
-
 	private void openLogDialog(final IApplication application) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
@@ -408,11 +408,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	/**
-	 * Viewer element comparer based on #equals(). The default implementation in CheckboxTableViewer compares elements
-	 * based on instance identity.
+	 * Viewer element comparer based on #equals(). The default implementation in
+	 * CheckboxTableViewer compares elements based on instance identity.
 	 * <p>
-	 * We need this since the available cartridges (item listed in the viewer) are not the same instance as the ones in
-	 * the embedded application (items to check in the viewer).
+	 * We need this since the available cartridges (item listed in the viewer)
+	 * are not the same instance as the ones in the embedded application (items
+	 * to check in the viewer).
 	 */
 	private static class EqualityComparer implements IElementComparer {
 
@@ -440,20 +441,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	protected void onPageActivated(final DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new Job("Loading existing applications...") {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						try {
-							pageModel.loadExistingApplications();
-							return Status.OK_STATUS;
-						} catch (NotFoundOpenShiftException e) {
-							return Status.OK_STATUS;
-						} catch (Exception e) {
-							return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not load applications",
-									e);
-						}
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						pageModel.loadExistingApplications();
+						return Status.OK_STATUS;
+					} catch (NotFoundOpenShiftException e) {
+						return Status.OK_STATUS;
+					} catch (Exception e) {
+						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not load applications",
+								e);
 					}
+				}
 
-				}, getContainer(), getDataBindingContext());
+			}, getContainer(), getDataBindingContext());
 
 			WizardUtils.runInWizard(new Job("Loading application cartridges...") {
 				@Override
@@ -511,7 +512,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		 * 
+		 * @see
+		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
@@ -546,7 +549,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		 * 
+		 * @see
+		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
