@@ -42,6 +42,7 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 
 	protected void createLink(IProperty property, final ViewerCell cell) {
 		final Hyperlink link = new Hyperlink((Tree) cell.getControl(), SWT.TRANSPARENT);
+		link.setBackground(cell.getBackground());
 		link.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
 		link.setUnderlined(true);
 		link.setText(property.getValue());

@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -46,8 +48,15 @@ public class TreeUtils {
 		Assert.isTrue(cell.getControl() instanceof Tree);
 		
 		Tree tree = ( Tree ) cell.getControl();
-		TreeEditor treeEditor = new TreeEditor( tree );
+		final TreeEditor treeEditor = new TreeEditor( tree );
 		initializeTreeEditor( treeEditor, control, cellText, cell );
+		tree.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				treeEditor.dispose();
+			}
+		});
 		return treeEditor;
 	}
 
