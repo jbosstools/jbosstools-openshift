@@ -39,7 +39,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  * @author Rob Stryker
  * @author Xavier Coulon
  * 
@@ -165,16 +165,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(remoteNameText))
 				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an existing project' option.
-		useDefaultRemoteNameButton.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				remoteNameText.setFocus();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
+		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
 		IObservableValue remoteNameValidityObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY).observe(pageModel);
 		dbc.addValidationStatusProvider(new RemoteNameValidationStatusProvider(remoteNameValidityObservable,
@@ -187,6 +178,15 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		sshPrefsLink.addSelectionListener(onSshPrefs());
 
 		return cloneGroup;
+	}
+
+	private SelectionAdapter onDefaultRemoteNameUnchecked() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				remoteNameText.setFocus();
+			}
+		};
 	}
 
 	private SelectionListener onRepoPath() {
@@ -274,10 +274,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			return ValidationStatus.ok();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
-		 */
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
@@ -309,10 +305,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			return ValidationStatus.ok();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
-		 */
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
