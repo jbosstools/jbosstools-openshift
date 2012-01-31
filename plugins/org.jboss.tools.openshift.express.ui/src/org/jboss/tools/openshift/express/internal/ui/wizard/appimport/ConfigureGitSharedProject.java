@@ -118,9 +118,9 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		Repository repository = EGitUtils.getRepository(project);
 		Assert.isTrue(repository != null);
 		
-		if (EGitUtils.hasRemote("rhcloud.com", repository)) {
-			return;
-		}
+//		if (EGitUtils.hasRemoteUrl("rhcloud.com", repository)) {
+//			return;
+//		}
 		
 		EGitUtils.addRemoteTo(
 				getRemoteName(),
