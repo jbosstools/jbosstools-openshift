@@ -428,12 +428,13 @@ public class EGitUtils {
 
 	private static String getErrors(PushOperationResult pushResult) {
 		StringBuilder builder = new StringBuilder();
-		for(RemoteRefUpdate failedUpdate : getFailedUpdates(pushResult)) {
+		for (RemoteRefUpdate failedUpdate : getFailedUpdates(pushResult)) {
 			builder.append(MessageFormat.format(
-					"push from {0} to {1} was {2}", failedUpdate.getSrcRef(), failedUpdate.getRemoteName(), failedUpdate.getStatus()));
+					"push from {0} to {1} was {2}", failedUpdate.getSrcRef(), failedUpdate.getRemoteName(),
+					failedUpdate.getStatus()));
 		}
 		return builder.toString();
-		
+
 	}
 
 	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force)
@@ -647,30 +648,32 @@ public class EGitUtils {
 
 	/**
 	 * Gets the remote config with the given name from the list of remote
-	 * repositories. Returns <code>null</code> if it was not found.
+	 * configs. Returns <code>null</code> if it was not found.
 	 * 
 	 * @param remoteName
 	 *            the remote name
 	 * @param remoteRepositories
 	 *            the remote repositories
 	 * @return the remote config
+	 * 
+	 * @see #getAllRemoteConfigs(Repository)
 	 */
-	private static RemoteConfig getRemoteConfig(String remoteName, List<RemoteConfig> remoteRepositories) {
-		RemoteConfig defaultConfig = null;
-		RemoteConfig configuredConfig = null;
-		for (RemoteConfig config : remoteRepositories) {
-			// if (config.getName().equals(Constants.DEFAULT_REMOTE_NAME))
-			// defaultConfig = config;
-			if (remoteName != null && config.getName().equals(remoteName))
-				configuredConfig = config;
+	public static RemoteConfig getRemoteConfig(String name, List<RemoteConfig> remoteConfigs) {
+		Assert.isLegal(name != null);
+		RemoteConfig remoteConfig = null;
+		for (RemoteConfig config : remoteConfigs) {
+			if (name != null && config.getName().equals(name)) {
+				remoteConfig = config;
+				break;
+			}
 		}
-
-		if (configuredConfig == null) {
-			return defaultConfig;
-		}
-		return configuredConfig;
+		return remoteConfig;
 	}
 
+	public static boolean hasRemoteConfig(String name, List<RemoteConfig> remoteConfigs) {
+		return getRemoteConfig(name, remoteConfigs) != null;
+	}
+	
 	/**
 	 * Returns all the remote configs from the given repository.
 	 * 
@@ -688,13 +691,22 @@ public class EGitUtils {
 		}
 	}
 	
-	public static boolean hasRemote(String regex, Repository repository) throws CoreException {
-		return hasRemote(Pattern.compile(regex), repository);
+	public static boolean hasRemoteUrl(String regex, Repository repository) throws CoreException {
+		return hasRemoteUrl(Pattern.compile(regex), repository);
 	}
-	
-	public static boolean hasRemote(Pattern pattern, Repository repository) throws CoreException {
+
+	/**
+	 * Returns <code>true</code> if the given repository has a configured remote
+	 * repository with an url that matches the given pattern.
+	 * 
+	 * @param pattern
+	 * @param repository
+	 * @return
+	 * @throws CoreException
+	 */
+	public static boolean hasRemoteUrl(Pattern pattern, Repository repository) throws CoreException {
 		for (RemoteConfig config : getAllRemoteConfigs(repository)) {
-			for(URIish uri : config.getURIs()) {
+			for (URIish uri : config.getURIs()) {
 				Matcher matcher = pattern.matcher(uri.toString());
 				if (matcher.find()) {
 					return true;

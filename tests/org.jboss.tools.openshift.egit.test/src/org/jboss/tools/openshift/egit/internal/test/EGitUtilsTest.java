@@ -8,7 +8,9 @@ import static org.junit.Assert.assertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -18,6 +20,7 @@ import org.eclipse.egit.core.Activator;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.jboss.tools.common.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.internal.test.util.TestProject;
@@ -59,7 +62,6 @@ public class EGitUtilsTest {
 		testRepository2.connect(testProject2.getProject());
 		
 		this.testRepositoryClone = cloneRepository(testRepository);
-//		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 	}
 
 	private TestRepository cloneRepository(TestRepository repository) throws URISyntaxException,
@@ -229,6 +231,31 @@ public class EGitUtilsTest {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
 		file.delete();
 		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+	}
+
+	@Test
+	public void canGetSingleRemoteConfig() throws CoreException, MalformedURLException, URISyntaxException, IOException {
+		String remoteName = "repo2";
+		
+		testRepository.addRemoteTo(remoteName, testRepository2.getRepository());
+		List<RemoteConfig> allRemoteConfigs = EGitUtils.getAllRemoteConfigs(testRepository.getRepository());
+		assertNotNull(allRemoteConfigs);
+		assertEquals(1, allRemoteConfigs.size());
+		RemoteConfig repo2Config = EGitUtils.getRemoteConfig(remoteName, allRemoteConfigs);
+		assertNotNull(repo2Config);
+	}
+
+	@Test
+	public void canGetFromSeveralRemoteConfig() throws CoreException, MalformedURLException, URISyntaxException, IOException {
+		String repo2RemoteName = "repo2";
+		
+		testRepositoryClone.addRemoteTo(repo2RemoteName, testRepository2.getRepository());
+		List<RemoteConfig> allRemoteConfigs = EGitUtils.getAllRemoteConfigs(testRepositoryClone.getRepository());
+		assertNotNull(allRemoteConfigs);
+		// clone already has repo1 as origin
+		assertEquals(2, allRemoteConfigs.size());
+		RemoteConfig repo2Config = EGitUtils.getRemoteConfig(repo2RemoteName, allRemoteConfigs);
+		assertNotNull(repo2Config);
 	}
 
 }
