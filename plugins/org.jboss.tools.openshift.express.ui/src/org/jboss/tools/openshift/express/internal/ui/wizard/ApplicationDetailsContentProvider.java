@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.AbstractPropertyTableContentProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.ContainerElement;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.IProperty;
@@ -28,9 +29,8 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 	public Object[] getElements(Object inputElement) {
 		List<IProperty> elements = new ArrayList<IProperty>();
 		if (inputElement instanceof IApplication) {
+			IApplication application = (IApplication) inputElement;
 			try {
-				IApplication application = (IApplication) inputElement;
-
 				elements.add(new StringElement("Name", application.getName()));
 				elements.add(
 						new StringElement("Public URL", application.getApplicationUrl().toString(), true));
@@ -43,7 +43,8 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 				elements.add(createCartridges(application));
 
 			} catch (Exception e) {
-				Logger.error("Failed to display details for OpenShift application", e);
+				Logger.error(
+						NLS.bind("Could not display details for OpenShift application {0}", application.getName()), e);
 			}
 		}
 		return elements.toArray();
