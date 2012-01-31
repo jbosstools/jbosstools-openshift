@@ -147,9 +147,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		remoteNameText = new Text(cloneGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().span(1, 1).align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER)
 				.grab(true, false).applyTo(remoteNameText);
-		Label fillerForRemoteName = new Label(cloneGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().span(1, 1).align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER)
-				.grab(false, false).applyTo(fillerForRemoteName);
+
 		final IObservableValue remoteNameTextObservable = WidgetProperties.text(SWT.Modify).observe(remoteNameText);
 		final IObservableValue remoteNameModelObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
