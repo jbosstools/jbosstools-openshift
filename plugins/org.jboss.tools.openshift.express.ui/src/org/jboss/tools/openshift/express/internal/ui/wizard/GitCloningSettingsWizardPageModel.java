@@ -24,7 +24,7 @@ import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Rob Stryker
  * @author Xavier Coulon
  */
@@ -173,11 +173,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	}
 
 	public String getApplicationName() {
-		IApplication application = wizardModel.getApplication();
-		if (application == null) {
-			return wizardModel.getApplicationName();
-		}
-		return application.getName();
+		return wizardModel.getApplicationName();
 	}
 
 	public boolean isJBossAS7Application() {
