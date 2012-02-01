@@ -18,9 +18,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.Trace;
+import org.jboss.ide.eclipse.as.core.server.IJBossLaunchDelegate;
 import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
 import org.jboss.ide.eclipse.as.core.server.internal.launch.DelegatingStartLaunchConfiguration;
-import org.jboss.ide.eclipse.as.core.server.internal.launch.IJBossLaunchDelegate;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.core.util.LaunchCommandPreferences;
 
