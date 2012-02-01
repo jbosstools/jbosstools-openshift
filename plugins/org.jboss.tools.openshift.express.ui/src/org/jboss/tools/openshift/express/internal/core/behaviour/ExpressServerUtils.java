@@ -114,9 +114,8 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
-	// TODO Must secure this!!! 
 	public static String getExpressPassword(IServerWorkingCopy server ) {
-		return getExpressApplicationId(server.getOriginal());
+		return getExpressPassword(server.getOriginal());
 	}
 	
 	public static String getExpressPassword(IServer server ) {
