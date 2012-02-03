@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat Inc..
+ * Copyright (c) 2012 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class ExpressServerUtils {
 	public static final String EXPRESS_SOURCE_MODE =  "publishSource";
 	public static final String ATTRIBUTE_APPLICATION_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";
 	public static final String ATTRIBUTE_APPLICATION_ID =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";
+	public static final String ATTRIBUTE_DEPLOY_PROJECT =  "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
 	// Legacy, not to be used
@@ -72,17 +73,25 @@ public class ExpressServerUtils {
 	public static String getExpressApplicationName(IServerAttributes attributes ) {
 		return attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String)null);
 	}
-	
-	public static String getExpressApplicationId(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String)null);
-	}
-	
+
 	public static IServer setExpressApplication(IServer server, String val) throws CoreException {
 		IServerWorkingCopy wc = server.createWorkingCopy();
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, val);
 		return wc.save(false, new NullProgressMonitor());
 	}
 
+	public static String getExpressDeployProject(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_DEPLOY_PROJECT, (String)null);
+	}
+	public static IServer setExpressDeployProject(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+
+	public static String getExpressApplicationId(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String)null);
+	}
 
 	public static String getExpressDomain(IServerAttributes attributes ) {
 		return attributes.getAttribute(ATTRIBUTE_DOMAIN, (String)null);
@@ -119,15 +128,16 @@ public class ExpressServerUtils {
 	}
 	
 	public static String getExpressPassword(IServer server ) {
+		if( server == null )
+			return null;
 		String s = ServerUtil.getFromSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD);
 		if( s == null )
 			return server.getAttribute(ExpressServerUtils.ATTRIBUTE_PASSWORD, (String)null);
 		return s;
 	}
 	
-	public static IServer setExpressPassword(IServer server, String val) throws CoreException {
+	public static void setExpressPassword(IServerAttributes server, String val) throws CoreException {
 		ServerUtil.storeInSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD, val);
-		return server;
 	}
 	
 	
@@ -226,7 +236,12 @@ public class ExpressServerUtils {
 		if( host.endsWith("/"))
 			host = host.substring(0, host.length()-1);
 		wc.setHost(host);
-		wc.setAttribute(IDeployableServer.SERVER_MODE, "openshift");
+		if(mode.equals(ExpressServerUtils.EXPRESS_SOURCE_MODE)) {
+			wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
+		} else {
+			wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBinaryBehaviourDelegate.OPENSHIFT_BINARY_ID);
+			
+		}
 		wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);

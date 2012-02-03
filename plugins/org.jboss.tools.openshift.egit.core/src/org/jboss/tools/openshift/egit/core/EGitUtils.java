@@ -361,6 +361,22 @@ public class EGitUtils {
 		return op.getCommit();
 	}
 
+	public static List<URIish> getRemoteURIs(IProject p) throws CoreException {
+		RemoteConfig rc = getRemoteConfig(p);
+		if( rc != null ) {
+			return rc.getURIs();
+		}
+		return new ArrayList<URIish>();
+	}
+	
+	public static RemoteConfig getRemoteConfig(IProject project) throws CoreException {
+		Repository rep = getRepository(project);
+		if( rep != null ) {
+			return getRemoteConfig(rep);
+		}
+		return null;
+	}
+	
 	/**
 	 * Pushes the current branch of the given repository to the remote
 	 * repository that it originates from.

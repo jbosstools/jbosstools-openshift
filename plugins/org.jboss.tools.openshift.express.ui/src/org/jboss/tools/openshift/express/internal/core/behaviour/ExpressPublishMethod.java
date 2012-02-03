@@ -27,13 +27,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.internal.ui.wizards.ConfigureProjectWizard;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.navigator.filters.CoreExpressionFilter;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
-import org.jboss.ide.eclipse.as.core.server.IServerAlreadyStartedHandler;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
@@ -61,14 +59,18 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			shareProjects(projects);
 			projectsLackingGitRepo = null;
 		}
+        return areAllPublished(behaviour) ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
+    }
+	
+	protected boolean areAllPublished(DeployableServerBehavior behaviour) {
         IModule[] modules = behaviour.getServer().getModules();
         boolean allpublished= true;
         for (int i = 0; i < modules.length; i++) {
         	if(behaviour.getServer().getModulePublishState(new IModule[]{modules[i]})!=IServer.PUBLISH_STATE_NONE)
                 allpublished=false;
         }
-        return allpublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
-    }
+        return allpublished;
+	}
 
 	@Override
 	public int publishModule(DeployableServerBehavior behaviour, int kind,
@@ -98,19 +100,28 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 		}
 		
+		commitAndPushProject(p, behaviour, monitor);
+		
+		return IServer.PUBLISH_STATE_NONE;
+	}
+
+	protected PushOperationResult commitAndPushProject(IProject p,
+			DeployableServerBehavior behaviour, IProgressMonitor monitor) throws CoreException {
+		Repository repository = EGitUtils.getRepository(p);
+
 		int changed = EGitUtils.countCommitableChanges(p, behaviour.getServer(), new NullProgressMonitor() );
 		String remoteName = behaviour.getServer().getAttribute(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, 
 				ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		PushOperationResult result = null;
 		boolean committed = false;
 		try {
-			if( changed != 0 && requestCommitAndPushApproval(module, changed)) {
+			if( changed != 0 && requestCommitAndPushApproval(p.getName(), changed)) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
 				committed = true;
 			} 
 			
-			if( committed || (changed == 0 && requestPushApproval(module))) {
+			if( committed || (changed == 0 && requestPushApproval(p.getName()))) {
 				if( !committed )
 					monitor.beginTask("Publishing " + p.getName(), 200);
 				result = EGitUtils.push(remoteName, EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
@@ -131,10 +142,10 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		if( result != null ) {
 			ConsoleUtils.appendGitPushToConsole(behaviour.getServer(), result);
 		}
-		
-		return IServer.PUBLISH_STATE_NONE;
+		return result;
 	}
-
+	
+	
 	private void shareProjects(final IProject[] projects) {
 		Display.getDefault().asyncExec(new Runnable() { 
 			public void run() {
@@ -150,21 +161,23 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		});
 	}
 	
-	private boolean requestCommitAndPushApproval(final IModule[] module, int changed) {
-		String projName = module[module.length-1].getProject().getName();
+	protected String getModuleProjectName(IModule[] module) {
+		return module[module.length-1].getProject().getName();
+	}
+	
+	protected boolean requestCommitAndPushApproval(String projName, int changed) {
 		String msg = NLS.bind(ExpressMessages.requestCommitAndPushMsg, changed, projName);
 		String title = NLS.bind(ExpressMessages.requestCommitAndPushTitle, projName);
 		return requestApproval(msg, title);
 	}
 
-	private boolean requestPushApproval(final IModule[] module) {
-		String projName = module[module.length-1].getProject().getName();
+	protected boolean requestPushApproval(String projName) {
 		String msg = NLS.bind(ExpressMessages.requestPushMsg, projName);
 		String title = NLS.bind(ExpressMessages.requestPushTitle, projName);
 		return requestApproval(msg, title);
 	}
 
-	private boolean requestApproval(final String message, final String title) {
+	protected boolean requestApproval(final String message, final String title) {
 		final boolean[] b = new boolean[1];
 		Display.getDefault().syncExec(new Runnable() { 
 			public void run() {
@@ -174,7 +187,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		return b[0];
 	}
 	
-	private static Shell getActiveShell() {
+	protected static Shell getActiveShell() {
 		Display display = Display.getDefault();
 		final Shell[] ret = new Shell[1];
 		display.syncExec(new Runnable() {

@@ -71,6 +71,14 @@
             serverTypes="org.jboss.tools.openshift.express.openshift.server.type"
             typeId="openshift">
       </behaviour>
+      <behaviour
+            behaviourDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBinaryBehaviourDelegate"
+            launchDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressLaunchDelegate"
+            name="Openshift Binary"
+            publishMethod="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBinaryPublishMethod"
+            serverTypes="org.jboss.ide.eclipse.as.70"
+            typeId="openshiftBinary">
+      </behaviour>
    </extension>
 
    <extension
@@ -271,4 +279,16 @@
              typeIds="org.jboss.tools.openshift.express.openshift.server.type">
        </fragment>
     </extension>
+    
+    
+    
+    
+    <!-- Openshift Binary -->
+    <extension
+         point="org.jboss.ide.eclipse.as.ui.DeployMethodUI">
+      <ui class="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressBinaryUI"
+            deployMethodId="openshiftBinary">
+      </ui>
+   </extension>
+    
 </plugin>
