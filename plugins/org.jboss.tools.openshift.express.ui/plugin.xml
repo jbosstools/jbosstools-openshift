@@ -173,11 +173,12 @@
 				class="org.jboss.tools.openshift.express.internal.ui.console.TailServerLogActionProvider"
 				id="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider">
 			<enablement>
-		      <and>
-		         <instanceof
-		               value="org.eclipse.wst.server.core.IServer">
-		         </instanceof>
-		      </and>
+              <and>
+           <instanceof
+                 value="org.eclipse.wst.server.core.IServer">
+           </instanceof>
+        </and>
+		      
 			</enablement>
 		</actionProvider>
     </extension>
@@ -275,10 +276,7 @@
              typeIds="org.jboss.tools.openshift.express.openshift.server.type">
        </fragment>
     </extension>
-    
-    
-    
-    
+   
     <!-- Openshift Binary -->
     <extension
          point="org.jboss.ide.eclipse.as.ui.DeployMethodUI">
@@ -286,5 +284,276 @@
             deployMethodId="openshiftBinary">
       </ui>
    </extension>
-    
+   
+    <!-- the 'Express console' view -->
+     <extension
+         point="org.eclipse.ui.views">
+      <!--view
+            category="org.jboss.tools.common.model.ui.views"
+            class="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftConsoleExpressView"
+            icon="icons/openshift-logo-white-icon.png"
+            id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
+            name="OpenShift Express Console">
+      </view-->
+      <view
+            category="org.jboss.tools.common.model.ui.views"
+            class="org.eclipse.ui.navigator.CommonNavigator"
+            icon="icons/openshift-logo-white-icon.png"
+            id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
+            name="OpenShift Express Console">
+      </view>
+      
+   </extension>
+   <extension point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+         <popupMenu
+               allowsPlatformContributions="false">
+            <insertionPoint
+                  name="group.showIn"
+                  separator="true">
+            </insertionPoint>
+            <insertionPoint
+                  name="group.edition"
+                  separator="true">
+            </insertionPoint>
+            <insertionPoint
+                  name="group.server"
+                  separator="true">
+            </insertionPoint>
+            <insertionPoint
+                  name="group.properties"
+                  separator="true">
+            </insertionPoint>
+         </popupMenu>
+         <options>
+            <property
+                  name="org.eclipse.ui.navigator.hideLinkWithEditorAction"
+                  value="true">
+            </property>
+         </options>
+      </viewer>
+    	<viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+	       <includes>
+           	  <actionExtension
+	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.*"/>
+           	  </includes>
+	    </viewerActionBinding>
+        <viewerContentBinding
+              viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+           <includes>
+              <contentExtension
+                    isRoot="false"
+                    pattern="org.jboss.tools.openshift.express.ui.viewer.expressConsoleContent">
+              </contentExtension>
+           </includes>
+        </viewerContentBinding>
+     </extension>
+     <extension
+           point="org.eclipse.ui.navigator.navigatorContent">
+        <navigatorContent
+              contentProvider="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider"
+              id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleContent"
+              labelProvider="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleLabelProvider"
+              name="OpenShift Express Console Content">
+           <triggerPoints></triggerPoints>
+        </navigatorContent>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.EditDomainActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.editDomainAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IUser">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.CreateApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.createApplicationAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IUser">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.OpenInWebBrowserActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.openInWebBrowserAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.TailServerLogActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.tailServerLogAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.EditCartridgesActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.editCartridgesAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.ImportApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.importApplicationAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.DeleteApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.deleteApplicationAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.CreateServerAdapterActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.createServerAdapterAction">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.ShowPropertiesActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.showPropertiesAction">
+           <enablement>
+              <or>
+                 <instanceof
+                       value="com.openshift.express.client.IUser">
+                 </instanceof>
+                 <instanceof
+                       value="com.openshift.express.client.IApplication">
+                 </instanceof>
+                 <instanceof
+                       value="com.openshift.express.client.IEmbeddableCartridge">
+                 </instanceof>
+              </or>
+           </enablement>
+        </actionProvider>
+        
+     </extension>
+     
+     <extension
+           point="org.eclipse.ui.viewActions">
+        <viewContribution
+              id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleViewContribution"
+              targetID="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+           <!--action
+                 class="org.jboss.tools.openshift.express.internal.ui.viewer.RefreshDomainAction"
+                 icon="icons/refresh.gif"
+                 id="org.jboss.tools.openshift.express.ui.viewActions.refreshAction"
+                 label="Refresh"
+                 style="push"
+                 toolbarPath="openshift">
+           </action-->
+           <action
+                 class="org.jboss.tools.openshift.express.internal.ui.viewer.action.OpenConnectionDialogActionDelegate"
+                 icon="icons/resource_obj.gif"
+                 id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
+                 label="Connect"
+                 style="push"
+                 toolbarPath="openshift"
+                 tooltip="Connect to OpenShift">
+           </action>
+        </viewContribution>
+     </extension>
+     <!-- when using the 'classic' properties view. -->
+     <extension
+           point="org.eclipse.core.runtime.adapters">
+        <factory
+              adaptableType="com.openshift.express.client.IUser"
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
+           <adapter
+                 type="org.eclipse.ui.views.properties.IPropertySource">
+           </adapter>
+        </factory>
+        <factory
+              adaptableType="com.openshift.express.client.IApplication"
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
+           <adapter
+                 type="org.eclipse.ui.views.properties.IPropertySource">
+           </adapter>
+        </factory>
+        <factory
+              adaptableType="com.openshift.express.client.IEmbeddableCartridge"
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
+           <adapter
+                 type="org.eclipse.ui.views.properties.IPropertySource">
+           </adapter>
+        </factory>
+     </extension>
+     <!-- when using the new 'tabbed' properties view. -->
+     
+     <!--extension
+           point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+        <propertyContributor
+              contributorId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
+              typeMapper="org.jboss.tools.openshift.express.internal.ui.viewer.TypeMapper">
+           <propertyCategory
+                 category="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTabCategory"></propertyCategory>
+        </propertyContributor>
+     </extension>
+     <extension
+           point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+        <propertyTabs
+              contributorId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+           <propertyTab
+                 category="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTabCategory"
+                 id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleUserTab"
+                 label="Account">
+           </propertyTab>
+           <propertyTab
+                 category="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTabCategory"
+                 id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleApplicationsTab"
+                 label="Account">
+           </propertyTab>
+        </propertyTabs>
+     </extension>
+     <extension
+           point="org.eclipse.ui.views.properties.tabbed.propertySections">
+        <propertySections
+              contributorId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+           <propertySection
+                 class="org.jboss.tools.openshift.express.internal.ui.viewer.property.UserPropertySection"
+                 id="org.jboss.tools.openshift.express.ui.userPropertySection"
+                 tab="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTab">
+              <input
+                    type="com.openshift.express.client.IUser">
+              </input>
+           </propertySection>
+        </propertySections>
+     </extension -->      
 </plugin>

@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
+import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -70,7 +71,17 @@ public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicatio
 	@Override
 	public void addPages() {
 		setWizardModel(new ImportExistingApplicationWizardModel());
-		addPage(new CredentialsWizardPage(this, getWizardModel()));
+		final IUser user = OpenShiftUIActivator.getDefault().getUser();
+		try {
+			if(user == null || !user.isValid()) {
+				addPage(new CredentialsWizardPage(this));
+			} else {
+				getWizardModel().setUser(user);
+			}
+		} catch (OpenShiftException e) {
+			// if the user's validity can't be checked, we may want to re-connect..
+			addPage(new CredentialsWizardPage(this));
+		}
 		addPage(new ApplicationSelectionWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));

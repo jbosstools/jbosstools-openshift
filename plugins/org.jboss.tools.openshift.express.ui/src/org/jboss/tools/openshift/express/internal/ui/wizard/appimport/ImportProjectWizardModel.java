@@ -27,8 +27,8 @@ import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPageModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreateNewApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ImportExistingApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.CreateNewApplicationWizardModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ImportExistingApplicationWizardModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;

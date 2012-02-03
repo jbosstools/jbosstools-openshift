@@ -47,10 +47,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private IUser user;
 	private StringPreferenceValue rhLoginPreferenceValue;
 
-	private AbstractOpenShiftApplicationWizardModel wizardModel;
-
-	public CredentialsWizardPageModel(AbstractOpenShiftApplicationWizardModel model) {
-		this.wizardModel = model;
+	public CredentialsWizardPageModel() {
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.rhLogin = initRhLogin();
 		resetCredentialsStatus();
@@ -136,6 +133,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			this.user = new User(getRhLogin(), getPassword(), CLIENT_ID);
 			if (user.isValid()) {
 				status = Status.OK_STATUS;
+				OpenShiftUIActivator.getDefault().setUser(user);
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
@@ -145,8 +143,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		} catch (Exception e) {
 			this.user = null;
 		}
-		if( wizardModel != null )
-			wizardModel.setUser(user);
+		
 		setCredentialsStatus(status);
 		return status;
 	}

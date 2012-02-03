@@ -80,7 +80,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		Group embedGroup = new Group(parent, SWT.NONE);
 		embedGroup.setText("Embeddable Cartridges");
 		GridDataFactory.fillDefaults()
-				.hint(200, 150).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(embedGroup);
+				.hint(200, 200).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(embedGroup);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(3).margins(6, 6).applyTo(embedGroup);
 

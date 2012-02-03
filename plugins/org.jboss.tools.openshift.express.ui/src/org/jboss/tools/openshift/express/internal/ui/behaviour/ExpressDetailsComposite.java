@@ -221,7 +221,7 @@ public class ExpressDetailsComposite {
 	}
 	
 	private void verifyPressed() {
-		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(null);
+		final CredentialsWizardPageModel model = new CredentialsWizardPageModel();
 		this.fapplication = null;
 		this.fuser = null;
 		this.appListNames = null;

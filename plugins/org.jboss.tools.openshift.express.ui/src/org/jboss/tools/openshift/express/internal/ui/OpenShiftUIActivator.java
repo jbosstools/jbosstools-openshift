@@ -1,10 +1,19 @@
 package org.jboss.tools.openshift.express.internal.ui;
 
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.openshift.express.client.IUser;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -17,6 +26,9 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	// The shared instance
 	private static OpenShiftUIActivator plugin;
 
+	/** The user connected on OpenShift. */
+	private IUser user = null;
+	
 	/**
 	 * The constructor
 	 */
@@ -78,5 +90,41 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 
 	public static IStatus createErrorStatus(String message, Throwable throwable, Object... arguments) {
 		return createErrorStatus(NLS.bind(message, arguments), throwable);
+	}
+
+	
+	public void setUser(IUser user) {
+		this.user = user;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public final IUser getUser() {
+		return user;
+	}
+	
+	/**
+	 * Creates an image by loading it from a file in the plugin's images
+	 * directory.
+	 * 
+	 * @param imagePath path to the image, relative to the /icons directory of the plugin
+	 * @return The image object loaded from the image file
+	 */
+	public final Image createImage(final String imagePath) {
+		return createImageDescriptor(imagePath).createImage();
+	}
+	
+	/**
+	 * Creates an image descriptor by loading it from a file in the plugin's images
+	 * directory.
+	 * 
+	 * @param imagePath path to the image, relative to the /icons directory of the plugin
+	 * @return The image object loaded from the image file
+	 */
+	public final ImageDescriptor createImageDescriptor(final String imagePath) {
+		IPath imageFilePath = new Path("/icons/" + imagePath);
+		URL imageFileUrl = FileLocator.find(this.getBundle(), imageFilePath, null);
+		return ImageDescriptor.createFromURL(imageFileUrl);
 	}
 }

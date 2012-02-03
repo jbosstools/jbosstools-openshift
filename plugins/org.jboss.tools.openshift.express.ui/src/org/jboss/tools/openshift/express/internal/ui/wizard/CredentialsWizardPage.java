@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +44,7 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
@@ -53,15 +55,15 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 
 	protected static final String OPENSHIFT_EXPRESS_SIGNUP_URL = "https://openshift.redhat.com/app/user/new/express"; //$NON-NLS-1$
 
-	private final CredentialsWizardPageModel model;
+	private final CredentialsWizardPageModel pageModel;
 
 	private Text rhLoginText = null;
 	private Text passwordText = null;
 
-	public CredentialsWizardPage(IWizard wizard, AbstractOpenShiftApplicationWizardModel wizardModel) {
+	public CredentialsWizardPage(IWizard wizard) {
 		super("Server connection", "Please provide your OpenShift Express user credentials, then click 'next'.", "Server Connection",
 				wizard);
-		this.model = new CredentialsWizardPageModel(wizardModel);
+		this.pageModel = new CredentialsWizardPageModel();
 	}
 
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
@@ -83,7 +85,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(rhLoginText);
 		UIUtils.selectAllOnFocus(rhLoginText);
 		final IObservableValue rhLoginObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_RHLOGIN)
-				.observe(model);
+				.observe(pageModel);
 		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(rhLoginText), rhLoginObservable);
 
 		Label passwordLabel = new Label(container, SWT.NONE);
@@ -93,12 +95,12 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(passwordText);
 		UIUtils.selectAllOnFocus(passwordText);
 		final IObservableValue passwordModelObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_PASSWORD)
-				.observe(model);
+				.observe(pageModel);
 		final ISWTObservableValue passwordTextObservable = WidgetProperties.text(SWT.Modify).observe(passwordText);
 		dbc.bindValue(passwordTextObservable, passwordModelObservable);
 		
 		IObservableValue credentialsStatusObservable = BeanProperties.value(
-				CredentialsWizardPageModel.PROPERTY_CREDENTIALS_STATUS).observe(model);
+				CredentialsWizardPageModel.PROPERTY_CREDENTIALS_STATUS).observe(pageModel);
 		dbc.addValidationStatusProvider(new CredentialsInputValidator(rhLoginObservable,
 				passwordModelObservable));
 		final CredentialsStatusValidator credentialsStatusValidator = new CredentialsStatusValidator(credentialsStatusObservable, passwordTextObservable);
@@ -131,7 +133,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		super.onPageActivated(dbc);
-		if (model.getRhLogin() == null || model.getRhLogin().isEmpty() && rhLoginText != null) {
+		if (pageModel.getRhLogin() == null || pageModel.getRhLogin().isEmpty() && rhLoginText != null) {
 			rhLoginText.setFocus();
 		} else if (passwordText != null) {
 			passwordText.setFocus();
@@ -143,31 +145,36 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
-
-		if (!model.areCredentialsValid()) {
-			try {
-				final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);
-				WizardUtils.runInWizard(new Job("Verifying user credentials...") {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						IStatus status = model.validateCredentials();
-						queue.offer(status);
-						monitor.done();
-						return Status.OK_STATUS;
-					}
-				}, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
-				queue.poll(10, TimeUnit.SECONDS);
-				event.doit = model.areCredentialsValid();
-				if(!event.doit) {
-					passwordText.setFocus();
-					passwordText.selectAll();
-				}
-			} catch (Exception ex) {
-				event.doit = false;
-			} finally {
+		if (!pageModel.areCredentialsValid()) {
+			event.doit = performAuthentication();
+			if (!event.doit) {
+				passwordText.setFocus();
+				passwordText.selectAll();
 			}
-
 		}
+	}
+
+	public boolean performAuthentication() {
+		try {
+			final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);
+			WizardUtils.runInWizard(new Job("Verifying user credentials...") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					IStatus status = pageModel.validateCredentials();
+					queue.offer(status);
+					monitor.done();
+					return Status.OK_STATUS;
+				}
+			}, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
+			queue.poll(10, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			Logger.error("Failed to authenticate on OpenShift", e);
+			return false;
+		} catch (InvocationTargetException e) {
+			Logger.error("Failed to authenticate on OpenShift", e);
+			return false;
+		}
+		return pageModel.areCredentialsValid();
 	}
 
 	class CredentialsInputValidator extends MultiValidator {
@@ -210,7 +217,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			final IStatus credentialsValidityStatus = (IStatus) credentialsStatusObservable.getValue();
 
 			if (credentialsValidityStatus != null) {
-				final IStatus credentialsValidity = model.getCredentialsStatus();
+				final IStatus credentialsValidity = pageModel.getCredentialsStatus();
 				return credentialsValidity;
 			}
 			return ValidationStatus.ok();

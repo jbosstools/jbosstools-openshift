@@ -9,11 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteSession;
 import org.eclipse.jgit.transport.SshSessionFactory;
@@ -24,7 +20,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.navigator.CommonViewer;
 import org.eclipse.ui.views.IViewDescriptor;
 import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
@@ -33,6 +28,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker.JschToEclipseLogger;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.viewer.action.AbstractAction;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -44,10 +40,7 @@ import com.openshift.express.client.utils.Base64Encoder;
  * @author Xavier Coulon
  * 
  */
-public class TailServerLogAction extends Action implements ISelectionChangedListener, IConsoleListener {
-
-	/** The current selection in the view. */
-	private ISelection selection = null;
+public class TailServerLogAction extends AbstractAction implements IConsoleListener {
 
 	/**
 	 * The message consoles associated with the 'tail' workers that write the
@@ -157,19 +150,6 @@ public class TailServerLogAction extends Action implements ISelectionChangedList
 		final String command = commandBuilder.toString();
 		Logger.debug("ssh command to execute: " + command);
 		return command;
-	}
-
-	@Override
-	public void selectionChanged(SelectionChangedEvent event) {
-		Object source = event.getSource();
-		if (source instanceof CommonViewer) {
-			this.selection = ((CommonViewer) source).getSelection();
-		}
-	}
-
-	public void setSelection(ISelection selection) {
-		this.selection = selection;
-
 	}
 
 	public IServer getServer() {

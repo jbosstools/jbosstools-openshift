@@ -30,13 +30,15 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author Andr� Dietisheim
  * @author Xavier Coulon
  */
-public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWizard<CreateNewApplicationWizardModel> implements INewWizard {
+public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWizard<CreateNewApplicationWizardModel>
+		implements INewWizard {
 
 	public CreateNewApplicationWizard() {
 		setWizardModel(new CreateNewApplicationWizardModel());
@@ -45,7 +47,17 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 
 	@Override
 	public void addPages() {
-		addPage(new CredentialsWizardPage(this, getWizardModel()));
+		final IUser user = OpenShiftUIActivator.getDefault().getUser();
+		try {
+			if (user == null || !user.isValid()) {
+				addPage(new CredentialsWizardPage(this));
+			} else {
+				getWizardModel().setUser(user);
+			}
+		} catch (OpenShiftException e) {
+			// if the user's validity can't be checked, we may want to re-connect..
+			addPage(new CredentialsWizardPage(this));
+		}
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
@@ -66,18 +78,16 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 		if (successfull) {
 			successfull = processCartridges();
 		}
-		if(successfull) {
+		if (successfull) {
 			try {
 				final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-				IStatus jobResult =
-						WizardUtils.runInWizard(
-								new ImportJob(delegatingMonitor),
-								delegatingMonitor, getContainer());
+				IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
+						getContainer());
 				return JobUtils.isOk(jobResult);
 			} catch (Exception e) {
-				ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
-						new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								"An exception occurred while creating local git repository.", e));
+				ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", new Status(
+						IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"An exception occurred while creating local git repository.", e));
 				return false;
 			}
 		}
@@ -129,8 +139,8 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 							} catch (OpenShiftException e) {
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
-										"Could not embed cartridges to application {0}", getWizardModel().getApplication()
-												.getName()), e);
+										"Could not embed cartridges to application {0}", getWizardModel()
+												.getApplication().getName()), e);
 							}
 							return Status.OK_STATUS;
 						}
@@ -140,5 +150,5 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 			return false;
 		}
 	}
-	
+
 }
