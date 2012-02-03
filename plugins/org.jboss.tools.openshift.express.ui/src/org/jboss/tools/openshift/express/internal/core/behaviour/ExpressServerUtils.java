@@ -53,6 +53,8 @@ public class ExpressServerUtils {
 	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT =  "origin";
 	
+	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";
+	
 	/** the OpensHift Server Type as defined in the plugin.xml.*/
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";
 	
@@ -143,6 +145,17 @@ public class ExpressServerUtils {
 		ServerUtil.storeInSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD, val);
 	}
 	
+	
+	public static boolean getIgnoresContextRoot(IServerAttributes server) {
+		return server.getAttribute(PREFERENCE_IGNORE_CONTEXT_ROOT, true);
+	}
+
+	public static IServer setIgnoresContextRoot(IServerAttributes server, boolean val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+
 	
 	/**
 	 * To be used if you must create a local runtime adapter 

@@ -77,6 +77,7 @@ public class ExpressServer extends ServerDelegate implements IURLProvider {
 
 	@Override
 	public URL getModuleRootURL(IModule module) {
-		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80);
+		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer());
+		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore);
 	}
 }
