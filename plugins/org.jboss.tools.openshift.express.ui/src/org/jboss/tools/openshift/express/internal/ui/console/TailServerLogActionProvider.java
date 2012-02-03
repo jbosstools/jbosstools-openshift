@@ -6,7 +6,9 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
+import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.views.server.extensions.CommonActionProviderUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
 public class TailServerLogActionProvider extends CommonActionProvider {
 
@@ -27,9 +29,14 @@ public class TailServerLogActionProvider extends CommonActionProvider {
 
 	public void fillContextMenu(IMenuManager menu) {
 		if (action != null && action.isEnabled()) {
-			//menu.insertBefore(ServerActionProvider.CONTROL_SERVER_SECTION_END_SEPARATOR, action);
-			CommonActionProviderUtils.addToShowInQuickSubMenu(action, menu, actionExtensionSite);
-			
+			Object sel = getSelection();
+			if( sel instanceof IServer ) {
+				IServer server = (IServer)sel;
+				if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
+					//menu.insertBefore(ServerActionProvider.CONTROL_SERVER_SECTION_END_SEPARATOR, action);
+					CommonActionProviderUtils.addToShowInQuickSubMenu(action, menu, actionExtensionSite);
+				}
+			}
 		}
 	}
 

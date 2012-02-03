@@ -177,10 +177,6 @@
 		         <instanceof
 		               value="org.eclipse.wst.server.core.IServer">
 		         </instanceof>
-		         <test
-		               forcePluginActivation="true"
-		               property="org.jboss.tools.openshift.express.isOpenShiftServer">
-		         </test>
 		      </and>
 			</enablement>
 		</actionProvider>

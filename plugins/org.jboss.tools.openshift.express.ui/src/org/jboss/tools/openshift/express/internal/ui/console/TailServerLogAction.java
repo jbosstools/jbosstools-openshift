@@ -5,6 +5,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -70,22 +74,32 @@ public class TailServerLogAction extends Action implements ISelectionChangedList
 	@Override
 	public void run() {
 		final IServer server = getServer();
-		if (ExpressServerUtils.isOpenShiftRuntime(server)) {
+		if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
 			MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
-			String consoleName = console.getName();
-			if (!this.consoleWorkers.containsKey(consoleName)) {
+			ConsoleUtils.displayConsoleView(console);
+			console.newMessageStream().println("Loading....");
+			
+			if (!this.consoleWorkers.containsKey(console.getName())) {
+				launchTailServerJob(console, server);
+			}
+		}
+	}
+	
+	private void launchTailServerJob(final MessageConsole console, final IServer server) {
+		new Job("Launching Tail Server Operation") {
+			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					final TailServerLogWorker tailServerLogWorker = startTailProcess(server, console);
-					consoleWorkers.put(consoleName, tailServerLogWorker);
 					consoleWorkers.put(console.getName(), tailServerLogWorker);
 					Thread thread = new Thread(tailServerLogWorker);
 					thread.start();
 				} catch (Exception e) {
 					Logger.error("Failed to retrieve remote server logs", e);
 				}
+				return Status.OK_STATUS;
 			}
-			ConsoleUtils.displayConsoleView(console);
-		}
+			
+		}.schedule();
 	}
 
 	/**

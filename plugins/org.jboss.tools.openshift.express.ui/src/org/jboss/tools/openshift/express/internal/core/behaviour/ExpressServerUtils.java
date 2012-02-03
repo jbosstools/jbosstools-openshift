@@ -20,8 +20,11 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
+import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethodType;
+import org.jboss.ide.eclipse.as.core.util.DeploymentPreferenceLoader;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
+import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 
@@ -279,4 +282,23 @@ public class ExpressServerUtils {
 		return (OPENSHIFT_SERVER_TYPE.equals(serverTypeId));
 	}
 
+	/**
+	 * Returns true if the given server is a server using an openshift behaviour
+	 * @param server the server to check
+	 * @return true or false
+	 */
+	public static boolean isInOpenshiftBehaviourMode(IServer server) {
+		IDeployableServer ds = ServerConverter.getDeployableServer(server);
+		if( ds != null ) {
+			IJBossServerPublishMethodType type = DeploymentPreferenceLoader.getCurrentDeploymentMethodType(server);
+			if( type != null ) {
+				String id = type.getId();
+				if( ExpressBinaryBehaviourDelegate.OPENSHIFT_BINARY_ID.equals(id) || ExpressBehaviourDelegate.OPENSHIFT_ID.equals(id))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	
 }
