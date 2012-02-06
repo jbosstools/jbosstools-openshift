@@ -24,7 +24,6 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -127,9 +126,9 @@ public interface IOpenShiftWizardModel {
 
 	public Object getProperty(String key);
 
-	public void setUser(IUser user);
-
-	public IUser getUser();
+//	public void setUser(IUser user);
+//
+//	public IUser getUser();
 
 	public IApplication getApplication();
 

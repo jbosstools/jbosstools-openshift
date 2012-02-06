@@ -17,6 +17,7 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
@@ -24,7 +25,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ServerAdap
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
@@ -94,7 +94,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo im
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, getUser())
+				, OpenShiftUIActivator.getDefault().getUser())
 				.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
@@ -132,7 +132,8 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo im
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, getUser())
+//				, getUser())
+				, OpenShiftUIActivator.getDefault().getUser())
 				.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
@@ -166,15 +167,17 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo im
 		return dataModel.get(key);
 	}
 
-	@Override
-	public void setUser(IUser user) {
-		setProperty(USER, user);
-	}
+//	@Override
+//	public void setUser(IUser user) {
+//		setProperty(USER, user);
+//		OpenShiftUIActivator.getDefault().setUser(user);
+//	}
 
-	@Override
-	public IUser getUser() {
-		return (IUser) getProperty(USER);
-	}
+//	@Override
+//	public IUser getUser() {
+//		return (IUser) getProperty(USER);
+//		return OpenShiftUIActivator.getDefault().getUser();
+//	}
 
 	@Override
 	public IApplication getApplication() {

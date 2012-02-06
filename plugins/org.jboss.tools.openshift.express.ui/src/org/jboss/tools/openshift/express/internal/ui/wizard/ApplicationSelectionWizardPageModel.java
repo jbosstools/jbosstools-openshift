@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -63,7 +64,7 @@ public class ApplicationSelectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public IUser getUser() {
-		return wizardModel.getUser();
+		return OpenShiftUIActivator.getDefault().getUser();
 	}
 
 }

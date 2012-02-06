@@ -26,7 +26,7 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Xavier Coulon
  * 
  */
@@ -52,7 +52,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public IUser getUser() {
-		return wizardModel.getUser();
+//		return wizardModel.getUser();
+		return OpenShiftUIActivator.getDefault().getUser();
 	}
 
 	public void loadExistingApplications() throws OpenShiftException {
@@ -77,7 +78,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadCartridges() throws OpenShiftException {
-		setCartridges(wizardModel.getUser().getCartridges());
+//		setCartridges(wizardModel.getUser().getCartridges());
+		setCartridges(OpenShiftUIActivator.getDefault().getUser().getCartridges());
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
@@ -99,7 +101,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
-		List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
+//		List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
+		List<IEmbeddableCartridge> cartridges = OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
 	}
@@ -155,7 +158,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public boolean hasApplication(ICartridge cartridge) {
 		try {
-			return wizardModel.getUser().hasApplication(cartridge);
+//			return wizardModel.getUser().hasApplication(cartridge);
+			return getUser().hasApplication(cartridge);
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log(OpenShiftUIActivator
 					.createErrorStatus("Could not get application by cartridge", e));

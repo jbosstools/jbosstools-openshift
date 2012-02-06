@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.internal.ui.importexport.launchconfigurations.WizardMessages;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -126,7 +127,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			this.user = new User(getRhLogin(), getPassword(), CLIENT_ID);
 			if (user.isValid()) {
 				status = Status.OK_STATUS;
-				OpenShiftUIActivator.getDefault().setUser(user);
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
@@ -137,6 +137,9 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			this.user = null;
 		}
 
+		if (status.isOK()) {
+			OpenShiftUIActivator.getDefault().setUser(user);
+		}
 		setCredentialsStatus(status);
 		return status;
 	}

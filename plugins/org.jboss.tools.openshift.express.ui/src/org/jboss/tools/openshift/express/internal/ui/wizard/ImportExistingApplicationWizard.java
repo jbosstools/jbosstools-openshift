@@ -75,8 +75,6 @@ public class ImportExistingApplicationWizard extends AbstractOpenShiftApplicatio
 		try {
 			if(user == null || !user.isValid()) {
 				addPage(new CredentialsWizardPage(this));
-			} else {
-				getWizardModel().setUser(user);
 			}
 		} catch (OpenShiftException e) {
 			// if the user's validity can't be checked, we may want to re-connect..

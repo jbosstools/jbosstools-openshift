@@ -5,11 +5,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.express.client.OpenShiftException;
 
@@ -37,7 +39,11 @@ public class CreateNewApplicationWizardModel extends AbstractOpenShiftApplicatio
 	}
 
 	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		IApplication application = getUser().createApplication(name, cartridge);
+		IUser user = OpenShiftUIActivator.getDefault().getUser();
+		if (user == null) {
+			throw new OpenShiftException("Could not create application, have no valid user credentials");
+		}
+		IApplication application = user.createApplication(name, cartridge);
 		waitForAccessible(application, monitor);
 		return application;
 	}

@@ -49,13 +49,15 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 	public void addPages() {
 		final IUser user = OpenShiftUIActivator.getDefault().getUser();
 		try {
-			if (user == null || !user.isValid()) {
+			if (user == null 
+					|| !user.isValid()) {
 				addPage(new CredentialsWizardPage(this));
-			} else {
-				getWizardModel().setUser(user);
+//			} else {
+//				getWizardModel().setUser(user);
 			}
 		} catch (OpenShiftException e) {
-			// if the user's validity can't be checked, we may want to re-connect..
+			// if the user's validity can't be checked, we may want to
+			// re-connect..
 			addPage(new CredentialsWizardPage(this));
 		}
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
@@ -81,13 +83,13 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 		if (successfull) {
 			try {
 				final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-				IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
-						getContainer());
+				IStatus jobResult = WizardUtils.runInWizard(
+						new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
 				return JobUtils.isOk(jobResult);
 			} catch (Exception e) {
-				ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", new Status(
-						IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-						"An exception occurred while creating local git repository.", e));
+				ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
+						new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+								"An exception occurred while creating local git repository.", e));
 				return false;
 			}
 		}
@@ -129,10 +131,11 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
 
-								List<IEmbeddableCartridge> selectedCartridges = getWizardModel()
-										.getSelectedEmbeddableCartridges();
+								List<IEmbeddableCartridge> selectedCartridges =
+										getWizardModel().getSelectedEmbeddableCartridges();
 								final IApplication application = getWizardModel().getApplication();
-								if (selectedCartridges != null && !selectedCartridges.isEmpty()) {
+								if (selectedCartridges != null 
+										&& !selectedCartridges.isEmpty()) {
 									application.addEmbbedCartridges(selectedCartridges);
 								}
 								queue.offer(true);
@@ -150,5 +153,4 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 			return false;
 		}
 	}
-
 }
