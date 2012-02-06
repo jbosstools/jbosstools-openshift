@@ -20,7 +20,7 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  * 
  */
@@ -31,9 +31,9 @@ public class ApplicationSelectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_APPLICATION = "selectedApplication";
 
 	private IApplication selectedApplication;
-	private AbstractOpenShiftApplicationWizardModel wizardModel;
+	private IOpenShiftWizardModel wizardModel;
 
-	public ApplicationSelectionWizardPageModel(AbstractOpenShiftApplicationWizardModel wizardModel) {
+	public ApplicationSelectionWizardPageModel(IOpenShiftWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
 

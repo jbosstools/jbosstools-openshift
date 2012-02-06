@@ -18,7 +18,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Xavier Coulon
  * 
  */
@@ -36,11 +36,11 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	/** Whether the existing project is a valid one or not. */
 	public static final String PROPERTY_EXISTING_PROJECT_VALIDITY = "existingProjectValidity";
 
-	private AbstractOpenShiftApplicationWizardModel wizardModel;
+	private IOpenShiftWizardModel wizardModel;
 
 	private IStatus existingProjectValidity;
 
-	public ProjectAndServerAdapterSettingsWizardPageModel(AbstractOpenShiftApplicationWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setNewProject(true);
 	}

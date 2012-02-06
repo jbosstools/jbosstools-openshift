@@ -46,7 +46,7 @@ import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 
 /**
- * @author AndrŽ Dietisheim
+ * @author Andrï¿½ Dietisheim
  * @author Xavier Coulon
  */
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
@@ -57,7 +57,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 	private Text existingProjectNameText = null;
 
-	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, AbstractOpenShiftApplicationWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftWizardModel wizardModel) {
 		super("Project configuration",
 				"Configure your project and server adapter settings, then click 'next' or 'finish'.",
 				"Project configuration", wizard);

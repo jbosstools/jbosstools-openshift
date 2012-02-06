@@ -53,7 +53,7 @@ import com.openshift.express.client.NotFoundOpenShiftException;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class ApplicationSelectionWizardPage extends AbstractOpenShiftWizardPage {
@@ -61,7 +61,7 @@ public class ApplicationSelectionWizardPage extends AbstractOpenShiftWizardPage 
 	private TableViewer tableViewer;
 	private final ApplicationSelectionWizardPageModel pageModel;
 
-	public ApplicationSelectionWizardPage(IWizard wizard, AbstractOpenShiftApplicationWizardModel wizardModel) {
+	public ApplicationSelectionWizardPage(IWizard wizard, IOpenShiftWizardModel wizardModel) {
 		super("Application selection", "Click 'next' or select another application to import.",
 				"Application selection", wizard);
 		this.pageModel = new ApplicationSelectionWizardPageModel(wizardModel);

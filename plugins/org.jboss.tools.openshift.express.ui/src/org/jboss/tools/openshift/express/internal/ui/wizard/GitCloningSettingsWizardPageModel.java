@@ -53,7 +53,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY = "customRemoteNameValidity";
 
-	private AbstractOpenShiftApplicationWizardModel wizardModel;
+	private IOpenShiftWizardModel wizardModel;
 	private boolean loading;
 
 	private boolean useDefaultRepoPath = true;
@@ -64,7 +64,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	private boolean useDefaultRemoteName = true;
 
-	public GitCloningSettingsWizardPageModel(AbstractOpenShiftApplicationWizardModel wizardModel) {
+	public GitCloningSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
 

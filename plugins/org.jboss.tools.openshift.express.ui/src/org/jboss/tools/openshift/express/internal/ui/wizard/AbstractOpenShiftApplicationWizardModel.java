@@ -17,8 +17,6 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
@@ -29,28 +27,9 @@ import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
-public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
+public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
-	public static final String NEW_PROJECT = "enableProject";
-	public static final String USER = "user";
-	public static final String APPLICATION = "application";
-	public static final String REMOTE_NAME = "remoteName";
-	public static final String REPOSITORY_PATH = "repositoryPath";
-	public static final String PROJECT_NAME = "projectName";
-	public static final String MERGE_URI = "mergeUri";
-	public static final String RUNTIME_DELEGATE = "runtimeDelegate";
-
-	public static final String CREATE_SERVER_ADAPTER = "createServerAdapter";
-	public static final String PUBLICATION_MODE = "serverMode";
-	public static final String PUBLISH_SOURCE = ExpressServerUtils.EXPRESS_SOURCE_MODE;
-	public static final String PUBLISH_BINARY = ExpressServerUtils.EXPRESS_BINARY_MODE;
-	public static final String SERVER_TYPE = "serverType";
-
-	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
-	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
-	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
-
 	public AbstractOpenShiftApplicationWizardModel() {
 		super();
 		// default value(s)
@@ -74,6 +53,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
 	 */
+	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException {
 		List<IProject> importedProjects = new ImportNewProject(getProjectName(), getApplication(), getRemoteName(),
@@ -106,6 +86,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
 	 */
+	@Override
 	public void configureUnsharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
@@ -143,6 +124,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
 	 */
+	@Override
 	public void configureGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
@@ -162,6 +144,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 		new ServerAdapterFactory().create(project, this, monitor);
 	}
 
+	@Override
 	public File getRepositoryFile() {
 		String repositoryPath = getRepositoryPath();
 		if (repositoryPath == null || repositoryPath.length() == 0) {
@@ -170,6 +153,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 		return new File(repositoryPath, getApplicationName());
 	}
 
+	@Override
 	public Object setProperty(String key, Object value) {
 		Object oldVal = dataModel.get(key);
 		dataModel.put(key, value);
@@ -177,22 +161,27 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 		return value;
 	}
 
+	@Override
 	public Object getProperty(String key) {
 		return dataModel.get(key);
 	}
 
+	@Override
 	public void setUser(IUser user) {
 		setProperty(USER, user);
 	}
 
+	@Override
 	public IUser getUser() {
 		return (IUser) getProperty(USER);
 	}
 
+	@Override
 	public IApplication getApplication() {
 		return (IApplication) getProperty(APPLICATION);
 	}
 
+	@Override
 	public String getApplicationName() {
 		String applicationName = null;
 		IApplication application = getApplication();
@@ -202,6 +191,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 		return applicationName;
 	}
 
+	@Override
 	public ICartridge getApplicationCartridge() {
 		ICartridge cartridge = null;
 		IApplication application = getApplication();
@@ -211,6 +201,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 		return cartridge;
 	}
 
+	@Override
 	public String getApplicationCartridgeName() {
 		String cartridgeName = null;
 		ICartridge cartridge = getApplicationCartridge();
@@ -220,47 +211,58 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 		return cartridgeName;
 	}
 
+	@Override
 	public void setApplication(IApplication application) {
 		setProperty(APPLICATION, application);
 	}
 
+	@Override
 	public String setRemoteName(String remoteName) {
 		setProperty(REMOTE_NAME, remoteName);
 		return remoteName;
 	}
 
+	@Override
 	public String getRemoteName() {
 		return (String) getProperty(REMOTE_NAME);
 	}
 
+	@Override
 	public String setRepositoryPath(String repositoryPath) {
 		return (String) setProperty(REPOSITORY_PATH, repositoryPath);
 	}
 
+	@Override
 	public String getRepositoryPath() {
 		return (String) getProperty(REPOSITORY_PATH);
 	}
 
+	@Override
 	public boolean isNewProject() {
 		return (Boolean) getProperty(NEW_PROJECT);
 	}
 
+	@Override
 	public boolean isExistingProject() {
 		return !((Boolean) getProperty(NEW_PROJECT));
 	}
 
+	@Override
 	public Boolean setNewProject(boolean newProject) {
 		return (Boolean) setProperty(NEW_PROJECT, newProject);
 	}
 
+	@Override
 	public Boolean setExistingProject(boolean existingProject) {
 		return (Boolean) setProperty(NEW_PROJECT, !existingProject);
 	}
 
+	@Override
 	public String setProjectName(String projectName) {
 		return (String) setProperty(PROJECT_NAME, projectName);
 	}
 
+	@Override
 	public boolean isGitSharedProject() {
 		return EGitUtils.isSharedWithGit(getProject());
 	}
@@ -268,39 +270,48 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo {
 	private IProject getProject() {
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
 	}
+	@Override
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter) {
 		return (Boolean) setProperty(CREATE_SERVER_ADAPTER, createServerAdapter);
 	}
 
+	@Override
 	public String getProjectName() {
 		return (String) getProperty(PROJECT_NAME);
 	}
 
+	@Override
 	public String setMergeUri(String mergeUri) {
 		return (String) setProperty(MERGE_URI, mergeUri);
 	}
 
+	@Override
 	public String getMergeUri() {
 		return (String) getProperty(MERGE_URI);
 	}
 
+	@Override
 	public IRuntime getRuntime() {
 		return (IRuntime) getProperty(RUNTIME_DELEGATE);
 	}
 
+	@Override
 	public String getMode() {
 		return (String) getProperty(PUBLICATION_MODE);
 	}
 
+	@Override
 	public boolean isCreateServerAdapter() {
 		Boolean isCreateServer = (Boolean) getProperty(CREATE_SERVER_ADAPTER);
 		return isCreateServer != null && isCreateServer.booleanValue();
 	}
 
+	@Override
 	public IServerType getServerType() {
 		return (IServerType) getProperty(SERVER_TYPE);
 	}
 
+	@Override
 	public void setServerType(IServerType serverType) {
 		setProperty(SERVER_TYPE, serverType);
 	}

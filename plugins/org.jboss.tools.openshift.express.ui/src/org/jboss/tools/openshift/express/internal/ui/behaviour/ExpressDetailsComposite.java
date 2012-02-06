@@ -45,8 +45,8 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftApplicationWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -129,7 +129,7 @@ public class ExpressDetailsComposite {
 		userLabel.setText("Username: ");
 		passLabel.setText("Password: ");
 		remoteLabel.setText("Remote: ");
-		remoteText.setText(AbstractOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+		remoteText.setText(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		
 		String n = ExpressServerUtils.getExpressUsername(server);
 		String p = ExpressServerUtils.getExpressPassword(server.getOriginal());
