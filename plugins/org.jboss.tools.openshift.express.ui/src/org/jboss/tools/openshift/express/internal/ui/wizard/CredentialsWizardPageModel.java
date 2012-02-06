@@ -20,13 +20,10 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
 import com.openshift.express.client.OpenShiftException;
 import com.openshift.express.client.User;
-import com.openshift.express.client.configuration.DefaultConfiguration;
-import com.openshift.express.client.configuration.SystemConfiguration;
-import com.openshift.express.client.configuration.SystemProperties;
-import com.openshift.express.client.configuration.UserConfiguration;
+import com.openshift.express.client.configuration.OpenShiftConfiguration;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class CredentialsWizardPageModel extends ObservableUIPojo {
@@ -66,11 +63,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	protected String getUserConfiguration() {
 		String configuredUsername = null;
 		try {
-			configuredUsername =
-					new SystemProperties(
-							new UserConfiguration(
-									new SystemConfiguration(
-											new DefaultConfiguration()))).getRhlogin();
+			configuredUsername = new OpenShiftConfiguration().getRhlogin();
 		} catch (Exception e) {
 			// do nothing
 		}
@@ -129,7 +122,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Your credentails are not valid.");
 		try {
 			// reset without notifying
-			//this.credentialsValidity = null;
+			// this.credentialsValidity = null;
 			this.user = new User(getRhLogin(), getPassword(), CLIENT_ID);
 			if (user.isValid()) {
 				status = Status.OK_STATUS;
@@ -143,7 +136,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		} catch (Exception e) {
 			this.user = null;
 		}
-		
+
 		setCredentialsStatus(status);
 		return status;
 	}
