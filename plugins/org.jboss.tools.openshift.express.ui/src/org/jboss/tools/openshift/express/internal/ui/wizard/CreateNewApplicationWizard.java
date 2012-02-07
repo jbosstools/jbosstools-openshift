@@ -34,7 +34,7 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr� Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWizard<CreateNewApplicationWizardModel>
@@ -109,7 +109,8 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 								return Status.OK_STATUS;
 							} catch (Exception e) {
 								queue.offer(false);
-								return OpenShiftUIActivator.createErrorStatus("Could not create application", e);
+								return OpenShiftUIActivator.createErrorStatus(
+										"Could not create application \"{0}\"", e, getWizardModel().getApplicationName());
 							}
 						}
 
