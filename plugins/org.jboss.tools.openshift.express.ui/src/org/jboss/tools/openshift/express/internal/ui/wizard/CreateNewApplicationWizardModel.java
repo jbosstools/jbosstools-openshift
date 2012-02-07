@@ -20,7 +20,7 @@ public class CreateNewApplicationWizardModel extends AbstractOpenShiftApplicatio
 	/**
 	 * Timeout in seconds when trying to contact an application after it had been created.
 	 */
-	private static final int APP_CREATION_TIMEOUT = 10;
+	private static final int APP_CREATION_TIMEOUT = 20;
 	private static final String APPLICATION_NAME = "applicationName";
 	private static final String APPLICATION_CARTRIDGE = "applicationCartridge";
 	private static final String SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";

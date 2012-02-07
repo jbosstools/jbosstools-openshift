@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -19,7 +20,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
 import com.openshift.express.client.OpenShiftException;
-import com.openshift.express.client.User;
 import com.openshift.express.client.configuration.OpenShiftConfiguration;
 
 /**
@@ -27,9 +27,6 @@ import com.openshift.express.client.configuration.OpenShiftConfiguration;
  * @author Xavier Coulon
  */
 public class CredentialsWizardPageModel extends ObservableUIPojo {
-
-	private static final String CLIENT_ID = OpenShiftUIActivator.PLUGIN_ID
-			+ " " + OpenShiftUIActivator.getDefault().getBundle().getVersion();
 
 	private static final String RHLOGIN_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN";
 
@@ -41,7 +38,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private String rhLogin;
 	private String password;
 	private IStatus credentialsStatus;
-	private IUser user;
 	private StringPreferenceValue rhLoginPreferenceValue;
 
 	public CredentialsWizardPageModel() {
@@ -119,31 +115,22 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IStatus validateCredentials() {
-		IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Your credentails are not valid.");
+		IStatus status = Status.OK_STATUS;
 		try {
 			// reset without notifying
 			// this.credentialsValidity = null;
-			this.user = new User(getRhLogin(), getPassword(), CLIENT_ID);
-			if (user.isValid()) {
-				status = Status.OK_STATUS;
-			}
+			IUser user = OpenShiftUIActivator.getDefault().createUser(getRhLogin(), getPassword());
+			user.isValid();
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
-			status = Status.OK_STATUS;
 		} catch (OpenShiftException e) {
-			this.user = null;
+			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Your credentails are not valid.");
 		} catch (Exception e) {
-			this.user = null;
+			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+					NLS.bind("Could not check user credentials: {0}.", e.getMessage()));
 		}
 
-		if (status.isOK()) {
-			OpenShiftUIActivator.getDefault().setUser(user);
-		}
 		setCredentialsStatus(status);
 		return status;
-	}
-
-	public IUser getUser() {
-		return user;
 	}
 }

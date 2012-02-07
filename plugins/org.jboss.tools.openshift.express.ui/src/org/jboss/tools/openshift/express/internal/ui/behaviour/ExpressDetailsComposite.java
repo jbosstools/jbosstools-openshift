@@ -45,6 +45,7 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel;
 
@@ -343,9 +344,9 @@ public class ExpressDetailsComposite {
 		System.out.println(deployProject);
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
 		try {
-			final List<IApplication> allApps = model.getUser().getApplications();
+			fuser = OpenShiftUIActivator.getDefault().getUser();
+			final List<IApplication> allApps = fuser.getApplications();
 			fapplication = findApplicationForProject(p, allApps);
-			fuser = model.getUser();
 			
 			if( fapplication == null ) {
 				error = "Application for project \"" + p.getName() + "\" not found";
@@ -368,7 +369,8 @@ public class ExpressDetailsComposite {
 		// now check the app name and cartridge
 		String[] appNames = new String[]{};
 		try {
-			final List<IApplication> allApps = model.getUser().getApplications();
+			IUser user = OpenShiftUIActivator.getDefault().getUser();
+			final List<IApplication> allApps = user.getApplications();
 			appNames = getAppNamesAsStrings(allApps);
 			int index = Arrays.asList(appNames).indexOf(app);
 			IApplication application = index == -1 ? null : allApps.get(index);
@@ -379,7 +381,7 @@ public class ExpressDetailsComposite {
 				// Fill with new data
 				try {
 					ExpressDetailsComposite.this.fapplication = application;
-					ExpressDetailsComposite.this.fuser = model.getUser();
+					ExpressDetailsComposite.this.fuser = user;
 					
 					// update the values 
 					IServerWorkingCopy wc = callback.getServer(); 

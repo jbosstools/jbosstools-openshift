@@ -1,5 +1,6 @@
 package org.jboss.tools.openshift.express.internal.ui;
 
+import java.io.IOException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -14,6 +15,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
+import com.openshift.express.client.User;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -93,10 +96,11 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	}
 
 	
-	public void setUser(IUser user) {
-		this.user = user;
+	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
+		this.user = new User(username, password, PLUGIN_ID + " " + getBundle().getVersion());
+		return user;
 	}
-
+	
 	/**
 	 * @return the user
 	 */
