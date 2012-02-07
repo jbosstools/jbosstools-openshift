@@ -258,4 +258,12 @@ public class EGitUtilsTest {
 		assertNotNull(repo2Config);
 	}
 
+	@Test
+	public void canCheckIfHasRemote() throws CoreException, MalformedURLException, URISyntaxException, IOException {
+		String repo2RemoteName = "repo2";
+		
+		testRepositoryClone.addRemoteTo(repo2RemoteName, testRepository2.getRepository());
+		assertTrue(
+				EGitUtils.hasRemote(repo2RemoteName, testRepository2.getUri().toString(), testRepositoryClone.getRepository()));
+	}
 }

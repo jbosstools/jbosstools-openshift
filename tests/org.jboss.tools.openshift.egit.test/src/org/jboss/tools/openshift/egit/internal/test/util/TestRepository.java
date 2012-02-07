@@ -282,7 +282,7 @@ public class TestRepository {
 	 * @throws IOException
 	 */
 	public void add(File file) throws IOException {
-		String repoPath = 
+		String repoPath =
 				getRepoRelativePath(file.getAbsolutePath());
 		try {
 			new Git(repository).add().addFilepattern(repoPath).call();
@@ -573,6 +573,10 @@ public class TestRepository {
 		remoteConfig.addURI(uri);
 		remoteConfig.update(config);
 		config.save();
+	}
+
+	public URIish getUri() throws MalformedURLException {
+		return new URIish(repository.getDirectory().toURI().toURL());
 	}
 
 }

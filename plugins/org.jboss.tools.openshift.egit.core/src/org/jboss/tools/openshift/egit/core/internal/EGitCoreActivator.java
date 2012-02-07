@@ -37,6 +37,10 @@ public class EGitCoreActivator implements BundleActivator {
 		EGitCoreActivator.context = null;
 	}
 	
+	public static IStatus createErrorStatus(String message) {
+		return createStatus(IStatus.ERROR, message, null);
+	}
+
 	public static IStatus createErrorStatus(String message, Throwable throwable) {
 		return createStatus(IStatus.ERROR, message, throwable);
 	}

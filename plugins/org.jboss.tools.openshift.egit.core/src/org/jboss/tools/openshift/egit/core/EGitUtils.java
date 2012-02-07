@@ -71,6 +71,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
+import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
 
 /**
  * The Class EGitUtils.
@@ -363,20 +364,20 @@ public class EGitUtils {
 
 	public static List<URIish> getRemoteURIs(IProject p) throws CoreException {
 		RemoteConfig rc = getRemoteConfig(p);
-		if( rc != null ) {
+		if (rc != null) {
 			return rc.getURIs();
 		}
 		return new ArrayList<URIish>();
 	}
-	
+
 	public static RemoteConfig getRemoteConfig(IProject project) throws CoreException {
 		Repository rep = getRepository(project);
-		if( rep != null ) {
+		if (rep != null) {
 			return getRemoteConfig(rep);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Pushes the current branch of the given repository to the remote
 	 * repository that it originates from.
@@ -686,10 +687,6 @@ public class EGitUtils {
 		return remoteConfig;
 	}
 
-	public static boolean hasRemoteConfig(String name, List<RemoteConfig> remoteConfigs) {
-		return getRemoteConfig(name, remoteConfigs) != null;
-	}
-	
 	/**
 	 * Returns all the remote configs from the given repository.
 	 * 
@@ -706,10 +703,6 @@ public class EGitUtils {
 					repository.toString()));
 		}
 	}
-	
-	public static boolean hasRemoteUrl(String regex, Repository repository) throws CoreException {
-		return hasRemoteUrl(Pattern.compile(regex), repository);
-	}
 
 	/**
 	 * Returns <code>true</code> if the given repository has a configured remote
@@ -722,14 +715,43 @@ public class EGitUtils {
 	 */
 	public static boolean hasRemoteUrl(Pattern pattern, Repository repository) throws CoreException {
 		for (RemoteConfig config : getAllRemoteConfigs(repository)) {
-			for (URIish uri : config.getURIs()) {
-				Matcher matcher = pattern.matcher(uri.toString());
-				if (matcher.find()) {
-					return true;
-				}
+			if (hasRemoteUrl(pattern, config)) {
+				return true;
 			}
 		}
 		return false;
+	}
+
+	public static boolean hasRemoteUrl(Pattern pattern, RemoteConfig config) {
+		for (URIish uri : config.getURIs()) {
+			Matcher matcher = pattern.matcher(uri.toString());
+			if (matcher.find()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given repository has a remote config
+	 * with the given name and url.
+	 * 
+	 * @param name
+	 *            the name that the remote config shall match
+	 * @param url
+	 *            the url that the remote config shall match
+	 * @param repository
+	 *            the repository that is searched
+	 * @return
+	 * @throws CoreException
+	 */
+	public static boolean hasRemote(String name, String url, Repository repository) throws CoreException {
+		RemoteConfig remoteConfig = getRemoteConfig(name, repository);
+		if (remoteConfig == null) {
+			return false;
+		}
+
+		return hasRemoteUrl(Pattern.compile(RegexUtils.toPatternString(url)), remoteConfig);
 	}
 
 	/**
