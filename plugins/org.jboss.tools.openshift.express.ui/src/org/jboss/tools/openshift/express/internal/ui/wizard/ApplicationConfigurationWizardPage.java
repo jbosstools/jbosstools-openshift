@@ -103,7 +103,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		Label applicationNameLabel = new Label(container, SWT.NONE);
 		applicationNameLabel.setText("Name:");
-		GridDataFactory.fillDefaults().grab(false, false).align(SWT.FILL, SWT.FILL).applyTo(applicationNameLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(applicationNameLabel);
 		Text applicationNameText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(applicationNameText);
 		UIUtils.selectAllOnFocus(applicationNameText);
@@ -117,8 +117,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		Label applicationTypeLabel = new Label(container, SWT.NONE);
 		applicationTypeLabel.setText("Type:");
-		GridDataFactory.fillDefaults()
-				.grab(false, false).align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
 		Combo cartridgesCombo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(cartridgesCombo);
