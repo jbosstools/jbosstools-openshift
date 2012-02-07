@@ -1,7 +1,9 @@
-package org.jboss.tools.openshift.express.internal.ui.console;
+package org.jboss.tools.openshift.express.internal.ui.action;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,13 +27,15 @@ import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker.JschToEclipseLogger;
+import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
+import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.viewer.action.AbstractAction;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.OpenShiftException;
 import com.openshift.express.client.utils.Base64Encoder;
 
 /**
@@ -43,8 +47,7 @@ import com.openshift.express.client.utils.Base64Encoder;
 public class TailServerLogAction extends AbstractAction implements IConsoleListener {
 
 	/**
-	 * The message consoles associated with the 'tail' workers that write the
-	 * output.
+	 * The message consoles associated with the 'tail' workers that write the output.
 	 */
 	private Map<String, TailServerLogWorker> consoleWorkers = new HashMap<String, TailServerLogWorker>();
 
@@ -60,29 +63,66 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	}
 
 	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no
-	 * Console/Worker existed, a new one is created, otherwise, it is displayed.
-	 * {@inheritDoc}
+	 * Operation called when the user clicks on 'Show In>Remote Console'. If no Console/Worker existed, a new one is
+	 * created, otherwise, it is displayed. {@inheritDoc}
 	 */
 	@Override
 	public void run() {
-		final IServer server = getServer();
+		try {
+			if (selection instanceof IStructuredSelection) {
+				final Object selectedItem = ((IStructuredSelection) selection).getFirstElement();
+				if (selectedItem instanceof IServer) {
+					final IServer server = ((IServer) selectedItem);
+					run(server);
+				} else if (selectedItem instanceof IServerModule) {
+					final IServer server = ((IServerModule) selectedItem).getServer();
+					run(server);
+				} else if (selectedItem instanceof IApplication) {
+					final IApplication application = (IApplication) selectedItem;
+					run(application);
+				}
+			}
+		} catch (Exception e) {
+			Logger.error("Failed to open Remote Console", e);
+		}
+	}
+
+	private void run(final IApplication application) throws OpenShiftException, MalformedURLException {
+		final String host = new URL(application.getApplicationUrl()).getHost();
+		final String appId = application.getUUID();
+		final String appName = application.getName();
+		final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(appName, host));
+		ConsoleUtils.displayConsoleView(console);
+		console.newMessageStream().println("Loading....");
+		if (!this.consoleWorkers.containsKey(console.getName())) {
+			launchTailServerJob(host, appId, appName, console);
+		}
+	}
+
+	private static String createConsoleId(String appName, String host) {
+		return host;
+	}
+
+	private void run(final IServer server) {
 		if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
-			MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
+			final String host = server.getHost();
+			final String appId = ExpressServerUtils.getExpressApplicationId(server);
+			final String appName = ExpressServerUtils.getExpressApplicationName(server);
+			final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(appName, host));
 			ConsoleUtils.displayConsoleView(console);
 			console.newMessageStream().println("Loading....");
-			
 			if (!this.consoleWorkers.containsKey(console.getName())) {
-				launchTailServerJob(console, server);
+				launchTailServerJob(host, appId, appName, console);
 			}
 		}
 	}
-	
-	private void launchTailServerJob(final MessageConsole console, final IServer server) {
+
+	private void launchTailServerJob(final String host, final String appId, final String appName,
+			final MessageConsole console) {
 		new Job("Launching Tail Server Operation") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					final TailServerLogWorker tailServerLogWorker = startTailProcess(server, console);
+					final TailServerLogWorker tailServerLogWorker = startTailProcess(host, appId, appName, console);
 					consoleWorkers.put(console.getName(), tailServerLogWorker);
 					Thread thread = new Thread(tailServerLogWorker);
 					thread.start();
@@ -91,28 +131,27 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 				}
 				return Status.OK_STATUS;
 			}
-			
+
 		}.schedule();
 	}
 
 	/**
-	 * Starting the tail process on the remote OpenShift Platform. This method
-	 * relies on the JGit SSH support (including JSch) to open a connection AND
-	 * execute a command in a single invocation. The connection establishement
-	 * requires an SSH key, and the passphrase is prompted to the user if
-	 * necessary.
+	 * Starting the tail process on the remote OpenShift Platform. This method relies on the JGit SSH support (including
+	 * JSch) to open a connection AND execute a command in a single invocation. The connection establishement requires
+	 * an SSH key, and the passphrase is prompted to the user if necessary.
 	 * 
-	 * @param server the server adapter on which the action is perforemd
-	 * @param console the console into which the tail should be writtent
+	 * @param server
+	 *            the server adapter on which the action is performed
+	 * @param console
+	 *            the console into which the tail should be writtent
 	 * @return the Worker that encapsulate the established RemoteSession, the tail Process and the output console
-	 * @throws JSchException in case of underlying exception
-	 * @throws IOException in case of underlying exception
+	 * @throws JSchException
+	 *             in case of underlying exception
+	 * @throws IOException
+	 *             in case of underlying exception
 	 */
-	private TailServerLogWorker startTailProcess(final IServer server, final MessageConsole console)
-			throws JSchException, IOException {
-		final String host = server.getHost();
-		final String appId = ExpressServerUtils.getExpressApplicationId(server);
-		final String appName = ExpressServerUtils.getExpressApplicationName(server);
+	private TailServerLogWorker startTailProcess(final String host, final String appId, final String appName,
+			final MessageConsole console) throws JSchException, IOException {
 		final String logFilePath = appName + "/logs/*.log";
 		final String options = "-f -n 100";
 
@@ -132,8 +171,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	}
 
 	/**
-	 * Builds the 'ssh tail' command that should be executed on the remote
-	 * OpenShift platform.
+	 * Builds the 'ssh tail' command that should be executed on the remote OpenShift platform.
 	 * 
 	 * @param filePath
 	 * @param options
@@ -152,7 +190,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		return command;
 	}
 
-	public IServer getServer() {
+	public Object getSelection() {
 		if (selection instanceof IStructuredSelection) {
 			final Object selectedItem = ((IStructuredSelection) selection).getFirstElement();
 			if (selectedItem instanceof IServer) {
@@ -160,6 +198,9 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 			}
 			if (selectedItem instanceof IServerModule) {
 				return ((IServerModule) selectedItem).getServer();
+			}
+			if (selectedItem instanceof IApplication) {
+
 			}
 		}
 		return null;
@@ -171,12 +212,10 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	}
 
 	/**
-	 * Operation to perform when the console is removed (through the
-	 * CloseConsoleAction that was brung by the
-	 * <code>TailConsolePageParticipant</code>). In the current case, the
-	 * associated worker is stopped and the console/worker are removed from the
-	 * map, so that further 'Show In>Remote Console' invocation will trigger a
-	 * new worker process.
+	 * Operation to perform when the console is removed (through the CloseConsoleAction that was brung by the
+	 * <code>TailConsolePageParticipant</code>). In the current case, the associated worker is stopped and the
+	 * console/worker are removed from the map, so that further 'Show In>Remote Console' invocation will trigger a new
+	 * worker process.
 	 */
 	@Override
 	public void consolesRemoved(IConsole[] consoles) {

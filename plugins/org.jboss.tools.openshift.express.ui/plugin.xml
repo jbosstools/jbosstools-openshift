@@ -187,18 +187,18 @@
 		<viewerContentBinding viewerId="org.eclipse.wst.server.ui.ServersView">
 		</viewerContentBinding>
     	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
-       <includes>
-          <actionExtension
-                pattern="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider"/>
-       </includes>
-    </viewerActionBinding>
+	       <includes>
+	          <actionExtension
+	                pattern="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider"/>
+	       </includes>
+	    </viewerActionBinding>
 	</extension>
 	
     <extension
           point="org.eclipse.ui.console.consolePageParticipants">
        <consolePageParticipant
              class="org.jboss.tools.openshift.express.internal.ui.console.TailConsolePageParticipant"
-             id="org.jboss.tools.openshift.express.ui.tailConsolePageParticipant">
+             id="org.jboss.tools.openshift.express.ui.action.tailConsolePageParticipant">
           <enablement>
           		<and>
 		         <instanceof
@@ -336,7 +336,7 @@
     	<viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
 	       <includes>
            	  <actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.*"/>
+	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.*"/>
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
@@ -359,8 +359,8 @@
            <triggerPoints></triggerPoints>
         </navigatorContent>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.EditDomainActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.editDomainAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditDomainActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editDomainActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -370,8 +370,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.CreateApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.createApplicationAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.createApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -381,8 +381,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.OpenInWebBrowserActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.openInWebBrowserAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.OpenInWebBrowserActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.openInWebBrowserActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -392,8 +392,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.TailServerLogActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.tailServerLogAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.TailServerLogActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.tailServerLogActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -403,8 +403,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.EditCartridgesActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.editCartridgesAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditCartridgesActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editCartridgesActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -414,8 +414,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.ImportApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.importApplicationAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ImportApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.importApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -425,8 +425,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.DeleteApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.deleteApplicationAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.deleteApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -436,8 +436,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.CreateServerAdapterActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.createServerAdapterAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateServerAdapterActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.createServerAdapterActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -447,8 +447,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.action.ShowPropertiesActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.showPropertiesAction">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ShowPropertiesActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.showPropertiesActionProvider">
            <enablement>
               <or>
                  <instanceof
@@ -480,7 +480,7 @@
                  toolbarPath="openshift">
            </action-->
            <action
-                 class="org.jboss.tools.openshift.express.internal.ui.viewer.action.OpenConnectionDialogActionDelegate"
+                 class="org.jboss.tools.openshift.express.internal.ui.action.OpenConnectionDialogActionDelegate"
                  icon="icons/resource_obj.gif"
                  id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
                  label="Connect"

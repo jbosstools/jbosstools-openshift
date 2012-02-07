@@ -9,6 +9,7 @@ import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.views.server.extensions.CommonActionProviderUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.ui.action.TailServerLogAction;
 
 public class TailServerLogActionProvider extends CommonActionProvider {
 

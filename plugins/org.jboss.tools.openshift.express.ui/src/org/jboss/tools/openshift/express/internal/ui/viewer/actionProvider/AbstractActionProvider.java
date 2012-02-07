@@ -1,10 +1,11 @@
-package org.jboss.tools.openshift.express.internal.ui.viewer.action;
+package org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
+import org.jboss.tools.openshift.express.internal.ui.action.AbstractAction;
 
 public abstract class AbstractActionProvider extends CommonActionProvider {
 

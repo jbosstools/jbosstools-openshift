@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.express.internal.ui.viewer.action;
+package org.jboss.tools.openshift.express.internal.ui.action;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
