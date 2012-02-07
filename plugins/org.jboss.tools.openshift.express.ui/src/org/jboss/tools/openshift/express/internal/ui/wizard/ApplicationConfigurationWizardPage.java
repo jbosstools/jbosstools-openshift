@@ -541,7 +541,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			if (applicationName == null || applicationName.isEmpty() || applicationType == null
 					|| applicationType.isEmpty()) {
 				return ValidationStatus
-						.cancel("Please input a name and select a type for the OpenShift application you want to create.");
+						.cancel("Please enter a name and select a type for the OpenShift application you want to create.");
 			}
 			return ValidationStatus.ok();
 		}
