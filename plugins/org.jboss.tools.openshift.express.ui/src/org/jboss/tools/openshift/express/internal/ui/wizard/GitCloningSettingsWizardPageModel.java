@@ -10,12 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import static org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftApplicationWizardModel.*;
+import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
+import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -24,7 +31,7 @@ import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr� Dietisheim
+ * @author Andre Dietisheim
  * @author Rob Stryker
  * @author Xavier Coulon
  */
@@ -33,7 +40,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_NEW_PROJECT = "newProject";
 	public static final String PROPERTY_CLONE_URI = "cloneUri";
 	// public static final String PROPERTY_MERGE_URI = "mergeUri";
-	public static final String PROPERTY_PROJECT_NAME = "projectName";
 	public static final String PROPERTY_APPLICATION_URL = "applicationUrl";
 	public static final String PROPERTY_REPO_PATH = "repositoryPath";
 	public static final String PROPERTY_REMOTE_NAME = "remoteName";
@@ -347,12 +353,39 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "The custom remote name must not be empty.");
 			} else if(!remoteName.matches("\\S+")) {
 				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "The custom remote name must not contain spaces.");
+			} else if (hasRemoteName(remoteName, getProject())) {
+				status = new Status(IStatus.ERROR, 
+						OpenShiftUIActivator.PLUGIN_ID, NLS.bind("The existing project already has a remote named {0}.", remoteName));
 			}
 		}
 		setCustomRemoteNameValidity(status);
 		return status;
 	}
 
+	private boolean hasRemoteName(String remoteName, IProject project) {
+		try {
+			if (project == null
+					|| !project.isAccessible()) {
+				return false;
+			}
+			
+			Repository repository = EGitUtils.getRepository(project);
+			return EGitUtils.hasRemote(remoteName, repository);
+		} catch (Exception e) {
+			OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
+			return false;
+		}
+	}
+	
+	private IProject getProject() {
+		String projectName = wizardModel.getProjectName();
+		if (projectName == null) {
+			return null;
+		}
+		
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+	}
+	
 	public void setCustomRemoteNameValidity(IStatus status) {
 		firePropertyChange(PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY, this.customRemoteNameValidity,
 				this.customRemoteNameValidity = status);

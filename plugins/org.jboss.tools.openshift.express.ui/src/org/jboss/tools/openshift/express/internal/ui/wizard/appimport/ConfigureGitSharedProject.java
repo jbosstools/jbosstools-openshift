@@ -33,6 +33,7 @@ import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
@@ -49,7 +50,7 @@ import com.openshift.express.client.OpenShiftException;
  */
 public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
 
-	private ArrayList<IResource> modifiedResources;
+	private List<IResource> modifiedResources;
 
 	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
 			IUser user) {
@@ -114,18 +115,20 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		return Collections.singletonList(project);
 	}
 
-	private void addRemote(String remoteName, String uuid, IProject project) throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException {
+	private void addRemote(String remoteName, String uuid, IProject project)
+			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException {
 		Repository repository = EGitUtils.getRepository(project);
 		Assert.isTrue(repository != null);
-		
-//		if (EGitUtils.hasRemoteUrl("rhcloud.com", repository)) {
-//			return;
-//		}
-		
-		EGitUtils.addRemoteTo(
-				getRemoteName(),
-				getApplication().getGitUri(),
-				repository);
+
+		if (EGitUtils.hasRemote(remoteName, repository)) {
+			// we shouldn't get here, the UI should validate the remote name and
+			// inform about an error in this case
+			throw new OpenShiftUIException(
+					"Could not enable OpenShift on project {0}. There's already a a remote called {1}.",
+					project.getName(), remoteName);
+		}
+
+		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUri(), repository);
 	}
 
 	private void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException {

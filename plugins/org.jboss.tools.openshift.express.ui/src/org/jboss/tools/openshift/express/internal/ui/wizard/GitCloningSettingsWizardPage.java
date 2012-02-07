@@ -59,7 +59,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		this.pageModel = new GitCloningSettingsWizardPageModel(model);
 		setPageComplete(false);
 	}
-	
+
 	public GitCloningSettingsWizardPage(ImportExistingApplicationWizard wizard, IOpenShiftWizardModel model) {
 		super(
 				"Import an existing OpenShift application",
@@ -82,8 +82,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		Group cloneGroup = new Group(parent, SWT.BORDER);
 		cloneGroup.setText("Cloning settings");
 		cloneGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(false).margins(10, 10)// .extendedMargins(0, 0, 0, 10)
-				.applyTo(cloneGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
+
 		// Repo Path Management
 		useDefaultRepoPathButton = new Button(cloneGroup, SWT.CHECK);
 		useDefaultRepoPathButton.setText("Use default location");
@@ -97,17 +98,18 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(repoPathText);
 		final IObservableValue repoPathTextObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
-		final IObservableValue repoPathModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH).observe(pageModel);
+		final IObservableValue repoPathModelObservable =
+				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH).observe(pageModel);
 		ValueBindingBuilder.bind(repoPathTextObservable).to(repoPathModelObservable).in(dbc);
 
 		Button browseRepoPathButton = new Button(cloneGroup, SWT.PUSH);
 		browseRepoPathButton.setText("Browse");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
 		browseRepoPathButton.addSelectionListener(onRepoPath());
 
-		final IObservableValue useDefaultRepoButtonSelectionObservable = WidgetProperties.selection().observe(
-				useDefaultRepoPathButton);
+		final IObservableValue useDefaultRepoButtonSelectionObservable =
+				WidgetProperties.selection().observe(useDefaultRepoPathButton);
 		final IObservableValue useDefaultRepoModelObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REPO_PATH).observe(pageModel);
 		ValueBindingBuilder.bind(useDefaultRepoButtonSelectionObservable).to(useDefaultRepoModelObservable).in(dbc);
@@ -115,24 +117,20 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseRepoPathButton))
 				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		// move focus to the project location text control when not choosing the 'Use default location' option.
-		useDefaultRepoPathButton.addSelectionListener(new SelectionListener() {
+		// move focus to the project location text control when not choosing the
+		// 'Use default location' option.
+		useDefaultRepoPathButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				repoPathText.setFocus();
 				repoPathText.selectAll();
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
-		
+
 		IObservableValue repoPathValidityObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_CUSTOM_REPO_PATH_VALIDITY).observe(pageModel);
 		dbc.addValidationStatusProvider(new RepoPathValidationStatusProvider(repoPathValidityObservable,
 				repoPathTextObservable));
-
 
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
@@ -149,20 +147,23 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				.grab(true, false).applyTo(remoteNameText);
 
 		final IObservableValue remoteNameTextObservable = WidgetProperties.text(SWT.Modify).observe(remoteNameText);
-		final IObservableValue remoteNameModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
+		final IObservableValue remoteNameModelObservable =
+				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
 		ValueBindingBuilder.bind(remoteNameTextObservable).to(remoteNameModelObservable).in(dbc);
 
-		final IObservableValue useDefaultRemoteNameButtonSelectionObservable = WidgetProperties.selection().observe(
-				useDefaultRemoteNameButton);
-		final IObservableValue useDefaultRemoteNameModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(pageModel);
+		final IObservableValue useDefaultRemoteNameButtonSelectionObservable =
+				WidgetProperties.selection().observe(useDefaultRemoteNameButton);
+		final IObservableValue useDefaultRemoteNameModelObservable =
+				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(
+						pageModel);
 
 		ValueBindingBuilder.bind(useDefaultRemoteNameButtonSelectionObservable).to(useDefaultRemoteNameModelObservable)
 				.in(dbc);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(remoteNameText))
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(remoteNameText))
 				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		// move focus to the project name text control when choosing the 'Use an existing project' option.
+		// move focus to the project name text control when choosing the 'Use an
+		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
 		IObservableValue remoteNameValidityObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY).observe(pageModel);
@@ -224,7 +225,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 	protected void onPageActivated(DataBindingContext dbc) {
 		// allow to enable a proj only for as7 openshift applications
-		// setTitle(NLS.bind("Import OpenShift application {0}", pageModel.getApplicationName()));
+		// setTitle(NLS.bind("Import OpenShift application {0}",
+		// pageModel.getApplicationName()));
 		pageModel.resetRepositoryPath();
 		pageModel.resetRemoteName();
 		if (pageModel.isNewProject()) {
@@ -237,16 +239,20 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			useDefaultRemoteNameButton.setEnabled(true);
 			remoteNameText.setEnabled(!useDefaultRemoteNameButton.getSelection());
 		}
-		// pageModel.getWizardModel().setProperty(AdapterWizardPageModel.MODE, AdapterWizardPageModel.MODE_SOURCE);
+		// pageModel.getWizardModel().setProperty(AdapterWizardPageModel.MODE,
+		// AdapterWizardPageModel.MODE_SOURCE);
 		onPageActivatedBackground(dbc);
 	}
 
 	protected void onPageActivatedBackground(final DataBindingContext dbc) {
 		/*
-		 * new Job("Loading remote OpenShift application") { public IStatus run(IProgressMonitor monitor) { try {
-		 * pageModel.loadGitUri(); pageModel.loadApplicationUrl(); } catch (OpenShiftException e) { IStatus status =
-		 * OpenShiftUIActivator.createErrorStatus(e.getMessage(), e); OpenShiftUIActivator.log(status); return status; }
-		 * return Status.OK_STATUS; } }.schedule();
+		 * new Job("Loading remote OpenShift application") { public IStatus
+		 * run(IProgressMonitor monitor) { try { pageModel.loadGitUri();
+		 * pageModel.loadApplicationUrl(); } catch (OpenShiftException e) {
+		 * IStatus status =
+		 * OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+		 * OpenShiftUIActivator.log(status); return status; } return
+		 * Status.OK_STATUS; } }.schedule();
 		 */
 	}
 
