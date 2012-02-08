@@ -408,13 +408,13 @@ public class EGitUtils {
 	 */
 	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
-		RemoteConfig remoteConfig = getRemoteConfig(remote, repository);
+		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
 		return push(repository, remoteConfig, false, monitor);
 	}
 
 	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
-		RemoteConfig remoteConfig = getRemoteConfig(remote, repository);
+		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
 		return push(repository, remoteConfig, true, monitor);
 	}
 
@@ -634,7 +634,7 @@ public class EGitUtils {
 
 		String currentBranch = getCurrentBranch(repository);
 		String remote = getRemoteName(currentBranch, repository);
-		return getRemoteConfig(remote, repository);
+		return getRemoteByName(remote, repository);
 	}
 
 	/**
@@ -645,7 +645,7 @@ public class EGitUtils {
 	 * @return
 	 * @throws CoreException
 	 */
-	private static RemoteConfig getRemoteConfig(String remote, Repository repository) throws CoreException {
+	private static RemoteConfig getRemoteByName(String remote, Repository repository) throws CoreException {
 		Assert.isLegal(repository != null, "Could not get configuration. No repository provided.");
 
 		List<RemoteConfig> allRemotes = getAllRemoteConfigs(repository);
@@ -705,21 +705,20 @@ public class EGitUtils {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given repository has a configured remote
-	 * repository with an url that matches the given pattern.
+	 * Returns the first configured remote in the given repository whose url matches the given pattern.
 	 * 
 	 * @param pattern
 	 * @param repository
 	 * @return
 	 * @throws CoreException
 	 */
-	public static boolean hasRemoteUrl(Pattern pattern, Repository repository) throws CoreException {
+	public static RemoteConfig getRemoteByUrl(Pattern pattern, Repository repository) throws CoreException {
 		for (RemoteConfig config : getAllRemoteConfigs(repository)) {
 			if (hasRemoteUrl(pattern, config)) {
-				return true;
+				return config;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public static boolean hasRemoteUrl(Pattern pattern, RemoteConfig config) {
@@ -730,6 +729,21 @@ public class EGitUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given repository has a remote with the
+	 * given name,
+	 * 
+	 * @param name
+	 *            the remote name that we're looking for
+	 * @param repository
+	 *            the repository to look at
+	 * @return true if the given repo has a remote with the given name
+	 * @throws CoreException
+	 */
+	public static boolean hasRemote(String name, Repository repository) throws CoreException {
+		return getRemoteByName(name, repository) != null;
 	}
 
 	/**
@@ -746,7 +760,7 @@ public class EGitUtils {
 	 * @throws CoreException
 	 */
 	public static boolean hasRemote(String name, String url, Repository repository) throws CoreException {
-		RemoteConfig remoteConfig = getRemoteConfig(name, repository);
+		RemoteConfig remoteConfig = getRemoteByName(name, repository);
 		if (remoteConfig == null) {
 			return false;
 		}
