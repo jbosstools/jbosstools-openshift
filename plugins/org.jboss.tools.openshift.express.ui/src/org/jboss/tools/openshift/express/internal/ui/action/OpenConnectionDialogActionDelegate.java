@@ -10,6 +10,7 @@ import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectToOpenShiftWizard;
@@ -30,10 +31,7 @@ public class OpenConnectionDialogActionDelegate implements IViewActionDelegate {
 		if (returnCode == Window.OK) {
 			Logger.debug("OpenShift Auth succeeded.");
 			if (view != null) {
-				IUser user = OpenShiftUIActivator.getDefault().getUser();
-				//view.switchToCommonViewer();
-				view.getCommonViewer().setInput(new OpenShiftExpressConsoleContentCategory(user));
-				//view.getCommonViewer().refresh();
+				view.getCommonViewer().setInput(UserModel.getDefault());
 			}
 		}
 
