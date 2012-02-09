@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
@@ -81,19 +82,17 @@ public class OpenShiftExpressApplicationWizard extends
 
 	@Override
 	public void addPages() {
-		final IUser user = initialUser;
-		try {
-			if (user == null || !user.isValid()) {
-				addPage(new CredentialsWizardPage(this));
-			}
-		} catch (OpenShiftException e) {
-			// if the user's validity can't be checked, we may want to re-connect..
-			addPage(new CredentialsWizardPage(this));
-		}
+		addPage(new CredentialsWizardPage(this));
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
 	}
+
+	@Override
+    public IWizardPage getStartingPage() {
+		IWizardPage[] pages = getPages();
+		return initialUser == null ? pages[0] : pages[1];
+    }
 
 	@Override
 	public boolean performFinish() {

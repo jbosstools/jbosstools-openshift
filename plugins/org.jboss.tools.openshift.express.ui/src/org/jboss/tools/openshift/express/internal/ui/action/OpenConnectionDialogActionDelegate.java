@@ -11,12 +11,8 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectToOpenShiftWizard;
-import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentCategory;
-
-import com.openshift.express.client.IUser;
 
 public class OpenConnectionDialogActionDelegate implements IViewActionDelegate {
 

@@ -62,6 +62,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -622,6 +623,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
+		// This is needed for some strange freezing issues when 
+		// launching the wizard from the console view. The UI seems to freeze
+		new Thread() {
+			public void run() {
+				Display.getDefault().asyncExec(new Runnable() { 
+					public void run() {
+						onPageActivated2(dbc);
+					}
+				});
+			}
+		}.start();
+	}
+	protected void onPageActivated2(final DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new Job("Loading existing applications...") {
 				@Override
