@@ -50,18 +50,16 @@ public class CreateNewApplicationWizard extends OpenShiftExpressApplicationWizar
 	public void addPages() {
 		final IUser user = OpenShiftUIActivator.getDefault().getUser();
 		try {
-			if (user == null 
+			if (user == null
 					|| !user.isValid()) {
 				addPage(new CredentialsWizardPage(this));
-//			} else {
-//				getWizardModel().setUser(user);
 			}
 		} catch (OpenShiftException e) {
 			// if the user's validity can't be checked, we may want to
 			// re-connect..
 			addPage(new CredentialsWizardPage(this));
 		}
-		//addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
+		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
 	}
@@ -109,9 +107,11 @@ public class CreateNewApplicationWizard extends OpenShiftExpressApplicationWizar
 								queue.offer(true);
 								return Status.OK_STATUS;
 							} catch (Exception e) {
+								// TODO: refresh user
 								queue.offer(false);
 								return OpenShiftUIActivator.createErrorStatus(
-										"Could not create application \"{0}\"", e, getWizardModel().getApplicationName());
+										"Could not create application \"{0}\"", e, getWizardModel()
+												.getApplicationName());
 							}
 						}
 
@@ -136,7 +136,7 @@ public class CreateNewApplicationWizard extends OpenShiftExpressApplicationWizar
 								List<IEmbeddableCartridge> selectedCartridges =
 										getWizardModel().getSelectedEmbeddableCartridges();
 								final IApplication application = getWizardModel().getApplication();
-								if (selectedCartridges != null 
+								if (selectedCartridges != null
 										&& !selectedCartridges.isEmpty()) {
 									application.addEmbbedCartridges(selectedCartridges);
 								}
