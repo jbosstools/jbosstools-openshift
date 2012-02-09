@@ -49,7 +49,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
@@ -70,11 +70,23 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(container);
 
+		Link signupLink = new Link(container, SWT.WRAP);
+		signupLink.setText("If you do not have an account on OpenShift Express, please sign up <a>here</a>.");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(signupLink);
+		signupLink.addSelectionListener(onSignupLinkClicked());
+
+		Label fillerLabel = new Label(container, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.span(2, 1).hint(SWT.DEFAULT, 6).applyTo(fillerLabel);
+
 		Label rhLoginLabel = new Label(container, SWT.NONE);
 		rhLoginLabel.setText("&Username");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
 		rhLoginText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
 		UIUtils.selectAllOnFocus(rhLoginText);
 		final IObservableValue rhLoginObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_RHLOGIN)
 				.observe(pageModel);
@@ -86,34 +98,32 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		passwordText = new Text(container, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(passwordText);
 		UIUtils.selectAllOnFocus(passwordText);
-		final IObservableValue passwordModelObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_PASSWORD)
+		final IObservableValue passwordModelObservable = BeanProperties.value(
+				CredentialsWizardPageModel.PROPERTY_PASSWORD)
 				.observe(pageModel);
 		final ISWTObservableValue passwordTextObservable = WidgetProperties.text(SWT.Modify).observe(passwordText);
 		dbc.bindValue(passwordTextObservable, passwordModelObservable);
-		
+
 		IObservableValue credentialsStatusObservable = BeanProperties.value(
 				CredentialsWizardPageModel.PROPERTY_CREDENTIALS_STATUS).observe(pageModel);
 		dbc.addValidationStatusProvider(new CredentialsInputValidator(rhLoginObservable,
 				passwordModelObservable));
-		final CredentialsStatusValidator credentialsStatusValidator = new CredentialsStatusValidator(credentialsStatusObservable, passwordTextObservable);
+		final CredentialsStatusValidator credentialsStatusValidator = new CredentialsStatusValidator(
+				credentialsStatusObservable, passwordTextObservable);
 		dbc.addValidationStatusProvider(credentialsStatusValidator);
 		ControlDecorationSupport.create(credentialsStatusValidator, SWT.LEFT | SWT.TOP);
 
-		new Label(container, SWT.NONE); // filler to align the checkbox under the text fields
+		new Label(container, SWT.NONE); // filler to align the checkbox under
+										// the text fields
 		Button rememberPasswordCheckBox = new Button(container, SWT.CHECK);
 		rememberPasswordCheckBox.setText("Save password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberPasswordCheckBox);
-		final IObservableValue rememberPasswordModelObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_REMEMBER_PASSWORD)
+		final IObservableValue rememberPasswordModelObservable = BeanProperties.value(
+				CredentialsWizardPageModel.PROPERTY_REMEMBER_PASSWORD)
 				.observe(pageModel);
-		final ISWTObservableValue rememberPasswordCheckBoxObservable = WidgetProperties.selection().observe(rememberPasswordCheckBox);
+		final ISWTObservableValue rememberPasswordCheckBoxObservable = WidgetProperties.selection().observe(
+				rememberPasswordCheckBox);
 		dbc.bindValue(rememberPasswordCheckBoxObservable, rememberPasswordModelObservable);
-		
-		
-		
-		Link signupLink = new Link(container, SWT.WRAP);
-		signupLink.setText("If you don't have an account on OpenShift, please sign up <a>here</a>.");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(2, 1).hint(SWT.DEFAULT, 30).applyTo(signupLink);
-		signupLink.addSelectionListener(onSignupLinkClicked());
 	}
 
 	protected SelectionAdapter onSignupLinkClicked() {
@@ -194,7 +204,8 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 
 		@Override
 		protected IStatus validate() {
-			// set the wizard page status to OK as soon as a user types something..
+			// set the wizard page status to OK as soon as a user types
+			// something..
 			final String rhLoginValue = (String) rhLoginObservable.getValue();
 			final String passwordValue = (String) passwordObservable.getValue();
 			if (rhLoginValue != null && !rhLoginValue.isEmpty() && passwordValue != null && !passwordValue.isEmpty()) {
@@ -209,8 +220,9 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		private final IObservableValue credentialsStatusObservable;
 
 		private final IObservableValue passwordTextObservable;
-		
-		public CredentialsStatusValidator(IObservableValue credentialsStatusObservable, IObservableValue passwordTextObservable) {
+
+		public CredentialsStatusValidator(IObservableValue credentialsStatusObservable,
+				IObservableValue passwordTextObservable) {
 			this.credentialsStatusObservable = credentialsStatusObservable;
 			this.passwordTextObservable = passwordTextObservable;
 		}
@@ -226,8 +238,11 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			return ValidationStatus.ok();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
@@ -235,8 +250,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			targets.add(passwordTextObservable);
 			return targets;
 		}
-		
-		
+
 	}
 
 }
