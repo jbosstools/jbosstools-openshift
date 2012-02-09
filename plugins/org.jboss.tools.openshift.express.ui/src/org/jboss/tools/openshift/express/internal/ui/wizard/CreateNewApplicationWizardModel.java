@@ -21,7 +21,7 @@ public class CreateNewApplicationWizardModel extends OpenShiftExpressApplication
 	/**
 	 * Timeout in seconds when trying to contact an application after it had been created.
 	 */
-	private static final int APP_CREATION_TIMEOUT = 30;
+	private static final int APP_CREATION_TIMEOUT = 40;
 	private static final String APPLICATION_NAME = "applicationName";
 	private static final String APPLICATION_CARTRIDGE = "applicationCartridge";
 	private static final String SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
@@ -72,7 +72,7 @@ public class CreateNewApplicationWizardModel extends OpenShiftExpressApplication
 		return (ICartridge)dataModel.get(APPLICATION_CARTRIDGE);
 	}
 	
-	@Override
+//	@Override
 	public String getApplicationCartridgeName() {
 		final ICartridge cartridge = (ICartridge)dataModel.get(APPLICATION_CARTRIDGE);
 		if(cartridge != null) {
