@@ -236,22 +236,33 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		applicationNameLabel.setText("Name:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(applicationNameLabel);
 		Text applicationNameText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(applicationNameText);
+		GridDataFactory.fillDefaults()
+				.grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(applicationNameText);
 		UIUtils.selectAllOnFocus(applicationNameText);
 		final IObservableValue applicationNameModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
 		final ISWTObservableValue applicationNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
 				applicationNameText);
 		dbc.bindValue(applicationNameTextObservable, applicationNameModelObservable);
+		IObservableValue useExistingObservable =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION)
+						.observe(pageModel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(applicationNameText))
+				.notUpdating(useExistingObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+
 		final IObservableValue applicationNameStatusObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME_STATUS).observe(pageModel);
 
 		Label applicationTypeLabel = new Label(container, SWT.NONE);
 		applicationTypeLabel.setText("Type:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
 		Combo cartridgesCombo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
-				.applyTo(cartridgesCombo);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(cartridgesCombo);
 		fillCartridgesCombo(dbc, cartridgesCombo);
 		final ISWTObservableValue cartridgesComboObservable = WidgetProperties.selection().observe(cartridgesCombo);
 		final IObservableValue selectedCartridgeModelObservable = BeanProperties.value(
@@ -259,8 +270,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindValue(cartridgesComboObservable, selectedCartridgeModelObservable,
 				new UpdateValueStrategy().setConverter(new StringToCartridgeConverter()),
 				new UpdateValueStrategy().setConverter(new CartridgeToStringConverter()));
-		final ApplicationToCreateInputValidator applicationInputValidator = new ApplicationToCreateInputValidator(
-				applicationNameTextObservable, cartridgesComboObservable);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(cartridgesCombo))
+				.notUpdating(useExistingObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+
+		final ApplicationToCreateInputValidator applicationInputValidator =
+				new ApplicationToCreateInputValidator(applicationNameTextObservable, cartridgesComboObservable);
 		dbc.addValidationStatusProvider(applicationInputValidator);
 		/*
 		 * final ApplicationToSelectNameValidator applicationNameValidator = new
@@ -279,20 +296,35 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.numColumns(2).margins(6, 6).applyTo(cartridgesGroup);
 
 		Composite tableContainer = new Composite(cartridgesGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
-				.applyTo(tableContainer);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250).applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(viewer.getTable()))
+				.notUpdating(useExistingObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 		Button checkAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");
 		GridDataFactory.fillDefaults()
 				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(checkAllButton);
 		checkAllButton.addSelectionListener(onCheckAll());
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(checkAllButton))
+				.notUpdating(useExistingObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 
 		Button uncheckAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		uncheckAllButton.setText("&Deselect All");
 		GridDataFactory.fillDefaults()
 				.hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(uncheckAllButton))
+				.notUpdating(useExistingObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 		// bottom filler
 		Composite spacer = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults()
