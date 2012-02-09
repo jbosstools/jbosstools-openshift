@@ -37,11 +37,10 @@ import com.openshift.express.client.OpenShiftException;
 public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
-	
+
 	private static final int APP_CREATION_TIMEOUT = 40;
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
-	
 	public OpenShiftExpressApplicationWizardModel() {
 		super();
 		// default value(s)
@@ -54,7 +53,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setUseExistingApplication(false);
 	}
 
-	
 	/**
 	 * Imports the project that the user has chosen into the workspace.
 	 * 
@@ -145,7 +143,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-//				, getUser())
+				// , getUser())
 				, OpenShiftUIActivator.getDefault().getUser())
 				.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
@@ -180,17 +178,17 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return dataModel.get(key);
 	}
 
-//	@Override
-//	public void setUser(IUser user) {
-//		setProperty(USER, user);
-//		OpenShiftUIActivator.getDefault().setUser(user);
-//	}
+	// @Override
+	// public void setUser(IUser user) {
+	// setProperty(USER, user);
+	// OpenShiftUIActivator.getDefault().setUser(user);
+	// }
 
-//	@Override
-//	public IUser getUser() {
-//		return (IUser) getProperty(USER);
-//		return OpenShiftUIActivator.getDefault().getUser();
-//	}
+	// @Override
+	// public IUser getUser() {
+	// return (IUser) getProperty(USER);
+	// return OpenShiftUIActivator.getDefault().getUser();
+	// }
 
 	@Override
 	public IApplication getApplication() {
@@ -198,43 +196,15 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public String getApplicationName() {
-		String applicationName = null;
-		IApplication application = getApplication();
-		if (application != null) {
-			applicationName = application.getName();
-		}
-		return applicationName;
-	}
-
-	@Override
-	public ICartridge getApplicationCartridge() {
-		ICartridge cartridge = null;
-		IApplication application = getApplication();
-		if (application != null) {
-			cartridge = application.getCartridge();
-		}
-		return cartridge;
-	}
-
-	@Override
-	public String getApplicationCartridgeName() {
-		String cartridgeName = null;
-		ICartridge cartridge = getApplicationCartridge();
-		if (cartridge != null) {
-			cartridgeName = cartridge.getName();
-		}
-		return cartridgeName;
-	}
-
-	@Override
 	public void setApplication(IApplication application) {
 		setProperty(APPLICATION, application);
-		if(application == null) {
+		if (application == null) {
 			setUseExistingApplication(false);
 		} else {
 			setUseExistingApplication(true);
 		}
+		setApplicationCartridge(application);
+		setApplicationName(application);
 	}
 
 	@Override
@@ -291,6 +261,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	private IProject getProject() {
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
 	}
+
 	@Override
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter) {
 		return (Boolean) setProperty(CREATE_SERVER_ADAPTER, createServerAdapter);
@@ -336,23 +307,20 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public void setServerType(IServerType serverType) {
 		setProperty(SERVER_TYPE, serverType);
 	}
-	
+
 	private void setPublicationMode(String mode) {
 		setProperty(PUBLICATION_MODE, mode);
 	}
-
 
 	@Override
 	public boolean isExistingApplication() {
 		return (Boolean) getProperty(USE_EXISTING_APPLICATION);
 	}
 
-
 	@Override
 	public void setUseExistingApplication(boolean useExistingApplication) {
 		setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
 	}
-
 
 	private void waitForAccessible(IApplication application, IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
@@ -362,8 +330,9 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING, application.getApplicationUrl()));
 		}
 	}
-	
-	IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+
+	IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor)
+			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
 		IUser user = OpenShiftUIActivator.getDefault().getUser();
 		if (user == null) {
 			throw new OpenShiftException("Could not create application, have no valid user credentials");
@@ -372,34 +341,53 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		waitForAccessible(application, monitor);
 		return application;
 	}
-	
-	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+
+	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
+			OpenShiftException {
 		IApplication application = createApplication(getApplicationName(), getApplicationCartridge(), monitor);
 		setApplication(application);
-		
-	}
 
+	}
 
 	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
-		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel.get(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
-		if(selectedEmbeddableCartridges == null) {
+		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel
+				.get(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
+		if (selectedEmbeddableCartridges == null) {
 			selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 			dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 		}
 		return selectedEmbeddableCartridges;
 	}
 
-
 	public void setApplicationCartridge(ICartridge cartridge) {
-		// TODO Auto-generated method stub
-		
+		dataModel.put(APPLICATION_CARTRIDGE, cartridge);
 	}
 
+	protected void setApplicationCartridge(IApplication application) {
+		if (application == null) {
+			return;
+		}
+		dataModel.put(APPLICATION_CARTRIDGE, application.getCartridge());
+	}
+
+	public ICartridge getApplicationCartridge() {
+		return (ICartridge) dataModel.get(APPLICATION_CARTRIDGE);
+	}
 
 	public void setApplicationName(String applicationName) {
-		// TODO Auto-generated method stub
-		
+		dataModel.put(APPLICATION_NAME, applicationName);
 	}
 
+	protected void setApplicationName(IApplication application) {
+		if (application == null) {
+			return;
+		}
+		dataModel.put(APPLICATION_NAME, application.getName());
+	}
+
+	@Override
+	public String getApplicationName() {
+		return (String) dataModel.get(APPLICATION_NAME);
+	}
 }

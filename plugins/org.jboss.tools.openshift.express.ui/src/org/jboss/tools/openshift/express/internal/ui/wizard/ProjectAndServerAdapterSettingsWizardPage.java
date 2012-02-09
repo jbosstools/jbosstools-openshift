@@ -263,13 +263,11 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		protected IStatus validate() {
 			final IStatus existingProjectValidityStatus = (IStatus) existingProjectValidityObservable.getValue();
 
-			if (existingProjectValidityStatus != null) {
-				final IStatus existingProjectValidity = pageModel.getExistingProjectValidity();
-				return existingProjectValidity;
+			if (existingProjectValidityStatus == null) {
+				return ValidationStatus.ok();
 			}
-			return ValidationStatus.ok();
+			return existingProjectValidityStatus;
 		}
-
 	}
 
 	/*

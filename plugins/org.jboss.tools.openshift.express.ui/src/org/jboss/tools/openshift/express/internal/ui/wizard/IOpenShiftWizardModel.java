@@ -34,6 +34,8 @@ public interface IOpenShiftWizardModel {
 	public static final String NEW_PROJECT = "enableProject";
 	public static final String USER = "user";
 	public static final String APPLICATION = "application";
+	public static final String APPLICATION_NAME = "applicationName";
+	public static final String APPLICATION_CARTRIDGE = "applicationCartridge";
 	public static final String USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String REMOTE_NAME = "remoteName";
 	public static final String REPOSITORY_PATH = "repositoryPath";
@@ -136,8 +138,6 @@ public interface IOpenShiftWizardModel {
 	public String getApplicationName();
 
 	public ICartridge getApplicationCartridge();
-
-	public String getApplicationCartridgeName();
 
 	public void setApplication(IApplication application);
 

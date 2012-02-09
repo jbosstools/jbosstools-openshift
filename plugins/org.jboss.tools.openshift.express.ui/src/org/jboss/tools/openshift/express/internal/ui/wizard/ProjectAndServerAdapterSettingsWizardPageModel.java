@@ -14,11 +14,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
- * @author Andr� Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  * 
  */
@@ -78,25 +79,29 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 
 	public IStatus validateExistingProject() {
 		IStatus status = Status.OK_STATUS;
-		// skip the validation if the user wants to create a new project. The name and state of the existing project do
-		// not matter...
 		final String applicationName = getApplicationName();
-		if (isNewProject() && applicationName != null) {
-			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
-			if(project.exists()) {
-				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "A project named '" + applicationName + "' already exists in the workspace.");
+		if (isNewProject()) {
+			if (applicationName == null) {
+				status = OpenShiftUIActivator.createErrorStatus("You have to choose an application name");
+			} else {
+				final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
+				if(project.exists()) {
+					status = OpenShiftUIActivator.createErrorStatus(
+							NLS.bind("A project named {0} already exists in the workspace.", applicationName));
+				}
 			}
 		} else {
 			final String projectName = wizardModel.getProjectName();
 			if (projectName == null || projectName.isEmpty()) {
-				status = new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID,
-						"Select an open project in the workspace.");
+				status = OpenShiftUIActivator.createErrorStatus("Select an open project in the workspace.");
 			} else {
 				final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 				if (!project.exists()) {
-					status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "The project does not exist.");
+					status = OpenShiftUIActivator.createErrorStatus(
+							NLS.bind("The project {0} does not exist in your workspace.", projectName));
 				} else if (!project.isOpen()) {
-					status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "The project is not open.");
+					status = OpenShiftUIActivator.createErrorStatus(
+							NLS.bind("The project {0} is not open.", projectName));
 				}
 			}
 		}
