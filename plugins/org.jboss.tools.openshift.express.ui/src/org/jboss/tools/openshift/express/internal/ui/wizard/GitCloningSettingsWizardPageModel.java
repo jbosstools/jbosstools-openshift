@@ -15,6 +15,7 @@ import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWiz
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -29,7 +30,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.OpenShiftException;
-
 /**
  * @author Andre Dietisheim
  * @author Rob Stryker

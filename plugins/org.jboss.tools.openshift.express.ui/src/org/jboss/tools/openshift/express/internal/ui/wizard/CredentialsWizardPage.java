@@ -61,13 +61,13 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	private Text passwordText = null;
 
 	public CredentialsWizardPage(IWizard wizard) {
-		super("Server connection", "Please provide your OpenShift Express user credentials, then click 'next'.", "Server Connection",
+		super("Server connection", "Please provide your OpenShift Express credentials.", "Server Connection",
 				wizard);
 		this.pageModel = new CredentialsWizardPageModel();
 	}
 
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(container);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(container);
 
 		// This wizard page status and navigation controls are bound to the credentials validity status:
 		// 1 - No error message is displayed if the credentials validity status is "OK"
@@ -82,7 +82,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		rhLoginLabel.setText("&Username");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
 		rhLoginText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(rhLoginText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
 		UIUtils.selectAllOnFocus(rhLoginText);
 		final IObservableValue rhLoginObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_RHLOGIN)
 				.observe(pageModel);
@@ -92,7 +92,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		passwordLabel.setText("&Password");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
 		passwordText = new Text(container, SWT.BORDER | SWT.PASSWORD);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(passwordText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(passwordText);
 		UIUtils.selectAllOnFocus(passwordText);
 		final IObservableValue passwordModelObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_PASSWORD)
 				.observe(pageModel);
@@ -109,7 +109,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 
 		Link signupLink = new Link(container, SWT.WRAP);
 		signupLink.setText("If you don't have an account on OpenShift, please sign up <a>here</a>.");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).hint(SWT.DEFAULT, 30).applyTo(signupLink);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(2, 1).hint(SWT.DEFAULT, 30).applyTo(signupLink);
 		signupLink.addSelectionListener(onSignupLinkClicked());
 	}
 

@@ -124,7 +124,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 	private void createApplicationsGroup(Composite container, DataBindingContext dbc) {
 		Group applicationGroup = new Group(container, SWT.BORDER);
 		applicationGroup.setText("Available Applications");
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).hint(400, 260).span(3, 1)
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1)
 				.applyTo(applicationGroup);
 		GridLayoutFactory.fillDefaults().numColumns(4).margins(6, 6).applyTo(applicationGroup);
 

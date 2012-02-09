@@ -40,6 +40,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
@@ -77,12 +78,13 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		// projectGroup.setText("Project");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(projectGroup);
-		GridLayoutFactory.fillDefaults().numColumns(5).margins(6, 6).applyTo(projectGroup);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(projectGroup);
 
-		// new project radio button
-		Button newProjectRadioBtn = new Button(projectGroup, SWT.RADIO);
+		// new project checkbox
+		Button newProjectRadioBtn = new Button(projectGroup, SWT.CHECK);
 		newProjectRadioBtn.setText("Create a new project");
-		newProjectRadioBtn.setToolTipText("The project will have the name of the OpenShift application");
+		newProjectRadioBtn
+		.setToolTipText("The OpenShift application code will be pulled into the newly created project or merged into the selected one.");
 		newProjectRadioBtn.setFocus();
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
 				.applyTo(newProjectRadioBtn);
@@ -93,16 +95,11 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		dbc.bindValue(newProjectRadioBtnSelection, newProjectObservable);
 
 		// existing project
-		Button existingProjectRadioBtn = new Button(projectGroup, SWT.RADIO);
-		existingProjectRadioBtn.setText("Use an existing project");
-		existingProjectRadioBtn
-				.setToolTipText("The OpenShift application code will be merged into the existing project");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(3, 1).grab(false, false)
-				.applyTo(existingProjectRadioBtn);
-		final ISWTObservableValue existingProjectRadioBtnSelection = WidgetProperties.selection().observe(
-				existingProjectRadioBtn);
-		ValueBindingBuilder.bind(existingProjectRadioBtnSelection).notUpdating(newProjectObservable)
-				.converting(new InvertingBooleanConverter()).in(dbc);
+		Label existingProjectLabel = new Label(projectGroup, SWT.NONE);
+		existingProjectLabel.setText("Use the existing project");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(false, false)
+		.indent(10, 0).applyTo(existingProjectLabel);
+
 		existingProjectNameText = new Text(projectGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
 				.applyTo(existingProjectNameText);
@@ -115,7 +112,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingProjectNameText))
 				.notUpdating(newProjectObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an existing project' option.
-		existingProjectRadioBtn.addSelectionListener(new SelectionListener() {
+		newProjectRadioBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				existingProjectNameText.setFocus();

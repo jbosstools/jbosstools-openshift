@@ -16,6 +16,10 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.util.OpenShiftPasswordStorageKey;
+import org.jboss.tools.openshift.express.internal.ui.util.SecurePasswordStore;
+import org.jboss.tools.openshift.express.internal.ui.util.SecurePasswordStoreException;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
@@ -39,21 +43,60 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private String password;
 	private IStatus credentialsStatus;
 	private StringPreferenceValue rhLoginPreferenceValue;
+	private final String libraServer;
+
+	private SecurePasswordStore store;
 
 	public CredentialsWizardPageModel() {
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		this.libraServer = initLibraServer();
 		this.rhLogin = initRhLogin();
+		initSecureStore(libraServer, rhLogin);
+		this.password = initPassword();
 		resetCredentialsStatus();
 	}
 
+	private String initLibraServer() {
+		try {
+			return new OpenShiftConfiguration().getLibraServer();
+		} catch (Exception e) {
+			Logger.error("Failed to load OpenShift configuration from client library", e);
+		}
+		return null;
+	}
+
+	private SecurePasswordStore initSecureStore(final String platform, final String username) {
+		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
+		store = new SecurePasswordStore(key);
+		return store;
+	}
+	
 	protected String initRhLogin() {
 		String rhLogin = null;
 		rhLogin = rhLoginPreferenceValue.get();
-		if (rhLogin == null
-				|| rhLogin.length() == 0) {
+		if (rhLogin == null || rhLogin.length() == 0) {
 			rhLogin = getUserConfiguration();
 		}
 		return rhLogin;
+	}
+
+	protected String initPassword() {
+		if (libraServer != null && rhLogin != null && !rhLogin.isEmpty() && store!= null) {
+			try {
+				return store.getPassword();
+			} catch (SecurePasswordStoreException e) {
+				Logger.error("Failed to retrieve OpenShift user's password from Secured Store", e);
+			}
+		}
+		return null;
+	}
+
+	private void storePassword(String password) {
+		try {
+			store.setPassword(password);
+		} catch (SecurePasswordStoreException e) {
+			Logger.error(e.getMessage(), e);
+		}
 	}
 
 	protected String getUserConfiguration() {
@@ -71,8 +114,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setRhLogin(String rhLogin) {
-		if (rhLogin != null
-				&& !rhLogin.equals(this.rhLogin)) {
+		if (rhLogin != null && !rhLogin.equals(this.rhLogin)) {
 			rhLoginPreferenceValue.store(rhLogin);
 			firePropertyChange(PROPERTY_RHLOGIN, this.rhLogin, this.rhLogin = rhLogin);
 			resetCredentialsStatus();
@@ -84,8 +126,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setPassword(String password) {
-		if (password != null
-				&& !password.equals(this.password)) {
+		if (password != null && !password.equals(this.password)) {
 			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
 			resetCredentialsStatus();
 		}
@@ -96,8 +137,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void setCredentialsStatus(IStatus status) {
-		firePropertyChange(PROPERTY_CREDENTIALS_STATUS, this.credentialsStatus,
-				this.credentialsStatus = status);
+		firePropertyChange(PROPERTY_CREDENTIALS_STATUS, this.credentialsStatus, this.credentialsStatus = status);
 	}
 
 	public IStatus getCredentialsStatus() {
@@ -106,8 +146,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 
 	public boolean areCredentialsValid() {
 		IStatus validationStatus = getCredentialsStatus();
-		return validationStatus != null
-				&& validationStatus.isOK();
+		return validationStatus != null && validationStatus.isOK();
 	}
 
 	public boolean areCredentialsValidated() {
@@ -120,14 +159,16 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			// reset without notifying
 			// this.credentialsValidity = null;
 			IUser user = OpenShiftUIActivator.getDefault().createUser(getRhLogin(), getPassword());
-			user.isValid();
+			if (user.isValid()) {
+				storePassword(password);
+			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
 		} catch (OpenShiftException e) {
 			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Your credentails are not valid.");
 		} catch (Exception e) {
-			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-					NLS.bind("Could not check user credentials: {0}.", e.getMessage()));
+			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
+					"Could not check user credentials: {0}.", e.getMessage()));
 		}
 
 		setCredentialsStatus(status);

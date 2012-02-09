@@ -28,7 +28,7 @@
       </category>
       <wizard
             category="org.jboss.tools.openshift.express.ui.wizard.importCategory"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.ImportExistingApplicationWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
             name="Existing OpenShift Express Application">

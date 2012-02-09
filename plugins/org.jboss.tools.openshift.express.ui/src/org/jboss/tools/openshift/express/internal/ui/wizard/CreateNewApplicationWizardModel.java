@@ -15,7 +15,8 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.express.client.OpenShiftException;
 
-public class CreateNewApplicationWizardModel extends AbstractOpenShiftApplicationWizardModel {
+@Deprecated
+public class CreateNewApplicationWizardModel extends OpenShiftExpressApplicationWizardModel {
 
 	/**
 	 * Timeout in seconds when trying to contact an application after it had been created.

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,12 +13,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
@@ -25,12 +28,20 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ServerAdap
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.express.client.OpenShiftException;
 
-public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
+public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
-	public AbstractOpenShiftApplicationWizardModel() {
+	
+	private static final int APP_CREATION_TIMEOUT = 30;
+	private static final String SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+
+	
+	public OpenShiftExpressApplicationWizardModel() {
 		super();
 		// default value(s)
 		setNewProject(true);
@@ -39,6 +50,7 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo im
 		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		setServerType(ServerCore.findServerType("org.jboss.tools.openshift.express.openshift.server.type"));
 		setPublicationMode(PUBLISH_SOURCE);
+		setUseExistingApplication(false);
 	}
 
 	
@@ -217,6 +229,11 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo im
 	@Override
 	public void setApplication(IApplication application) {
 		setProperty(APPLICATION, application);
+		if(application == null) {
+			setUseExistingApplication(false);
+		} else {
+			setUseExistingApplication(true);
+		}
 	}
 
 	@Override
@@ -323,5 +340,65 @@ public class AbstractOpenShiftApplicationWizardModel extends ObservableUIPojo im
 		setProperty(PUBLICATION_MODE, mode);
 	}
 
+
+	@Override
+	public boolean isExistingApplication() {
+		return (Boolean) getProperty(USE_EXISTING_APPLICATION);
+	}
+
+
+	@Override
+	public void setUseExistingApplication(boolean useExistingApplication) {
+		setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
+	}
+
+
+	private void waitForAccessible(IApplication application, IProgressMonitor monitor)
+			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+		// monitor.subTask("waiting for application to become accessible...");
+		if (!application.waitForAccessible(APP_CREATION_TIMEOUT * 1000)) {
+			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
+					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING, application.getApplicationUrl()));
+		}
+	}
+	
+	IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+		IUser user = OpenShiftUIActivator.getDefault().getUser();
+		if (user == null) {
+			throw new OpenShiftException("Could not create application, have no valid user credentials");
+		}
+		IApplication application = user.createApplication(name, cartridge);
+		waitForAccessible(application, monitor);
+		return application;
+	}
+	
+	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException, OpenShiftException {
+		IApplication application = createApplication(getApplicationName(), getApplicationCartridge(), monitor);
+		setApplication(application);
+		
+	}
+
+
+	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
+		@SuppressWarnings("unchecked")
+		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel.get(SELECTED_EMBEDDABLE_CARTRIDGES);
+		if(selectedEmbeddableCartridges == null) {
+			selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
+			dataModel.put(SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
+		}
+		return selectedEmbeddableCartridges;
+	}
+
+
+	public void setApplicationCartridge(ICartridge cartridge) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void setApplicationName(String applicationName) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

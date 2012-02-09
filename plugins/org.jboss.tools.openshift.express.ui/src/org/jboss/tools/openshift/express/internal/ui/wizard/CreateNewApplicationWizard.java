@@ -37,11 +37,12 @@ import com.openshift.express.client.OpenShiftException;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWizard<CreateNewApplicationWizardModel>
+@Deprecated
+public class CreateNewApplicationWizard extends OpenShiftExpressApplicationWizard
 		implements INewWizard {
 
 	public CreateNewApplicationWizard() {
-		setWizardModel(new CreateNewApplicationWizardModel());
+		setWizardModel(new OpenShiftExpressApplicationWizardModel());
 		setNeedsProgressMonitor(true);
 	}
 
@@ -60,7 +61,7 @@ public class CreateNewApplicationWizard extends AbstractOpenShiftApplicationWiza
 			// re-connect..
 			addPage(new CredentialsWizardPage(this));
 		}
-		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
+		//addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
 	}

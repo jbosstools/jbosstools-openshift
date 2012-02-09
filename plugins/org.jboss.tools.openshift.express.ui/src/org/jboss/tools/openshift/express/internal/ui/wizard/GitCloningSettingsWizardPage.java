@@ -60,7 +60,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		setPageComplete(false);
 	}
 
-	public GitCloningSettingsWizardPage(ImportExistingApplicationWizard wizard, IOpenShiftWizardModel model) {
+	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard, IOpenShiftWizardModel model) {
 		super(
 				"Import an existing OpenShift application",
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
