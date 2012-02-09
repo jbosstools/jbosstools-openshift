@@ -100,9 +100,15 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(credentialsStatusValidator, SWT.LEFT | SWT.TOP);
 
 		new Label(container, SWT.NONE); // filler to align the checkbox under the text fields
-		Button rememberMeCheckBox = new Button(container, SWT.CHECK);
-		rememberMeCheckBox.setText("Save password (could trigger secure storage login)");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberMeCheckBox);
+		Button rememberPasswordCheckBox = new Button(container, SWT.CHECK);
+		rememberPasswordCheckBox.setText("Save password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberPasswordCheckBox);
+		final IObservableValue rememberPasswordModelObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_REMEMBER_PASSWORD)
+				.observe(pageModel);
+		final ISWTObservableValue rememberPasswordCheckBoxObservable = WidgetProperties.selection().observe(rememberPasswordCheckBox);
+		dbc.bindValue(rememberPasswordCheckBoxObservable, rememberPasswordModelObservable);
+		
+		
 		
 		Link signupLink = new Link(container, SWT.WRAP);
 		signupLink.setText("If you don't have an account on OpenShift, please sign up <a>here</a>.");
