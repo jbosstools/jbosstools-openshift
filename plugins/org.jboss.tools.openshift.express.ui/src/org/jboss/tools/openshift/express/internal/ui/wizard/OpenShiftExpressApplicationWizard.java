@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
@@ -42,7 +43,7 @@ import com.openshift.express.client.OpenShiftException;
  * @author Xavier Coulon
  */
 public class OpenShiftExpressApplicationWizard extends
-		AbstractOpenShiftApplicationWizard<OpenShiftExpressApplicationWizardModel> implements IImportWizard {
+		AbstractOpenShiftApplicationWizard<OpenShiftExpressApplicationWizardModel> implements IImportWizard, INewWizard {
 
 	public OpenShiftExpressApplicationWizard() {
 		super();
