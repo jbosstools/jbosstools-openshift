@@ -47,8 +47,8 @@ public class OpenShiftExpressApplicationWizard extends
 		AbstractOpenShiftApplicationWizard<OpenShiftExpressApplicationWizardModel> implements IImportWizard, INewWizard {
 
 	private IUser initialUser;
+
 	public OpenShiftExpressApplicationWizard() {
-		super();
 		setWizardModel(new OpenShiftExpressApplicationWizardModel());
 	}
 
@@ -71,8 +71,8 @@ public class OpenShiftExpressApplicationWizard extends
 		setWindowTitle("OpenShift Application Wizard");
 		setNeedsProgressMonitor(true);
 		Object o = selection.getFirstElement();
-		if( o instanceof IUser ) {
-			this.initialUser = (IUser)o;
+		if (o instanceof IUser) {
+			setInitialUser((IUser) o);
 		}
 	}
 
@@ -89,28 +89,29 @@ public class OpenShiftExpressApplicationWizard extends
 	}
 
 	@Override
-    public IWizardPage getStartingPage() {
+	public IWizardPage getStartingPage() {
 		IWizardPage[] pages = getPages();
 		return initialUser == null ? pages[0] : pages[1];
-    }
+	}
 
 	@Override
 	public boolean performFinish() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
-					getContainer());
+			IStatus jobResult = WizardUtils.runInWizard(
+					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", new Status(
-					IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-					"An exception occurred while creating local git repository.", e));
+			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
+					OpenShiftUIActivator.createErrorStatus(
+							"An exception occurred while creating local git repository.", e));
 			return false;
 		}
 	}
 
 	/**
-	 * A workspace job that will create a new project or enable the selected project to be used with OpenShift.
+	 * A workspace job that will create a new project or enable the selected
+	 * project to be used with OpenShift.
 	 */
 	class ImportJob extends WorkspaceJob {
 
