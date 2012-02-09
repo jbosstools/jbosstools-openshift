@@ -8,10 +8,10 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.util;
+package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.util.SecurePasswordStore.IStorageKey;
+import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore.IStorageKey;
 
 
 /**

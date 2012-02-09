@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.express.internal.ui.util;
+package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

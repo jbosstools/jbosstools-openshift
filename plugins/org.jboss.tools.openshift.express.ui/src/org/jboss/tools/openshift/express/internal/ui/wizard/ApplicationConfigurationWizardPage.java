@@ -136,7 +136,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final ISWTObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
 				existingAppNameText);
 		ValueBindingBuilder.bind(existingAppNameTextObservable).to(existingAppNameModelObservable).in(dbc);
-		existingAppNameText.setText(pageModel.getExistingApplicationName());
+		if (pageModel.getExistingApplicationName() != null) {
+			existingAppNameText.setText(pageModel.getExistingApplicationName());
+		}
 		// enable the app name text when the model state is set to 'use existing app'
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingAppNameText))
 				.notUpdating(useExistingAppObservable).in(dbc);
@@ -175,12 +177,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final IObservableValue existingAppValidityObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
 
-		
 		final ApplicationToSelectNameValidator existingProjectValidator = new ApplicationToSelectNameValidator(
 				existingAppValidityObservable, existingAppNameTextObservable, existingAppNameModelObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
-		
+
 		return existingAppSelectionGroup;
 	}
 
@@ -257,11 +258,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final ApplicationToCreateInputValidator applicationInputValidator = new ApplicationToCreateInputValidator(
 				applicationNameTextObservable, cartridgesComboObservable);
 		dbc.addValidationStatusProvider(applicationInputValidator);
-		/*final ApplicationToSelectNameValidator applicationNameValidator = new ApplicationToSelectNameValidator(us
-				applicationNameStatusObservable, applicationNameTextObservable);
-		dbc.addValidationStatusProvider(applicationNameValidator);
-		ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT | SWT.TOP);
-		*/
+		/*
+		 * final ApplicationToSelectNameValidator applicationNameValidator = new ApplicationToSelectNameValidator(us
+		 * applicationNameStatusObservable, applicationNameTextObservable);
+		 * dbc.addValidationStatusProvider(applicationNameValidator);
+		 * ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT | SWT.TOP);
+		 */
 		// embeddable cartridges
 		Group cartridgesGroup = new Group(container, SWT.NONE);
 		cartridgesGroup.setText("Embeddable Cartridges");
@@ -626,14 +628,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	class ApplicationToSelectNameValidator extends MultiValidator {
 
-		private final IObservableValue applicationNameStatusObservable;
+		private final IObservableValue existingAppValidityObservable;
+		private final ISWTObservableValue existingAppNameTextObservable;
+		private final IObservableValue existingAppNameModelObservable;
 
-		private final ISWTObservableValue applicationNameTextObservable;
-
-		public ApplicationToSelectNameValidator(IObservableValue applicationNameStatusObservable,
-				ISWTObservableValue applicationNameTextObservable, IObservableValue existingAppNameModelObservable) {
-			this.applicationNameStatusObservable = applicationNameStatusObservable;
-			this.applicationNameTextObservable = applicationNameTextObservable;
+		public ApplicationToSelectNameValidator(IObservableValue existingAppValidityObservable,
+				ISWTObservableValue existingAppNameTextObservable, IObservableValue existingAppNameModelObservable) {
+			this.existingAppValidityObservable = existingAppValidityObservable;
+			this.existingAppNameTextObservable = existingAppNameTextObservable;
+			this.existingAppNameModelObservable = existingAppNameModelObservable;
 		}
 
 		@Override
@@ -652,7 +655,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
-			targets.add(applicationNameTextObservable);
+			targets.add(existingAppNameTextObservable);
 			return targets;
 		}
 

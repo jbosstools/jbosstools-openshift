@@ -35,6 +35,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -69,15 +70,6 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(container);
 
-		// This wizard page status and navigation controls are bound to the credentials validity status:
-		// 1 - No error message is displayed if the credentials validity status is "OK"
-		// 2 - when the user changes the 'rhLogin' or 'password' field values, the credentials validity status is set to
-		// "Cancel", thus no error message should appear on the wizard page
-		// 3 - when the 'rhLogin' and the 'password' fields are not null/empty, the 'next' control button is enabled
-		// 4 - if the credentials validation fails (ie, invalid credentials), the 'next' button is disabled and an error
-		// message is displayed at the top of the wizard page until the 'rhLogin' and/or the 'password' field values
-		// have been changed. Then back to step 2.
-
 		Label rhLoginLabel = new Label(container, SWT.NONE);
 		rhLoginLabel.setText("&Username");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
@@ -107,6 +99,11 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		dbc.addValidationStatusProvider(credentialsStatusValidator);
 		ControlDecorationSupport.create(credentialsStatusValidator, SWT.LEFT | SWT.TOP);
 
+		new Label(container, SWT.NONE); // filler to align the checkbox under the text fields
+		Button rememberMeCheckBox = new Button(container, SWT.CHECK);
+		rememberMeCheckBox.setText("Save password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberMeCheckBox);
+		
 		Link signupLink = new Link(container, SWT.WRAP);
 		signupLink.setText("If you don't have an account on OpenShift, please sign up <a>here</a>.");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(2, 1).hint(SWT.DEFAULT, 30).applyTo(signupLink);

@@ -16,10 +16,10 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.util.OpenShiftPasswordStorageKey;
-import org.jboss.tools.openshift.express.internal.ui.util.SecurePasswordStore;
-import org.jboss.tools.openshift.express.internal.ui.util.SecurePasswordStoreException;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
+import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore;
+import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreException;
 
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jboss.tools.openshift.express.internal.ui.util;
+package org.jboss.tools.openshift.express.internal.ui.utils;
 
 /**
  * @author Xavier Coulon
