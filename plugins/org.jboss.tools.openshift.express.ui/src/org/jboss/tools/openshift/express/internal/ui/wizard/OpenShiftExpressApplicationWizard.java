@@ -45,6 +45,7 @@ import com.openshift.express.client.OpenShiftException;
 public class OpenShiftExpressApplicationWizard extends
 		AbstractOpenShiftApplicationWizard<OpenShiftExpressApplicationWizardModel> implements IImportWizard, INewWizard {
 
+	private IUser initialUser;
 	public OpenShiftExpressApplicationWizard() {
 		super();
 		setWizardModel(new OpenShiftExpressApplicationWizardModel());
@@ -68,12 +69,19 @@ public class OpenShiftExpressApplicationWizard extends
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		setWindowTitle("OpenShift Application Wizard");
 		setNeedsProgressMonitor(true);
+		Object o = selection.getFirstElement();
+		if( o instanceof IUser ) {
+			this.initialUser = (IUser)o;
+		}
 	}
 
+	public void setInitialUser(IUser user) {
+		this.initialUser = user;
+	}
 
 	@Override
 	public void addPages() {
-		final IUser user = OpenShiftUIActivator.getDefault().getUser();
+		final IUser user = initialUser;
 		try {
 			if (user == null || !user.isValid()) {
 				addPage(new CredentialsWizardPage(this));
