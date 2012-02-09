@@ -56,7 +56,7 @@ public class UserModel {
 
 	public void addUser(IUser user) {
 		try {
-			allUsers.put(user.getRhlogin(), recentUser);
+			allUsers.put(user.getRhlogin(), user);
 			this.recentUser = user;
 		} catch(OpenShiftException ose ) {
 			// TODO 
