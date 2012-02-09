@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
@@ -31,8 +32,12 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	@Override
 	public Object[] getElements(final Object parentElement) {
 		if(parentElement instanceof IWorkspaceRoot) {
-			return new Object[0];
+			return UserModel.getDefault().getUsers();
 		}
+		if( parentElement instanceof UserModel ) {
+			return ((UserModel)parentElement).getUsers();
+		}
+		
 		final ArrayBlockingQueue<Object[]> queue = new ArrayBlockingQueue<Object[]>(1);
 		try {
 			Job job = new Job("Loading OpenShift Express User information...") {

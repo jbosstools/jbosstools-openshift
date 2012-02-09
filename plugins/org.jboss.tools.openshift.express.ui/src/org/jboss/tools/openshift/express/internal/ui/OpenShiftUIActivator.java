@@ -12,6 +12,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.osgi.framework.BundleContext;
 
 import com.openshift.express.client.IUser;
@@ -29,9 +30,6 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	// The shared instance
 	private static OpenShiftUIActivator plugin;
 
-	/** The user connected on OpenShift. */
-	private IUser user = null;
-	
 	/**
 	 * The constructor
 	 */
@@ -96,16 +94,27 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	}
 
 	
+	/**
+	 * Create a new user and add it to the model
+	 * @param username
+	 * @param password
+	 * @return
+	 * @throws OpenShiftException
+	 * @throws IOException
+	 */
 	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
-		this.user = new User(username, password, PLUGIN_ID + " " + getBundle().getVersion());
-		return user;
+		IUser u = UserModel.getDefault().createUser(username, password);
+		UserModel.getDefault().addUser(u);
+		return u;
 	}
 	
 	/**
+	 * Get the most recently created or used user
+	 * 
 	 * @return the user
 	 */
 	public final IUser getUser() {
-		return user;
+		return UserModel.getDefault().getRecentUser();
 	}
 	
 	/**
