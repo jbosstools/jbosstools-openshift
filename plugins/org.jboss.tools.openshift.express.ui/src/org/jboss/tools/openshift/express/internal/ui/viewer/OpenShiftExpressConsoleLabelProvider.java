@@ -51,6 +51,10 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 		if (element instanceof IEmbeddableCartridge) {
 			return OpenShiftUIActivator.getDefault().createImage("task-repository.gif");
 		}
+		if( element instanceof LoadingStub) {
+			return OpenShiftUIActivator.getDefault().createImage("systemprocess.gif");
+		}
+		
 		return null;
 	}
 

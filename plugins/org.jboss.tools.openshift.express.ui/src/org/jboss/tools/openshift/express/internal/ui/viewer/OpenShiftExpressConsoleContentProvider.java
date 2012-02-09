@@ -107,16 +107,8 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				// Get the actual children, with the delay
 				loadingUsers.add(user);
 				getChildrenFor(user, true);
-				
 				loadedUsers.add(user);
 				loadingUsers.remove(user);
-				
-				// refresh the parent object in the viewer when finished
-				try {
-					Thread.sleep(10000);
-				} catch(InterruptedException ie) {
-					
-				}
 				refreshViewerObject(user);
 				monitor.done();
 				return Status.OK_STATUS;
