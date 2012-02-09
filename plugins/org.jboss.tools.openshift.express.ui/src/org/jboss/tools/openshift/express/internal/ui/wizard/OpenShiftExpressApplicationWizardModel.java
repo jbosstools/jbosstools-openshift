@@ -19,6 +19,7 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
@@ -37,8 +38,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 	
-	private static final int APP_CREATION_TIMEOUT = 30;
-	private static final String SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+	private static final int APP_CREATION_TIMEOUT = 40;
+	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
 	
 	public OpenShiftExpressApplicationWizardModel() {
@@ -48,7 +49,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setCreateServerAdapter(true);
 		setRepositoryPath(DEFAULT_REPOSITORY_PATH);
 		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		setServerType(ServerCore.findServerType("org.jboss.tools.openshift.express.openshift.server.type"));
+		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
 		setPublicationMode(PUBLISH_SOURCE);
 		setUseExistingApplication(false);
 	}
@@ -381,10 +382,10 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
-		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel.get(SELECTED_EMBEDDABLE_CARTRIDGES);
+		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel.get(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
 		if(selectedEmbeddableCartridges == null) {
 			selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
-			dataModel.put(SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
+			dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 		}
 		return selectedEmbeddableCartridges;
 	}
