@@ -110,17 +110,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Composite createApplicationSelectionGroup(Composite container, DataBindingContext dbc) {
 		Composite existingAppSelectionGroup = new Composite(container, SWT.NONE);
 		// projectGroup.setText("Project");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(existingAppSelectionGroup);
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
 
 		// existing app checkbox
 		useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
 		useExistingAppBtn.setText("Use the existing application");
 		useExistingAppBtn.setToolTipText("Select an existing application or uncheck to create a new one.");
 		useExistingAppBtn.setFocus();
-		GridDataFactory.fillDefaults().span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
-				.applyTo(useExistingAppBtn);
+		GridDataFactory.fillDefaults()
+				.span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(useExistingAppBtn);
 		final IObservableValue useExistingAppObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel);
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
@@ -128,44 +130,32 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		// existing app name
 		final Text existingAppNameText = new Text(existingAppSelectionGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
-				.applyTo(existingAppNameText);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(existingAppNameText);
 		final IObservableValue existingAppNameModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
-		// observe text changes
-		final ISWTObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
-				existingAppNameText);
+		final ISWTObservableValue existingAppNameTextObservable =
+				WidgetProperties.text(SWT.Modify).observe(existingAppNameText);
 		ValueBindingBuilder.bind(existingAppNameTextObservable).to(existingAppNameModelObservable).in(dbc);
 		if (pageModel.getExistingApplicationName() != null) {
 			existingAppNameText.setText(pageModel.getExistingApplicationName());
 		}
-		// enable the app name text when the model state is set to 'use existing app'
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingAppNameText))
-				.notUpdating(useExistingAppObservable).in(dbc);
-		// move focus to the project name text control when choosing the 'Use an existing project' option.
-		useExistingAppBtn.addSelectionListener(new SelectionListener() {
+		// enable the app name text when the model state is set to 'use existing
+		// app'
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(existingAppNameText))
+				.notUpdating(useExistingAppObservable)
+				.in(dbc);
+		// move focus to the project name text control when choosing the 'Use an
+		// existing project' option.
+		useExistingAppBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				existingAppNameText.setFocus();
 				existingAppNameText.selectAll();
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
-		// let's provide content assist on the existing project name
-		ControlDecoration dec = new ControlDecoration(existingAppNameText, SWT.TOP | SWT.LEFT);
-		FieldDecoration contentProposalFieldIndicator = FieldDecorationRegistry.getDefault().getFieldDecoration(
-				FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
-		dec.setImage(contentProposalFieldIndicator.getImage());
-		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
-		dec.setShowOnlyOnFocus(true);
-
-		AutoCompleteField adapter = new AutoCompleteField(existingAppNameText, new TextContentAdapter(),
-				new String[] {});
-
-		adapter.setProposals(getApplicationNames());
+		createContentAssist(existingAppNameText);
 
 		Button browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
 		browseAppsButton.setText("Browse");
@@ -177,12 +167,26 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final IObservableValue existingAppValidityObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
 
-		final ApplicationToSelectNameValidator existingProjectValidator = new ApplicationToSelectNameValidator(
-				existingAppValidityObservable, existingAppNameTextObservable, existingAppNameModelObservable);
+		final ApplicationToSelectNameValidator existingProjectValidator =
+				new ApplicationToSelectNameValidator(
+						existingAppValidityObservable, existingAppNameTextObservable, existingAppNameModelObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
 		return existingAppSelectionGroup;
+	}
+
+	private void createContentAssist(final Text existingAppNameText) {
+		ControlDecoration dec = new ControlDecoration(existingAppNameText, SWT.TOP | SWT.LEFT);
+		FieldDecoration contentProposalFieldIndicator =
+				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		dec.setImage(contentProposalFieldIndicator.getImage());
+		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
+		dec.setShowOnlyOnFocus(true);
+
+		AutoCompleteField adapter =
+				new AutoCompleteField(existingAppNameText, new TextContentAdapter(), new String[] {});
+		adapter.setProposals(getApplicationNames());
 	}
 
 	private String[] getApplicationNames() {
@@ -259,16 +263,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				applicationNameTextObservable, cartridgesComboObservable);
 		dbc.addValidationStatusProvider(applicationInputValidator);
 		/*
-		 * final ApplicationToSelectNameValidator applicationNameValidator = new ApplicationToSelectNameValidator(us
-		 * applicationNameStatusObservable, applicationNameTextObservable);
+		 * final ApplicationToSelectNameValidator applicationNameValidator = new
+		 * ApplicationToSelectNameValidator(us applicationNameStatusObservable,
+		 * applicationNameTextObservable);
 		 * dbc.addValidationStatusProvider(applicationNameValidator);
-		 * ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT | SWT.TOP);
+		 * ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT |
+		 * SWT.TOP);
 		 */
 		// embeddable cartridges
 		Group cartridgesGroup = new Group(container, SWT.NONE);
 		cartridgesGroup.setText("Embeddable Cartridges");
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(2, 1).applyTo(cartridgesGroup);
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(cartridgesGroup);
+		GridDataFactory.fillDefaults()
+				.grab(true, true).align(SWT.FILL, SWT.FILL).span(2, 1).applyTo(cartridgesGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).margins(6, 6).applyTo(cartridgesGroup);
 
 		Composite tableContainer = new Composite(cartridgesGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
@@ -276,28 +284,33 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		this.viewer = createTable(tableContainer);
 		Button checkAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");
-		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP)
-				.applyTo(checkAllButton);
+		GridDataFactory.fillDefaults()
+				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(checkAllButton);
 		checkAllButton.addSelectionListener(onCheckAll());
 
 		Button uncheckAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		uncheckAllButton.setText("&Deselect All");
-		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP)
-				.applyTo(uncheckAllButton);
+		GridDataFactory.fillDefaults()
+				.hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
 		// bottom filler
 		Composite spacer = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
+		GridDataFactory.fillDefaults()
+				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
 
-		// enabling the group if the 'use existing application' checkbox state is 'false' (unchecked)
+		// enabling the group if the 'use existing application' checkbox state
+		// is 'false' (unchecked)
 		final ISWTObservableValue useExistinAppBtnObservable = WidgetProperties.selection().observe(
 				this.useExistingAppBtn);
 
 		final ISWTObservableValue createApplicationGroupEnabled = WidgetProperties.enabled().observe(container);
-		ValueBindingBuilder.bind(createApplicationGroupEnabled).notUpdatingParticipant().to(useExistinAppBtnObservable)
+		ValueBindingBuilder
+				.bind(createApplicationGroupEnabled).notUpdatingParticipant()
+				.to(useExistinAppBtnObservable)
 				.converting(new InvertingBooleanConverter()).in(dbc);
 
-		// dbc.bindValue(useExistinAppBtnObservable, createApplicationGroupEnabled);
+		// dbc.bindValue(useExistinAppBtnObservable,
+		// createApplicationGroupEnabled);
 
 	}
 
@@ -546,11 +559,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	/**
-	 * Viewer element comparer based on #equals(). The default implementation in CheckboxTableViewer compares elements
-	 * based on instance identity.
+	 * Viewer element comparer based on #equals(). The default implementation in
+	 * CheckboxTableViewer compares elements based on instance identity.
 	 * <p>
-	 * We need this since the available cartridges (item listed in the viewer) are not the same instance as the ones in
-	 * the embedded application (items to check in the viewer).
+	 * We need this since the available cartridges (item listed in the viewer)
+	 * are not the same instance as the ones in the embedded application (items
+	 * to check in the viewer).
 	 */
 	private static class EqualityComparer implements IElementComparer {
 
@@ -642,7 +656,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		@Override
 		protected IStatus validate() {
 			/*
-			 * final IStatus applicationNameStatus = (IStatus) applicationNameStatusObservable.getValue(); if
+			 * final IStatus applicationNameStatus = (IStatus)
+			 * applicationNameStatusObservable.getValue(); if
 			 * (applicationNameStatus != null) { return applicationNameStatus; }
 			 */
 			return ValidationStatus.ok();
@@ -650,7 +665,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		 * 
+		 * @see
+		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
@@ -687,7 +704,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		 * 
+		 * @see
+		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
