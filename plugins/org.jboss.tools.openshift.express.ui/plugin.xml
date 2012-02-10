@@ -297,7 +297,7 @@
       </view-->
       <view
             category="org.jboss.tools.common.model.ui.views"
-            class="org.eclipse.ui.navigator.CommonNavigator"
+            class="org.jboss.tools.openshift.express.internal.ui.console.ExpressConsoleView"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
             name="OpenShift Express Console">
@@ -361,6 +361,17 @@
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditDomainActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editDomainActionProvider">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IUser">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RemoveConnectionActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RemoveConnectionActionProvider">
            <enablement>
               <and>
                  <instanceof

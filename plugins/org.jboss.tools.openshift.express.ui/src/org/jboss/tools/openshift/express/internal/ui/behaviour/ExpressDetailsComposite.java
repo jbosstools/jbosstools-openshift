@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
@@ -24,7 +23,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,8 +40,8 @@ import org.jboss.ide.eclipse.as.ui.Messages;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
-import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel;
@@ -63,9 +61,9 @@ public class ExpressDetailsComposite {
 	protected IServerModeUICallback callback;
 	private ModifyListener nameModifyListener, remoteModifyListener, 
 							appModifyListener, deployProjectModifyListener;
-//	private ModifyListener passModifyListener;
+	private ModifyListener passModifyListener;
 	protected Text userText, remoteText;
-//	protected Text passText;
+	protected Text passText;
 	protected Combo appNameCombo, deployProjectCombo;
 	protected Button verifyButton;
 	protected boolean showVerify;
@@ -91,18 +89,14 @@ public class ExpressDetailsComposite {
 		return composite;
 	}
 	
-	public String getPassword() {
-		return pass;
-	}
-	
 	private void fillSection(Composite composite) {
 		composite.setLayout(new GridLayout(2, false));
 		Label userLabel = new Label(composite, SWT.NONE);
 		userText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).applyTo(userText);
 		Label passLabel = new Label(composite, SWT.NONE);
-//		passText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
-//		GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).applyTo(passText);
+		passText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
+		GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).applyTo(passText);
 		
 		if( mode.equals(ExpressServerUtils.EXPRESS_SOURCE_MODE) ) {
 			Label appNameLabel = new Label(composite, SWT.NONE);
@@ -134,9 +128,10 @@ public class ExpressDetailsComposite {
 		remoteText.setText(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		
 		String n = ExpressServerUtils.getExpressUsername(server);
+		String p = UserModel.getDefault().getPasswordFromSecureStorage(n);
 		String remote = ExpressServerUtils.getExpressRemoteName(server);
 		if( n != null ) userText.setText(n);
-//		if( p != null ) passText.setText(p);
+		if( p != null ) passText.setText(p);
 		if( remote != null ) remoteText.setText(remote);
 		
 		if( showVerify ) {
@@ -169,18 +164,21 @@ public class ExpressDetailsComposite {
 		nameModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				user = userText.getText();
+				String storedPass = UserModel.getDefault().getPasswordFromSecureStorage(user);
+				if( storedPass != null && !storedPass.equals(""))
+					passText.setText(storedPass);
 				callback.execute(new SetUserCommand(server));
 			}
 		};
 		userText.addModifyListener(nameModifyListener);
 		
-//		passModifyListener = new ModifyListener() {
-//			public void modifyText(ModifyEvent e) {
-//				//pass = passText.getText();
-//				callback.execute(new SetPassCommand(server));
-//			}
-//		};
-//		passText.addModifyListener(passModifyListener);
+		passModifyListener = new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				//pass = passText.getText();
+				callback.execute(new SetPassCommand(server));
+			}
+		};
+		passText.addModifyListener(passModifyListener);
 
 		remoteModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -283,32 +281,31 @@ public class ExpressDetailsComposite {
 		}
 	}
 
-//	public class SetPassCommand extends ServerWorkingCopyPropertyCommand {
-//		public SetPassCommand(IServerWorkingCopy server) {
-//			super(server, Messages.EditorChangePasswordCommandName, passText, passText.getText(), 
-//					IJBossToolingConstants.SERVER_PASSWORD, passModifyListener);
-//			oldVal = passText.getText();
-//		}
-//		
-//		public void execute() {
-//			pass = newVal;
-//		}
-//		
-//		public void undo() {
-//			pass = oldVal;
-//			text.removeModifyListener(listener);
-//			text.setText(oldVal);
-//			text.addModifyListener(listener);
-//		}
-//	}
+	public class SetPassCommand extends ServerWorkingCopyPropertyCommand {
+		public SetPassCommand(IServerWorkingCopy server) {
+			super(server, Messages.EditorChangePasswordCommandName, passText, passText.getText(), 
+					null, passModifyListener);
+			oldVal = passText.getText();
+		}
+		
+		public void execute() {
+			pass = newVal;
+		}
+		
+		public void undo() {
+			pass = oldVal;
+			text.removeModifyListener(listener);
+			text.setText(oldVal);
+			text.addModifyListener(listener);
+		}
+	}
 
 	private Runnable getVerifyingCredentialsJob(final CredentialsWizardPageModel model) {
 		return new Runnable() {
 			public void run() {
 				final IStatus s = model.validateCredentials();
-				String error = null;
 				if( !s.isOK() ) {
-					error = "Credentials Failed";
+					ExpressDetailsComposite.this.error = "Credentials Failed";
 				} else {
 					
 					if( mode.equals(ExpressServerUtils.EXPRESS_SOURCE_MODE) ) {
@@ -317,28 +314,11 @@ public class ExpressDetailsComposite {
 						verifyApplicationBinaryMode(model);
 					}
 				}
-				ExpressDetailsComposite.this.error = error;
 			}
 		};
 	}
 	
-	private IApplication findApplicationForProject(IProject p, List<IApplication> applications) 
-			throws OpenShiftException, CoreException {
-		List<URIish> uris = EGitUtils.getRemoteURIs(p);
-		Iterator<IApplication> i = applications.iterator();
-		while(i.hasNext()) {
-			IApplication a = i.next();
-			String gitUri = a.getGitUri();
-			Iterator<URIish> j = uris.iterator();
-			while(j.hasNext()) {
-				String projUri = j.next().toPrivateString();
-				if( projUri.equals(gitUri)) {
-					return a;
-				}
-			}
-		}
-		return null;
-	}
+
 	
 	private void verifyApplicationBinaryMode(CredentialsWizardPageModel model) {
 		System.out.println(deployProject);
@@ -346,7 +326,7 @@ public class ExpressDetailsComposite {
 		try {
 			fuser = OpenShiftUIActivator.getDefault().getUser();
 			final List<IApplication> allApps = fuser.getApplications();
-			fapplication = findApplicationForProject(p, allApps);
+			fapplication = ExpressServerUtils.findApplicationForProject(p, allApps);
 			
 			if( fapplication == null ) {
 				error = "Application for project \"" + p.getName() + "\" not found";
@@ -366,6 +346,7 @@ public class ExpressDetailsComposite {
 	}
 	
 	private void verifyApplicationSourceMode(CredentialsWizardPageModel model) {
+		error = null;
 		// now check the app name and cartridge
 		String[] appNames = new String[]{};
 		try {
@@ -406,5 +387,27 @@ public class ExpressDetailsComposite {
 		return appNames;
 	}
 
+	public String getUsername() {
+		return user;
+	}
+	
+	public String getPassword() {
+		return pass;
+	}
+	
+	public String getApplicationName() {
+		return app;
+	}
 
+	public IUser getUser() {
+		return fuser;
+	}
+	
+	public IApplication getApplication() {
+		return fapplication;
+	}
+	
+	public String getRemote() {
+		return remote;
+	}
 }

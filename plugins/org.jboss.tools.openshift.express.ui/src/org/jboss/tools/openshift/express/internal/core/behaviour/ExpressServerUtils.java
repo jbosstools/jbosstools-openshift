@@ -10,8 +10,14 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
@@ -26,8 +32,7 @@ import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
-import org.jboss.ide.eclipse.as.core.util.ServerUtil;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -320,5 +325,38 @@ public class ExpressServerUtils {
 		return false;
 	}
 
-	
+	public static IApplication findApplicationForProject(IProject p, List<IApplication> applications) 
+			throws OpenShiftException, CoreException {
+		List<URIish> uris = EGitUtils.getRemoteURIs(p);
+		Iterator<IApplication> i = applications.iterator();
+		while(i.hasNext()) {
+			IApplication a = i.next();
+			String gitUri = a.getGitUri();
+			Iterator<URIish> j = uris.iterator();
+			while(j.hasNext()) {
+				String projUri = j.next().toPrivateString();
+				if( projUri.equals(gitUri)) {
+					return a;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static IProject findProjectForApplication(IApplication application)
+			throws OpenShiftException, CoreException {
+		String gitUri = application.getGitUri();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		for( int i = 0; i < projects.length; i++ ) {
+			List<URIish> uris = EGitUtils.getRemoteURIs(projects[i]);
+			Iterator<URIish> it = uris.iterator();
+			while(it.hasNext()) {
+				String projURI = it.next().toPrivateString();
+				if( projURI.equals(gitUri))
+					return projects[i];
+			}
+		}
+		return null;
+	}
+
 }

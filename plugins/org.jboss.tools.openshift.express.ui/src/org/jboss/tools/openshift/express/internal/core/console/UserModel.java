@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core.console;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,9 +41,18 @@ public class UserModel {
 	/** The most recent user connected on OpenShift. */
 	private IUser recentUser = null;
 	private HashMap<String, IUser> allUsers = new HashMap<String,IUser>();
+	private ArrayList<IUserModelListener> listeners = new ArrayList<IUserModelListener>();
 	
 	public UserModel() {
 		load();
+	}
+	
+	public void addListener(IUserModelListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeListener(IUserModelListener listener) {
+		listeners.remove(listener);
 	}
 	
 	/**
@@ -60,12 +70,49 @@ public class UserModel {
 		return u;
 	}
 
+	private static final int ADDED = 0;
+	private static final int REMOVED = 1;
+	private static final int CHANGED = 2;
+	
 	public void addUser(IUser user) {
 		try {
 			allUsers.put(user.getRhlogin(), user);
 			this.recentUser = user;
+			fireModelChange(user, ADDED);
 		} catch(OpenShiftException ose ) {
 			// TODO 
+		}
+	}
+
+	public void removeUser(IUser user) {
+		try {
+			allUsers.remove(user.getRhlogin());
+			if( this.recentUser == user )
+				this.recentUser = null;
+			fireModelChange(user, REMOVED);
+		} catch(OpenShiftException ose ) {
+			// TODO 
+		}
+	}
+
+	private void fireModelChange(IUser user, int type) {
+		Iterator<IUserModelListener> i = listeners.iterator();
+		while(i.hasNext()) {
+			IUserModelListener l = i.next();
+			switch (type) {
+			case ADDED:
+				l.userAdded(user);
+				break;
+			case REMOVED:
+				l.userRemoved(user);
+				break;
+			case CHANGED:
+				l.userChanged(user);
+				break;
+
+			default:
+				break;
+			}
 		}
 	}
 	
@@ -177,6 +224,9 @@ public class UserModel {
 	 * null if platform not found, or password not stored
 	 */
 	public String getPasswordFromSecureStorage(final String rhLogin) {
+		if( rhLogin == null )
+			return null;
+		
 		SecurePasswordStore store = getSecureStore(rhLogin);
 		if( store != null && rhLogin != null && !rhLogin.isEmpty() ) {
 			try {

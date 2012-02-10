@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -22,6 +23,11 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
 	private IWizardHandle handle;
@@ -66,6 +72,19 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
-//		ExpressServerUtils.setExpressPassword(callback.getServer(), composite.getPassword());
+		IUser user = composite.getUser();
+		UserModel.getDefault().addUser(user);
+		IApplication app = composite.getApplication();
+		try {
+			// Only clone and import if there's no project already in existence
+			IProject p = ExpressServerUtils.findProjectForApplication(app);
+			if( p == null ) {
+				// clone and import
+				
+				// If we had to clone and import, we also need to add the module ??
+			}
+		} catch(OpenShiftException ose ) {
+			
+		} 
 	}
 }

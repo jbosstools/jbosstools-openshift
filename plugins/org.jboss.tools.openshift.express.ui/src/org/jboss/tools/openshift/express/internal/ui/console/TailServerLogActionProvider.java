@@ -1,5 +1,6 @@
 package org.jboss.tools.openshift.express.internal.ui.console;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.navigator.CommonActionProvider;
@@ -9,12 +10,15 @@ import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.views.server.extensions.CommonActionProviderUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.action.TailServerLogAction;
+
+import com.openshift.express.client.IUser;
 
 public class TailServerLogActionProvider extends CommonActionProvider {
 
 	private TailServerLogAction action;
-
+	
 	private ICommonActionExtensionSite actionExtensionSite;
 
 	public void init(ICommonActionExtensionSite actionExtensionSite) {
@@ -24,7 +28,6 @@ public class TailServerLogActionProvider extends CommonActionProvider {
 		if (site instanceof ICommonViewerWorkbenchSite) {
 			action = new TailServerLogAction();
 			action.setSelection(actionExtensionSite.getStructuredViewer().getSelection());
-			actionExtensionSite.getStructuredViewer().addSelectionChangedListener(action);
 		}
 	}
 
@@ -34,7 +37,6 @@ public class TailServerLogActionProvider extends CommonActionProvider {
 			if( sel instanceof IServer ) {
 				IServer server = (IServer)sel;
 				if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
-					//menu.insertBefore(ServerActionProvider.CONTROL_SERVER_SECTION_END_SEPARATOR, action);
 					CommonActionProviderUtils.addToShowInQuickSubMenu(action, menu, actionExtensionSite);
 				}
 			}
