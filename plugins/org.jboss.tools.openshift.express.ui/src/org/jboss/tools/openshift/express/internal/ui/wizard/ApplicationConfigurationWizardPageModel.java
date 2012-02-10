@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -162,6 +163,19 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		List<IEmbeddableCartridge> cartridges = OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
+	}
+
+	public void setExistingApplication(IApplication application) throws OpenShiftException {
+		if (application == null) {
+			return;
+		}
+		wizardModel.setApplication(application);
+		setExistingApplicationName(application.getName());
+		setApplicationName(application.getName());
+		setSelectedCartridge(application.getCartridge());
+		Set<IEmbeddableCartridge> embeddedCartridges = new HashSet<IEmbeddableCartridge>();
+		embeddedCartridges.addAll(application.getEmbeddedCartridges());
+		setSelectedEmbeddableCartridges(embeddedCartridges);
 	}
 
 	public void setApplicationName(String applicationName) {

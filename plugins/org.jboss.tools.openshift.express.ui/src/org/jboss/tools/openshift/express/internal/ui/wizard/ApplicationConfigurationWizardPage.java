@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -137,10 +136,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		this.existingAppNameText = new Text(existingAppSelectionGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
 				.applyTo(existingAppNameText);
-		final IObservableValue existingAppNameModelObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
-		final ISWTObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
-				existingAppNameText);
+		final IObservableValue existingAppNameModelObservable =
+				BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
+		final ISWTObservableValue existingAppNameTextObservable =
+				WidgetProperties.text(SWT.Modify).observe(existingAppNameText);
 		ValueBindingBuilder
 				.bind(existingAppNameTextObservable)
 				.to(existingAppNameModelObservable)
@@ -205,12 +205,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
 					if (selectedApplication != null) {
 						try {
-							pageModel.setApplicationName(selectedApplication.getName());
-							newApplicationNameText.setText(selectedApplication.getName());
-							pageModel.setSelectedCartridge(selectedApplication.getCartridge());
-							Set<IEmbeddableCartridge> embeddedCartridges = new HashSet<IEmbeddableCartridge>();
-							embeddedCartridges.addAll(selectedApplication.getEmbeddedCartridges());
-							pageModel.setSelectedEmbeddableCartridges(embeddedCartridges);
+							pageModel.setExistingApplication(selectedApplication);
 						} catch (OpenShiftException ex) {
 							OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
 									"Could not get embedded cartridges for application {0}",

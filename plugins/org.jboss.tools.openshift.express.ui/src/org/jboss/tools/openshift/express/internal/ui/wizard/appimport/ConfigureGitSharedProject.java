@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -28,8 +29,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
+import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -120,7 +123,12 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		Repository repository = EGitUtils.getRepository(project);
 		Assert.isTrue(repository != null);
 
-		if (EGitUtils.hasRemote(remoteName, repository)) {
+		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
+		if (config != null) {
+			if (EGitUtils.hasRemoteUrl(
+						Pattern.compile(RegExUtils.escapeRegex(getApplication().getGitUri())), config)) {
+							return;
+			}
 			// we shouldn't get here, the UI should validate the remote name and
 			// inform about an error in this case
 			throw new OpenShiftUIException(
