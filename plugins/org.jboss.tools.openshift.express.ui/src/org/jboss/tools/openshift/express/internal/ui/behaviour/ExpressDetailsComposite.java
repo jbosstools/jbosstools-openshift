@@ -128,11 +128,30 @@ public class ExpressDetailsComposite {
 		remoteText.setText(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		
 		String n = ExpressServerUtils.getExpressUsername(server);
+		String[] appNames = null;
+		if( n == null ) {
+			// We're in a new server wizard
+			IUser user = UserModel.getDefault().getRecentUser();
+			if( user == null && UserModel.getDefault().getUsers().length > 0 ) {
+				user = UserModel.getDefault().getUsers()[0];
+			}
+			if( user != null )
+				try {
+					n = user.getRhlogin();
+					List<IApplication> allApps = user.getApplications();
+					appNames = getAppNamesAsStrings(allApps);
+				} catch(Exception e) { /* ignore */ }
+		}
 		String p = UserModel.getDefault().getPasswordFromSecureStorage(n);
 		String remote = ExpressServerUtils.getExpressRemoteName(server);
 		if( n != null ) userText.setText(n);
 		if( p != null ) passText.setText(p);
 		if( remote != null ) remoteText.setText(remote);
+		
+		if( appNames != null ) {
+			appListNames = appNames;
+			appNameCombo.setItems(appListNames);
+		}
 		
 		if( showVerify ) {
 			verifyButton = new Button(composite, SWT.PUSH);
