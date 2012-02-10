@@ -128,6 +128,8 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 					thread.start();
 				} catch (Exception e) {
 					Logger.error("Failed to retrieve remote server logs", e);
+					console.newMessageStream().println("Failed to retrieve remote server logs: " + e.getMessage());
+					console.newMessageStream().println("Please make sure your ssh key is added to your ssh preferences");
 				}
 				return Status.OK_STATUS;
 			}
