@@ -13,10 +13,12 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
@@ -25,7 +27,7 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
- * @author Andr� Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  * 
  */
@@ -35,13 +37,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
+	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
 
 	private final OpenShiftExpressApplicationWizardModel wizardModel;
 
-	// start with a null value as a marker of non-initialized state (used during first pass validation)
+	// start with a null value as a marker of non-initialized state (used during
+	// first pass validation)
 	private List<IApplication> existingApplications = null;
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
@@ -74,6 +78,20 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			return Collections.emptyList();
 		}
 		return user.getApplications();
+	}
+
+	public String[] getApplicationNames() {
+		try {
+			List<IApplication> applications = getApplications();
+			String[] applicationNames = new String[applications.size()];
+			for (int i = 0; i < applications.size(); i++) {
+				applicationNames[i] = applications.get(i).getName();
+			}
+			return applicationNames;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications", e);
+			return new String[0];
+		}
 	}
 
 	public boolean isUseExistingApplication() {
@@ -138,11 +156,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public void setSelectedCartridge(ICartridge cartridge) {
 		wizardModel.setApplicationCartridge(cartridge);
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, selectedCartridge, this.selectedCartridge = cartridge);
-		// validateApplicationName();
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
-		// List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
 		List<IEmbeddableCartridge> cartridges = OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
@@ -158,25 +174,30 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
-		firePropertyChange(PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges,
-				this.embeddableCartridges = cartridges);
+		firePropertyChange(
+				PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges, this.embeddableCartridges = cartridges);
 	}
 
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
 		return embeddableCartridges;
 	}
 
-	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
+	}
+
+	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES,
+				wizardModel.getSelectedEmbeddableCartridges(),
+				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
 	}
 
 	public boolean hasApplication(ICartridge cartridge) {
 		try {
-			// return wizardModel.getUser().hasApplication(cartridge);
 			return getUser().hasApplication(cartridge);
 		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(OpenShiftUIActivator
-					.createErrorStatus("Could not get application by cartridge", e));
+			OpenShiftUIActivator.log(
+					OpenShiftUIActivator.createErrorStatus("Could not get application by cartridge", e));
 			return false;
 		}
 	}

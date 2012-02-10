@@ -13,7 +13,9 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -151,7 +153,7 @@ public class OpenShiftExpressApplicationWizard extends
 	}
 
 	private boolean addRemoveCartridges(final IApplication application,
-			final List<IEmbeddableCartridge> selectedCartridges) {
+			final Set<IEmbeddableCartridge> selectedCartridges) {
 		try {
 			IStatus status = WizardUtils.runInWizard(
 					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", getWizardModel()
@@ -162,7 +164,9 @@ public class OpenShiftExpressApplicationWizard extends
 							try {
 								if (selectedCartridges != null
 										&& !selectedCartridges.isEmpty()) {
-									application.addEmbbedCartridges(selectedCartridges);
+									List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
+									embeddableCartridges.addAll(selectedCartridges);
+									application.addEmbbedCartridges(embeddableCartridges);
 								}
 							} catch (OpenShiftException e) {
 								return OpenShiftUIActivator.createErrorStatus(

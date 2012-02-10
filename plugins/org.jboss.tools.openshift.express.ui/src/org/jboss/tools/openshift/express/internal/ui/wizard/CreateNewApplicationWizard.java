@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -133,12 +135,14 @@ public class CreateNewApplicationWizard extends OpenShiftExpressApplicationWizar
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
 
-								List<IEmbeddableCartridge> selectedCartridges =
+								Set<IEmbeddableCartridge> selectedCartridges =
 										getWizardModel().getSelectedEmbeddableCartridges();
 								final IApplication application = getWizardModel().getApplication();
 								if (selectedCartridges != null
 										&& !selectedCartridges.isEmpty()) {
-									application.addEmbbedCartridges(selectedCartridges);
+									List<IEmbeddableCartridge> list = new ArrayList<IEmbeddableCartridge>();
+									list.addAll(selectedCartridges);
+									application.addEmbbedCartridges(list);
 								}
 								queue.offer(true);
 							} catch (OpenShiftException e) {

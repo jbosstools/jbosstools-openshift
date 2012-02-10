@@ -1,7 +1,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
@@ -81,11 +81,11 @@ public class CreateNewApplicationWizardModel extends OpenShiftExpressApplication
 		return null;
 	}
 
-	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
-		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel.get(SELECTED_EMBEDDABLE_CARTRIDGES);
+		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = (Set<IEmbeddableCartridge>) dataModel.get(SELECTED_EMBEDDABLE_CARTRIDGES);
 		if(selectedEmbeddableCartridges == null) {
-			selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
+			selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
 			dataModel.put(SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 		}
 		return selectedEmbeddableCartridges;

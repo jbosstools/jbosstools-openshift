@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -67,8 +68,9 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException {
-		List<IProject> importedProjects = 
-				new ImportNewProject(getProjectName(), getApplication(), getRemoteName(), getRepositoryFile()).execute(monitor);
+		List<IProject> importedProjects =
+				new ImportNewProject(getProjectName(), getApplication(), getRemoteName(), getRepositoryFile())
+						.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
 
@@ -197,12 +199,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public void setApplication(IApplication application) {
+		setUseExistingApplication(application != null);
 		setProperty(APPLICATION, application);
-		if (application == null) {
-			setUseExistingApplication(false);
-		} else {
-			setUseExistingApplication(true);
-		}
 		setApplicationCartridge(application);
 		setApplicationName(application);
 	}
@@ -349,14 +347,19 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	}
 
-	public List<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
-		List<IEmbeddableCartridge> selectedEmbeddableCartridges = (List<IEmbeddableCartridge>) dataModel
-				.get(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
+		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
+				(Set<IEmbeddableCartridge>) dataModel.get(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
 		if (selectedEmbeddableCartridges == null) {
-			selectedEmbeddableCartridges = new ArrayList<IEmbeddableCartridge>();
-			dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
+			selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
+			setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
 		}
+		return selectedEmbeddableCartridges;
+	}
+
+	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
+		dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 		return selectedEmbeddableCartridges;
 	}
 
