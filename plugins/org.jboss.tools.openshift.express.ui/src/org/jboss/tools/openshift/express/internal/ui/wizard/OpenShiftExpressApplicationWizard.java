@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -20,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -36,6 +38,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
 import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IEmbeddableCartridge;
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
@@ -96,6 +99,20 @@ public class OpenShiftExpressApplicationWizard extends
 
 	@Override
 	public boolean performFinish() {
+		boolean success = false;
+		if (!getWizardModel().isExistingApplication()) {
+			if (createApplication()) {
+				success = addRemoveCartridges(
+						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
+			}
+		}
+		if (success) {
+			success = importProject();
+		}
+		return success;
+	}
+
+	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 			IStatus jobResult = WizardUtils.runInWizard(
@@ -105,6 +122,58 @@ public class OpenShiftExpressApplicationWizard extends
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
 					OpenShiftUIActivator.createErrorStatus(
 							"An exception occurred while creating local git repository.", e));
+			return false;
+		}
+	}
+
+	private boolean createApplication() {
+		try {
+			IStatus status = WizardUtils.runInWizard(
+					new Job(NLS.bind("Creating application \"{0}\"...", getWizardModel().getApplicationName())) {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								getWizardModel().createApplication(monitor);
+								return Status.OK_STATUS;
+							} catch (Exception e) {
+								// TODO: refresh user
+								return OpenShiftUIActivator.createErrorStatus(
+										"Could not create application \"{0}\"", e, getWizardModel()
+												.getApplicationName());
+							}
+						}
+
+					}, getContainer());
+			return status.isOK();
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private boolean addRemoveCartridges(final IApplication application,
+			final List<IEmbeddableCartridge> selectedCartridges) {
+		try {
+			IStatus status = WizardUtils.runInWizard(
+					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", getWizardModel()
+							.getApplication().getName())) {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								if (selectedCartridges != null
+										&& !selectedCartridges.isEmpty()) {
+									application.addEmbbedCartridges(selectedCartridges);
+								}
+							} catch (OpenShiftException e) {
+								return OpenShiftUIActivator.createErrorStatus(
+										NLS.bind("Could not embed cartridges to application {0}"
+												, getWizardModel().getApplication().getName()), e);
+							}
+							return Status.OK_STATUS;
+						}
+					}, getContainer());
+			return status.isOK();
+		} catch (Exception e) {
 			return false;
 		}
 	}
