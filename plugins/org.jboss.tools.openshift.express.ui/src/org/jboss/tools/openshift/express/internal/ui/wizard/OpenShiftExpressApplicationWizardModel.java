@@ -67,8 +67,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException {
-		List<IProject> importedProjects = new ImportNewProject(getProjectName(), getApplication(), getRemoteName(),
-				getRepositoryFile()).execute(monitor);
+		List<IProject> importedProjects = 
+				new ImportNewProject(getProjectName(), getApplication(), getRemoteName(), getRepositoryFile()).execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
 

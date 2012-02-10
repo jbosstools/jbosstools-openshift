@@ -76,7 +76,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return user.getApplications();
 	}
 
-	public boolean getUseExistingApplication() {
+	public boolean isUseExistingApplication() {
 		return this.useExistingApplication;
 	}
 

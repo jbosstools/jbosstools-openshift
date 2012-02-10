@@ -20,6 +20,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
@@ -42,54 +43,76 @@ public class UIUtils {
 		});
 
 	}
-	
+
 	/**
-	 * Register a {@link ContributionManager}. The contribution manager gets unregistered on control disposal
+	 * Register a {@link ContributionManager}. The contribution manager gets
+	 * unregistered on control disposal
 	 * 
-	 * @param id the id
-	 * @param contributionManager the contribution manager
-	 * @param control the control
+	 * @param id
+	 *            the id
+	 * @param contributionManager
+	 *            the contribution manager
+	 * @param control
+	 *            the control
 	 * 
 	 * @see ContributionManager
 	 * @see IMenuService
 	 * @see DisposeListener
 	 */
-	public static void registerContributionManager( final String id, final IContributionManager contributionManager,
-			final Control control )
+	public static void registerContributionManager(final String id, final IContributionManager contributionManager,
+			final Control control)
 	{
-		Assert.isNotNull( id );
-		Assert.isNotNull( contributionManager );
-		Assert.isTrue( control != null && !control.isDisposed()  );
+		Assert.isNotNull(id);
+		Assert.isNotNull(contributionManager);
+		Assert.isTrue(control != null && !control.isDisposed());
 
-		final IMenuService menuService = ( IMenuService ) PlatformUI.getWorkbench().getService( IMenuService.class );
-		menuService.populateContributionManager( ( ContributionManager ) contributionManager, id );
-		contributionManager.update( true );
-		control.addDisposeListener( new DisposeListener()
+		final IMenuService menuService = (IMenuService) PlatformUI.getWorkbench().getService(IMenuService.class);
+		menuService.populateContributionManager((ContributionManager) contributionManager, id);
+		contributionManager.update(true);
+		control.addDisposeListener(new DisposeListener()
 		{
-			public void widgetDisposed( DisposeEvent e )
+			public void widgetDisposed(DisposeEvent e)
 			{
-				menuService.releaseContributions( ( ContributionManager ) contributionManager );
+				menuService.releaseContributions((ContributionManager) contributionManager);
 			}
-		} );
+		});
 	}
 
 	/**
 	 * Creates context menu to a given control.
 	 * 
-	 * @param control the control
+	 * @param control
+	 *            the control
 	 * 
 	 * @return the i menu manager
 	 */
-	public static IMenuManager createContextMenu( final Control control )
+	public static IMenuManager createContextMenu(final Control control)
 	{
-		Assert.isTrue( control != null && !control.isDisposed() );
+		Assert.isTrue(control != null && !control.isDisposed());
 
 		MenuManager menuManager = new MenuManager();
-		menuManager.add( new GroupMarker( IWorkbenchActionConstants.MB_ADDITIONS ) );
+		menuManager.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
 
-		Menu menu = menuManager.createContextMenu( control );
-		control.setMenu( menu );
+		Menu menu = menuManager.createContextMenu(control);
+		control.setMenu(menu);
 		return menuManager;
 	}
-	
+
+	public static void doForAllChildren(IWidgetVisitor visitor, Composite composite) {
+		if (composite == null
+				|| composite.isDisposed()) {
+			return;
+		}
+		for (Control control : composite.getChildren()) {
+			if (control instanceof Composite) {
+				doForAllChildren(visitor, (Composite) control);
+			}
+			visitor.visit(control);
+		}
+	}
+
+	public static interface IWidgetVisitor {
+		public void visit(Control control);
+	}
+
 }
