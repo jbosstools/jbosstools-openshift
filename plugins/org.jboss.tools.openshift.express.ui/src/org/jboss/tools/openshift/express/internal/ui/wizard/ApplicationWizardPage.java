@@ -198,7 +198,7 @@ public class ApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
 	private void createDomain() throws OpenShiftException {
 		if (WizardUtils.openWizardDialog(
-				new NewDomainDialog(model.getNamespace(), wizardModel), getContainer().getShell()) == Dialog.OK) {
+				new NewDomainDialog(wizardModel.getUser()), getContainer().getShell()) == Dialog.OK) {
 			model.loadDomain();
 		}
 	}

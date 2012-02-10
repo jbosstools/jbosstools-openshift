@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.util.concurrent.ArrayBlockingQueue;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -20,7 +18,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportProjectWizardModel;
+
+import com.openshift.express.client.IUser;
 
 /**
  * @author André Dietisheim
@@ -30,25 +29,20 @@ public class NewDomainDialog extends Wizard {
 	private String namespace;
 	private NewDomainWizardPageModel model;
 
-	public NewDomainDialog(String namespace, ImportProjectWizardModel wizardModel) {
-		this.namespace = namespace;
-		this.model = new NewDomainWizardPageModel(namespace, wizardModel.getUser());
+	public NewDomainDialog(IUser user) {
+		this.model = new NewDomainWizardPageModel(user);
 		setNeedsProgressMonitor(true);
 	}
 
 	@Override
 	public boolean performFinish() {
-		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
 		try {
 			WizardUtils.runInWizard(new Job("Creating domain...") {
-
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						model.createDomain();
-						queue.offer(true);
 					} catch (Exception e) {
-						queue.offer(false);
 						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 								NLS.bind("Could not create domain \"{0}\"", model.getNamespace()), e);
 					}
@@ -56,9 +50,8 @@ public class NewDomainDialog extends Wizard {
 				}
 			}, getContainer());
 		} catch (Exception e) {
-			// ignore
 		}
-		return queue.poll();
+		return true;
 	}
 
 	@Override

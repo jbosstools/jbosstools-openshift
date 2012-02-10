@@ -10,7 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.express.client.IUser;
 
@@ -29,28 +35,26 @@ public class EditDomainDialog extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-//		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
-//		try {
-//			WizardUtils.runInWizard(new Job("Renaming domain...") {
-//
-//				@Override
-//				protected IStatus run(IProgressMonitor monitor) {
-//					try {
-//						model.renameDomain();
-//						queue.offer(true);
-//					} catch (Exception e) {
-//						queue.offer(false);
-//						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-//								NLS.bind("Could not create domain \"{0}\"", model.getNamespace()), e);
-//					}
-//					return Status.OK_STATUS;
-//				}
-//			}, getContainer());
-//		} catch (Exception e) {
-//			// ignore
-//		}
-//		return queue.poll();
+		renameDomain();
 		return true;
+	}
+
+	private void renameDomain() {
+		try {
+			WizardUtils.runInWizard(new Job("Renaming domain...") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						model.renameDomain();
+						return Status.OK_STATUS;
+					} catch (Exception e) {
+						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not rename domain", e);
+					}
+				}
+			}, getContainer());
+		} catch (Exception ex) {
+			// ignore
+		}
 	}
 
 	@Override

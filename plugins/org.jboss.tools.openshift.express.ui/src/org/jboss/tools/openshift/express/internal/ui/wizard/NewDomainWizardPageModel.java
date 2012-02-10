@@ -44,8 +44,7 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	private String sshKey;
 	private IUser user;
 
-	public NewDomainWizardPageModel(String namespace, IUser user) {
-		this.namespace = namespace;
+	public NewDomainWizardPageModel(IUser user) {
 		this.user = user;
 	}
 
