@@ -341,6 +341,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 */
 	private void enableApplicationWidgets(final Boolean useExisting, final Group applicationConfigurationGroup,
 			final Text applicationNameText, final Button applicationBrowseButton) {
+		if (!useExisting) {
+			pageModel.resetExistingApplication();
+		}
 		applicationNameText.setEnabled(useExisting);
 		applicationBrowseButton.setEnabled(useExisting);
 		UIUtils.doForAllChildren(new UIUtils.IWidgetVisitor() {

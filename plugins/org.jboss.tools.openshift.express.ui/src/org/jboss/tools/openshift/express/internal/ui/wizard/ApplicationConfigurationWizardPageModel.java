@@ -178,6 +178,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		setSelectedEmbeddableCartridges(embeddedCartridges);
 	}
 
+	public void resetExistingApplication() {
+		wizardModel.setApplication(null);
+		setExistingApplicationName(null);
+		setApplicationName(null);
+		setSelectedCartridge(null);
+		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+	}
+
 	public void setApplicationName(String applicationName) {
 		wizardModel.setApplicationName(applicationName);
 		firePropertyChange(PROPERTY_APPLICATION_NAME, this.applicationName, this.applicationName = applicationName);
