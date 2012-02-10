@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -34,21 +32,20 @@ import com.openshift.express.client.OpenShiftException;
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
-	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplication";
+	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
-	public static final String PROPERTY_APPLICATION_NAME_STATUS = "applicationNameStatus";
+	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
 
-	
 	private final OpenShiftExpressApplicationWizardModel wizardModel;
 
-	private List<IApplication> existingApplications = new ArrayList<IApplication>();
+	// start with a null value as a marker of non-initialized state (used during first pass validation)
+	private List<IApplication> existingApplications = null;
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String applicationName;
-	private IStatus applicationNameStatus;
 	private ICartridge selectedCartridge;
 	private String selectedApplicationName;
 	private boolean useExistingApplication;
@@ -56,9 +53,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setUseExistingApplication(wizardModel.isExistingApplication());
-		setExistingApplicationName(wizardModel.getApplication() != null ? wizardModel.getApplication().getName() : null); 
+		setExistingApplicationName(wizardModel.getApplication() != null ? wizardModel.getApplication().getName() : null);
 	}
-	
+
 	/**
 	 * @return the wizardModel
 	 */
@@ -67,10 +64,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IUser getUser() {
-//		return wizardModel.getUser();
+		// return wizardModel.getUser();
 		return OpenShiftUIActivator.getDefault().getUser();
 	}
-	
+
 	public List<IApplication> getApplications() throws OpenShiftException {
 		IUser user = getUser();
 		if (user == null) {
@@ -78,30 +75,25 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		}
 		return user.getApplications();
 	}
-	
+
 	public boolean getUseExistingApplication() {
 		return this.useExistingApplication;
 	}
-	
+
 	public void setUseExistingApplication(boolean useExistingApplication) {
 		wizardModel.setUseExistingApplication(useExistingApplication);
-		firePropertyChange(PROPERTY_USE_EXISTING_APPLICATION, this.useExistingApplication, this.useExistingApplication = useExistingApplication);
+		firePropertyChange(PROPERTY_USE_EXISTING_APPLICATION, this.useExistingApplication,
+				this.useExistingApplication = useExistingApplication);
 	}
-	
 
 	public String getExistingApplicationName() {
 		return selectedApplicationName;
 	}
 
 	public void setExistingApplicationName(String applicationName) {
-		for(IApplication application : getExistingApplications()) {
-			if(application.getName().equals(applicationName)) {
-				wizardModel.setApplication(application);
-			}
-		}
-		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME, this.selectedApplicationName, this.selectedApplicationName = applicationName);
+		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME, this.selectedApplicationName,
+				this.selectedApplicationName = applicationName);
 	}
-
 
 	public void loadExistingApplications() throws OpenShiftException {
 		IUser user = getUser();
@@ -109,7 +101,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			setExistingApplications(user.getApplications());
 		}
 	}
-	
+
 	/**
 	 * @return the existingApplications
 	 */
@@ -118,14 +110,16 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	/**
-	 * @param existingApplications the existingApplications to set
+	 * @param existingApplications
+	 *            the existingApplications to set
 	 */
 	public void setExistingApplications(List<IApplication> existingApplications) {
-		this.existingApplications = existingApplications;
+		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS, this.existingApplications,
+				this.existingApplications = existingApplications);
 	}
 
 	public void loadCartridges() throws OpenShiftException {
-//		setCartridges(wizardModel.getUser().getCartridges());
+		// setCartridges(wizardModel.getUser().getCartridges());
 		setCartridges(OpenShiftUIActivator.getDefault().getUser().getCartridges());
 	}
 
@@ -144,11 +138,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public void setSelectedCartridge(ICartridge cartridge) {
 		wizardModel.setApplicationCartridge(cartridge);
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, selectedCartridge, this.selectedCartridge = cartridge);
-		//validateApplicationName();
+		// validateApplicationName();
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
-//		List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
+		// List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
 		List<IEmbeddableCartridge> cartridges = OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
@@ -157,37 +151,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public void setApplicationName(String applicationName) {
 		wizardModel.setApplicationName(applicationName);
 		firePropertyChange(PROPERTY_APPLICATION_NAME, this.applicationName, this.applicationName = applicationName);
-		validateApplicationName();
 	}
 
 	public String getApplicationName() {
 		return this.applicationName;
-	}
-
-	public void setApplicationNameStatus(IStatus applicationNameStatus) {
-		firePropertyChange(PROPERTY_APPLICATION_NAME_STATUS, this.applicationNameStatus,
-				this.applicationNameStatus = applicationNameStatus);
-	}
-
-	public IStatus getApplicationNameStatus() {
-		return this.applicationNameStatus;
-	}
-
-	public IStatus validateApplicationName() {
-		IStatus status = Status.OK_STATUS;
-		final String applicationName = getApplicationName();
-		if (!applicationName.matches("\\S+")) {
-			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-					"The application name must not contain spaces.");
-		}
-		for(IApplication application : getExistingApplications()) {
-			if(application.getName().equalsIgnoreCase(applicationName)) {
-				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-						"An application with the same name already exists on OpenShift.");
-			}
-		}
-		setApplicationNameStatus(status);
-		return status;
 	}
 
 	public void setEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
@@ -205,7 +172,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public boolean hasApplication(ICartridge cartridge) {
 		try {
-//			return wizardModel.getUser().hasApplication(cartridge);
+			// return wizardModel.getUser().hasApplication(cartridge);
 			return getUser().hasApplication(cartridge);
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log(OpenShiftUIActivator

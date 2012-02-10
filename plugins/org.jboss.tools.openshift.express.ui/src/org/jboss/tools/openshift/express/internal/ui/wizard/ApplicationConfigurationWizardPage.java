@@ -95,7 +95,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Button useExistingAppBtn = null;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
-		super("Application Configuration", "Configure the application you want to create.",
+		super("Application Configuration", "Configure the application you want\nto create or import.",
 				"Application configuration", wizard);
 		this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
 	}
@@ -111,19 +111,17 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Composite createApplicationSelectionGroup(Composite container, DataBindingContext dbc) {
 		Composite existingAppSelectionGroup = new Composite(container, SWT.NONE);
 		// projectGroup.setText("Project");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(existingAppSelectionGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
 
 		// existing app checkbox
 		useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
-		useExistingAppBtn.setText("Use the existing application");
+		useExistingAppBtn.setText("Use existing application");
 		useExistingAppBtn.setToolTipText("Select an existing application or uncheck to create a new one.");
 		useExistingAppBtn.setFocus();
-		GridDataFactory.fillDefaults()
-				.span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(useExistingAppBtn);
+		GridDataFactory.fillDefaults().span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
+				.applyTo(useExistingAppBtn);
 		final IObservableValue useExistingAppObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel);
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
@@ -131,22 +129,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		// existing app name
 		final Text existingAppNameText = new Text(existingAppSelectionGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(existingAppNameText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
+				.applyTo(existingAppNameText);
 		final IObservableValue existingAppNameModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
-		final ISWTObservableValue existingAppNameTextObservable =
-				WidgetProperties.text(SWT.Modify).observe(existingAppNameText);
+		final ISWTObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
+				existingAppNameText);
 		ValueBindingBuilder.bind(existingAppNameTextObservable).to(existingAppNameModelObservable).in(dbc);
 		if (pageModel.getExistingApplicationName() != null) {
 			existingAppNameText.setText(pageModel.getExistingApplicationName());
 		}
 		// enable the app name text when the model state is set to 'use existing
 		// app'
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(existingAppNameText))
-				.notUpdating(useExistingAppObservable)
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingAppNameText))
+				.notUpdating(useExistingAppObservable).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an
 		// existing project' option.
 		useExistingAppBtn.addSelectionListener(new SelectionAdapter() {
@@ -165,12 +161,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.applyTo(browseAppsButton);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseAppsButton))
 				.notUpdating(useExistingAppObservable).in(dbc);
-		final IObservableValue existingAppValidityObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
+		// observe the list of application, get notified once they have been loaded
+		final IObservableValue existingAppsObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS).observe(pageModel);
 
-		final ApplicationToSelectNameValidator existingProjectValidator =
-				new ApplicationToSelectNameValidator(
-						existingAppValidityObservable, existingAppNameTextObservable, existingAppNameModelObservable);
+		final ApplicationToSelectNameValidator existingProjectValidator = new ApplicationToSelectNameValidator(
+				useExistingAppBtnSelection, existingAppNameTextObservable, existingAppsObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
@@ -179,14 +175,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	private void createContentAssist(final Text existingAppNameText) {
 		ControlDecoration dec = new ControlDecoration(existingAppNameText, SWT.TOP | SWT.LEFT);
-		FieldDecoration contentProposalFieldIndicator =
-				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		FieldDecoration contentProposalFieldIndicator = FieldDecorationRegistry.getDefault().getFieldDecoration(
+				FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
 		dec.setImage(contentProposalFieldIndicator.getImage());
 		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
 		dec.setShowOnlyOnFocus(true);
 
-		AutoCompleteField adapter =
-				new AutoCompleteField(existingAppNameText, new TextContentAdapter(), new String[] {});
+		AutoCompleteField adapter = new AutoCompleteField(existingAppNameText, new TextContentAdapter(),
+				new String[] {});
 		adapter.setProposals(getApplicationNames());
 	}
 
@@ -237,33 +233,24 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		applicationNameLabel.setText("Name:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(applicationNameLabel);
 		Text applicationNameText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(applicationNameText);
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(applicationNameText);
 		UIUtils.selectAllOnFocus(applicationNameText);
 		final IObservableValue applicationNameModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
 		final ISWTObservableValue applicationNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
 				applicationNameText);
 		dbc.bindValue(applicationNameTextObservable, applicationNameModelObservable);
-		IObservableValue useExistingObservable =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION)
-						.observe(pageModel);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(applicationNameText))
-				.notUpdating(useExistingObservable)
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
-
-		final IObservableValue applicationNameStatusObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME_STATUS).observe(pageModel);
+		IObservableValue useExistingObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(applicationNameText))
+				.notUpdating(useExistingObservable).converting(new InvertingBooleanConverter()).in(dbc);
 
 		Label applicationTypeLabel = new Label(container, SWT.NONE);
 		applicationTypeLabel.setText("Type:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(applicationTypeLabel);
 		Combo cartridgesCombo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(cartridgesCombo);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
+				.applyTo(cartridgesCombo);
 		fillCartridgesCombo(dbc, cartridgesCombo);
 		final ISWTObservableValue cartridgesComboObservable = WidgetProperties.selection().observe(cartridgesCombo);
 		final IObservableValue selectedCartridgeModelObservable = BeanProperties.value(
@@ -271,65 +258,49 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindValue(cartridgesComboObservable, selectedCartridgeModelObservable,
 				new UpdateValueStrategy().setConverter(new StringToCartridgeConverter()),
 				new UpdateValueStrategy().setConverter(new CartridgeToStringConverter()));
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(cartridgesCombo))
-				.notUpdating(useExistingObservable)
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
-
-		final ApplicationToCreateInputValidator applicationInputValidator =
-				new ApplicationToCreateInputValidator(applicationNameTextObservable, cartridgesComboObservable);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(cartridgesCombo))
+				.notUpdating(useExistingObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
+		
+		final ApplicationToCreateInputValidator applicationInputValidator = new ApplicationToCreateInputValidator(useExistingAppBtnSelection,
+				applicationNameTextObservable, cartridgesComboObservable);
 		dbc.addValidationStatusProvider(applicationInputValidator);
 		/*
-		 * final ApplicationToSelectNameValidator applicationNameValidator = new
-		 * ApplicationToSelectNameValidator(us applicationNameStatusObservable,
-		 * applicationNameTextObservable);
+		 * final ApplicationToSelectNameValidator applicationNameValidator = new ApplicationToSelectNameValidator(us
+		 * applicationNameStatusObservable, applicationNameTextObservable);
 		 * dbc.addValidationStatusProvider(applicationNameValidator);
-		 * ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT |
-		 * SWT.TOP);
+		 * ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT | SWT.TOP);
 		 */
 		// embeddable cartridges
 		Group cartridgesGroup = new Group(container, SWT.NONE);
 		cartridgesGroup.setText("Embeddable Cartridges");
-		GridDataFactory.fillDefaults()
-				.grab(true, true).align(SWT.FILL, SWT.FILL).span(2, 1).applyTo(cartridgesGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(cartridgesGroup);
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(2, 1).applyTo(cartridgesGroup);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(cartridgesGroup);
 
 		Composite tableContainer = new Composite(cartridgesGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
+				.applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(viewer.getTable()))
-				.notUpdating(useExistingObservable)
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(viewer.getTable()))
+				.notUpdating(useExistingObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		Button checkAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");
-		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(checkAllButton);
+		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP)
+				.applyTo(checkAllButton);
 		checkAllButton.addSelectionListener(onCheckAll());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(checkAllButton))
-				.notUpdating(useExistingObservable)
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(checkAllButton)).notUpdating(useExistingObservable)
+				.converting(new InvertingBooleanConverter()).in(dbc);
 
 		Button uncheckAllButton = new Button(cartridgesGroup, SWT.PUSH);
 		uncheckAllButton.setText("&Deselect All");
-		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
+		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP)
+				.applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(uncheckAllButton))
-				.notUpdating(useExistingObservable)
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(uncheckAllButton))
+				.notUpdating(useExistingObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// bottom filler
 		Composite spacer = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
 
 		// enabling the group if the 'use existing application' checkbox state
 		// is 'false' (unchecked)
@@ -337,9 +308,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				this.useExistingAppBtn);
 
 		final ISWTObservableValue createApplicationGroupEnabled = WidgetProperties.enabled().observe(container);
-		ValueBindingBuilder
-				.bind(createApplicationGroupEnabled).notUpdatingParticipant()
-				.to(useExistinAppBtnObservable)
+		ValueBindingBuilder.bind(createApplicationGroupEnabled).notUpdatingParticipant().to(useExistinAppBtnObservable)
 				.converting(new InvertingBooleanConverter()).in(dbc);
 
 		// dbc.bindValue(useExistinAppBtnObservable,
@@ -592,12 +561,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	/**
-	 * Viewer element comparer based on #equals(). The default implementation in
-	 * CheckboxTableViewer compares elements based on instance identity.
+	 * Viewer element comparer based on #equals(). The default implementation in CheckboxTableViewer compares elements
+	 * based on instance identity.
 	 * <p>
-	 * We need this since the available cartridges (item listed in the viewer)
-	 * are not the same instance as the ones in the embedded application (items
-	 * to check in the viewer).
+	 * We need this since the available cartridges (item listed in the viewer) are not the same instance as the ones in
+	 * the embedded application (items to check in the viewer).
 	 */
 	private static class EqualityComparer implements IElementComparer {
 
@@ -623,11 +591,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		// This is needed for some strange freezing issues when 
+		// This is needed for some strange freezing issues when
 		// launching the wizard from the console view. The UI seems to freeze
 		new Thread() {
 			public void run() {
-				Display.getDefault().asyncExec(new Runnable() { 
+				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						onPageActivated2(dbc);
 					}
@@ -635,6 +603,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 		}.start();
 	}
+
 	protected void onPageActivated2(final DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new Job("Loading existing applications...") {
@@ -688,32 +657,44 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	class ApplicationToSelectNameValidator extends MultiValidator {
 
-		private final IObservableValue existingAppValidityObservable;
+		private final ISWTObservableValue useExistingAppBtnbservable;
 		private final ISWTObservableValue existingAppNameTextObservable;
-		private final IObservableValue existingAppNameModelObservable;
+		private final IObservableValue existingAppsObservable;
 
-		public ApplicationToSelectNameValidator(IObservableValue existingAppValidityObservable,
-				ISWTObservableValue existingAppNameTextObservable, IObservableValue existingAppNameModelObservable) {
-			this.existingAppValidityObservable = existingAppValidityObservable;
+		public ApplicationToSelectNameValidator(ISWTObservableValue useExistingAppBtnbservable,
+				ISWTObservableValue existingAppNameTextObservable, IObservableValue existingAppsObservable) {
+			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
 			this.existingAppNameTextObservable = existingAppNameTextObservable;
-			this.existingAppNameModelObservable = existingAppNameModelObservable;
+			this.existingAppsObservable = existingAppsObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
-			/*
-			 * final IStatus applicationNameStatus = (IStatus)
-			 * applicationNameStatusObservable.getValue(); if
-			 * (applicationNameStatus != null) { return applicationNameStatus; }
-			 */
-			return ValidationStatus.ok();
+			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
+			final String appName = (String) existingAppNameTextObservable.getValue();
+			@SuppressWarnings("unchecked")
+			final List<IApplication> existingApps = (List<IApplication>) existingAppsObservable.getValue();
+			if (!useExistingApp) {
+				return ValidationStatus.ok();
+			}
+			if (existingApps != null) {
+				for (IApplication application : pageModel.getExistingApplications()) {
+					if (application.getName().equalsIgnoreCase(appName)) {
+						return ValidationStatus.ok();
+					}
+				}
+				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+					"The application '" + appName + "' does not exist.");
+			}
+			return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID,
+					"Select an existing OpenShift application.");
+			
+
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
@@ -726,23 +707,33 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	class ApplicationToCreateInputValidator extends MultiValidator {
 
-		private final ISWTObservableValue applicationNameTextObservable, cartridgesComboObservable;
+		private final ISWTObservableValue useExistingAppBtnbservable;
+		private final ISWTObservableValue applicationNameTextObservable;
+		private final ISWTObservableValue cartridgesComboObservable;
 
-		public ApplicationToCreateInputValidator(ISWTObservableValue applicationNameTextObservable,
+		public ApplicationToCreateInputValidator(ISWTObservableValue useExistingAppBtnbservable,
+				ISWTObservableValue applicationNameTextObservable,
 				ISWTObservableValue cartridgesComboObservable) {
+			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
 			this.applicationNameTextObservable = applicationNameTextObservable;
 			this.cartridgesComboObservable = cartridgesComboObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
-			if (!pageModel.getUseExistingApplication()) {
-				final String applicationName = (String) applicationNameTextObservable.getValue();
-				final String applicationType = (String) cartridgesComboObservable.getValue();
-				if (applicationName == null || applicationName.isEmpty() || applicationType == null
-						|| applicationType.isEmpty()) {
-					return ValidationStatus
-							.cancel("Please enter a name and select a type for the OpenShift application you want to create.");
+			final String applicationName = (String) applicationNameTextObservable.getValue();
+			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
+			if (useExistingApp) {
+				return ValidationStatus.ok();
+			}
+			if (!applicationName.matches("\\S+")) {
+				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"The application name must not contain spaces.");
+			}
+			for (IApplication application : pageModel.getExistingApplications()) {
+				if (application.getName().equalsIgnoreCase(applicationName)) {
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+							"An application with the same name already exists on OpenShift.");
 				}
 			}
 			return ValidationStatus.ok();
@@ -750,9 +741,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		/*
 		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
+		 * @see org.eclipse.core.databinding.validation.MultiValidator#getTargets()
 		 */
 		@Override
 		public IObservableList getTargets() {
