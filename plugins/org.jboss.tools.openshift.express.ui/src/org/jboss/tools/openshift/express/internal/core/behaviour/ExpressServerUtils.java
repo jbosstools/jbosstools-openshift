@@ -27,6 +27,7 @@ import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -49,7 +50,7 @@ public class ExpressServerUtils {
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
 	// Legacy, not to be used
-	public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
+	//public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT =  "origin";
 	
@@ -128,22 +129,28 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
-	public static String getExpressPassword(IServerWorkingCopy server ) {
-		return getExpressPassword(server.getOriginal());
-	}
-	
-	public static String getExpressPassword(IServer server ) {
-		if( server == null )
-			return null;
-		String s = ServerUtil.getFromSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD);
-		if( s == null )
-			return server.getAttribute(ExpressServerUtils.ATTRIBUTE_PASSWORD, (String)null);
-		return s;
-	}
-	
-	public static void setExpressPassword(IServerAttributes server, String val) throws CoreException {
-		ServerUtil.storeInSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD, val);
-	}
+//	public static String getExpressPassword(IServerWorkingCopy server ) {
+//		String username = getExpressUsername(server);
+//		return UserModel.getDefault().getPasswordFromSecureStorage(username);
+//	}
+//	
+//	public static String getExpressPassword(IServer server ) {
+//		String username = getExpressUsername(server);
+//		return UserModel.getDefault().getPasswordFromSecureStorage(username);
+//		
+//		// Can safely delete this if we have no need for backwards compat currently
+////		if( server == null )
+////			return null;
+////		String s = ServerUtil.getFromSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD);
+////		if( s == null )
+////			return server.getAttribute(ExpressServerUtils.ATTRIBUTE_PASSWORD, (String)null);
+////		return s;
+//	}
+//	
+//	public static void setExpressPassword(IServerAttributes server, String val) throws CoreException {
+//		String username = getExpressUsername(server);
+//		UserModel.getDefault().setPasswordInSecureStorage(username, val);
+//	}
 	
 	
 	public static boolean getIgnoresContextRoot(IServerAttributes server) {
@@ -239,7 +246,7 @@ public class ExpressServerUtils {
 		ServerWorkingCopy wc = (ServerWorkingCopy)server.createWorkingCopy();
 		fillServerWithOpenShiftDetails(wc, host, username, domain, appName, appId, mode, remoteName);
 		IServer saved = wc.save(true, new NullProgressMonitor());
-		ExpressServerUtils.setExpressPassword(wc, password);
+//		ExpressServerUtils.setExpressPassword(wc, password);
 		return saved;
 	}
 	

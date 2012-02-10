@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
-import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.ui.Messages;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
@@ -63,8 +62,10 @@ public class ExpressDetailsComposite {
 	
 	protected IServerModeUICallback callback;
 	private ModifyListener nameModifyListener, remoteModifyListener, 
-							passModifyListener, appModifyListener, deployProjectModifyListener;
-	protected Text userText, passText, remoteText;
+							appModifyListener, deployProjectModifyListener;
+//	private ModifyListener passModifyListener;
+	protected Text userText, remoteText;
+//	protected Text passText;
 	protected Combo appNameCombo, deployProjectCombo;
 	protected Button verifyButton;
 	protected boolean showVerify;
@@ -100,8 +101,8 @@ public class ExpressDetailsComposite {
 		userText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).applyTo(userText);
 		Label passLabel = new Label(composite, SWT.NONE);
-		passText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
-		GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).applyTo(passText);
+//		passText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
+//		GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).applyTo(passText);
 		
 		if( mode.equals(ExpressServerUtils.EXPRESS_SOURCE_MODE) ) {
 			Label appNameLabel = new Label(composite, SWT.NONE);
@@ -133,10 +134,9 @@ public class ExpressDetailsComposite {
 		remoteText.setText(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		
 		String n = ExpressServerUtils.getExpressUsername(server);
-		String p = ExpressServerUtils.getExpressPassword(server.getOriginal());
 		String remote = ExpressServerUtils.getExpressRemoteName(server);
 		if( n != null ) userText.setText(n);
-		if( p != null ) passText.setText(p);
+//		if( p != null ) passText.setText(p);
 		if( remote != null ) remoteText.setText(remote);
 		
 		if( showVerify ) {
@@ -174,13 +174,13 @@ public class ExpressDetailsComposite {
 		};
 		userText.addModifyListener(nameModifyListener);
 		
-		passModifyListener = new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				//pass = passText.getText();
-				callback.execute(new SetPassCommand(server));
-			}
-		};
-		passText.addModifyListener(passModifyListener);
+//		passModifyListener = new ModifyListener() {
+//			public void modifyText(ModifyEvent e) {
+//				//pass = passText.getText();
+//				callback.execute(new SetPassCommand(server));
+//			}
+//		};
+//		passText.addModifyListener(passModifyListener);
 
 		remoteModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -283,24 +283,24 @@ public class ExpressDetailsComposite {
 		}
 	}
 
-	public class SetPassCommand extends ServerWorkingCopyPropertyCommand {
-		public SetPassCommand(IServerWorkingCopy server) {
-			super(server, Messages.EditorChangePasswordCommandName, passText, passText.getText(), 
-					IJBossToolingConstants.SERVER_PASSWORD, passModifyListener);
-			oldVal = passText.getText();
-		}
-		
-		public void execute() {
-			pass = newVal;
-		}
-		
-		public void undo() {
-			pass = oldVal;
-			text.removeModifyListener(listener);
-			text.setText(oldVal);
-			text.addModifyListener(listener);
-		}
-	}
+//	public class SetPassCommand extends ServerWorkingCopyPropertyCommand {
+//		public SetPassCommand(IServerWorkingCopy server) {
+//			super(server, Messages.EditorChangePasswordCommandName, passText, passText.getText(), 
+//					IJBossToolingConstants.SERVER_PASSWORD, passModifyListener);
+//			oldVal = passText.getText();
+//		}
+//		
+//		public void execute() {
+//			pass = newVal;
+//		}
+//		
+//		public void undo() {
+//			pass = oldVal;
+//			text.removeModifyListener(listener);
+//			text.setText(oldVal);
+//			text.addModifyListener(listener);
+//		}
+//	}
 
 	private Runnable getVerifyingCredentialsJob(final CredentialsWizardPageModel model) {
 		return new Runnable() {

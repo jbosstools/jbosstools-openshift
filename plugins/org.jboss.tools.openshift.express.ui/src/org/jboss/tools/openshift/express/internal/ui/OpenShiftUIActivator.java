@@ -17,7 +17,6 @@ import org.osgi.framework.BundleContext;
 
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
-import com.openshift.express.client.User;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -56,6 +55,7 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	 * )
 	 */
 	public void stop(BundleContext context) throws Exception {
+		UserModel.getDefault().save();
 		plugin = null;
 		super.stop(context);
 	}

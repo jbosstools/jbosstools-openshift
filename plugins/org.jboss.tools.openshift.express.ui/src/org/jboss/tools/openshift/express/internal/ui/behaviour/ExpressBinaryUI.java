@@ -75,7 +75,6 @@ public class ExpressBinaryUI implements IDeploymentTypeUI {
 
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		ExpressServerUtils.setExpressPassword(wrapped.getServer(), composite.getPassword());
 	}
 	
 }

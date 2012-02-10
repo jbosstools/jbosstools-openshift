@@ -13,8 +13,11 @@ package org.jboss.tools.openshift.express.internal.core.console;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
+import org.jboss.tools.common.ui.preferencevalue.StringsPreferenceValue;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
@@ -32,12 +35,15 @@ public class UserModel {
 		if( model == null )
 			model = new UserModel();
 		return model;
-	}
-	
+	}	
 	
 	/** The most recent user connected on OpenShift. */
 	private IUser recentUser = null;
 	private HashMap<String, IUser> allUsers = new HashMap<String,IUser>();
+	
+	public UserModel() {
+		load();
+	}
 	
 	/**
 	 * Create a user for temporary external use
@@ -93,25 +99,52 @@ public class UserModel {
 	 * Load the user list from preferences and secure storage
 	 */
 	public void load() {
-		// TODO
+		StringsPreferenceValue pref = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		String[] users = pref.get();
+		for( int i = 0; i < users.length; i++ ) {
+			try {
+				String password = getPasswordFromSecureStorage(users[i]);
+				IUser u = createUser(users[i], password);
+				addUser(u);
+			} catch(OpenShiftException ose ) {
+				// TODO 
+			} catch( IOException ioe) {
+				// TODO
+			}
+		}
 	}
 	
 	/**
 	 * Save the user list to preferences and secure storage
 	 */
 	public void save() {
-		// TODO
-		// save the passwords in secure storage, save the username list somewhere else
+		// passwords are already in secure storage, save the username list somewhere else
+		Set<String> set = allUsers.keySet();
+		String[] userList = (String[]) set.toArray(new String[set.size()]);
+		StringsPreferenceValue pref = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		pref.store(userList);
+		
+		Iterator<IUser> i = allUsers.values().iterator();
+		IUser tmp;
+		while(i.hasNext()) {
+			tmp = i.next();
+			try {
+				setPasswordInSecureStorage(tmp.getRhlogin(), tmp.getPassword());
+			} catch(OpenShiftException ose ) {
+				// TODO log
+			}
+		}
 	}
 	
-	private static final String RHLOGIN_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN";
+	private static final String RECENT_RHLOGIN_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN";
+	private static final String RHLOGIN_LIST_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN_LIST";
 
 	/**
 	 * Get the username stored in preferences as most recently used
 	 * @return
 	 */
 	public String getDefaultUsername() {
-		StringPreferenceValue pref = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		StringPreferenceValue pref = new StringPreferenceValue(RECENT_RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		String rhLogin = null;
 		rhLogin = pref.get();
 		if (rhLogin == null || rhLogin.length() == 0) {
@@ -131,7 +164,7 @@ public class UserModel {
 	 */
 	public boolean setDefaultUsername(String rhLogin) {
 		String prev = getDefaultUsername();
-		StringPreferenceValue preference = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		StringPreferenceValue preference = new StringPreferenceValue(RECENT_RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		if (rhLogin != null && !rhLogin.equals(prev)) {
 			preference.store(rhLogin);
 			return true;

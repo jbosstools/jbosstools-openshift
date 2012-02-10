@@ -65,6 +65,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	}
 	
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		ExpressServerUtils.setExpressPassword(callback.getServer(), composite.getPassword());
+		super.performFinish(monitor);
+//		ExpressServerUtils.setExpressPassword(callback.getServer(), composite.getPassword());
 	}
 }

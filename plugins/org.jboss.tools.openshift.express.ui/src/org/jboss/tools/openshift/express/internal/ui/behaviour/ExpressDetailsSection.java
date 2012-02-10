@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -55,12 +54,12 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	 * @param monitor the progress monitor for the save operation.
 	 */
 	public void doSave(IProgressMonitor monitor) {
-		try {
-			ExpressServerUtils.setExpressPassword(server.getOriginal(), details.getPassword());
-			monitor.worked(100);
-		} catch( CoreException ce ) {
-			// TODO 
-		}
+//		try {
+//			ExpressServerUtils.setExpressPassword(server.getOriginal(), details.getPassword());
+//			monitor.worked(100);
+//		} catch( CoreException ce ) {
+//			// TODO 
+//		}
 	}
 
 }
