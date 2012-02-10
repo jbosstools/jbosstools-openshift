@@ -70,8 +70,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 * @see #getRepositoryPath()
 	 */
 	protected File cloneRepository(IApplication application, String remoteName, File destination,
-			boolean addToRepoView,
-			IProgressMonitor monitor)
+			boolean addToRepoView, IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
 		EGitUIUtils.ensureEgitUIIsStarted();
