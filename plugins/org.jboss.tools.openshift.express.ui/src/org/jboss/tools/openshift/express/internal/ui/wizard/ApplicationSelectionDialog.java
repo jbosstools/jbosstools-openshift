@@ -34,6 +34,8 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -159,7 +161,14 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		return new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				openDetailsDialog();
+				final ISelection selection = event.getSelection();
+				if(selection instanceof StructuredSelection) {
+					final Object firstElement = ((StructuredSelection) selection).getFirstElement();
+					if(firstElement instanceof IApplication) {
+						dialogModel.setSelectedApplication((IApplication) firstElement);
+						close();
+					}
+				}
 			}
 		};
 	}
