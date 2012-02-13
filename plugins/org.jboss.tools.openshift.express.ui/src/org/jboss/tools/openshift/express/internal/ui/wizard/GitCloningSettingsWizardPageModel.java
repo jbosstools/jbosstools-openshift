@@ -15,7 +15,6 @@ import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWiz
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -30,6 +29,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.OpenShiftException;
+
 /**
  * @author Andre Dietisheim
  * @author Rob Stryker
@@ -72,6 +72,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public GitCloningSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
+		setRepositoryPath(getDefaultRepositoryPath());
 	}
 
 	public boolean isNewProject() {
@@ -79,7 +80,8 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	}
 
 	// public void setMergeUri(String mergeUri) {
-	// firePropertyChange(PROPERTY_MERGE_URI, wizardModel.getMergeUri(), wizardModel.setMergeUri(mergeUri));
+	// firePropertyChange(PROPERTY_MERGE_URI, wizardModel.getMergeUri(),
+	// wizardModel.setMergeUri(mergeUri));
 	// }
 	//
 	// public String getMergeUri() {
@@ -130,10 +132,12 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	// public List<GitUri> getMergeUris() {
 	// ArrayList<GitUri> mergeUris = new ArrayList<GitUri>();
 	// mergeUris.add(new GitUri(
-	// "seambooking-example", "git://github.com/openshift/seambooking-example.git",
+	// "seambooking-example",
+	// "git://github.com/openshift/seambooking-example.git",
 	// ICartridge.JBOSSAS_7));
 	// mergeUris.add(new GitUri(
-	// "tweetstream-example", "git://github.com/openshift/tweetstream-example.git",
+	// "tweetstream-example",
+	// "git://github.com/openshift/tweetstream-example.git",
 	// ICartridge.JBOSSAS_7));
 	// mergeUris.add(new GitUri(
 	// "sinatra-example", "git://github.com/openshift/sinatra-example.git",
@@ -205,14 +209,16 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	}
 
-	public void resetRepositoryPath() {
-		if (wizardModel.isNewProject() || getRepositoryPath() == null) {
-			setRepositoryPath(getDefaultRepositoryPath());
-		}
-	}
+	// public void resetRepositoryPath() {
+	// if (wizardModel.isNewProject()
+	// || getRepositoryPath() == null) {
+	// setRepositoryPath(getDefaultRepositoryPath());
+	// }
+	// }
 
 	public void resetRemoteName() {
-		// if existing project and remote name is still 'origin' -> switch to 'openshift'
+		// if existing project and remote name is still 'origin' -> switch to
+		// 'openshift'
 		// (so, if existing project and remote name is not 'origin', leave as-is
 		if (!wizardModel.isNewProject() && NEW_PROJECT_REMOTE_NAME_DEFAULT.equals(getRemoteName())) {
 			setRemoteName(EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
@@ -224,7 +230,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	@Deprecated
 	private String getDefaultRepositoryPath() {
 		return EGitUIUtils.getEGitDefaultRepositoryPath();
 	}
@@ -291,7 +296,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		if (this.useDefaultRepoPath) {
 			setRepositoryPath(getDefaultRepositoryPath());
 		} else {
-			
+
 		}
 		validateRepoPathProject();
 	}
@@ -302,21 +307,32 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	private IStatus validateRepoPathProject() {
 		IStatus status = Status.OK_STATUS;
-		// skip the validation if the user wants to create a new project. The name and state of the existing project do
+		// skip the validation if the user wants to create a new project. The
+		// name and state of the existing project do
 		// not matter...
-		final IPath repoPath = new Path(getRepositoryPath());
-		if (!isUseDefaultRepoPath()) {
-			if (repoPath.isEmpty() || !repoPath.isAbsolute() || !repoPath.toFile().canWrite()) {
-				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-						"The path does not exist or is not writeable.");
+		String applicationName = getApplicationName();
+		if (applicationName == null
+				|| applicationName.length() == 0) {
+			status = OpenShiftUIActivator
+					.createCancelStatus("You have to choose an application name / existing application");
+		} else {
+			if (!isUseDefaultRepoPath()) {
+				final IPath repoPath = new Path(getRepositoryPath());
+				if (repoPath.isEmpty()
+						|| !repoPath.isAbsolute()
+						|| !repoPath.toFile().canWrite()) {
+					status = OpenShiftUIActivator.createErrorStatus("The path does not exist or is not writeable.");
+				} else {
+					final IPath applicationPath = repoPath.append(new Path(getApplicationName()));
+					if (applicationPath.toFile().exists()) {
+						status = OpenShiftUIActivator.createErrorStatus(
+								"The location '" + repoPath.toOSString() + "' already contains a folder named '"
+										+ getApplicationName() + "'.");
+					}
+				}
 			}
 		}
-		final IPath applicationPath = repoPath.append(new Path(getApplicationName()));
-		if (applicationPath.toFile().exists()) {
-			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-					"The location '" + repoPath.toOSString() + "' already contains a folder named '"+ getApplicationName() +"'.");
-		}
-	
+
 		setCustomRepoPathValidity(status);
 		return status;
 	}
@@ -345,17 +361,21 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	private IStatus validateRemoteName() {
 		IStatus status = Status.OK_STATUS;
-		// skip the validation if the user wants to create a new project. The name and state of the existing project do
+		// skip the validation if the user wants to create a new project. The
+		// name and state of the existing project do
 		// not matter...
 		if (!isUseDefaultRemoteName()) {
 			final String remoteName = getRemoteName();
-			if(remoteName == null || remoteName.isEmpty()) {
-				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "The custom remote name must not be empty.");
-			} else if(!remoteName.matches("\\S+")) {
-				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "The custom remote name must not contain spaces.");
+			if (remoteName == null || remoteName.isEmpty()) {
+				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"The custom remote name must not be empty.");
+			} else if (!remoteName.matches("\\S+")) {
+				status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"The custom remote name must not contain spaces.");
 			} else if (hasRemoteName(remoteName, getProject())) {
-				status = new Status(IStatus.ERROR, 
-						OpenShiftUIActivator.PLUGIN_ID, NLS.bind("The existing project already has a remote named {0}.", remoteName));
+				status = new Status(IStatus.ERROR,
+						OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
+								"The existing project already has a remote named {0}.", remoteName));
 			}
 		}
 		setCustomRemoteNameValidity(status);
@@ -368,7 +388,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 					|| !project.isAccessible()) {
 				return false;
 			}
-			
+
 			Repository repository = EGitUtils.getRepository(project);
 			return EGitUtils.hasRemote(remoteName, repository);
 		} catch (Exception e) {
@@ -376,16 +396,16 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 			return false;
 		}
 	}
-	
+
 	private IProject getProject() {
 		String projectName = wizardModel.getProjectName();
 		if (projectName == null) {
 			return null;
 		}
-		
+
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
-	
+
 	public void setCustomRemoteNameValidity(IStatus status) {
 		firePropertyChange(PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY, this.customRemoteNameValidity,
 				this.customRemoteNameValidity = status);

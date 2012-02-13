@@ -218,7 +218,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// allow to enable a proj only for as7 openshift applications
 		// setTitle(NLS.bind("Import OpenShift application {0}",
 		// pageModel.getApplicationName()));
-		pageModel.resetRepositoryPath();
+//		pageModel.resetRepositoryPath();
 		pageModel.resetRemoteName();
 		if (pageModel.isNewProject()) {
 			useDefaultRepoPathButton.setEnabled(true);
