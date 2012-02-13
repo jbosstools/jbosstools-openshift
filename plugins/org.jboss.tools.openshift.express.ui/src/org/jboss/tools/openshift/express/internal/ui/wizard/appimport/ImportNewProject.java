@@ -56,10 +56,11 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	 * @throws InterruptedException
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
+	 * @throws IOException 
 	 */
 	public List<IProject> execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
-			InvocationTargetException {
+			InvocationTargetException, IOException {
 		if (cloneDestinationExists()) {
 			throw new WontOverwriteException(
 					NLS.bind("There's already a folder at {0}. The new OpenShift project would overwrite it. " +
@@ -80,7 +81,10 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		}
 
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
-		
+		// TODO: handle multiple projects (is this really possible?)
+		IProject project = importedProjects.get(0);
+		addToModified(setupGitIgnore(project, monitor));
+		addAndCommitModifiedResource(project, monitor);
 		
 		return importedProjects;
 	}

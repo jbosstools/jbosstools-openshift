@@ -15,15 +15,23 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 
 import com.openshift.express.client.IApplication;
@@ -37,11 +45,13 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	private String projectName;
 	private IApplication application;
 	private String remoteName;
+	protected List<IResource> modifiedResources;
 
 	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName) {
 		this.projectName = projectName;
 		this.application = application;
 		this.remoteName = remoteName;
+		this.modifiedResources = new ArrayList<IResource>();
 	}
 
 	/**
@@ -136,4 +146,81 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	protected String getRemoteName() {
 		return remoteName;
 	}
+
+	/**
+	 * Marks the given resources as modified.
+	 * 
+	 * @param resources
+	 *            the resources that shall be marked as modified
+	 * 
+	 * @see #addAndCommitModifiedResource(IProject, IProgressMonitor)
+	 */
+	protected void addToModified(Collection<IResource> resources) {
+		if (resources == null) {
+			return;
+		}
+		modifiedResources.addAll(resources);
+	}
+
+	/**
+	 * 
+	 * Marks the given resource as modified.
+	 * 
+	 * @param resource
+	 *            the resource that shall be marked as modified
+	 * 
+	 * @see #addAndCommitModifiedResource(IProject, IProgressMonitor)
+	 */
+	protected void addToModified(IResource resource) {
+		if (resource == null) {
+			return;
+		}
+		modifiedResources.add(resource);
+	}
+
+	/**
+	 * Adds and commits all (modified) resources in the given project to the git
+	 * repository that it is attached to.
+	 * 
+	 * @param project
+	 *            the project to commit
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * @throws CoreException
+	 * @throws OpenShiftException
+	 * 
+	 * @see #addToModified(Collection<IResource>)
+ 	 * @see #addToModified(IResource)
+ 	 * 
+	 */
+	protected void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException,
+			OpenShiftException {
+		Repository repository = EGitUtils.getRepository(project);
+		if (repository == null) {
+			throw new OpenShiftException("project {0} is not connected to a git repository.", project.getName());
+		}
+		new AddToIndexOperation(modifiedResources).execute(monitor);
+		EGitUtils.commit(project, monitor);
+	}
+
+	/**
+	 * Adds a predefined set of entries to the gitignore file in (root of) the
+	 * given project. If no .gitignore exists yet, a fresh one is created.
+	 * 
+	 * @param project
+	 *            the project to which the .gitignore shall be configured
+	 * @return
+	 * @throws IOException
+	 * @throws CoreException
+	 */
+	protected IFile setupGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
+		GitIgnore gitIgnore = new GitIgnore(project);
+		gitIgnore.add("target")
+				.add(".settings")
+				.add(".project")
+				.add(".classpath")
+				.add(".factorypath");
+		return gitIgnore.write(monitor);
+	}
+
 }

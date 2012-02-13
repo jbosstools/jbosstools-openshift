@@ -61,9 +61,10 @@ public interface IOpenShiftWizardModel {
 	 * @throws InterruptedException
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
+	 * @throws IOException 
 	 */
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException;
+			URISyntaxException, InvocationTargetException, IOException;
 
 	/**
 	 * Enables the user chosen, unshared project to be used on the chosen

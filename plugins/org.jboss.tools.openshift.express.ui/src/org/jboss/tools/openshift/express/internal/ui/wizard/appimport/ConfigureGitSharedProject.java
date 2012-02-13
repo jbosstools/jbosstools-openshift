@@ -15,26 +15,22 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException;
@@ -53,12 +49,9 @@ import com.openshift.express.client.OpenShiftException;
  */
 public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
 
-	private List<IResource> modifiedResources;
-
 	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
 			IUser user) {
 		super(projectName, application, remoteName);
-		this.modifiedResources = new ArrayList<IResource>();
 	}
 
 	/**
@@ -139,11 +132,6 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUri(), repository);
 	}
 
-	private void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException {
-		new AddToIndexOperation(modifiedResources).execute(monitor);
-		EGitUtils.commit(project, monitor);
-	}
-
 	private IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
 		Assert.isLegal(OpenShiftMavenProfile.isMavenProject(project));
 
@@ -198,39 +186,4 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		FileUtil.safeDelete(tmpFolder);
 		return copiedResources;
 	}
-
-	/**
-	 * Adds a predefined set of entries to the gitignore file in (root of) the
-	 * given project. If no .gitignore exists yet, a fresh one is created.
-	 * 
-	 * @param project
-	 *            the project to which the .gitignore shall be configured
-	 * @return
-	 * @throws IOException
-	 * @throws CoreException
-	 */
-	private IFile setupGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
-		GitIgnore gitIgnore = new GitIgnore(project);
-		gitIgnore.add("target")
-				.add(".settings")
-				.add(".project")
-				.add(".classpath")
-				.add(".factorypath");
-		return gitIgnore.write(monitor);
-	}
-
-	private void addToModified(Collection<IResource> resources) {
-		if (resources == null) {
-			return;
-		}
-		modifiedResources.addAll(resources);
-	}
-
-	private void addToModified(IResource resource) {
-		if (resource == null) {
-			return;
-		}
-		modifiedResources.add(resource);
-	}
-
 }

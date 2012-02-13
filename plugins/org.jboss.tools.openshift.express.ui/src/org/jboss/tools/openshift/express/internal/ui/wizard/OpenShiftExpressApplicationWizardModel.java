@@ -64,12 +64,17 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * @throws InterruptedException
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
+	 * @throws IOException 
 	 */
 	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException {
+			URISyntaxException, InvocationTargetException, IOException {
 		List<IProject> importedProjects =
-				new ImportNewProject(getProjectName(), getApplication(), getRemoteName(), getRepositoryFile())
+				new ImportNewProject(
+						getProjectName()
+						, getApplication()
+						, getRemoteName()
+						, getRepositoryFile())
 						.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
@@ -358,7 +363,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return selectedEmbeddableCartridges;
 	}
 
-	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
+	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
+			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
 		dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 		return selectedEmbeddableCartridges;
 	}

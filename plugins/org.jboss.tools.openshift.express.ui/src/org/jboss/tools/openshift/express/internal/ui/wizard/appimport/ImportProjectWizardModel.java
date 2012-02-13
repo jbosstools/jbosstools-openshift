@@ -68,9 +68,10 @@ public class ImportProjectWizardModel extends ObservableUIPojo {
 	 * @throws InterruptedException
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
+	 * @throws IOException 
 	 */
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException {
+			URISyntaxException, InvocationTargetException, IOException {
 		List<IProject> importedProjects = new ImportNewProject(getProjectName()
 				, getApplication()
 				, getRemoteName()
