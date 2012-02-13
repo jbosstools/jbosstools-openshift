@@ -19,7 +19,6 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.SelectionProviderAction;
 
 /**
@@ -30,7 +29,7 @@ public class CopyPropertyAction extends SelectionProviderAction {
 	private ISelectionProvider selectionProvider;
 
 	public CopyPropertyAction(ISelectionProvider provider) {
-		super(provider, ActionFactory.COPY.getId());
+		super(provider, "Copy");
 		initAction();
 		this.selectionProvider = provider;
 	}
@@ -39,7 +38,8 @@ public class CopyPropertyAction extends SelectionProviderAction {
 		ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
 		setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
-		setActionDefinitionId(ActionFactory.COPY.getCommandId());
+//		setActionDefinitionId(ActionFactory.COPY.getCommandId());
+//		setAccelerator(SWT.CTRL | 'C');
 	}
 
 	@Override
