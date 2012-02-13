@@ -161,18 +161,23 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		return new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				final ISelection selection = event.getSelection();
-				if(selection instanceof StructuredSelection) {
-					final Object firstElement = ((StructuredSelection) selection).getFirstElement();
-					if(firstElement instanceof IApplication) {
-						dialogModel.setSelectedApplication((IApplication) firstElement);
-						close();
-					}
-				}
+//				openDetailsDialog();
+				setApplicationSelected(event.getSelection());
 			}
 		};
 	}
 
+	private void setApplicationSelected(ISelection selection) {
+		if(selection instanceof StructuredSelection) {
+			final Object firstElement = ((StructuredSelection) selection).getFirstElement();
+			if(firstElement instanceof IApplication) {
+				IApplication application = (IApplication) firstElement;
+				dialogModel.setSelectedApplication(application);
+				close();
+			}
+		}
+	}
+	
 	protected TableViewer createTable(Composite tableContainer) {
 		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		int desiredHeight = table.getItemHeight() * 10 + table.getHeaderHeight();
