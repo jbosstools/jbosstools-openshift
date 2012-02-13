@@ -197,9 +197,9 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
 		} catch (OpenShiftException e) {
-			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Your credentails are not valid.");
+			status = OpenShiftUIActivator.createErrorStatus("Your credentails are not valid.");
 		} catch (Exception e) {
-			status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
+			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 					"Could not check user credentials: {0}.", e.getMessage()));
 		}
 
