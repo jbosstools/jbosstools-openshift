@@ -645,7 +645,7 @@ public class EGitUtils {
 	 * @return
 	 * @throws CoreException
 	 */
-	private static RemoteConfig getRemoteByName(String remote, Repository repository) throws CoreException {
+	public static RemoteConfig getRemoteByName(String remote, Repository repository) throws CoreException {
 		Assert.isLegal(repository != null, "Could not get configuration. No repository provided.");
 
 		List<RemoteConfig> allRemotes = getAllRemoteConfigs(repository);
