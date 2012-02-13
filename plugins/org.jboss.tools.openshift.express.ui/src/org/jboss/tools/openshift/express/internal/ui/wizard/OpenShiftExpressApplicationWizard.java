@@ -101,8 +101,8 @@ public class OpenShiftExpressApplicationWizard extends
 
 	@Override
 	public boolean performFinish() {
-		boolean success = false;
-		if (!getWizardModel().isExistingApplication()) {
+		boolean success = getWizardModel().isExistingApplication();
+		if (!success) {
 			if (createApplication()) {
 				success = addRemoveCartridges(
 						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
