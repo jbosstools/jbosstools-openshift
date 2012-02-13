@@ -30,12 +30,12 @@ import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
- *
+ * 
  */
 public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvider {
 
 	private StructuredViewer viewer;
-	
+
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
@@ -44,9 +44,9 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer = (StructuredViewer)viewer;
+		this.viewer = (StructuredViewer) viewer;
 	}
-	
+
 	public static class LoadingStub {
 		public LoadingStub() {
 		}
@@ -55,25 +55,25 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	// Keep track of what's loading and what's finished
 	private ArrayList<IUser> loadedUsers = new ArrayList<IUser>();
 	private ArrayList<IUser> loadingUsers = new ArrayList<IUser>();
-	
+
 	@Override
 	public Object[] getElements(final Object parentElement) {
-		if(parentElement instanceof IWorkspaceRoot) {
+		if (parentElement instanceof IWorkspaceRoot) {
 			return UserModel.getDefault().getUsers();
 		}
-		if( parentElement instanceof UserModel ) {
-			IUser[] users = ((UserModel)parentElement).getUsers();
+		if (parentElement instanceof UserModel) {
+			IUser[] users = ((UserModel) parentElement).getUsers();
 			return users;
 		}
-		
-		if( parentElement instanceof IUser ) {
-			if( !loadedUsers.contains(parentElement)) {
-				if( !loadingUsers.contains(parentElement)) {
+
+		if (parentElement instanceof IUser) {
+			if (!loadedUsers.contains(parentElement)) {
+				if (!loadingUsers.contains(parentElement)) {
 					// Load the data
-					launchLoadingUserJob((IUser)parentElement);
+					launchLoadingUserJob((IUser) parentElement);
 				}
 				// return a stub object that says loading...
-				return new Object[]{new LoadingStub()};
+				return new Object[] { new LoadingStub() };
 			}
 		}
 		return getChildrenFor(parentElement, false);
@@ -81,11 +81,11 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 
 	// Force the children to load completely
 	private void getChildrenFor(Object[] parentElements) {
-		for( int i = 0; i < parentElements.length; i++ ) {
+		for (int i = 0; i < parentElements.length; i++) {
 			getChildrenFor(parentElements[i], true);
 		}
 	}
-	
+
 	// Get the children without the protection of a "loading..." situation
 	private Object[] getChildrenFor(Object parentElement, boolean recurse) {
 		// .... the actual work is done here...
@@ -96,13 +96,16 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				children = new Object[] { user };
 			}
 			if (parentElement instanceof IUser) {
-				children = ((IUser) parentElement).getApplications().toArray();
+				final IUser user = (IUser) parentElement;
+				if (user.hasDomain()) {
+					children = user.getApplications().toArray();
+				}
 			}
 			if (parentElement instanceof IApplication) {
 				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
 			}
-			
-			if( recurse ) {
+
+			if (recurse) {
 				getChildrenFor(children);
 			}
 		} catch (OpenShiftException e) {
@@ -110,10 +113,10 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		}
 		return children;
 	}
-	
+
 	private void launchLoadingUserJob(final IUser user) {
 		Job job = new Job("Loading OpenShift Express User information...") {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Loading OpenShift Express information...", IProgressMonitor.UNKNOWN);
@@ -131,7 +134,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		job.setPriority(Job.LONG);
 		job.schedule();
 	}
-	
+
 	private void refreshViewerObject(final Object object) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
@@ -139,7 +142,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			}
 		});
 	}
-	
+
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		return getElements(parentElement);
