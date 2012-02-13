@@ -171,11 +171,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				BeanProperties.value(
 						ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS).observe(pageModel);
 
-		final ApplicationToSelectNameValidator existingProjectValidator =
+		final ApplicationToSelectNameValidator existingAppValidator =
 				new ApplicationToSelectNameValidator(
 						useExistingAppBtnSelection, existingAppNameTextObservable, existingAppsObservable);
-		dbc.addValidationStatusProvider(existingProjectValidator);
-		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
+		dbc.addValidationStatusProvider(existingAppValidator);
+		ControlDecorationSupport.create(existingAppValidator, SWT.LEFT | SWT.TOP);
 
 		return existingAppSelectionGroup;
 	}
@@ -273,6 +273,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new ApplicationToCreateInputValidator(
 						useExistingAppBtnSelection, applicationNameTextObservable, selectedCartridgeComboObservable);
 		dbc.addValidationStatusProvider(applicationInputValidator);
+		//ControlDecorationSupport.create(applicationInputValidator, SWT.LEFT | SWT.TOP);
+		ControlDecorationSupport.create(applicationInputValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
+
 		/*
 		 * final ApplicationToSelectNameValidator applicationNameValidator = new
 		 * ApplicationToSelectNameValidator(us applicationNameStatusObservable,
@@ -761,6 +764,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			if (useExistingApp) {
 				return ValidationStatus.ok();
 			}
+			if (applicationName.isEmpty()) {
+				return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID,
+						"Give a name and select a type for the application you want to create.");
+			}
+			
 			if (!applicationName.matches("\\S+")) {
 				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 						"The application name must not contain spaces.");
@@ -778,6 +786,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
 			targets.add(applicationNameTextObservable);
+			targets.add(cartridgesComboObservable);
 			return targets;
 		}
 
