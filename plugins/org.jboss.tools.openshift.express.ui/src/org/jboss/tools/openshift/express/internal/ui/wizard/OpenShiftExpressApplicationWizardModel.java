@@ -21,6 +21,7 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
@@ -43,9 +44,15 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
 	public OpenShiftExpressApplicationWizardModel() {
-		super();
+		this(OpenShiftUIActivator.getDefault().getUser(), null, null);
+	}
+	
+	public OpenShiftExpressApplicationWizardModel(IUser user, IProject project, IApplication application) {
 		// default value(s)
+		setUser(user);
+		setProject(project);
 		setNewProject(true);
+		setApplication(application);
 		setCreateServerAdapter(true);
 		setRepositoryPath(DEFAULT_REPOSITORY_PATH);
 		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
@@ -150,8 +157,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				// , getUser())
-				, OpenShiftUIActivator.getDefault().getUser())
+				, getUser())
 				.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
@@ -255,6 +261,18 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public String setProjectName(String projectName) {
 		return (String) setProperty(PROJECT_NAME, projectName);
 	}
+	
+	@Override 
+	public IProject setProject(IProject project) {
+		if (project != null && project.exists()) {
+			setExistingProject(false);
+			setProjectName(project.getName());
+		} else {
+			setExistingProject(true);
+			setProjectName(null);
+		}
+		return project;
+	}
 
 	@Override
 	public boolean isGitSharedProject() {
@@ -336,7 +354,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		IUser user = OpenShiftUIActivator.getDefault().getUser();
+		IUser user = getUser();
 		if (user == null) {
 			throw new OpenShiftException("Could not create application, have no valid user credentials");
 		}
@@ -399,4 +417,24 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public String getApplicationName() {
 		return (String) dataModel.get(APPLICATION_NAME);
 	}
+	
+	/**
+	 * Returns the user that was stored in this model or the recent user from UserModel
+	 * 
+	 * @see OpenShiftExpressApplicationWizardModel(IUser)
+	 * @see OpenShiftExpressApplicationWizardModel()
+	 */
+	public IUser getUser() {
+		IUser user = (IUser) dataModel.get(USER);
+		if (user == null) {
+			user = UserModel.getDefault().getRecentUser();
+		}
+		return user;
+	}
+	
+	public IUser setUser(IUser user) {
+		dataModel.put(USER, user);
+		return user;
+	}
+
 }

@@ -39,24 +39,25 @@ public class ImportApplicationAction extends AbstractAction {
 		if (selection instanceof ITreeSelection 
 				&& treeSelection.getFirstElement() instanceof IApplication) {
 			final IApplication application = (IApplication) treeSelection.getFirstElement();
-			//final IUser user = OpenShiftUIActivator.getDefault().getUser();
-			OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard();
-			TreePath[] paths = treeSelection.getPaths();
-			if( paths != null && paths.length == 1 ) {
-				Object user = paths[0].getParentPath().getLastSegment();
-				if( user instanceof IUser )
-					wizard.setInitialUser((IUser)user);
-			}
-			wizard.setSelectedApplication(application);
+			final IUser user = getUser(treeSelection.getPaths());
 			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(application.getName());
-			if(project.exists()) {
-				wizard.setSelectedProject(project);
-			}
+			OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user, project, application);
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 			dialog.create();
 			dialog.open();
 			
 		}
+	}
+
+	private IUser getUser(TreePath[] paths) {
+		IUser user = null;
+		if( paths != null 
+				&& paths.length == 1 ) {
+			Object selection = paths[0].getParentPath().getLastSegment();
+			if( selection instanceof IUser )
+				user = (IUser) selection;
+		}
+		return user;
 	}
 
 	

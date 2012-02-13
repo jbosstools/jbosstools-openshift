@@ -1,7 +1,6 @@
 package org.jboss.tools.openshift.express.internal.ui.action;
 
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -29,8 +28,8 @@ public class CreateApplicationAction extends AbstractAction  {
 		if (selection != null && selection instanceof ITreeSelection ) {
 			Object sel = ((ITreeSelection)selection).getFirstElement();
 			if( sel instanceof IUser) {
-				OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard();
-				wizard.setInitialUser((IUser)sel);
+				IUser user = (IUser) sel;
+				OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user);
 				new WizardDialog(new Shell(), wizard).open();
 			}
 		}

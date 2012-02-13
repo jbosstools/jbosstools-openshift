@@ -69,8 +69,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IUser getUser() {
-		// return wizardModel.getUser();
-		return OpenShiftUIActivator.getDefault().getUser();
+		return wizardModel.getUser();
+//		return OpenShiftUIActivator.getDefault().getUser();
 	}
 
 	public List<IApplication> getApplications() throws OpenShiftException {
@@ -138,8 +138,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadCartridges() throws OpenShiftException {
-		// setCartridges(wizardModel.getUser().getCartridges());
-		setCartridges(OpenShiftUIActivator.getDefault().getUser().getCartridges());
+		setCartridges(getUser().getCartridges());
+		//setCartridges(OpenShiftUIActivator.getDefault().getUser().getCartridges());
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
@@ -160,7 +160,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
-		List<IEmbeddableCartridge> cartridges = OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
+//		List<IEmbeddableCartridge> cartridges = OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
+		List<IEmbeddableCartridge> cartridges = getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
 	}

@@ -61,7 +61,8 @@ public class ApplicationSelectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IUser getUser() {
-		return OpenShiftUIActivator.getDefault().getUser();
+//		return OpenShiftUIActivator.getDefault().getUser();
+		return wizardModel.getUser();
 	}
 
 	public boolean getUseExistingApplication() {

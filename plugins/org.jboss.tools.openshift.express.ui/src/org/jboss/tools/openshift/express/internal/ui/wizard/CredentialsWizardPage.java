@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -169,17 +167,14 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public boolean performAuthentication() {
 		try {
-			final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);
 			WizardUtils.runInWizard(new Job("Verifying user credentials...") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					IStatus status = pageModel.validateCredentials();
-					queue.offer(status);
+					pageModel.validateCredentials();
 					monitor.done();
 					return Status.OK_STATUS;
 				}
 			}, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
-			queue.poll(10, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			Logger.error("Failed to authenticate on OpenShift", e);
 			return false;
@@ -187,7 +182,8 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			Logger.error("Failed to authenticate on OpenShift", e);
 			return false;
 		}
-		return pageModel.areCredentialsValid();
+		boolean valid = pageModel.areCredentialsValid();
+		return valid;
 	}
 
 	class CredentialsInputValidator extends MultiValidator {

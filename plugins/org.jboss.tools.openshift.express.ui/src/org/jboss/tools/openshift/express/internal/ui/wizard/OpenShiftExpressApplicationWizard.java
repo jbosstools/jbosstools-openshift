@@ -53,8 +53,20 @@ public class OpenShiftExpressApplicationWizard extends
 
 	private IUser initialUser;
 
+	/**
+	 * @see #getUser which calls UserModel#getRecentUser if no user present at
+	 *      construction time
+	 */
 	public OpenShiftExpressApplicationWizard() {
-		setWizardModel(new OpenShiftExpressApplicationWizardModel());
+		this(null, null, null);
+	}
+
+	public OpenShiftExpressApplicationWizard(IUser user) {
+		this(user, null, null);
+	}
+
+	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application) {
+		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application));
 	}
 
 	public void setSelectedApplication(IApplication application) {
@@ -62,13 +74,7 @@ public class OpenShiftExpressApplicationWizard extends
 	}
 
 	public void setSelectedProject(IProject project) {
-		if (project != null && project.exists()) {
-			getWizardModel().setExistingProject(false);
-			getWizardModel().setProjectName(project.getName());
-		} else {
-			getWizardModel().setExistingProject(true);
-			getWizardModel().setProjectName(null);
-		}
+		getWizardModel().setProject(project);
 	}
 
 	@Override
@@ -77,12 +83,12 @@ public class OpenShiftExpressApplicationWizard extends
 		setNeedsProgressMonitor(true);
 		Object o = selection.getFirstElement();
 		if (o instanceof IUser) {
-			setInitialUser((IUser) o);
+			setUser((IUser) o);
 		}
 	}
 
-	public void setInitialUser(IUser user) {
-		this.initialUser = user;
+	protected void setUser(IUser user) {
+		getWizardModel().setUser(user);
 	}
 
 	@Override

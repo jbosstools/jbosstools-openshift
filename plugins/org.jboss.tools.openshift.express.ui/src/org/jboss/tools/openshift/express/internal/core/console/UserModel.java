@@ -31,6 +31,8 @@ import com.openshift.express.client.User;
 import com.openshift.express.client.configuration.OpenShiftConfiguration;
 
 public class UserModel {
+	private static final String USER_ID = OpenShiftUIActivator.PLUGIN_ID + " " + 
+			OpenShiftUIActivator.getDefault().getBundle().getVersion();
 	private static UserModel model;
 	public static UserModel getDefault() {
 		if( model == null )
@@ -65,8 +67,7 @@ public class UserModel {
 	 * @throws IOException
 	 */
 	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
-		IUser u = new User(username, password, OpenShiftUIActivator.PLUGIN_ID + " " + 
-				OpenShiftUIActivator.getDefault().getBundle().getVersion());
+		IUser u = new User(username, password, USER_ID);
 		return u;
 	}
 
@@ -205,7 +206,7 @@ public class UserModel {
 		}
 		return rhLogin;
 	}
-	
+
 	/*
 	 * Return true if the value is updated, false otherwise
 	 */

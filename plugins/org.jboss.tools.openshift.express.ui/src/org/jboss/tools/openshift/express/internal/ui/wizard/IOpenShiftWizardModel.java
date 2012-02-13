@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
@@ -24,6 +25,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -160,6 +162,8 @@ public interface IOpenShiftWizardModel {
 
 	public String setProjectName(String projectName);
 
+	public IProject setProject(IProject project);
+	
 	public boolean isGitSharedProject();
 
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter);
@@ -183,5 +187,9 @@ public interface IOpenShiftWizardModel {
 	public boolean isExistingApplication();
 
 	public void setUseExistingApplication(boolean useExistingApplication);
+	
+	public IUser getUser();
 
+	public IUser setUser(IUser user);
+	
 }

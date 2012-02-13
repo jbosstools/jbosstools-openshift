@@ -51,7 +51,7 @@ public class ServerAdapterFactory {
 
 	public void create(IProject project, IOpenShiftWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
 		createServerAdapter(project, wizardModel.getServerType(), wizardModel.getRuntime(), wizardModel.getMode(), 
-				wizardModel.getApplication(), OpenShiftUIActivator.getDefault().getUser(), wizardModel.getRemoteName(), monitor);
+				wizardModel.getApplication(), wizardModel.getUser(), wizardModel.getRemoteName(), monitor);
 	}
 
 	public void create(IProject project, IServerType serverType, IRuntime runtime, String mode,
