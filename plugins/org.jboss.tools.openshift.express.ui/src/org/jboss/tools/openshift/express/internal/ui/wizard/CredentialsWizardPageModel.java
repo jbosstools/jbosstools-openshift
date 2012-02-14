@@ -122,7 +122,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		try {
 			configuredUsername = new OpenShiftConfiguration().getRhlogin();
 		} catch (Exception e) {
-			// do nothing
+			Logger.error("Cound not retrieve rhlogin from express configuration");
 		}
 		return configuredUsername;
 	}
