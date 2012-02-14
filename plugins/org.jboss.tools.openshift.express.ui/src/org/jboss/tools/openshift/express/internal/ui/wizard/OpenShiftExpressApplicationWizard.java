@@ -58,8 +58,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private OpenShiftExpressApplicationWizardModel wizardModel;
 
 	/**
-	 * @see #getUser which calls UserModel#getRecentUser if no user present at
-	 *      construction time
+	 * @see #setUser called by CredentialsWizardPageModel#getValidityStatus
 	 */
 	public OpenShiftExpressApplicationWizard(String wizardTitle) {
 		this(null, null, null, wizardTitle);
@@ -156,7 +155,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	@Override
 	public boolean performFinish() {
-		boolean success = getWizardModel().isExistingApplication();
+		boolean success = getWizardModel().isUseExistingApplication();
 		if (!success) {
 			if (createApplication()) {
 				success = addRemoveCartridges(
@@ -187,8 +186,9 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	private boolean createApplication() {
 		try {
+			final String applicationName = wizardModel.getApplicationName();
 			IStatus status = WizardUtils.runInWizard(
-					new Job(NLS.bind("Creating application \"{0}\"...", getWizardModel().getApplicationName())) {
+					new Job(NLS.bind("Creating application \"{0}\"...", applicationName)) {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
@@ -197,8 +197,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 							} catch (Exception e) {
 								// TODO: refresh user
 								return OpenShiftUIActivator.createErrorStatus(
-										"Could not create application \"{0}\"", e, getWizardModel()
-												.getApplicationName());
+										"Could not create application \"{0}\"", e, applicationName);
 							}
 						}
 

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -25,6 +26,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
+import com.openshift.express.client.IEmbeddableCartridge;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -37,7 +39,7 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 	public static final String APPLICATION = "application";
 	public static final String APPLICATION_NAME = "applicationName";
 	public static final String APPLICATION_CARTRIDGE = "applicationCartridge";
-	public static final String USE_EXISTING_APPLICATION = "useExistingApplication";
+	public static final String USE_EXISTING_APPLICATION = "uswizardModel.getApplicationName()eExistingApplication";
 	public static final String REMOTE_NAME = "remoteName";
 	public static final String REPOSITORY_PATH = "repositoryPath";
 	public static final String PROJECT_NAME = "projectName";
@@ -62,7 +64,7 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 	 * @throws InterruptedException
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException, IOException;
@@ -131,13 +133,13 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 
 	public Object getProperty(String key);
 
-//	public void setUser(IUser user);
-//
-//	public IUser getUser();
-
 	public IApplication getApplication();
 
+	public String setApplicationName(String name);
+
 	public String getApplicationName();
+
+	public void setApplicationCartridge(ICartridge cartridge);
 
 	public ICartridge getApplicationCartridge();
 
@@ -162,7 +164,7 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 	public String setProjectName(String projectName);
 
 	public IProject setProject(IProject project);
-	
+
 	public boolean isGitSharedProject();
 
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter);
@@ -183,8 +185,15 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 
 	public void setServerType(IServerType serverType);
 
-	public boolean isExistingApplication();
+	public boolean isUseExistingApplication();
 
-	public void setUseExistingApplication(boolean useExistingApplication);
-	
+	public boolean setUseExistingApplication(boolean useExistingApplication);
+
+	public void addUserToModel();
+
+	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
+			Set<IEmbeddableCartridge> selectedEmbeddableCartridges);
+
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges();
+
 }

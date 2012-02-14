@@ -57,7 +57,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
 		setPublicationMode(PUBLISH_SOURCE);
-		setUseExistingApplication(false);
 	}
 
 	/**
@@ -190,18 +189,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return dataModel.get(key);
 	}
 
-	// @Override
-	// public void setUser(IUser user) {
-	// setProperty(USER, user);
-	// OpenShiftUIActivator.getDefault().setUser(user);
-	// }
-
-	// @Override
-	// public IUser getUser() {
-	// return (IUser) getProperty(USER);
-	// return OpenShiftUIActivator.getDefault().getUser();
-	// }
-
 	@Override
 	public IApplication getApplication() {
 		return (IApplication) getProperty(APPLICATION);
@@ -209,8 +196,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public void setApplication(IApplication application) {
-		setUseExistingApplication(application != null);
 		setProperty(APPLICATION, application);
+		setUseExistingApplication(application);
 		setApplicationCartridge(application);
 		setApplicationName(application);
 	}
@@ -333,13 +320,17 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public boolean isExistingApplication() {
+	public boolean isUseExistingApplication() {
 		return (Boolean) getProperty(USE_EXISTING_APPLICATION);
 	}
 
 	@Override
-	public void setUseExistingApplication(boolean useExistingApplication) {
-		setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
+	public boolean setUseExistingApplication(boolean useExistingApplication) {
+		return (Boolean) setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
+	}
+
+	protected void setUseExistingApplication(IApplication application) {
+		setUseExistingApplication(application != null);
 	}
 
 	private void waitForAccessible(IApplication application, IProgressMonitor monitor)
@@ -351,7 +342,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		}
 	}
 
-	IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor)
+	protected IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
 		IUser user = getUser();
 		if (user == null) {
@@ -366,9 +357,9 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 			OpenShiftException {
 		IApplication application = createApplication(getApplicationName(), getApplicationCartridge(), monitor);
 		setApplication(application);
-
 	}
 
+	@Override
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
 		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
@@ -380,12 +371,14 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return selectedEmbeddableCartridges;
 	}
 
+	@Override
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
 		dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 		return selectedEmbeddableCartridges;
 	}
 
+	@Override
 	public void setApplicationCartridge(ICartridge cartridge) {
 		dataModel.put(APPLICATION_CARTRIDGE, cartridge);
 	}
@@ -397,12 +390,14 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		dataModel.put(APPLICATION_CARTRIDGE, application.getCartridge());
 	}
 
+	@Override
 	public ICartridge getApplicationCartridge() {
 		return (ICartridge) dataModel.get(APPLICATION_CARTRIDGE);
 	}
 
-	public void setApplicationName(String applicationName) {
-		dataModel.put(APPLICATION_NAME, applicationName);
+	@Override
+	public String setApplicationName(String applicationName) {
+		return (String) dataModel.put(APPLICATION_NAME, applicationName);
 	}
 
 	protected void setApplicationName(IApplication application) {
@@ -417,15 +412,18 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return (String) dataModel.get(APPLICATION_NAME);
 	}
 
+	@Override
 	public IUser getUser() {
 		return (IUser) dataModel.get(USER);
 	}
 
+	@Override
 	public IUser setUser(IUser user) {
 		dataModel.put(USER, user);
 		return user;
 	}
 
+	@Override
 	public void addUserToModel() {
 		IUser user = getUser();
 		Assert.isNotNull(user);
