@@ -70,7 +70,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		SecurePasswordStore store = null;
 		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
 		if (key != null) {
-			 store = new SecurePasswordStore(key);
+			store = new SecurePasswordStore(key);
 		}
 		return store;
 	}
@@ -106,11 +106,11 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			Logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	private void erasePasswordStore() {
 		try {
 			if (store != null) {
-				store.remove();	
+				store.remove();
 			}
 		} catch (SecurePasswordStoreException e) {
 			Logger.error(e.getMessage(), e);
@@ -198,11 +198,13 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 				} else {
 					erasePasswordStore();
 				}
+			} else {
+				status = OpenShiftUIActivator.createErrorStatus(
+						NLS.bind("The credentials for user {0} are not valid", user.getRhlogin()));
+
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
-		} catch (OpenShiftException e) {
-			status = OpenShiftUIActivator.createErrorStatus("Your credentails are not valid.");
 		} catch (Exception e) {
 			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 					"Could not check user credentials: {0}.", e.getMessage()));

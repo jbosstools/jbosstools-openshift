@@ -44,6 +44,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
@@ -157,12 +158,11 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
-		if (!pageModel.areCredentialsValid()) {
-			event.doit = performAuthentication();
-			if (!event.doit) {
-				passwordText.setFocus();
-				passwordText.selectAll();
-			}
+		boolean validCredemtials = performAuthentication();
+		event.doit = validCredemtials;
+		if (!event.doit) {
+			passwordText.setFocus();
+			passwordText.selectAll();
 		}
 	}
 
@@ -183,8 +183,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			Logger.error("Failed to authenticate on OpenShift", e);
 			return false;
 		}
-		boolean valid = pageModel.areCredentialsValid();
-		return valid;
+		return pageModel.areCredentialsValid();
 	}
 
 	class CredentialsInputValidator extends MultiValidator {
@@ -205,7 +204,8 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			// something..
 			final String rhLoginValue = (String) rhLoginObservable.getValue();
 			final String passwordValue = (String) passwordObservable.getValue();
-			if (rhLoginValue != null && !rhLoginValue.isEmpty() && passwordValue != null && !passwordValue.isEmpty()) {
+			if (!StringUtils.isEmpty(rhLoginValue)
+					&& !StringUtils.isEmpty(passwordValue)) {
 				return ValidationStatus.ok();
 			}
 			return ValidationStatus.cancel("Please provide your OpenShift Express user credentials");
