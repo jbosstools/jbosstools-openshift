@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.egit.core.op.PushOperationResult;
@@ -29,16 +29,18 @@ import org.eclipse.team.internal.ui.wizards.ConfigureProjectWizard;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
+import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
+import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
+import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
-
-	private ArrayList<IProject> projectsLackingGitRepo = null;
 
 	public ExpressPublishMethod() {
 		// TODO Auto-generated constructor stub
@@ -54,11 +56,14 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	@Override
 	public int publishFinish(DeployableServerBehavior behaviour,
 			IProgressMonitor monitor) throws CoreException {
-		if( projectsLackingGitRepo != null ) {
-			IProject[] projects = (IProject[]) projectsLackingGitRepo.toArray(new IProject[projectsLackingGitRepo.size()]);
-			shareProjects(projects);
-			projectsLackingGitRepo = null;
+		IProject destProj = ExpressServerUtils.findProjectForServersApplication(behaviour.getServer());
+		if( destProj != null ) {
+			if( destProj.exists() ) {
+				refreshProject(destProj, submon(monitor, 100));
+				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
+			}
 		}
+
         return areAllPublished(behaviour) ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
     }
 	
@@ -85,24 +90,27 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		if( s == null || !s.equals("user"))
 			return -1;
 		
+		if( module.length > 1 )
+			return 0;
 		
-		int state = behaviour.getServer().getModulePublishState(module);
-		IProject p = module[module.length-1].getProject();
+		IProject destProj = ExpressServerUtils.findProjectForServersApplication(behaviour.getServer());
+		IPath dest = destProj.getLocation().append("deployments");
 		
-		if( deltaKind == ServerBehaviourDelegate.REMOVED)
-			return IServer.PUBLISH_STATE_NONE;  // go ahead and remove it
-		
-		Repository repository = EGitUtils.getRepository(p);
-		if (repository==null) {
-			if( projectsLackingGitRepo == null )
-				projectsLackingGitRepo = new ArrayList<IProject>();
-			projectsLackingGitRepo.add(p);
-			return IServer.PUBLISH_STATE_UNKNOWN;
+		if( module.length == 0 ) return IServer.PUBLISH_STATE_NONE;
+		int modulePublishState = behaviour.getServer().getModulePublishState(module);
+		int publishType = behaviour.getPublishType(kind, deltaKind, modulePublishState);
+
+		IModuleResourceDelta[] delta = new IModuleResourceDelta[]{};
+		if( deltaKind != ServerBehaviourDelegate.REMOVED)
+			delta = behaviour.getPublishedResourceDelta(module);
+
+		try {
+			LocalZippedPublisherUtil util = new LocalZippedPublisherUtil();
+			IStatus status = util.publishModule(behaviour.getServer(), dest.toString(), module, publishType, delta, monitor);
+		} catch( Exception e ) {
+			e.printStackTrace();
 		}
-		
-		commitAndPushProject(p, behaviour, monitor);
-		
-		return IServer.PUBLISH_STATE_NONE;
+		return 0;
 	}
 
 	protected PushOperationResult commitAndPushProject(IProject p,
@@ -205,10 +213,22 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		return null;
 	}
 
-	@Override
 	public String getPublishDefaultRootFolder(IServer server) {
-		// TODO Auto-generated method stub
-		return null;
+		IDeployableServer s = ServerConverter.getDeployableServer(server);
+		return s.getDeployFolder();
 	}
+	protected void refreshProject(final IProject project,IProgressMonitor monitor) throws CoreException {
+		// Already inside a workspace scheduling rule
+		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+	}
+
+
+    public static IProgressMonitor submon( final IProgressMonitor parent, final int ticks ) {
+    	return submon( parent, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL );
+    }
+    public static IProgressMonitor submon( final IProgressMonitor parent,
+            final int ticks, final int style ) {
+    	return ( parent == null ? new NullProgressMonitor() : new SubProgressMonitor( parent, ticks, style ) );
+    }
 
 }

@@ -23,16 +23,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
@@ -45,6 +49,7 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -62,6 +67,7 @@ public class ExpressDetailsComposite {
 	private ModifyListener nameModifyListener, remoteModifyListener, 
 							appModifyListener, deployProjectModifyListener;
 	private ModifyListener passModifyListener;
+	private Link importLink;
 	protected Text userText, remoteText;
 	protected Text passText;
 	protected Combo appNameCombo, deployProjectCombo;
@@ -154,6 +160,11 @@ public class ExpressDetailsComposite {
 		}
 		
 		if( showVerify ) {
+			importLink = new Link(composite, SWT.DEFAULT);
+			importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
+			importLink.setEnabled(false);
+			GridData gd = GridDataFactory.fillDefaults().span(2, 1).create();
+			importLink.setLayoutData(gd);
 			verifyButton = new Button(composite, SWT.PUSH);
 			verifyButton.setText("Verify...");
 		}
@@ -228,6 +239,19 @@ public class ExpressDetailsComposite {
 		} 
 
 		if( verifyButton != null ) {
+			importLink.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard();
+					wizard.setInitialUser(fuser);
+					wizard.setSelectedApplication(fapplication);
+					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+					dialog.create();
+					dialog.open();
+				}
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			});
+
 			verifyButton.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					verifyPressed();
@@ -258,6 +282,7 @@ public class ExpressDetailsComposite {
 	}
 	
 	private void postLongRunningValidate() {
+		importLink.setEnabled(true);
 		if( appListNames == null ) {
 			appListNames = new String[0];
 		}
@@ -266,6 +291,13 @@ public class ExpressDetailsComposite {
 			appNameCombo.setItems(appListNames);
 			if( index != -1 )
 				appNameCombo.select(index);
+		}
+		if( error == null ) {
+			IProject p = ExpressServerUtils.findProjectForApplication(fapplication);
+			if( p == null ) {
+				error = "Your workspace does not have a project corresponding to " + app +". Please import one.";
+				importLink.setEnabled(true);
+			}
 		}
 		callback.setErrorMessage(error);
 		verifyButton.setEnabled(true);
@@ -340,7 +372,6 @@ public class ExpressDetailsComposite {
 
 	
 	private void verifyApplicationBinaryMode(CredentialsWizardPageModel model) {
-		System.out.println(deployProject);
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
 		try {
 			fuser = OpenShiftUIActivator.getDefault().getUser();
@@ -382,11 +413,16 @@ public class ExpressDetailsComposite {
 				try {
 					ExpressDetailsComposite.this.fapplication = application;
 					ExpressDetailsComposite.this.fuser = user;
+					IProject p = ExpressServerUtils.findProjectForApplication(fapplication);
 					
 					// update the values 
 					IServerWorkingCopy wc = callback.getServer(); 
 					ExpressServerUtils.fillServerWithOpenShiftDetails(wc, application, fuser,
 							mode, remote);
+					wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
+					wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
+					wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY, p.getFolder("deployments").getLocation().toString());
+					wc.setAttribute(IDeployableServer.TEMP_DEPLOY_DIRECTORY, p.getFolder("deployments").getLocation().toString());
 				} catch(CoreException ce) {
 					// TODO FIX HANDLE
 				}

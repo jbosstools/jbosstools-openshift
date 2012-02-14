@@ -33,6 +33,7 @@ import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -343,18 +344,44 @@ public class ExpressServerUtils {
 		return null;
 	}
 
-	public static IProject findProjectForApplication(IApplication application)
-			throws OpenShiftException, CoreException {
-		String gitUri = application.getGitUri();
+	public static IProject findProjectForApplication(IApplication application) {
+		if( application ==null )
+			return null;
+		String gitUri = null;
+		try {
+			gitUri = application.getGitUri();
+		} catch(OpenShiftException ose) {
+			return null;
+		}
+		
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for( int i = 0; i < projects.length; i++ ) {
-			List<URIish> uris = EGitUtils.getRemoteURIs(projects[i]);
-			Iterator<URIish> it = uris.iterator();
-			while(it.hasNext()) {
-				String projURI = it.next().toPrivateString();
-				if( projURI.equals(gitUri))
-					return projects[i];
+			List<URIish> uris = null;
+			try {
+				uris = EGitUtils.getRemoteURIs(projects[i]);
+				Iterator<URIish> it = uris.iterator();
+				while(it.hasNext()) {
+					String projURI = it.next().toPrivateString();
+					if( projURI.equals(gitUri))
+						return projects[i];
+				}
+			} catch(CoreException ce) {
+				// Log? Not 100 required, just skip this project?
 			}
+		}
+		return null;
+	}
+
+	public static IProject findProjectForServersApplication(IServer server) {
+		try {
+			String user = ExpressServerUtils.getExpressUsername(server);
+			IUser user2 = UserModel.getDefault().findUser(user);
+			String appName = ExpressServerUtils.getExpressApplicationName(server);
+			IApplication app = user2.getApplicationByName(appName);
+			IProject destProj = ExpressServerUtils.findProjectForApplication(app);
+			return destProj;
+		} catch(OpenShiftException ose) {
+			//TODO log and throw core e
 		}
 		return null;
 	}

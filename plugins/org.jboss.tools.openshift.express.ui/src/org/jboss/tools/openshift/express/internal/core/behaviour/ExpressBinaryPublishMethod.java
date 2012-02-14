@@ -11,16 +11,12 @@
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
@@ -29,7 +25,6 @@ import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
 import org.jboss.ide.eclipse.as.core.publishers.PublishUtil;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
-import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 
 public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
@@ -42,7 +37,7 @@ public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
 		if( outProject != null ) {
 			final IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(outProject);
 			if( destProj.exists() ) {
-				refreshProject(destProj);
+				refreshProject(destProj,new NullProgressMonitor());
 				commitAndPushProject(destProj, behaviour, monitor);
 			}
 		}
@@ -50,11 +45,6 @@ public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
         return areAllPublished(behaviour) ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
 	}
 	
-	private void refreshProject(final IProject project) throws CoreException {
-		// Already inside a workspace scheduling rule
-		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-	}
-
 	@Override
 	public int publishModule(DeployableServerBehavior behaviour, int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)

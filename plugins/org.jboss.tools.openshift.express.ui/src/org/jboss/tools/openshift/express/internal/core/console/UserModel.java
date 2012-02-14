@@ -126,15 +126,7 @@ public class UserModel {
 	}
 	
 	public IUser findUser(String username) {
-		try {
-			for( int i = 0; i < allUsers.size(); i++ ) {
-				if( allUsers.get(i).getUUID().equals(username))
-					return allUsers.get(i);
-			}
-		} catch(OpenShiftException ose) {
-			
-		}
-		return null;
+		return allUsers.get(username);
 	}
 	
 	public IUser[] getUsers() {

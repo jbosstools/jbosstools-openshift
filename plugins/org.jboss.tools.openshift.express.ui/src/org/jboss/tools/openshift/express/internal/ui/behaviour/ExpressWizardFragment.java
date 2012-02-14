@@ -75,16 +75,15 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 		IUser user = composite.getUser();
 		UserModel.getDefault().addUser(user);
 		IApplication app = composite.getApplication();
-		try {
-			// Only clone and import if there's no project already in existence
-			IProject p = ExpressServerUtils.findProjectForApplication(app);
-			if( p == null ) {
-				// clone and import
-				
-				// If we had to clone and import, we also need to add the module ??
-			}
-		} catch(OpenShiftException ose ) {
+		
+		// Only clone and import if there's no project already in existence
+		IProject p = ExpressServerUtils.findProjectForApplication(app);
+		System.out.println(p);
+		if( p == null ) {
+			System.out.println(p);
+			// clone and import
 			
-		} 
+			// If we had to clone and import, we also need to add the module ??
+		}
 	}
 }

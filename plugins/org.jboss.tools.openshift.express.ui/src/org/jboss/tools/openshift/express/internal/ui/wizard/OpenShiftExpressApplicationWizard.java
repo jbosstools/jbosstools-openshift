@@ -104,6 +104,10 @@ public class OpenShiftExpressApplicationWizard extends
 		IWizardPage[] pages = getPages();
 		return initialUser == null ? pages[0] : pages[1];
 	}
+	
+	public void setInitialUser(IUser user) {
+		this.initialUser = user;
+	}
 
 	@Override
 	public boolean performFinish() {
