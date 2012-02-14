@@ -51,5 +51,13 @@ public class StringUtils {
 		return System.getProperty(LINE_SEPARATOR_KEY);
 	}
 
+	public static boolean isAlphaNumeric(String value) {
+		for (int i = 0; i < value.length(); ++i) {
+			if (!Character.isLetterOrDigit(value.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 }

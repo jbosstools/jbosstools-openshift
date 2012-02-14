@@ -16,12 +16,16 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -34,14 +38,47 @@ import org.eclipse.ui.menus.IMenuService;
 public class UIUtils {
 
 	public static void selectAllOnFocus(final Text text) {
-		text.addFocusListener(new FocusAdapter() {
+		final FocusListener onFocus = new FocusAdapter() {
 
 			@Override
 			public void focusGained(FocusEvent e) {
 				text.selectAll();
 			}
-		});
+		};
+		text.addFocusListener(onFocus);
+		text.addDisposeListener(new DisposeListener() {
 
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				text.removeFocusListener(onFocus);
+			}
+		});
+	}
+
+	/**
+	 * Ensures that the given text gets the focus if the given control is
+	 * selected.
+	 * 
+	 * @param control
+	 * @param text
+	 */
+	public static void focusOnSelection(final Control control, final Text text) {
+		final Listener onSelect = new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				text.selectAll();
+				text.setFocus();
+			}
+		};
+		control.addListener(SWT.Selection, onSelect);
+		control.addDisposeListener(new DisposeListener() {
+
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				control.removeListener(SWT.Selection, onSelect);
+			}
+		});
 	}
 
 	/**
