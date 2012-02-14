@@ -175,8 +175,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new ApplicationToSelectNameValidator(
 						useExistingAppBtnSelection, existingAppNameTextObservable, existingAppsObservable);
 		dbc.addValidationStatusProvider(existingAppValidator);
-		ControlDecorationSupport.create(existingAppValidator, SWT.LEFT | SWT.TOP);
-
+		ControlDecorationSupport.create(existingAppValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater(false));
 		return existingAppSelectionGroup;
 	}
 
@@ -269,21 +268,17 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.in(dbc);
 
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
-		final ApplicationToCreateInputValidator applicationInputValidator =
-				new ApplicationToCreateInputValidator(
-						useExistingAppBtnSelection, applicationNameTextObservable, selectedCartridgeComboObservable);
-		dbc.addValidationStatusProvider(applicationInputValidator);
-		//ControlDecorationSupport.create(applicationInputValidator, SWT.LEFT | SWT.TOP);
-		ControlDecorationSupport.create(applicationInputValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
+		final NewApplicationNameValidator newApplicationNameValidator =
+				new NewApplicationNameValidator(
+						useExistingAppBtnSelection, applicationNameTextObservable);
+		dbc.addValidationStatusProvider(newApplicationNameValidator);
+		ControlDecorationSupport.create(newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
+		final NewApplicationTypeValidator newApplicationTypeValidator =
+				new NewApplicationTypeValidator(
+						useExistingAppBtnSelection, selectedCartridgeComboObservable);
+		dbc.addValidationStatusProvider(newApplicationTypeValidator);
+		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
 
-		/*
-		 * final ApplicationToSelectNameValidator applicationNameValidator = new
-		 * ApplicationToSelectNameValidator(us applicationNameStatusObservable,
-		 * applicationNameTextObservable);
-		 * dbc.addValidationStatusProvider(applicationNameValidator);
-		 * ControlDecorationSupport.create(applicationNameValidator, SWT.LEFT |
-		 * SWT.TOP);
-		 */
 		// embeddable cartridges
 		Group cartridgesGroup = new Group(container, SWT.NONE);
 		cartridgesGroup.setText("Embeddable Cartridges");
@@ -720,7 +715,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			if (!useExistingApp) {
 				return ValidationStatus.ok();
 			}
-			if (existingApps != null) {
+			
+			if (existingApps != null && appName != null && !appName.isEmpty()) {
 				for (IApplication application : pageModel.getExistingApplications()) {
 					if (application.getName().equalsIgnoreCase(appName)) {
 						return ValidationStatus.ok();
@@ -743,18 +739,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	}
 
-	class ApplicationToCreateInputValidator extends MultiValidator {
+	class NewApplicationNameValidator extends MultiValidator {
 
 		private final ISWTObservableValue useExistingAppBtnbservable;
 		private final ISWTObservableValue applicationNameTextObservable;
-		private final ISWTObservableValue cartridgesComboObservable;
 
-		public ApplicationToCreateInputValidator(ISWTObservableValue useExistingAppBtnbservable,
-				ISWTObservableValue applicationNameTextObservable,
-				ISWTObservableValue cartridgesComboObservable) {
+		public NewApplicationNameValidator(ISWTObservableValue useExistingAppBtnbservable,
+				ISWTObservableValue applicationNameTextObservable) {
 			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
 			this.applicationNameTextObservable = applicationNameTextObservable;
-			this.cartridgesComboObservable = cartridgesComboObservable;
 		}
 
 		@Override
@@ -766,12 +759,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			if (applicationName.isEmpty()) {
 				return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID,
-						"Give a name and select a type for the application you want to create.");
+						"Select an alphanumerical name and a type for the application to create.");
 			}
-			
-			if (!applicationName.matches("\\S+")) {
-				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-						"The application name must not contain spaces.");
+			for (int i = 0; i < applicationName.length(); ++i) {
+				if (!Character.isLetterOrDigit(applicationName.charAt(i))) {
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+							"The application name must not contain spaces.");
+				}
 			}
 			for (IApplication application : pageModel.getExistingApplications()) {
 				if (application.getName().equalsIgnoreCase(applicationName)) {
@@ -786,6 +780,38 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
 			targets.add(applicationNameTextObservable);
+			return targets;
+		}
+	}
+	
+	class NewApplicationTypeValidator extends MultiValidator {
+
+		private final ISWTObservableValue useExistingAppBtnbservable;
+		private final ISWTObservableValue cartridgesComboObservable;
+
+		public NewApplicationTypeValidator(ISWTObservableValue useExistingAppBtnbservable,
+				ISWTObservableValue cartridgesComboObservable) {
+			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
+			this.cartridgesComboObservable = cartridgesComboObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
+			final String cartridge =  (String) cartridgesComboObservable.getValue();
+			if (useExistingApp) {
+				return ValidationStatus.ok();
+			}
+			if(cartridge == null || cartridge.isEmpty()) {
+				return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID,
+						"Select an alphanumerical name and a type for the application to create.");
+			}
+			return ValidationStatus.ok();
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
 			targets.add(cartridgesComboObservable);
 			return targets;
 		}

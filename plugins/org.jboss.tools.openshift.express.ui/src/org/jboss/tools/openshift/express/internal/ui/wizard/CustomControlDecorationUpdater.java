@@ -15,6 +15,23 @@ import org.eclipse.swt.graphics.Image;
  */
 public class CustomControlDecorationUpdater extends ControlDecorationUpdater {
 
+	private final boolean showRequiredDecorator;
+	
+	/**
+	 * Default constructor: provides a 'REQUIRED' decorator when the status is CANCEL
+	 */
+	public CustomControlDecorationUpdater() {
+		this(true);
+	}
+	
+	/**
+	 * Default constructor: provides a 'REQUIRED' decorator when the status is CANCEL
+	 */
+	public CustomControlDecorationUpdater(final boolean showRequiredDecorator) {
+		super();
+		this.showRequiredDecorator = showRequiredDecorator;
+	}
+	
 	/**
 	 * {@inheritDoc} Overrides the standard behaviour: for CANCEL status, items are decorated with the REQUIRED
 	 * decorator, not the ERROR one.
@@ -36,7 +53,7 @@ public class CustomControlDecorationUpdater extends ControlDecorationUpdater {
 			fieldDecorationID = FieldDecorationRegistry.DEC_ERROR;
 			break;
 		case IStatus.CANCEL:
-			fieldDecorationID = FieldDecorationRegistry.DEC_REQUIRED;
+			fieldDecorationID = showRequiredDecorator ? FieldDecorationRegistry.DEC_REQUIRED : null;
 			break;
 		}
 
