@@ -48,7 +48,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
 		Text namespaceText = new Text(domainGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
-		DataBindingUtils.bindMandatoryTextField(namespaceText, "Domain", ApplicationWizardPageModel.PROPERTY_NAMESPACE,
+		DataBindingUtils.bindMandatoryTextField(namespaceText, "Domain", EditDomainWizardPageModel.PROPERTY_NAMESPACE,
 				model, dbc);
 	}
 

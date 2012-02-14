@@ -13,9 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.debug.internal.ui.importexport.launchconfigurations.WizardMessages;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
