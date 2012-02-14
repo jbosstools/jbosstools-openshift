@@ -27,10 +27,8 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
 
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
-	private IWizardHandle handle;
 	private ExpressDetailsComposite composite;
 	private NewServerWizardBehaviourCallback  callback;
 	
@@ -47,7 +45,6 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		this.handle = handle;
 		handle.setTitle("Create an Openshift Server");
 		handle.setDescription("Create an Openshift Server adapter by typing in your credentials and choosing an application.");
 		callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
