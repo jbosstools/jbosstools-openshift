@@ -86,28 +86,29 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
 		UIUtils.selectAllOnFocus(rhLoginText);
-		final IObservableValue rhLoginObservable = BeanProperties.value(CredentialsWizardPageModel.PROPERTY_RHLOGIN)
-				.observe(pageModel);
+		final IObservableValue rhLoginObservable =
+				BeanProperties.value(CredentialsWizardPageModel.PROPERTY_RHLOGIN).observe(pageModel);
 		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(rhLoginText), rhLoginObservable);
 
 		Label passwordLabel = new Label(container, SWT.NONE);
 		passwordLabel.setText("&Password");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
 		passwordText = new Text(container, SWT.BORDER | SWT.PASSWORD);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(passwordText);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(passwordText);
 		UIUtils.selectAllOnFocus(passwordText);
-		final IObservableValue passwordModelObservable = BeanProperties.value(
-				CredentialsWizardPageModel.PROPERTY_PASSWORD)
-				.observe(pageModel);
+		final IObservableValue passwordModelObservable =
+				BeanProperties.value(CredentialsWizardPageModel.PROPERTY_PASSWORD).observe(pageModel);
 		final ISWTObservableValue passwordTextObservable = WidgetProperties.text(SWT.Modify).observe(passwordText);
 		dbc.bindValue(passwordTextObservable, passwordModelObservable);
 
-		IObservableValue credentialsStatusObservable = BeanProperties.value(
-				CredentialsWizardPageModel.PROPERTY_CREDENTIALS_STATUS).observe(pageModel);
-		dbc.addValidationStatusProvider(new CredentialsInputValidator(rhLoginObservable,
-				passwordModelObservable));
-		final CredentialsStatusValidator credentialsStatusValidator = new CredentialsStatusValidator(
-				credentialsStatusObservable, passwordTextObservable);
+		IObservableValue credentialsStatusObservable =
+				BeanProperties.value(CredentialsWizardPageModel.PROPERTY_CREDENTIALS_STATUS).observe(pageModel);
+		dbc.addValidationStatusProvider(
+				new CredentialsInputValidator(rhLoginObservable, passwordModelObservable));
+		final CredentialsStatusValidator credentialsStatusValidator =
+				new CredentialsStatusValidator(credentialsStatusObservable, passwordTextObservable);
 		dbc.addValidationStatusProvider(credentialsStatusValidator);
 		ControlDecorationSupport.create(credentialsStatusValidator, SWT.LEFT | SWT.TOP);
 
@@ -115,12 +116,12 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 										// the text fields
 		Button rememberPasswordCheckBox = new Button(container, SWT.CHECK);
 		rememberPasswordCheckBox.setText("Save password (could trigger secure storage login)");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberPasswordCheckBox);
-		final IObservableValue rememberPasswordModelObservable = BeanProperties.value(
-				CredentialsWizardPageModel.PROPERTY_REMEMBER_PASSWORD)
-				.observe(pageModel);
-		final ISWTObservableValue rememberPasswordCheckBoxObservable = WidgetProperties.selection().observe(
-				rememberPasswordCheckBox);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberPasswordCheckBox);
+		final IObservableValue rememberPasswordModelObservable =
+				BeanProperties.value(CredentialsWizardPageModel.PROPERTY_REMEMBER_PASSWORD).observe(pageModel);
+		final ISWTObservableValue rememberPasswordCheckBoxObservable =
+				WidgetProperties.selection().observe(rememberPasswordCheckBox);
 		dbc.bindValue(rememberPasswordCheckBoxObservable, rememberPasswordModelObservable);
 	}
 
