@@ -57,6 +57,15 @@ public class OpenShiftExpressApplicationWizard extends
 	 * @see #getUser which calls UserModel#getRecentUser if no user present at
 	 *      construction time
 	 */
+	public OpenShiftExpressApplicationWizard() {
+		this(null, null, null, null);
+	}
+
+	
+	/**
+	 * @see #getUser which calls UserModel#getRecentUser if no user present at
+	 *      construction time
+	 */
 	public OpenShiftExpressApplicationWizard(String wizardTitle) {
 		this(null, null, null, wizardTitle);
 	}
