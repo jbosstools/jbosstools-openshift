@@ -23,7 +23,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreEx
 
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
-import com.openshift.express.client.OpenShiftException;
 import com.openshift.express.client.configuration.OpenShiftConfiguration;
 
 /**

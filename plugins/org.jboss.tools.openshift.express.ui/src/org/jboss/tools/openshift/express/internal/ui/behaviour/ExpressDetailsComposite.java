@@ -49,6 +49,7 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
 import com.openshift.express.client.IApplication;
@@ -241,7 +242,7 @@ public class ExpressDetailsComposite {
 		if( verifyButton != null ) {
 			importLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard("Import");
+					OpenShiftExpressApplicationWizard wizard = new ImportOpenShiftExpressApplicationWizard();
 					wizard.setInitialUser(fuser);
 					wizard.setSelectedApplication(fapplication);
 					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);

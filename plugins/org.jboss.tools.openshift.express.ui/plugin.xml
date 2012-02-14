@@ -14,7 +14,7 @@
       </category>
       <wizard
             category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.NewOpenShiftExpressApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
             name="OpenShift Express Application">
@@ -28,7 +28,7 @@
       </category>
       <wizard
             category="org.jboss.tools.openshift.express.ui.wizard.importCategory"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
             name="Existing OpenShift Express Application">

@@ -5,6 +5,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.wizard.NewOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
 import com.openshift.express.client.IUser;
@@ -29,7 +30,7 @@ public class CreateApplicationAction extends AbstractAction  {
 			Object sel = ((ITreeSelection)selection).getFirstElement();
 			if( sel instanceof IUser) {
 				IUser user = (IUser) sel;
-				OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user, "New OpenShift Application");
+				OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(user);
 				new WizardDialog(new Shell(), wizard).open();
 			}
 		}

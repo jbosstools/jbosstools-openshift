@@ -25,8 +25,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
@@ -48,20 +51,12 @@ import com.openshift.express.client.OpenShiftException;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-public class OpenShiftExpressApplicationWizard extends
-		AbstractOpenShiftApplicationWizard<OpenShiftExpressApplicationWizardModel> implements IImportWizard, INewWizard {
+public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
 	private IUser initialUser;
 
-	/**
-	 * @see #getUser which calls UserModel#getRecentUser if no user present at
-	 *      construction time
-	 */
-	public OpenShiftExpressApplicationWizard() {
-		this(null, null, null, null);
-	}
+	private OpenShiftExpressApplicationWizardModel wizardModel;
 
-	
 	/**
 	 * @see #getUser which calls UserModel#getRecentUser if no user present at
 	 *      construction time
@@ -70,16 +65,57 @@ public class OpenShiftExpressApplicationWizard extends
 		this(null, null, null, wizardTitle);
 	}
 
-	public OpenShiftExpressApplicationWizard(IUser user, String wizardTitle) {
-		this(user, null, null, wizardTitle);
-	}
-
 	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application, String wizardTitle) {
 		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application));
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
 	}
 
+	void setWizardModel(OpenShiftExpressApplicationWizardModel wizardModel) {
+		this.wizardModel = wizardModel;
+	}
+	
+	OpenShiftExpressApplicationWizardModel getWizardModel() {
+		return wizardModel;
+	}
+
+	protected boolean isTransportException(InvocationTargetException e) {
+		return e.getTargetException() instanceof JGitInternalException
+				&& e.getTargetException().getCause() instanceof TransportException;
+	}
+
+	protected TransportException getTransportException(InvocationTargetException e) {
+		if (isTransportException(e)) {
+			return (TransportException) ((JGitInternalException) e.getTargetException()).getCause();
+		}
+		return null;
+	}
+
+	protected void openError(final String title, final String message) {
+		getShell().getDisplay().syncExec(new Runnable() {
+	
+			@Override
+			public void run() {
+				MessageDialog.openError(getShell(), title, message);
+			}
+		});
+	}
+
+	protected boolean askForConfirmation(final String message, final String applicationName) {
+		final boolean[] confirmed = new boolean[1];
+		getShell().getDisplay().syncExec(new Runnable() {
+	
+			@Override
+			public void run() {
+				confirmed[0] = MessageDialog.openConfirm(
+						getShell(),
+						NLS.bind("Import OpenShift Application ", applicationName),
+						message);
+			}
+		});
+		return confirmed[0];
+	}
+	
 	public void setSelectedApplication(IApplication application) {
 		getWizardModel().setApplication(application);
 	}
