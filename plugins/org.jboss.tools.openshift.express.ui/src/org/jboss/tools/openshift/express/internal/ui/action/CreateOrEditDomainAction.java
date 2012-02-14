@@ -16,7 +16,7 @@ import com.openshift.express.client.OpenShiftException;
 public class CreateOrEditDomainAction extends AbstractAction {
 
 	public CreateOrEditDomainAction() {
-		super(OpenShiftExpressUIMessages.EDIT_DOMAIN_ACTION);
+		super(OpenShiftExpressUIMessages.CREATE_OR_EDIT_DOMAIN_ACTION);
 		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("edit.gif"));
 	}
 

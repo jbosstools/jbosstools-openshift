@@ -18,7 +18,7 @@ public class OpenShiftExpressUIMessages extends NLS {
 
 	public static String TAIL_SERVER_LOG_ACTION;
 
-	public static String EDIT_DOMAIN_ACTION;
+	public static String CREATE_OR_EDIT_DOMAIN_ACTION;
 	
 	public static String SHOW_IN_ACTION_GROUP;
 	
