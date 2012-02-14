@@ -27,7 +27,6 @@ import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPageModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreateNewApplicationWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizardModel;
 
 import com.openshift.express.client.IApplication;
@@ -37,7 +36,7 @@ import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>
- * @Deprecated: see the {@link CreateNewApplicationWizardModel} and the {@link OpenShiftExpressApplicationWizardModel}
+ * @Deprecated: see {@link OpenShiftExpressApplicationWizardModel}
  */
 @Deprecated
 public class ImportProjectWizardModel extends ObservableUIPojo {

@@ -36,14 +36,13 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AdapterWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreateNewApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
 import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
- * @Deprecated: see the {@link CreateNewApplicationWizard} and the {@link OpenShiftExpressApplicationWizard}
+ * @Deprecated: see {@link OpenShiftExpressApplicationWizard}
  */
 @Deprecated
 public class ImportProjectWizard extends Wizard implements INewWizard {

@@ -57,16 +57,18 @@ public class OpenShiftExpressApplicationWizard extends
 	 * @see #getUser which calls UserModel#getRecentUser if no user present at
 	 *      construction time
 	 */
-	public OpenShiftExpressApplicationWizard() {
-		this(null, null, null);
+	public OpenShiftExpressApplicationWizard(String wizardTitle) {
+		this(null, null, null, wizardTitle);
 	}
 
-	public OpenShiftExpressApplicationWizard(IUser user) {
-		this(user, null, null);
+	public OpenShiftExpressApplicationWizard(IUser user, String wizardTitle) {
+		this(user, null, null, wizardTitle);
 	}
 
-	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application) {
+	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application, String wizardTitle) {
 		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application));
+		setWindowTitle(wizardTitle);
+		setNeedsProgressMonitor(true);
 	}
 
 	public void setSelectedApplication(IApplication application) {
@@ -79,8 +81,6 @@ public class OpenShiftExpressApplicationWizard extends
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle("OpenShift Application Wizard");
-		setNeedsProgressMonitor(true);
 		Object o = selection.getFirstElement();
 		if (o instanceof IUser) {
 			setUser((IUser) o);

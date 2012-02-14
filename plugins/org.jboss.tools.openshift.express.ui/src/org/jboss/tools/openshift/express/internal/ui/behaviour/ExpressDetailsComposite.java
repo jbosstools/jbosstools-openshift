@@ -241,7 +241,7 @@ public class ExpressDetailsComposite {
 		if( verifyButton != null ) {
 			importLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard();
+					OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard("Import");
 					wizard.setInitialUser(fuser);
 					wizard.setSelectedApplication(fapplication);
 					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);

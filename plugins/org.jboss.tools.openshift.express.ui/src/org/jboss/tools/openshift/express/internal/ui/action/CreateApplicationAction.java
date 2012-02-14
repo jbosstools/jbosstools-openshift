@@ -29,7 +29,7 @@ public class CreateApplicationAction extends AbstractAction  {
 			Object sel = ((ITreeSelection)selection).getFirstElement();
 			if( sel instanceof IUser) {
 				IUser user = (IUser) sel;
-				OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user);
+				OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user, "New OpenShift Application");
 				new WizardDialog(new Shell(), wizard).open();
 			}
 		}

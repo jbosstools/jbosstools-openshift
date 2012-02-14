@@ -41,7 +41,7 @@ public class ImportApplicationAction extends AbstractAction {
 			final IApplication application = (IApplication) treeSelection.getFirstElement();
 			final IUser user = getUser(treeSelection.getPaths());
 			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(application.getName());
-			OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user, project, application);
+			OpenShiftExpressApplicationWizard wizard = new OpenShiftExpressApplicationWizard(user, project, application, "Import");
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 			dialog.create();
 			dialog.open();

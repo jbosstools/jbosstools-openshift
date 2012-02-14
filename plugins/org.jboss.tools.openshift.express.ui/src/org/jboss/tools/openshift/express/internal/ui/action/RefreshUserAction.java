@@ -5,7 +5,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
-public class RefreshDomainAction implements IViewActionDelegate {
+public class RefreshUserAction implements IViewActionDelegate {
 
 	@Override
 	public void run(IAction action) {

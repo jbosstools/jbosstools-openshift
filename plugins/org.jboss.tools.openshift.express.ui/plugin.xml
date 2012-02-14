@@ -484,14 +484,14 @@
         <viewContribution
               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleViewContribution"
               targetID="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
-           <!--action
-                 class="org.jboss.tools.openshift.express.internal.ui.viewer.RefreshDomainAction"
+           <action
+                 class="org.jboss.tools.openshift.express.internal.ui.action.RefreshUserActionDelegate"
                  icon="icons/refresh.gif"
                  id="org.jboss.tools.openshift.express.ui.viewActions.refreshAction"
                  label="Refresh"
                  style="push"
                  toolbarPath="openshift">
-           </action-->
+           </action>
            <action
                  class="org.jboss.tools.openshift.express.internal.ui.action.OpenConnectionDialogActionDelegate"
                  icon="icons/resource_obj.gif"
