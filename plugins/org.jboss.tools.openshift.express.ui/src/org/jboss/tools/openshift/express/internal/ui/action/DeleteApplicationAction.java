@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
@@ -32,7 +33,7 @@ public class DeleteApplicationAction extends AbstractAction {
 	 */
 	@Override
 	public void run() {
-		if (selection != null && selection instanceof ITreeSelection && ((ITreeSelection)selection).getFirstElement() instanceof IApplication) {
+		if (isApplication(selection)) {
 			final IApplication application = (IApplication) ((ITreeSelection)selection).getFirstElement();
 			final String appName = application.getName();
 			final boolean confirm = MessageDialog
@@ -58,6 +59,12 @@ public class DeleteApplicationAction extends AbstractAction {
 				job.schedule(); // start as soon as possible
 			}
 		}
+	}
+
+	private boolean isApplication(ISelection selection) {
+		return selection != null 
+				&& selection instanceof ITreeSelection 
+				&& ((ITreeSelection)selection).getFirstElement() instanceof IApplication;
 	}
 
 }
