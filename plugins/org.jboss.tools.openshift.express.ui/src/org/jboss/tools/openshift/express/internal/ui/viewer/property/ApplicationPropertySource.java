@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
@@ -33,17 +33,17 @@ public class ApplicationPropertySource implements IPropertySource {
 
 	@Override
 	public Object getEditableValue() {
-		return this;
+		return null;
 	}
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { new TextPropertyDescriptor("3.URL", "Public URL"),
-				new TextPropertyDescriptor("1.Name", "Name"), 
-				new TextPropertyDescriptor("6.UUID", "UUID"), 
-				new TextPropertyDescriptor("5.Git URI", "Git URI"), 
-				new TextPropertyDescriptor("2.Type", "Type"), 
-				new TextPropertyDescriptor("4.Created on", "Created on") };
+		return new IPropertyDescriptor[] { new PropertyDescriptor("3.URL", "Public URL"),
+				new PropertyDescriptor("1.Name", "Name"), 
+				new PropertyDescriptor("6.UUID", "UUID"), 
+				new PropertyDescriptor("5.Git URI", "Git URI"), 
+				new PropertyDescriptor("2.Type", "Type"), 
+				new PropertyDescriptor("4.Created on", "Created on") };
 	}
 
 	@Override

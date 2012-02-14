@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IEmbeddableCartridge;
@@ -36,8 +36,8 @@ public class EmbeddableCartridgePropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { new TextPropertyDescriptor("Name", "Name"),
-				new TextPropertyDescriptor("URL", "URL") };
+		return new IPropertyDescriptor[] { new PropertyDescriptor("Name", "Name"),
+				new PropertyDescriptor("URL", "URL") };
 	}
 
 	@Override

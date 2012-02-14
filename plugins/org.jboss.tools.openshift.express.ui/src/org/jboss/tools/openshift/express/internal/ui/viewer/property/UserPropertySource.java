@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IUser;
@@ -36,8 +36,8 @@ public class UserPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { new TextPropertyDescriptor("Username", "Username"),
-				new TextPropertyDescriptor("Domain", "Domain") };
+		return new IPropertyDescriptor[] { new PropertyDescriptor("Username", "Username"),
+				new PropertyDescriptor("Domain", "Domain") };
 	}
 
 	@Override
