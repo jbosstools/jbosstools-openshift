@@ -46,15 +46,14 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private IStatus credentialsStatus;
 	private StringPreferenceValue rhLoginPreferenceValue;
 	private final String libraServer;
-
 	private SecurePasswordStore store;
 
 	public CredentialsWizardPageModel() {
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.libraServer = initLibraServer();
 		this.rhLogin = initRhLogin();
-		initSecureStore(libraServer, rhLogin);
-		initPassword();
+		this.store = initSecureStore(libraServer, rhLogin);
+		this.password = initPassword();
 		resetCredentialsStatus();
 	}
 
@@ -67,11 +66,13 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return null;
 	}
 
-	private void initSecureStore(final String platform, final String username) {
+	private SecurePasswordStore initSecureStore(final String platform, final String username) {
+		SecurePasswordStore store = null;
 		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
 		if (key != null) {
-			this.store = new SecurePasswordStore(key);
+			 store = new SecurePasswordStore(key);
 		}
+		return store;
 	}
 
 	protected String initRhLogin() {
@@ -83,15 +84,17 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return rhLogin;
 	}
 
-	protected void initPassword() {
+	protected String initPassword() {
+		String password = null;
 		if (libraServer != null && rhLogin != null && !rhLogin.isEmpty() && store != null) {
 			try {
-				this.password = store.getPassword();
+				password = store.getPassword();
 				setRememberPassword(this.password != null && !this.password.isEmpty());
 			} catch (SecurePasswordStoreException e) {
 				Logger.error("Failed to retrieve OpenShift user's password from Secured Store", e);
 			}
 		}
+		return password;
 	}
 
 	private void storePassword(String password) {
