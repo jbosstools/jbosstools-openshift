@@ -61,7 +61,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	private Text passwordText = null;
 
 	public CredentialsWizardPage(IWizard wizard, IUserAwareModel wizardModel) {
-		super("Server connection", "Please provide your OpenShift Express credentials.", "Server Connection",
+		super("OpenShift Connection", "Please provide your OpenShift Express credentials.", "Server Connection",
 				wizard);
 		this.pageModel = new CredentialsWizardPageModel(wizardModel);
 	}

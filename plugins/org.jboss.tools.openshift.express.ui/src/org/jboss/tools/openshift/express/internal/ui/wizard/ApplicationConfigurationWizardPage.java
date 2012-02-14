@@ -25,6 +25,8 @@ import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -767,11 +769,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 							"The application name must not contain spaces.");
 				}
 			}
-			for (IApplication application : pageModel.getExistingApplications()) {
-				if (application.getName().equalsIgnoreCase(applicationName)) {
-					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-							"An application with the same name already exists on OpenShift.");
-				}
+			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
+			if(project.exists()) {
+				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+						"A project with the same name already exists in the workspace.");
 			}
 			return ValidationStatus.ok();
 		}

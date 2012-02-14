@@ -31,7 +31,7 @@ public class RemoveConnectionActionProvider extends AbstractActionProvider {
 	public static class DeleteConnectionAction extends AbstractAction {
 
 		public DeleteConnectionAction() {
-			super("Delete Connection");
+			super("Disconnect");
 		}
 		
 		@Override

@@ -59,7 +59,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	private Text existingProjectNameText = null;
 
 	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftExpressWizardModel wizardModel) {
-		super("Setup Project",
+		super("Setup Project for OpenShift application '" + wizardModel.getApplicationName() + "'",
 				"Configure your project and server adapter settings, then click 'next' or 'finish'.",
 				"Project Configuration", wizard);
 		this.pageModel = new ProjectAndServerAdapterSettingsWizardPageModel(wizardModel);
@@ -96,7 +96,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 		// existing project
 		Label existingProjectLabel = new Label(projectGroup, SWT.NONE);
-		existingProjectLabel.setText("Use the existing project");
+		existingProjectLabel.setText("Use existing project:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(false, false)
 		.indent(10, 0).applyTo(existingProjectLabel);
 
@@ -137,7 +137,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		adapter.setProposals(getOpenProjectsInWorkspace());
 
 		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
-		browseProjectsButton.setText("Browse");
+		browseProjectsButton.setText("Browse...");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
 				.applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects());
@@ -198,7 +198,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		GridLayoutFactory.fillDefaults().numColumns(3).spacing(12, 8).applyTo(c);
 
 		final Button serverAdapterCheckbox = new Button(c, SWT.CHECK);
-		serverAdapterCheckbox.setText("Create a new Server Adapter");
+		serverAdapterCheckbox.setText("Create and setup a server for easy publishing");
 		serverAdapterCheckbox
 				.setToolTipText("This Server Adapter will let you publish your local changes onto OpenShift, right from your Eclipse workbench.");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
