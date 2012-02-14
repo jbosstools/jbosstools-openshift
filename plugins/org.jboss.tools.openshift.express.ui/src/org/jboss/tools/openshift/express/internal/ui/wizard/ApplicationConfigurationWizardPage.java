@@ -160,7 +160,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		createContentAssist(existingAppNameText);
 
 		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
-		browseAppsButton.setText("Browse");
+		browseAppsButton.setText("Browse...");
 		browseAppsButton.addSelectionListener(onBrowseApps());
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
