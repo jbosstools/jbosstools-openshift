@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
 
 /**
@@ -18,7 +19,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPag
  */
 public class ConnectToOpenShiftWizard extends Wizard {
 
-	private final CredentialsWizardPage page = new CredentialsWizardPage(this);
+	private final CredentialsWizardPage page = new CredentialsWizardPage(this, new ConnectToOpenShiftWizardModel());
 	
 	public ConnectToOpenShiftWizard() {
 		setNeedsProgressMonitor(true);
@@ -32,12 +33,8 @@ public class ConnectToOpenShiftWizard extends Wizard {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#addPages()
-	 */
 	@Override
 	public void addPages() {
 		addPage(page);
 	}
-
 }

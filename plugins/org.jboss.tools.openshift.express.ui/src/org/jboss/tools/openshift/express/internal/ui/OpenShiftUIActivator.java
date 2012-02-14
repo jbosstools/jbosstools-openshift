@@ -99,29 +99,6 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 
 	
 	/**
-	 * Create a new user and add it to the model
-	 * @param username
-	 * @param password
-	 * @return
-	 * @throws OpenShiftException
-	 * @throws IOException
-	 */
-	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
-		IUser u = UserModel.getDefault().createUser(username, password);
-		UserModel.getDefault().addUser(u);
-		return u;
-	}
-	
-	/**
-	 * Get the most recently created or used user
-	 * 
-	 * @return the user
-	 */
-	public final IUser getUser() {
-		return UserModel.getDefault().getRecentUser();
-	}
-	
-	/**
 	 * Creates an image by loading it from a file in the plugin's images
 	 * directory.
 	 * 

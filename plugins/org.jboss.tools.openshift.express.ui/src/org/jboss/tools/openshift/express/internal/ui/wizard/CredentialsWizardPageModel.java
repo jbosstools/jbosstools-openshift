@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
@@ -47,7 +48,10 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private final String libraServer;
 	private SecurePasswordStore store;
 
-	public CredentialsWizardPageModel() {
+	private IUserAwareModel wizardModel;
+	
+	public CredentialsWizardPageModel(IUserAwareModel wizardModel) {
+		this.wizardModel = wizardModel;
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.libraServer = initLibraServer();
 		this.rhLogin = initRhLogin();
@@ -182,16 +186,25 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	public boolean areCredentialsValidated() {
-		return credentialsStatus != null;// && credentialsValidity.isOK();
+		return credentialsStatus != null;
 	}
 
 	public IStatus validateCredentials() {
+		IStatus status = getValidityStatus(getRhLogin(), getPassword());
+		setCredentialsStatus(status);
+		return status;
+	}
+
+	protected void setUser(IUser user) {
+		wizardModel.setUser(user);
+	}
+	
+	private IStatus getValidityStatus(String rhLogin, String password) {
 		IStatus status = Status.OK_STATUS;
 		try {
-			// reset without notifying
-			// this.credentialsValidity = null;
-			IUser user = OpenShiftUIActivator.getDefault().createUser(getRhLogin(), getPassword());
+			IUser user = UserModel.getDefault().createUser(getRhLogin(), getPassword());
 			if (user.isValid()) {
+				setUser(user);
 				if (rememberPassword) {
 					storePassword(password);
 				} else {
@@ -208,8 +221,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 					"Could not check user credentials: {0}.", e.getMessage()));
 		}
-
-		setCredentialsStatus(status);
 		return status;
 	}
 

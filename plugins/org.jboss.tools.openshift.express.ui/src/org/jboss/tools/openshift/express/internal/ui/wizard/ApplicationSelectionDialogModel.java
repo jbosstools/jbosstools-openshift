@@ -31,9 +31,9 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 
 	private IApplication selectedApplication;
 
-	private IOpenShiftWizardModel wizardModel;
+	private IOpenShiftExpressWizardModel wizardModel;
 
-	public ApplicationSelectionDialogModel(IOpenShiftWizardModel wizardModel) {
+	public ApplicationSelectionDialogModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		this.selectedApplication = wizardModel.getApplication();
 	}

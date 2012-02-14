@@ -38,6 +38,7 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -138,7 +139,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	@Override
 	public void addPages() {
-		addPage(new CredentialsWizardPage(this));
+		addPage(new CredentialsWizardPage(this, getWizardModel()));
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
@@ -166,6 +167,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		if (success) {
 			success = importProject();
 		}
+
+		wizardModel.addToUserModel(getWizardModel().getUser());
 		return success;
 	}
 

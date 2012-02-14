@@ -60,10 +60,10 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	private Text rhLoginText = null;
 	private Text passwordText = null;
 
-	public CredentialsWizardPage(IWizard wizard) {
+	public CredentialsWizardPage(IWizard wizard, IUserAwareModel wizardModel) {
 		super("Server connection", "Please provide your OpenShift Express credentials.", "Server Connection",
 				wizard);
-		this.pageModel = new CredentialsWizardPageModel();
+		this.pageModel = new CredentialsWizardPageModel(wizardModel);
 	}
 
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
@@ -235,12 +235,6 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			return ValidationStatus.ok();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.core.databinding.validation.MultiValidator#getTargets()
-		 */
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();

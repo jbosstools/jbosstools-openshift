@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
-import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
+import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
+import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -59,7 +59,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY = "customRemoteNameValidity";
 
-	private IOpenShiftWizardModel wizardModel;
+	private IOpenShiftExpressWizardModel wizardModel;
 	private boolean loading;
 
 	private boolean useDefaultRepoPath = true;
@@ -70,7 +70,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	private boolean useDefaultRemoteName = true;
 
-	public GitCloningSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
+	public GitCloningSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setRepositoryPath(getDefaultRepositoryPath());
 	}

@@ -46,9 +46,9 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftWizardModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
@@ -132,7 +132,7 @@ public class ExpressDetailsComposite {
 		userLabel.setText("Username: ");
 		passLabel.setText("Password: ");
 		remoteLabel.setText("Remote: ");
-		remoteText.setText(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+		remoteText.setText(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		
 		String n = ExpressServerUtils.getExpressUsername(server);
 		String[] appNames = null;
@@ -264,7 +264,7 @@ public class ExpressDetailsComposite {
 	}
 	
 	private void verifyPressed() {
-		final CredentialsWizardPageModel model = new CredentialsWizardPageModel();
+		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(new ConnectToOpenShiftWizardModel());
 		this.fapplication = null;
 		this.fuser = null;
 		this.appListNames = null;
@@ -375,7 +375,7 @@ public class ExpressDetailsComposite {
 	private void verifyApplicationBinaryMode(CredentialsWizardPageModel model) {
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
 		try {
-			fuser = OpenShiftUIActivator.getDefault().getUser();
+			fuser = UserModel.getDefault().getRecentUser();
 			final List<IApplication> allApps = fuser.getApplications();
 			fapplication = ExpressServerUtils.findApplicationForProject(p, allApps);
 			
@@ -401,7 +401,7 @@ public class ExpressDetailsComposite {
 		// now check the app name and cartridge
 		String[] appNames = new String[]{};
 		try {
-			IUser user = OpenShiftUIActivator.getDefault().getUser();
+			IUser user = UserModel.getDefault().getRecentUser();
 			final List<IApplication> allApps = user.getApplications();
 			appNames = getAppNamesAsStrings(allApps);
 			int index = Arrays.asList(appNames).indexOf(app);

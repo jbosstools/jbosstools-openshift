@@ -22,7 +22,6 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
@@ -36,17 +35,17 @@ import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.express.client.OpenShiftException;
 
-public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
+public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
 	private static final int APP_CREATION_TIMEOUT = 60;
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
-	public OpenShiftExpressApplicationWizardModel() {
-		this(OpenShiftUIActivator.getDefault().getUser(), null, null);
+	public OpenShiftExpressApplicationWizardModel(IUser user) {
+		this(user, null, null);
 	}
-	
+
 	public OpenShiftExpressApplicationWizardModel(IUser user, IProject project, IApplication application) {
 		// default value(s)
 		setUser(user);
@@ -71,7 +70,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * @throws InterruptedException
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
@@ -119,7 +118,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, OpenShiftUIActivator.getDefault().getUser())
+				, getUser())
 				.execute(monitor);
 		createServerAdapter(monitor, importedProjects);
 	}
@@ -261,8 +260,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public String setProjectName(String projectName) {
 		return (String) setProperty(PROJECT_NAME, projectName);
 	}
-	
-	@Override 
+
+	@Override
 	public IProject setProject(IProject project) {
 		if (project != null && project.exists()) {
 			setExistingProject(false);
@@ -417,24 +416,20 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public String getApplicationName() {
 		return (String) dataModel.get(APPLICATION_NAME);
 	}
-	
-	/**
-	 * Returns the user that was stored in this model or the recent user from UserModel
-	 * 
-	 * @see OpenShiftExpressApplicationWizardModel(IUser)
-	 * @see OpenShiftExpressApplicationWizardModel()
-	 */
+
 	public IUser getUser() {
-		IUser user = (IUser) dataModel.get(USER);
-		if (user == null) {
-			user = UserModel.getDefault().getRecentUser();
-		}
-		return user;
+		return (IUser) dataModel.get(USER);
 	}
-	
+
 	public IUser setUser(IUser user) {
 		dataModel.put(USER, user);
 		return user;
+	}
+
+	public void addUserToModel() {
+		IUser user = getUser();
+		Assert.isNotNull(user);
+		UserModel.getDefault().addUser(user);
 	}
 
 }

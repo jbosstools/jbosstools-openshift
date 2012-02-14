@@ -37,11 +37,11 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	/** Whether the existing project is a valid one or not. */
 	public static final String PROPERTY_EXISTING_PROJECT_VALIDITY = "existingProjectValidity";
 
-	private IOpenShiftWizardModel wizardModel;
+	private IOpenShiftExpressWizardModel wizardModel;
 
 	private IStatus existingProjectValidity;
 
-	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setNewProject(true);
 	}

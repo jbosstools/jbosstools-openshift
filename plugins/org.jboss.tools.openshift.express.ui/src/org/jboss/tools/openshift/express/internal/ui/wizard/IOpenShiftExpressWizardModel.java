@@ -25,13 +25,12 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
  */
-public interface IOpenShiftWizardModel {
+public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 
 	public static final String NEW_PROJECT = "enableProject";
 	public static final String USER = "user";
@@ -187,9 +186,5 @@ public interface IOpenShiftWizardModel {
 	public boolean isExistingApplication();
 
 	public void setUseExistingApplication(boolean useExistingApplication);
-	
-	public IUser getUser();
-
-	public IUser setUser(IUser user);
 	
 }
