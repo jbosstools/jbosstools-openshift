@@ -189,10 +189,12 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			// reset without notifying
 			// this.credentialsValidity = null;
 			IUser user = OpenShiftUIActivator.getDefault().createUser(getRhLogin(), getPassword());
-			if (user.isValid() && rememberPassword) {
-				storePassword(password);
-			} else if(user.isValid() && !rememberPassword) {
-				erasePasswordStore();
+			if (user.isValid()) {
+				if (rememberPassword) {
+					storePassword(password);
+				} else {
+					erasePasswordStore();
+				}
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
