@@ -122,7 +122,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		// existing app checkbox
 		useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
-		useExistingAppBtn.setText("Use existing application");
+		useExistingAppBtn.setText("Use existing application:");
 		useExistingAppBtn.setToolTipText("Select an existing application or uncheck to create a new one.");
 		useExistingAppBtn.setFocus();
 		GridDataFactory.fillDefaults().span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
@@ -185,7 +185,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		FieldDecoration contentProposalFieldIndicator =
 				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
 		dec.setImage(contentProposalFieldIndicator.getImage());
-		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
+		dec.setDescriptionText("Auto-completion is enabled when you start typing an application name.");
 		dec.setShowOnlyOnFocus(true);
 
 		AutoCompleteField adapter =
@@ -223,7 +223,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	private void createApplicationConfigurationGroup(Composite parent, DataBindingContext dbc) {
 		Group container = new Group(parent, SWT.NONE);
-		container.setText("Application creation");
+		container.setText("New application");
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(container);
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
 
