@@ -38,7 +38,6 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -168,7 +167,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			success = importProject();
 		}
 
-		wizardModel.addToUserModel(getWizardModel().getUser());
+		wizardModel.addUserToModel();
 		return success;
 	}
 

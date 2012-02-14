@@ -431,5 +431,4 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		Assert.isNotNull(user);
 		UserModel.getDefault().addUser(user);
 	}
-
 }
