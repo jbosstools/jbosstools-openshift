@@ -46,6 +46,7 @@ import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -119,13 +120,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project location text control when not choosing the
 		// 'Use default location' option.
-		useDefaultRepoPathButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				repoPathText.setFocus();
-				repoPathText.selectAll();
-			}
-		});
+		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
 		dbc.addValidationStatusProvider(
 				new RepoPathValidationStatusProvider(isDefaultRepoObservable, repoPathObservable));
