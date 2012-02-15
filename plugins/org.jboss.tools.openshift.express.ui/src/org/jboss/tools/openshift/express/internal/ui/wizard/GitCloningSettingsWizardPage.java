@@ -221,7 +221,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// pageModel.getApplicationName()));
 		// pageModel.resetRepositoryPath();
 		pageModel.resetRemoteName();
-		if (pageModel.isNewProject()) {
+		enableWidgets(pageModel.isNewProject());
+	}
+
+	private void enableWidgets(boolean isNewProject) {
+		if (isNewProject) {
 			useDefaultRepoPathButton.setEnabled(true);
 			useDefaultRemoteNameButton.setEnabled(false);
 			useDefaultRemoteNameButton.setSelection(true);
