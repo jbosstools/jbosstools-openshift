@@ -20,7 +20,6 @@ import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author Andre Dietisheim
@@ -29,17 +28,12 @@ import com.openshift.express.client.OpenShiftException;
  */
 public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_NEW_PROJECT = "newProject";
-	public static final String PROPERTY_CLONE_URI = "cloneUri";
-	public static final String PROPERTY_APPLICATION_URL = "applicationUrl";
 	public static final String PROPERTY_REPO_PATH = "repositoryPath";
 	public static final String PROPERTY_REMOTE_NAME = "remoteName";
-	public static final String PROPERTY_LOADING = "loading";
 	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
 	public static final String PROPERTY_USE_DEFAULT_REMOTE_NAME = "useDefaultRemoteName";
 
 	private IOpenShiftExpressWizardModel wizardModel;
-	private boolean loading;
 	private boolean useDefaultRepoPath = true;
 	private boolean useDefaultRemoteName = true;
 
@@ -52,40 +46,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		return wizardModel.isNewProject();
 	}
 
-	public void loadGitUri() throws OpenShiftException {
-		setLoading(true);
-		setCloneUri("Loading...");
-		setCloneUri(getCloneUri());
-		setLoading(false);
-	}
-
-	private void setCloneUri(String gitUri) {
-		firePropertyChange(PROPERTY_CLONE_URI, null, gitUri);
-	}
-
-	public String getCloneUri() throws OpenShiftException {
-		IApplication application = wizardModel.getApplication();
-		if (application == null) {
-			return null;
-		}
-		return application.getGitUri();
-	}
-
-	public void loadApplicationUrl() throws OpenShiftException {
-		setLoading(true);
-		setApplicationUrl("Loading...");
-		setApplicationUrl(getApplicationUrl());
-		setLoading(false);
-	}
-
-	public String getApplicationUrl() throws OpenShiftException {
-		IApplication application = wizardModel.getApplication();
-		if (application == null) {
-			return null;
-		}
-		return application.getApplicationUrl();
-	}
-
 	public String getApplicationName() {
 		return wizardModel.getApplicationName();
 	}
@@ -96,10 +56,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 			return false;
 		}
 		return ICartridge.JBOSSAS_7.equals(application.getCartridge());
-	}
-
-	public void setApplicationUrl(String applicationUrl) {
-		firePropertyChange(PROPERTY_APPLICATION_URL, null, applicationUrl);
 	}
 
 	public String getRepositoryPath() {
@@ -146,14 +102,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public void setRemoteName(String remoteName) {
 		firePropertyChange(PROPERTY_REMOTE_NAME, wizardModel.getRemoteName(), wizardModel.setRemoteName(remoteName));
-	}
-
-	public boolean isLoading() {
-		return loading;
-	}
-
-	public void setLoading(boolean loading) {
-		firePropertyChange(PROPERTY_LOADING, this.loading, this.loading = loading);
 	}
 
 	public boolean isCompatibleToApplicationCartridge(ICartridge cartridge) {
