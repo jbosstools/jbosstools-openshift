@@ -33,6 +33,7 @@ import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -47,19 +48,20 @@ import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 
 /**
- * @author Andr� Dietisheim
+ * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
-
+	
+	private static final String PAGE_TITLE_FORMAT = "Setup Project for OpenShift application \"{0}\""; 
+	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
-
 	private Text existingProjectNameText = null;
 
 	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftExpressWizardModel wizardModel) {
-		super("Setup Project for OpenShift application '" + wizardModel.getApplicationName() + "'",
+		super(NLS.bind(PAGE_TITLE_FORMAT, wizardModel.getApplicationName()),
 				"Configure your project and server adapter settings, then click 'next' or 'finish'.",
 				"Project Configuration", wizard);
 		this.pageModel = new ProjectAndServerAdapterSettingsWizardPageModel(wizardModel);
@@ -270,15 +272,14 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage#onPageActivated(org.eclipse.
-	 * core.databinding.DataBindingContext)
-	 */
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
+		setPageTitle();
 		pageModel.validateExistingProject();
+	}
+
+	private void setPageTitle() {
+		setTitle(NLS.bind(PAGE_TITLE_FORMAT, pageModel.getApplicationName()));
 	}
 
 }
