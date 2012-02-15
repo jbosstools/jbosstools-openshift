@@ -68,6 +68,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -79,6 +80,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 
 import com.openshift.express.client.Cartridge;
@@ -364,10 +366,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		existingAppNameText.setEnabled(useExisting);
 		browseAppsButton.setEnabled(useExisting);
 		
-		newAppNameLabel.setEnabled(!useExisting);
-		newAppNameText.setEnabled(!useExisting);
-		newAppTypeLabel.setEnabled(!useExisting);
-		newAppCartridgeCombo.setEnabled(!useExisting);
+		UIUtils.doForAllChildren(new IWidgetVisitor() {
+			
+			@Override
+			public void visit(Control control) {
+				control.setEnabled(!useExisting);
+			}
+		}, newAppConfigurationGroup);
 	}
 
 	private void fillCartridgesCombo(DataBindingContext dbc, Combo cartridgesCombo) {
