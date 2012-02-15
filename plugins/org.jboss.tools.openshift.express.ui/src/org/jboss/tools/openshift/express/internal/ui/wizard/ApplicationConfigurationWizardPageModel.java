@@ -130,9 +130,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	/**
-	 * @return the existingApplications
-	 */
 	public List<IApplication> getExistingApplications() {
 		return existingApplications;
 	}
@@ -151,8 +148,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 *            the existingApplications to set
 	 */
 	public void setExistingApplications(List<IApplication> existingApplications) {
-		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS, this.existingApplications,
-				this.existingApplications = existingApplications);
+		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS
+				, this.existingApplications
+				, this.existingApplications = existingApplications);
 	}
 
 	public void loadCartridges() throws OpenShiftException {
@@ -186,8 +184,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
-		// List<IEmbeddableCartridge> cartridges =
-		// OpenShiftUIActivator.getDefault().getUser().getEmbeddableCartridges();
 		List<IEmbeddableCartridge> cartridges = getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
