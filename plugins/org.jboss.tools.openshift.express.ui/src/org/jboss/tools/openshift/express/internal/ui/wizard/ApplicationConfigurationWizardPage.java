@@ -330,6 +330,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				Object newValue = event.diff.getNewValue();
 				if (newValue instanceof Boolean) {
 					Boolean useExisting = (Boolean) newValue;
+					if (!useExisting) {
+						pageModel.resetExistingApplication();
+					}
 					enableApplicationWidgets(
 							useExisting, applicationConfigurationGroup, applicationNameText, applicationBrowseButton);
 				}
@@ -348,9 +351,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 */
 	private void enableApplicationWidgets(final Boolean useExisting, final Group applicationConfigurationGroup,
 			final Text applicationNameText, final Button applicationBrowseButton) {
-		if (!useExisting) {
-			pageModel.resetExistingApplication();
-		}
 		applicationNameText.setEnabled(useExisting);
 		applicationBrowseButton.setEnabled(useExisting);
 		UIUtils.doForAllChildren(new UIUtils.IWidgetVisitor() {
