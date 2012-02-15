@@ -68,7 +68,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -237,11 +236,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		IObservableValue useExistingApplication =
 				WidgetProperties.selection().observe(useExistingAppBtn);
-		enableApplicationWidgets(
-				pageModel.isUseExistingApplication()
-				, newAppConfigurationGroup
-				, existingAppNameText
-				, browseAppsButton);
 
 		useExistingApplication.addValueChangeListener(
 				onUseExistingApplication(newAppConfigurationGroup, existingAppNameText,
@@ -342,9 +336,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					if (!useExisting) {
 						resetExistingApplication();
 					}
-					enableApplicationWidgets(
-							useExisting, applicationConfigurationGroup, applicationNameText,
-							applicationBrowseButton);
+					enableApplicationWidgets(useExisting);
 				}
 			}
 
@@ -368,17 +360,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 * @param applicationNameText
 	 * @param applicationBrowseButton
 	 */
-	private void enableApplicationWidgets(final Boolean useExisting, final Group applicationConfigurationGroup,
-			final Text applicationNameText, final Button applicationBrowseButton) {
-		applicationNameText.setEnabled(useExisting);
-		applicationBrowseButton.setEnabled(useExisting);
-		UIUtils.doForAllChildren(new UIUtils.IWidgetVisitor() {
-
-			@Override
-			public void visit(Control control) {
-				control.setEnabled(!useExisting);
-			}
-		}, applicationConfigurationGroup);
+	private void enableApplicationWidgets(final Boolean useExisting) {
+		existingAppNameText.setEnabled(useExisting);
+		browseAppsButton.setEnabled(useExisting);
+		
+		newAppNameLabel.setEnabled(!useExisting);
+		newAppNameText.setEnabled(!useExisting);
+		newAppTypeLabel.setEnabled(!useExisting);
+		newAppCartridgeCombo.setEnabled(!useExisting);
 	}
 
 	private void fillCartridgesCombo(DataBindingContext dbc, Combo cartridgesCombo) {
@@ -664,11 +653,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						loadOpenshiftResources(dbc);
-						enableApplicationWidgets(
-								pageModel.isUseExistingApplication()
-								, newAppConfigurationGroup
-								, existingAppNameText
-								, browseAppsButton);
+						enableApplicationWidgets(pageModel.isUseExistingApplication());
 					}
 				});
 			}

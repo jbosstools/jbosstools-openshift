@@ -157,7 +157,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public void loadCartridges() throws OpenShiftException {
 		setCartridges(getUser().getCartridges());
-		// setCartridges(OpenShiftUIActivator.getDefault().getUser().getCartridges());
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
