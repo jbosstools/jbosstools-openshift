@@ -58,6 +58,9 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 
 	@Override
 	public Object[] getElements(final Object parentElement) {
+		// A refresh on the whole model... clear our cache
+		loadedUsers.clear();
+		loadingUsers.clear();
 		if (parentElement instanceof IWorkspaceRoot) {
 			return UserModel.getDefault().getUsers();
 		}
@@ -65,7 +68,11 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			IUser[] users = ((UserModel) parentElement).getUsers();
 			return users;
 		}
-
+		return new Object[0];
+	}
+	
+	@Override
+	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IUser) {
 			if (!loadedUsers.contains(parentElement)) {
 				if (!loadingUsers.contains(parentElement)) {
@@ -141,11 +148,6 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				viewer.refresh(object);
 			}
 		});
-	}
-
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		return getElements(parentElement);
 	}
 
 	@Override

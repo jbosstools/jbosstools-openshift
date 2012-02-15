@@ -1,6 +1,5 @@
 package org.jboss.tools.openshift.express.internal.ui;
 
-import java.io.IOException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -14,9 +13,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.osgi.framework.BundleContext;
-
-import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
 
 /**
  * The activator class controls the plug-in life cycle
