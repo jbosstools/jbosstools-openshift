@@ -139,7 +139,7 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
 
 	public String getApplicationName();
 
-	public void setApplicationCartridge(ICartridge cartridge);
+	public ICartridge setApplicationCartridge(ICartridge cartridge);
 
 	public ICartridge getApplicationCartridge();
 

@@ -379,15 +379,15 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public void setApplicationCartridge(ICartridge cartridge) {
-		dataModel.put(APPLICATION_CARTRIDGE, cartridge);
+	public ICartridge setApplicationCartridge(ICartridge cartridge) {
+		return (ICartridge) dataModel.put(APPLICATION_CARTRIDGE, cartridge);
 	}
 
 	protected void setApplicationCartridge(IApplication application) {
 		if (application == null) {
 			return;
 		}
-		dataModel.put(APPLICATION_CARTRIDGE, application.getCartridge());
+		setApplicationCartridge(application.getCartridge());
 	}
 
 	@Override
@@ -404,7 +404,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		if (application == null) {
 			return;
 		}
-		dataModel.put(APPLICATION_NAME, application.getName());
+		setApplicationName(application.getName());
 	}
 
 	@Override

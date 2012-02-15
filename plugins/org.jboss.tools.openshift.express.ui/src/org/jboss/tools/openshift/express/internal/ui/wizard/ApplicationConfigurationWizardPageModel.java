@@ -50,18 +50,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	private List<IApplication> existingApplications = null;
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
-	// private String applicationName;
-	private ICartridge selectedCartridge;
 	private String existingApplicationName;
 
-	// private boolean useExistingApplication;
-
-	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel) throws OpenShiftException {
+	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel)
+			throws OpenShiftException {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
-		// setUseExistingApplication(wizardModel.isExistingApplication());
-		// setExistingApplicationName(wizardModel.getApplication() != null ?
-		// wizardModel.getApplication().getName() : null);
 	}
 
 	/**
@@ -107,6 +101,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				, wizardModel.setUseExistingApplication(useExistingApplication));
 	}
 
+	protected void setUseExistingApplication(IApplication application) {
+		setUseExistingApplication(application != null);
+	}
+
 	public String getExistingApplicationName() {
 		return existingApplicationName;
 	}
@@ -115,6 +113,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME
 				, existingApplicationName
 				, this.existingApplicationName = applicationName);
+	}
+
+	protected void setExistingApplicationName(IApplication application) {
+		String applicationName = null;
+		if (application != null) {
+			applicationName = application.getName();
+		}
+		setExistingApplicationName(applicationName);
 	}
 
 	public void loadExistingApplications() throws OpenShiftException {
@@ -129,6 +135,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 */
 	public List<IApplication> getExistingApplications() {
 		return existingApplications;
+	}
+
+	public boolean isExistingApplication(String applicationName) {
+		for (IApplication application : getExistingApplications()) {
+			if (application.getName().equalsIgnoreCase(applicationName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -154,12 +169,21 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public ICartridge getSelectedCartridge() {
-		return selectedCartridge;
+		return wizardModel.getApplicationCartridge();
 	}
 
 	public void setSelectedCartridge(ICartridge cartridge) {
-		wizardModel.setApplicationCartridge(cartridge);
-		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, selectedCartridge, this.selectedCartridge = cartridge);
+		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE
+				, wizardModel.getApplicationCartridge()
+				, wizardModel.setApplicationCartridge(cartridge));
+	}
+
+	protected void setSelectedCartridge(IApplication application) {
+		ICartridge applicationCartridge = null;
+		if (application != null) {
+			applicationCartridge = application.getCartridge();
+		}
+		setSelectedCartridge(applicationCartridge);
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
@@ -171,31 +195,30 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setExistingApplication(IApplication application) throws OpenShiftException {
-		if (application == null) {
-			return;
-		}
+		// setUseExistingApplication(application);
+		setExistingApplicationName(application);
+		setApplicationName(application);
+		setSelectedCartridge(application);
+		setSelectedEmbeddableCartridges(application);
 		wizardModel.setApplication(application);
-		setExistingApplicationName(application.getName());
-		setApplicationName(application.getName());
-		setSelectedCartridge(application.getCartridge());
-		Set<IEmbeddableCartridge> embeddedCartridges = new HashSet<IEmbeddableCartridge>();
-		embeddedCartridges.addAll(application.getEmbeddedCartridges());
-		setSelectedEmbeddableCartridges(embeddedCartridges);
 	}
 
-	public void resetExistingApplication() {
-		wizardModel.setApplication(null);
-		setExistingApplicationName(null);
-		setApplicationName(null);
-		setSelectedCartridge(null);
-		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+	public void resetExistingApplication() throws OpenShiftException {
+		setExistingApplication(null);
 	}
 
 	public void setApplicationName(String applicationName) {
-		wizardModel.setApplicationName(applicationName);
 		firePropertyChange(PROPERTY_APPLICATION_NAME
 				, wizardModel.getApplicationName()
 				, wizardModel.setApplicationName(applicationName));
+	}
+
+	protected void setApplicationName(IApplication application) {
+		String applicationName = null;
+		if (application != null) {
+			applicationName = application.getName();
+		}
+		setApplicationName(applicationName);
 	}
 
 	public String getApplicationName() {
@@ -221,6 +244,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
 	}
 
+	protected void setSelectedEmbeddableCartridges(IApplication application) throws OpenShiftException {
+		HashSet<IEmbeddableCartridge> selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
+		if (application != null) {
+			selectedEmbeddableCartridges.addAll(application.getEmbeddedCartridges());
+		}
+		setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
+	}
+
 	public boolean hasApplication(ICartridge cartridge) {
 		try {
 			return getUser().hasApplication(cartridge);
@@ -238,5 +269,4 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
 		return wizardModel.createApplication(name, ICartridge.JENKINS_14, monitor);
 	}
-
 }
