@@ -155,6 +155,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public void loadCartridges() throws OpenShiftException {
 		setCartridges(getUser().getCartridges());
+		refreshSelectedCartridge();
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
@@ -167,6 +168,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public ICartridge getSelectedCartridge() {
 		return wizardModel.getApplicationCartridge();
+	}
+
+	/**
+	 * forces property change listeners to update their value
+	 */
+	protected void refreshSelectedCartridge() {
+		ICartridge selectedCartridge = getSelectedCartridge();
+		setSelectedCartridge((ICartridge) null);
+		setSelectedCartridge(selectedCartridge);
 	}
 
 	public void setSelectedCartridge(ICartridge cartridge) {

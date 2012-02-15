@@ -184,7 +184,7 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 
 	public IServerType getServerType();
 
-	public void setServerType(IServerType serverType);
+	public IServerType setServerType(IServerType serverType);
 
 	public boolean isUseExistingApplication();
 

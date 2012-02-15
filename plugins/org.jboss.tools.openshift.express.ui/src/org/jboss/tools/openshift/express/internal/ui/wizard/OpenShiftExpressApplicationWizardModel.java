@@ -311,8 +311,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public void setServerType(IServerType serverType) {
-		setProperty(SERVER_TYPE, serverType);
+	public IServerType setServerType(IServerType serverType) {
+		return (IServerType) setProperty(SERVER_TYPE, serverType);
 	}
 
 	private void setPublicationMode(String mode) {
@@ -326,7 +326,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public boolean setUseExistingApplication(boolean useExistingApplication) {
-		return (Boolean) setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
+		Boolean isUseExistingApplication = (Boolean) setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
+		return isUseExistingApplication != null && isUseExistingApplication;
 	}
 
 	protected void setUseExistingApplication(IApplication application) {
@@ -363,7 +364,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
 		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
-				(Set<IEmbeddableCartridge>) dataModel.get(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
+				(Set<IEmbeddableCartridge>) getProperty(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
 		if (selectedEmbeddableCartridges == null) {
 			selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
 			setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
@@ -371,16 +372,16 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return selectedEmbeddableCartridges;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-		dataModel.put(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
-		return selectedEmbeddableCartridges;
+		return (Set<IEmbeddableCartridge>) setProperty(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 	}
 
 	@Override
 	public ICartridge setApplicationCartridge(ICartridge cartridge) {
-		return (ICartridge) dataModel.put(APPLICATION_CARTRIDGE, cartridge);
+		return (ICartridge) setProperty(APPLICATION_CARTRIDGE, cartridge);
 	}
 
 	protected void setApplicationCartridge(IApplication application) {
@@ -392,13 +393,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public ICartridge getApplicationCartridge() {
-		return (ICartridge) dataModel.get(APPLICATION_CARTRIDGE);
+		return (ICartridge) getProperty(APPLICATION_CARTRIDGE);
 	}
 
 	@Override
 	public String setApplicationName(String applicationName) {
-		firePropertyChange(APPLICATION_NAME, getApplicationName(), dataModel.put(APPLICATION_NAME, applicationName));
-		return applicationName;
+		return (String) setProperty(APPLICATION_NAME, applicationName);
 	}
 
 	protected void setApplicationName(IApplication application) {
@@ -410,18 +410,17 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public String getApplicationName() {
-		return (String) dataModel.get(APPLICATION_NAME);
+		return (String) getProperty(APPLICATION_NAME);
 	}
 
 	@Override
 	public IUser getUser() {
-		return (IUser) dataModel.get(USER);
+		return (IUser) getProperty(USER);
 	}
 
 	@Override
 	public IUser setUser(IUser user) {
-		dataModel.put(USER, user);
-		return user;
+		return (IUser) setProperty(USER, user);
 	}
 
 	@Override
