@@ -61,10 +61,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		return wizardModel.isNewProject();
 	}
 
-//	public void refreshApplicationName() {
-//		firePropertyChange(PROPERTY_APPLICATION_NAME, null, wizardModel.getApplicationName());
-//	}
-
 	public void setApplicationName(String name) {
 		firePropertyChange(PROPERTY_APPLICATION_NAME
 				, wizardModel.getApplicationName()
