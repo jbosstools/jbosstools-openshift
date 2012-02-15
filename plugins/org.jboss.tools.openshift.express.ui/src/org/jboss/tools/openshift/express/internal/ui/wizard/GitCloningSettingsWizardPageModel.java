@@ -13,6 +13,9 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
 import static org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
@@ -28,6 +31,7 @@ import com.openshift.express.client.ICartridge;
  */
 public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
+	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_REPO_PATH = "repositoryPath";
 	public static final String PROPERTY_REMOTE_NAME = "remoteName";
 	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
@@ -39,11 +43,32 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public GitCloningSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.APPLICATION_NAME, onWizardApplicationNameChanged());
 		setRepositoryPath(getDefaultRepositoryPath());
+	}
+
+	private PropertyChangeListener onWizardApplicationNameChanged() {
+		return new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				firePropertyChange(PROPERTY_APPLICATION_NAME, evt.getOldValue(), evt.getNewValue());
+			}
+		};
 	}
 
 	public boolean isNewProject() {
 		return wizardModel.isNewProject();
+	}
+
+//	public void refreshApplicationName() {
+//		firePropertyChange(PROPERTY_APPLICATION_NAME, null, wizardModel.getApplicationName());
+//	}
+
+	public void setApplicationName(String name) {
+		firePropertyChange(PROPERTY_APPLICATION_NAME
+				, wizardModel.getApplicationName()
+				, wizardModel.setApplicationName(name));
 	}
 
 	public String getApplicationName() {

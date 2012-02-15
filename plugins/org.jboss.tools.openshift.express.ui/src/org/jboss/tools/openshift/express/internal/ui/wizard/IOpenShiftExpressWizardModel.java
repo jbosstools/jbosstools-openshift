@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
+import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
@@ -32,7 +33,7 @@ import com.openshift.express.client.OpenShiftException;
 /**
  * @author André Dietisheim
  */
-public interface IOpenShiftExpressWizardModel extends IUserAwareModel {
+public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservablePojo {
 
 	public static final String NEW_PROJECT = "enableProject";
 	public static final String USER = "user";

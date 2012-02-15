@@ -313,4 +313,9 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
+	@Override
+	public void dispose() {
+		wizardModel.dispose();
+	}
+
 }

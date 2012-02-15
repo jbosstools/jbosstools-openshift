@@ -123,7 +123,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
 		dbc.addValidationStatusProvider(
-				new RepoPathValidationStatusProvider(isDefaultRepoObservable, repoPathObservable));
+				new RepoPathValidationStatusProvider(
+						isDefaultRepoObservable
+						, repoPathObservable
+						, BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(
+								pageModel)));
 
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
@@ -219,6 +223,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// allow to enable a proj only for as7 openshift applications
 		// pageModel.resetRepositoryPath();
 		pageModel.resetRemoteName();
+//		pageModel.refreshApplicationName();
 		enableWidgets(pageModel.isNewProject());
 	}
 
@@ -243,23 +248,25 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 		private final IObservableValue isDefaultRepoPathObservable;
 		private final IObservableValue repoPathObservable;
+		private IObservableValue applicationNameObservable;
 
 		public RepoPathValidationStatusProvider(IObservableValue isDefaultRepoPathObservable,
-				IObservableValue repoPathObservable) {
+				IObservableValue repoPathObservable, IObservableValue applicationNameObservable) {
 			this.isDefaultRepoPathObservable = isDefaultRepoPathObservable;
 			this.repoPathObservable = repoPathObservable;
+			this.applicationNameObservable = applicationNameObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
 			Boolean isDefaultRepoPath = (Boolean) isDefaultRepoPathObservable.getValue();
 			String repoPath = (String) repoPathObservable.getValue();
+			String applicationName = (String) applicationNameObservable.getValue();
 
 			// skip the validation if the user wants to create a new project.
 			// The
 			// name and state of the existing project do
 			// not matter...
-			String applicationName = pageModel.getApplicationName();
 			if (applicationName == null
 					|| applicationName.length() == 0) {
 				return OpenShiftUIActivator

@@ -397,7 +397,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public String setApplicationName(String applicationName) {
-		return (String) dataModel.put(APPLICATION_NAME, applicationName);
+		firePropertyChange(APPLICATION_NAME, getApplicationName(), dataModel.put(APPLICATION_NAME, applicationName));
+		return applicationName;
 	}
 
 	protected void setApplicationName(IApplication application) {
