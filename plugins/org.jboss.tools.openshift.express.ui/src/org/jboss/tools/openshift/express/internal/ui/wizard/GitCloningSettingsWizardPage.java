@@ -127,11 +127,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			}
 		});
 
-//		IObservableValue repoPathValidityObservable = BeanProperties.value(
-//				GitCloningSettingsWizardPageModel.PROPERTY_CUSTOM_REPO_PATH_VALIDITY).observe(pageModel);
-//		dbc.addValidationStatusProvider(
-//				new RepoPathValidationStatusProvider(isDefaultRepoObservable, repoPathObservable));
-
 		dbc.addValidationStatusProvider(
 				new RepoPathValidationStatusProvider(isDefaultRepoObservable, repoPathObservable));
 		
@@ -167,11 +162,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// move focus to the project name text control when choosing the 'Use an
 		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
-		// IObservableValue remoteNameValidityObservable = BeanProperties.value(
-		// GitCloningSettingsWizardPageModel.PROPERTY_CUSTOM_REMOTE_NAME_VALIDITY).observe(pageModel);
-		// dbc.addValidationStatusProvider(new
-		// RemoteNameValidationStatusProvider(remoteNameValidityObservable,
-		// remoteNameTextObservable));
 
 		dbc.addValidationStatusProvider(
 				new RemoteNameValidationStatusProvider(
@@ -246,21 +236,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			useDefaultRemoteNameButton.setEnabled(true);
 			remoteNameText.setEnabled(!useDefaultRemoteNameButton.getSelection());
 		}
-		// pageModel.getWizardModel().setProperty(AdapterWizardPageModel.MODE,
-		// AdapterWizardPageModel.MODE_SOURCE);
-		onPageActivatedBackground(dbc);
-	}
-
-	protected void onPageActivatedBackground(final DataBindingContext dbc) {
-		/*
-		 * new Job("Loading remote OpenShift application") { public IStatus
-		 * run(IProgressMonitor monitor) { try { pageModel.loadGitUri();
-		 * pageModel.loadApplicationUrl(); } catch (OpenShiftException e) {
-		 * IStatus status =
-		 * OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
-		 * OpenShiftUIActivator.log(status); return status; } return
-		 * Status.OK_STATUS; } }.schedule();
-		 */
 	}
 
 	/**
