@@ -124,7 +124,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 		dbc.addValidationStatusProvider(
 				new RepoPathValidationStatusProvider(isDefaultRepoObservable, repoPathObservable));
-		
+
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
 		useDefaultRemoteNameButton.setText("Use default remote name");
@@ -217,8 +217,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 	protected void onPageActivated(DataBindingContext dbc) {
 		// allow to enable a proj only for as7 openshift applications
-		// setTitle(NLS.bind("Import OpenShift application {0}",
-		// pageModel.getApplicationName()));
 		// pageModel.resetRepositoryPath();
 		pageModel.resetRemoteName();
 		enableWidgets(pageModel.isNewProject());
