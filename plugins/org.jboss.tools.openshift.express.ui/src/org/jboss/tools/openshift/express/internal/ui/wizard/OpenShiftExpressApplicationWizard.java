@@ -157,11 +157,10 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	public boolean performFinish() {
 		boolean success = getWizardModel().isUseExistingApplication();
 		if (!success) {
-			success = createApplication();
-		}
-		if (success) {
-			success = addRemoveCartridges(
-					getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
+			if(createApplication()) {
+				success = addRemoveCartridges(
+						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
+			}
 		}
 		if (success) {
 			success = importProject();
