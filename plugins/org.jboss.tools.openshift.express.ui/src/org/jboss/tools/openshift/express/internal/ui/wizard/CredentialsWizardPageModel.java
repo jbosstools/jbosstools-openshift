@@ -201,27 +201,32 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	
 	private IStatus getValidityStatus(String rhLogin, String password) {
 		IStatus status = Status.OK_STATUS;
+		IUser user = null;
 		try {
-			IUser user = UserModel.getDefault().createUser(getRhLogin(), getPassword());
+			user = UserModel.getDefault().createUser(getRhLogin(), getPassword());
 			if (user.isValid()) {
-				setUser(user);
-				if (rememberPassword) {
-					storePassword(password);
-				} else {
-					erasePasswordStore();
-				}
+				storeUser(user);
 			} else {
 				status = OpenShiftUIActivator.createErrorStatus(
 						NLS.bind("The credentials for user {0} are not valid", user.getRhlogin()));
-
 			}
 		} catch (NotFoundOpenShiftException e) {
+			storeUser(user);
 			// valid user without domain
 		} catch (Exception e) {
 			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 					"Could not check user credentials: {0}.", e.getMessage()));
 		}
 		return status;
+	}
+
+	private void storeUser(IUser user) {
+		setUser(user);
+		if (rememberPassword) {
+			storePassword(password);
+		} else {
+			erasePasswordStore();
+		}
 	}
 
 }
