@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore;
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreException;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
@@ -69,9 +70,9 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return null;
 	}
 
-	private SecurePasswordStore initSecureStore(final String platform, final String username) {
+	private SecurePasswordStore initSecureStore(final String platform, final String rhLogin) {
 		SecurePasswordStore store = null;
-		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
+		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, rhLogin);
 		if (key != null) {
 			store = new SecurePasswordStore(key);
 		}
@@ -80,19 +81,25 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 
 	protected String initRhLogin() {
 		String rhLogin = null;
-		rhLogin = rhLoginPreferenceValue.get();
-		if (rhLogin == null || rhLogin.length() == 0) {
-			rhLogin = getUserConfiguration();
+		IUser user = wizardModel.getUser();
+		if (user != null) {
+			rhLogin = user.getRhlogin();
+		} else {
+			rhLogin = rhLoginPreferenceValue.get();
+			if (rhLogin == null || rhLogin.length() == 0) {
+				rhLogin = getConfiguredUserName();
+			}
 		}
 		return rhLogin;
 	}
 
 	protected String initPassword() {
 		String password = null;
-		if (libraServer != null && rhLogin != null && !rhLogin.isEmpty() && store != null) {
+		if (!StringUtils.isEmpty(libraServer) 
+				&& !StringUtils.isEmpty(rhLogin) && store != null) {
 			try {
 				password = store.getPassword();
-				setRememberPassword(this.password != null && !this.password.isEmpty());
+				setRememberPassword(!StringUtils.isEmpty(password));
 			} catch (SecurePasswordStoreException e) {
 				Logger.error("Failed to retrieve OpenShift user's password from Secured Store", e);
 			}
@@ -120,7 +127,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	protected String getUserConfiguration() {
+	protected String getConfiguredUserName() {
 		String configuredUsername = null;
 		try {
 			configuredUsername = new OpenShiftConfiguration().getRhlogin();
