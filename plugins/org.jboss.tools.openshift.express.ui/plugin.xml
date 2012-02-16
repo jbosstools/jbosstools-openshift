@@ -18,6 +18,7 @@
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
             name="OpenShift Express Application">
+            <description>Create a new OpenShift Express Application</description>
       </wizard>
    </extension>
    <extension
@@ -32,6 +33,7 @@
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
             name="Existing OpenShift Express Application">
+            <description>Import an existing OpenShift Express Application</description>
       </wizard>
     </extension>  
    <extension
@@ -39,7 +41,7 @@
 		<perspectiveExtension
 			targetID="org.jboss.tools.common.ui.JBossPerspective">
 			<newWizardShortcut
-				id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.ImportProjectNewWizard">
+				id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard">
 			</newWizardShortcut>
 		</perspectiveExtension>
    </extension>
