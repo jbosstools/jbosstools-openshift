@@ -194,10 +194,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		setCredentialsStatus(status);
 		return status;
 	}
-
-	protected void setUser(IUser user) {
-		wizardModel.setUser(user);
-	}
 	
 	private IStatus getValidityStatus(String rhLogin, String password) {
 		IStatus status = Status.OK_STATUS;
@@ -221,7 +217,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void storeUser(IUser user) {
-		setUser(user);
+		wizardModel.setUser(user);
 		if (rememberPassword) {
 			storePassword(password);
 		} else {
