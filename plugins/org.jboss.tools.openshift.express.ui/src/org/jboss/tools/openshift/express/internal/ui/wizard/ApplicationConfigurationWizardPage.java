@@ -660,8 +660,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					public void run() {
 						loadOpenshiftResources(dbc);
 						enableApplicationWidgets(pageModel.isUseExistingApplication());
+						// this is needed because of weird issues with UI not
+						// reacting to model changes while wizard runnable is
+						// run. We force another update
 						dbc.updateModels();
-						dbc.updateTargets();
 					}
 				});
 			}
