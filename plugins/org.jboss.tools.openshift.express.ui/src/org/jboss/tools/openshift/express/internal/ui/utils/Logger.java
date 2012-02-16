@@ -120,6 +120,9 @@ public final class Logger {
 	 */
 	public static void debug(final String message) {
 		String debugOption = Platform.getDebugOption(DEBUG);
+		if( OpenShiftUIActivator.getDefault() == null )
+			return;
+		
 		if (OpenShiftUIActivator.getDefault().isDebugging() && "true".equalsIgnoreCase(debugOption)) {
 			System.out.println("[" + Thread.currentThread().getName() + "] " + message);
 		}

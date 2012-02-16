@@ -11,6 +11,8 @@ public abstract class AbstractAction extends Action implements ISelectionChanged
 
 	/** The current selection in the view. */
 	protected ISelection selection = null;
+	
+	protected CommonViewer viewer;
 
 	public AbstractAction(String text) {
 		super(text);
@@ -24,6 +26,7 @@ public abstract class AbstractAction extends Action implements ISelectionChanged
 	public void selectionChanged(SelectionChangedEvent event) {
 		Object source = event.getSource();
 		if (source instanceof CommonViewer) {
+			this.viewer = (CommonViewer) source;
 			this.selection = ((CommonViewer) source).getSelection();
 		}
 	}

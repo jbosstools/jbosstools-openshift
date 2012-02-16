@@ -26,7 +26,6 @@ import com.openshift.express.client.IUser;
  */
 public class NewDomainDialog extends Wizard {
 
-	private String namespace;
 	private NewDomainWizardPageModel model;
 
 	public NewDomainDialog(IUser user) {
@@ -56,6 +55,6 @@ public class NewDomainDialog extends Wizard {
 
 	@Override
 	public void addPages() {
-		addPage(new NewDomainWizardPage(namespace, model, this));
+		addPage(new NewDomainWizardPage(model, this));
 	}
 }

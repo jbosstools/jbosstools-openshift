@@ -485,7 +485,7 @@
               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleViewContribution"
               targetID="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
            <action
-                 class="org.jboss.tools.openshift.express.internal.ui.action.RefreshUserActionDelegate"
+                 class="org.jboss.tools.openshift.express.internal.ui.viewer.actionDelegate.RefreshViewerActionDelegate"
                  icon="icons/refresh.gif"
                  id="org.jboss.tools.openshift.express.ui.viewActions.refreshAction"
                  label="Refresh"
@@ -493,7 +493,7 @@
                  toolbarPath="openshift">
            </action>
            <action
-                 class="org.jboss.tools.openshift.express.internal.ui.action.OpenConnectionDialogActionDelegate"
+                 class="org.jboss.tools.openshift.express.internal.ui.viewer.actionDelegate.OpenConnectionDialogActionDelegate"
                  icon="icons/resource_obj.gif"
                  id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
                  label="Connect"

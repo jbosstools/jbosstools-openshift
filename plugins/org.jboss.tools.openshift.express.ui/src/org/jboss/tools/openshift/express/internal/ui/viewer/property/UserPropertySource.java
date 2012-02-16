@@ -46,7 +46,7 @@ public class UserPropertySource implements IPropertySource {
 			if (id.equals("Username")) {
 				return user.getRhlogin();
 			}
-			if (id.equals("Domain")) {
+			if (id.equals("Domain") && user.hasDomain()) {
 				return user.getDomain().getNamespace() + "." + user.getDomain().getRhcDomain();
 			}
 		} catch (OpenShiftException e) {

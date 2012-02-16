@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider;
 
-import org.jboss.tools.openshift.express.internal.ui.action.TailServerLogAction;
+import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogAction;
 
 /**
  * @author Xavier Coulon

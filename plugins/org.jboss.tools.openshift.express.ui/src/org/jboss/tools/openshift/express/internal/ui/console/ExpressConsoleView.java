@@ -23,7 +23,7 @@ public class ExpressConsoleView extends CommonNavigator implements IUserModelLis
 		super.dispose();
 	}
 	
-	private void refreshViewer() {
+	public void refreshViewer() {
 		Display.getDefault().asyncExec(new Runnable() { 
 			public void run() {
 				getCommonViewer().refresh();

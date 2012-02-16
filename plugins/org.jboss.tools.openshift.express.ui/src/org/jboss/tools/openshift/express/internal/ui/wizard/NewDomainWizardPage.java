@@ -63,7 +63,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 
 	private NewDomainWizardPageModel model;
 
-	public NewDomainWizardPage(String namespace, NewDomainWizardPageModel model, IWizard wizard) {
+	public NewDomainWizardPage(NewDomainWizardPageModel model, IWizard wizard) {
 		super("Domain Creation", "Create a new domain", "New Domain", wizard);
 		this.model = model;
 	}

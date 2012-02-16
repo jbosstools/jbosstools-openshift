@@ -1,11 +1,14 @@
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
@@ -33,16 +36,30 @@ public class DeleteApplicationAction extends AbstractAction {
 	 */
 	@Override
 	public void run() {
-		if (isApplication(selection)) {
-			final IApplication application = (IApplication) ((ITreeSelection)selection).getFirstElement();
-			final String appName = application.getName();
-			final boolean confirm = MessageDialog
-					.openConfirm(
-							Display.getCurrent().getActiveShell(),
-							"Application deletion",
-							"You are about to destroy the '" + appName + "' application.\n" +
-							"This is NOT reversible, all remote data for this application will be removed.");
-			if (confirm) {
+		final List<IApplication> appsToDelete = new ArrayList<IApplication>();
+		for (@SuppressWarnings("unchecked")
+		Iterator<Object> iterator = ((ITreeSelection) selection).iterator(); iterator.hasNext();) {
+			final Object element = iterator.next();
+			if (isApplication(element)) {
+				appsToDelete.add((IApplication) element);
+			}
+		}
+		if (appsToDelete.size() == 0) {
+			return;
+		}
+		boolean confirm = false;
+		if (appsToDelete.size() == 1) {
+			confirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Application deletion",
+					"You are about to destroy the '" + appsToDelete.get(0) + "' application.\n"
+							+ "This is NOT reversible, all remote data for this application will be removed.");
+		} else if (appsToDelete.size() > 1) {
+			confirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Application deletion",
+					"You are about to destroy " + appsToDelete.size() + " applications.\n"
+							+ "This is NOT reversible, all remote data for those applications will be removed.");
+		}
+		if (confirm) {
+			for (final IApplication application : appsToDelete) {
+				final String appName = application.getName();
 				Job job = new Job("Deleting application '" + appName + "'...") {
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
@@ -51,6 +68,9 @@ public class DeleteApplicationAction extends AbstractAction {
 							Logger.error("Failed to delete application '" + appName + "'", e);
 						} finally {
 							monitor.done();
+							if (viewer != null) {
+								viewer.refresh();
+							}
 						}
 						return Status.OK_STATUS;
 					}
@@ -59,12 +79,13 @@ public class DeleteApplicationAction extends AbstractAction {
 				job.schedule(); // start as soon as possible
 			}
 		}
+		if (viewer != null) {
+			viewer.refresh();
+		}
 	}
 
-	private boolean isApplication(ISelection selection) {
-		return selection != null 
-				&& selection instanceof ITreeSelection 
-				&& ((ITreeSelection)selection).getFirstElement() instanceof IApplication;
+	private boolean isApplication(Object selection) {
+		return selection instanceof IApplication;
 	}
 
 }

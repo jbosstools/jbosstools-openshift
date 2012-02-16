@@ -41,6 +41,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
@@ -73,7 +74,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	void setWizardModel(OpenShiftExpressApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
-	
+
 	OpenShiftExpressApplicationWizardModel getWizardModel() {
 		return wizardModel;
 	}
@@ -92,7 +93,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	protected void openError(final String title, final String message) {
 		getShell().getDisplay().syncExec(new Runnable() {
-	
+
 			@Override
 			public void run() {
 				MessageDialog.openError(getShell(), title, message);
@@ -103,18 +104,16 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	protected boolean askForConfirmation(final String message, final String applicationName) {
 		final boolean[] confirmed = new boolean[1];
 		getShell().getDisplay().syncExec(new Runnable() {
-	
+
 			@Override
 			public void run() {
-				confirmed[0] = MessageDialog.openConfirm(
-						getShell(),
-						NLS.bind("Import OpenShift Application ", applicationName),
-						message);
+				confirmed[0] = MessageDialog.openConfirm(getShell(),
+						NLS.bind("Import OpenShift Application ", applicationName), message);
 			}
 		});
 		return confirmed[0];
 	}
-	
+
 	public void setSelectedApplication(IApplication application) {
 		getWizardModel().setApplication(application);
 	}
@@ -148,7 +147,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		IWizardPage[] pages = getPages();
 		return initialUser == null ? pages[0] : pages[1];
 	}
-	
+
 	public void setInitialUser(IUser user) {
 		this.initialUser = user;
 	}
@@ -173,13 +172,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus jobResult = WizardUtils.runInWizard(
-					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
+			IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
+					getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
-					OpenShiftUIActivator.createErrorStatus(
-							"An exception occurred while creating local git repository.", e));
+			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", OpenShiftUIActivator
+					.createErrorStatus("An exception occurred while creating local git repository.", e));
 			return false;
 		}
 	}
@@ -196,8 +194,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 								return Status.OK_STATUS;
 							} catch (Exception e) {
 								// TODO: refresh user
-								return OpenShiftUIActivator.createErrorStatus(
-										"Could not create application \"{0}\"", e, applicationName);
+								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"",
+										e, applicationName);
 							}
 						}
 
@@ -218,16 +216,15 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								if (selectedCartridges != null
-										&& !selectedCartridges.isEmpty()) {
+								if (selectedCartridges != null && !selectedCartridges.isEmpty()) {
 									List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 									embeddableCartridges.addAll(selectedCartridges);
 									application.addEmbbedCartridges(embeddableCartridges);
 								}
 							} catch (OpenShiftException e) {
-								return OpenShiftUIActivator.createErrorStatus(
-										NLS.bind("Could not embed cartridges to application {0}"
-												, getWizardModel().getApplication().getName()), e);
+								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+										"Could not embed cartridges to application {0}", getWizardModel()
+												.getApplication().getName()), e);
 							}
 							return Status.OK_STATUS;
 						}
@@ -239,8 +236,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	}
 
 	/**
-	 * A workspace job that will create a new project or enable the selected
-	 * project to be used with OpenShift.
+	 * A workspace job that will create a new project or enable the selected project to be used with OpenShift.
 	 */
 	class ImportJob extends WorkspaceJob {
 
