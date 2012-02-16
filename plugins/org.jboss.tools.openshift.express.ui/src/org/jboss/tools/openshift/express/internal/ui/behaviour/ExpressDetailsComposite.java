@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -88,7 +86,9 @@ public class ExpressDetailsComposite {
 		this.mode = mode;
 		this.composite = fill;
 		this.showVerify = showVerify;
-		fillSection(fill);
+		initModel();
+		createWidgets(fill);
+		fillWidgets();
 		addListeners();
 	}
 	
@@ -96,7 +96,57 @@ public class ExpressDetailsComposite {
 		return composite;
 	}
 	
-	private void fillSection(Composite composite) {
+	private void initModel() {
+		String nameFromExistingServer = ExpressServerUtils.getExpressUsername(server);
+		if( nameFromExistingServer == null ) {
+			// We're in a new server wizard.
+			// First, check if the taskmodel has data
+			IUser tmpUser = (IUser)callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
+			if(  tmpUser == null ) {
+				// If not, use recent user
+				tmpUser = UserModel.getDefault().getRecentUser();
+			}
+			if( tmpUser == null && UserModel.getDefault().getUsers().length > 0 ) {
+				tmpUser = UserModel.getDefault().getUsers()[0];
+			}
+			if( tmpUser != null ) {
+				try {
+					this.fuser = tmpUser;
+					this.user = tmpUser.getRhlogin();
+					List<IApplication> allApps = tmpUser.getApplications();
+					this.appListNames = getAppNamesAsStrings(allApps);
+				} catch(Exception e) { /* ignore */ }
+			} 
+		} else {
+			this.user = nameFromExistingServer;
+		}
+		IApplication app = (IApplication)callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
+		if( app != null ) {
+			this.fapplication = app;
+			this.app = app.getName();
+		}
+		
+		this.pass = UserModel.getDefault().getPasswordFromSecureStorage(this.user);
+		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+		this.remote = this.remote == null ? IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT : this.remote;
+	}
+	
+	/* Set widgets initial values */
+	private void fillWidgets() {
+		if( user != null ) userText.setText(user);
+		if( pass != null ) passText.setText(pass);
+		if( remote != null ) remoteText.setText(remote);
+		if( appListNames != null ) appNameCombo.setItems(appListNames);
+		if( app != null ) {
+			int ind = appNameCombo.indexOf(app);
+			if( ind != -1 ) {
+				appNameCombo.select(ind);
+			}
+		}
+		remoteText.setText(remote);
+	}
+	
+	private void createWidgets(Composite composite) {
 		composite.setLayout(new GridLayout(2, false));
 		Label userLabel = new Label(composite, SWT.NONE);
 		userText = new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -112,16 +162,17 @@ public class ExpressDetailsComposite {
 			String aName = ExpressServerUtils.getExpressApplicationName(server);
 			if( aName != null ) appNameCombo.setText(aName);
 			if( aName != null ) appNameCombo.setEnabled(false);
-		} else {
-			Label deployLocationLabel = new Label(composite, SWT.NONE);
-			deployProjectCombo = new Combo(composite, SWT.NONE);
-			deployLocationLabel.setText("Openshift Project: " );
-			String[] projectNames = discoverOpenshiftProjects();
-			deployProjectCombo.setItems(projectNames);
-			String depLoc = ExpressServerUtils.getExpressDeployProject(server);
-			if( depLoc != null ) deployProjectCombo.setText(depLoc);
-			if( depLoc != null ) deployProjectCombo.setEnabled(false);
-		}
+		} 
+//		else {
+//			Label deployLocationLabel = new Label(composite, SWT.NONE);
+//			deployProjectCombo = new Combo(composite, SWT.NONE);
+//			deployLocationLabel.setText("Openshift Project: " );
+//			String[] projectNames = discoverOpenshiftProjects();
+//			deployProjectCombo.setItems(projectNames);
+//			String depLoc = ExpressServerUtils.getExpressDeployProject(server);
+//			if( depLoc != null ) deployProjectCombo.setText(depLoc);
+//			if( depLoc != null ) deployProjectCombo.setEnabled(false);
+//		}
 		
 		Label remoteLabel = new Label(composite, SWT.NONE);
 		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -132,33 +183,6 @@ public class ExpressDetailsComposite {
 		userLabel.setText("Username: ");
 		passLabel.setText("Password: ");
 		remoteLabel.setText("Remote: ");
-		remoteText.setText(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		
-		String n = ExpressServerUtils.getExpressUsername(server);
-		String[] appNames = null;
-		if( n == null ) {
-			// We're in a new server wizard
-			IUser user = UserModel.getDefault().getRecentUser();
-			if( user == null && UserModel.getDefault().getUsers().length > 0 ) {
-				user = UserModel.getDefault().getUsers()[0];
-			}
-			if( user != null )
-				try {
-					n = user.getRhlogin();
-					List<IApplication> allApps = user.getApplications();
-					appNames = getAppNamesAsStrings(allApps);
-				} catch(Exception e) { /* ignore */ }
-		}
-		String p = UserModel.getDefault().getPasswordFromSecureStorage(n);
-		String remote = ExpressServerUtils.getExpressRemoteName(server);
-		if( n != null ) userText.setText(n);
-		if( p != null ) passText.setText(p);
-		if( remote != null ) remoteText.setText(remote);
-		
-		if( appNames != null ) {
-			appListNames = appNames;
-			appNameCombo.setItems(appListNames);
-		}
 		
 		if( showVerify ) {
 			importLink = new Link(composite, SWT.DEFAULT);
@@ -170,27 +194,7 @@ public class ExpressDetailsComposite {
 			verifyButton.setText("Verify...");
 		}
 	}
-	
-	private String[] discoverOpenshiftProjects() { 
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		ArrayList<String> names = new ArrayList<String>();
-		for( int i = 0; i < projects.length; i++ ) {
-			if( isOpenshiftProjectWithDeploymentsFolder(projects[i])) {
-				names.add(projects[i].getName());
-			}
-		}
-		return (String[]) names.toArray(new String[names.size()]);
-	}
-	
-	private boolean isOpenshiftProjectWithDeploymentsFolder(IProject p) {
-		// TODO add other criteria? 
-		IFolder f = p.getFolder(".openshift");
-		if( f != null && f.exists()) {
-			return true;
-		}
-		return false;
-	}
-	
+		
 	private void addListeners() {
 		nameModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -422,8 +426,10 @@ public class ExpressDetailsComposite {
 							mode, remote);
 					wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 					wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
-					wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY, p.getFolder("deployments").getLocation().toString());
-					wc.setAttribute(IDeployableServer.TEMP_DEPLOY_DIRECTORY, p.getFolder("deployments").getLocation().toString());
+					if( p != null ) {
+						wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY, p.getFolder("deployments").getLocation().toString());
+						wc.setAttribute(IDeployableServer.TEMP_DEPLOY_DIRECTORY, p.getFolder("deployments").getLocation().toString());
+					}
 				} catch(CoreException ce) {
 					// TODO FIX HANDLE
 				}

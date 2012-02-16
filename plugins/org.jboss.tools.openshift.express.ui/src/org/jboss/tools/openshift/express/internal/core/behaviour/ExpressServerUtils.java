@@ -65,6 +65,12 @@ public class ExpressServerUtils {
 	/** the OpensHift Server Type as defined in the plugin.xml.*/
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";
 	
+	/* For use inside express wizard fragment */
+	public static final String TASK_WIZARD_ATTR_USER = "user";
+	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
+	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
+	
+	
 	public static String getExpressMode(IServerAttributes attributes ) {
 		return attributes.getAttribute(ATTRIBUTE_EXPRESS_MODE, EXPRESS_SOURCE_MODE);
 	}

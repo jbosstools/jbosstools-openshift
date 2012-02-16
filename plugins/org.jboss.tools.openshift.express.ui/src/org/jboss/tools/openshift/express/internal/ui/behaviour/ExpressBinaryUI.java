@@ -70,6 +70,9 @@ public class ExpressBinaryUI implements IDeploymentTypeUI {
 			public void setErrorMessage(String msg) {
 				inner.setErrorMessage(msg);
 			}
+			public Object getAttribute(String key) {
+				return null;
+			}
 		};
 	}
 
