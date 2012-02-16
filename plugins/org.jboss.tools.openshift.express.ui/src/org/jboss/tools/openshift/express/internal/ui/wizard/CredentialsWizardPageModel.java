@@ -101,7 +101,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 				password = store.getPassword();
 				setRememberPassword(!StringUtils.isEmpty(password));
 			} catch (SecurePasswordStoreException e) {
-				Logger.error("Failed to retrieve OpenShift user's password from Secured Store", e);
+				Logger.error("Could not retrieve user password from Secured Store", e);
 			}
 		}
 		return password;
