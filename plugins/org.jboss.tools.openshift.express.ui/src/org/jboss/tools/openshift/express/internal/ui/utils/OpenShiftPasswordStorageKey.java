@@ -29,7 +29,7 @@ public class OpenShiftPasswordStorageKey implements IStorageKey {
 	private String userName;
 
 	public OpenShiftPasswordStorageKey(String platform, String userName) {
-		this.userName = userName;
+		this.userName = platform;
 		this.platform = userName;
 	}
 

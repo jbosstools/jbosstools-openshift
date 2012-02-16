@@ -52,7 +52,7 @@ public class SecurePasswordStore {
 		update(storageKey, password);
 	}
 
-	private void update(IStorageKey key, String password) throws SecurePasswordStoreException {
+	public void update(IStorageKey key, String password) throws SecurePasswordStoreException {
 		if (!storageKey.equals(key) || isPasswordChanged(password)) {
 			storeInPreferences(this.password = password, this.storageKey = key);
 		}

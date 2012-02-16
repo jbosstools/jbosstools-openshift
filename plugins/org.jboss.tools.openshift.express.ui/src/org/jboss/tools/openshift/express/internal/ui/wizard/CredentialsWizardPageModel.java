@@ -50,13 +50,15 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private SecurePasswordStore store;
 
 	private IUserAwareModel wizardModel;
+
+	private OpenShiftPasswordStorageKey key;
 	
 	public CredentialsWizardPageModel(IUserAwareModel wizardModel) {
 		this.wizardModel = wizardModel;
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.libraServer = initLibraServer();
 		this.rhLogin = initRhLogin();
-		this.store = initSecureStore(libraServer, rhLogin);
+		initSecureStore(libraServer, rhLogin);
 		this.password = initPassword();
 		resetCredentialsStatus();
 	}
@@ -70,33 +72,36 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return null;
 	}
 
-	private SecurePasswordStore initSecureStore(final String platform, final String rhLogin) {
-		SecurePasswordStore store = null;
-		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, rhLogin);
-		if (key != null) {
-			store = new SecurePasswordStore(key);
-		}
-		return store;
+	private void initSecureStore(final String platform, final String rhLogin) {
+		this.key = new OpenShiftPasswordStorageKey(platform, rhLogin);
+		this.store = new SecurePasswordStore(key);
 	}
 
 	protected String initRhLogin() {
 		String rhLogin = null;
+
 		IUser user = wizardModel.getUser();
+		if (user == null) {
+			user = UserModel.getDefault().getRecentUser();
+		}
 		if (user != null) {
 			rhLogin = user.getRhlogin();
 		} else {
 			rhLogin = rhLoginPreferenceValue.get();
-			if (rhLogin == null || rhLogin.length() == 0) {
+			if (rhLogin == null 
+					|| rhLogin.length() == 0) {
 				rhLogin = getConfiguredUserName();
 			}
 		}
+		
 		return rhLogin;
 	}
-
+	
 	protected String initPassword() {
 		String password = null;
 		if (!StringUtils.isEmpty(libraServer) 
-				&& !StringUtils.isEmpty(rhLogin) && store != null) {
+				&& !StringUtils.isEmpty(rhLogin) 
+				&& store != null) {
 			try {
 				password = store.getPassword();
 				setRememberPassword(!StringUtils.isEmpty(password));
@@ -107,10 +112,11 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return password;
 	}
 
-	private void storePassword(String password) {
+	private void storePassword(IUser user) {
 		try {
 			if (store != null) {
-				store.setPassword(password);
+				OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(libraServer, user.getRhlogin());
+				store.update(key, password);
 			}
 		} catch (SecurePasswordStoreException e) {
 			Logger.error(e.getMessage(), e);
@@ -226,7 +232,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private void storeUser(IUser user) {
 		wizardModel.setUser(user);
 		if (rememberPassword) {
-			storePassword(password);
+			storePassword(user);
 		} else {
 			erasePasswordStore();
 		}
