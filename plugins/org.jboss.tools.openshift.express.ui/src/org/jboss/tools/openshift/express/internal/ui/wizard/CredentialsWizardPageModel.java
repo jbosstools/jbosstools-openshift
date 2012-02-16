@@ -207,8 +207,8 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 						NLS.bind("The credentials for user {0} are not valid", user.getRhlogin()));
 			}
 		} catch (NotFoundOpenShiftException e) {
-			storeUser(user);
 			// valid user without domain
+			storeUser(user);
 		} catch (Exception e) {
 			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 					"Could not check user credentials: {0}.", e.getMessage()));
