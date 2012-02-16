@@ -666,7 +666,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if(result != Dialog.OK) { 
 					final IWizardContainer container = getWizard().getContainer();
 					if(container instanceof WizardDialog) {
-						dbc.dispose();
+						event.doit = false;
 						((WizardDialog)container).close();
 					}
 				}
