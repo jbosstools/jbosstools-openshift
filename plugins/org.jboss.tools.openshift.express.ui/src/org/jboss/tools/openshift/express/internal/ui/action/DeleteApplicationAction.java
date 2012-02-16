@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
@@ -31,8 +32,9 @@ public class DeleteApplicationAction extends AbstractAction {
 	}
 
 	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no Console/Worker existed, a new one is
-	 * created, otherwise, it is displayed. {@inheritDoc}
+	 * Operation called when the user clicks on 'Show In>Remote Console'. If no
+	 * Console/Worker existed, a new one is created, otherwise, it is displayed.
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void run() {
@@ -69,7 +71,7 @@ public class DeleteApplicationAction extends AbstractAction {
 						} finally {
 							monitor.done();
 							if (viewer != null) {
-								viewer.refresh();
+								refresh();
 							}
 						}
 						return Status.OK_STATUS;
@@ -80,12 +82,23 @@ public class DeleteApplicationAction extends AbstractAction {
 			}
 		}
 		if (viewer != null) {
-			viewer.refresh();
+			refresh();
 		}
 	}
 
 	private boolean isApplication(Object selection) {
 		return selection instanceof IApplication;
+	}
+
+	private void refresh() {
+		if (!DisposeUtils.isDisposed(viewer))
+			viewer.getControl().getDisplay().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					viewer.refresh();
+				}
+			});
 	}
 
 }
