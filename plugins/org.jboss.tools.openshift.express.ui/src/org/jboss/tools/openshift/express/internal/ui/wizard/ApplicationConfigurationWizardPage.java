@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -174,14 +173,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
 				.applyTo(browseAppsButton);
 		// observe the list of application, get notified once they have been
-		// loaded
-		final IObservableValue existingAppsObservable =
-				BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS).observe(pageModel);
-
+		IObservableValue existingApplicationsLoaded =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
+						.observe(pageModel);
 		final ApplicationToSelectNameValidator existingAppValidator =
 				new ApplicationToSelectNameValidator(
-						useExistingAppBtnSelection, existingAppNameTextObservable, existingAppsObservable);
+						useExistingAppBtnSelection, existingAppNameTextObservable, existingApplicationsLoaded);
 		dbc.addValidationStatusProvider(existingAppValidator);
 		ControlDecorationSupport.create(
 				existingAppValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater(false));
@@ -202,7 +199,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	private SelectionListener onBrowseApps() {
-		return new SelectionListener() {
+		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -222,10 +219,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					}
 				}
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		};
 	}
 
@@ -240,8 +233,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				WidgetProperties.selection().observe(useExistingAppBtn);
 
 		useExistingApplication.addValueChangeListener(
-				onUseExistingApplication(newAppConfigurationGroup, existingAppNameText,
-						browseAppsButton));
+				onUseExistingApplication(
+						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
 
 		this.newAppNameLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		newAppNameLabel.setText("Name:");
@@ -325,6 +318,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
 	}
 
+	/**
+	 * Trieggered when the user checks "use existing application". It will
+	 * enable/disable the application widgets and reset existing values.
+	 * 
+	 * @param applicationConfigurationGroup
+	 * @param applicationNameText
+	 * @param applicationBrowseButton
+	 * @return
+	 */
 	private IValueChangeListener onUseExistingApplication(final Group
 			applicationConfigurationGroup,
 			final Text applicationNameText, final Button applicationBrowseButton) {
@@ -341,15 +343,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					enableApplicationWidgets(useExisting);
 				}
 			}
-
-			private void resetExistingApplication() {
-				try {
-					pageModel.resetExistingApplication();
-				} catch (OpenShiftException e) {
-					OpenShiftUIActivator.log(e);
-				}
-
-			}
 		};
 	}
 
@@ -365,14 +358,22 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private void enableApplicationWidgets(final Boolean useExisting) {
 		existingAppNameText.setEnabled(useExisting);
 		browseAppsButton.setEnabled(useExisting);
-		
+
 		UIUtils.doForAllChildren(new IWidgetVisitor() {
-			
+
 			@Override
 			public void visit(Control control) {
 				control.setEnabled(!useExisting);
 			}
 		}, newAppConfigurationGroup);
+	}
+
+	private void resetExistingApplication() {
+		try {
+			pageModel.resetExistingApplication();
+		} catch (OpenShiftException e) {
+			OpenShiftUIActivator.log(e);
+		}
 	}
 
 	private void fillCartridgesCombo(DataBindingContext dbc, Combo cartridgesCombo) {
@@ -659,6 +660,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					public void run() {
 						loadOpenshiftResources(dbc);
 						enableApplicationWidgets(pageModel.isUseExistingApplication());
+						dbc.updateModels();
+						dbc.updateTargets();
 					}
 				});
 			}
@@ -717,36 +720,39 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		private final IObservableValue useExistingAppBtnbservable;
 		private final IObservableValue existingAppNameTextObservable;
-		private final IObservableValue existingAppsObservable;
+		private final IObservableValue existingApplicationsLoadedObservable;
 
 		public ApplicationToSelectNameValidator(IObservableValue useExistingAppBtnbservable,
-				IObservableValue existingAppNameTextObservable, IObservableValue existingAppsObservable) {
+				IObservableValue existingAppNameTextObservable, IObservableValue existingApplicationsLoadedObservable) {
 			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
 			this.existingAppNameTextObservable = existingAppNameTextObservable;
-			this.existingAppsObservable = existingAppsObservable;
+			this.existingApplicationsLoadedObservable = existingApplicationsLoadedObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
 			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
 			final String appName = (String) existingAppNameTextObservable.getValue();
-			@SuppressWarnings("unchecked")
-			final List<IApplication> existingApps = (List<IApplication>) existingAppsObservable.getValue();
+			final Boolean existingApplicationsLoaded = (Boolean) existingApplicationsLoadedObservable.getValue();
+
 			if (!useExistingApp) {
 				return ValidationStatus.ok();
 			}
 
-			if (existingApps != null && appName != null && !appName.isEmpty()) {
-				for (IApplication application : pageModel.getExistingApplications()) {
-					if (application.getName().equalsIgnoreCase(appName)) {
-						return ValidationStatus.ok();
-					}
-				}
-				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-						"The application '" + appName + "' does not exist.");
+			if (StringUtils.isEmpty(appName)) {
+				return ValidationStatus.cancel("Please select an existing OpenShift application");
 			}
-			return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID,
-					"Select an existing OpenShift application.");
+
+			if (existingApplicationsLoaded != null
+					&& !existingApplicationsLoaded) {
+				return ValidationStatus.cancel("Existing applications are not loaded yet.");
+			} else {
+				if (!pageModel.hasApplication(appName)) {
+					return ValidationStatus.error(NLS.bind("The application \"{0}\" does not exist.", appName));
+				}
+			}
+
+			return ValidationStatus.ok();
 
 		}
 
@@ -778,19 +784,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.ok();
 			}
 			if (applicationName.isEmpty()) {
-				return OpenShiftUIActivator.createCancelStatus(
+				return ValidationStatus.cancel(
 						"Select an alphanumerical name and a type for the application to create.");
 			}
 			if (!StringUtils.isAlphaNumeric(applicationName)) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ValidationStatus.error(
 						"The name may only contain letters and numbers.");
 			}
 			if (pageModel.isExistingApplication(applicationName)) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ValidationStatus.error(
 						"An application with the same name already exists on OpenShift.");
 			}
 			if (isExistingProject(applicationName)) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ValidationStatus.error(
 						NLS.bind("A project {0} already exists in the workspace.", applicationName));
 			}
 			return ValidationStatus.ok();
@@ -840,6 +846,5 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			targets.add(selectedCartridgeObservable);
 			return targets;
 		}
-
 	}
 }
