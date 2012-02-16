@@ -31,32 +31,33 @@ import com.openshift.express.client.User;
 import com.openshift.express.client.configuration.OpenShiftConfiguration;
 
 public class UserModel {
-	private static final String USER_ID = OpenShiftUIActivator.PLUGIN_ID + " " + 
+	private static final String USER_ID = OpenShiftUIActivator.PLUGIN_ID + " " +
 			OpenShiftUIActivator.getDefault().getBundle().getVersion();
 	private static UserModel model;
+
 	public static UserModel getDefault() {
-		if( model == null )
+		if (model == null)
 			model = new UserModel();
 		return model;
-	}	
-	
+	}
+
 	/** The most recent user connected on OpenShift. */
 	private IUser recentUser = null;
-	private HashMap<String, IUser> allUsers = new HashMap<String,IUser>();
+	private HashMap<String, IUser> allUsers = new HashMap<String, IUser>();
 	private ArrayList<IUserModelListener> listeners = new ArrayList<IUserModelListener>();
-	
+
 	public UserModel() {
 		load();
 	}
-	
+
 	public void addListener(IUserModelListener listener) {
 		listeners.add(listener);
 	}
-	
+
 	public void removeListener(IUserModelListener listener) {
 		listeners.remove(listener);
 	}
-	
+
 	/**
 	 * Create a user for temporary external use
 	 * 
@@ -74,31 +75,23 @@ public class UserModel {
 	private static final int ADDED = 0;
 	private static final int REMOVED = 1;
 	private static final int CHANGED = 2;
-	
+
 	public void addUser(IUser user) {
-		try {
-			allUsers.put(user.getRhlogin(), user);
-			this.recentUser = user;
-			fireModelChange(user, ADDED);
-		} catch(OpenShiftException ose ) {
-			// TODO 
-		}
+		allUsers.put(user.getRhlogin(), user);
+		this.recentUser = user;
+		fireModelChange(user, ADDED);
 	}
 
 	public void removeUser(IUser user) {
-		try {
-			allUsers.remove(user.getRhlogin());
-			if( this.recentUser == user )
-				this.recentUser = null;
-			fireModelChange(user, REMOVED);
-		} catch(OpenShiftException ose ) {
-			// TODO 
-		}
+		allUsers.remove(user.getRhlogin());
+		if (this.recentUser == user)
+			this.recentUser = null;
+		fireModelChange(user, REMOVED);
 	}
 
 	private void fireModelChange(IUser user, int type) {
 		Iterator<IUserModelListener> i = listeners.iterator();
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			IUserModelListener l = i.next();
 			switch (type) {
 			case ADDED:
@@ -116,71 +109,71 @@ public class UserModel {
 			}
 		}
 	}
-	
+
 	public IUser getRecentUser() {
 		return recentUser;
 	}
-	
+
 	public void setRecentUser(IUser user) {
 		this.recentUser = user;
 	}
-	
+
 	public IUser findUser(String username) {
 		return allUsers.get(username);
 	}
-	
+
 	public IUser[] getUsers() {
 		Collection<IUser> c = allUsers.values();
 		IUser[] rets = (IUser[]) c.toArray(new IUser[c.size()]);
 		return rets;
 	}
-	
+
 	/**
 	 * Load the user list from preferences and secure storage
 	 */
 	public void load() {
-		StringsPreferenceValue pref = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		StringsPreferenceValue pref = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY,
+				OpenShiftUIActivator.PLUGIN_ID);
 		String[] users = pref.get();
-		for( int i = 0; i < users.length; i++ ) {
+		for (int i = 0; i < users.length; i++) {
 			try {
 				String password = getPasswordFromSecureStorage(users[i]);
 				IUser u = createUser(users[i], password);
 				addUser(u);
-			} catch(OpenShiftException ose ) {
-				// TODO 
-			} catch( IOException ioe) {
+			} catch (OpenShiftException ose) {
+				// TODO
+			} catch (IOException ioe) {
 				// TODO
 			}
 		}
 	}
-	
+
 	/**
 	 * Save the user list to preferences and secure storage
 	 */
 	public void save() {
-		// passwords are already in secure storage, save the username list somewhere else
+		// passwords are already in secure storage, save the username list
+		// somewhere else
 		Set<String> set = allUsers.keySet();
 		String[] userList = (String[]) set.toArray(new String[set.size()]);
-		StringsPreferenceValue pref = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		StringsPreferenceValue pref = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY,
+				OpenShiftUIActivator.PLUGIN_ID);
 		pref.store(userList);
-		
+
 		Iterator<IUser> i = allUsers.values().iterator();
 		IUser tmp;
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			tmp = i.next();
-			try {
-				setPasswordInSecureStorage(tmp.getRhlogin(), tmp.getPassword());
-			} catch(OpenShiftException ose ) {
-				// TODO log
-			}
+			setPasswordInSecureStorage(tmp.getRhlogin(), tmp.getPassword());
 		}
 	}
-	
+
 	private static final String RECENT_RHLOGIN_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN";
 	private static final String RHLOGIN_LIST_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN_LIST";
 
 	/**
 	 * Get the username stored in preferences as most recently used
+	 * 
 	 * @return
 	 */
 	public String getDefaultUsername() {
@@ -204,24 +197,25 @@ public class UserModel {
 	 */
 	public boolean setDefaultUsername(String rhLogin) {
 		String prev = getDefaultUsername();
-		StringPreferenceValue preference = new StringPreferenceValue(RECENT_RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
+		StringPreferenceValue preference = new StringPreferenceValue(RECENT_RHLOGIN_PREFS_KEY,
+				OpenShiftUIActivator.PLUGIN_ID);
 		if (rhLogin != null && !rhLogin.equals(prev)) {
 			preference.store(rhLogin);
 			return true;
 		}
 		return false;
 	}
-	
+
 	/*
-	 * Return a password from secure storage, or 
-	 * null if platform not found, or password not stored
+	 * Return a password from secure storage, or null if platform not found, or
+	 * password not stored
 	 */
 	public String getPasswordFromSecureStorage(final String rhLogin) {
-		if( rhLogin == null )
+		if (rhLogin == null)
 			return null;
-		
+
 		SecurePasswordStore store = getSecureStore(rhLogin);
-		if( store != null && rhLogin != null && !rhLogin.isEmpty() ) {
+		if (store != null && rhLogin != null && !rhLogin.isEmpty()) {
 			try {
 				return store.getPassword();
 			} catch (SecurePasswordStoreException e) {
@@ -230,10 +224,10 @@ public class UserModel {
 		}
 		return null;
 	}
-	
+
 	public void setPasswordInSecureStorage(final String rhLogin, String password) {
 		SecurePasswordStore store = getSecureStore(rhLogin);
-		if( store != null && rhLogin != null && !rhLogin.isEmpty() ) {
+		if (store != null && rhLogin != null && !rhLogin.isEmpty()) {
 			try {
 				store.setPassword(password);
 			} catch (SecurePasswordStoreException e) {
@@ -242,7 +236,6 @@ public class UserModel {
 		}
 	}
 
-	
 	private SecurePasswordStore getSecureStore(final String rhLogin) {
 		return getSecureStore(initLibraServer(), rhLogin);
 	}
@@ -251,7 +244,7 @@ public class UserModel {
 	 * Return a secure store or null if platform is not found
 	 */
 	private SecurePasswordStore getSecureStore(final String platform, final String username) {
-		if( platform == null )
+		if (platform == null)
 			return null;
 		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
 		SecurePasswordStore store = new SecurePasswordStore(key);
@@ -267,5 +260,4 @@ public class UserModel {
 		return null;
 	}
 
-	
 }
