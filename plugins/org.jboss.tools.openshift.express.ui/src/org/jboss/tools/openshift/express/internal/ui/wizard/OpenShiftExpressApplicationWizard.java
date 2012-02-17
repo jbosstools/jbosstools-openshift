@@ -172,7 +172,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 			IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
-					getContainer());
+					getContainer(), 300);
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", OpenShiftUIActivator
@@ -198,7 +198,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 							}
 						}
 
-					}, getContainer());
+					}, null, getContainer(), 300);
 			return status.isOK();
 		} catch (Exception e) {
 			return false;
