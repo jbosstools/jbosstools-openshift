@@ -17,8 +17,9 @@
             class="org.jboss.tools.openshift.express.internal.ui.wizard.NewOpenShiftExpressApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
-            name="OpenShift Express Application">
-            <description>Create a new OpenShift Express Application</description>
+            name="OpenShift Express Application"
+            project="true">
+                <description>Create a new OpenShift Express Application</description>
       </wizard>
    </extension>
    <extension
