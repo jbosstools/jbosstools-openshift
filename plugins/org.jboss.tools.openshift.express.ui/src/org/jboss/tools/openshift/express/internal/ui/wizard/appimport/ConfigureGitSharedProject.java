@@ -119,13 +119,13 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
 		if (config != null) {
 			if (EGitUtils.hasRemoteUrl(
-						Pattern.compile(RegExUtils.escapeRegex(getApplication().getGitUri())), config)) {
-							return;
+					Pattern.compile(RegExUtils.escapeRegex(getApplication().getGitUri())), config)) {
+				return;
 			}
 			// we shouldn't get here, the UI should validate the remote name and
 			// inform about an error in this case
 			throw new OpenShiftUIException(
-					"Could not enable OpenShift on project {0}. There's already a a remote called {1}.",
+					"Could not enable OpenShift on project {0}. There's already a a remote called {1} that points to a differnt git repository.",
 					project.getName(), remoteName);
 		}
 
