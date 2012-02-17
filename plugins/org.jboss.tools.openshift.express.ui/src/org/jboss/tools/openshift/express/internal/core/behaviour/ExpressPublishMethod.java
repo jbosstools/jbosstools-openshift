@@ -137,6 +137,9 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			}
 		} catch(CoreException ce) {
 			// Comes if either commit or push has failed
+			if( ce.getMessage().contains("UP_TO_DATE"))
+				return null;
+			
 			try {
 				result = EGitUtils.pushForce(remoteName, repository, new SubProgressMonitor(monitor, 100));
 				monitor.done();
