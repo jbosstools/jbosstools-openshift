@@ -8,16 +8,23 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.ide.eclipse.as.ui.dialogs.RequiredCredentialsDialog;
+import org.jboss.tools.openshift.express.internal.core.console.IPasswordPrompter;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.osgi.framework.BundleContext;
+
+import com.openshift.express.client.IUser;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class OpenShiftUIActivator extends AbstractUIPlugin {
+public class OpenShiftUIActivator extends AbstractUIPlugin implements IPasswordPrompter {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
@@ -41,6 +48,7 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		UserModel.setPasswordPrompt(this);
 	}
 
 	/*
@@ -116,5 +124,22 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 		IPath imageFilePath = new Path("/icons/" + imagePath);
 		URL imageFileUrl = FileLocator.find(this.getBundle(), imageFilePath, null);
 		return ImageDescriptor.createFromURL(imageFileUrl);
+	}
+
+	public String getPasswordFor(final IUser user) {
+		final String[] val =new String[1];
+		val[0] = null;
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				Shell shell = Display.getDefault().getActiveShell();
+				RequiredCredentialsDialog d = new RequiredCredentialsDialog(shell, user.getRhlogin(), user.getPassword());
+				d.setCanModifyUser(false);
+				d.setDescription("Provide enter the password for your express server");
+				if( d.open() == Window.OK) {
+					val[0] = d.getPass();
+				}
+			}
+		});
+		return val[0];
 	}
 }

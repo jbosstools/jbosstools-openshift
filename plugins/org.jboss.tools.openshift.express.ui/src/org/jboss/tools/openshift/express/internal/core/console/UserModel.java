@@ -41,6 +41,14 @@ public class UserModel {
 		return model;
 	}
 
+	private static IPasswordPrompter prompter;
+	public static void setPasswordPrompt(IPasswordPrompter prompt) {
+		prompter =prompt;
+	}
+	public static String promptForPassword(IUser user) {
+		return prompter == null ? null : prompter.getPasswordFor(user);
+	}
+	
 	/** The most recent user connected on OpenShift. */
 	private IUser recentUser = null;
 	private HashMap<String, IUser> allUsers = new HashMap<String, IUser>();
@@ -139,7 +147,7 @@ public class UserModel {
 			try {
 				String password = getPasswordFromSecureStorage(users[i]);
 				IUser u = createUser(users[i], password);
-				addUser(u);
+				addUser(new UserDelegator(u));
 			} catch (OpenShiftException ose) {
 				// TODO
 			} catch (IOException ioe) {
