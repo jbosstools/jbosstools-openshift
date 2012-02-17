@@ -41,6 +41,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 
 		details = ExpressDetailsComposite.createComposite(section, createCallback(), ExpressServerUtils.EXPRESS_SOURCE_MODE, false);
 		toolkit.paintBordersFor(details.getComposite());
+		toolkit.adapt(details.getComposite());
 		section.setClient(details.getComposite());
 		details.appNameCombo.setEnabled(false);
 	}
