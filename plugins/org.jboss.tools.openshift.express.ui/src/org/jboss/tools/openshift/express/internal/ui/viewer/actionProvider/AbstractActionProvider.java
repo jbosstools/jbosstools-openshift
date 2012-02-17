@@ -35,6 +35,7 @@ public abstract class AbstractActionProvider extends CommonActionProvider {
 		super.init(actionExtensionSite);
 		ICommonViewerSite site = actionExtensionSite.getViewSite();
 		if (site instanceof ICommonViewerWorkbenchSite) {
+			action.setViewer(actionExtensionSite.getStructuredViewer());
 			action.setSelection(actionExtensionSite.getStructuredViewer().getSelection());
 			actionExtensionSite.getStructuredViewer().addSelectionChangedListener(action);
 		}

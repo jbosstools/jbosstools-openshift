@@ -1,8 +1,10 @@
 package org.jboss.tools.openshift.express.internal.ui.action;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -14,10 +16,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 public class DeleteApplicationAction extends AbstractAction {
@@ -32,9 +34,8 @@ public class DeleteApplicationAction extends AbstractAction {
 	}
 
 	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no
-	 * Console/Worker existed, a new one is created, otherwise, it is displayed.
-	 * {@inheritDoc}
+	 * Operation called when the user clicks on 'Show In>Remote Console'. If no Console/Worker existed, a new one is
+	 * created, otherwise, it is displayed. {@inheritDoc}
 	 */
 	@Override
 	public void run() {
@@ -60,45 +61,43 @@ public class DeleteApplicationAction extends AbstractAction {
 							+ "This is NOT reversible, all remote data for those applications will be removed.");
 		}
 		if (confirm) {
-			for (final IApplication application : appsToDelete) {
-				final String appName = application.getName();
-				Job job = new Job("Deleting application '" + appName + "'...") {
-					protected IStatus run(IProgressMonitor monitor) {
-						try {
-							application.destroy();
-						} catch (OpenShiftException e) {
-							Logger.error("Failed to delete application '" + appName + "'", e);
-						} finally {
-							monitor.done();
-							if (viewer != null) {
-								refresh();
+			// rework here... loop inside the job, refresh required users only. Equals() and hashcode() in IUser ?
+			Job job = new Job("Deleting OpenShift Application(s)...") {
+				protected IStatus run(IProgressMonitor monitor) {
+					Set<String> usersToRefresh = new HashSet<String>();
+					try {
+						for (final IApplication application : appsToDelete) {
+							final String appName = application.getName();
+							try {
+								application.destroy(); 
+								usersToRefresh.add(application.getUser().getRhlogin());
+							} catch (OpenShiftException e) {
+								Logger.error("Failed to delete application '" + appName + "'", e);
 							}
 						}
-						return Status.OK_STATUS;
+					} finally {
+						monitor.done();
+						Display.getDefault().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								if (viewer != null) {
+									//viewer.g
+									viewer.refresh();
+								}
+							}
+						});
 					}
-				};
-				job.setPriority(Job.SHORT);
-				job.schedule(); // start as soon as possible
-			}
-		}
-		if (viewer != null) {
-			refresh();
+
+					return Status.OK_STATUS;
+				}
+			};
+			job.setPriority(Job.SHORT);
+			job.schedule(); // start as soon as possible
 		}
 	}
 
 	private boolean isApplication(Object selection) {
 		return selection instanceof IApplication;
-	}
-
-	private void refresh() {
-		if (!DisposeUtils.isDisposed(viewer))
-			viewer.getControl().getDisplay().syncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					viewer.refresh();
-				}
-			});
 	}
 
 }
