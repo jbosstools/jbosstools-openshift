@@ -39,7 +39,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	private static final int APP_CREATION_TIMEOUT = 60;
+	private static final int APP_CREATION_TIMEOUT = 120;
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
 	public OpenShiftExpressApplicationWizardModel(IUser user) {
