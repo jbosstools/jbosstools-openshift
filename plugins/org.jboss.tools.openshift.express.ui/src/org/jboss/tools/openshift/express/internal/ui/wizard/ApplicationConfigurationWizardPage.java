@@ -319,9 +319,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				Object newValue = event.diff.getNewValue();
 				if (newValue instanceof Boolean) {
 					Boolean useExisting = (Boolean) newValue;
-					if (!useExisting) {
-						resetExistingApplication();
-					}
+//					if (!useExisting) {
+//						resetExistingApplication();
+//					}
 					enableApplicationWidgets(useExisting);
 				}
 			}
