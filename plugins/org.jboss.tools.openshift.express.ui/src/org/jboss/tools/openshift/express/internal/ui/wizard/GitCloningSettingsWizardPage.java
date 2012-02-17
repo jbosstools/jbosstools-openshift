@@ -149,15 +149,20 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
 		ValueBindingBuilder.bind(remoteNameTextObservable).to(remoteNameModelObservable).in(dbc);
 
-		final IObservableValue useDefaultRemoteNameObservable =
-				WidgetProperties.selection().observe(useDefaultRemoteNameButton);
 		final IObservableValue useDefaultRemoteNameModelObservable =
 				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(
 						pageModel);
-		ValueBindingBuilder.bind(useDefaultRemoteNameObservable).to(useDefaultRemoteNameModelObservable)
+		final IObservableValue useDefaultRemoteNameObservable =
+				WidgetProperties.selection().observe(useDefaultRemoteNameButton);
+		ValueBindingBuilder
+				.bind(useDefaultRemoteNameObservable)
+				.to(useDefaultRemoteNameModelObservable)
 				.in(dbc);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(remoteNameText))
+				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(remoteNameLabel))
 				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an
 		// existing project' option.
@@ -224,7 +229,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// allow to enable a proj only for as7 openshift applications
 		// pageModel.resetRepositoryPath();
 		pageModel.resetRemoteName();
-//		pageModel.refreshApplicationName();
+		// pageModel.refreshApplicationName();
 		enableWidgets(pageModel.isNewProject());
 	}
 
