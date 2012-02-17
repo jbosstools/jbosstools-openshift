@@ -105,7 +105,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		ValueBindingBuilder.bind(repoPathObservable).to(repoPathModelObservable).in(dbc);
 
 		Button browseRepoPathButton = new Button(cloneGroup, SWT.PUSH);
-		browseRepoPathButton.setText("Browse");
+		browseRepoPathButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
 		browseRepoPathButton.addSelectionListener(onRepoPath());
