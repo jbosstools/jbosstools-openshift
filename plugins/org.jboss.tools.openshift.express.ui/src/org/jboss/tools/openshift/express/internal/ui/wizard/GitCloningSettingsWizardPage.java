@@ -60,6 +60,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private Button useDefaultRemoteNameButton;
 	private Button useDefaultRepoPathButton;
 	private Text remoteNameText;
+	private Label remoteNameLabel;
 
 	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard, IOpenShiftExpressWizardModel model) {
 		super(
@@ -135,10 +136,10 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRemoteNameButton);
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteName());
 
-		Label labelForRemoteName = new Label(cloneGroup, SWT.NONE);
-		labelForRemoteName.setText("Remote name:");
+		this.remoteNameLabel = new Label(cloneGroup, SWT.NONE);
+		remoteNameLabel.setText("Remote name:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
-				.applyTo(labelForRemoteName);
+				.applyTo(remoteNameLabel);
 		remoteNameText = new Text(cloneGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().span(1, 1).align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER)
 				.grab(true, false).applyTo(remoteNameText);
@@ -233,10 +234,12 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			useDefaultRemoteNameButton.setEnabled(false);
 			useDefaultRemoteNameButton.setSelection(true);
 			remoteNameText.setEnabled(false);
+			remoteNameLabel.setEnabled(false);
 		} else {
 			useDefaultRepoPathButton.setEnabled(false);
 			useDefaultRemoteNameButton.setEnabled(true);
 			remoteNameText.setEnabled(!useDefaultRemoteNameButton.getSelection());
+			remoteNameLabel.setEnabled(!useDefaultRemoteNameButton.getSelection());
 		}
 	}
 
