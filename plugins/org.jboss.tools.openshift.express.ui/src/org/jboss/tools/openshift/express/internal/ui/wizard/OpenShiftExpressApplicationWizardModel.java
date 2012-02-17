@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
@@ -81,7 +82,26 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 						, getRemoteName()
 						, getRepositoryFile())
 						.execute(monitor);
-		createServerAdapter(monitor, importedProjects);
+		String appName = getApplication().getName();
+		String host = getApplication().getApplicationUrl();
+		IServer found = findServer(appName, host);
+		if( found == null )
+			createServerAdapter(monitor, importedProjects);
+		else {
+			new ServerAdapterFactory().addModules(found, importedProjects, monitor);
+		}
+	}
+	
+	private IServer findServer(String appName, String host) {
+		IServer[] all = ServerCore.getServers();
+		for( int i = 0; i < all.length; i++ ) {
+			String host1 = all[i].getHost();
+			String app1 = ExpressServerUtils.getExpressApplicationName(all[i]);
+			if( (host.endsWith("/" + host1 + "/") || (host.endsWith("/" + host1)))
+					&& appName.equals(app1))
+					return all[i];
+		}
+		return null;
 	}
 
 	/**

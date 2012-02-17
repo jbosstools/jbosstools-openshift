@@ -112,6 +112,10 @@ public class ServerAdapterFactory {
 				application.getName(), application.getUUID(), mode, remoteName);
 		return server;
 	}
+	
+	public void addModules(IServer server, List<IProject> importedProjects, IProgressMonitor monitor) throws CoreException {
+		addModules(getModules(importedProjects), server, monitor);
+	}
 
 	private void addModules(List<IModule> modules, IServer server, IProgressMonitor monitor) throws CoreException {
 		if (modules == null
