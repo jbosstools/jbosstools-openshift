@@ -159,13 +159,13 @@ public class ExpressDetailsComposite {
 				.align(SWT.LEFT, SWT.CENTER).applyTo(userLabel);
 		userText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(userText);
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(userText);
 		Label passLabel = new Label(composite, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(passLabel);
 		passText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(passText);
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(passText);
 
 		if (mode.equals(ExpressServerUtils.EXPRESS_SOURCE_MODE)) {
 			Label appNameLabel = new Label(composite, SWT.NONE);
@@ -173,7 +173,7 @@ public class ExpressDetailsComposite {
 					.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 			appNameCombo = new Combo(composite, SWT.NONE);
 			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(appNameCombo);
+					.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameCombo);
 			appNameLabel.setText("Application Name: ");
 			String aName = ExpressServerUtils.getExpressApplicationName(server);
 			if (aName != null)
@@ -197,7 +197,7 @@ public class ExpressDetailsComposite {
 				.align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(remoteText);
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
 
 		// Text
 		userLabel.setText("Username: ");
