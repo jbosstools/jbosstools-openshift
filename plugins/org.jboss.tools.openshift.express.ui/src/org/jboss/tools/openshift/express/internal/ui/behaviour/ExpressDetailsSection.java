@@ -36,7 +36,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		
 		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.EXPANDED|ExpandableComposite.TITLE_BAR);
-		section.setText("Express Server in Source Mode (Details)");
+		section.setText("Openshift Express Server");
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL| GridData.GRAB_VERTICAL));
 
 		details = ExpressDetailsComposite.createComposite(section, createCallback(), ExpressServerUtils.EXPRESS_SOURCE_MODE, false);

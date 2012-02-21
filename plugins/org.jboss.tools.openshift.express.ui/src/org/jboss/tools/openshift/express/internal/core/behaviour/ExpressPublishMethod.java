@@ -10,16 +10,21 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
+import org.eclipse.egit.ui.Activator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -56,7 +61,8 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	@Override
 	public int publishFinish(DeployableServerBehavior behaviour,
 			IProgressMonitor monitor) throws CoreException {
-		IProject destProj = ExpressServerUtils.findProjectForServersApplication(behaviour.getServer());
+		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if( destProj != null ) {
 			if( destProj.exists() ) {
 				refreshProject(destProj, submon(monitor, 100));
@@ -93,8 +99,17 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		if( module.length > 1 )
 			return 0;
 		
-		IProject destProj = ExpressServerUtils.findProjectForServersApplication(behaviour.getServer());
-		IPath dest = destProj.getLocation().append("deployments");
+		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
+		
+		if( destProj.equals(module[module.length-1].getProject()))
+			return 0;
+		
+		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
+		
+		
+		IContainer destFolder = (IContainer)destProj.findMember(new Path(destinationFolder));
+		IPath dest = destFolder.getLocation();
 		
 		if( module.length == 0 ) return IServer.PUBLISH_STATE_NONE;
 		int modulePublishState = behaviour.getServer().getModulePublishState(module);
@@ -107,6 +122,17 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		try {
 			LocalZippedPublisherUtil util = new LocalZippedPublisherUtil();
 			IStatus status = util.publishModule(behaviour.getServer(), dest.toString(), module, publishType, delta, monitor);
+
+			IPath path = util.getOutputFilePath(module); // where it's deployed
+			IResource addedResource = destFolder.getFile(new Path(path.lastSegment()));
+			IResource[] resource = new IResource[]{addedResource};
+			final AddToIndexOperation operation = new AddToIndexOperation(resource);
+			try {
+				operation.execute(monitor);
+			} catch (CoreException e) {
+				// TODO
+			}
+
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,10 +56,13 @@ public class ExpressServerUtils {
 	public static final String ATTRIBUTE_DEPLOY_PROJECT =  "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
+	public static final String ATTRIBUTE_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.DEPLOY_FOLDER_LOC";
+	
 	// Legacy, not to be used
 	//public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT =  "origin";
+	public static final String ATTRIBUTE_DEPLOY_FOLDER_DEFAULT = "deployments";
 	
 	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";
 	
@@ -121,6 +125,10 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
+	public static String getExpressDeployFolder(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, "deployments");
+	}
+	
 	public static String getExpressRemoteName(IServerAttributes attributes ) {
 		return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, (String)null);
 	}
@@ -140,30 +148,6 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_USERNAME, val);
 		return wc.save(false, new NullProgressMonitor());
 	}
-
-//	public static String getExpressPassword(IServerWorkingCopy server ) {
-//		String username = getExpressUsername(server);
-//		return UserModel.getDefault().getPasswordFromSecureStorage(username);
-//	}
-//	
-//	public static String getExpressPassword(IServer server ) {
-//		String username = getExpressUsername(server);
-//		return UserModel.getDefault().getPasswordFromSecureStorage(username);
-//		
-//		// Can safely delete this if we have no need for backwards compat currently
-////		if( server == null )
-////			return null;
-////		String s = ServerUtil.getFromSecureStorage(server, ExpressServerUtils.ATTRIBUTE_PASSWORD);
-////		if( s == null )
-////			return server.getAttribute(ExpressServerUtils.ATTRIBUTE_PASSWORD, (String)null);
-////		return s;
-//	}
-//	
-//	public static void setExpressPassword(IServerAttributes server, String val) throws CoreException {
-//		String username = getExpressUsername(server);
-//		UserModel.getDefault().setPasswordInSecureStorage(username, val);
-//	}
-	
 	
 	public static boolean getIgnoresContextRoot(IServerAttributes server) {
 		return server.getAttribute(PREFERENCE_IGNORE_CONTEXT_ROOT, true);
@@ -174,68 +158,22 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
 		return wc.save(false, new NullProgressMonitor());
 	}
-
-	
-	/**
-	 * To be used if you must create a local runtime adapter 
-	 * as the user does not have one in their workspace yet
-	 * 
-	 * @param host
-	 * @param username
-	 * @param password
-	 * @param domain
-	 * @param appName
-	 * @param sourceOrBinary
-	 * @param localRuntimeHomeDir
-	 * @return
-	 * @throws CoreException
-	 */
-	public static IServer createAS7OpenShiftServer(
-			String host, String username, String password, 
-			String domain, String appName, String appId,
-			String sourceOrBinary, String remoteName,
-			String localRuntimeHomeDir) throws CoreException {
-		IServer server = createServerAndRuntime(IJBossToolingConstants.AS_70,
-				IJBossToolingConstants.SERVER_AS_70, 
-				localRuntimeHomeDir, /* irrelevant */ "default");
-		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary, remoteName);
-	}
-	
-	/**
-	 * To be used if a runtime is already provided, for example if a user has 
-	 * selected the proper as7 local runtime delegate from a combo box
-	 * 
-	 * @param host
-	 * @param username
-	 * @param password
-	 * @param domain
-	 * @param appName
-	 * @param sourceOrBinary
-	 * @param runtime
-	 * @return
-	 * @throws CoreException
-	 */
-	public static IServer createAS7OpenShiftServer(
-			String host, String username, String password, 
-			String domain, String appName, String appId, String sourceOrBinary, String remoteName,
-			IRuntime runtime) throws CoreException {
-		IServer server = createServer(runtime, IJBossToolingConstants.SERVER_AS_70);
-		return fillServerWithOpenShiftDetails(server, host, username, password, domain, appName, appId, sourceOrBinary, remoteName);
-	}
-
 	
 	public static IServer fillServerWithOpenShiftDetails(IServer server, IApplication application, 
-			IUser user, String mode, String remoteName) throws CoreException, OpenShiftException {
+			IUser user, String deployProject, String projectRelativeFolder,
+			String mode, String remoteName) throws CoreException, OpenShiftException {
 		return fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
 				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
-				application.getName(), application.getUUID(), mode, remoteName);
+				application.getName(), application.getUUID(), deployProject, projectRelativeFolder, mode, remoteName);
 	}
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
-			IUser user, String mode, String remoteName) throws CoreException, OpenShiftException {
+			IUser user, String mode, String deployProject, 
+			String projectRelativeFolder, String remoteName) throws CoreException, OpenShiftException {
 		fillServerWithOpenShiftDetails(wc, application.getApplicationUrl(),
 				user.getRhlogin(), user.getDomain().getNamespace(), 
-				application.getName(), application.getUUID(), mode, remoteName);
+				application.getName(), application.getUUID(), 
+				deployProject, projectRelativeFolder, mode, remoteName);
 	}
 
 	/**
@@ -254,16 +192,18 @@ public class ExpressServerUtils {
 	@SuppressWarnings("restriction")
 	public static IServer fillServerWithOpenShiftDetails(IServer server, String host, 
 			String username, String password, String domain, String appName, String appId,
+			String deployProject, String projectRelativeFolder,
 			String mode, String remoteName) throws CoreException {
 		ServerWorkingCopy wc = (ServerWorkingCopy)server.createWorkingCopy();
-		fillServerWithOpenShiftDetails(wc, host, username, domain, appName, appId, mode, remoteName);
+		fillServerWithOpenShiftDetails(wc, host, username, domain, appName, appId, 
+				deployProject, projectRelativeFolder, mode, remoteName);
 		IServer saved = wc.save(true, new NullProgressMonitor());
-//		ExpressServerUtils.setExpressPassword(wc, password);
 		return saved;
 	}
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host, 
-			String username, String domain, String appName, String appId,
+			String username, String domain, String appName, String appId, 
+			String deployProject, String projectRelativeFolder,
 			String mode, String remoteName) throws CoreException {
 
 		if( host.indexOf("://") != -1)
@@ -271,22 +211,20 @@ public class ExpressServerUtils {
 		if( host.endsWith("/"))
 			host = host.substring(0, host.length()-1);
 		wc.setHost(host);
-		if(mode.equals(ExpressServerUtils.EXPRESS_SOURCE_MODE)) {
-			wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
-		} else {
-			wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBinaryBehaviourDelegate.OPENSHIFT_BINARY_ID);
-			
-		}
+		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
+		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
 		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remoteName);
 		((ServerWorkingCopy)wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
 		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
+		wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
+		wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 	}
 	
 	
@@ -350,7 +288,8 @@ public class ExpressServerUtils {
 		return null;
 	}
 
-	public static IProject findProjectForApplication(IApplication application) {
+	public static IProject[] findProjectsForApplication(IApplication application) {
+		ArrayList<IProject> results = new ArrayList<IProject>();
 		if( application ==null )
 			return null;
 		String gitUri = null;
@@ -369,13 +308,18 @@ public class ExpressServerUtils {
 				while(it.hasNext()) {
 					String projURI = it.next().toPrivateString();
 					if( projURI.equals(gitUri))
-						return projects[i];
+						results.add(projects[i]);
 				}
 			} catch(CoreException ce) {
 				// Log? Not 100 required, just skip this project?
 			}
 		}
-		return null;
+		return results.toArray(new IProject[results.size()]);
+	}
+	
+	public static IProject findProjectForApplication(IApplication application) {
+		IProject[] p = findProjectsForApplication(application);
+		return p == null ? null : p.length == 0 ? null : p[0];
 	}
 
 	public static IProject findProjectForServersApplication(IServer server) {

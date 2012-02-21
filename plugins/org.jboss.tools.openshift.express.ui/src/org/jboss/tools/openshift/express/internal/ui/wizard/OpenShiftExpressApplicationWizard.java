@@ -135,6 +135,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	@Override
 	public void addPages() {
+		if( getWizardModel().getUser() == null)
+			getWizardModel().setUser(initialUser);
 		addPage(new CredentialsWizardPage(this, getWizardModel()));
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));

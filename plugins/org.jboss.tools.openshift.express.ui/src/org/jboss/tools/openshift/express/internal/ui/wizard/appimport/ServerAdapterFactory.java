@@ -67,18 +67,20 @@ public class ServerAdapterFactory {
 	 * @throws OpenShiftException
 	 */
 	protected void createServerAdapter(IProject project, IServerType serverType, IRuntime runtime, String mode,
-			IApplication application, IUser user, String remoteName, IProgressMonitor monitor) throws OpenShiftException {
+			IApplication application, IUser user,
+			String remoteName, IProgressMonitor monitor) throws OpenShiftException {
 		String name = project.getName();
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", name));
 		createServerAdapter(Collections.singletonList(project), serverType, runtime, 
-				mode, application, user, remoteName, monitor);
+				mode, application, user, project.getName(), remoteName, monitor);
 	}
 
 	protected void createServerAdapter(List<IProject> importedProjects, IServerType serverType,
-			IRuntime runtime, String mode, IApplication application, IUser user, String remoteName, IProgressMonitor monitor) {
+			IRuntime runtime, String mode, IApplication application, IUser user, 
+			String deployProject, String remoteName, IProgressMonitor monitor) {
 		try {
 			renameWebContextRoot(importedProjects);
-			IServer server = doCreateServerAdapter(serverType, runtime, mode, application, user, remoteName);
+			IServer server = doCreateServerAdapter(serverType, runtime, mode, application, user, deployProject, remoteName);
 			addModules(getModules(importedProjects), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
@@ -96,7 +98,7 @@ public class ServerAdapterFactory {
 	}
 
 	private IServer doCreateServerAdapter(IServerType serverType, IRuntime rt, String mode,
-			IApplication application, IUser user, String remoteName) throws CoreException,
+			IApplication application, IUser user, String deployProject, String remoteName) throws CoreException,
 			OpenShiftException {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(mode != null);
@@ -109,7 +111,8 @@ public class ServerAdapterFactory {
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
 		ExpressServerUtils.fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
 				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
-				application.getName(), application.getUUID(), mode, remoteName);
+				application.getName(), application.getUUID(), deployProject, 
+				ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT, mode, remoteName);
 		return server;
 	}
 	
