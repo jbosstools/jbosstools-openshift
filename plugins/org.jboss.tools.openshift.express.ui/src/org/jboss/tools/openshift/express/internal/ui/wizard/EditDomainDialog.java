@@ -15,10 +15,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftEndpointException;
 
 /**
  * @author Andre Dietisheim
@@ -47,8 +49,12 @@ public class EditDomainDialog extends Wizard {
 					try {
 						model.renameDomain();
 						return Status.OK_STATUS;
+					} catch(OpenShiftEndpointException e) {
+						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+								"Could not create domain \"{0}\": {1}", model.getNamespace(), e.getResponseResult()), e);
 					} catch (Exception e) {
-						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not rename domain", e);
+						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+								"Could not rename domain {0}", model.getNamespace()), e);
 					}
 				}
 			}, getContainer());

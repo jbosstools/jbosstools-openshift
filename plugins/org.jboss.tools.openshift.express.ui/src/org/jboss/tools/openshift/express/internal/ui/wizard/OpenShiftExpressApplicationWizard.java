@@ -45,6 +45,7 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
 import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftEndpointException;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -193,7 +194,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 							try {
 								getWizardModel().createApplication(monitor);
 								return Status.OK_STATUS;
-							} catch (Exception e) {
+							} catch (OpenShiftEndpointException e) {
+								// TODO: refresh user
+								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\": {1}",
+										e, applicationName, e.getResponseResult());
+							} catch (OpenShiftException e) {
 								// TODO: refresh user
 								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"",
 										e, applicationName);
@@ -210,9 +215,9 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private boolean addRemoveCartridges(final IApplication application,
 			final Set<IEmbeddableCartridge> selectedCartridges) {
 		try {
+			final String applicationName = getWizardModel().getApplication().getName();
 			IStatus status = WizardUtils.runInWizard(
-					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", getWizardModel()
-							.getApplication().getName())) {
+					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", applicationName)) {
 
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
@@ -222,6 +227,10 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 									embeddableCartridges.addAll(selectedCartridges);
 									application.addEmbbedCartridges(embeddableCartridges);
 								}
+							} catch (OpenShiftEndpointException e) {
+								// TODO: refresh user
+								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+										"Could not embed cartridges to application {0}: {1}", applicationName, e.getResponseResult()));
 							} catch (OpenShiftException e) {
 								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
 										"Could not embed cartridges to application {0}", getWizardModel()

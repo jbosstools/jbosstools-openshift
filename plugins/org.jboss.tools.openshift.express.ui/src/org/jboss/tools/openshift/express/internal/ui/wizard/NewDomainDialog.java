@@ -20,6 +20,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftEndpointException;
 
 /**
  * @author André Dietisheim
@@ -41,9 +42,12 @@ public class NewDomainDialog extends Wizard {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						model.createDomain();
+					} catch (OpenShiftEndpointException e) {
+						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+								"Could not create domain \"{0}\": {1}", model.getNamespace(), e.getResponseResult()), e);
 					} catch (Exception e) {
-						return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								NLS.bind("Could not create domain \"{0}\"", model.getNamespace()), e);
+						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+								"Could not create domain \"{0}\"", model.getNamespace()), e);
 					}
 					return Status.OK_STATUS;
 				}
