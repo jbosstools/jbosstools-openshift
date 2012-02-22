@@ -15,12 +15,15 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.LoadingStub;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
 import com.openshift.express.client.IUser;
+import com.openshift.express.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -65,7 +68,9 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 		if (element instanceof LoadingStub) {
 			return OpenShiftUIActivator.getDefault().createImage("systemprocess.gif");
 		}
-
+		if (element instanceof OpenShiftException ) {
+			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+		}
 		return null;
 	}
 
@@ -103,6 +108,9 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 
 		if (element instanceof LoadingStub) {
 			return new StyledString("Loading...");
+		}
+		if (element instanceof OpenShiftException ) {
+			return new StyledString( ((OpenShiftException)element).getMessage());
 		}
 		return null;
 	}

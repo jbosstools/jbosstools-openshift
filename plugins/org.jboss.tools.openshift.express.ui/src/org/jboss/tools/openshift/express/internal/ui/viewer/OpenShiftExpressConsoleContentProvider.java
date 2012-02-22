@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,12 +56,14 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	// Keep track of what's loading and what's finished
 	private ArrayList<IUser> loadedUsers = new ArrayList<IUser>();
 	private ArrayList<IUser> loadingUsers = new ArrayList<IUser>();
+	private HashMap<IUser, OpenShiftException> errors = new HashMap<IUser, OpenShiftException>();
 
 	@Override
 	public Object[] getElements(final Object parentElement) {
 		// A refresh on the whole model... clear our cache
 		loadedUsers.clear();
 		loadingUsers.clear();
+		errors.clear();
 		if (parentElement instanceof IWorkspaceRoot) {
 			return UserModel.getDefault().getUsers();
 		}
@@ -82,22 +85,35 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				// return a stub object that says loading...
 				return new Object[] { new LoadingStub() };
 			}
+			OpenShiftException ose = errors.get((IUser)parentElement);
+			if( ose != null ) {
+				return new Object[]{ose};
+			}
 		}
-		return getChildrenFor(parentElement, false);
+		return getChildrenForElement_LogException(parentElement, false);
 	}
 
 	// Force the children to load completely
 	private void getChildrenFor(Object[] parentElements) {
 		for (int i = 0; i < parentElements.length; i++) {
-			getChildrenFor(parentElements[i], true);
+			getChildrenForElement_LogException(parentElements[i], true);
 		}
 	}
 
 	// Get the children without the protection of a "loading..." situation
-	private Object[] getChildrenFor(Object parentElement, boolean recurse) {
+	private Object[] getChildrenForElement_LogException(Object parentElement, boolean recurse) {
+		try {
+			return getChildrenForElement(parentElement, recurse);
+		} catch (OpenShiftException e) {
+			Logger.error("Unable to retrieve OpenShift Express information", e);
+		}
+		return new Object[0];
+	}
+	
+	private Object[] getChildrenForElement(Object parentElement, boolean recurse) throws OpenShiftException {
 		// .... the actual work is done here...
 		Object[] children = new Object[0];
-		try {
+//		try {
 			if (parentElement instanceof OpenShiftExpressConsoleContentCategory) {
 				IUser user = ((OpenShiftExpressConsoleContentCategory) parentElement).getUser();
 				children = new Object[] { user };
@@ -115,9 +131,9 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			if (recurse) {
 				getChildrenFor(children);
 			}
-		} catch (OpenShiftException e) {
-			Logger.error("Unable to retrieve OpenShift Express information", e);
-		}
+//		} catch (OpenShiftException e) {
+//			Logger.error("Unable to retrieve OpenShift Express information", e);
+//		}
 		return children;
 	}
 
@@ -130,10 +146,14 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				monitor.worked(1);
 				// Get the actual children, with the delay
 				loadingUsers.add(user);
-				getChildrenFor(user, true);
+				try {
+					getChildrenForElement(user, true);
+				} catch(OpenShiftException e) {
+					errors.put(user, e);
+				}
 				loadedUsers.add(user);
 				loadingUsers.remove(user);
-				refreshViewerObject(user);
+				refreshViewerObject(user); 
 				monitor.done();
 				return Status.OK_STATUS;
 			}
