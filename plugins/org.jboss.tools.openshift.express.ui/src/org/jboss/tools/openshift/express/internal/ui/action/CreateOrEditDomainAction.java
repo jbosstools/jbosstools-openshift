@@ -36,7 +36,7 @@ public class CreateOrEditDomainAction extends AbstractAction {
 	@Override
 	public void run() {
 		final ITreeSelection treeSelection = (ITreeSelection) selection;
-		if (selection != null && selection instanceof ITreeSelection
+		if (selection instanceof ITreeSelection
 				&& treeSelection.getFirstElement() instanceof IUser) {
 			IWizard domainDialog = null;
 			final IUser user = (IUser) treeSelection.getFirstElement();
