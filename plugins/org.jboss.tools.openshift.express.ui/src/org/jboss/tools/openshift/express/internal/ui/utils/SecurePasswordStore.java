@@ -48,11 +48,13 @@ public class SecurePasswordStore {
 		}
 	}
 
-	public void setPassword(String password) throws SecurePasswordStoreException {
+	public void setPassword(String password)
+			throws SecurePasswordStoreException {
 		update(storageKey, password);
 	}
 
-	public void update(IStorageKey key, String password) throws SecurePasswordStoreException {
+	public void update(IStorageKey key, String password)
+			throws SecurePasswordStoreException {
 		if (!storageKey.equals(key) || isPasswordChanged(password)) {
 			storeInPreferences(this.password = password, this.storageKey = key);
 		}
@@ -62,7 +64,8 @@ public class SecurePasswordStore {
 		if (this.password == null && password == null) {
 			return false;
 		} else {
-			return (this.password == null && password != null) || (this.password != null && password == null)
+			return (this.password == null && password != null)
+					|| (this.password != null && password == null)
 					|| !password.equals(this.password);
 		}
 	}
@@ -71,15 +74,18 @@ public class SecurePasswordStore {
 		try {
 			ISecurePreferences node = getNode(storageKey);
 			if (node == null) {
-				throw new SecurePasswordStoreException("Could not remove password");
+				throw new SecurePasswordStoreException(
+						"Could not remove password");
 			}
 			node.clear();
 		} catch (Exception e) {
-			throw new SecurePasswordStoreException("Could not remove password", e);
+			throw new SecurePasswordStoreException("Could not remove password",
+					e);
 		}
 	}
 
-	private String getFromPreferences(IStorageKey key) throws StorageException, UnsupportedEncodingException {
+	private String getFromPreferences(IStorageKey key) throws StorageException,
+			UnsupportedEncodingException {
 		ISecurePreferences node = getNode(key);
 		String password = node.get("password", null); //$NON-NLS-1$
 		if (password == null) {
@@ -88,16 +94,22 @@ public class SecurePasswordStore {
 		return new String(EncodingUtils.decodeBase64(password));
 	}
 
-	private void storeInPreferences(String password, IStorageKey key) throws SecurePasswordStoreException {
-		try {
-			ISecurePreferences node = getNode(key);
-			node.put("password", EncodingUtils.encodeBase64(password.getBytes()), true /* encrypt */); //$NON-NLS-1$
-		} catch (Exception e) {
-			throw new SecurePasswordStoreException("Could not store password", e);
+	private void storeInPreferences(String password, IStorageKey key)
+			throws SecurePasswordStoreException {
+		if (password != null) {
+			try {
+				ISecurePreferences node = getNode(key);
+				node.put(
+						"password", EncodingUtils.encodeBase64(password.getBytes()), true /* encrypt */); //$NON-NLS-1$
+			} catch (Exception e) {
+				throw new SecurePasswordStoreException(
+						"Could not store password", e);
+			}
 		}
 	}
 
-	private ISecurePreferences getNode(IStorageKey key) throws UnsupportedEncodingException {
+	private ISecurePreferences getNode(IStorageKey key)
+			throws UnsupportedEncodingException {
 		if (key == null) {
 			return null;
 		}

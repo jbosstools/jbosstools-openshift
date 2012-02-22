@@ -29,8 +29,8 @@ public class OpenShiftPasswordStorageKey implements IStorageKey {
 	private String userName;
 
 	public OpenShiftPasswordStorageKey(String platform, String userName) {
-		this.userName = platform;
-		this.platform = userName;
+		this.platform = platform;
+		this.userName = userName;
 	}
 
 	@Override
@@ -47,8 +47,8 @@ public class OpenShiftPasswordStorageKey implements IStorageKey {
 		if (!key.getClass().isAssignableFrom(OpenShiftPasswordStorageKey.class)) {
 			return false;
 		}
-		OpenShiftPasswordStorageKey deltaCloudKey = (OpenShiftPasswordStorageKey) key;
-		return userName.equals(deltaCloudKey.userName)
-				&& platform.equals(deltaCloudKey.platform);
+		OpenShiftPasswordStorageKey openshiftKey = (OpenShiftPasswordStorageKey) key;
+		return (userName != null && openshiftKey.userName != null && userName.equals(openshiftKey.userName)) 
+				&& (platform != null && openshiftKey.platform != null && platform.equals(openshiftKey.platform));
 	}
 }

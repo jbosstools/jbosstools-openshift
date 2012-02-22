@@ -225,6 +225,8 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		} catch (Exception e) {
 			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 					"Could not check user credentials: {0}.", e.getMessage()));
+		} catch(Throwable e) {
+			Logger.error("Failed to validate credentials", e);
 		}
 		return status;
 	}
