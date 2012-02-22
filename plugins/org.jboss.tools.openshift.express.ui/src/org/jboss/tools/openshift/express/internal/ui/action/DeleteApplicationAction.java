@@ -51,13 +51,21 @@ public class DeleteApplicationAction extends AbstractAction {
 		}
 		boolean confirm = false;
 		if (appsToDelete.size() == 1) {
-			confirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Application deletion",
-					"You are about to destroy the '" + appsToDelete.get(0) + "' application.\n"
-							+ "This is NOT reversible, all remote data for this application will be removed.");
+			confirm = MessageDialog
+					.openConfirm(
+							Display.getCurrent().getActiveShell(),
+							"Application deletion",
+							NLS.bind(
+									"You are about to destroy the \"{0}\" application.\n."
+											+
+											"This is NOT reversible, all remote data for this application will be removed.",
+									appsToDelete.get(0)));
 		} else if (appsToDelete.size() > 1) {
-			confirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Application deletion",
-					"You are about to destroy " + appsToDelete.size() + " applications.\n"
-							+ "This is NOT reversible, all remote data for those applications will be removed.");
+			confirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(),
+					"Application deletion",
+					NLS.bind("You are about to destroy {0} applications.\n"
+							+ "This is NOT reversible, all remote data for those applications will be removed.",
+							appsToDelete.size()));
 		}
 		if (confirm) {
 			// rework here... loop inside the job, refresh required users only.
