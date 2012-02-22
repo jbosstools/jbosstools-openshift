@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +35,9 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
+import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IEmbeddableCartridge;
+
 /**
  * @author André Dietisheim
  */
@@ -41,15 +45,25 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 	private static final Pattern HTTP_LINK_REGEX = Pattern.compile("(http[^ |\n]+)");
 
-	private LogEntry[] logEntries;
+	private Collection<IEmbeddableCartridge> cartridges;
+	private IApplication application;
 	private List<LinkSubstring> linkSubstrings;
-
-	public CreationLogDialog(Shell parentShell, LogEntry... logEntries) {
-		super(parentShell);
-		this.logEntries = logEntries;
-		this.linkSubstrings = new ArrayList<LinkSubstring>();
+	
+	public CreationLogDialog(Shell parentShell, Collection<IEmbeddableCartridge> cartridges) {
+		this(parentShell);
+		this.cartridges = cartridges;
 	}
 
+	public CreationLogDialog(Shell parentShell, IApplication application) {
+		this(parentShell);
+		this.application = application;
+	}
+
+	protected CreationLogDialog(Shell parentShell) {
+		super(parentShell);
+		this.linkSubstrings = new ArrayList<LinkSubstring>();
+	}
+	
 	@Override
 	protected Control createContents(Composite parent) {
 		Control control = super.createContents(parent);
@@ -75,9 +89,36 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 		StyledText logText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(logText);
-		writeLogEntries(logEntries, logText);
+		writeLogEntries(createLogEntries(), logText);
 		logText.addListener(SWT.MouseDown, onLinkClicked(logText));
 		return container;
+	}
+
+	private LogEntry[] createLogEntries() {
+		if (cartridges != null) {
+			return createLogEntries(cartridges);
+		} else {
+			return createLogEntries(application);
+		}
+	}
+
+	private LogEntry[] createLogEntries(Collection<IEmbeddableCartridge> cartridges) {
+		if (cartridges == null
+				|| cartridges.isEmpty()) {
+			return new LogEntry[] {};
+		}
+		ArrayList<LogEntry> logEntries = new ArrayList<LogEntry>();
+		for (IEmbeddableCartridge cartridge : cartridges) {
+			logEntries.add(new LogEntry(cartridge.getName(), cartridge.getCreationLog()));
+		}
+		return logEntries.toArray(new LogEntry[cartridges.size()]);
+	}
+	
+	private LogEntry[] createLogEntries(IApplication application) {
+		if (application == null) {
+			return new LogEntry[] {};
+		}
+		return new LogEntry[] { new LogEntry(application.getName(), application.getCreationLog()) };
 	}
 
 	private Listener onLinkClicked(final StyledText logText) {

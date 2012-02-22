@@ -84,7 +84,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 
 import com.openshift.express.client.Cartridge;
 import com.openshift.express.client.IApplication;
@@ -595,8 +594,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(), new LogEntry(application.getName(), application.getCreationLog()))
-						.open();
+				new CreationLogDialog(getShell(), application).open();
 			}
 		});
 	}

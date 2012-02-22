@@ -52,7 +52,6 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
@@ -375,18 +374,12 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		if (cartridges.size() == 0) {
 			return;
 		}
-		
-		final ArrayList<LogEntry> logEntries = new ArrayList<LogEntry>();
-		for (IEmbeddableCartridge cartridge : cartridges) {
-			logEntries.add(new LogEntry(cartridge.getName(), cartridge.getCreationLog()));
-		}
 
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(),
-						logEntries.toArray(new LogEntry[logEntries.size()])).open();
+				new CreationLogDialog(getShell(), cartridges).open();
 
 			}
 		});
@@ -397,8 +390,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(),
-						new LogEntry(application.getName(), application.getCreationLog())).open();
+				new CreationLogDialog(getShell(), application).open();
 			}
 		});
 	}

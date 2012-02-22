@@ -226,6 +226,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 									List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 									embeddableCartridges.addAll(selectedCartridges);
 									application.addEmbbedCartridges(embeddableCartridges);
+									openCreationLogDialog(embeddableCartridges);
 								}
 							} catch (OpenShiftEndpointException e) {
 								// TODO: refresh user
@@ -243,6 +244,20 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	private void openCreationLogDialog(final List<IEmbeddableCartridge> embeddableCartridges) {
+		if (embeddableCartridges == null
+				|| embeddableCartridges.isEmpty()) {
+			return;
+		}
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				new CreationLogDialog(getShell(), embeddableCartridges).open();
+			}
+		});
 	}
 
 	/**
