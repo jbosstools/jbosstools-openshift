@@ -364,6 +364,17 @@
            <triggerPoints></triggerPoints>
         </navigatorContent>
         <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.createApplicationActionProvider">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.express.client.IUser">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditDomainActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editDomainActionProvider">
            <enablement>
@@ -377,17 +388,6 @@
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RemoveConnectionActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RemoveConnectionActionProvider">
-           <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.express.client.IUser">
-                 </instanceof>
-              </and>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.createApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
