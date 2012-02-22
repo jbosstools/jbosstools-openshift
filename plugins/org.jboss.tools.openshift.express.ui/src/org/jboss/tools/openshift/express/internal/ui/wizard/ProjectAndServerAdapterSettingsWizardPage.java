@@ -72,7 +72,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		createProjectGroup(container, dbc);
 		createServerAdapterGroup(container, dbc);
-		createWorkingSetGroup(container, dbc);
+//		createWorkingSetGroup(container, dbc);
 	}
 
 	private Composite createProjectGroup(Composite parent, DataBindingContext dbc) {
