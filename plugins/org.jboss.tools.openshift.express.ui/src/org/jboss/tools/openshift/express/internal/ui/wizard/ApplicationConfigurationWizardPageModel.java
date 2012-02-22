@@ -111,18 +111,21 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return existingApplicationName;
 	}
 
-	public void setExistingApplicationName(String applicationName) {
+	public void setExistingApplicationName(String applicationName) throws OpenShiftException {
 		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME
 				, existingApplicationName
 				, this.existingApplicationName = applicationName);
-	}
-
-	protected void setExistingApplicationName(IApplication application) {
-		String applicationName = null;
-		if (application != null) {
-			applicationName = application.getName();
+		if (applicationName != null) {
+			for (IApplication application : getApplications()) {
+				if (application.getName().equals(applicationName)) {
+					setApplicationName(application.getName());
+					setSelectedCartridge(application.getCartridge());
+					setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(
+							application.getEmbeddedCartridges()));
+				}
+			}
 		}
-		setExistingApplicationName(applicationName);
+	
 	}
 
 	public void loadExistingApplications() throws OpenShiftException {
@@ -213,11 +216,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setExistingApplication(IApplication application) throws OpenShiftException {
-		// setUseExistingApplication(application);
-		setExistingApplicationName(application);
-		setApplicationName(application);
-		setSelectedCartridge(application);
-		setSelectedEmbeddableCartridges(application);
+		if(application != null) {
+			setExistingApplicationName(application.getName());
+			setApplicationName(application.getName());
+			setSelectedCartridge(application.getCartridge());
+			setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(application.getEmbeddedCartridges()));
+		}
 		wizardModel.setApplication(application);
 	}
 
@@ -260,14 +264,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES,
 				wizardModel.getSelectedEmbeddableCartridges(),
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
-	}
-
-	protected void setSelectedEmbeddableCartridges(IApplication application) throws OpenShiftException {
-		HashSet<IEmbeddableCartridge> selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
-		if (application != null) {
-			selectedEmbeddableCartridges.addAll(application.getEmbeddedCartridges());
-		}
-		setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
 	}
 
 	public boolean hasApplication(ICartridge cartridge) {

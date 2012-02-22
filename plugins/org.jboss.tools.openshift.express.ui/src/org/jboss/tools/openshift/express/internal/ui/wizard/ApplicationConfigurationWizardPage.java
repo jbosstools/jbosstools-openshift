@@ -161,7 +161,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
 		ValueBindingBuilder.bind(existingAppNameTextObservable).to(existingAppNameModelObservable).in(dbc);
 		UIUtils.focusOnSelection(useExistingAppBtn, existingAppNameText);
-		createContentAssist(existingAppNameText);
+		createExistingAppNameContentAssist();
 
 		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
 		browseAppsButton.setText("Browse...");
@@ -181,7 +181,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		return existingAppSelectionGroup;
 	}
 
-	private void createContentAssist(final Text existingAppNameText) {
+	private void createExistingAppNameContentAssist() {
 		ControlDecoration dec = new ControlDecoration(existingAppNameText, SWT.TOP | SWT.LEFT);
 		FieldDecoration contentProposalFieldIndicator = FieldDecorationRegistry.getDefault().getFieldDecoration(
 				FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
@@ -638,6 +638,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					public void run() {
 						loadOpenshiftResources(dbc);
 						enableApplicationWidgets(pageModel.isUseExistingApplication());
+						createExistingAppNameContentAssist();
 						// this is needed because of weird issues with UI not
 						// reacting to model changes while wizard runnable is
 						// run. We force another update
