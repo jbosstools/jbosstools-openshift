@@ -17,7 +17,7 @@
             class="org.jboss.tools.openshift.express.internal.ui.wizard.NewOpenShiftExpressApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
-            name="OpenShift Express Application"
+            name="OpenShift Application"
             project="true">
                 <description>Create a new OpenShift Express Application</description>
       </wizard>
@@ -33,7 +33,7 @@
             class="org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
-            name="Existing OpenShift Express Application">
+            name="Existing OpenShift Application">
             <description>Import an existing OpenShift Express Application</description>
       </wizard>
     </extension>  

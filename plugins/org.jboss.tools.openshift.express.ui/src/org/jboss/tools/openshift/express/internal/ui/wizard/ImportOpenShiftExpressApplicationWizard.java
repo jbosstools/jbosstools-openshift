@@ -18,7 +18,7 @@ public class ImportOpenShiftExpressApplicationWizard extends OpenShiftExpressApp
 	 * Constructor
 	 */
 	public ImportOpenShiftExpressApplicationWizard() {
-		super("Import OpenShift Application");
+		super("Import OpenShift Express Application");
 	}
 
 	/**
@@ -28,6 +28,6 @@ public class ImportOpenShiftExpressApplicationWizard extends OpenShiftExpressApp
 	 * @param application
 	 */
 	public ImportOpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application) {
-		super(user, project, application, "Import OpenShift Application");
+		super(user, project, application, "Import OpenShift Express Application");
 	}
 }
