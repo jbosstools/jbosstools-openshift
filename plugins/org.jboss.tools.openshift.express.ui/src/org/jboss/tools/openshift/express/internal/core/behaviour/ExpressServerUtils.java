@@ -35,6 +35,7 @@ import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IUser;
@@ -126,11 +127,11 @@ public class ExpressServerUtils {
 	}
 
 	public static String getExpressDeployFolder(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, "deployments");
+		return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
 	}
 	
 	public static String getExpressRemoteName(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, (String)null);
+		return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 	}
 
 	public static IServer setExpressRemoteName(IServer server, String val) throws CoreException {
@@ -169,10 +170,13 @@ public class ExpressServerUtils {
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
 			IUser user, String mode, String deployProject, 
-			String projectRelativeFolder, String remoteName) throws CoreException, OpenShiftException {
-		fillServerWithOpenShiftDetails(wc, application.getApplicationUrl(),
-				user.getRhlogin(), user.getDomain().getNamespace(), 
-				application.getName(), application.getUUID(), 
+			String projectRelativeFolder, String remoteName) throws OpenShiftException {
+		fillServerWithOpenShiftDetails(wc, 
+				application == null ? null : application.getApplicationUrl(),
+				user == null ? null : user.getRhlogin(), 
+				user == null ? null : user.getDomain().getNamespace(), 
+				application == null ? null : application.getName(), 
+				application == null ? null : application.getUUID(), 
 				deployProject, projectRelativeFolder, mode, remoteName);
 	}
 
@@ -204,12 +208,13 @@ public class ExpressServerUtils {
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host, 
 			String username, String domain, String appName, String appId, 
 			String deployProject, String projectRelativeFolder,
-			String mode, String remoteName) throws CoreException {
-
-		if( host.indexOf("://") != -1)
-			host = host.substring(host.indexOf("://") + 3);
-		if( host.endsWith("/"))
-			host = host.substring(0, host.length()-1);
+			String mode, String remoteName)  {
+		if( host != null ) {
+			if( host.indexOf("://") != -1)
+				host = host.substring(host.indexOf("://") + 3);
+			if( host.endsWith("/"))
+				host = host.substring(0, host.length()-1);
+		}
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_USERNAME, username);

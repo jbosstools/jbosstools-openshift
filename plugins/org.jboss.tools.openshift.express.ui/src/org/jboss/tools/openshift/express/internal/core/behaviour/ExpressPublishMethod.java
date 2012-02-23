@@ -61,6 +61,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	@Override
 	public int publishFinish(DeployableServerBehavior behaviour,
 			IProgressMonitor monitor) throws CoreException {
+		
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if( destProj != null ) {
@@ -107,8 +108,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		
 		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
 		
-		
-		IContainer destFolder = (IContainer)destProj.findMember(new Path(destinationFolder));
+		IContainer destFolder = "".equals(destinationFolder) ? destProj : (IContainer)destProj.findMember(new Path(destinationFolder));
 		IPath dest = destFolder.getLocation();
 		
 		if( module.length == 0 ) return IServer.PUBLISH_STATE_NONE;

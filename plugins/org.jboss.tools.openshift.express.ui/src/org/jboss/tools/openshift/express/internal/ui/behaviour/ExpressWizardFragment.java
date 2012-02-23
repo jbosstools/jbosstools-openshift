@@ -59,7 +59,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 			}
 		};
 		composite = ExpressDetailsComposite.createComposite(parent,callback, ExpressServerUtils.EXPRESS_SOURCE_MODE, true);
-		setComplete(false);
+		setComplete(getTaskModel().getObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP) != null);
 		return composite.getComposite();
 	}
 		

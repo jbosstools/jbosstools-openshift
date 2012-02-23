@@ -11,13 +11,13 @@
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -48,8 +47,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.internal.handlers.ResetPerspectiveHandler;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
@@ -66,7 +63,6 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
@@ -82,26 +78,35 @@ public class ExpressDetailsComposite {
 		return new ExpressDetailsComposite(composite, callback, mode, showVerify);
 	}
 
+	// How to display errors, set attributes, etc
 	protected IServerModeUICallback callback;
+	
+	// Widgets 
 	private ModifyListener nameModifyListener, remoteModifyListener,
 			appModifyListener, deployProjectModifyListener, deployDestinationModifyListener;
 	private ModifyListener passModifyListener;
+	private Composite composite;
 	private Link importLink;
 	protected Text userText, remoteText;
 	protected Text passText;
 	protected Text deployFolderText;
 	protected Combo appNameCombo, deployProjectCombo;
 	protected Button verifyButton,  browseDestButton;
+	
+	// Data / Model 
 	protected boolean showVerify;
-	private Composite composite;
 	private String user, pass, app, remote, deployProject, deployFolder;
 	private IApplication fapplication;
 	private IUser fuser;
+	private List<IApplication> appList;
 	private String[] appListNames;
 	private String error;
 	private IServerWorkingCopy server;
 	private String mode;
-
+	private HashMap<IApplication, IProject[]> projectsPerApp = new HashMap<IApplication, IProject[]>();
+	private boolean credentialsFailed = false;
+	
+	
 	public ExpressDetailsComposite(Composite fill, IServerModeUICallback callback, String mode, boolean showVerify) {
 		this.callback = callback;
 		this.server = callback.getServer();
@@ -112,83 +117,76 @@ public class ExpressDetailsComposite {
 		createWidgets(fill);
 		fillWidgets();
 		addListeners();
+		postLongRunningValidate();
 	}
 
 	public Composite getComposite() {
 		return composite;
 	}
 
-	// We already have an initial user, so username and pw can be frozen
-	private boolean createServerHasInitialUser = false;
-	
 	private void initModel() {
 		String nameFromExistingServer = ExpressServerUtils.getExpressUsername(server);
 		if (nameFromExistingServer == null) {
-			// We're in a new server wizard.
-			// First, check if the taskmodel has data
-			IUser tmpUser = (IUser) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
-			createServerHasInitialUser = tmpUser != null;
-			if (tmpUser == null) {
-				// If not, use recent user
-				tmpUser = UserModel.getDefault().getRecentUser();
-			}
-			if (tmpUser == null && UserModel.getDefault().getUsers().length > 0) {
-				tmpUser = UserModel.getDefault().getUsers()[0];
-			}
-			if (tmpUser != null) {
-				try {
-					this.fuser = tmpUser;
-					this.user = tmpUser.getRhlogin();
-					if( createServerHasInitialUser ) {
-						List<IApplication> allApps = tmpUser.getApplications();
-						this.appListNames = getAppNamesAsStrings(allApps);
-					}
-				} catch (Exception e) { 
-					/* TODO */
-				}
-			}
-		} else {
-			this.user = nameFromExistingServer;
-		}
-		IApplication app = (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
-		if (app != null) {
-			this.fapplication = app;
-			this.app = app.getName();
-		} else {
-			this.app = ExpressServerUtils.getExpressApplicationName(server);
+			initModelNewServerWizard();
+			return;
 		}
 
+		this.user = nameFromExistingServer;
+		this.fuser = UserModel.getDefault().findUser(this.user);
+		this.app = ExpressServerUtils.getExpressApplicationName(server);
 		this.pass = UserModel.getDefault().getPasswordFromSecureStorage(this.user);
 		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
-		this.remote = this.remote == null ? IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT : this.remote;
 	}
 
+	private void initModelNewServerWizard() {
+		// We're in a new server wizard.
+		IUser tmpUser = (IUser) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
+		IApplication app = (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
+		
+		if( tmpUser != null && app != null ) {
+			// started from express console with a user and an app
+			try {
+				this.fuser = tmpUser;
+				this.user = fuser.getRhlogin();
+				this.appList = fuser.getApplications();
+				this.appListNames = getAppNamesAsStrings(this.appList);
+				this.fapplication = app;
+				this.app = app.getName();
+				showVerify = false;
+			} catch( OpenShiftException ose ) {
+				// ignore, allow appList and appListNames to be null / empty
+			}
+		} else {
+			// we may or may not have a user, clearly no app
+			this.fuser = tmpUser == null ? UserModel.getDefault().getRecentUser() : tmpUser;
+			this.user = fuser == null ? null : fuser.getRhlogin();
+		}
+		
+		this.pass = this.user == null ? null : UserModel.getDefault().getPasswordFromSecureStorage(this.user);
+		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
+		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+	}
+	
 	/* Set widgets initial values */
 	private void fillWidgets() {
 		if (user != null) {
 			userText.setText(user);
-			userText.setEnabled(!createServerHasInitialUser);
+			userText.setEnabled(showVerify);
 		}
 		if (showVerify && pass != null) {
 			passText.setText(pass);
-			passText.setEnabled(!createServerHasInitialUser);
+			passText.setEnabled(fapplication == null);
 		}
 		if (remote != null)
 			remoteText.setText(remote);
 		if (appListNames != null)
 			appNameCombo.setItems(appListNames);
-		app = ExpressServerUtils.getExpressApplicationName(server);
-		app = app != null ? app : fapplication == null ? null : fapplication.getName();
 		if (app != null) {
-			appNameCombo.setText(app);
 			appNameCombo.setEnabled(false);
-			int ind = appNameCombo.indexOf(app);
-			if (ind != -1) {
-				appNameCombo.select(ind);
-			}
-
+			appNameCombo.setItems(new String[]{app});
+			appNameCombo.select(0);
 			if( fapplication != null ) {
 				resetDeployProjectCombo();
 			} else {
@@ -230,11 +228,14 @@ public class ExpressDetailsComposite {
 			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passLabel);
 			passText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(passText);
+			verifyButton = new Button(composite, SWT.PUSH);
+			verifyButton.setText("Verify...");
+			new Composite(composite, SWT.NULL); // Stub, fill the empty space
 		}
 		Label appNameLabel = new Label(composite, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
-		appNameCombo = new Combo(composite, SWT.NONE);
+		appNameCombo = new Combo(composite, SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameCombo);
 		appNameLabel.setText("Application Name: ");
 		
@@ -243,17 +244,24 @@ public class ExpressDetailsComposite {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
 		deployLocationLabel.setText("Deploy Project: " );
 		
+		if( showVerify ) {
+			importLink = new Link(composite, SWT.DEFAULT);
+			importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
+			importLink.setEnabled(false);
+			GridData gd = GridDataFactory.fillDefaults().span(2, 1).create();
+			importLink.setLayoutData(gd);
+		}
 		Label zipDestLabel = new Label(composite, SWT.NONE);
 		zipDestLabel.setText("Output Directory: ");
 		
 		Composite zipDestComposite = new Composite(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
-		browseDestButton = new Button(zipDestComposite, SWT.DEFAULT);
+		browseDestButton = new Button(zipDestComposite, SWT.PUSH);
 		browseDestButton.setText("Browse...");
-		browseDestButton.setLayoutData(UIUtil.createFormData2(0,5,100,-5,null,0,100,-5));
+		browseDestButton.setLayoutData(UIUtil.createFormData2(0,5,100,-5,null,0,100,0));
 		deployFolderText = new Text(zipDestComposite, SWT.SINGLE | SWT.BORDER);
-		deployFolderText.setLayoutData(UIUtil.createFormData2(0,5,100,-5,0,5,browseDestButton,-5));
+		deployFolderText.setLayoutData(UIUtil.createFormData2(0,5,100,-5,0,0,browseDestButton,-5));
 		
 		
 		
@@ -266,16 +274,6 @@ public class ExpressDetailsComposite {
 		userLabel.setText("Username: ");
 		if( passLabel != null ) passLabel.setText("Password: ");
 		remoteLabel.setText("Remote: ");
-
-		if (showVerify) {
-			importLink = new Link(composite, SWT.DEFAULT);
-			importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
-			importLink.setEnabled(false);
-			GridData gd = GridDataFactory.fillDefaults().span(2, 1).create();
-			importLink.setLayoutData(gd);
-			verifyButton = new Button(composite, SWT.PUSH);
-			verifyButton.setText("Verify...");
-		}
 	}
 
 	private void addListeners() {
@@ -310,8 +308,13 @@ public class ExpressDetailsComposite {
 			appModifyListener = new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					app = appNameCombo.getText();
+					int ind = appNameCombo.indexOf(app);
+					if( ind != -1 ) {
+						fapplication = appList.get(ind);
+					}
 					callback.execute(new SetApplicationCommand(server));
 					resetDeployProjectCombo();
+					postLongRunningValidate();
 				}
 			};
 			appNameCombo.addModifyListener(appModifyListener);
@@ -406,14 +409,11 @@ public class ExpressDetailsComposite {
 	}
 	
 	private void verifyPressed() {
-		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(new ConnectToOpenShiftWizardModel());
 		this.fapplication = null;
 		this.fuser = null;
 		this.appListNames = null;
-		model.setPassword(pass);
-		model.setRhLogin(user);
 		verifyButton.setEnabled(false);
-		final Runnable runnable = getVerifyingCredentialsJob(model);
+		final Runnable runnable = getVerifyingCredentialsJob();
 		Job j = new Job("Verifying Credentials and Application") {
 			protected IStatus run(IProgressMonitor monitor) {
 				runnable.run();
@@ -421,30 +421,56 @@ public class ExpressDetailsComposite {
 			}
 		};
 		callback.executeLongRunning(j);
+		postVerifyUpdateWidgets();
 		postLongRunningValidate();
 	}
 
-	private void postLongRunningValidate() {
+	private void postVerifyUpdateWidgets() {
 		importLink.setEnabled(false);
-		if (appListNames == null) {
-			appListNames = new String[0];
-		}
+		verifyButton.setEnabled(true);
 		if (appNameCombo != null) {
-			int index = Arrays.asList(appListNames).indexOf(app);
 			appNameCombo.setItems(appListNames);
+			int index = Arrays.asList(appListNames).indexOf(app);
 			if (index != -1)
 				appNameCombo.select(index);
-		}
-		if (error == null) {
-			IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
-			if (p == null || p.length == 0) {
-				error = "Your workspace does not have a project corresponding to " + app + ". Please import one.";
-				importLink.setEnabled(true);
+			else if( (app == null || "".equals(app)) && appListNames.length > 0) {
+				int select = 0;
+				for( int i = 0; i < appList.size(); i++ ) {
+					IProject[] p = projectsPerApp.get(appList.get(i));
+					if( p != null && p.length > 0 ) {
+						select = i;
+						break;
+					}
+				}
+				appNameCombo.select(select);
 			}
-			resetDeployProjectCombo();
+		}
+		IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
+		importLink.setEnabled(p == null || p.length == 0);
+		resetDeployProjectCombo();
+	}
+	
+	private void postLongRunningValidate() {
+		if( !showVerify )
+			return;
+		
+		error = null;
+		if( credentialsFailed ) {
+			error = "Credentials Failed";
+		} else {
+			if( appList == null ) {
+				error = "Please click \"verify\" to test your credentials.";
+			}
+			else if( app == null || app.equals("")) {
+				error = "Please select an application from the combo below.";
+			} else {
+				IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
+				if (p == null || p.length == 0) {
+					error = "Your workspace does not have a project corresponding to " + app + ". Please import one.";
+				}
+			}
 		}
 		callback.setErrorMessage(error);
-		verifyButton.setEnabled(true);
 	}
 
 	public class SetUserCommand extends ServerWorkingCopyPropertyCommand {
@@ -501,50 +527,51 @@ public class ExpressDetailsComposite {
 		}
 	}
 
-	private Runnable getVerifyingCredentialsJob(final CredentialsWizardPageModel model) {
+	private Runnable getVerifyingCredentialsJob() {
+		final ConnectToOpenShiftWizardModel inner = new ConnectToOpenShiftWizardModel();
+		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(inner);
+		model.setPassword(pass);
+		model.setRhLogin(user);
 		return new Runnable() {
 			public void run() {
 				final IStatus s = model.validateCredentials();
+				error = null;
 				if (!s.isOK()) {
-					ExpressDetailsComposite.this.error = "Credentials Failed";
+					credentialsFailed = true;
 				} else {
-					verifyApplicationSourceMode(model);
+					credentialsFailed = false;
+					try {
+						updateModelForNewUser(inner.getUser());
+					} catch(OpenShiftException ose) {
+						error = ose.getMessage();
+					}
 				}
 			}
 		};
 	}
 
-	private void verifyApplicationSourceMode(CredentialsWizardPageModel model) {
-		error = null;
-		// now check the app name and cartridge
-		String[] appNames = new String[] {};
-		try {
-			IUser user = UserModel.getDefault().getRecentUser();
-			final List<IApplication> allApps = user.getApplications();
-			appNames = getAppNamesAsStrings(allApps);
-			int index = Arrays.asList(appNames).indexOf(app);
-			IApplication application = index == -1 ? null : allApps.get(index);
-			ExpressDetailsComposite.this.appListNames = appNames;
-			if (application == null) {
-				error = "Application " + app + " not found. Please select one from the combo box.";
-			} else {
-				// Fill with new data
-				try {
-					ExpressDetailsComposite.this.fapplication = application;
-					ExpressDetailsComposite.this.fuser = user;
-					if( deployProject != null && !deployProject.equals("")) {
-						// update the values
-						IServerWorkingCopy wc = callback.getServer();
-						ExpressServerUtils.fillServerWithOpenShiftDetails(wc, application, 
-								fuser, mode, deployProject, deployFolder, remote);
-					}
-				} catch (CoreException ce) {
-					// TODO FIX HANDLE
-				}
-			}
-		} catch (OpenShiftException ose) {
-			error = "Application \"" + app + "\" not found: " + ose.getMessage();
+	private void updateModelForNewUser(IUser user) throws OpenShiftException {
+
+		// Updating the model, some long-running 
+		projectsPerApp.clear();
+		this.appList = user.getApplications();
+		String[] appNames = getAppNamesAsStrings(appList);
+		int index = Arrays.asList(appNames).indexOf(app);
+		IApplication application = index == -1 ? null : appList.get(index);
+		this.appListNames = appNames == null ? new String[0] : appNames;
+		this.fapplication = application;
+		this.fuser = user;
+		this.user = fuser.getRhlogin();
+		
+		for( int i = 0; i < appList.size(); i++ ) {
+			projectsPerApp.put(appList.get(i), ExpressServerUtils.findProjectsForApplication(appList.get(i)));
 		}
+		
+		// Fill the server working copy
+		// update the values
+		IServerWorkingCopy wc = callback.getServer();
+		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, application, 
+				fuser, mode, deployProject, deployFolder, remote);
 	}
 
 	private String[] getAppNamesAsStrings(List<IApplication> allApps) {
