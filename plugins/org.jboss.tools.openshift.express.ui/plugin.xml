@@ -386,8 +386,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RemoveConnectionActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RemoveConnectionActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider">
            <enablement>
               <and>
                  <instanceof
