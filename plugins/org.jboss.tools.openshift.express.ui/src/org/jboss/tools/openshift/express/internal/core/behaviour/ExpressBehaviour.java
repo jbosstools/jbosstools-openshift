@@ -15,11 +15,19 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IModule;
 import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
 
 public class ExpressBehaviour extends DelegatingServerBehavior {
 	private IAdaptable publishAdaptableInfo;
+	public IStatus publish(int kind, IProgressMonitor monitor) {
+		if( publishAdaptableInfo != null && "user".equals(publishAdaptableInfo.getAdapter(String.class)))
+			return super.publish(kind, monitor);
+		return Status.OK_STATUS;
+	}
+	
 	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info) throws CoreException {
 		publishAdaptableInfo = info;
 		try {
