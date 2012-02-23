@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -40,7 +41,10 @@ public class EditCartridgesAction extends AbstractAction {
 			EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 			dialog.create();
-			dialog.open();
+			int result = dialog.open();
+			if(result == Dialog.OK) {
+				viewer.refresh(application);
+			}
 			
 		}
 	}
