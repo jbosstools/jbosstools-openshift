@@ -37,7 +37,6 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_NAMESPACE = "namespace";
 	public static final String PROPERTY_SSHKEY = "sshKey";
-	public static final String PROPERTY_DOMAIN = "domain";
 
 	private String namespace;
 	private IDomain domain;
@@ -88,7 +87,6 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 
 	public void createDomain() throws OpenShiftException, IOException {
 		IDomain domain = user.createDomain(namespace, loadSshKey());
-		setDomain(domain);
 	}
 
 	public String getSshKey() {
@@ -156,10 +154,4 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return domain;
 	}
 
-	public void setDomain(IDomain domain) {
-		firePropertyChange(PROPERTY_DOMAIN, this.domain, this.domain = domain);
-		if (domain != null) {
-			setNamespace(domain.getNamespace());
-		}
-	}
 }

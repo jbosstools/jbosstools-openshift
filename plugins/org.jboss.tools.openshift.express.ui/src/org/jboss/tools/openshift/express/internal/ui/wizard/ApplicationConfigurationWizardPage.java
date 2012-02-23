@@ -348,14 +348,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}, newAppConfigurationGroup);
 	}
 
-	private void resetExistingApplication() {
-		try {
-			pageModel.resetExistingApplication();
-		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(e);
-		}
-	}
-
 	private void fillCartridgesCombo(DataBindingContext dbc, Combo cartridgesCombo) {
 		dbc.bindList(WidgetProperties.items().observe(cartridgesCombo),
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_CARTRIDGES).observe(pageModel),
@@ -796,7 +788,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			if (!StringUtils.isAlphaNumeric(applicationName)) {
 				return ValidationStatus.error(
-						"The name may only contain letters and numbers.");
+						"The name may only contain lower-case letters and digits.");
 			}
 			if (pageModel.isExistingApplication(applicationName)) {
 				return ValidationStatus.error(

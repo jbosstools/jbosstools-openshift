@@ -53,7 +53,8 @@ public class StringUtils {
 
 	public static boolean isAlphaNumeric(String value) {
 		for (int i = 0; i < value.length(); ++i) {
-			if (!Character.isLetterOrDigit(value.charAt(i))) {
+			final char c = value.charAt(i);
+			if (!Character.isLowerCase(c) && !Character.isDigit(c)) {
 				return false;
 			}
 		}

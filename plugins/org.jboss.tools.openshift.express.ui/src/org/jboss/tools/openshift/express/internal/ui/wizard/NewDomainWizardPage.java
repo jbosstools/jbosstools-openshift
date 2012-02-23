@@ -17,11 +17,16 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -43,9 +48,9 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
+import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
@@ -61,11 +66,11 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 	private static final String FILTEREXPRESSION_PUBLIC_SSH_KEY = "*.pub";
 	private static final String FILTERNAME_PUBLIC_SSH_KEY = "Public ssh key file (*.pub)";
 
-	private NewDomainWizardPageModel model;
+	private NewDomainWizardPageModel pageModel;
 
-	public NewDomainWizardPage(NewDomainWizardPageModel model, IWizard wizard) {
+	public NewDomainWizardPage(NewDomainWizardPageModel pageModel, IWizard wizard) {
 		super("Domain Creation", "Create a new domain", "New Domain", wizard);
-		this.model = model;
+		this.pageModel = pageModel;
 	}
 
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
@@ -78,9 +83,20 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		Text namespaceText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
-		DataBindingUtils.bindMandatoryTextField(
-				namespaceText, "Domain name", NewDomainWizardPageModel.PROPERTY_NAMESPACE, model, dbc);
+		ISWTObservableValue namespaceTextObservable = WidgetProperties.text(SWT.Modify)
+				.observe(namespaceText);
+		final NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
+		dbc.addValidationStatusProvider(namespaceValidator);
+		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
+				new CustomControlDecorationUpdater());
+		final IObservableValue namespaceModelObservable = BeanProperties.value(
+				EditDomainWizardPageModel.PROPERTY_NAMESPACE).observe(pageModel);
+		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
 
+		/*DataBindingUtils.bindMandatoryTextField(
+				namespaceText, "Domain name", NewDomainWizardPageModel.PROPERTY_NAMESPACE, model, dbc);
+		*/
+		
 		Label sshKeyLabel = new Label(container, SWT.NONE);
 		sshKeyLabel.setText("SSH Public Key");
 		GridDataFactory.fillDefaults()
@@ -90,13 +106,13 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sshKeyText);
 		Binding sshKeyTextBinding = dbc.bindValue(
 				WidgetProperties.text(SWT.Modify).observe(sshKeyText),
-				BeanProperties.value(NewDomainWizardPageModel.PROPERTY_SSHKEY).observe(model),
+				BeanProperties.value(NewDomainWizardPageModel.PROPERTY_SSHKEY).observe(pageModel),
 				new UpdateValueStrategy().setAfterGetValidator(new MandatoryStringValidator(
 						"You have to select a ssh public key")),
 				new UpdateValueStrategy().setAfterGetValidator(new SSHKeyValidator()));
 		ControlDecorationSupport.create(sshKeyTextBinding, SWT.TOP | SWT.LEFT);
 		try {
-			model.initSshKey();
+			pageModel.initSshKey();
 		} catch (OpenShiftException ex) {
 			IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 					"Could check your ssh keys", ex);
@@ -134,10 +150,10 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 
 				try {
-					if (model.libraPublicKeyExists()) {
+					if (pageModel.libraPublicKeyExists()) {
 						MessageDialog.openInformation(getShell(), 
 								"Libra Key already present", 
-								"You already have a key at \"" + model.getLibraPublicKey() + "\". Please move it or use it.");
+								"You already have a key at \"" + pageModel.getLibraPublicKey() + "\". Please move it or use it.");
 						return;
 					} 
 
@@ -145,7 +161,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 					if (Dialog.OK == dialog.open()) {
 						try {
 							String passPhrase = dialog.getValue();
-							model.createLibraKeyPair(passPhrase);
+							pageModel.createLibraKeyPair(passPhrase);
 						} catch (FileNotFoundException ex) {
 							IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 									"Could not read the ssh key folder", ex);
@@ -183,7 +199,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 				dialog.setFilterExtensions(new String[] { FILTEREXPRESSION_PUBLIC_SSH_KEY });
 				String sshKeyPath = dialog.open();
 				if (sshKeyPath != null) {
-					model.setSshKey(sshKeyPath);
+					pageModel.setSshKey(sshKeyPath);
 				}
 			}
 		};
@@ -243,6 +259,36 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 			return false;
+		}
+	}
+	
+	private class NamespaceValidator extends MultiValidator {
+
+		private final ISWTObservableValue domainNameObservable;
+
+		public NamespaceValidator(ISWTObservableValue domainNameObservable) {
+			this.domainNameObservable = domainNameObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			final String domainName = (String) domainNameObservable.getValue();
+			if (domainName.isEmpty()) {
+				return ValidationStatus.cancel(
+						"Select an alphanumerical name and a type for the domain to edit.");
+			}
+			if (!StringUtils.isAlphaNumeric(domainName)) {
+				return ValidationStatus.error(
+						"The name may only contain lower-case letters and digits.");
+			}
+			return ValidationStatus.ok();
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(domainNameObservable);
+			return targets;
 		}
 	}
 
