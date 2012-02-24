@@ -78,6 +78,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -802,8 +803,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						"An application with the same name already exists on OpenShift.");
 			}
 			if (isExistingProject(applicationName)) {
-				return ValidationStatus.error(
-						NLS.bind("A project {0} already exists in the workspace.", applicationName));
+				return ValidationStatus.warning(
+						NLS.bind("A project already exists with the same application name. This can cause problems when importing.", applicationName));
 			}
 			return ValidationStatus.ok();
 		}
@@ -853,4 +854,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return targets;
 		}
 	}
+
+	protected void setupWizardPageSupport(DataBindingContext dbc) {
+		ParametrizableWizardPageSupport.create(
+				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
+				dbc);
+	}
+
 }
