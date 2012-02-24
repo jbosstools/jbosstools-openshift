@@ -283,7 +283,9 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					if (!askForConfirmation(
 							NLS.bind("OpenShift application {0} will be enabled on project {1} by "
 									+ "copying OpenShift configuration and enabling Git for the project.\n "
-									+ "This cannot be undone. Do you wish to continue ?",
+									+ "This cannot be undone. \n" 
+									+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n" 
+									+ "Do you wish to continue ?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
@@ -291,9 +293,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					getWizardModel().configureUnsharedProject(delegatingMonitor);
 				} else {
 					if (!askForConfirmation(
-							NLS.bind("OpenShift application {0} will be enabled on project {1} by copying OpenShift "
-									+ "configuration and adding the OpenShift git repo as remote.\n "
-									+ "This cannot be undone. Do you wish to continue ?",
+							NLS.bind("OpenShift application {0} will be enabled on project {1} by "
+									+ "copying OpenShift configuration and enabling Git for the project.\n "
+									+ "This cannot be undone. \n" 
+									+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n" 
+									+ "Do you wish to continue ?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
