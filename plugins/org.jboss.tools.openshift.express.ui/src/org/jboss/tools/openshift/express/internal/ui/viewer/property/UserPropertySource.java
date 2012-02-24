@@ -23,6 +23,8 @@ import com.openshift.express.client.OpenShiftException;
  */
 public class UserPropertySource implements IPropertySource {
 
+	private static final String PROPERTY_DOMAIN = "Domain";
+	private static final String PROPERTY_USERNAME = "Username";
 	private final IUser user;
 
 	public UserPropertySource(IUser user) {
@@ -36,17 +38,18 @@ public class UserPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { new PropertyDescriptor("Username", "Username"),
-				new PropertyDescriptor("Domain", "Domain") };
+		return new IPropertyDescriptor[] { 
+				new PropertyDescriptor(PROPERTY_USERNAME, PROPERTY_USERNAME),
+				new PropertyDescriptor(PROPERTY_DOMAIN, PROPERTY_DOMAIN) };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
 		try {
-			if (id.equals("Username")) {
+			if (id.equals(PROPERTY_USERNAME)) {
 				return user.getRhlogin();
 			}
-			if (id.equals("Domain") && user.hasDomain()) {
+			if (id.equals(PROPERTY_DOMAIN) && user.hasDomain()) {
 				return user.getDomain().getNamespace() + "." + user.getDomain().getRhcDomain();
 			}
 		} catch (OpenShiftException e) {
