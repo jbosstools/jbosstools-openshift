@@ -10,9 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.FormAttachment;
@@ -54,8 +52,8 @@ public class UserPropertySection extends AbstractPropertySection {
 
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		Assert.isTrue(selection instanceof IStructuredSelection);
-		Object input = ((IStructuredSelection) selection).getFirstElement();
+//		Assert.isTrue(selection instanceof IStructuredSelection);
+//		Object input = ((IStructuredSelection) selection).getFirstElement();
 	}
 
 	public void refresh() {
