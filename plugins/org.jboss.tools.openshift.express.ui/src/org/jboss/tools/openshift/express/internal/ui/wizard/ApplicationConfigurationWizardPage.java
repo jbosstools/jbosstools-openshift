@@ -803,8 +803,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						"An application with the same name already exists on OpenShift.");
 			}
 			if (isExistingProject(applicationName)) {
-				return ValidationStatus.warning(
-						NLS.bind("A project already exists with the same application name. This can cause problems when importing.", applicationName));
+				return ValidationStatus
+						.warning("A project already exists with the same application name. This can cause problems when importing.");
 			}
 			return ValidationStatus.ok();
 		}
