@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
@@ -35,6 +36,7 @@ import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 
 import com.openshift.express.client.IApplication;
@@ -328,17 +330,23 @@ public class ExpressServerUtils {
 	}
 
 	public static IProject findProjectForServersApplication(IServer server) {
+		IApplication app = findApplicationForServer(server);
+		if (app == null) {
+			return null;
+		}
+		return ExpressServerUtils.findProjectForApplication(app);
+	}
+
+	public static IApplication findApplicationForServer(IServer server) {
 		try {
 			String user = ExpressServerUtils.getExpressUsername(server);
 			IUser user2 = UserModel.getDefault().findUser(user);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = user2.getApplicationByName(appName);
-			IProject destProj = ExpressServerUtils.findProjectForApplication(app);
-			return destProj;
+			return app;
 		} catch(OpenShiftException ose) {
-			//TODO log and throw core e
+			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
+			return null;
 		}
-		return null;
 	}
-
 }
