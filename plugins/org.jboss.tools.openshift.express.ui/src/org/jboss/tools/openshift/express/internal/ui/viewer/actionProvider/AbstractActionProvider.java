@@ -22,8 +22,10 @@ import org.jboss.tools.openshift.express.internal.ui.action.AbstractAction;
  */
 public abstract class AbstractActionProvider extends CommonActionProvider {
 
-	private final AbstractAction action;
+	protected final AbstractAction action;
 	
+	protected ICommonActionExtensionSite actionExtensionSite;
+
 	private final String group;
 	
 	public AbstractActionProvider(AbstractAction action, String group) {
@@ -33,6 +35,7 @@ public abstract class AbstractActionProvider extends CommonActionProvider {
 
 	public void init(ICommonActionExtensionSite actionExtensionSite) {
 		super.init(actionExtensionSite);
+		this.actionExtensionSite = actionExtensionSite;
 		ICommonViewerSite site = actionExtensionSite.getViewSite();
 		if (site instanceof ICommonViewerWorkbenchSite) {
 			action.setViewer(actionExtensionSite.getStructuredViewer());

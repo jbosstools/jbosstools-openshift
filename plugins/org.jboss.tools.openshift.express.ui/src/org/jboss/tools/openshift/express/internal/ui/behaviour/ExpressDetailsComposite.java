@@ -155,6 +155,9 @@ public class ExpressDetailsComposite {
 				this.fapplication = app;
 				this.app = app.getName();
 				showVerify = false;
+				ExpressServerUtils.fillServerWithOpenShiftDetails(
+						callback.getServer(), fapplication, fuser, mode,
+						deployProject, deployFolder, remote);
 			} catch( OpenShiftException ose ) {
 				// ignore, allow appList and appListNames to be null / empty
 			}
