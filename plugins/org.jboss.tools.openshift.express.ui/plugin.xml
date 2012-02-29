@@ -2,11 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.jboss.ide.eclipse.as.ui.DeployMethodUI">
-      <ui deployMethodId="openshift"
-          class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftDeployUI"/>
-   </extension>
-   <extension
          point="org.eclipse.ui.newWizards">
       <category
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
