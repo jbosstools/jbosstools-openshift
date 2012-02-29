@@ -33,7 +33,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	private NewServerWizardBehaviourCallback  callback;
 	
 	public ExpressWizardFragment() {
-		// TODO Auto-generated constructor stub
+		setComplete(false);
 	}
 	
 	public boolean hasComposite() {
