@@ -58,15 +58,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	private OpenShiftExpressApplicationWizardModel wizardModel;
 
-	/**
-	 * @see #setUser called by CredentialsWizardPageModel#getValidityStatus
-	 */
-	public OpenShiftExpressApplicationWizard(String wizardTitle) {
-		this(null, null, null, wizardTitle);
+	public OpenShiftExpressApplicationWizard(boolean useExistingApplication, String wizardTitle) {
+		this(null, null, null, useExistingApplication, wizardTitle);
 	}
-
-	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application, String wizardTitle) {
-		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application));
+	
+	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
+		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application, useExistingApplication));
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
 	}

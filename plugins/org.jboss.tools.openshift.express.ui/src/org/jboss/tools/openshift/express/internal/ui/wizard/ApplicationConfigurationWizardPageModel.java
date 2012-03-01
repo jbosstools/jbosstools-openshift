@@ -221,8 +221,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
 			setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(application.getEmbeddedCartridges()));
+			wizardModel.setApplication(application);
 		}
-		wizardModel.setApplication(application);
 	}
 
 	public void resetExistingApplication() throws OpenShiftException {

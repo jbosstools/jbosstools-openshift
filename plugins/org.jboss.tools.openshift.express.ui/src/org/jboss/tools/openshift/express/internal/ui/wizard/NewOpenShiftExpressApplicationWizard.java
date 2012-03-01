@@ -15,10 +15,10 @@ public class NewOpenShiftExpressApplicationWizard extends OpenShiftExpressApplic
 	 * Constructor
 	 */
 	public NewOpenShiftExpressApplicationWizard() {
-		super("New OpenShift Express Application");
+		super(false, "New OpenShift Express Application");
 	}
 
 	public NewOpenShiftExpressApplicationWizard(IUser user) {
-		super(user, null, null, "New OpenShift Express Application");
+		super(user, null, null, false, "New OpenShift Express Application");
 	}
 }

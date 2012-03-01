@@ -43,15 +43,16 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
 	public OpenShiftExpressApplicationWizardModel(IUser user) {
-		this(user, null, null);
+		this(user, null, null, false);
 	}
 
-	public OpenShiftExpressApplicationWizardModel(IUser user, IProject project, IApplication application) {
+	public OpenShiftExpressApplicationWizardModel(IUser user, IProject project, IApplication application, boolean useExistingApplication) {
 		// default value(s)
 		setUser(user);
 		setProject(project);
 		setNewProject(true);
 		setApplication(application);
+		setUseExistingApplication(useExistingApplication);
 		setCreateServerAdapter(true);
 		setRepositoryPath(DEFAULT_REPOSITORY_PATH);
 		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
