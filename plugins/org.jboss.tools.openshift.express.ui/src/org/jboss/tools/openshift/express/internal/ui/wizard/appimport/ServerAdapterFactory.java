@@ -30,6 +30,7 @@ import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
@@ -75,12 +76,30 @@ public class ServerAdapterFactory {
 				mode, application, user, project.getName(), remoteName, monitor);
 	}
 
+	private IServer findServer(String applicationName, String host) {
+		IServer[] all = ServerCore.getServers();
+		for( int i = 0; i < all.length; i++ ) {
+			String host1 = all[i].getHost();
+			String app1 = ExpressServerUtils.getExpressApplicationName(all[i]);
+			if( (host.endsWith("/" + host1 + "/") || (host.endsWith("/" + host1)))
+					&& applicationName.equals(app1))
+					return all[i];
+		}
+		return null;
+	}
+
+	
 	protected void createServerAdapter(List<IProject> importedProjects, IServerType serverType,
 			IRuntime runtime, String mode, IApplication application, IUser user, 
 			String deployProject, String remoteName, IProgressMonitor monitor) {
 		try {
 			renameWebContextRoot(importedProjects);
-			IServer server = doCreateServerAdapter(serverType, runtime, mode, application, user, deployProject, remoteName);
+			String name = application.getName();
+			String host = application.getApplicationUrl();
+			IServer server = findServer(name, host);
+			if( server == null ) {
+				server = doCreateServerAdapter(serverType, runtime, mode, application, user, deployProject, remoteName);
+			} 
 			addModules(getModules(importedProjects), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
