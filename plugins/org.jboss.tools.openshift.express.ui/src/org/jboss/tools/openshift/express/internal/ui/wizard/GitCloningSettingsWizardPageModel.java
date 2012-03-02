@@ -88,28 +88,11 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 				wizardModel.setRepositoryPath(repositoryPath));
 	}
 
-	// public void resetRepositoryPath() {
-	// if (wizardModel.isNewProject()
-	// || getRepositoryPath() == null) {
-	// setRepositoryPath(getDefaultRepositoryPath());
-	// }
-	// }
-
-	public void resetRemoteName() {
+	private void resetRemoteName() {
 		if (!wizardModel.isNewProject()) {
-			// if existing project and remote name is still 'origin'
-			// -> switch to 'openshift' (leave as is if existing project and
-			// remote name != 'origin')
-			if (NEW_PROJECT_REMOTE_NAME_DEFAULT.equals(getRemoteName())) {
 				setRemoteName(EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
-			}
 		} else {
-			// if new project and remote name is not 'origin'
-			// -> restore 'origin'
-			if (!NEW_PROJECT_REMOTE_NAME_DEFAULT.equals(getRemoteName())) {
-				setUseDefaultRemoteName(true);
 				setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
-			}
 		}
 	}
 
@@ -148,8 +131,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_USE_DEFAULT_REMOTE_NAME, useDefaultRemoteName,
 				this.useDefaultRemoteName = useDefaultRemoteName);
 		if (useDefaultRemoteName) {
-			// setRemoteName(isNewProject() ? NEW_PROJECT_REMOTE_NAME_DEFAULT :
-			// EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
 			resetRemoteName();
 		}
 	}

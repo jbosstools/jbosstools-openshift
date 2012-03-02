@@ -134,7 +134,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
 		useDefaultRemoteNameButton.setText("Use default remote name");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRemoteNameButton);
-		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteName());
 
 		this.remoteNameLabel = new Label(cloneGroup, SWT.NONE);
 		remoteNameLabel.setText("Remote name:");
@@ -205,16 +204,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		};
 	}
 
-	private SelectionListener onDefaultRemoteName() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				pageModel.resetRemoteName();
-			}
-		};
-	}
-
 	private SelectionAdapter onSshPrefs() {
 		return new SelectionAdapter() {
 
@@ -226,10 +215,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	}
 
 	protected void onPageActivated(DataBindingContext dbc) {
-		// allow to enable a proj only for as7 openshift applications
-		// pageModel.resetRepositoryPath();
-		pageModel.resetRemoteName();
-		// pageModel.refreshApplicationName();
 		enableWidgets(pageModel.isNewProject());
 	}
 
