@@ -35,7 +35,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		super(shell, new ProjectLabelProvider());
 		setTitle("Select Existing Project");
 		setMessage(NLS.bind(
-				"Select an existing project for {0}.\nOnly java projects can be used.",
+				"Select an existing project for {0}.\nOnly Dynamic Web/Eclipse WTP projects can be used.",
 				openShiftAppName));
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
