@@ -94,7 +94,7 @@ public class ExpressDetailsComposite {
 	protected Button verifyButton,  browseDestButton;
 	
 	// Data / Model 
-	protected boolean showVerify;
+	protected boolean showVerify, showImportLink;
 	private String user, pass, app, remote, deployProject, deployFolder;
 	private IApplication fapplication;
 	private IUser fuser;
@@ -113,6 +113,7 @@ public class ExpressDetailsComposite {
 		this.mode = mode;
 		this.composite = fill;
 		this.showVerify = showVerify;
+		this.showImportLink = showVerify;
 		initModel();
 		createWidgets(fill);
 		fillWidgets();
@@ -148,16 +149,12 @@ public class ExpressDetailsComposite {
 		if( tmpUser != null && app != null ) {
 			// started from express console with a user and an app
 			try {
-				this.fuser = tmpUser;
-				this.user = fuser.getRhlogin();
-				this.appList = fuser.getApplications();
-				this.appListNames = getAppNamesAsStrings(this.appList);
-				this.fapplication = app;
 				this.app = app.getName();
+				updateModelForNewUser(tmpUser);
+				postLongRunningValidate();
 				showVerify = false;
-				ExpressServerUtils.fillServerWithOpenShiftDetails(
-						callback.getServer(), fapplication, fuser, mode,
-						deployProject, deployFolder, remote);
+				IProject[] p = projectsPerApp.get(app);
+				showImportLink = p == null || p.length == 0;
 			} catch( OpenShiftException ose ) {
 				// ignore, allow appList and appListNames to be null / empty
 			}
@@ -198,6 +195,8 @@ public class ExpressDetailsComposite {
 					this.deployProjectCombo.setItems(new String[]{deployProject});
 					this.deployProjectCombo.select(0);
 					this.deployProjectCombo.setEnabled(false);
+				} else {
+					this.browseDestButton.setEnabled(false);
 				}
 			}
 		}
@@ -216,6 +215,9 @@ public class ExpressDetailsComposite {
 		if( names.length > 0 ) {
 			deployProjectCombo.select(0);
 			this.deployProject = names[0];
+			browseDestButton.setEnabled(true);
+		} else {
+			browseDestButton.setEnabled(false);
 		}
 	}
 	
@@ -247,10 +249,12 @@ public class ExpressDetailsComposite {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
 		deployLocationLabel.setText("Deploy Project: " );
 		
-		if( showVerify ) {
+		if( showImportLink ) {
 			importLink = new Link(composite, SWT.DEFAULT);
 			importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
-			importLink.setEnabled(false);
+			//  if we show verify, start import link disabled (wait for verify pressed to enable)
+			//  Otherwise, not showing verify means we're inside new wizard fragment with no suitable projects
+			importLink.setEnabled(!showVerify);
 			GridData gd = GridDataFactory.fillDefaults().span(2, 1).create();
 			importLink.setLayoutData(gd);
 		}
@@ -347,7 +351,7 @@ public class ExpressDetailsComposite {
 		});
 
 		
-		if (verifyButton != null) {
+		if (showImportLink ) {
 			importLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					OpenShiftExpressApplicationWizard wizard = new ImportOpenShiftExpressApplicationWizard();
@@ -369,7 +373,8 @@ public class ExpressDetailsComposite {
 				public void widgetDefaultSelected(SelectionEvent e) {
 				}
 			});
-
+		}
+		if (showVerify) {
 			verifyButton.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					verifyPressed();
@@ -389,6 +394,9 @@ public class ExpressDetailsComposite {
 	}
 	
 	private IFolder chooseFolder() {
+		if( this.deployProject == null )
+			return null;
+		
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(this.deployProject);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
@@ -569,6 +577,9 @@ public class ExpressDetailsComposite {
 		for( int i = 0; i < appList.size(); i++ ) {
 			projectsPerApp.put(appList.get(i), ExpressServerUtils.findProjectsForApplication(appList.get(i)));
 		}
+		
+		IProject[] possibleProjects = projectsPerApp.get(fapplication);
+		this.deployProject = possibleProjects == null || possibleProjects.length == 0 ? null : possibleProjects[0].getName();
 		
 		// Fill the server working copy
 		// update the values
