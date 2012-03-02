@@ -51,7 +51,7 @@ public class EditDomainDialog extends Wizard {
 						return Status.OK_STATUS;
 					} catch(OpenShiftEndpointException e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-								"Could not create domain \"{0}\": {1}", model.getNamespace(), e.getResponseResult()), e);
+								"Could not rename domain \"{0}\": {1}", model.getNamespace(), e.getResponseResult()), e);
 					} catch (Exception e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
 								"Could not rename domain {0}", model.getNamespace()), e);

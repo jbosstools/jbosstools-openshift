@@ -73,7 +73,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(IStatus.ERROR, this, dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
 	}
 	
 	class NamespaceValidator extends MultiValidator {
@@ -89,11 +89,15 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 			final String domainName = (String) domainNameObservable.getValue();
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Select an alphanumerical name and a type for the domain to edit.");
+						"Enter a domain name with lower-case letters and digits only. Max length is 16 characters.");
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
-						"The name may only contain lower-case letters and digits.");
+						"The domain name may only contain lower-case letters and digits.");
+			}
+			if (domainName.length() > 16) {
+				return ValidationStatus.error(
+						"The domain name max length is 16 characters.");
 			}
 			return ValidationStatus.ok();
 		}
