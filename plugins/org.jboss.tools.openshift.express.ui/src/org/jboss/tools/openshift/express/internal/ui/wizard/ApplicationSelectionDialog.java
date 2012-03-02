@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -64,6 +65,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 
 	private final ApplicationSelectionDialogModel dialogModel;
 	private final DataBindingContext dbc;
+	private final IWizard wizard;
 	private TableViewer tableViewer;
 
 	public ApplicationSelectionDialog(OpenShiftExpressApplicationWizard wizard, IApplication selectedApplication,
@@ -71,6 +73,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		super(parentShell);
 		this.dialogModel = new ApplicationSelectionDialogModel(wizard.getWizardModel());
 		this.dialogModel.setSelectedApplication(selectedApplication);
+		this.wizard = wizard;
 		this.dbc = new DataBindingContext();
 	}
 
@@ -142,7 +145,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		refreshButton.addSelectionListener(onRefresh(dbc));
 
 		Button detailsButton = new Button(dialogArea, SWT.PUSH);
-		detailsButton.setText("De&tails");
+		detailsButton.setText("De&tails...");
 		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.TOP).grab(false, true).hint(80, SWT.DEFAULT)
 				.applyTo(detailsButton);
 		DataBindingUtils.bindEnablementToValidationStatus(detailsButton, IStatus.OK, dbc, selectedApplicationBinding);
@@ -241,8 +244,9 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 							return Status.OK_STATUS;
 						}
 
-					}, null, dbc);
+					}, wizard.getContainer(), dbc);
 				} catch (Exception e) {
+					Logger.error("Failed to refresh applications list", e);
 					// ignore
 				}
 			}
