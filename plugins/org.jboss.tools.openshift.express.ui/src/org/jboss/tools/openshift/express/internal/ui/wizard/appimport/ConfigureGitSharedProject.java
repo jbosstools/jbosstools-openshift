@@ -31,7 +31,6 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
@@ -130,17 +129,6 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		}
 
 		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUri(), repository);
-	}
-
-	private IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
-		Assert.isLegal(OpenShiftMavenProfile.isMavenProject(project));
-
-		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, OpenShiftUIActivator.PLUGIN_ID);
-		if (profile.existsInPom()) {
-			return null;
-		}
-		profile.addToPom(project.getName());
-		return profile.savePom(monitor);
 	}
 
 	/**

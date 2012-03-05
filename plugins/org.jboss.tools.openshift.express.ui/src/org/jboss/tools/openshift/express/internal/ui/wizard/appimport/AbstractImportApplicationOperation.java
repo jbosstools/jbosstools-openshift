@@ -33,6 +33,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.OpenShiftException;
@@ -223,4 +224,16 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		return gitIgnore.write(monitor);
 	}
 
+	protected IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
+		if(!OpenShiftMavenProfile.isMavenProject(project)) {
+			return null;
+		}
+
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, OpenShiftUIActivator.PLUGIN_ID);
+		if (profile.existsInPom()) {
+			return null;
+		}
+		profile.addToPom(project.getName());
+		return profile.savePom(monitor);
+	}
 }

@@ -95,6 +95,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 
 		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
 		createGitIgnore(project, monitor);
+		setupOpenShiftMavenProfile(project, monitor);
 		shareProject(project, monitor);
 		addRemoteRepo(getRemoteName(), getApplication().getGitUri(), EGitUtils.getRepository(project));
 
