@@ -15,10 +15,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.common.ui.preferencevalue.StringsPreferenceValue;
+import org.jboss.tools.openshift.express.internal.core.console.IPasswordPrompter.PromptResult;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
@@ -45,13 +48,29 @@ public class UserModel {
 	public static void setPasswordPrompt(IPasswordPrompter prompt) {
 		prompter =prompt;
 	}
-	public static String promptForPassword(IUser user) {
+
+	public static IPasswordPrompter getPasswordPrompt() {
+		return prompter;
+	}
+
+	/**
+	 * Returns a map of the values entered by the user. The value indexed with {@link IPasswordPrompter.PromptResult.PASSWORD_VALUE} in the
+	 * returning array is the input password, the value indexed with indexed with {@link IPasswordPrompter.PromptResult.SAVE_PASSWORD_VALUE} is the Boolean stating
+	 * whether the password should be saved in the secured storage or not.
+	 * 
+	 * @param user
+	 * @return map with password value (as String) and 'save password' (as
+	 *         Boolean), or null if the password prompter could not be
+	 *         initialized
+	 */
+
+	public static Map<PromptResult, Object> promptForPassword(IUser user) {
 		return prompter == null ? null : prompter.getPasswordFor(user);
 	}
-	
+
 	/** The most recent user connected on OpenShift. */
-	private IUser recentUser = null;
-	private HashMap<String, IUser> allUsers = new HashMap<String, IUser>();
+	private UserDelegate recentUser = null;
+	private HashMap<String, UserDelegate> allUsers = new HashMap<String, UserDelegate>();
 	private ArrayList<IUserModelListener> listeners = new ArrayList<IUserModelListener>();
 
 	public UserModel() {
@@ -76,15 +95,14 @@ public class UserModel {
 	 * @throws IOException
 	 */
 	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
-		IUser u = new User(username, password, USER_ID);
-		return u;
+		return new User(username, password, USER_ID);
 	}
 
 	private static final int ADDED = 0;
 	private static final int REMOVED = 1;
 	private static final int CHANGED = 2;
 
-	public void addUser(IUser user) {
+	public void addUser(UserDelegate user) {
 		allUsers.put(user.getRhlogin(), user);
 		this.recentUser = user;
 		fireModelChange(user, ADDED);
@@ -118,21 +136,21 @@ public class UserModel {
 		}
 	}
 
-	public IUser getRecentUser() {
+	public UserDelegate getRecentUser() {
 		return recentUser;
 	}
 
-	public void setRecentUser(IUser user) {
+	public void setRecentUser(UserDelegate user) {
 		this.recentUser = user;
 	}
 
-	public IUser findUser(String username) {
+	public UserDelegate findUser(String username) {
 		return allUsers.get(username);
 	}
 
-	public IUser[] getUsers() {
-		Collection<IUser> c = allUsers.values();
-		IUser[] rets = (IUser[]) c.toArray(new IUser[c.size()]);
+	public UserDelegate[] getUsers() {
+		Collection<UserDelegate> c = allUsers.values();
+		UserDelegate[] rets = (UserDelegate[]) c.toArray(new UserDelegate[c.size()]);
 		return rets;
 	}
 
@@ -146,8 +164,8 @@ public class UserModel {
 		for (int i = 0; i < users.length; i++) {
 			try {
 				String password = getPasswordFromSecureStorage(users[i]);
-				IUser u = createUser(users[i], password);
-				addUser(new UserDelegator(u));
+				UserDelegate u = new UserDelegate(createUser(users[i], password), password != null);
+				addUser(u);
 			} catch (OpenShiftException ose) {
 				// TODO
 			} catch (IOException ioe) {
@@ -168,11 +186,12 @@ public class UserModel {
 				OpenShiftUIActivator.PLUGIN_ID);
 		pref.store(userList);
 
-		Iterator<IUser> i = allUsers.values().iterator();
-		IUser tmp;
-		while (i.hasNext()) {
-			tmp = i.next();
-			setPasswordInSecureStorage(tmp.getRhlogin(), tmp.getPassword());
+		for (Entry<String, UserDelegate> entry : allUsers.entrySet()) {
+			UserDelegate user = entry.getValue();
+			if (user.isRememberPassword()) {
+				setPasswordInSecureStorage(user.getRhlogin(),
+						user.getPassword());
+			}
 		}
 	}
 

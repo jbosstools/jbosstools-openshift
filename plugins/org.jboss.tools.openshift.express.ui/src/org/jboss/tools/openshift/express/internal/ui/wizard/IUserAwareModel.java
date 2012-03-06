@@ -1,11 +1,11 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import com.openshift.express.client.IUser;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 public interface IUserAwareModel {
 
-	public IUser getUser();
+	public UserDelegate getUser();
 
-	public IUser setUser(IUser user);
+	public UserDelegate setUser(UserDelegate user);
 
 }

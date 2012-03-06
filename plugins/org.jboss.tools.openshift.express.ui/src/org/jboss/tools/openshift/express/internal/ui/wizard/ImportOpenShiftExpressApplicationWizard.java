@@ -4,9 +4,9 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.core.resources.IProject;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 
 /**
  * @author Xavier Coulon
@@ -27,7 +27,7 @@ public class ImportOpenShiftExpressApplicationWizard extends OpenShiftExpressApp
 	 * @param project
 	 * @param application
 	 */
-	public ImportOpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application) {
+	public ImportOpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application) {
 		super(user, project, application, true, "Import OpenShift Express Application");
 	}
 }

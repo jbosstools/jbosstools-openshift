@@ -21,6 +21,7 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
@@ -42,11 +43,11 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	private static final int APP_CREATION_TIMEOUT = 120;
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
-	public OpenShiftExpressApplicationWizardModel(IUser user) {
+	public OpenShiftExpressApplicationWizardModel(UserDelegate user) {
 		this(user, null, null, false);
 	}
 
-	public OpenShiftExpressApplicationWizardModel(IUser user, IProject project, IApplication application, boolean useExistingApplication) {
+	public OpenShiftExpressApplicationWizardModel(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication) {
 		// default value(s)
 		setUser(user);
 		setProject(project);
@@ -417,18 +418,18 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public IUser getUser() {
-		return (IUser) getProperty(USER);
+	public UserDelegate getUser() {
+		return (UserDelegate) getProperty(USER);
 	}
 
 	@Override
-	public IUser setUser(IUser user) {
-		return (IUser) setProperty(USER, user);
+	public UserDelegate setUser(UserDelegate user) {
+		return (UserDelegate) setProperty(USER, user);
 	}
 
 	@Override
 	public void addUserToModel() {
-		IUser user = getUser();
+		UserDelegate user = getUser();
 		Assert.isNotNull(user);
 		UserModel.getDefault().addUser(user);
 	}

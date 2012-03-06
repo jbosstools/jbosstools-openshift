@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -43,7 +44,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 
 	private String rhLogin;
 	private String password;
-	private boolean rememberPassword;
+	private boolean rememberPassword = false;
 	private IStatus credentialsStatus;
 	private StringPreferenceValue rhLoginPreferenceValue;
 	private final String libraServer;
@@ -114,7 +115,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 
 	private void storePassword(IUser user) {
 		try {
-			if (store != null) {
+			if (store != null ) {
 				OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(libraServer, user.getRhlogin());
 				store.update(key, password);
 			}
@@ -136,6 +137,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	protected String getConfiguredUserName() {
 		String configuredUsername = null;
 		try {
+			// retrieved from the local 'express.conf' configuration file
 			configuredUsername = new OpenShiftConfiguration().getRhlogin();
 		} catch (Exception e) {
 			Logger.error("Cound not retrieve rhlogin from express configuration");
@@ -210,9 +212,9 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	
 	private IStatus getValidityStatus(String rhLogin, String password) {
 		IStatus status = Status.OK_STATUS;
-		IUser user = null;
+		UserDelegate user = null;
 		try {
-			user = UserModel.getDefault().createUser(getRhLogin(), getPassword());
+			user = new UserDelegate(UserModel.getDefault().createUser(getRhLogin(), getPassword()), rememberPassword);
 			if (user.isValid()) {
 				storeUser(user);
 			} else {
@@ -229,7 +231,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return status;
 	}
 
-	private void storeUser(IUser user) {
+	private void storeUser(UserDelegate user) {
 		wizardModel.setUser(user);
 		if (rememberPassword) {
 			storePassword(user);

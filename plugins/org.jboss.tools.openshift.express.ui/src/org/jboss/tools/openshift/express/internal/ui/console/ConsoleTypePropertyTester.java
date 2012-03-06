@@ -3,9 +3,11 @@
  */
 package org.jboss.tools.openshift.express.internal.ui.console;
 
+import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.CONSOLE_TYPE_KEY;
+import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.CONSOLE_TYPE_VALUE;
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.ui.console.MessageConsole;
-import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.*;
 
 /**
  * Property tester used to verify that the given instance of

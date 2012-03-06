@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-
-import com.openshift.express.client.IUser;
 
 /**
  * @author André Dietisheim
@@ -20,12 +19,12 @@ import com.openshift.express.client.IUser;
 public class ConnectToOpenShiftWizardModel implements IUserAwareModel {
 
 	@Override
-	public IUser getUser() {
+	public UserDelegate getUser() {
 		return UserModel.getDefault().getRecentUser();
 	}
 
 	@Override
-	public IUser setUser(IUser user) {
+	public UserDelegate setUser(UserDelegate user) {
 		UserModel.getDefault().addUser(user);
 		return user;
 	}

@@ -11,6 +11,10 @@
 package org.jboss.tools.openshift.express.internal.core.console;
 
 import java.util.List;
+import java.util.Map;
+
+import org.jboss.tools.openshift.express.internal.core.console.IPasswordPrompter.PromptResult;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
@@ -20,10 +24,13 @@ import com.openshift.express.client.ISSHPublicKey;
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
-public class UserDelegator implements IUser {
+public class UserDelegate implements IUser {
 	private IUser delegate;
-	public UserDelegator(IUser user) {
+	private boolean rememberPassword;
+	
+	public UserDelegate(IUser user, boolean rememberPassword) {
 		this.delegate = user;
+		this.rememberPassword = rememberPassword;
 	}
 	
 	public String getRhlogin() {
@@ -32,13 +39,23 @@ public class UserDelegator implements IUser {
 	public String getPassword() {
 		return delegate.getPassword();
 	}
+	
+	public boolean isRememberPassword() {
+		return rememberPassword;
+	}
+
 	protected void checkForPassword() {
 		if( delegate.getPassword() == null || "".equals(delegate.getPassword())) {
 			try {
-				String newPw = UserModel.promptForPassword(this);
-				delegate = UserModel.getDefault().createUser(delegate.getRhlogin(), newPw);
+				Map<PromptResult, Object> passwordAndSaveValues = UserModel.promptForPassword(this);
+				if(passwordAndSaveValues != null) {
+					final String password = (String) passwordAndSaveValues.get(PromptResult.PASSWORD_VALUE);
+					delegate = UserModel.getDefault().createUser(delegate.getRhlogin(), password);
+					final Boolean save = (Boolean) passwordAndSaveValues.get(PromptResult.SAVE_PASSWORD_VALUE);
+					this.rememberPassword = save; 
+				}
 			} catch( Exception e ) {
-				// TODO log handle everything
+				Logger.error("Failed to retrieve User's password", e);
 			}
 		}
 	}

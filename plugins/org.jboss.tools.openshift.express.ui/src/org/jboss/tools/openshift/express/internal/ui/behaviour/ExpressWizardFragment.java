@@ -23,10 +23,10 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
 	private ExpressDetailsComposite composite;
@@ -69,7 +69,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
-		IUser user = composite.getUser();
+		UserDelegate user = composite.getUser();
 		UserModel.getDefault().addUser(user);
 		IApplication app = composite.getApplication();
 		

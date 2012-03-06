@@ -10,8 +10,22 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.console;
 
+import java.util.Map;
+
 import com.openshift.express.client.IUser;
 
 public interface IPasswordPrompter {
-	public String getPasswordFor(IUser user);
+	
+	public enum PromptResult {
+		PASSWORD_VALUE, SAVE_PASSWORD_VALUE;
+	}
+	/**
+	 * Returns a map of the values entered by the user. The value indexed with {@link IPasswordPrompter.PromptResult.PASSWORD_VALUE} in the
+	 * returning array is the input password, the value indexed with indexed with {@link IPasswordPrompter.PromptResult.SAVE_PASSWORD_VALUE} is the Boolean stating
+	 * whether the password should be saved in the secured storage or not.
+	 * 
+	 * @param user
+	 * @return map with password value (as String) and 'save password' (as Boolean) 
+	 */
+	public Map<PromptResult, Object> getPasswordFor(IUser user);
 }

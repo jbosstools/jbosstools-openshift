@@ -1,6 +1,8 @@
 package org.jboss.tools.openshift.express.internal.ui;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -126,9 +128,8 @@ public class OpenShiftUIActivator extends AbstractUIPlugin implements IPasswordP
 		return ImageDescriptor.createFromURL(imageFileUrl);
 	}
 
-	public String getPasswordFor(final IUser user) {
-		final String[] val =new String[1];
-		val[0] = null;
+	public Map<PromptResult, Object> getPasswordFor(final IUser user) {
+		final Map<PromptResult, Object> val = new HashMap<PromptResult, Object>();
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				Shell shell = Display.getDefault().getActiveShell();
@@ -136,10 +137,11 @@ public class OpenShiftUIActivator extends AbstractUIPlugin implements IPasswordP
 				d.setCanModifyUser(false);
 				d.setDescription("Provide enter the password for your express server");
 				if( d.open() == Window.OK) {
-					val[0] = d.getPass();
+					val.put(PromptResult.PASSWORD_VALUE, d.getPass());
+					val.put(PromptResult.SAVE_PASSWORD_VALUE, d.getSave());
 				}
 			}
 		});
-		return val[0];
+		return val;
 	}
 }

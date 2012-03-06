@@ -38,6 +38,7 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -54,15 +55,14 @@ import com.openshift.express.client.OpenShiftException;
  */
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
-	private IUser initialUser;
+	private UserDelegate initialUser;
 
 	private OpenShiftExpressApplicationWizardModel wizardModel;
 
 	public OpenShiftExpressApplicationWizard(boolean useExistingApplication, String wizardTitle) {
 		this(null, null, null, useExistingApplication, wizardTitle);
 	}
-	
-	public OpenShiftExpressApplicationWizard(IUser user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
+	public OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
 		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application, useExistingApplication));
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
@@ -123,11 +123,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		Object o = selection.getFirstElement();
 		if (o instanceof IUser) {
-			setUser((IUser) o);
+			setUser((UserDelegate) o);
 		}
 	}
 
-	protected void setUser(IUser user) {
+	protected void setUser(UserDelegate user) {
 		getWizardModel().setUser(user);
 	}
 
@@ -147,7 +147,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		return initialUser == null ? pages[0] : pages[1];
 	}
 
-	public void setInitialUser(IUser user) {
+	public void setInitialUser(UserDelegate user) {
 		this.initialUser = user;
 	}
 

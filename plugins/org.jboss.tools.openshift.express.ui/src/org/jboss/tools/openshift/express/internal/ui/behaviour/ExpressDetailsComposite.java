@@ -60,6 +60,7 @@ import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallbac
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
@@ -67,7 +68,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpre
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 public class ExpressDetailsComposite {
@@ -97,7 +97,7 @@ public class ExpressDetailsComposite {
 	protected boolean showVerify, showImportLink;
 	private String user, pass, app, remote, deployProject, deployFolder;
 	private IApplication fapplication;
-	private IUser fuser;
+	private UserDelegate fuser;
 	private List<IApplication> appList;
 	private String[] appListNames;
 	private String error;
@@ -143,7 +143,7 @@ public class ExpressDetailsComposite {
 
 	private void initModelNewServerWizard() {
 		// We're in a new server wizard.
-		IUser tmpUser = (IUser) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
+		UserDelegate tmpUser = (UserDelegate) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
 		IApplication app = (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
 		
 		if( tmpUser != null && app != null ) {
@@ -561,7 +561,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	private void updateModelForNewUser(IUser user) throws OpenShiftException {
+	private void updateModelForNewUser(UserDelegate user) throws OpenShiftException {
 
 		// Updating the model, some long-running 
 		projectsPerApp.clear();
@@ -608,7 +608,7 @@ public class ExpressDetailsComposite {
 		return app;
 	}
 
-	public IUser getUser() {
+	public UserDelegate getUser() {
 		return fuser;
 	}
 
