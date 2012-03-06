@@ -6,6 +6,7 @@ public class OpenShiftExpressUIMessages extends NLS {
 
 	private static final String BUNDLE_NAME = OpenShiftExpressUIMessages.class.getName();
 
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OpenShiftExpressUIMessages.class);
 	}
@@ -40,4 +41,5 @@ public class OpenShiftExpressUIMessages extends NLS {
 
 	public static String REFRESH_VIEWER_ACTION;
 
+	public static String DELETE_CONNECTION_ACTION;
 }
