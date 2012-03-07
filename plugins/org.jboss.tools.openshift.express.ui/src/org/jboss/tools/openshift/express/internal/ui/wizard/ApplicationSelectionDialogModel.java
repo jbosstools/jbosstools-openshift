@@ -38,6 +38,14 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 		this.selectedApplication = wizardModel.getApplication();
 	}
 
+	public void refresh() {
+		try {
+			getUser().refresh();
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to refresh User's account", e);
+		}
+	}
+	
 	public List<IApplication> getApplications() {
 		try {
 			IUser user = getUser();
