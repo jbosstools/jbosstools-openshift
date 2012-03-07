@@ -14,6 +14,7 @@ import java.util.Map;
 
 import com.openshift.express.client.IUser;
 
+@Deprecated
 public interface IPasswordPrompter {
 	
 	public enum PromptResult {

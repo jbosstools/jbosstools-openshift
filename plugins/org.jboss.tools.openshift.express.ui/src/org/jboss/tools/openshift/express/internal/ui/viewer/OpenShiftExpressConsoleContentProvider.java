@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -53,6 +54,11 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		}
 	}
 
+	public static class NotConnectedUserStub {
+		public NotConnectedUserStub () {
+		}
+	}
+
 	// Keep track of what's loading and what's finished
 	private ArrayList<IUser> loadedUsers = new ArrayList<IUser>();
 	private ArrayList<IUser> loadingUsers = new ArrayList<IUser>();
@@ -76,7 +82,11 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IUser) {
+		if (parentElement instanceof UserDelegate) {
+			UserDelegate user = (UserDelegate) parentElement;
+			if(!user.isConnected() && !user.canPromptForPassword()) {
+				return new Object[]{new NotConnectedUserStub()};
+			}
 			if (!loadedUsers.contains(parentElement)) {
 				if (!loadingUsers.contains(parentElement)) {
 					// Load the data
@@ -118,8 +128,8 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				IUser user = ((OpenShiftExpressConsoleContentCategory) parentElement).getUser();
 				children = new Object[] { user };
 			}
-			if (parentElement instanceof IUser) {
-				final IUser user = (IUser) parentElement;
+			if (parentElement instanceof UserDelegate) {
+				final UserDelegate user = (UserDelegate) parentElement;
 				if (user.hasDomain()) {
 					children = user.getApplications().toArray();
 				}

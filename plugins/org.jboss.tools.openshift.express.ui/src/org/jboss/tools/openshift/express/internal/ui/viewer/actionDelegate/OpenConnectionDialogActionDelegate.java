@@ -4,10 +4,10 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
@@ -20,8 +20,7 @@ public class OpenConnectionDialogActionDelegate implements IViewActionDelegate {
 
 	@Override
 	public void run(IAction action) {
-		final Display display = Display.getCurrent();
-		final Shell shell = new Shell(display);
+		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		final IWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard();
 		int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
 		if (returnCode == Window.OK) {

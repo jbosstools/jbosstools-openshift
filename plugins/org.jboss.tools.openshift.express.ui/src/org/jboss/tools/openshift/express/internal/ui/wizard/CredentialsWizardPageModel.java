@@ -214,7 +214,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		UserDelegate user = null;
 		try {
-			user = new UserDelegate(UserModel.getDefault().createUser(getRhLogin(), getPassword()), rememberPassword);
+			user = new UserDelegate(UserModel.getDefault().createUser(rhLogin, password), rememberPassword, password != null);
 			if (user.isValid()) {
 				storeUser(user);
 			} else {

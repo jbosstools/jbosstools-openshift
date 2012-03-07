@@ -15,13 +15,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.common.ui.preferencevalue.StringsPreferenceValue;
-import org.jboss.tools.openshift.express.internal.core.console.IPasswordPrompter.PromptResult;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
@@ -42,30 +40,6 @@ public class UserModel {
 		if (model == null)
 			model = new UserModel();
 		return model;
-	}
-
-	private static IPasswordPrompter prompter;
-	public static void setPasswordPrompt(IPasswordPrompter prompt) {
-		prompter =prompt;
-	}
-
-	public static IPasswordPrompter getPasswordPrompt() {
-		return prompter;
-	}
-
-	/**
-	 * Returns a map of the values entered by the user. The value indexed with {@link IPasswordPrompter.PromptResult.PASSWORD_VALUE} in the
-	 * returning array is the input password, the value indexed with indexed with {@link IPasswordPrompter.PromptResult.SAVE_PASSWORD_VALUE} is the Boolean stating
-	 * whether the password should be saved in the secured storage or not.
-	 * 
-	 * @param user
-	 * @return map with password value (as String) and 'save password' (as
-	 *         Boolean), or null if the password prompter could not be
-	 *         initialized
-	 */
-
-	public static Map<PromptResult, Object> promptForPassword(IUser user) {
-		return prompter == null ? null : prompter.getPasswordFor(user);
 	}
 
 	/** The most recent user connected on OpenShift. */
@@ -164,7 +138,7 @@ public class UserModel {
 		for (int i = 0; i < users.length; i++) {
 			try {
 				String password = getPasswordFromSecureStorage(users[i]);
-				UserDelegate u = new UserDelegate(createUser(users[i], password), password != null);
+				UserDelegate u = new UserDelegate(createUser(users[i], password), password != null, password != null);
 				addUser(u);
 			} catch (OpenShiftException ose) {
 				// TODO

@@ -18,7 +18,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.LoadingStub;
+import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.NotConnectedUserStub;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
@@ -107,7 +109,10 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 		}
 
 		if (element instanceof LoadingStub) {
-			return new StyledString("Loading...");
+			return new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
+		}
+		if (element instanceof NotConnectedUserStub) {
+			return new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
 		}
 		if (element instanceof OpenShiftException ) {
 			return new StyledString( ((OpenShiftException)element).getMessage());

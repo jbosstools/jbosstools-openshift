@@ -12,10 +12,10 @@ package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.IUser;
 
 /**
  * @author Xavier Coulon
@@ -26,8 +26,8 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
 		if(adapterType == IPropertySource.class) {
-			if(adaptableObject instanceof IUser) {
-				return new UserPropertySource((IUser)adaptableObject);
+			if(adaptableObject instanceof UserDelegate) {
+				return new UserPropertySource((UserDelegate)adaptableObject);
 			}
 			if(adaptableObject instanceof IApplication) {
 				return new ApplicationPropertySource((IApplication)adaptableObject);

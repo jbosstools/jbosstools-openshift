@@ -42,4 +42,9 @@ public class OpenShiftExpressUIMessages extends NLS {
 	public static String REFRESH_VIEWER_ACTION;
 
 	public static String DELETE_CONNECTION_ACTION;
+	
+	public static String USER_NOT_CONNECTED_LABEL;
+	
+	public static String LOADING_USER_APPLICATIONS_LABEL;
+
 }

@@ -13,9 +13,10 @@ package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -25,9 +26,9 @@ public class UserPropertySource implements IPropertySource {
 
 	private static final String PROPERTY_DOMAIN = "Domain";
 	private static final String PROPERTY_USERNAME = "Username";
-	private final IUser user;
+	private final UserDelegate user;
 
-	public UserPropertySource(IUser user) {
+	public UserPropertySource(UserDelegate user) {
 		this.user = user;
 	}
 
@@ -46,6 +47,13 @@ public class UserPropertySource implements IPropertySource {
 	@Override
 	public Object getPropertyValue(Object id) {
 		try {
+			if(!user.isConnected() && !user.canPromptForPassword()) {
+				return OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL;
+			}
+			if(!user.isConnected() && user.canPromptForPassword()) {
+				user.checkForPassword();
+			}
+			
 			if (id.equals(PROPERTY_USERNAME)) {
 				return user.getRhlogin();
 			}
