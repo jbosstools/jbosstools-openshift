@@ -36,7 +36,7 @@ public class DomainDestroyer {
         try {
             resp_code = client.executeMethod(method);
         } catch (Exception e) {
-            System.err.println(e);
+            System.out.println(e);
         } finally {
             method.releaseConnection();
         }
@@ -47,6 +47,10 @@ public class DomainDestroyer {
      * @param args
      */
     public static void main(String[] args) {
-        destroyDomain("rhtestdomain", "sbunciak", "rhtest123");
+        if (destroyDomain("rhtest", "sbunciak", "rhtest123") == 200) {
+        	System.out.println("Domain destroyed.");
+        } else {
+        	System.out.println("Domain was not destroyed.");
+        }
     }
 }

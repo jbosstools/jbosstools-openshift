@@ -16,6 +16,8 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * <b>OpenShift SWTBot TestSuite</b>
+ * <br>
+ * This bot test will try to demonstrate a new OpenShift Express Application and domain life cycle. 
  * 
  * <br>
  * TestSuite covers following test cases :
@@ -36,18 +38,20 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @SuiteClasses({
 
-CredentialsValidation.class, 
+ValidateCredentials.class, 
+SSHKeyManagement.class,
 CreateDomain.class,
-SSHKeysManagment.class,
+CreateAppAS7.class,
+EmbeddCartrides.class,
+RepublishAppASS7.class,
 RenameDomain.class,
-CreateAppAS7.class, 
-EmbeddCartrides.class, 
-ImportRepublishAppASS7.class,
 DeleteAppAS7.class, 
 DestroyDomain.class
 
 })
 @RunWith(RequirementAwareSuite.class)
 public class OpenShiftAllBotTests {
-    // TODO: test republishing with selenium
+	/**
+	 * Wrapper Suite class
+	 */
 }

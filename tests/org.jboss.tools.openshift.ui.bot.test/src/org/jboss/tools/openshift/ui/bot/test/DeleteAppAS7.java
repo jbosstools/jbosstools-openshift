@@ -1,108 +1,105 @@
 package org.jboss.tools.openshift.ui.bot.test;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
-import org.eclipse.swtbot.swt.finder.waits.Conditions;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
+import org.eclipse.swtbot.swt.finder.waits.ICondition;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.jboss.tools.openshift.ui.bot.util.OpenShiftUI;
 import org.jboss.tools.openshift.ui.bot.util.TestProperties;
 import org.jboss.tools.ui.bot.ext.SWTTestExt;
-import org.jboss.tools.ui.bot.ext.gen.ActionItem;
 import org.jboss.tools.ui.bot.ext.types.IDELabel;
 import org.junit.Test;
 
 public class DeleteAppAS7 extends SWTTestExt {
-    @Test
-    public void deleteApplication() {
-        SWTBot wiz = open.newObject(ActionItem.NewObject.create("OpenShift",
-                "OpenShift Express Application"));
-        wiz.text(0).setText(TestProperties.getProperty("openshift.user.name"));
-        wiz.text(1).setText(TestProperties.getProperty("openshift.user.pwd"));
-        wiz.button(IDELabel.Button.NEXT).click();
-        
-        SWTBotText domainText = bot.textInGroup("Domain", 0);
-        bot.waitUntil(Conditions.widgetIsEnabled(domainText));
-        
-        SWTBotTable appTable = bot.tableInGroup("Available Applications");
+	@Test
+	public void canDeleteApplication() {
+		projectExplorer.show();
+		projectExplorer.bot().tree(0).contextMenu("Delete").click();
 
-        appTable.select(TestProperties.getProperty("openshift.jbossapp.name"));
+		bot.waitForShell("Delete Resources");
+		bot.checkBox().select();
+		bot.button(IDELabel.Button.OK).click();
 
-        bot.buttonInGroup(IDELabel.Button.DELETE, "Available Applications")
-                .click();
+		assertFalse("The project still exists!",
+				projectExplorer.existsResource(TestProperties
+						.getProperty("openshift.jbossapp.name")));
 
-        bot.waitUntilWidgetAppears(Conditions
-                .waitForWidget(WidgetMatcherFactory
-                        .withLabel("You're up to delete all data within an application. "
-                                + "The data may not be recovered. Are you sure that you want to delete application "+TestProperties.getProperty("openshift.jbossapp.name")+"?")));
+		SWTBotView openshiftConsole = open.viewOpen(OpenShiftUI.Console.iView);
 
-        bot.button(IDELabel.Button.YES).click();
+		SWTBot consoleBot = openshiftConsole.bot();
 
-        bot.waitUntil(Conditions.widgetIsEnabled(appTable));
+		SWTBotTreeItem account = consoleBot.tree()
+				.expandNode(TestProperties.getProperty("openshift.user.name"))
+				.doubleClick();
 
-        assertFalse(appTable.containsItem(TestProperties
-                .getProperty("openshift.jbossapp.name")));
+		account.getNode(0).contextMenu("Delete Application").click();
 
-        deleteJenkins();
-        
-        deleteLocalGitRepo();
-    }
+		bot.waitForShell("Application deletion");
 
-    /*
-     * Since the JBoss tooling doesn't remove app repos, we need to delete it
-     * manually
-     */
-    private void deleteLocalGitRepo() {
+		bot.button(IDELabel.Button.OK).click();
+// TODO !!!
+		bot.waitWhile(new ICondition() {
 
-        String userHome = System.getProperty("user.home");
-        String defaultGitLocation = userHome + "\\git\\"
-                + TestProperties.getProperty("openshift.jbossapp.name");
+			private boolean deletionInvoked = false;
 
-        log.info("Removing " + defaultGitLocation);
+			@Override
+			public boolean test() throws Exception {
 
-        File gitDir = new File(defaultGitLocation);
-        if (gitDir.exists() && gitDir.isDirectory()) {
-            try {
-                doDelete(gitDir);
-            } catch (IOException e) {
-                log.error("Exception when trying to delete git repo!", e);
-            }
-        }
+				if (deletionInvoked && getJobs().size() == 0) {
+					return false;
+				} else {
+					return true;
+				}
 
-    }
+			}
 
-    private void doDelete(File path) throws IOException {
-        if (path.isDirectory()) {
-            for (File child : path.listFiles()) {
-                doDelete(child);
-            }
-        }
-        if (!path.delete()) {
-            throw new IOException("Could not delete " + path);
-        }
-    }
+			@Override
+			public void init(SWTBot bot) {
+				// Keep empty
+			}
 
-    private void deleteJenkins() {
-        SWTBotTable appTable = bot.tableInGroup("Available Applications");
+			@Override
+			public String getFailureMessage() {
+				return "Deletion was not invoked in timeout.";
+			}
 
-        if (appTable.containsItem("jenkins")) {
-            appTable.select("jenkins");
+			private List<Job> getJobs() {
+				List<Job> jobs = new ArrayList<Job>();
+				for (Job job : Job.getJobManager().find(null)) {
+					if (Job.SLEEPING != job.getState()) {
+						jobs.add(job);
 
-            bot.buttonInGroup(IDELabel.Button.DELETE, "Available Applications")
-                    .click();
+						System.out.println("Job: " + job.getName());
 
-            bot.waitUntilWidgetAppears(Conditions
-                    .waitForWidget(WidgetMatcherFactory
-                            .withLabel("You're up to delete all data within an application. "
-                                    + "The data may not be recovered. Are you sure that you want to delete application jbossapp?")));
+						if (job.getName().contains("OpenShift")) {
+							System.out
+									.println("!!!!!!!!!!!FOUND ONE!!!!!!!!!!!!!");
+							deletionInvoked = true;
+						}
 
-            bot.button(IDELabel.Button.YES).click();
+					}
+				}
+				return jobs;
+			}
+		}, TIME_60S, TIME_1S);
 
-            bot.waitUntil(Conditions.widgetIsEnabled(appTable));
+		/*
+		 * TODO
+		 * 
+		 * // delete jenkins if present if (account.getNode("jenkins") != null)
+		 * { account.getNode("jenkins").contextMenu("Delete Application");
+		 * 
+		 * bot.waitForShell("Application deletion");
+		 * bot.button(IDELabel.Button.OK).click();
+		 * 
+		 * bot.waitUntil(new NonSystemJobRunsCondition()); }
+		 */
+		assertTrue("Application still present in the OpenShift Console view!",
+				account.getItems().length == 0);
 
-            assertFalse(appTable.containsItem("jenkins"));
-        }
-    }
+	}
 }

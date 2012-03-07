@@ -1,30 +1,49 @@
 package org.jboss.tools.openshift.ui.bot.test;
 
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
+import org.hamcrest.Matcher;
 import org.jboss.tools.openshift.ui.bot.util.TestProperties;
 import org.jboss.tools.ui.bot.ext.SWTTestExt;
+import org.jboss.tools.ui.bot.ext.condition.NonSystemJobRunsCondition;
+import org.jboss.tools.ui.bot.ext.types.IDELabel;
 import org.junit.Test;
 
+/**
+ * Domain creation consists of creating the SSH key pair, storing user password
+ * in the secure storage and creating the domain itself.
+ * 
+ * @author sbunciak
+ * 
+ */
 public class CreateDomain extends SWTTestExt {
 
-    @Test
-    public void domainCreate() {
+	@Test
+	public void canCreateDomain() throws InterruptedException {
 
-        // create domain only if explicit configured
-        if (Boolean.parseBoolean(TestProperties.getProperty("createDomain"))) {
+			SWTBotText domainText = bot.text(0);
+			
+			assertTrue("Domain should not be set at this stage!", domainText
+					.getText().equals(""));
 
-            SWTBotText domainText = bot.textInGroup("Domain", 0);
+			domainText.setText(TestProperties.getProperty("openshift.domain"));
+			bot.button(IDELabel.Button.FINISH).click();
 
-            bot.waitUntil(Conditions.widgetIsEnabled(domainText));
+			bot.waitUntil(new NonSystemJobRunsCondition());
 
-            assertTrue("Domain should not be set at this stage!", domainText
-                    .getText().equals(""));
+			bot.waitForShell("New OpenShift Express Application", 100);
+			
+			@SuppressWarnings("unchecked")
+			Matcher<Widget> matcher = WidgetMatcherFactory.allOf(
+					WidgetMatcherFactory.widgetOfType(Shell.class),
+					WidgetMatcherFactory.withText("New OpenShift Express Application"));
 
-            domainText.setText(TestProperties.getProperty("openshift.domain"));
-
-            bot.button("Create").click();
-        }
-    }
+			bot.waitUntilWidgetAppears(Conditions.waitForWidget(matcher));
+			
+			bot.waitUntil(new NonSystemJobRunsCondition());
+	}
 
 }
