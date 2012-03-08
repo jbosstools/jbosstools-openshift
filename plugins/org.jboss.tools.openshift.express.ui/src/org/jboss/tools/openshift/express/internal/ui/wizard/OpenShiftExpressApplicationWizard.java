@@ -44,6 +44,7 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftEndpointException;
 import com.openshift.express.client.OpenShiftException;
 
