@@ -33,7 +33,6 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	private NewServerWizardBehaviourCallback  callback;
 	
 	public ExpressWizardFragment() {
-		setComplete(false);
 	}
 	
 	public boolean hasComposite() {
@@ -43,6 +42,9 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 		super.setComplete(complete);
 	}
 
+	public boolean isComplete() {
+		return getTaskModel().getObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP) != null;
+	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		handle.setTitle("Create an Openshift Server");
@@ -59,7 +61,6 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 			}
 		};
 		composite = ExpressDetailsComposite.createComposite(parent,callback, ExpressServerUtils.EXPRESS_SOURCE_MODE, true);
-		setComplete(getTaskModel().getObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP) != null);
 		return composite.getComposite();
 	}
 		
