@@ -70,6 +70,9 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressAppl
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.OpenShiftException;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressDetailsComposite {
 	public static ExpressDetailsComposite createComposite(Composite parent,
 			IServerModeUICallback callback, String mode, boolean showVerify) {
