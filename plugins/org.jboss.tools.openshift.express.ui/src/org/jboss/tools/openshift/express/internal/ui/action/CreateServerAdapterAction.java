@@ -26,6 +26,7 @@ import org.eclipse.wst.server.ui.internal.wizard.fragment.NewServerWizardFragmen
 import org.eclipse.wst.server.ui.internal.wizard.fragment.TasksWizardFragment;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
@@ -52,7 +53,7 @@ public class CreateServerAdapterAction extends AbstractAction {
 			final IApplication application = (IApplication) treeSelection.getFirstElement();
 			IUser user = application.getUser();
 			NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, user);
+			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, UserModel.getDefault().findUser(user.getRhlogin()));
 			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
 			dialog.open();
