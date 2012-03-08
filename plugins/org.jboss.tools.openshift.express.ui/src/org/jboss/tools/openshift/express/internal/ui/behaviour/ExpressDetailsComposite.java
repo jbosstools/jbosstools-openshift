@@ -358,9 +358,8 @@ public class ExpressDetailsComposite {
 		if (showImportLink ) {
 			importLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					OpenShiftExpressApplicationWizard wizard = new ImportOpenShiftExpressApplicationWizard();
-					wizard.setInitialUser(fuser);
-					wizard.setSelectedApplication(fapplication);
+					OpenShiftExpressApplicationWizard wizard = 
+							new ImportOpenShiftExpressApplicationWizard(fuser, null, fapplication, true);
 					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 					int oldServerCount = ServerCore.getServers().length;
 					dialog.create();

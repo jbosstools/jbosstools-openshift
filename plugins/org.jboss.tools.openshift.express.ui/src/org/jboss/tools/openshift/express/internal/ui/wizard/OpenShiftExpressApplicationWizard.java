@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
@@ -45,7 +44,6 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftEndpointException;
 import com.openshift.express.client.OpenShiftException;
 
@@ -55,17 +53,22 @@ import com.openshift.express.client.OpenShiftException;
  */
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
-	private UserDelegate initialUser;
-
+	private boolean skipCredentialsPage;
+	
 	private OpenShiftExpressApplicationWizardModel wizardModel;
 
 	public OpenShiftExpressApplicationWizard(boolean useExistingApplication, String wizardTitle) {
 		this(null, null, null, useExistingApplication, wizardTitle);
 	}
 	public OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
+		this(user, project, application, useExistingApplication, false, wizardTitle);
+	}
+
+	public OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, boolean skipCredentialsPage, String wizardTitle) {
 		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application, useExistingApplication));
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
+		this.skipCredentialsPage = skipCredentialsPage;
 	}
 
 	void setWizardModel(OpenShiftExpressApplicationWizardModel wizardModel) {
@@ -111,14 +114,6 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		return confirmed[0];
 	}
 
-	public void setSelectedApplication(IApplication application) {
-		getWizardModel().setApplication(application);
-	}
-
-	public void setSelectedProject(IProject project) {
-		getWizardModel().setProject(project);
-	}
-
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		Object o = selection.getFirstElement();
@@ -133,22 +128,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	@Override
 	public void addPages() {
-		if( getWizardModel().getUser() == null)
-			getWizardModel().setUser(initialUser);
-		addPage(new CredentialsWizardPage(this, getWizardModel()));
+		if (!skipCredentialsPage) {
+			addPage(new CredentialsWizardPage(this, getWizardModel()));
+		}
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
 		addPage(new GitCloningSettingsWizardPage(this, getWizardModel()));
-	}
-
-	@Override
-	public IWizardPage getStartingPage() {
-		IWizardPage[] pages = getPages();
-		return initialUser == null ? pages[0] : pages[1];
-	}
-
-	public void setInitialUser(UserDelegate user) {
-		this.initialUser = user;
 	}
 
 	@Override
