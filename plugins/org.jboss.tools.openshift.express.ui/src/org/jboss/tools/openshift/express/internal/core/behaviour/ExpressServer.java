@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.core.behaviour;
 import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -55,7 +56,8 @@ public class ExpressServer extends DeployableServer implements IURLProvider {
 
 	@Override
 	public URL getModuleRootURL(IModule module) {
-		IProject appProj = ExpressServerUtils.findProjectForServersApplication(getServer());
+		String appProjString = ExpressServerUtils.getExpressDeployProject(getServer());
+		IProject appProj = appProjString == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
 		IProject p =module.getProject();
 		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		
 		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore);
