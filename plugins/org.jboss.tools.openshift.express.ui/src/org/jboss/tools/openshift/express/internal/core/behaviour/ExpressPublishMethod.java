@@ -99,7 +99,12 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		if( module.length > 1 )
 			return 0;
 		
+		// Magic Project
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		
+		if( isInDestProjectTree(destProjName, module))
+			return IServer.PUBLISH_STATE_NONE;
+		
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		
 		if( destProj.equals(module[module.length-1].getProject()))
@@ -136,6 +141,19 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			e.printStackTrace();
 		}
 		return 0;
+	}
+	
+	protected boolean isInDestProjectTree(String magicProject, IModule[] module) {
+		IProject magic = magicProject == null ? null : 
+			ResourcesPlugin.getWorkspace().getRoot().getProject(magicProject);
+		IProject moduleProject = module == null ? null : module.length == 0 ? null : module[module.length-1].getProject();
+		if( magic == null || moduleProject == null )
+			return false;
+		
+		IPath moduleProjectRoot = moduleProject.getLocation();
+		IPath magicProjectRoot = magic.getLocation();
+		boolean ret = magicProjectRoot.isPrefixOf(moduleProjectRoot);
+		return ret;
 	}
 
 	protected PushOperationResult commitAndPushProject(IProject p,
