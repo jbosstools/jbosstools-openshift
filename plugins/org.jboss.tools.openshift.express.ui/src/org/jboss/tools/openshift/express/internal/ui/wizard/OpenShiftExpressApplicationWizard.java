@@ -44,7 +44,6 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftEndpointException;
 import com.openshift.express.client.OpenShiftException;
 
@@ -118,7 +117,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		Object o = selection.getFirstElement();
-		if (o instanceof IUser) {
+		if (o instanceof UserDelegate) {
 			setUser((UserDelegate) o);
 		}
 	}
@@ -324,5 +323,4 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	public void dispose() {
 		wizardModel.dispose();
 	}
-
 }
