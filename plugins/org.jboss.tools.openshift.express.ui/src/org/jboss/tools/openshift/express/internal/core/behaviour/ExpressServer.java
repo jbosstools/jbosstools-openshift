@@ -22,11 +22,13 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.model.IURLProvider;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServer;
+import org.jboss.ide.eclipse.as.core.server.internal.IExtendedPropertiesProvider;
 import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
+import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
 
-public class ExpressServer extends DeployableServer implements IURLProvider {
+public class ExpressServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setName(ServerUtil.getDefaultServerName(getServer().getServerType().getName()));
 		setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
@@ -54,12 +56,15 @@ public class ExpressServer extends DeployableServer implements IURLProvider {
 			IProgressMonitor monitor) throws CoreException {
 	}
 
-	@Override
 	public URL getModuleRootURL(IModule module) {
 		String appProjString = ExpressServerUtils.getExpressDeployProject(getServer());
 		IProject appProj = appProjString == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
 		IProject p =module.getProject();
 		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		
 		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore);
+	}
+	
+	public ServerExtendedProperties getExtendedProperties() {
+		return new ExpressServerExtendedProperties(getServer());
 	}
 }
