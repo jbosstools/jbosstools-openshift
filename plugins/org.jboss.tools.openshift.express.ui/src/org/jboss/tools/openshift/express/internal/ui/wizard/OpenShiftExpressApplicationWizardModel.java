@@ -32,7 +32,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ServerAdap
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.express.client.OpenShiftException;
 
@@ -349,7 +348,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	protected IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		IUser user = getUser();
+		UserDelegate user = getUser();
 		if (user == null) {
 			throw new OpenShiftException("Could not create application, have no valid user credentials");
 		}

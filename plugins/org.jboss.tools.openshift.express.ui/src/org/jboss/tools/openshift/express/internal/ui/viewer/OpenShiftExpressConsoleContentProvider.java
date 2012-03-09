@@ -60,9 +60,9 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	}
 
 	// Keep track of what's loading and what's finished
-	private ArrayList<IUser> loadedUsers = new ArrayList<IUser>();
-	private ArrayList<IUser> loadingUsers = new ArrayList<IUser>();
-	private HashMap<IUser, OpenShiftException> errors = new HashMap<IUser, OpenShiftException>();
+	private ArrayList<UserDelegate> loadedUsers = new ArrayList<UserDelegate>();
+	private ArrayList<UserDelegate> loadingUsers = new ArrayList<UserDelegate>();
+	private HashMap<UserDelegate, OpenShiftException> errors = new HashMap<UserDelegate, OpenShiftException>();
 
 	@Override
 	public Object[] getElements(final Object parentElement) {
@@ -74,7 +74,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			return UserModel.getDefault().getUsers();
 		}
 		if (parentElement instanceof UserModel) {
-			IUser[] users = ((UserModel) parentElement).getUsers();
+			UserDelegate[] users = ((UserModel) parentElement).getUsers();
 			return users;
 		}
 		return new Object[0];
@@ -90,12 +90,12 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			if (!loadedUsers.contains(parentElement)) {
 				if (!loadingUsers.contains(parentElement)) {
 					// Load the data
-					launchLoadingUserJob((IUser) parentElement);
+					launchLoadingUserJob((UserDelegate) parentElement);
 				}
 				// return a stub object that says loading...
 				return new Object[] { new LoadingStub() };
 			}
-			OpenShiftException ose = errors.get((IUser)parentElement);
+			OpenShiftException ose = errors.get((UserDelegate)parentElement);
 			if( ose != null ) {
 				return new Object[]{ose};
 			}
@@ -125,16 +125,14 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		Object[] children = new Object[0];
 //		try {
 			if (parentElement instanceof OpenShiftExpressConsoleContentCategory) {
-				IUser user = ((OpenShiftExpressConsoleContentCategory) parentElement).getUser();
+				UserDelegate user = ((OpenShiftExpressConsoleContentCategory) parentElement).getUser();
 				children = new Object[] { user };
-			}
-			if (parentElement instanceof UserDelegate) {
+			} else if (parentElement instanceof UserDelegate) {
 				final UserDelegate user = (UserDelegate) parentElement;
 				if (user.hasDomain()) {
 					children = user.getApplications().toArray();
 				}
-			}
-			if (parentElement instanceof IApplication) {
+			} else if (parentElement instanceof IApplication) {
 				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
 			}
 
@@ -147,7 +145,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		return children;
 	}
 
-	private void launchLoadingUserJob(final IUser user) {
+	private void launchLoadingUserJob(final UserDelegate user) {
 		Job job = new Job("Loading OpenShift Express User information...") {
 
 			@Override
@@ -188,7 +186,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof IUser) {
+		if (element instanceof UserDelegate) {
 			return true;
 		}
 		if (element instanceof IApplication) {

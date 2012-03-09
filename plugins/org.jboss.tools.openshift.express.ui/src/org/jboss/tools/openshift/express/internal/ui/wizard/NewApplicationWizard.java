@@ -11,9 +11,9 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 
 /**
  * @author André Dietisheim
@@ -24,7 +24,7 @@ public class NewApplicationWizard extends Wizard {
 	private NewApplicationWizardPage applicationPage;
 	private EmbedCartridgeWizardPage embedCartridgePage;
 
-	public NewApplicationWizard(IUser user) {
+	public NewApplicationWizard(UserDelegate user) {
 		this.wizardModel = new ApplicationWizardModel(user);
 		setNeedsProgressMonitor(true);
 	}

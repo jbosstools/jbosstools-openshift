@@ -13,11 +13,11 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.express.client.OpenShiftException;
 
@@ -34,21 +34,21 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	 */
 	private static final int APP_CREATION_TIMEOUT = 10;
 
-	private IUser user;
+	private UserDelegate user;
 	private IApplication application;
 	private String name;
 	private ICartridge cartridge;
 
-	public ApplicationWizardModel(IUser user) {
+	public ApplicationWizardModel(UserDelegate user) {
 		this(null, user);
 	}
 
-	public ApplicationWizardModel(IApplication application, IUser user) {
+	public ApplicationWizardModel(IApplication application, UserDelegate user) {
 		this.application = application;
 		this.user = user;
 	}
 
-	public IUser getUser() {
+	public UserDelegate getUser() {
 		return user;
 	}
 

@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -37,9 +38,9 @@ public class CreateOrEditDomainAction extends AbstractAction {
 	public void run() {
 		final ITreeSelection treeSelection = (ITreeSelection) selection;
 		if (selection instanceof ITreeSelection
-				&& treeSelection.getFirstElement() instanceof IUser) {
+				&& treeSelection.getFirstElement() instanceof UserDelegate) {
 			IWizard domainDialog = null;
-			final IUser user = (IUser) treeSelection.getFirstElement();
+			final UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
 			try {
 				if (user.getDomain() == null || user.getDomain().getNamespace() == null) {
 					domainDialog = new NewDomainDialog(user);

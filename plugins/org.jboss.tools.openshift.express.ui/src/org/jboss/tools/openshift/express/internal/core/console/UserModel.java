@@ -82,14 +82,14 @@ public class UserModel {
 		fireModelChange(user, ADDED);
 	}
 
-	public void removeUser(IUser user) {
+	public void removeUser(UserDelegate user) {
 		allUsers.remove(user.getRhlogin());
 		if (this.recentUser == user)
 			this.recentUser = null;
 		fireModelChange(user, REMOVED);
 	}
 
-	private void fireModelChange(IUser user, int type) {
+	private void fireModelChange(UserDelegate user, int type) {
 		Iterator<IUserModelListener> i = listeners.iterator();
 		while (i.hasNext()) {
 			IUserModelListener l = i.next();

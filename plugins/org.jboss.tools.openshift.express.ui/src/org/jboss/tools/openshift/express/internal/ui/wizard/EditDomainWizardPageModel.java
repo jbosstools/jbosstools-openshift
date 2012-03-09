@@ -11,9 +11,9 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -26,9 +26,9 @@ public class EditDomainWizardPageModel extends ObservableUIPojo {
 
 	private String namespace;
 
-	private final IUser user;
+	private final UserDelegate user;
 
-	public EditDomainWizardPageModel(IUser user) {
+	public EditDomainWizardPageModel(UserDelegate user) {
 		this.user = user;
 		try {
 			if (user.getDomain() != null) {

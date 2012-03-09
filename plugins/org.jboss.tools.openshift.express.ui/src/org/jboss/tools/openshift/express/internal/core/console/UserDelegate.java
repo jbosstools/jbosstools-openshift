@@ -30,7 +30,7 @@ import com.openshift.express.client.ISSHPublicKey;
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
-public class UserDelegate implements IUser {
+public class UserDelegate {
 	private IUser delegate;
 	private boolean rememberPassword;
 	private boolean connected;

@@ -398,7 +398,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IUser">
+                       value=" org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
               </and>
            </enablement>
@@ -409,7 +409,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IUser">
+                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
               </and>
            </enablement>
@@ -420,7 +420,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IUser">
+                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
               </and>
            </enablement>
@@ -497,7 +497,7 @@
            <enablement>
               <or>
                  <instanceof
-                       value="com.openshift.express.client.IUser">
+                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
                  <instanceof
                        value="com.openshift.express.client.IApplication">
@@ -539,7 +539,7 @@
      <extension
            point="org.eclipse.core.runtime.adapters">
         <factory
-              adaptableType="com.openshift.express.client.IUser"
+              adaptableType="org.jboss.tools.openshift.express.internal.core.console.UserDelegate"
               class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
@@ -596,7 +596,7 @@
                  id="org.jboss.tools.openshift.express.ui.userPropertySection"
                  tab="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTab">
               <input
-                    type="com.openshift.express.client.IUser">
+                    type="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
               </input>
            </propertySection>
         </propertySections>

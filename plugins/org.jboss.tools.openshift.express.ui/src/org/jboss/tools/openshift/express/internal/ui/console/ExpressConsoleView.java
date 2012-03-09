@@ -15,10 +15,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
 import org.jboss.tools.openshift.express.internal.core.console.IUserModelListener;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
-
-import com.openshift.express.client.IUser;
 
 public class ExpressConsoleView extends CommonNavigator implements IUserModelListener {
 	protected Object getInitialInput() {
@@ -46,15 +45,15 @@ public class ExpressConsoleView extends CommonNavigator implements IUserModelLis
 		});
 	}
 
-	public void userAdded(IUser user) {
+	public void userAdded(UserDelegate user) {
 		refreshViewer();
 	}
 
-	public void userRemoved(IUser user) {
+	public void userRemoved(UserDelegate user) {
 		refreshViewer();
 	}
 
-	public void userChanged(IUser user) {
+	public void userChanged(UserDelegate user) {
 		refreshViewer();
 	}
 }

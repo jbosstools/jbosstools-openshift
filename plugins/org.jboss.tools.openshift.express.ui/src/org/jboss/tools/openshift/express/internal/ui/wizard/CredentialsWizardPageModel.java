@@ -24,7 +24,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore;
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreException;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.NotFoundOpenShiftException;
 import com.openshift.express.client.configuration.OpenShiftConfiguration;
 
@@ -81,7 +80,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	protected String initRhLogin() {
 		String rhLogin = null;
 
-		IUser user = wizardModel.getUser();
+		UserDelegate user = wizardModel.getUser();
 		if (user == null) {
 			user = UserModel.getDefault().getRecentUser();
 		}
@@ -113,7 +112,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		return password;
 	}
 
-	private void storePassword(IUser user) {
+	private void storePassword(UserDelegate user) {
 		try {
 			if (store != null ) {
 				OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(libraServer, user.getRhlogin());

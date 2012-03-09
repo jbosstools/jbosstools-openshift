@@ -17,9 +17,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftEndpointException;
 
 /**
@@ -29,7 +29,7 @@ public class NewDomainDialog extends Wizard {
 
 	private NewDomainWizardPageModel model;
 
-	public NewDomainDialog(IUser user) {
+	public NewDomainDialog(UserDelegate user) {
 		this.model = new NewDomainWizardPageModel(user);
 		setNeedsProgressMonitor(true);
 	}

@@ -18,13 +18,13 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
 import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -67,12 +67,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return wizardModel;
 	}
 
-	public IUser getUser() {
+	public UserDelegate getUser() {
 		return wizardModel.getUser();
 	}
 
 	public List<IApplication> getApplications() throws OpenShiftException {
-		IUser user = getUser();
+		UserDelegate user = getUser();
 		if (user == null || !user.hasDomain()) {
 			return Collections.emptyList();
 		}
@@ -129,7 +129,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadExistingApplications() throws OpenShiftException {
-		IUser user = getUser();
+		UserDelegate user = getUser();
 		if (user != null) {
 			setExistingApplications(user.getApplications());
 			setExistingApplicationsLoaded(true);

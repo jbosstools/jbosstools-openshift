@@ -14,13 +14,13 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.EmbedCartridgeWizard;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 
 /**
  * @author Xavier Coulon
@@ -37,7 +37,7 @@ public class EditCartridgesAction extends AbstractAction {
 		final ITreeSelection treeSelection = (ITreeSelection)selection;
 		if (selection != null && selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
 			final IApplication application = (IApplication) treeSelection.getFirstElement();
-			final IUser user = UserModel.getDefault().getRecentUser();
+			final UserDelegate user = UserModel.getDefault().getRecentUser();
 			EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 			dialog.create();

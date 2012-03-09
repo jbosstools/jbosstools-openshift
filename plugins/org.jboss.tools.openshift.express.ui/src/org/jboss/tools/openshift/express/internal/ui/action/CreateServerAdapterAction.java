@@ -12,9 +12,11 @@ package org.jboss.tools.openshift.express.internal.ui.action;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -26,6 +28,7 @@ import org.eclipse.wst.server.ui.internal.wizard.fragment.NewServerWizardFragmen
 import org.eclipse.wst.server.ui.internal.wizard.fragment.TasksWizardFragment;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
@@ -52,8 +55,10 @@ public class CreateServerAdapterAction extends AbstractAction {
 				&& treeSelection.getFirstElement() instanceof IApplication) {
 			final IApplication application = (IApplication) treeSelection.getFirstElement();
 			IUser user = application.getUser();
+			Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
+			UserDelegate userDelegate = UserModel.getDefault().findUser(user.getRhlogin());
 			NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, UserModel.getDefault().findUser(user.getRhlogin()));
+			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, userDelegate);
 			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
 			dialog.open();

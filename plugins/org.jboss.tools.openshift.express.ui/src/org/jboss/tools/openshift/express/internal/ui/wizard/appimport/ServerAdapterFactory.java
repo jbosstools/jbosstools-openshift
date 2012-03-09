@@ -33,11 +33,11 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 
 import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -55,7 +55,7 @@ public class ServerAdapterFactory {
 	}
 
 	public void create(IProject project, IServerType serverType, IRuntime runtime, String mode,
-			IApplication application, IUser user, IProgressMonitor monitor) throws OpenShiftException {
+			IApplication application, UserDelegate user, IProgressMonitor monitor) throws OpenShiftException {
 		createServerAdapter(project, serverType, runtime, mode, application, user, null, monitor);
 	}
 
@@ -67,7 +67,7 @@ public class ServerAdapterFactory {
 	 * @throws OpenShiftException
 	 */
 	protected void createServerAdapter(IProject project, IServerType serverType, IRuntime runtime, String mode,
-			IApplication application, IUser user,
+			IApplication application, UserDelegate user,
 			String remoteName, IProgressMonitor monitor) throws OpenShiftException {
 		String name = project.getName();
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", name));
@@ -76,7 +76,7 @@ public class ServerAdapterFactory {
 	}
 	
 	protected void createServerAdapter(List<IProject> importedProjects, IServerType serverType,
-			IRuntime runtime, String mode, IApplication application, IUser user, 
+			IRuntime runtime, String mode, IApplication application, UserDelegate user, 
 			String deployProject, String remoteName, IProgressMonitor monitor) {
 		try {
 			renameWebContextRoot(importedProjects);
@@ -98,7 +98,7 @@ public class ServerAdapterFactory {
 	}
 
 	private IServer doCreateServerAdapter(IServerType serverType, IRuntime rt, String mode,
-			IApplication application, IUser user, String deployProject, String remoteName) throws CoreException,
+			IApplication application, UserDelegate user, String deployProject, String remoteName) throws CoreException,
 			OpenShiftException {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(mode != null);

@@ -35,6 +35,7 @@ import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
@@ -171,7 +172,7 @@ public class ExpressServerUtils {
 	}
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
-			IUser user, String mode, String deployProject, 
+			UserDelegate user, String mode, String deployProject, 
 			String projectRelativeFolder, String remoteName) throws OpenShiftException {
 		fillServerWithOpenShiftDetails(wc, 
 				application == null ? null : application.getApplicationUrl(),
@@ -340,7 +341,7 @@ public class ExpressServerUtils {
 	public static IApplication findApplicationForServer(IServer server) {
 		try {
 			String user = ExpressServerUtils.getExpressUsername(server);
-			IUser user2 = UserModel.getDefault().findUser(user);
+			UserDelegate user2 = UserModel.getDefault().findUser(user);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = user2.getApplicationByName(appName);
 			return app;

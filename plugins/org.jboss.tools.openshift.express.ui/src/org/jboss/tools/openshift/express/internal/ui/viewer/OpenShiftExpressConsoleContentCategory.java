@@ -10,23 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
-import com.openshift.express.client.IUser;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 /**
  * @author Xavier Coulon
  */
 public class OpenShiftExpressConsoleContentCategory {
 
-	private final IUser user;
+	private final UserDelegate user;
 	
-	public OpenShiftExpressConsoleContentCategory(final IUser user) {
+	public OpenShiftExpressConsoleContentCategory(final UserDelegate user) {
 		this.user = user;
 	}
 
 	/**
 	 * @return the user
 	 */
-	public IUser getUser() {
+	public UserDelegate getUser() {
 		return user;
 	}
 	

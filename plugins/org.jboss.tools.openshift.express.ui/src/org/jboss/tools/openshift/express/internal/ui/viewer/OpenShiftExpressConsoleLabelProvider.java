@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.LoadingStub;
@@ -24,7 +25,6 @@ import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressCons
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -58,7 +58,7 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof IUser) {
+		if (element instanceof UserDelegate) {
 			return OpenShiftUIActivator.getDefault().createImage("repository-middle.gif");
 		}
 		if (element instanceof IApplication) {
@@ -83,8 +83,8 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 
 	@Override
 	public StyledString getStyledText(Object element) {
-		if (element instanceof IUser) {
-			String message = ((IUser) element).getRhlogin();
+		if (element instanceof UserDelegate) {
+			String message = ((UserDelegate) element).getRhlogin();
 			StyledString styledString = new StyledString(message);
 			styledString.setStyle(0, message.length(), StyledString.DECORATIONS_STYLER);
 			return new StyledString(message);
