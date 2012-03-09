@@ -21,6 +21,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.express.client.IApplication;
 import com.openshift.express.client.ICartridge;
@@ -48,7 +49,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	// start with a null value as a marker of non-initialized state (used during
 	// first pass validation)
-	private List<IApplication> existingApplications = null;
+	private List<IApplication> existingApplications = new ArrayList<IApplication>();
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
 	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String existingApplicationName;
@@ -111,21 +112,24 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return existingApplicationName;
 	}
 
+	/**
+	 * Sets the existing application in this model by name. If there's an
+	 * existing application with the given name, all properties related to an
+	 * existing application are also set.
+	 * 
+	 * @param applicationName
+	 * @throws OpenShiftException
+	 * 
+	 * @see #doSetExistingApplication(IApplication)
+	 */
 	public void setExistingApplicationName(String applicationName) throws OpenShiftException {
 		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME
-				, existingApplicationName
-				, this.existingApplicationName = applicationName);
-		if (applicationName != null) {
-			for (IApplication application : getApplications()) {
-				if (application.getName().equals(applicationName)) {
-					setApplicationName(application.getName());
-					setSelectedCartridge(application.getCartridge());
-					setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(
-							application.getEmbeddedCartridges()));
-				}
-			}
+				, this.existingApplicationName, this.existingApplicationName = applicationName);
+
+		if (!StringUtils.isEmpty(applicationName)
+				&& isExistingApplication(applicationName)) {
+			doSetExistingApplication(getExistingApplication(applicationName));
 		}
-	
 	}
 
 	public void loadExistingApplications() throws OpenShiftException {
@@ -146,13 +150,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return existingApplicationsLoaded;
 	}
 
-	public boolean isExistingApplication(String applicationName) {
+	public IApplication getExistingApplication(String applicationName) {
 		for (IApplication application : getExistingApplications()) {
 			if (application.getName().equalsIgnoreCase(applicationName)) {
-				return true;
+				return application;
 			}
 		}
-		return false;
+		return null;
+	}
+
+	public boolean isExistingApplication(String applicationName) {
+		return getExistingApplication(applicationName) != null;
 	}
 
 	/**
@@ -215,9 +223,40 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return cartridges;
 	}
 
+	/**
+	 * Sets the properties in this model that are related to an existing
+	 * application. The name of the existing application is set!.
+	 * 
+	 * @param application
+	 * @throws OpenShiftException
+	 * 
+	 * @see #setExistingApplicationName(String)
+	 * @see #setApplicationName(IApplication)
+	 * @see #setSelectedCartridge(IApplication)
+	 * @see #setSelectedEmbeddableCartridges(Set)
+	 * @see #wizardModel#setApplication
+	 */
 	public void setExistingApplication(IApplication application) throws OpenShiftException {
-		if(application != null) {
+		if (application != null) {
 			setExistingApplicationName(application.getName());
+			doSetExistingApplication(application);
+		}
+	}
+
+	/**
+	 * Sets the properties in this model that are related to an existing
+	 * application. It does not set the name of the existing application!.
+	 * 
+	 * @param application
+	 * @throws OpenShiftException
+	 * 
+	 * @see #setApplicationName(IApplication)
+	 * @see #setSelectedCartridge(IApplication)
+	 * @see #setSelectedEmbeddableCartridges(Set)
+	 * @see #wizardModel#setApplication
+	 */
+	protected void doSetExistingApplication(IApplication application) throws OpenShiftException {
+		if (application != null) {
 			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
 			setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(application.getEmbeddedCartridges()));
@@ -226,7 +265,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void resetExistingApplication() throws OpenShiftException {
-		setExistingApplication(null);
+		setExistingApplication((IApplication) null);
 	}
 
 	public void setApplicationName(String applicationName) {

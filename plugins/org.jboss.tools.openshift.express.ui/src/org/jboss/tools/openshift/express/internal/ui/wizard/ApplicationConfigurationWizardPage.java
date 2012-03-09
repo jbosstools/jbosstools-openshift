@@ -207,7 +207,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
 					if (selectedApplication != null) {
 						try {
-							pageModel.setExistingApplication(selectedApplication);
+							pageModel.setExistingApplicationName(selectedApplication.getName());
 						} catch (OpenShiftException ex) {
 							OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
 									"Could not get embedded cartridges for application {0}",
