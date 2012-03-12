@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
+import org.eclipse.egit.core.op.RemoveFromIndexOperation;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -42,6 +43,7 @@ import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
@@ -125,22 +127,25 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 		try {
 			LocalZippedPublisherUtil util = new LocalZippedPublisherUtil();
-			IStatus status = util.publishModule(behaviour.getServer(), dest.toString(), module, publishType, delta, monitor);
-
-			IPath path = util.getOutputFilePath(module); // where it's deployed
-			IResource addedResource = destFolder.getFile(new Path(path.lastSegment()));
-			IResource[] resource = new IResource[]{addedResource};
-			final AddToIndexOperation operation = new AddToIndexOperation(resource);
-			try {
-				operation.execute(monitor);
-			} catch (CoreException e) {
-				// TODO
+			IPath path = util.getOutputFilePath(behaviour.getServer(), module, dest.toString()); // where it's deployed
+			IResource changedResource = destFolder.getFile(new Path(path.lastSegment()));
+			IResource[] resource = new IResource[]{changedResource};
+			
+			if( deltaKind == ServerBehaviourDelegate.REMOVED) {
+				changedResource.delete(false, monitor);
+			} else {
+				IStatus status = util.publishModule(behaviour.getServer(), dest.toString(), module, publishType, delta, monitor);
+				final AddToIndexOperation operation = new AddToIndexOperation(resource);
+				try {
+					operation.execute(monitor);
+				} catch (CoreException e) {
+					OpenShiftUIActivator.log(e.getStatus());
+				}
 			}
-
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
-		return 0;
+		return IServer.PUBLISH_STATE_NONE;
 	}
 	
 	protected boolean isInDestProjectTree(String magicProject, IModule[] module) {
