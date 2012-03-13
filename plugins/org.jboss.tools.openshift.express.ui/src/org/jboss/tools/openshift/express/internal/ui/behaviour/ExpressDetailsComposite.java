@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -53,15 +54,13 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
-import org.jboss.ide.eclipse.as.ui.Messages;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
-import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
-import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
@@ -74,13 +73,6 @@ import com.openshift.express.client.OpenShiftException;
  * @author Rob Stryker
  */
 public class ExpressDetailsComposite {
-	public static ExpressDetailsComposite createComposite(Composite parent,
-			IServerModeUICallback callback, String mode, boolean showVerify) {
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(2, false));
-		return new ExpressDetailsComposite(composite, callback, mode, showVerify);
-	}
-
 	// How to display errors, set attributes, etc
 	protected IServerModeUICallback callback;
 	
@@ -103,7 +95,6 @@ public class ExpressDetailsComposite {
 	private UserDelegate fuser;
 	private List<IApplication> appList;
 	private String[] appListNames;
-	private String error;
 	private IServerWorkingCopy server;
 	private String mode;
 	private HashMap<IApplication, IProject[]> projectsPerApp = new HashMap<IApplication, IProject[]>();
@@ -121,7 +112,7 @@ public class ExpressDetailsComposite {
 		createWidgets(fill);
 		fillWidgets();
 		addListeners();
-		postLongRunningValidate();
+		quickValidate();
 	}
 
 	public Composite getComposite() {
@@ -154,7 +145,7 @@ public class ExpressDetailsComposite {
 			try {
 				this.app = app.getName();
 				updateModelForNewUser(tmpUser);
-				postLongRunningValidate();
+				quickValidate();
 				showVerify = false;
 				IProject[] p = projectsPerApp.get(app);
 				showImportLink = p == null || p.length == 0;
@@ -293,23 +284,22 @@ public class ExpressDetailsComposite {
 				String storedPass = UserModel.getDefault().getPasswordFromSecureStorage(user);
 				if (storedPass != null && !storedPass.equals(""))
 					passText.setText(storedPass);
-				callback.execute(new SetUserCommand(server));
 			}
 		};
 		userText.addModifyListener(nameModifyListener);
 
 		passModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				// pass = passText.getText();
-				callback.execute(new SetPassCommand(server));
+				pass = passText.getText();
 			}
 		};
-		if( showVerify ) passText.addModifyListener(passModifyListener);
+		
+		if( showVerify ) 
+			passText.addModifyListener(passModifyListener);
 
 		remoteModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				remote = remoteText.getText();
-				callback.execute(new SetRemoteCommand(server));
 			}
 		};
 		remoteText.addModifyListener(remoteModifyListener);
@@ -322,10 +312,9 @@ public class ExpressDetailsComposite {
 					if( ind != -1 ) {
 						fapplication = appList.get(ind);
 					}
-					callback.execute(new SetApplicationCommand(server));
 					resetDeployProjectCombo();
 					enableImportLink();
-					postLongRunningValidate();
+					quickValidate();
 				}
 			};
 			appNameCombo.addModifyListener(appModifyListener);
@@ -335,7 +324,6 @@ public class ExpressDetailsComposite {
 			deployProjectModifyListener = new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					deployProject = deployProjectCombo.getText();
-					callback.execute(new SetDeployProjectCommand(server));
 				}
 			};
 			deployProjectCombo.addModifyListener(deployProjectModifyListener);
@@ -343,7 +331,6 @@ public class ExpressDetailsComposite {
 		deployDestinationModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				deployFolder = deployFolderText.getText();
-				callback.execute(new SetDeployFolderCommand(server));
 			}
 		};
 		deployFolderText.addModifyListener(deployDestinationModifyListener);
@@ -436,7 +423,7 @@ public class ExpressDetailsComposite {
 		};
 		callback.executeLongRunning(j);
 		postVerifyUpdateWidgets();
-		postLongRunningValidate();
+		quickValidate();
 	}
 
 	private void postVerifyUpdateWidgets() {
@@ -468,11 +455,14 @@ public class ExpressDetailsComposite {
 		importLink.setEnabled(p == null || p.length == 0);
 	}
 
-	private void postLongRunningValidate() {
+	private void quickValidate() {
 		if( !showVerify )
 			return;
-		
-		error = null;
+		callback.setErrorMessage(getErrorString());
+	}
+
+	private String getErrorString() {
+		String error = null;
 		if( credentialsFailed ) {
 			error = "Credentials Failed";
 		} else {
@@ -488,61 +478,7 @@ public class ExpressDetailsComposite {
 				}
 			}
 		}
-		callback.setErrorMessage(error);
-	}
-
-	public class SetUserCommand extends ServerWorkingCopyPropertyCommand {
-		public SetUserCommand(IServerWorkingCopy server) {
-			super(server, Messages.EditorChangeUsernameCommandName, userText, userText.getText(),
-					ExpressServerUtils.ATTRIBUTE_USERNAME, nameModifyListener);
-		}
-	}
-
-	public class SetRemoteCommand extends ServerWorkingCopyPropertyCommand {
-		public SetRemoteCommand(IServerWorkingCopy server) {
-			super(server, "Change Remote Name", remoteText, remoteText.getText(),
-					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener);
-		}
-	}
-
-	public class SetApplicationCommand extends ServerWorkingCopyPropertyComboCommand {
-		public SetApplicationCommand(IServerWorkingCopy server) {
-			super(server, "Change Application Name", appNameCombo, appNameCombo.getText(),
-					ExpressServerUtils.ATTRIBUTE_APPLICATION_NAME, appModifyListener);
-		}
-	}
-
-	public class SetDeployProjectCommand extends ServerWorkingCopyPropertyComboCommand {
-		public SetDeployProjectCommand(IServerWorkingCopy server) {
-			super(server, "Change Deployment Project", appNameCombo, deployProjectCombo.getText(),
-					ExpressServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectModifyListener);
-		}
-	}
-
-	public class SetDeployFolderCommand extends ServerWorkingCopyPropertyCommand {
-		public SetDeployFolderCommand(IServerWorkingCopy server) {
-			super(server, "Change Deployment Folder", deployFolderText, deployFolderText.getText(),
-					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener);
-		}
-	}
-
-	public class SetPassCommand extends ServerWorkingCopyPropertyCommand {
-		public SetPassCommand(IServerWorkingCopy server) {
-			super(server, Messages.EditorChangePasswordCommandName, passText, passText.getText(),
-					null, passModifyListener);
-			oldVal = passText.getText();
-		}
-
-		public void execute() {
-			pass = newVal;
-		}
-
-		public void undo() {
-			pass = oldVal;
-			text.removeModifyListener(listener);
-			text.setText(oldVal);
-			text.addModifyListener(listener);
-		}
+		return error;
 	}
 
 	private Runnable getVerifyingCredentialsJob() {
@@ -553,7 +489,6 @@ public class ExpressDetailsComposite {
 		return new Runnable() {
 			public void run() {
 				final IStatus s = model.validateCredentials();
-				error = null;
 				if (!s.isOK()) {
 					credentialsFailed = true;
 				} else {
@@ -561,7 +496,7 @@ public class ExpressDetailsComposite {
 					try {
 						updateModelForNewUser(inner.getUser());
 					} catch(OpenShiftException ose) {
-						error = ose.getMessage();
+						callback.setErrorMessage(ose.getMessage());
 					}
 				}
 			}
@@ -588,10 +523,23 @@ public class ExpressDetailsComposite {
 		IProject[] possibleProjects = projectsPerApp.get(fapplication);
 		this.deployProject = possibleProjects == null || possibleProjects.length == 0 ? null : possibleProjects[0].getName();
 		
+		fillServerWithDetails();
+	}
+	
+	
+	public void finish(IProgressMonitor monitor) throws CoreException {
+		try {
+			UserModel.getDefault().addUser(fuser);
+			fillServerWithDetails();
+		} catch(OpenShiftException ose) {
+			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, ose.getMessage(), ose));
+		}
+	}
+	private void fillServerWithDetails() throws OpenShiftException {
 		// Fill the server working copy
 		// update the values
 		IServerWorkingCopy wc = callback.getServer();
-		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, application, 
+		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, fapplication, 
 				fuser, mode, deployProject, deployFolder, remote);
 	}
 
@@ -601,29 +549,5 @@ public class ExpressDetailsComposite {
 			appNames[i] = allApps.get(i).getName();
 		}
 		return appNames;
-	}
-
-	public String getUsername() {
-		return user;
-	}
-
-	public String getPassword() {
-		return pass;
-	}
-
-	public String getApplicationName() {
-		return app;
-	}
-
-	public UserDelegate getUser() {
-		return fuser;
-	}
-
-	public IApplication getApplication() {
-		return fapplication;
-	}
-
-	public String getRemote() {
-		return remote;
 	}
 }

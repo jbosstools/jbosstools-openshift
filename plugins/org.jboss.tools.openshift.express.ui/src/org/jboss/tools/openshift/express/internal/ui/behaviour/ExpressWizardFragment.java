@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
@@ -43,7 +45,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	}
 
 	public boolean isComplete() {
-		return getTaskModel().getObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP) != null;
+		return super.isComplete();
 	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
@@ -60,8 +62,11 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 				}
 			}
 		};
-		composite = ExpressDetailsComposite.createComposite(parent,callback, ExpressServerUtils.EXPRESS_SOURCE_MODE, true);
-		return composite.getComposite();
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
+		this.composite = new ExpressDetailsComposite(
+				composite, callback,ExpressServerUtils.EXPRESS_SOURCE_MODE, true);
+		return this.composite.getComposite();
 	}
 		
 	public void enter() {
@@ -70,18 +75,6 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
-		UserDelegate user = composite.getUser();
-		UserModel.getDefault().addUser(user);
-		IApplication app = composite.getApplication();
-		
-		// Only clone and import if there's no project already in existence
-		IProject p = ExpressServerUtils.findProjectForApplication(app);
-		System.out.println(p);
-		if( p == null ) {
-			System.out.println(p);
-			// clone and import
-			
-			// If we had to clone and import, we also need to add the module ??
-		}
+		composite.finish(monitor);
 	}
 }
