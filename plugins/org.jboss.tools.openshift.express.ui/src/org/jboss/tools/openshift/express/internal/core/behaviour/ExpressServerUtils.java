@@ -225,6 +225,7 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
+		wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, projectRelativeFolder);
 		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remoteName);
 		((ServerWorkingCopy)wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
