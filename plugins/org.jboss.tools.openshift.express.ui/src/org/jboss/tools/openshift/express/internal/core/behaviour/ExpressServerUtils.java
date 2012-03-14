@@ -256,7 +256,7 @@ public class ExpressServerUtils {
 	 * @param server the server to check
 	 * @return true or false
 	 */
-	public static boolean isOpenShiftRuntime(IServer server) {
+	public static boolean isOpenShiftRuntime(IServerAttributes server) {
 		final String serverTypeId = server.getServerType().getId();
 		return (OPENSHIFT_SERVER_TYPE.equals(serverTypeId));
 	}
@@ -331,7 +331,7 @@ public class ExpressServerUtils {
 		return p == null ? null : p.length == 0 ? null : p[0];
 	}
 
-	public static IProject findProjectForServersApplication(IServer server) {
+	public static IProject findProjectForServersApplication(IServerAttributes server) {
 		IApplication app = findApplicationForServer(server);
 		if (app == null) {
 			return null;
@@ -339,7 +339,7 @@ public class ExpressServerUtils {
 		return ExpressServerUtils.findProjectForApplication(app);
 	}
 
-	public static IApplication findApplicationForServer(IServer server) {
+	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
 			String user = ExpressServerUtils.getExpressUsername(server);
 			UserDelegate user2 = UserModel.getDefault().findUser(user);
