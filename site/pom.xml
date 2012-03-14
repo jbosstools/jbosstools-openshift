@@ -8,5 +8,5 @@
 	</parent>
 	<groupId>org.jboss.tools.openshift</groupId>
 	<artifactId>openshift.site</artifactId> 
-	<packaging>eclipse-update-site</packaging>
+	<packaging>eclipse-repository</packaging>
 </project>
