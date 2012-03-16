@@ -8,14 +8,14 @@
 	<feature url="features/org.jboss.tools.openshift.egit.integration.feature_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.feature" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
-	<feature url="features/org.jboss.tools.openshift.egit.integration.source.feature_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.source.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-
 	<feature url="features/org.jboss.tools.openshift.express.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.feature" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
-	<feature url="features/org.jboss.tools.openshift.express.source.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.source.feature" version="0.0.0">
+	<!-- Sources -->
+	<feature url="features/org.jboss.tools.openshift.egit.integration.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.feature.source" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+	<feature url="features/org.jboss.tools.openshift.express.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.express.feature.source" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
 </site>
