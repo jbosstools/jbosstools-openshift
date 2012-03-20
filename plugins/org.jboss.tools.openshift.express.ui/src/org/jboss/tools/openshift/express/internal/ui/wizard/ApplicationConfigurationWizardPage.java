@@ -115,7 +115,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Button uncheckAllButton;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
-		super("Setup OpenShift Application", "Select an existing or create a new OpenShift Express Application.",
+		super("Setup OpenShift Application", 
+				"Enter a name and select a type for your new OpenShift Express application.",
 				"Setup OpenShift Application", wizard);
 		try {
 			this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
