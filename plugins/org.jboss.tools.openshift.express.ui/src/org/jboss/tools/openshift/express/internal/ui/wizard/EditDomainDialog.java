@@ -19,6 +19,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.express.client.OpenShiftEndpointException;
 
@@ -37,17 +38,14 @@ public class EditDomainDialog extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		renameDomain();
-		return true;
-	}
-
-	private void renameDomain() {
+		final boolean result[] = new boolean[]{false};
 		try {
 			WizardUtils.runInWizard(new Job("Renaming domain...") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						model.renameDomain();
+						result[0] = true;
 						return Status.OK_STATUS;
 					} catch(OpenShiftEndpointException e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
@@ -59,8 +57,9 @@ public class EditDomainDialog extends Wizard {
 				}
 			}, getContainer());
 		} catch (Exception ex) {
-			// ignore
+			Logger.error("Could not rename domain", ex);
 		}
+		return result[0];
 	}
 
 	@Override
