@@ -189,7 +189,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	}
 
 	private Group createServerAdapterGroup(Composite container, DataBindingContext dbc) {
-		Group serverAdapterGroup = new Group(container, SWT.BORDER);
+		Group serverAdapterGroup = new Group(container, SWT.NONE);
 		serverAdapterGroup.setText("Server Adapter");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(serverAdapterGroup);

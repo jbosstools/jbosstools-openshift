@@ -80,7 +80,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	}
 
 	private Composite createCloneGroup(Composite parent, DataBindingContext dbc) {
-		Group cloneGroup = new Group(parent, SWT.BORDER);
+		Group cloneGroup = new Group(parent, SWT.NONE);
 		cloneGroup.setText("Cloning settings");
 		cloneGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		GridLayoutFactory.fillDefaults()
