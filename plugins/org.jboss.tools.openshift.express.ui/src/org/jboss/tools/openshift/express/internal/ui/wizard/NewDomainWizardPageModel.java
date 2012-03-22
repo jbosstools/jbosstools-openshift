@@ -71,14 +71,27 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	}
 
 	public File getLibraPrivateKey() throws OpenShiftException {
+		String ssh2Home = getSSH2Home();
+		File ssh2HomeFile = new File(ssh2Home);
+		if (!FileUtils.canRead(ssh2HomeFile)) {
+			try {
+				ssh2HomeFile.createNewFile();
+			} catch(IOException e) {
+				throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
+			}
+		}
+		
+		return new File(ssh2Home, LIBRA_KEY);
+	}
+
+	private String getSSH2Home() throws OpenShiftException {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
 		String ssh2Home = preferences.getString(IConstants.KEY_SSH2HOME);
 		if (ssh2Home == null 
 				|| ssh2Home.trim().length() == 0) {
 			throw new OpenShiftException("Could not determine your ssh2 home directory");
 		}
-		
-		return new File(ssh2Home, LIBRA_KEY);
+		return ssh2Home;
 	}
 
 	public String getNamespace() {
@@ -103,6 +116,7 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 			// key already exists
 			return;
 		}
+		createSSHHome(getSSH2Home());
 		File libraPrivateKey = getLibraPrivateKey();
 		SSHKeyPair keyPair = SSHKeyPair.create(passPhrase, libraPrivateKey.getAbsolutePath(), libraPublicKey.getAbsolutePath());
 		setFilePermissions(libraPrivateKey);
@@ -110,6 +124,26 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		setSshKey(keyPair.getPublicKeyPath());
 	}
 	
+	private void createSSHHome(String ssh2Home)
+			throws OpenShiftException {
+		File ssh2HomeFile = new File(ssh2Home);
+		if (FileUtils.canRead(ssh2HomeFile)) {
+			if (!FileUtils.isDirectory(ssh2HomeFile)) {
+				throw new OpenShiftException(
+						ssh2Home + " is a file instead of a directory. This prevents creation and usage of ssh keys");
+			}
+			return;
+		}
+
+		try {
+			if(!ssh2HomeFile.mkdirs()) {
+				throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
+			}
+		} catch(SecurityException e) {
+			throw new OpenShiftException(e, "Could not create ssh2 home directory at {0}", ssh2Home);
+		}
+	}
+
 	private void setFilePermissions(File file) {
 		// set f permission to correspond to 'chmod 0600' read/write only for user
 		// First clear all permissions for both user and others
