@@ -169,12 +169,14 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private boolean createApplication() {
 		try {
 			final String applicationName = wizardModel.getApplicationName();
+			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 			IStatus status = WizardUtils.runInWizard(
 					new Job(NLS.bind("Creating application \"{0}\"...", applicationName)) {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								getWizardModel().createApplication(monitor);
+								delegatingMonitor.add(monitor);
+								getWizardModel().createApplication(delegatingMonitor);
 								return Status.OK_STATUS;
 							} catch (OpenShiftEndpointException e) {
 								// TODO: refresh user
@@ -187,7 +189,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 							}
 						}
 
-					}, null, getContainer(), 300);
+					}, delegatingMonitor, getContainer(), 300);
 			return status.isOK();
 		} catch (Exception e) {
 			return false;
@@ -323,4 +325,5 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	public void dispose() {
 		wizardModel.dispose();
 	}
+
 }

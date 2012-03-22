@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -24,6 +28,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
@@ -39,7 +44,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	private static final int APP_CREATION_TIMEOUT = 120;
+	private static final int APP_CREATION_TIMEOUT = 180;
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
 	public OpenShiftExpressApplicationWizardModel(UserDelegate user) {
@@ -163,13 +168,14 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	private void createServerAdapter(IProgressMonitor monitor, List<IProject> importedProjects)
 			throws OpenShiftException {
-		if (isCreateServerAdapter()) {
+		Assert.isTrue(importedProjects.size() > 0);
+		if (isCreateServerAdapter()) {	
 			Assert.isTrue(importedProjects.size() > 0);
 			IProject project = importedProjects.get(0);
 			new ServerAdapterFactory().create(project, this, monitor);
 		}
 	}
-
+	
 	@Override
 	public File getRepositoryFile() {
 		String repositoryPath = getRepositoryPath();
@@ -346,15 +352,45 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		}
 	}
 
-	protected IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor)
+	protected IApplication createApplication(final String name, final ICartridge cartridge, final IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		UserDelegate user = getUser();
+		final UserDelegate user = getUser();
 		if (user == null) {
 			throw new OpenShiftException("Could not create application, have no valid user credentials");
 		}
-		IApplication application = user.createApplication(name, cartridge);
-		waitForAccessible(application, monitor);
-		return application;
+		ExecutorService executor = Executors.newFixedThreadPool(1);
+		try {
+			FutureTask<IApplication> future = new FutureTask<IApplication>(
+					new Callable<IApplication>() {
+						@Override
+						public IApplication call() throws Exception {
+							monitor.setTaskName("Creating application \"" + name + "\"...");
+							Logger.debug("creating application...");
+							final IApplication application
+							= user.createApplication(name, cartridge);
+							monitor.beginTask("Waiting for application to be reachable...",
+									IProgressMonitor.UNKNOWN);
+							Logger.debug("Waiting for application to be reachable...");
+							waitForAccessible(application, monitor);
+							return application;
+						}
+					});
+			executor.execute(future);
+			while (!future.isDone()) {
+				if(monitor.isCanceled()) {
+					throw new OpenShiftException("Operation was cancelled by user.");
+				}
+				Thread.sleep(1000);
+			}
+			final IApplication application = future.get();
+			return application;
+		} catch (Exception e) { // InterruptedException and ExecutionException
+			Throwable cause = e.getCause() !=null ?e.getCause() : e;
+			Logger.error("Failed to create application", cause);
+			throw new OpenShiftException("Failed to create application: {0}", cause.getMessage());
+		} finally {
+			executor.shutdown();
+		}
 	}
 
 	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
