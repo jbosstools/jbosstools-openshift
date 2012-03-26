@@ -258,7 +258,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final ISWTObservableValue selectedCartridgeComboObservable =
 				WidgetProperties.selection().observe(newAppCartridgeCombo);
 		final IObservableValue selectedCartridgeModelObservable = BeanProperties.value(
-				NewApplicationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
+				ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
 		ValueBindingBuilder.bind(selectedCartridgeComboObservable).converting(new StringToCartridgeConverter())
 				.to(selectedCartridgeModelObservable).converting(new CartridgeToStringConverter()).in(dbc);
 
