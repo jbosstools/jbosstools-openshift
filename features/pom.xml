@@ -14,6 +14,7 @@
 	<modules>
 		<module>org.jboss.tools.openshift.egit.integration.feature</module>
 		<module>org.jboss.tools.openshift.express.feature</module>
+		<module>org.jboss.tools.openshift.express.test.feature</module>
 	</modules>
 </project>
 	
