@@ -572,9 +572,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private static class JenkinsApplicationDialog extends InputDialog {
 
 		public JenkinsApplicationDialog(Shell shell) {
-			super(shell, "New Jenkins application",
-					"To embed jenkins into your application, you'd first have to create a jenkins application.\n"
-							+ "Please provide a name for your jenkins application:", null, new JenkinsNameValidator());
+			super(
+					shell,
+					"New Jenkins application",
+					"To embed Jenkins into your application, you first have to create a separate Jenkins application. "
+							+ "Please provide a name for this new Jenkins application (lower-case letters and digits only):"
+					, null, new JenkinsNameValidator());
 		}
 
 		private static class JenkinsNameValidator implements IInputValidator {
@@ -583,6 +586,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			public String isValid(String input) {
 				if (StringUtils.isEmpty(input)) {
 					return "You have to provide a name for the jenkins application";
+				}
+
+				if (!StringUtils.isAlphaNumeric(input)) {
+					return "The name may only contain lower-case letters and digits.";
 				}
 				return null;
 			}
