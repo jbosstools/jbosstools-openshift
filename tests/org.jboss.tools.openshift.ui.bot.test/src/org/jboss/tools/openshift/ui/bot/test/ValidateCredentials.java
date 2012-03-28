@@ -35,6 +35,8 @@ public class ValidateCredentials extends SWTTestExt {
 		// create new OpenShift Express Application
 		SWTBot wiz = open.newObject(OpenShiftUI.NewApplication.iNewObject);
 
+		storePasswordThenForward();
+		
 		// set wrong user credentials
 		wiz.text(0).setText(TestProperties.getProperty("openshift.user.name"));
 		wiz.text(1).setText(
@@ -68,9 +70,10 @@ public class ValidateCredentials extends SWTTestExt {
 	 * passphrase)
 	 */
 	private void storePasswordThenForward() {
-		bot.waitForShell(IDELabel.Shell.SECURE_STORAGE);
-		bot.text(0).setText(TestProperties.getPassphrase());
-		bot.button(IDELabel.Button.OK).click();
+		if (bot.waitForShell(IDELabel.Shell.SECURE_STORAGE) != null) {
+			bot.text(0).setText(TestProperties.getPassphrase());
+			bot.button(IDELabel.Button.OK).click();
+		}
 	}
 
 }

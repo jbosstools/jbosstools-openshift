@@ -1,9 +1,5 @@
 package org.jboss.tools.openshift.ui.bot.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
@@ -15,6 +11,9 @@ import org.jboss.tools.ui.bot.ext.types.IDELabel;
 import org.junit.Test;
 
 public class DeleteAppAS7 extends SWTTestExt {
+		
+	SWTBotTreeItem account;
+	
 	@Test
 	public void canDeleteApplication() {
 		projectExplorer.show();
@@ -32,7 +31,7 @@ public class DeleteAppAS7 extends SWTTestExt {
 
 		SWTBot consoleBot = openshiftConsole.bot();
 
-		SWTBotTreeItem account = consoleBot.tree()
+		account = consoleBot.tree()
 				.expandNode(TestProperties.getProperty("openshift.user.name"))
 				.doubleClick();
 
@@ -41,52 +40,25 @@ public class DeleteAppAS7 extends SWTTestExt {
 		bot.waitForShell("Application deletion");
 
 		bot.button(IDELabel.Button.OK).click();
-// TODO !!!
 		bot.waitWhile(new ICondition() {
-
-			private boolean deletionInvoked = false;
-
 			@Override
 			public boolean test() throws Exception {
-
-				if (deletionInvoked && getJobs().size() == 0) {
-					return false;
-				} else {
-					return true;
-				}
-
+				return account.getItems().length > 0;
 			}
 
 			@Override
 			public void init(SWTBot bot) {
-				// Keep empty
+				// keep empty
 			}
 
 			@Override
 			public String getFailureMessage() {
-				return "Deletion was not invoked in timeout.";
+				return "Application is still present in user account after reasonable timeout.";
 			}
-
-			private List<Job> getJobs() {
-				List<Job> jobs = new ArrayList<Job>();
-				for (Job job : Job.getJobManager().find(null)) {
-					if (Job.SLEEPING != job.getState()) {
-						jobs.add(job);
-
-						System.out.println("Job: " + job.getName());
-
-						if (job.getName().contains("OpenShift")) {
-							System.out
-									.println("!!!!!!!!!!!FOUND ONE!!!!!!!!!!!!!");
-							deletionInvoked = true;
-						}
-
-					}
-				}
-				return jobs;
-			}
+			
 		}, TIME_60S, TIME_1S);
 
+		
 		/*
 		 * TODO
 		 * 
@@ -102,4 +74,5 @@ public class DeleteAppAS7 extends SWTTestExt {
 				account.getItems().length == 0);
 
 	}
+	
 }

@@ -47,7 +47,7 @@ public class DomainDestroyer {
      * @param args
      */
     public static void main(String[] args) {
-        if (destroyDomain("rhtest", "sbunciak", "rhtest123") == 200) {
+        if (destroyDomain("rhtestdomain", "sbunciak", "rhtest123") == 200) {
         	System.out.println("Domain destroyed.");
         } else {
         	System.out.println("Domain was not destroyed.");
