@@ -17,5 +17,6 @@ public class ExpressMessages extends NLS {
 	public static String shareProjectTitle;
 	public static String shareProjectMessage;	
 	public static String additionNotRequiredModule;
+	public static String publishFailMissingProject;
 	
 }

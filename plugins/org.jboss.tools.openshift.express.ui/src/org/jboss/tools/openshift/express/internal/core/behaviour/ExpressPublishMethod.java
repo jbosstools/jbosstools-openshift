@@ -21,10 +21,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
-import org.eclipse.egit.core.op.RemoveFromIndexOperation;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -55,8 +55,13 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	@Override
 	public void publishStart(DeployableServerBehavior behaviour,
 			IProgressMonitor monitor) throws CoreException {
-		// TODO Auto-generated method stub
-
+		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		IProject magicProject = destProjName == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
+		if( magicProject == null || !magicProject.isAccessible()) {
+			throw new CoreException(new Status(IStatus.ERROR, 
+				OpenShiftUIActivator.PLUGIN_ID, 
+				NLS.bind(ExpressMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
+		}
 	}
 
 	@Override
@@ -103,7 +108,6 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		
 		// Magic Project
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
-		
 		if( isInDestProjectTree(destProjName, module))
 			return IServer.PUBLISH_STATE_NONE;
 		
@@ -163,9 +167,13 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 	protected PushOperationResult commitAndPushProject(IProject p,
 			DeployableServerBehavior behaviour, IProgressMonitor monitor) throws CoreException {
-		Repository repository = EGitUtils.getRepository(p);
-
-		int changed = EGitUtils.countCommitableChanges(p, behaviour.getServer(), new NullProgressMonitor() );
+		
+		int changed = 0;
+		try {
+			changed = EGitUtils.countCommitableChanges(p, behaviour.getServer(), new NullProgressMonitor() );
+		} catch( CoreException ce) {
+			// What to do in this situation?? 
+		}
 		String remoteName = behaviour.getServer().getAttribute(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, 
 				ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		PushOperationResult result = null;
@@ -189,6 +197,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 				return null;
 			
 			try {
+				Repository repository = EGitUtils.getRepository(p);
 				result = EGitUtils.pushForce(remoteName, repository, new SubProgressMonitor(monitor, 100));
 				monitor.done();
 			} catch(CoreException ce2) {
