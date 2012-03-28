@@ -17,15 +17,16 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
  * @author André Dietisheim
  */
 public class ConnectToOpenShiftWizardModel implements IUserAwareModel {
-
+	protected UserDelegate created = null;
 	@Override
 	public UserDelegate getUser() {
-		return UserModel.getDefault().getRecentUser();
+		return created == null ? UserModel.getDefault().getRecentUser() : created;
 	}
 
 	@Override
 	public UserDelegate setUser(UserDelegate user) {
 		UserModel.getDefault().addUser(user);
+		created = user;
 		return user;
 	}
 

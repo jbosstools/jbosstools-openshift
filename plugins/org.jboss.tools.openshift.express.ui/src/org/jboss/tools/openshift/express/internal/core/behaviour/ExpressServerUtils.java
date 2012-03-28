@@ -41,6 +41,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 
 import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IDomain;
 import com.openshift.express.client.IUser;
 import com.openshift.express.client.OpenShiftException;
 
@@ -172,12 +173,12 @@ public class ExpressServerUtils {
 	}
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
-			UserDelegate user, String mode, String deployProject, 
+			UserDelegate user, IDomain domain, String mode, String deployProject, 
 			String projectRelativeFolder, String remoteName) throws OpenShiftException {
 		fillServerWithOpenShiftDetails(wc, 
 				application == null ? null : application.getApplicationUrl(),
 				user == null ? null : user.getRhlogin(), 
-				user == null ? null : user.getDomain().getNamespace(), 
+				domain == null ? null : domain.getNamespace(), 
 				application == null ? null : application.getName(), 
 				application == null ? null : application.getUUID(), 
 				deployProject, projectRelativeFolder, mode, remoteName);

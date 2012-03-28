@@ -882,19 +882,22 @@ public class EGitUtils {
 		return hasChanges;
 	}
 
-	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) {
+	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		try {
-			Set<String> commitable = getCommitableChanges(project, server, monitor);
+			Repository repo = getRepository(project);
+			if( repo == null ) {
+				throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, "Project " + project + " has no repository associated with it."));
+			}
+			Set<String> commitable = getCommitableChanges(repo, server, monitor);
 			return commitable.size();
 		} catch (IOException ioe) {
+			throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, "Unable to count commitable resources", ioe));
 		}
-		return -1;
 	}
 
-	private static Set<String> getCommitableChanges(IProject project, IServer server, IProgressMonitor monitor)
+	private static Set<String> getCommitableChanges(Repository repo, IServer server, IProgressMonitor monitor)
 			throws IOException {
-		Repository repo = getRepository(project);
-
+		
 		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
 		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
 				IteratorService.createInitialIterator(repo));

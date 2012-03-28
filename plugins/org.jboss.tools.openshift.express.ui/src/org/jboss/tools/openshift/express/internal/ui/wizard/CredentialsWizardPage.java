@@ -43,6 +43,7 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -116,7 +117,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		new Label(container, SWT.NONE); // filler to align the checkbox under
 										// the text fields
 		Button rememberPasswordCheckBox = new Button(container, SWT.CHECK);
-		rememberPasswordCheckBox.setText("Save password (could trigger secure storage login)");
+		rememberPasswordCheckBox.setText(OpenshiftUIMessages.OpenshiftWizardSavePassword);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(rememberPasswordCheckBox);
 		final IObservableValue rememberPasswordModelObservable =

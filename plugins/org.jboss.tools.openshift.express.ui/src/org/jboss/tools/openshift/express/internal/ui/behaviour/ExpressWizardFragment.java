@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -25,10 +24,6 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-
-import com.openshift.express.client.IApplication;
 
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
 	private ExpressDetailsComposite composite;
@@ -45,7 +40,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	}
 
 	public boolean isComplete() {
-		return super.isComplete();
+		return composite.getErrorString() == null;
 	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {

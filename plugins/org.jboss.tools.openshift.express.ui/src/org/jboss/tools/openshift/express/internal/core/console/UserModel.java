@@ -237,6 +237,17 @@ public class UserModel {
 		}
 	}
 
+	public void clearPasswordInSecureStorage(final String rhLogin) {
+		SecurePasswordStore store = getSecureStore(rhLogin);
+		if (store != null && rhLogin != null && !rhLogin.isEmpty()) {
+			try {
+				store.remove();
+			} catch (SecurePasswordStoreException e) {
+				Logger.error(e.getMessage(), e);
+			}
+		}
+	}
+
 	private SecurePasswordStore getSecureStore(final String rhLogin) {
 		return getSecureStore(initLibraServer(), rhLogin);
 	}

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -61,12 +62,15 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
 import com.openshift.express.client.IApplication;
+import com.openshift.express.client.IDomain;
+import com.openshift.express.client.NotFoundOpenShiftException;
 import com.openshift.express.client.OpenShiftException;
 
 /**
@@ -86,20 +90,21 @@ public class ExpressDetailsComposite {
 	protected Text passText;
 	protected Text deployFolderText;
 	protected Combo appNameCombo, deployProjectCombo;
-	protected Button verifyButton,  browseDestButton;
+	protected Button verifyButton,  browseDestButton, rememberPasswordCheckBox;
+	protected boolean showVerify, showImportLink;
 	
 	// Data / Model 
-	protected boolean showVerify, showImportLink;
+	private boolean rememberPassword = true;
 	private String user, pass, app, remote, deployProject, deployFolder;
 	private IApplication fapplication;
 	private UserDelegate fuser;
+	private IDomain fdomain;
 	private List<IApplication> appList;
 	private String[] appListNames;
 	private IServerWorkingCopy server;
 	private String mode;
 	private HashMap<IApplication, IProject[]> projectsPerApp = new HashMap<IApplication, IProject[]>();
 	private boolean credentialsFailed = false;
-	
 	
 	public ExpressDetailsComposite(Composite fill, IServerModeUICallback callback, String mode, boolean showVerify) {
 		this.callback = callback;
@@ -169,9 +174,12 @@ public class ExpressDetailsComposite {
 			userText.setText(user);
 			userText.setEnabled(showVerify);
 		}
-		if (showVerify && pass != null) {
-			passText.setText(pass);
-			passText.setEnabled(fapplication == null);
+		if( showVerify ) {
+			if (pass != null) {
+				passText.setText(pass);
+				passText.setEnabled(fapplication == null);
+			}
+			rememberPasswordCheckBox.setSelection(rememberPassword);
 		}
 		if (remote != null)
 			remoteText.setText(remote);
@@ -229,8 +237,12 @@ public class ExpressDetailsComposite {
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(passText);
 			verifyButton = new Button(composite, SWT.PUSH);
 			verifyButton.setText("Verify...");
-			new Composite(composite, SWT.NULL); // Stub, fill the empty space
+			
+			// Add label to check for password remember
+			rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
+			rememberPasswordCheckBox.setText(OpenshiftUIMessages.OpenshiftWizardSavePassword);
 		}
+		
 		Label appNameLabel = new Label(composite, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
@@ -365,12 +377,14 @@ public class ExpressDetailsComposite {
 			});
 		}
 		if (showVerify) {
-			verifyButton.addSelectionListener(new SelectionListener() {
+			verifyButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					verifyPressed();
 				}
-
-				public void widgetDefaultSelected(SelectionEvent e) {
+			});
+			rememberPasswordCheckBox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					rememberPassword = rememberPasswordCheckBox.getSelection();
 				}
 			});
 		}
@@ -461,31 +475,36 @@ public class ExpressDetailsComposite {
 		callback.setErrorMessage(getErrorString());
 	}
 
-	private String getErrorString() {
+	public String getErrorString() {
 		String error = null;
 		if( credentialsFailed ) {
 			error = "Credentials Failed";
+		} else if( appList == null ) {
+			error = "Please click \"verify\" to test your credentials.";
+		} else if( fdomain == null ) {
+			error = "Your OpenShift Express account has not been configured with a domain.";
+		} else if( app == null || app.equals("")) {
+			error = "Please select an application from the combo below.";
 		} else {
-			if( appList == null ) {
-				error = "Please click \"verify\" to test your credentials.";
-			}
-			else if( app == null || app.equals("")) {
-				error = "Please select an application from the combo below.";
-			} else {
-				IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
-				if (p == null || p.length == 0) {
-					error = "Your workspace does not have a project corresponding to " + app + ". Please import one.";
-				}
+			IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
+			if (p == null || p.length == 0) {
+				error = "Your workspace does not have a project corresponding to " + app + ". Please import one.";
 			}
 		}
 		return error;
 	}
 
 	private Runnable getVerifyingCredentialsJob() {
-		final ConnectToOpenShiftWizardModel inner = new ConnectToOpenShiftWizardModel();
+		final ConnectToOpenShiftWizardModel inner = new ConnectToOpenShiftWizardModel() {
+			public UserDelegate setUser(UserDelegate user) {
+				created = user;
+				return user;
+			}
+		};
 		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(inner);
 		model.setPassword(pass);
 		model.setRhLogin(user);
+		model.setRememberPassword(false);
 		return new Runnable() {
 			public void run() {
 				final IStatus s = model.validateCredentials();
@@ -495,8 +514,9 @@ public class ExpressDetailsComposite {
 					credentialsFailed = false;
 					try {
 						updateModelForNewUser(inner.getUser());
+					} catch(NotFoundOpenShiftException nose) {
+						// Ignore this. It will be handled later
 					} catch(OpenShiftException ose) {
-						callback.setErrorMessage(ose.getMessage());
 					}
 				}
 			}
@@ -504,10 +524,18 @@ public class ExpressDetailsComposite {
 	}
 
 	private void updateModelForNewUser(UserDelegate user) throws OpenShiftException {
-
+		
 		// Updating the model, some long-running 
 		projectsPerApp.clear();
-		this.appList = user.getApplications();
+		try {
+			// IF we load the applications first, domain gets loaded automatically
+			this.appList = user.getApplications();
+			fdomain = user.getDomain();
+		} catch(NotFoundOpenShiftException nfose) {
+			// Credentials work, but no domain, so no applications either
+			this.appList = new ArrayList<IApplication>();
+			fdomain = null;
+		}
 		String[] appNames = getAppNamesAsStrings(appList);
 		int index = Arrays.asList(appNames).indexOf(app);
 		IApplication application = index == -1 ? null : appList.get(index);
@@ -530,6 +558,11 @@ public class ExpressDetailsComposite {
 	public void finish(IProgressMonitor monitor) throws CoreException {
 		try {
 			UserModel.getDefault().addUser(fuser);
+			if( rememberPassword ) {
+				UserModel.getDefault().setPasswordInSecureStorage(fuser.getRhlogin(), fuser.getPassword());
+			} else {
+				UserModel.getDefault().clearPasswordInSecureStorage(fuser.getRhlogin());
+			}
 			fillServerWithDetails();
 		} catch(OpenShiftException ose) {
 			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, ose.getMessage(), ose));
@@ -540,7 +573,7 @@ public class ExpressDetailsComposite {
 		// update the values
 		IServerWorkingCopy wc = callback.getServer();
 		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, fapplication, 
-				fuser, mode, deployProject, deployFolder, remote);
+				fuser, fdomain, mode, deployProject, deployFolder, remote);
 	}
 
 	private String[] getAppNamesAsStrings(List<IApplication> allApps) {

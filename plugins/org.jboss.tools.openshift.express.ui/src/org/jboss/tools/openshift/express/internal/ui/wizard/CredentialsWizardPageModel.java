@@ -47,7 +47,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	private IStatus credentialsStatus;
 	private StringPreferenceValue rhLoginPreferenceValue;
 	private final String libraServer;
-	private SecurePasswordStore store;
 
 	private IUserAwareModel wizardModel;
 
@@ -58,7 +57,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
 		this.libraServer = initLibraServer();
 		this.rhLogin = initRhLogin();
-		initSecureStore(libraServer, rhLogin);
 		this.password = initPassword();
 		resetCredentialsStatus();
 	}
@@ -70,11 +68,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			Logger.error("Failed to load OpenShift configuration from client library", e);
 		}
 		return null;
-	}
-
-	private void initSecureStore(final String platform, final String rhLogin) {
-		this.key = new OpenShiftPasswordStorageKey(platform, rhLogin);
-		this.store = new SecurePasswordStore(key);
 	}
 
 	protected String initRhLogin() {
@@ -100,37 +93,19 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	protected String initPassword() {
 		String password = null;
 		if (!StringUtils.isEmpty(libraServer) 
-				&& !StringUtils.isEmpty(rhLogin) 
-				&& store != null) {
-			try {
-				password = store.getPassword();
-				setRememberPassword(!StringUtils.isEmpty(password));
-			} catch (SecurePasswordStoreException e) {
-				Logger.error("Could not retrieve user password from Secured Store", e);
-			}
+				&& !StringUtils.isEmpty(rhLogin)) {
+			password = UserModel.getDefault().getPasswordFromSecureStorage(rhLogin);
+			setRememberPassword(!StringUtils.isEmpty(password));
 		}
 		return password;
 	}
 
 	private void storePassword(UserDelegate user) {
-		try {
-			if (store != null ) {
-				OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(libraServer, user.getRhlogin());
-				store.update(key, password);
-			}
-		} catch (SecurePasswordStoreException e) {
-			Logger.error(e.getMessage(), e);
-		}
+		UserModel.getDefault().setPasswordInSecureStorage(user.getRhlogin(), password);
 	}
 
 	private void erasePasswordStore() {
-		try {
-			if (store != null) {
-				store.remove();
-			}
-		} catch (SecurePasswordStoreException e) {
-			Logger.error(e.getMessage(), e);
-		}
+		UserModel.getDefault().clearPasswordInSecureStorage(rhLogin);
 	}
 
 	protected String getConfiguredUserName() {
