@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 public class ShowPropertiesAction extends AbstractAction {
 
 	public ShowPropertiesAction() {
-		super(OpenShiftExpressUIMessages.SHOW_PROPERTIES_VIEW_ACTION);
+		super(OpenShiftExpressUIMessages.SHOW_PROPERTIES_VIEW_ACTION, true);
 	}
 
 	/*

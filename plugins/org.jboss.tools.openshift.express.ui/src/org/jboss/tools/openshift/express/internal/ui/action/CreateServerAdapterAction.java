@@ -44,7 +44,7 @@ import com.openshift.express.client.IUser;
 public class CreateServerAdapterAction extends AbstractAction {
 
 	public CreateServerAdapterAction() {
-		super(OpenShiftExpressUIMessages.CREATE_SERVER_ADAPTER_ACTION);
+		super(OpenShiftExpressUIMessages.CREATE_SERVER_ADAPTER_ACTION, true);
 		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("edit.gif"));
 	}
 

@@ -14,6 +14,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.ui.navigator.CommonViewer;
@@ -27,9 +28,16 @@ public abstract class AbstractAction extends Action implements ISelectionChanged
 	protected ISelection selection = null;
 	
 	protected StructuredViewer viewer;
+	
+	private boolean enableForSingleElement = false;
 
 	public AbstractAction(String text) {
 		super(text);
+	}
+	
+	public AbstractAction(String text, boolean enableForSingleElement) {
+		super(text);
+		this.enableForSingleElement = enableForSingleElement;
 	}
 
 	public AbstractAction(String text, ImageDescriptor image) {
@@ -42,6 +50,13 @@ public abstract class AbstractAction extends Action implements ISelectionChanged
 		if (source instanceof CommonViewer) {
 			this.viewer = (CommonViewer) source;
 			this.selection = ((CommonViewer) source).getSelection();
+			if(enableForSingleElement){
+				if(selection instanceof ITreeSelection && ((ITreeSelection) selection).size() == 1){
+					setEnabled(true);
+				}else{
+					setEnabled(false);
+				}
+			}
 		}
 	}
 

@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 public class DeleteConnectionAction extends AbstractAction {
 
 	public DeleteConnectionAction() {
-		super(OpenShiftExpressUIMessages.DELETE_CONNECTION_ACTION);
+		super(OpenShiftExpressUIMessages.DELETE_CONNECTION_ACTION, true);
 	}
 
 	@Override

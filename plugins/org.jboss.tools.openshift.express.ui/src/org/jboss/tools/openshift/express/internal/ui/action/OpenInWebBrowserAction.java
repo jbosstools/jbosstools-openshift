@@ -25,7 +25,7 @@ import com.openshift.express.client.OpenShiftException;
 public class OpenInWebBrowserAction extends AbstractAction {
 
 	public OpenInWebBrowserAction() {
-		super(OpenShiftExpressUIMessages.SHOW_IN_BROWSER_ACTION);
+		super(OpenShiftExpressUIMessages.SHOW_IN_BROWSER_ACTION, true);
 		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("open-browser.gif"));
 	}
 

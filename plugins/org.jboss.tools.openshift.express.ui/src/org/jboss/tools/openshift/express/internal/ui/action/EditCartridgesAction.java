@@ -28,7 +28,7 @@ import com.openshift.express.client.IApplication;
 public class EditCartridgesAction extends AbstractAction {
 
 	public EditCartridgesAction() {
-		super(OpenShiftExpressUIMessages.EDIT_CARTRIDGES_ACTION);
+		super(OpenShiftExpressUIMessages.EDIT_CARTRIDGES_ACTION, true);
 		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("task-repository-new.gif"));
 	}
 	

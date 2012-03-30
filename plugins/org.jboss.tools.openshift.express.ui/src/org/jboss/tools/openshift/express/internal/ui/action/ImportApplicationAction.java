@@ -30,7 +30,7 @@ import com.openshift.express.client.IApplication;
 public class ImportApplicationAction extends AbstractAction {
 
 	public ImportApplicationAction() {
-		super(OpenShiftExpressUIMessages.IMPORT_APPLICATION_ACTION);
+		super(OpenShiftExpressUIMessages.IMPORT_APPLICATION_ACTION, true);
 		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("go-into.gif"));
 	}
 	

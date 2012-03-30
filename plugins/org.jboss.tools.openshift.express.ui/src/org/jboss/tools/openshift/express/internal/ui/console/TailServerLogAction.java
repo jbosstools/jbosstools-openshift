@@ -55,7 +55,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	 * Constructor
 	 */
 	public TailServerLogAction() {
-		super(OpenShiftExpressUIMessages.TAIL_SERVER_LOG_ACTION);
+		super(OpenShiftExpressUIMessages.TAIL_SERVER_LOG_ACTION, true);
 		IViewRegistry reg = PlatformUI.getWorkbench().getViewRegistry();
 		IViewDescriptor desc = reg.find(IConsoleConstants.ID_CONSOLE_VIEW);
 		setImageDescriptor(desc.getImageDescriptor());
