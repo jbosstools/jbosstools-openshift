@@ -21,6 +21,8 @@ public class OpenShiftExpressUIMessages extends NLS {
 
 	public static String CREATE_OR_EDIT_DOMAIN_ACTION;
 	
+	public static String DELETE_DOMAIN_ACTION;
+	
 	public static String SHOW_IN_ACTION_GROUP;
 	
 	public static String SHOW_IN_BROWSER_ACTION;

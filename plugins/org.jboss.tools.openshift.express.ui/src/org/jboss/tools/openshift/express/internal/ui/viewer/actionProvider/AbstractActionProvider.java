@@ -46,7 +46,8 @@ public abstract class AbstractActionProvider extends CommonActionProvider {
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
-		if (action != null && action.isEnabled()) {
+		action.validate();
+		if (action != null/* && action.isEnabled()*/) {
 			menu.appendToGroup(group, action);
 		}
 	}

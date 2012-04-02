@@ -68,5 +68,9 @@ public abstract class AbstractAction extends Action implements ISelectionChanged
 	public void setViewer(StructuredViewer viewer) {
 		this.viewer = viewer;
 	}
+	
+	public void validate(){
+		
+	}
 
 }

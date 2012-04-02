@@ -373,6 +373,17 @@
            </enablement>
         </actionProvider>
         <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteDomainActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.deleteDomainActionProvider">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider">
            <enablement>
