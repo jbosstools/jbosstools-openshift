@@ -36,11 +36,6 @@
 							<artifactId>org.jboss.tools.openshift.express.feature.feature.group</artifactId>
 							<version>2.3.0</version>
 						</dependency>
-						<dependency>
-							<type>p2-installable-unit</type>
-							<artifactId>org.jboss.tools.as.feature.feature.group</artifactId>
-							<version>2.3.0</version>
-						</dependency>
 					</dependencies>
 				</configuration>
 			</plugin>
