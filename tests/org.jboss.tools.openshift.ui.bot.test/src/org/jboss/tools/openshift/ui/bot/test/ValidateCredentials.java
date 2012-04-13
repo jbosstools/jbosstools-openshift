@@ -72,9 +72,14 @@ public class ValidateCredentials extends SWTTestExt {
 	private void storePasswordThenForward() {
 		if (bot.waitForShell(IDELabel.Shell.SECURE_STORAGE) != null) {
 			bot.text(0).setText(TestProperties.getPassphrase());
-			if (bot.text(1) != null)
+			if (bot.text(1) != null){
 				bot.text(1).setText(TestProperties.getPassphrase());
-			bot.button(IDELabel.Button.OK).click();
+				bot.button(IDELabel.Button.OK).click();
+				bot.waitForShell(IDELabel.Shell.SECURE_STORAGE);
+				bot.button(IDELabel.Button.CANCEL).click();
+			} else {
+				bot.button(IDELabel.Button.OK).click();
+			}
 		}
 	}
 
