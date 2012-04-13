@@ -88,6 +88,7 @@ public class DeleteApplicationAction extends AbstractAction {
 							try {
 								application.destroy();
 							} catch (OpenShiftException e) {
+								MessageDialog.openError(Display.getCurrent().getActiveShell(), NLS.bind("Failed to delete application \"{0}\"", appName), e.getMessage());
 								Logger.error(NLS.bind("Failed to delete application \"{0}\"", appName), e);
 							}
 						}
