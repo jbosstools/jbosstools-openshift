@@ -47,10 +47,15 @@ public class DomainDestroyer {
      * @param args
      */
     public static void main(String[] args) {
-        if (destroyDomain("rhtestdomain", "sbunciak", "rhtest123") == 200) {
+    	int resp_code = DomainDestroyer.destroyDomain(
+				TestProperties.getProperty("openshift.domain.new"),
+				TestProperties.getProperty("openshift.user.name"),
+				TestProperties.getProperty("openshift.user.pwd"));
+    	
+        if (resp_code == 200) {
         	System.out.println("Domain destroyed.");
         } else {
-        	System.out.println("Domain was not destroyed.");
+        	System.out.println("Domain was not destroyed. Response code: "+resp_code);
         }
     }
 }
