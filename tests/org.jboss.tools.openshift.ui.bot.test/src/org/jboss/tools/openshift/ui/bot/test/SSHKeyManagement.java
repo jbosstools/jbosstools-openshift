@@ -24,9 +24,13 @@ public class SSHKeyManagement extends SWTTestExt {
 
 		bot.waitUntilWidgetAppears(Conditions.waitForWidget(matcher));
 
+		log.info("OpenShift SWTBot Tests: SSH Keys creation.");
+		
 		bot.link(0).click("SSH2 Preferences");
 		bot.waitForShell(IDELabel.Shell.PREFERENCES);
 
+		log.info("OpenShift SWTBot Tests: SSH Preferences opened.");
+		
 		//SWTBotText sshDirText = bot.text(1);
 		//sshDirText.setText(System.getProperty("user.home") + "/.ssh2");
 
@@ -38,6 +42,8 @@ public class SSHKeyManagement extends SWTTestExt {
 		bot.text(0).setText(TestProperties.getPassphrase());
 		bot.button(IDELabel.Button.OK).click();
 
+		log.info("OpenShift SWTBot Tests: SSH Keys created.");
+		
 		bot.waitUntilWidgetAppears(Conditions.waitForWidget(matcher));
 	}
 

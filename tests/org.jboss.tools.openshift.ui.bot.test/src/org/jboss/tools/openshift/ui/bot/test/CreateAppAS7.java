@@ -23,9 +23,13 @@ public class CreateAppAS7 extends SWTTestExt {
 		appNameText.setText(TestProperties
 				.getProperty("openshift.jbossapp.name"));
 		
+		log.info("OpenShift SWTBot Tests: Application name set.");
+		
 		SWTBotCombo appTypeCombo = bot.comboBoxInGroup("New application");
 		bot.waitUntil(Conditions.widgetIsEnabled(appNameText));
 		appTypeCombo.setSelection(OpenShiftUI.AppType.JBOSS);
+		
+		log.info("OpenShift SWTBot Tests: Application type selected.");
 		
 		bot.button(IDELabel.Button.NEXT).click();
 
@@ -33,11 +37,17 @@ public class CreateAppAS7 extends SWTTestExt {
 				.button(IDELabel.Button.FINISH)));
 		bot.button(IDELabel.Button.FINISH).click();
 
+		log.info("OpenShift SWTBot Tests: Application creation started.");
+		
 		bot.waitForShell("Information", 500);
 		bot.text(0).setText(TestProperties.getPassphrase());
 		bot.button(IDELabel.Button.OK).click();
 
+		log.info("OpenShift SWTBot Tests: SSH passphrase given.");
+		
 		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_20S);
+		
+		log.info("OpenShift SWTBot Tests: 'New Application wizard' was closed.");
 		
 		assertNotNull("OpenShift Server runtime is not in the Servers View!",
 				servers.findServerByName(servers.show().bot().tree(),

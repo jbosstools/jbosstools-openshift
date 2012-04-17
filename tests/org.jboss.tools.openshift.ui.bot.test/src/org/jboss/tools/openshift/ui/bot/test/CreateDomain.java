@@ -29,16 +29,9 @@ public class CreateDomain extends SWTTestExt {
 			domainText.setText(TestProperties.getProperty("openshift.domain"));
 			bot.button(IDELabel.Button.FINISH).click();
 
-			bot.waitUntil(new NonSystemJobRunsCondition());
-
-			bot.waitForShell("New OpenShift Express Application", 100);
+			log.info("OpenShift SWTBot Tests: Domain name set.");
 			
-			//@SuppressWarnings("unchecked")
-			//Matcher<Widget> matcher = WidgetMatcherFactory.allOf(
-			//		WidgetMatcherFactory.widgetOfType(Shell.class),
-			//		WidgetMatcherFactory.withText("New OpenShift Express Application"));
-
-			//bot.waitUntilWidgetAppears(Conditions.waitForWidget(matcher));
+			// wait while the domain is being created
 			bot.waitWhile(new ICondition() {
 				@Override
 				public boolean test() {
@@ -56,6 +49,13 @@ public class CreateDomain extends SWTTestExt {
 				}
 				
 			}, TIME_20S, TIME_1S);
+			
+			log.info("OpenShift SWTBot Tests: Domain created.");
+			log.info("OpenShift SWTBot Tests: Waiting for 'New Application wizard'.");
+			
+			bot.waitForShell("New OpenShift Express Application", 100);
+			
+			log.info("OpenShift SWTBot Tests: 'New Application wizard' created.");
 			
 			bot.waitUntil(new NonSystemJobRunsCondition());
 	}
