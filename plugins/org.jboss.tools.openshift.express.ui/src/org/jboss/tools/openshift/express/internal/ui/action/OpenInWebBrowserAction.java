@@ -14,10 +14,8 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon
@@ -37,15 +35,11 @@ public class OpenInWebBrowserAction extends AbstractAction {
 	public void run() {
 		if (selection != null && selection instanceof ITreeSelection
 				&& ((ITreeSelection) selection).getFirstElement() instanceof IApplication) {
-			try {
-				final IApplication application = (IApplication) ((ITreeSelection) selection).getFirstElement();
-				final String appName = application.getName();
-				final String appUrl = application.getApplicationUrl();
-				BrowserUtil.checkedCreateInternalBrowser(appUrl, appName,
-						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-			} catch (OpenShiftException e) {
-				Logger.error("Failed to open OpenShift Application in a browser", e);
-			}
+			final IApplication application = (IApplication) ((ITreeSelection) selection).getFirstElement();
+			final String appName = application.getName();
+			final String appUrl = application.getApplicationUrl();
+			BrowserUtil.checkedCreateInternalBrowser(appUrl, appName,
+					OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 		}
 	}
 

@@ -15,17 +15,17 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
  */
 public class EmbeddableCartridgePropertySource implements IPropertySource {
 
-	private final IEmbeddableCartridge cartridge;
+	private final IEmbeddedCartridge cartridge;
 
-	public EmbeddableCartridgePropertySource(IEmbeddableCartridge cartridge) {
+	public EmbeddableCartridgePropertySource(IEmbeddedCartridge cartridge) {
 		this.cartridge = cartridge;
 	}
 

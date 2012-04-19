@@ -20,7 +20,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.EmbedCartridgeWizard;
 
-import com.openshift.express.client.IApplication;
+import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon

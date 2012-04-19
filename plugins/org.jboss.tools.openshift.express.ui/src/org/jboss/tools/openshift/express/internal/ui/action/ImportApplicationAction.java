@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
-import com.openshift.express.client.IApplication;
+import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon

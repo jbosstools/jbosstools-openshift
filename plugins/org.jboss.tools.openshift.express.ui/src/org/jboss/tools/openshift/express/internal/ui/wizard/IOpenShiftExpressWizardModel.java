@@ -25,10 +25,10 @@ import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
+import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim

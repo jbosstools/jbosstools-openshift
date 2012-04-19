@@ -37,8 +37,8 @@ import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * Strategy that enables the given git shared project to be used on the chosen
@@ -118,7 +118,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
 		if (config != null) {
 			if (EGitUtils.hasRemoteUrl(
-					Pattern.compile(RegExUtils.escapeRegex(getApplication().getGitUri())), config)) {
+					Pattern.compile(RegExUtils.escapeRegex(getApplication().getGitUrl())), config)) {
 				return;
 			}
 			// we shouldn't get here, the UI should validate the remote name and
@@ -128,7 +128,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 					project.getName(), remoteName);
 		}
 
-		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUri(), repository);
+		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUrl(), repository);
 	}
 
 	/**

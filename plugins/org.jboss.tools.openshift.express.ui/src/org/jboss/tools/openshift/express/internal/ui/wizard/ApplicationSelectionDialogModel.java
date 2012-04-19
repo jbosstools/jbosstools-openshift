@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,8 +18,8 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Andre Dietisheim
@@ -54,6 +55,8 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 			}
 			return user.getApplications();
 		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve User's applications", e);
+		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to retrieve User's applications", e);
 		}
 		return Collections.emptyList();

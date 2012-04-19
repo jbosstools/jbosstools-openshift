@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.OpenShiftEndpointException;
+import com.openshift.client.OpenShiftEndpointException;
 
 /**
  * @author André Dietisheim
@@ -47,7 +47,7 @@ public class NewDomainDialog extends Wizard {
 						result[0] = true;
 					} catch (OpenShiftEndpointException e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-								"Could not create domain \"{0}\": {1}", model.getNamespace(), e.getResponseResult()), e);
+								"Could not create domain \"{0}\": {1}", model.getNamespace(), e.getRestResponseMessages()), e);
 					} catch (Exception e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
 								"Could not create domain \"{0}\"", model.getNamespace()), e);

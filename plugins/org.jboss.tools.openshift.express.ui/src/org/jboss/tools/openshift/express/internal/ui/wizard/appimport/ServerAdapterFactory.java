@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,8 +38,8 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>
@@ -88,6 +89,10 @@ public class ServerAdapterFactory {
 			IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 					"Cannot create openshift server adapter", ose);
 			OpenShiftUIActivator.getDefault().getLog().log(s);
+		} catch (SocketTimeoutException ste) {
+			IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+					"Cannot create openshift server adapter", ste);
+			OpenShiftUIActivator.getDefault().getLog().log(s);
 		}
 	}
 
@@ -99,7 +104,7 @@ public class ServerAdapterFactory {
 
 	private IServer doCreateServerAdapter(IServerType serverType, IRuntime rt, String mode,
 			IApplication application, UserDelegate user, String deployProject, String remoteName) throws CoreException,
-			OpenShiftException {
+			OpenShiftException, SocketTimeoutException {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(mode != null);
 		Assert.isLegal(application != null);
@@ -110,7 +115,7 @@ public class ServerAdapterFactory {
 
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
 		ExpressServerUtils.fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
-				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
+				user.getRhlogin(), user.getPassword(), user.getDefaultDomain().getId(), 
 				application.getName(), application.getUUID(), deployProject, 
 				ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT, mode, remoteName);
 		return server;

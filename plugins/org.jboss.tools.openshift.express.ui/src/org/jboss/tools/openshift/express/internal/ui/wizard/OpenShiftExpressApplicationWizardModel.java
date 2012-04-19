@@ -34,11 +34,11 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureU
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ServerAdapterFactory;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
+import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.OpenShiftApplicationNotAvailableException;
+import com.openshift.client.OpenShiftException;
 
 public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
 

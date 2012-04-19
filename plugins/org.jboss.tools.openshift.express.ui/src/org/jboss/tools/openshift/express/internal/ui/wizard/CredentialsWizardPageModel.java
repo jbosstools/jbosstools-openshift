@@ -20,12 +20,10 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
-import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore;
-import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreException;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.express.client.NotFoundOpenShiftException;
-import com.openshift.express.client.configuration.OpenShiftConfiguration;
+import com.openshift.client.NotFoundOpenShiftException;
+import com.openshift.client.configuration.OpenShiftConfiguration;
 
 /**
  * @author Andre Dietisheim

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,10 +54,11 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
+import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
@@ -116,7 +118,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void update(ViewerCell cell) {
-				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) cell.getElement();
+				IEmbeddedCartridge cartridge = (IEmbeddedCartridge) cell.getElement();
 				cell.setText(cartridge.getName());
 			}
 		}, viewer, tableLayout);
@@ -138,17 +140,17 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				try {
-					IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
+					IEmbeddedCartridge cartridge = (IEmbeddedCartridge) event.getElement();
 					if (event.getChecked()) {
-						if (IEmbeddableCartridge.PHPMYADMIN_34.equals(cartridge)) {
+						if (IEmbeddedCartridge.PHPMYADMIN_34.equals(cartridge)) {
 							addPhpMyAdminCartridge(cartridge);
-						} else if (IEmbeddableCartridge.JENKINS_14.equals(cartridge)) {
+						} else if (IEmbeddedCartridge.JENKINS_14.equals(cartridge)) {
 							addJenkinsCartridge(cartridge);
 						} else {
 							addCartridge(cartridge);
 						}
 					} else {
-						if (IEmbeddableCartridge.MYSQL_51.equals(cartridge)) {
+						if (IEmbeddedCartridge.MYSQL_51.equals(cartridge)) {
 							removeMySQLCartridge(cartridge);
 						} else {
 							removeCartridge(cartridge);
@@ -156,12 +158,14 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 					}
 				} catch (OpenShiftException e) {
 					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+				} catch (SocketTimeoutException e) {
+					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 				}
 			}
 		};
 	}
 
-	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException {
+	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		if (model.hasApplication(ICartridge.JENKINS_14)) {
 			model.getSelectedEmbeddableCartridges().add(cartridge);
 		} else {
@@ -206,13 +210,13 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void addPhpMyAdminCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		if (!viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
+	private void addPhpMyAdminCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+		if (!viewer.getChecked(IEmbeddedCartridge.MYSQL_51)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed mysql cartridge",
 					"To embed phpmyadmin, you'd also have to embed mysql.")) {
-				model.getSelectedEmbeddableCartridges().add(IEmbeddableCartridge.MYSQL_51);
+				model.getSelectedEmbeddableCartridges().add(IEmbeddedCartridge.MYSQL_51);
 				model.getSelectedEmbeddableCartridges().add(cartridge);
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
+				viewer.setChecked(IEmbeddedCartridge.MYSQL_51, true);
 			} else {
 				viewer.setChecked(cartridge, false);
 			}
@@ -221,18 +225,18 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
+	private void addCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		model.getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
-	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
+	private void removeMySQLCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		List<IEmbeddableCartridge> checkedCartridges = model.getSelectedEmbeddableCartridges();
-		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
+		if (viewer.getChecked(IEmbeddedCartridge.PHPMYADMIN_34)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
 					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
-				checkedCartridges.remove(IEmbeddableCartridge.PHPMYADMIN_34);
+				checkedCartridges.remove(IEmbeddedCartridge.PHPMYADMIN_34);
 				checkedCartridges.remove(cartridge);
-				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
+				viewer.setChecked(IEmbeddedCartridge.PHPMYADMIN_34, false);
 			} else {
 				viewer.setChecked(cartridge, true);
 			}
@@ -241,7 +245,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
+	private void removeCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		model.getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
@@ -252,8 +256,10 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				viewer.setAllChecked(true);
 				try {
-					addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
+					addJenkinsCartridge(IEmbeddedCartridge.JENKINS_14);
 				} catch (OpenShiftException ex) {
+					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+				} catch (SocketTimeoutException ex) {
 					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
 				}
 			}
@@ -352,10 +358,15 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								List<IEmbeddableCartridge> addedCartridges = model.embedCartridges();
+								List<IEmbeddedCartridge> addedCartridges = model.embedCartridges();
 								openLogDialog(addedCartridges);
 								queue.offer(true);
 							} catch (OpenShiftException e) {
+								queue.offer(false);
+								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+										NLS.bind("Could not embed cartridges to application {0}",
+												model.getApplication().getName()), e);
+							} catch (SocketTimeoutException e) {
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",
@@ -370,7 +381,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 	
-	private void openLogDialog(final List<IEmbeddableCartridge> cartridges) {
+	private void openLogDialog(final List<IEmbeddedCartridge> cartridges) {
 		if (cartridges.size() == 0) {
 			return;
 		}

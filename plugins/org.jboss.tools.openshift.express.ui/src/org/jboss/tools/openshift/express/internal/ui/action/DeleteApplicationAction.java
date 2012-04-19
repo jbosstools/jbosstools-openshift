@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,8 +28,8 @@ import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -88,6 +89,9 @@ public class DeleteApplicationAction extends AbstractAction {
 							try {
 								application.destroy();
 							} catch (OpenShiftException e) {
+								MessageDialog.openError(Display.getCurrent().getActiveShell(), NLS.bind("Failed to delete application \"{0}\"", appName), e.getMessage());
+								Logger.error(NLS.bind("Failed to delete application \"{0}\"", appName), e);
+							} catch (SocketTimeoutException e) {
 								MessageDialog.openError(Display.getCurrent().getActiveShell(), NLS.bind("Failed to delete application \"{0}\"", appName), e.getMessage());
 								Logger.error(NLS.bind("Failed to delete application \"{0}\"", appName), e);
 							}

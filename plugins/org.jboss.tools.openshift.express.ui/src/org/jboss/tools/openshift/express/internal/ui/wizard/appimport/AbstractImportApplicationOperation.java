@@ -35,8 +35,8 @@ import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>
@@ -87,10 +87,10 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		EGitUIUtils.ensureEgitUIIsStarted();
 		if (addToRepoView) {
 			EGitUtils.cloneRepository(
-					application.getGitUri(), remoteName, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+					application.getGitUrl(), remoteName, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
 		} else {
 			EGitUtils.cloneRepository(
-					application.getGitUri(), remoteName, destination, monitor);
+					application.getGitUrl(), remoteName, destination, monitor);
 		}
 		return destination;
 	}

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -68,10 +69,10 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPag
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IDomain;
-import com.openshift.express.client.NotFoundOpenShiftException;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
+import com.openshift.client.NotFoundOpenShiftException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Rob Stryker
@@ -155,6 +156,8 @@ public class ExpressDetailsComposite {
 				IProject[] p = projectsPerApp.get(app);
 				showImportLink = p == null || p.length == 0;
 			} catch( OpenShiftException ose ) {
+				// ignore, allow appList and appListNames to be null / empty
+			} catch( SocketTimeoutException ste) {
 				// ignore, allow appList and appListNames to be null / empty
 			}
 		} else {
@@ -517,20 +520,21 @@ public class ExpressDetailsComposite {
 					} catch(NotFoundOpenShiftException nose) {
 						// Ignore this. It will be handled later
 					} catch(OpenShiftException ose) {
+					} catch(SocketTimeoutException ose) {
 					}
 				}
 			}
 		};
 	}
 
-	private void updateModelForNewUser(UserDelegate user) throws OpenShiftException {
+	private void updateModelForNewUser(UserDelegate user) throws OpenShiftException, SocketTimeoutException {
 		
 		// Updating the model, some long-running 
 		projectsPerApp.clear();
 		try {
 			// IF we load the applications first, domain gets loaded automatically
 			this.appList = user.getApplications();
-			fdomain = user.getDomain();
+			fdomain = user.getDefaultDomain();
 		} catch(NotFoundOpenShiftException nfose) {
 			// Credentials work, but no domain, so no applications either
 			this.appList = new ArrayList<IApplication>();

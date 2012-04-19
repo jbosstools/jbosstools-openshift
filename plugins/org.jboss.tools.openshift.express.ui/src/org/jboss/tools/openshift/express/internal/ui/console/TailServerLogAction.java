@@ -34,9 +34,9 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
-import com.openshift.express.client.utils.Base64Encoder;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
+import com.openshift.client.utils.Base64Coder;
 
 /**
  * The action associated with the "Show In>Remote Console" menu item.
@@ -184,7 +184,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	private String buildCommand(final String filePath, final String options) throws UnsupportedEncodingException {
 		StringBuilder commandBuilder = new StringBuilder("tail ");
 		if (options != null && !options.isEmpty()) {
-			final String opts = new String(Base64Encoder.encode(options.getBytes("UTF-8")), "UTF-8");
+			final String opts = new String(Base64Coder.encode(options.getBytes()));
 			commandBuilder.append("--opts ").append(opts).append(" ");
 		}
 		commandBuilder.append(filePath);

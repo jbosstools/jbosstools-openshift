@@ -29,8 +29,8 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * Strategy that enables the given git shared project to be used on the chosen
@@ -97,7 +97,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		createGitIgnore(project, monitor);
 		setupOpenShiftMavenProfile(project, monitor);
 		shareProject(project, monitor);
-		addRemoteRepo(getRemoteName(), getApplication().getGitUri(), EGitUtils.getRepository(project));
+		addRemoteRepo(getRemoteName(), getApplication().getGitUrl(), EGitUtils.getRepository(project));
 
 		return Collections.singletonList(project);
 	}

@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.core.console;
 
 import java.util.Map;
 
-import com.openshift.express.client.IUser;
+import com.openshift.client.IUser;
 
 @Deprecated
 public interface IPasswordPrompter {

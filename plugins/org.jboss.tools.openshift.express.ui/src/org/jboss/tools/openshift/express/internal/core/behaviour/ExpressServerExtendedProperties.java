@@ -16,8 +16,8 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 
@@ -32,15 +32,9 @@ public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 		if (!ExpressServerUtils.isOpenShiftRuntime(server)) {
 			return null;
 		}
-		IApplication application = ExpressServerUtils.findApplicationForServer(server);
+		final IApplication application = ExpressServerUtils.findApplicationForServer(server);
 		if (application != null) {
-			try {
-				return application.getApplicationUrl();
-			} catch (OpenShiftException e) {
-				IStatus status = OpenShiftUIActivator.createErrorStatus(
-						NLS.bind("Could not get application url for server {0}", server.getName()), e);
-				OpenShiftUIActivator.log(status);
-			}
+			return application.getApplicationUrl();
 		}
 		return null;
 	}

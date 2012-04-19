@@ -6,7 +6,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import org.eclipse.core.resources.IProject;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
-import com.openshift.express.client.IApplication;
+import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,14 +20,13 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
+import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Andre Dietisheim
@@ -38,8 +38,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
-	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
-	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
+	public static final String PROPERTY_SELECTED_EMBEDDED_CARTRIDGES = "selectedEmbeddedCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
@@ -51,12 +51,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	// first pass validation)
 	private List<IApplication> existingApplications = new ArrayList<IApplication>();
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
-	private List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
+	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;;
 
 	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel)
-			throws OpenShiftException {
+			throws OpenShiftException, SocketTimeoutException {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
 	}
@@ -72,7 +72,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getUser();
 	}
 
-	public List<IApplication> getApplications() throws OpenShiftException {
+	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
 		UserDelegate user = getUser();
 		if (user == null || !user.hasDomain()) {
 			return Collections.emptyList();
@@ -89,6 +89,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			}
 			return applicationNames;
 		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications", e);
+			return new String[0];
+		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to retrieve list of OpenShift applications", e);
 			return new String[0];
 		}
@@ -119,10 +122,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * 
 	 * @param applicationName
 	 * @throws OpenShiftException
+	 * @throws SocketTimeoutException 
 	 * 
 	 * @see #doSetExistingApplication(IApplication)
 	 */
-	public void setExistingApplicationName(String applicationName) throws OpenShiftException {
+	public void setExistingApplicationName(String applicationName) throws OpenShiftException, SocketTimeoutException {
 		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME
 				, this.existingApplicationName, this.existingApplicationName = applicationName);
 
@@ -132,7 +136,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	public void loadExistingApplications() throws OpenShiftException {
+	public void loadExistingApplications() throws OpenShiftException, SocketTimeoutException {
 		UserDelegate user = getUser();
 		if (user != null) {
 			setExistingApplications(user.getApplications());
@@ -177,8 +181,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return existingApplications;
 	}
 
-	public void loadCartridges() throws OpenShiftException {
-		setCartridges(getUser().getCartridges());
+	public void loadStandaloneCartridges() throws OpenShiftException, SocketTimeoutException {
+		setCartridges(getUser().getStandaloneCartridgeNames());
 		refreshSelectedCartridge();
 	}
 
@@ -210,16 +214,13 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void setSelectedCartridge(IApplication application) {
-		ICartridge applicationCartridge = null;
-		if (application != null) {
-			applicationCartridge = application.getCartridge();
-		}
+		final ICartridge applicationCartridge = (application != null) ? application.getCartridge() : null;
 		setSelectedCartridge(applicationCartridge);
 	}
 
-	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException {
+	public List<IEmbeddableCartridge> loadEmbeddedCartridges() throws OpenShiftException, SocketTimeoutException {
 		List<IEmbeddableCartridge> cartridges = getUser().getEmbeddableCartridges();
-		setEmbeddableCartridges(cartridges);
+		setEmbeddedCartridges(cartridges);
 		return cartridges;
 	}
 
@@ -229,6 +230,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * 
 	 * @param application
 	 * @throws OpenShiftException
+	 * @throws SocketTimeoutException 
 	 * 
 	 * @see #setExistingApplicationName(String)
 	 * @see #setApplicationName(IApplication)
@@ -236,7 +238,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @see #setSelectedEmbeddableCartridges(Set)
 	 * @see #wizardModel#setApplication
 	 */
-	public void setExistingApplication(IApplication application) throws OpenShiftException {
+	public void setExistingApplication(IApplication application) throws OpenShiftException, SocketTimeoutException {
 		if (application != null) {
 			setExistingApplicationName(application.getName());
 			doSetExistingApplication(application);
@@ -249,13 +251,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * 
 	 * @param application
 	 * @throws OpenShiftException
+	 * @throws SocketTimeoutException 
 	 * 
 	 * @see #setApplicationName(IApplication)
 	 * @see #setSelectedCartridge(IApplication)
 	 * @see #setSelectedEmbeddableCartridges(Set)
 	 * @see #wizardModel#setApplication
 	 */
-	protected void doSetExistingApplication(IApplication application) throws OpenShiftException {
+	protected void doSetExistingApplication(IApplication application) throws OpenShiftException, SocketTimeoutException {
 		if (application != null) {
 			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
@@ -264,7 +267,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	public void resetExistingApplication() throws OpenShiftException {
+	public void resetExistingApplication() throws OpenShiftException, SocketTimeoutException {
 		setExistingApplication((IApplication) null);
 	}
 
@@ -286,43 +289,35 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getApplicationName();
 	}
 
-	public void setEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
+	public void setEmbeddedCartridges(List<IEmbeddableCartridge> cartridges) {
 		firePropertyChange(
-				PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges, this.embeddableCartridges = cartridges);
+				PROPERTY_EMBEDDED_CARTRIDGES, this.embeddedCartridges, this.embeddedCartridges = cartridges);
 	}
 
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
-		return embeddableCartridges;
+	public List<IEmbeddableCartridge> getEmbeddedCartridges() {
+		return embeddedCartridges;
 	}
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
+	public Set<IEmbeddableCartridge> getSelectedEmbeddedCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
+	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) {
+		
+	}
+
 	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES,
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDED_CARTRIDGES,
 				wizardModel.getSelectedEmbeddableCartridges(),
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
 	}
 
-	public boolean hasApplication(ICartridge cartridge) {
-		try {
-			return getUser().hasApplication(cartridge);
-		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(
-					OpenShiftUIActivator.createErrorStatus("Could not get application by cartridge", e));
-			return false;
-		}
+	public boolean hasApplicationOfType(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
+		return getUser().hasApplicationOfType(cartridge);
 	}
 
-	public boolean hasApplication(String applicationName) {
-		try {
-			return getUser().hasApplication(applicationName);
-		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(
-					OpenShiftUIActivator.createErrorStatus("Could not get application by name", e));
-			return false;
-		}
+	public boolean hasApplication(String applicationName) throws SocketTimeoutException, OpenShiftException {
+		return getUser().hasApplication(applicationName);
 	}
 
 	public IApplication getApplication() {
@@ -332,4 +327,5 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
 		return wizardModel.createApplication(name, ICartridge.JENKINS_14, monitor);
 	}
+
 }

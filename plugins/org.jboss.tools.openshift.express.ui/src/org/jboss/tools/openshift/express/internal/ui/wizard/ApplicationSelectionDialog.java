@@ -54,8 +54,7 @@ import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
 
 /**
  * @author Andre Dietisheim
@@ -194,7 +193,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		createTableColumn("Name", 1, new CellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
-				IApplication application = (IApplication) cell.getElement();
+				final IApplication application = (IApplication) cell.getElement();
 				cell.setText(application.getName());
 			}
 		}, viewer, tableLayout);
@@ -202,7 +201,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		createTableColumn("Type", 1, new CellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
-				IApplication application = (IApplication) cell.getElement();
+				final IApplication application = (IApplication) cell.getElement();
 				cell.setText(application.getCartridge().getName());
 			}
 		}, viewer, tableLayout);
@@ -210,11 +209,8 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		createTableColumn("URL", 3, new CellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
-				IApplication application = (IApplication) cell.getElement();
-				try {
-					cell.setText(application.getApplicationUrl());
-				} catch (OpenShiftException e) {
-				}
+				final IApplication application = (IApplication) cell.getElement();
+				cell.setText(application.getApplicationUrl());
 			}
 		}, viewer, tableLayout);
 

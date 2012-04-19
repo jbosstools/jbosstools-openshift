@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.console;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
@@ -22,13 +23,13 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectToOpenShiftWizard;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.IDomain;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.ISSHPublicKey;
-import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.EnumApplicationScale;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
+import com.openshift.client.IDomain;
+import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IUser;
+import com.openshift.client.OpenShiftException;
 
 public class UserDelegate {
 	private IUser delegate;
@@ -54,7 +55,7 @@ public class UserDelegate {
 	 */
 	protected final void setDelegate(IUser delegate) {
 		this.delegate = delegate;
-	}
+	} 
 
 	public String getRhlogin() {
 		return delegate.getRhlogin();
@@ -111,115 +112,106 @@ public class UserDelegate {
 		return (delegate.getPassword() != null  && !"".equals(delegate.getPassword()));
 	}
 	
-	public IApplication createApplication(String arg0, ICartridge arg1)
-			throws OpenShiftException {
+	public IApplication createApplication(String applicationName, ICartridge applicationType)
+			throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.createApplication(arg0, arg1);
+			return delegate.getDefaultDomain().createApplication(applicationName, applicationType, EnumApplicationScale.DEFAULT, null);
 		}
 		return null;
 	}
 
-	public IDomain createDomain(String arg0, ISSHPublicKey arg1)
-			throws OpenShiftException {
+	/**
+	 * Create a new domain with the given id
+	 * @param id the domain id
+	 * @return the created domain
+	 * @throws OpenShiftException
+	 * @throws SocketTimeoutException 
+	 */
+	public IDomain createDomain(String id)
+			throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.createDomain(arg0, arg1);
+			return delegate.createDomain(id);
 		} 
 		return null;
 	}
 	public IApplication getApplicationByName(String arg0)
-			throws OpenShiftException {
-		if(checkForPassword()) {
-			return delegate.getApplicationByName(arg0);
+			throws OpenShiftException, SocketTimeoutException {
+		if(checkForPassword() && delegate.hasDomain()) {
+			return delegate.getDefaultDomain().getApplicationByName(arg0);
 		} 
 		return null;
 	}
-	public List<IApplication> getApplications() throws OpenShiftException {
+	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getApplications();
+			return delegate.getDefaultDomain().getApplications();
 		} 
 		return null;
 	}
-	public List<IApplication> getApplicationsByCartridge(ICartridge arg0)
-			throws OpenShiftException {
-		if(checkForPassword()) {
-			return delegate.getApplicationsByCartridge(arg0);
-		} 
-		return null;
-	}
+	
 	public String getAuthIV() {
 		if(checkForPassword()) {
 			return delegate.getAuthIV();
 		} 
 		return null;
 	}
+	
 	public String getAuthKey() {
 		if(checkForPassword()) {
 			return delegate.getAuthKey();
 		} 
 		return null;
 	}
-	public ICartridge getCartridgeByName(String arg0) throws OpenShiftException {
+	
+	public List<ICartridge> getStandaloneCartridgeNames() throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getCartridgeByName(arg0);
+			return delegate.getConnection().getStandaloneCartridges();
 		} 
 		return null;
 	}
-	public List<ICartridge> getCartridges() throws OpenShiftException {
+	
+	public IDomain getDefaultDomain() throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getCartridges();
+			return delegate.getDefaultDomain();
 		} 
 		return null;
 	}
-	public IDomain getDomain() throws OpenShiftException {
-		if(checkForPassword()) {
-			return delegate.getDomain();
-		} 
-		return null;
-	}
+	
 	public List<IEmbeddableCartridge> getEmbeddableCartridges()
-			throws OpenShiftException {
+			throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getEmbeddableCartridges();
+			return delegate.getConnection().getEmbeddableCartridges();
 		} 
 		return null;
 	}
-	public ISSHPublicKey getSshKey() throws OpenShiftException {
+	
+	public boolean hasApplication(String name) throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getSshKey();
-		} 
-		return null;
-	}
-	public String getUUID() throws OpenShiftException {
-		if(checkForPassword()) {
-			return delegate.getUUID();
-		} 
-		return null;
-	}
-	public boolean hasApplication(String arg0) throws OpenShiftException {
-		if(checkForPassword()) {
-			return delegate.hasApplication(arg0);
+			return delegate.getDefaultDomain().hasApplicationByName(name);
 		} 
 		return false;
 	}
-	public boolean hasApplication(ICartridge arg0) throws OpenShiftException {
-		if(checkForPassword()) {
-			return delegate.hasApplication(arg0);
+	
+	public boolean hasApplicationOfType(ICartridge type) throws OpenShiftException, SocketTimeoutException {
+		if(hasDomain()) {
+			return delegate.getDefaultDomain().hasApplicationByCartridge(type);
 		} 
 		return false;
 	}
-	public boolean hasDomain() throws OpenShiftException {
+	
+	public boolean hasDomain() throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
 			return delegate.hasDomain();
 		}
 		return false;
-			
 	}
+	
 	public boolean isValid() throws OpenShiftException {
 		if(checkForPassword()) {
-			return delegate.isValid();
+			return true;//delegate.isValid();
 		} 
 		return false;
 	}
+	
 	public void refresh() throws OpenShiftException {
 		if(checkForPassword()) {
 			delegate.refresh();

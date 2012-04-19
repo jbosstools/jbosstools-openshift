@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -33,8 +34,10 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
+import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
+import com.openshift.client.IUser;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -50,18 +53,26 @@ public class CreateServerAdapterAction extends AbstractAction {
 
 	@Override
 	public void run() {
-		final ITreeSelection treeSelection = (ITreeSelection) selection;
-		if (selection instanceof ITreeSelection
-				&& treeSelection.getFirstElement() instanceof IApplication) {
-			final IApplication application = (IApplication) treeSelection.getFirstElement();
-			IUser user = application.getUser();
-			Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
-			UserDelegate userDelegate = UserModel.getDefault().findUser(user.getRhlogin());
-			NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, userDelegate);
-			w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
-			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
-			dialog.open();
+		try {
+			final ITreeSelection treeSelection = (ITreeSelection) selection;
+			if (selection instanceof ITreeSelection
+					&& treeSelection.getFirstElement() instanceof IApplication) {
+				final IApplication application = (IApplication) treeSelection.getFirstElement();
+				final IDomain domain = application.getDomain();
+				final IUser user = domain.getUser();
+				Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
+				UserDelegate userDelegate = UserModel.getDefault().findUser(user.getRhlogin());
+				NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
+				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, userDelegate);
+				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_DOMAIN, domain);
+				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
+				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
+				dialog.open();
+			}
+		} catch (SocketTimeoutException e) {
+			OpenShiftUIActivator.log("Could not create OpenShift server", e);
+		} catch (OpenShiftException e) {
+			OpenShiftUIActivator.log("Could not create OpenShift server", e);
 		}
 	}
 	

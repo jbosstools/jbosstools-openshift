@@ -17,8 +17,8 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -48,32 +48,27 @@ public class ApplicationPropertySource implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		try {
-			if (id.equals("3.URL")) {
-				return application.getApplicationUrl().toString();
-			}
-			if (id.equals("1.Name")) {
-				return application.getName();
-			}
-			if (id.equals("6.UUID")) {
-				return application.getUUID();
-			}
-			if (id.equals("4.Created on")) {
-				SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss");
-				return format.format(application.getCreationTime());
-			}
-			
-			if (id.equals("2.Type")) {
-				return application.getCartridge().getName();
-			}
-			if (id.equals("5.Git URI")) {
-				return application.getGitUri();
-			}
-			
-			
-		} catch (OpenShiftException e) {
-			Logger.error("Could not get selected object's property '" + id + "'.", e);
+		if (id.equals("3.URL")) {
+			return application.getApplicationUrl().toString();
 		}
+		if (id.equals("1.Name")) {
+			return application.getName();
+		}
+		if (id.equals("6.UUID")) {
+			return application.getUUID();
+		}
+		if (id.equals("4.Created on")) {
+			SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss");
+			return format.format(application.getCreationTime());
+		}
+
+		if (id.equals("2.Type")) {
+			return application.getCartridge();
+		}
+		if (id.equals("5.Git URI")) {
+			return application.getGitUrl();
+		}
+
 		return null;
 	}
 

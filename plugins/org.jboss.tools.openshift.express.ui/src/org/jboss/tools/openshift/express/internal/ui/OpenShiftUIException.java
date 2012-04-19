@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Andre Dietisheim

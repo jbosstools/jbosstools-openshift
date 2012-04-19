@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.OpenShiftEndpointException;
+import com.openshift.client.OpenShiftEndpointException;
 
 /**
  * @author Andre Dietisheim
@@ -49,10 +49,10 @@ public class EditDomainDialog extends Wizard {
 						return Status.OK_STATUS;
 					} catch(OpenShiftEndpointException e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-								"Could not rename domain \"{0}\": {1}", model.getNamespace(), e.getResponseResult()), e);
+								"Could not rename domain \"{0}\": {1}", model.getDomainId(), e.getRestResponseMessages()), e);
 					} catch (Exception e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-								"Could not rename domain {0}", model.getNamespace()), e);
+								"Could not rename domain {0}", model.getDomainId()), e);
 					}
 				}
 			}, getContainer());

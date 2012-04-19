@@ -14,8 +14,8 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.client.IApplication;
+import com.openshift.client.IEmbeddedCartridge;
 
 /**
  * @author Xavier Coulon
@@ -31,8 +31,8 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 			}
 			if(adaptableObject instanceof IApplication) {
 				return new ApplicationPropertySource((IApplication)adaptableObject);
-			}if(adaptableObject instanceof IEmbeddableCartridge) {
-				return new EmbeddableCartridgePropertySource((IEmbeddableCartridge)adaptableObject);
+			}if(adaptableObject instanceof IEmbeddedCartridge) {
+				return new EmbeddableCartridgePropertySource((IEmbeddedCartridge)adaptableObject);
 			}
 		}
 		return null;

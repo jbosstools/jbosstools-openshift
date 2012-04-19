@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,10 +41,9 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IDomain;
-import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
+import com.openshift.client.OpenShiftException;
 
 /**
  * This class holds the attribute names whose values will be
@@ -52,6 +52,7 @@ import com.openshift.express.client.OpenShiftException;
  *
  * @author Rob Stryker
  */
+@SuppressWarnings("restriction")
 public class ExpressServerUtils {
 	public static final String ATTRIBUTE_EXPRESS_MODE = "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressMode";
 	public static final String EXPRESS_BINARY_MODE =  "publishBinary";
@@ -76,6 +77,7 @@ public class ExpressServerUtils {
 	
 	/* For use inside express wizard fragment */
 	public static final String TASK_WIZARD_ATTR_USER = "user";
+	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";
 	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
 	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
 	
@@ -164,13 +166,14 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 	
+	/*
 	public static IServer fillServerWithOpenShiftDetails(IServer server, IApplication application, 
 			IUser user, String deployProject, String projectRelativeFolder,
 			String mode, String remoteName) throws CoreException, OpenShiftException {
 		return fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
 				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
 				application.getName(), application.getUUID(), deployProject, projectRelativeFolder, mode, remoteName);
-	}
+	}*/
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
 			UserDelegate user, IDomain domain, String mode, String deployProject, 
@@ -178,7 +181,7 @@ public class ExpressServerUtils {
 		fillServerWithOpenShiftDetails(wc, 
 				application == null ? null : application.getApplicationUrl(),
 				user == null ? null : user.getRhlogin(), 
-				domain == null ? null : domain.getNamespace(), 
+				domain == null ? null : domain.getId(), 
 				application == null ? null : application.getName(), 
 				application == null ? null : application.getUUID(), 
 				deployProject, projectRelativeFolder, mode, remoteName);
@@ -286,7 +289,7 @@ public class ExpressServerUtils {
 		Iterator<IApplication> i = applications.iterator();
 		while(i.hasNext()) {
 			IApplication a = i.next();
-			String gitUri = a.getGitUri();
+			String gitUri = a.getGitUrl();
 			Iterator<URIish> j = uris.iterator();
 			while(j.hasNext()) {
 				String projUri = j.next().toPrivateString();
@@ -298,18 +301,12 @@ public class ExpressServerUtils {
 		return null;
 	}
 
-	public static IProject[] findProjectsForApplication(IApplication application) {
-		ArrayList<IProject> results = new ArrayList<IProject>();
+	public static IProject[] findProjectsForApplication(final IApplication application) {
+		final ArrayList<IProject> results = new ArrayList<IProject>();
 		if( application ==null )
 			return null;
-		String gitUri = null;
-		try {
-			gitUri = application.getGitUri();
-		} catch(OpenShiftException ose) {
-			return null;
-		}
-		
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		final String gitUri = application.getGitUrl();
+		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for( int i = 0; i < projects.length; i++ ) {
 			List<URIish> uris = null;
 			try {
@@ -348,6 +345,9 @@ public class ExpressServerUtils {
 			IApplication app = user2.getApplicationByName(appName);
 			return app;
 		} catch(OpenShiftException ose) {
+			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
+			return null;
+		} catch(SocketTimeoutException ose) {
 			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
 			return null;
 		}

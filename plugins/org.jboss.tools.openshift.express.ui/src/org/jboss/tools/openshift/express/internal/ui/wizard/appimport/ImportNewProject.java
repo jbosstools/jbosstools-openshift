@@ -30,8 +30,8 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.MavenProjectImportOperation;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>
@@ -94,7 +94,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 			IProgressMonitor monitor)
 			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException,
 			InvocationTargetException {
-		URIish uri = new URIish(application.getGitUri());
+		URIish uri = new URIish(application.getGitUrl());
 		EGitUtils.addRemoteTo("openshift", uri, repository);
 		EGitUtils.mergeWithRemote(uri, "refs/remotes/openshift/HEAD", repository, monitor);
 	}

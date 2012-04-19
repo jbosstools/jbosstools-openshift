@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +43,11 @@ import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftEndpointException;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.OpenShiftEndpointException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Andre Dietisheim
@@ -181,7 +183,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 							} catch (OpenShiftEndpointException e) {
 								// TODO: refresh user
 								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\": {1}",
-										e, applicationName, e.getResponseResult());
+										e, applicationName, e.getRestResponseMessages());
 							} catch (OpenShiftException e) {
 								// TODO: refresh user
 								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"",
@@ -209,14 +211,18 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 								if (selectedCartridges != null && !selectedCartridges.isEmpty()) {
 									List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
 									embeddableCartridges.addAll(selectedCartridges);
-									application.addEmbbedCartridges(embeddableCartridges);
-									openCreationLogDialog(embeddableCartridges);
+									final List<IEmbeddedCartridge> embeddedCartridges = application.addEmbeddableCartridges(embeddableCartridges);
+									openCreationLogDialog(embeddedCartridges);
 								}
 							} catch (OpenShiftEndpointException e) {
 								// TODO: refresh user
 								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-										"Could not embed cartridges to application {0}: {1}", applicationName, e.getResponseResult()));
+										"Could not embed cartridges to application {0}: {1}", applicationName, e.getRestResponseMessages()));
 							} catch (OpenShiftException e) {
+								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+										"Could not embed cartridges to application {0}", getWizardModel()
+												.getApplication().getName()), e);
+							} catch (SocketTimeoutException e) {
 								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
 										"Could not embed cartridges to application {0}", getWizardModel()
 												.getApplication().getName()), e);
@@ -230,7 +236,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
-	private void openCreationLogDialog(final List<IEmbeddableCartridge> embeddableCartridges) {
+	private void openCreationLogDialog(final List<IEmbeddedCartridge> embeddableCartridges) {
 		if (embeddableCartridges == null
 				|| embeddableCartridges.isEmpty()) {
 			return;

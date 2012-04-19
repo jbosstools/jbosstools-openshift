@@ -3,6 +3,7 @@
  */
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +15,9 @@ import org.jboss.tools.openshift.express.internal.ui.propertytable.IProperty;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.StringElement;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -39,7 +40,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 				elements.add(
 						new StringElement("Created on", format.format(application.getCreationTime())));
 				elements.add(new StringElement("UUID", application.getUUID()));
-				elements.add(new StringElement("Git URL", application.getGitUri()));
+				elements.add(new StringElement("Git URL", application.getGitUrl()));
 				elements.add(createCartridges(application));
 
 			} catch (Exception e) {
@@ -51,9 +52,9 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 	}
 
 	private ContainerElement createCartridges(IApplication application)
-			throws OpenShiftException {
+			throws OpenShiftException, SocketTimeoutException {
 		ContainerElement cartridgesContainer = new ContainerElement("Cartridges");
-		for (IEmbeddableCartridge cartridge : application.getEmbeddedCartridges()) {
+		for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
 			cartridgesContainer.add(
 					new StringElement(cartridge.getName(), cartridge.getUrl().toString(), true,
 							cartridgesContainer));

@@ -21,8 +21,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
 
 /**
  * @author Andre Dietisheim

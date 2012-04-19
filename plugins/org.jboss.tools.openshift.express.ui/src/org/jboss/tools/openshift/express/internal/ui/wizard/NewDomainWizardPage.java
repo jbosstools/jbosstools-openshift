@@ -56,7 +56,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
@@ -90,7 +90,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
 				new CustomControlDecorationUpdater());
 		final IObservableValue namespaceModelObservable = BeanProperties.value(
-				EditDomainWizardPageModel.PROPERTY_NAMESPACE).observe(pageModel);
+				EditDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
 
 		/*DataBindingUtils.bindMandatoryTextField(

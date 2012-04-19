@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import java.net.SocketTimeoutException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,8 +27,8 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IDomain;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IDomain;
+import com.openshift.client.OpenShiftException;
 
 public class DeleteDomainAction extends AbstractAction {
 
@@ -45,12 +47,16 @@ public class DeleteDomainAction extends AbstractAction {
 			UserDelegate user = (UserDelegate) ((IStructuredSelection) selection)
 					.getFirstElement();
 			try {
-				IDomain domain = user.getDomain();
+				IDomain domain = user.getDefaultDomain();
 
 				if (domain != null && user.getApplications().size() == 0) {
 					enable = true;
 				}
 			} catch (OpenShiftException e) {
+				Logger.warn(
+						"Failed to retrieve User domain, prompting for creation",
+						e);
+			} catch (SocketTimeoutException e) {
 				Logger.warn(
 						"Failed to retrieve User domain, prompting for creation",
 						e);
@@ -66,14 +72,14 @@ public class DeleteDomainAction extends AbstractAction {
 				&& treeSelection.getFirstElement() instanceof UserDelegate) {
 			UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
 			try {
-				final IDomain domain = user.getDomain();
+				final IDomain domain = user.getDefaultDomain();
 				if (domain != null) {
 					boolean confirm = false;
 					confirm = MessageDialog.openConfirm(Display.getCurrent()
 							.getActiveShell(), "Domain deletion", NLS.bind(
 							"You are about to delete the \"{0}\" domain.\n"
 									+ "Do you want to continue?",
-							domain.getNamespace()));
+							domain.getId()));
 					if (confirm) {
 						Job job = new Job("Deleting OpenShift Domain...") {
 							@Override
@@ -82,11 +88,9 @@ public class DeleteDomainAction extends AbstractAction {
 									try {
 										domain.destroy();
 									} catch (OpenShiftException e) {
-										Logger.error(
-												NLS.bind(
-														"Failed to delete domain \"{0}\"",
-														domain.getNamespace()),
-												e);
+										Logger.error(NLS.bind("Failed to delete domain \"{0}\"", domain.getId()), e);
+									} catch (SocketTimeoutException e) {
+										Logger.error(NLS.bind("Failed to delete domain \"{0}\"", domain.getId()), e);
 									}
 								} finally {
 									monitor.done();
@@ -101,6 +105,10 @@ public class DeleteDomainAction extends AbstractAction {
 
 				}
 			} catch (OpenShiftException e) {
+				Logger.warn(
+						"Failed to retrieve User domain, prompting for creation",
+						e);
+			} catch (SocketTimeoutException e) {
 				Logger.warn(
 						"Failed to retrieve User domain, prompting for creation",
 						e);

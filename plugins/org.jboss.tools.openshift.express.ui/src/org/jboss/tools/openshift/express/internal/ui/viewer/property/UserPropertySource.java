@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
+import java.net.SocketTimeoutException;
+
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -17,7 +19,7 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -58,9 +60,11 @@ public class UserPropertySource implements IPropertySource {
 				return user.getRhlogin();
 			}
 			if (id.equals(PROPERTY_DOMAIN) && user.hasDomain()) {
-				return user.getDomain().getNamespace() + "." + user.getDomain().getRhcDomain();
+				return user.getDefaultDomain().getId() + "." + user.getDefaultDomain().getSuffix();
 			}
 		} catch (OpenShiftException e) {
+		 	Logger.error("Could not get selected object's property '" + id + "'.", e);
+		} catch (SocketTimeoutException e) {
 			Logger.error("Could not get selected object's property '" + id + "'.", e);
 		}
 		return null;

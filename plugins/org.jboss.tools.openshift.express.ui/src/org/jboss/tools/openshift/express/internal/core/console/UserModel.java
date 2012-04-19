@@ -26,10 +26,10 @@ import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStor
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore;
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreException;
 
-import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
-import com.openshift.express.client.User;
-import com.openshift.express.client.configuration.OpenShiftConfiguration;
+import com.openshift.client.IUser;
+import com.openshift.client.OpenShiftConnectionFactory;
+import com.openshift.client.OpenShiftException;
+import com.openshift.client.configuration.OpenShiftConfiguration;
 
 public class UserModel {
 	private static final String USER_ID = OpenShiftUIActivator.PLUGIN_ID + " " +
@@ -69,7 +69,7 @@ public class UserModel {
 	 * @throws IOException
 	 */
 	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
-		return new User(username, password, USER_ID);
+		return new OpenShiftConnectionFactory().getConnection(USER_ID, username, password).getUser();
 	}
 
 	private static final int ADDED = 0;

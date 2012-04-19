@@ -34,7 +34,7 @@ import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyNameC
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyValueCellLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
-import com.openshift.express.client.IApplication;
+import com.openshift.client.IApplication;
 
 /**
  * @author Andre Dietisheim

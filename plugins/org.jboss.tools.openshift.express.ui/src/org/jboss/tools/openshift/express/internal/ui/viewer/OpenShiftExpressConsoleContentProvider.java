@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -26,9 +27,8 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -62,7 +62,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	// Keep track of what's loading and what's finished
 	private ArrayList<UserDelegate> loadedUsers = new ArrayList<UserDelegate>();
 	private ArrayList<UserDelegate> loadingUsers = new ArrayList<UserDelegate>();
-	private HashMap<UserDelegate, OpenShiftException> errors = new HashMap<UserDelegate, OpenShiftException>();
+	private HashMap<UserDelegate, Exception> errors = new HashMap<UserDelegate, Exception>();
 
 	@Override
 	public Object[] getElements(final Object parentElement) {
@@ -95,7 +95,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				// return a stub object that says loading...
 				return new Object[] { new LoadingStub() };
 			}
-			OpenShiftException ose = errors.get((UserDelegate)parentElement);
+			Exception ose = errors.get((UserDelegate)parentElement);
 			if( ose != null ) {
 				return new Object[]{ose};
 			}
@@ -116,11 +116,13 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			return getChildrenForElement(parentElement, recurse);
 		} catch (OpenShiftException e) {
 			Logger.error("Unable to retrieve OpenShift Express information", e);
+		} catch (SocketTimeoutException e) {
+			Logger.error("Unable to retrieve OpenShift Express information", e);
 		}
 		return new Object[0];
 	}
 	
-	private Object[] getChildrenForElement(Object parentElement, boolean recurse) throws OpenShiftException {
+	private Object[] getChildrenForElement(Object parentElement, boolean recurse) throws OpenShiftException, SocketTimeoutException {
 		// .... the actual work is done here...
 		Object[] children = new Object[0];
 //		try {
@@ -157,6 +159,8 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				try {
 					getChildrenForElement(user, true);
 				} catch(OpenShiftException e) {
+					errors.put(user, e);
+				} catch(SocketTimeoutException e) {
 					errors.put(user, e);
 				}
 				loadedUsers.add(user);

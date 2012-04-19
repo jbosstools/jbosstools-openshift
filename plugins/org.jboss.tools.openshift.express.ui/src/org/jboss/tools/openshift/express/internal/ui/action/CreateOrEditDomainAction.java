@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import java.net.SocketTimeoutException;
+
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -21,8 +23,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.EditDomainDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.NewDomainDialog;
 
-import com.openshift.express.client.IUser;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -42,12 +43,16 @@ public class CreateOrEditDomainAction extends AbstractAction {
 			IWizard domainDialog = null;
 			final UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
 			try {
-				if (user.getDomain() == null || user.getDomain().getNamespace() == null) {
+				if (user.getDefaultDomain() == null || user.getDefaultDomain().getId() == null) {
 					domainDialog = new NewDomainDialog(user);
 				} else {
 					domainDialog = new EditDomainDialog(user);
 				}
 			} catch (OpenShiftException e) {
+				Logger.warn("Failed to retrieve User domain, prompting for creation", e);
+				// let's use the domain creation wizard, then.
+				domainDialog = new NewDomainDialog(user);
+			}  catch (SocketTimeoutException e) {
 				Logger.warn("Failed to retrieve User domain, prompting for creation", e);
 				// let's use the domain creation wizard, then.
 				domainDialog = new NewDomainDialog(user);

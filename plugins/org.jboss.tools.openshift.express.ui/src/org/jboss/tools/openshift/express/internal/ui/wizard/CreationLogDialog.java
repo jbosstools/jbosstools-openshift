@@ -35,8 +35,8 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IEmbeddableCartridge;
+import com.openshift.client.IApplication;
+import com.openshift.client.IEmbeddedCartridge;
 
 /**
  * @author André Dietisheim
@@ -45,11 +45,11 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 	private static final Pattern HTTP_LINK_REGEX = Pattern.compile("(http[^ |\n]+)");
 
-	private Collection<IEmbeddableCartridge> cartridges;
+	private Collection<IEmbeddedCartridge> cartridges;
 	private IApplication application;
 	private List<LinkSubstring> linkSubstrings;
 	
-	public CreationLogDialog(Shell parentShell, Collection<IEmbeddableCartridge> cartridges) {
+	public CreationLogDialog(Shell parentShell, Collection<IEmbeddedCartridge> cartridges) {
 		this(parentShell);
 		this.cartridges = cartridges;
 	}
@@ -102,13 +102,13 @@ public class CreationLogDialog extends TitleAreaDialog {
 		}
 	}
 
-	private LogEntry[] createLogEntries(Collection<IEmbeddableCartridge> cartridges) {
+	private LogEntry[] createLogEntries(Collection<IEmbeddedCartridge> cartridges) {
 		if (cartridges == null
 				|| cartridges.isEmpty()) {
 			return new LogEntry[] {};
 		}
 		ArrayList<LogEntry> logEntries = new ArrayList<LogEntry>();
-		for (IEmbeddableCartridge cartridge : cartridges) {
+		for (IEmbeddedCartridge cartridge : cartridges) {
 			logEntries.add(new LogEntry(cartridge.getName(), cartridge.getCreationLog()));
 		}
 		return logEntries.toArray(new LogEntry[cartridges.size()]);

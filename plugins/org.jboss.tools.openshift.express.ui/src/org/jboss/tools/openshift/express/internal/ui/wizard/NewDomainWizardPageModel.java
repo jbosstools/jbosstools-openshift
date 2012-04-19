@@ -21,11 +21,11 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 
-import com.openshift.express.client.IDomain;
-import com.openshift.express.client.ISSHPublicKey;
-import com.openshift.express.client.OpenShiftException;
-import com.openshift.express.client.SSHKeyPair;
-import com.openshift.express.client.SSHPublicKey;
+import com.openshift.client.IDomain;
+import com.openshift.client.ISSHPublicKey;
+import com.openshift.client.OpenShiftException;
+import com.openshift.client.SSHKeyPair;
+import com.openshift.client.SSHPublicKey;
 
 /**
  * @author André Dietisheim
@@ -99,7 +99,7 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void createDomain() throws OpenShiftException, IOException {
-		IDomain domain = user.createDomain(namespace, loadSshKey());
+		IDomain domain = user.createDomain(namespace);
 	}
 
 	public String getSshKey() {

@@ -10,16 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.net.SocketTimeoutException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.ICartridge;
-import com.openshift.express.client.OpenShiftApplicationNotAvailableException;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.ICartridge;
+import com.openshift.client.OpenShiftApplicationNotAvailableException;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
@@ -73,18 +75,18 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		return application;
 	}
 
-	public void createApplication(IProgressMonitor monitor) throws OpenShiftException {
+	public void createApplication(IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException {
 		IApplication application = createApplication(name, cartridge, monitor);
 		setApplication(application);
 	}
-	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftException {
+	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException {
 //		monitor.subTask("creating application...");
 		IApplication application = getUser().createApplication(name, cartridge);
 		waitForAccessible(application, monitor);
 		return application;
 	}
 
-	public boolean hasApplication(String name) throws OpenShiftException {
+	public boolean hasApplication(String name) throws OpenShiftException, SocketTimeoutException {
 		return user.hasApplication(name);
 	}
 

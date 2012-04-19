@@ -23,9 +23,9 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.LoadingStub;
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.NotConnectedUserStub;
 
-import com.openshift.express.client.IApplication;
-import com.openshift.express.client.IEmbeddableCartridge;
-import com.openshift.express.client.OpenShiftException;
+import com.openshift.client.IApplication;
+import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -64,7 +64,7 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 		if (element instanceof IApplication) {
 			return OpenShiftUIActivator.getDefault().createImage("query.gif");
 		}
-		if (element instanceof IEmbeddableCartridge) {
+		if (element instanceof IEmbeddedCartridge) {
 			return OpenShiftUIActivator.getDefault().createImage("task-repository.gif");
 		}
 		if (element instanceof LoadingStub) {
@@ -101,8 +101,8 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 			styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);
 			return styledString;
 		}
-		if (element instanceof IEmbeddableCartridge) {
-			String message = ((IEmbeddableCartridge) element).getName();
+		if (element instanceof IEmbeddedCartridge) {
+			String message = ((IEmbeddedCartridge) element).getName();
 			StyledString styledString = new StyledString(message);
 			styledString.setStyle(0, message.length(), StyledString.DECORATIONS_STYLER);
 			return new StyledString(message);

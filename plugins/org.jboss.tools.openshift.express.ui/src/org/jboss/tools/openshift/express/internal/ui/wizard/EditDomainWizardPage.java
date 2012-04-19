@@ -65,7 +65,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
 				new CustomControlDecorationUpdater());
 		final IObservableValue namespaceModelObservable = BeanProperties.value(
-				EditDomainWizardPageModel.PROPERTY_NAMESPACE).observe(pageModel);
+				EditDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
 
 		}
