@@ -14,7 +14,7 @@
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
             name="OpenShift Application"
             project="true">
-                <description>Create a new OpenShift Express Application</description>
+                <description>Create a new OpenShift Application</description>
       </wizard>
    </extension>
    <extension
@@ -29,7 +29,7 @@
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
             name="Existing OpenShift Application">
-            <description>Import an existing OpenShift Express Application</description>
+            <description>Import an existing OpenShift Application</description>
       </wizard>
     </extension>  
    <extension
@@ -64,7 +64,7 @@
       <behaviour
             behaviourDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBehaviourDelegate"
             launchDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressLaunchDelegate"
-            name="OpenShift Express"
+            name="OpenShift"
             publishMethod="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressPublishMethod"
             serverTypes="org.jboss.tools.openshift.express.openshift.server.type"
             typeId="openshift">
@@ -235,8 +235,8 @@
     <extension  point="org.eclipse.ui.editors.templates">    
         <template id="org.jboss.tools.maven.editor.xml.templates.profiles.openshift"
          contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.profiles"
-         name="OpenShift Express profile" 
-         description="OpenShift Express profile">
+         name="OpenShift profile" 
+         description="OpenShift profile">
          <pattern>             &lt;profile&gt;
   &lt;!-- When built in OpenShift the &#39;openshift&#39; profile will be used when invoking mvn. --&gt;
   &lt;!-- Use this profile for any OpenShift specific customization your app will need. --&gt;
@@ -285,14 +285,14 @@
             class="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftConsoleExpressView"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
-            name="OpenShift Express Console">
+            name="OpenShift Explorer">
       </view-->
       <view
             category="org.jboss.tools.common.model.ui.views"
             class="org.jboss.tools.openshift.express.internal.ui.console.ExpressConsoleView"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
-            name="OpenShift Express Console">
+            name="OpenShift Explorer">
       </view>
       
    </extension>
@@ -400,7 +400,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
               </and>
            </enablement>
@@ -411,7 +411,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
               </and>
            </enablement>
@@ -422,7 +422,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
               </and>
            </enablement>
@@ -433,7 +433,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
               </and>
            </enablement>
@@ -444,7 +444,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
               </and>
            </enablement>
@@ -455,7 +455,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
               </and>
            </enablement>
@@ -469,10 +469,10 @@
                        value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
                  <instanceof
-                       value="com.openshift.express.client.IApplication">
+                       value="com.openshift.client.IApplication">
                  </instanceof>
                  <instanceof
-                       value="com.openshift.express.client.IEmbeddableCartridge">
+                       value="com.openshift.client.IEmbeddableCartridge">
                  </instanceof>
               </or>
            </enablement>
@@ -515,14 +515,14 @@
            </adapter>
         </factory>
         <factory
-              adaptableType="com.openshift.express.client.IApplication"
+              adaptableType="com.openshift.client.IApplication"
               class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
         <factory
-              adaptableType="com.openshift.express.client.IEmbeddableCartridge"
+              adaptableType="com.openshift.client.IEmbeddableCartridge"
               class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
