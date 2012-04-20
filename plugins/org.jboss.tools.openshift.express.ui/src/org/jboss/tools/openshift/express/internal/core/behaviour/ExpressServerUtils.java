@@ -342,7 +342,7 @@ public class ExpressServerUtils {
 			String user = ExpressServerUtils.getExpressUsername(server);
 			UserDelegate user2 = UserModel.getDefault().findUser(user);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
-			IApplication app = user2.getApplicationByName(appName);
+			IApplication app = user2 == null ? null : user2.getApplicationByName(appName);
 			return app;
 		} catch(OpenShiftException ose) {
 			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
