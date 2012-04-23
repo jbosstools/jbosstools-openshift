@@ -115,7 +115,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Button uncheckAllButton;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
-		super("Setup OpenShift Application", 
+		super("Setup OpenShift Application",
 				"Enter a name and select a type for your new OpenShift Express application.",
 				"Setup OpenShift Application", wizard);
 		try {
@@ -124,7 +124,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
 			OpenShiftUIActivator.log(status);
 			ErrorDialog.openError(getShell(), "Error", "Error initializing application configuration page", status);
-		}  catch (SocketTimeoutException e) {
+		} catch (SocketTimeoutException e) {
 			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
 			OpenShiftUIActivator.log(status);
 			ErrorDialog.openError(getShell(), "Error", "Error initializing application configuration page", status);
@@ -267,8 +267,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				WidgetProperties.selection().observe(newAppCartridgeCombo);
 		final IObservableValue selectedCartridgeModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
-		ValueBindingBuilder.bind(selectedCartridgeComboObservable) // .converting(new StringToCartridgeConverter())
-				.to(selectedCartridgeModelObservable).converting(new CartridgeToStringConverter()).in(dbc);
+		ValueBindingBuilder.bind(selectedCartridgeComboObservable)
+				.converting(new StringToCartridgeConverter())
+				.to(selectedCartridgeModelObservable)
+				.converting(new CartridgeToStringConverter())
+				.in(dbc);
 
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
 		final NewApplicationNameValidator newApplicationNameValidator =
@@ -431,7 +434,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException,
+			SocketTimeoutException {
 		if (pageModel.hasApplicationOfType(ICartridge.JENKINS_14)) {
 			pageModel.getSelectedEmbeddedCartridges().add(cartridge);
 		} else {
@@ -564,20 +568,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
-	/*
-	private static final class StringToCartridgeConverter extends Converter {
+	private final class StringToCartridgeConverter extends Converter {
 		private StringToCartridgeConverter() {
 			super(String.class, ICartridge.class);
 		}
 
 		@Override
 		public Object convert(Object fromObject) {
-			if (fromObject instanceof String && ((String) fromObject).length() > 0) {
-				return new Cartridge(((String) fromObject));
+			if (fromObject instanceof String) {
+				return pageModel.getCartridgeByName((String) fromObject);
 			}
 			return null;
 		}
-	}*/
+	}
 
 	private static class JenkinsApplicationDialog extends InputDialog {
 
@@ -779,9 +782,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						return ValidationStatus.error(NLS.bind("The application \"{0}\" does not exist.", appName));
 					}
 				} catch (SocketTimeoutException e) {
-					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.", appName));
+					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.",
+							appName));
 				} catch (OpenShiftException e) {
-					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.", appName));
+					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.",
+							appName));
 				}
 			}
 

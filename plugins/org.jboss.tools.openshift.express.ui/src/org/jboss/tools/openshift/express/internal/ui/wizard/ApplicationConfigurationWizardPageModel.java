@@ -193,6 +193,23 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public List<ICartridge> getCartridges() {
 		return cartridges;
 	}
+	
+	public ICartridge getCartridgeByName(String name) {
+		List<ICartridge> cartridges = getCartridges();
+		if (cartridges == null) {
+			return null;
+		}
+		
+		ICartridge matchingCartridge = null; 
+		for (ICartridge cartridge : cartridges) {
+			if (name.equals(cartridge.getName())) {
+				matchingCartridge = cartridge;
+				break;
+			}
+		}
+		
+		return matchingCartridge;
+	}
 
 	public ICartridge getSelectedCartridge() {
 		return wizardModel.getApplicationCartridge();
