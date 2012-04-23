@@ -55,9 +55,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 				|| application.getEmbeddedCartridges() == null) {
 			return;
 		}
-		for(IEmbeddedCartridge configuredCartridge : application.getEmbeddedCartridges()) {
-			selectedCartridges.add(configuredCartridge);
-		}
+		selectedCartridges.addAll(application.getEmbeddedCartridges());
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
@@ -141,21 +139,21 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 		ListDiff listDiff = Diffs.computeListDiff(getApplication().getEmbeddedCartridges(), selectedCartridges);
 		for (ListDiffEntry entry : listDiff.getDifferences()) {
 			if (entry.isAddition()) {
-				addedCartridges.add((IEmbeddedCartridge) entry.getElement());
+				addedCartridges.add((IEmbeddableCartridge) entry.getElement());
 			} else {
-				removedCartridges.add((IEmbeddedCartridge) entry.getElement());
+				removedCartridges.add((IEmbeddableCartridge) entry.getElement());
 			}
 		}
 	}
 
-	private static class CartridgeComparator implements Comparator<IEmbeddedCartridge> {
+	private static class CartridgeComparator implements Comparator<IEmbeddableCartridge> {
 
 		@Override
-		public int compare(IEmbeddedCartridge thisCartridge, IEmbeddedCartridge thatCartridge) {
+		public int compare(IEmbeddableCartridge thisCartridge, IEmbeddableCartridge thatCartridge) {
 			// mysql has to be added/removed before phpmyadmin
-			if (thisCartridge.equals(IEmbeddedCartridge.MYSQL_51)) {
+			if (thisCartridge.equals(IEmbeddableCartridge.MYSQL_51)) {
 				return -1;
-			} else if (thatCartridge.equals(IEmbeddedCartridge.MYSQL_51)) {
+			} else if (thatCartridge.equals(IEmbeddableCartridge.MYSQL_51)) {
 				return 1;
 			}
 			return 0;

@@ -63,7 +63,7 @@ public class ApplicationPropertySource implements IPropertySource {
 		}
 
 		if (id.equals("2.Type")) {
-			return application.getCartridge();
+			return application.getCartridge().getName();
 		}
 		if (id.equals("5.Git URI")) {
 			return application.getGitUrl();

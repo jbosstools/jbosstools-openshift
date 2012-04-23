@@ -118,7 +118,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void update(ViewerCell cell) {
-				IEmbeddedCartridge cartridge = (IEmbeddedCartridge) cell.getElement();
+				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) cell.getElement();
 				cell.setText(cartridge.getName());
 			}
 		}, viewer, tableLayout);
@@ -130,7 +130,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		TableViewerColumn column = new TableViewerColumn(viewer, SWT.LEFT);
 		column.getColumn().setText(name);
 		column.setLabelProvider(cellLabelProvider);
-
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
@@ -140,7 +139,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				try {
-					IEmbeddedCartridge cartridge = (IEmbeddedCartridge) event.getElement();
+					IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
 					if (event.getChecked()) {
 						if (IEmbeddedCartridge.PHPMYADMIN_34.equals(cartridge)) {
 							addPhpMyAdminCartridge(cartridge);
@@ -210,7 +209,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void addPhpMyAdminCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	private void addPhpMyAdminCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		if (!viewer.getChecked(IEmbeddedCartridge.MYSQL_51)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed mysql cartridge",
 					"To embed phpmyadmin, you'd also have to embed mysql.")) {
@@ -225,11 +224,11 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void addCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	private void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		model.getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
-	private void removeMySQLCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		List<IEmbeddableCartridge> checkedCartridges = model.getSelectedEmbeddableCartridges();
 		if (viewer.getChecked(IEmbeddedCartridge.PHPMYADMIN_34)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
@@ -245,7 +244,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void removeCartridge(IEmbeddedCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	private void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		model.getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 

@@ -180,17 +180,19 @@ public class CreationLogDialog extends TitleAreaDialog {
 	}
 
 	private void createLinks(String log, int baseIndex, List<StyleRange> styles) {
-		Matcher matcher = HTTP_LINK_REGEX.matcher(log);
-		while (matcher.find() 
-				&& matcher.groupCount() == 1) {
-			int linkStart = matcher.start() + baseIndex;
-			int linkStop = matcher.end() + baseIndex;
-			StyleRange linkStyle = createLinkStyleRange(linkStart, linkStop);
-			styles.add(linkStyle);
-			String url = matcher.group(1);
-			LinkSubstring linkEntry = 
-					new LinkSubstring(linkStart, linkStop, url);
-			linkSubstrings.add(linkEntry);
+		if(log != null) {
+			Matcher matcher = HTTP_LINK_REGEX.matcher(log);
+			while (matcher.find() 
+					&& matcher.groupCount() == 1) {
+				int linkStart = matcher.start() + baseIndex;
+				int linkStop = matcher.end() + baseIndex;
+				StyleRange linkStyle = createLinkStyleRange(linkStart, linkStop);
+				styles.add(linkStyle);
+				String url = matcher.group(1);
+				LinkSubstring linkEntry = 
+						new LinkSubstring(linkStart, linkStop, url);
+				linkSubstrings.add(linkEntry);
+			}
 		}
 	}
 
