@@ -61,7 +61,7 @@ public class ExpressServer extends DeployableServer implements IURLProvider, IEx
 		IProject appProj = appProjString == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
 		IProject p =module.getProject();
 		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		
-		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore);
+		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore ? "" : null);
 	}
 	
 	public ServerExtendedProperties getExtendedProperties() {
