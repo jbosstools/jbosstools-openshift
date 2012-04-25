@@ -47,10 +47,10 @@ public class NewDomainDialog extends Wizard {
 						result[0] = true;
 					} catch (OpenShiftEndpointException e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-								"Could not create domain \"{0}\": {1}", model.getNamespace(), e.getRestResponseMessages()), e);
+								"Could not create domain \"{0}\": {1}", model.getDomainId(), e.getRestResponseMessages()), e);
 					} catch (Exception e) {
 						return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-								"Could not create domain \"{0}\"", model.getNamespace()), e);
+								"Could not create domain \"{0}\"", model.getDomainId()), e);
 					}
 					return Status.OK_STATUS;
 				}

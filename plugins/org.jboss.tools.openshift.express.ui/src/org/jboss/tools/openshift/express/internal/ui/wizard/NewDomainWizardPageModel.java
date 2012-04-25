@@ -35,10 +35,10 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	public static final String LIBRA_KEY = "libra_id_rsa";
 	private static final String PUBLIC_KEY_SUFFIX = ".pub";
 
-	public static final String PROPERTY_NAMESPACE = "namespace";
+	public static final String PROPERTY_DOMAIN_ID = "domainId";
 	public static final String PROPERTY_SSHKEY = "sshKey";
 
-	private String namespace;
+	private String domainId;
 	private IDomain domain;
 	private String sshKey;
 	private UserDelegate user;
@@ -94,12 +94,12 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return ssh2Home;
 	}
 
-	public String getNamespace() {
-		return this.namespace;
+	public String getDomainId() {
+		return this.domainId;
 	}
 
 	public void createDomain() throws OpenShiftException, IOException {
-		IDomain domain = user.createDomain(namespace);
+		IDomain domain = user.createDomain(domainId);
 	}
 
 	public String getSshKey() {
@@ -176,8 +176,8 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return new SSHPublicKey(new File(sshKey));
 	}
 
-	public void setNamespace(String namespace) {
-		firePropertyChange(PROPERTY_NAMESPACE, this.namespace, this.namespace = namespace);
+	public void setDomainId(String domainId) {
+		firePropertyChange(PROPERTY_DOMAIN_ID, this.domainId, this.domainId = domainId);
 	}
 
 	public boolean hasDomain() {
