@@ -182,6 +182,7 @@ public class ExpressDetailsComposite {
 				passText.setText(pass);
 				passText.setEnabled(fapplication == null);
 			}
+			rememberPassword = pass != null && !"".equals(pass);
 			rememberPasswordCheckBox.setSelection(rememberPassword);
 		}
 		if (remote != null)
