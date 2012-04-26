@@ -157,7 +157,7 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				// Get the actual children, with the delay
 				loadingUsers.add(user);
 				try {
-					getChildrenForElement(user, true);
+					getChildrenForElement(user, false);
 				} catch(OpenShiftException e) {
 					errors.put(user, e);
 				} catch(SocketTimeoutException e) {
