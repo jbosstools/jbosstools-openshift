@@ -622,5 +622,15 @@
               </input>
            </propertySection>
         </propertySections>
-     </extension -->      
+     </extension -->
+     <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      	<perspectiveExtension
+            targetID="org.jboss.tools.common.ui.JBossPerspective">
+            <view relative="org.eclipse.ui.views.ProblemView"
+         	   relationship="stack"
+               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+         </view>
+      	</perspectiveExtension> 
+     </extension>
 </plugin>
