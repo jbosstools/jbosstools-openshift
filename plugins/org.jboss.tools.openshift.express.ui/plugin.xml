@@ -162,7 +162,7 @@
     	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
 	       <includes>
 	          <actionExtension
-	                pattern="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider"/>
+	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.tailServerLogActionProvider"/>
 	       </includes>
 	    </viewerActionBinding>
 	</extension>
@@ -329,6 +329,8 @@
 	       <includes>
            	  <actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.*"/>
+           	  <actionExtension
+	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/>
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
@@ -347,7 +349,7 @@
               contentProvider="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider"
               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleContent"
               labelProvider="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleLabelProvider"
-              name="OpenShift Express Console Content">
+              name="OpenShift Explorer Content">
            <triggerPoints></triggerPoints>
         </navigatorContent>
         <actionProvider
@@ -402,7 +404,7 @@
                  <instanceof
                        value="com.openshift.client.IApplication">
                  </instanceof>
-              </and>
+              </and> 
            </enablement>
         </actionProvider>
         <actionProvider
@@ -416,6 +418,18 @@
               </and>
            </enablement>
         </actionProvider>
+        <actionProvider
+              class="org.jboss.tools.openshift.express.internal.core.portforward.ApplicationPortForwardingActionProvider"
+              id="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider">
+           <enablement>
+              <and>
+                 <instanceof
+                       value="com.openshift.client.IApplication">
+                 </instanceof>
+              </and>
+           </enablement>
+        </actionProvider>
+        
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditCartridgesActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editCartridgesActionProvider">
@@ -529,6 +543,45 @@
            </adapter>
         </factory>
      </extension>
+     <!-- Launch configuration type to debug remote openshift applications. Not fully implemented yet... -->
+     <!--extension
+           point="org.eclipse.debug.core.launchConfigurationTypes">
+        <launchConfigurationType
+              delegate="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
+              delegateName="Remote OpenShift Application "
+              id="org.jboss.tools.openshift.launchDebugConfigurationType"
+              modes="debug"
+              name="Remote OpenShift Application "
+              public="true">
+        </launchConfigurationType>
+     </extension>
+     <extension
+           point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+        <launchConfigurationTypeImage
+              configTypeID="org.jboss.tools.openshift.launchDebugConfigurationType"
+              icon="icons/openshift-logo-white-icon.png"
+              id="org.jboss.tools.openshift.launchDebugConfigurationTypeImage">
+        </launchConfigurationTypeImage>
+     </extension>
+     <extension
+           point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+        <launchConfigurationTabGroup
+              class="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationConfigurationTabGroup"
+              id="org.jboss.tools.openshift.launchDebugConfigurationTabGroup"
+              type="org.jboss.tools.openshift.launchDebugConfigurationType">
+        </launchConfigurationTabGroup>
+     </extension -->
+     
+     <!--extension
+           point="org.eclipse.debug.core.launchDelegates">
+        <launchDelegate
+              delegate="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
+              id="org.jboss.tools.openshift.express.ui.launchDelegate2"
+              modes="debug"
+              name="Remote OpenShift application"
+              type="org.jboss.tools.openshift.launchDebugConfigurationType">
+        </launchDelegate>
+     </extension-->
      <!-- when using the new 'tabbed' properties view. -->
      
      <!--extension
