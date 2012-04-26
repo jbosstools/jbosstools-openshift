@@ -486,7 +486,7 @@ public class ExpressDetailsComposite {
 		} else if( appList == null ) {
 			error = "Please click \"verify\" to test your credentials.";
 		} else if( fdomain == null ) {
-			error = "Your OpenShift Express account has not been configured with a domain.";
+			error = "Your OpenShift account has not been configured with a domain.";
 		} else if( app == null || app.equals("")) {
 			error = "Please select an application from the combo below.";
 		} else {

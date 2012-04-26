@@ -25,7 +25,7 @@ public class OpenShiftUI {
 		public static final IView iView = new IView() {
 			@Override
 			public String getName() {
-				return "OpenShift Express Console";
+				return "OpenShift Explorer";
 			}
 
 			@Override
@@ -39,7 +39,7 @@ public class OpenShiftUI {
 
 	/**
 	 * 
-	 * Class representing "navigation" to new OpenShift Express Application
+	 * Class representing "navigation" to new OpenShift Application
 	 * 
 	 */
 	public static class NewApplication {

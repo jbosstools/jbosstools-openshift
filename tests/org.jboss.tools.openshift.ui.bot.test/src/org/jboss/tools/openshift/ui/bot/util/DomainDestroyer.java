@@ -13,7 +13,7 @@ public class DomainDestroyer {
 
     /**
      * 
-     * Destroys registered domain on OpenShift Express 
+     * Destroys registered domain on OpenShift
      * 
      * @param domain
      * @param login

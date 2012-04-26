@@ -65,7 +65,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		
 		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.EXPANDED|ExpandableComposite.TITLE_BAR);
-		section.setText("Openshift Express Server");
+		section.setText("Openshift Server");
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL| GridData.GRAB_VERTICAL));
 		Composite c = new Composite(section, SWT.NONE);
 		c.setLayout(new GridLayout(2,true));

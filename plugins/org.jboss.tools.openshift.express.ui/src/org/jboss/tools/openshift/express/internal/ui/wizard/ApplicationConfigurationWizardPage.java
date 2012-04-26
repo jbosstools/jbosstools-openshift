@@ -116,7 +116,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
 		super("Setup OpenShift Application",
-				"Enter a name and select a type for your new OpenShift Express application.",
+				"Enter a name and select a type for your new OpenShift application.",
 				"Setup OpenShift Application", wizard);
 		try {
 			this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);

@@ -17,7 +17,7 @@ import org.junit.runners.Suite.SuiteClasses;
 /**
  * <b>OpenShift SWTBot TestSuite</b>
  * <br>
- * This bot test will try to demonstrate a new OpenShift Express Application and domain life cycle. 
+ * This bot test will try to demonstrate a new OpenShift Application and domain life cycle. 
  * 
  * <br>
  * TestSuite covers following test cases :
@@ -27,7 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * <li>JBDS50_XXXX Domain is created, renamed correctly</li>
  * <li>JBDS50_XXXX App with JBossAS7 cartridge is created correctly via
  * OpenShift wizards</li>
- * <li>JBDS50_XXXX Embed jenkins etc. into OpenShift Express applications</li>
+ * <li>JBDS50_XXXX Embed jenkins etc. into OpenShift applications</li>
  * <li>JBDS50_XXXX App with JBossAS7 cartridge can be deleted</li>
  * <li>JBDS50_XXXX JBoss server adapter is created successfully</li>
  * <li>JBDS50_XXXX App with JBossAS7 cartridge can be modified and republished</li>

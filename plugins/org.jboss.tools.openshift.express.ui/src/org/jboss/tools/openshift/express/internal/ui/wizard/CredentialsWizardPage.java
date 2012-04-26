@@ -62,7 +62,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 	private Text passwordText = null;
 
 	public CredentialsWizardPage(IWizard wizard, IUserAwareModel wizardModel) {
-		super("Sign in to OpenShift", "Please provide your OpenShift Express credentials.", "Server Connection",
+		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server Connection",
 				wizard);
 		this.pageModel = new CredentialsWizardPageModel(wizardModel);
 	}
@@ -71,7 +71,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(container);
 
 		Link signupLink = new Link(container, SWT.WRAP);
-		signupLink.setText("If you do not have an account on OpenShift Express, please sign up <a>here</a>.");
+		signupLink.setText("If you do not have an account on OpenShift, please sign up <a>here</a>.");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(signupLink);
 		signupLink.addSelectionListener(onSignupLinkClicked());
@@ -210,7 +210,7 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 					&& !StringUtils.isEmpty(passwordValue)) {
 				return ValidationStatus.ok();
 			}
-			return ValidationStatus.cancel("Please provide your OpenShift Express user credentials");
+			return ValidationStatus.cancel("Please provide your OpenShift user credentials");
 		}
 	}
 

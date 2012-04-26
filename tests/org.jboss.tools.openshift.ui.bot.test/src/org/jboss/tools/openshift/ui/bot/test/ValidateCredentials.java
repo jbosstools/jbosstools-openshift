@@ -32,7 +32,7 @@ public class ValidateCredentials extends SWTTestExt {
 
 	@Test
 	public void canValidateCredentials() throws InterruptedException {
-		// create new OpenShift Express Application
+		// create new OpenShift Application
 		SWTBot wiz = open.newObject(OpenShiftUI.NewApplication.iNewObject);
 
 		storePasswordThenForward();

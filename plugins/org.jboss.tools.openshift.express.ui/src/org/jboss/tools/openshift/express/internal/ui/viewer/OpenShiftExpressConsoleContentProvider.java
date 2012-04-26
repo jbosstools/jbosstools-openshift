@@ -115,9 +115,9 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		try {
 			return getChildrenForElement(parentElement, recurse);
 		} catch (OpenShiftException e) {
-			Logger.error("Unable to retrieve OpenShift Express information", e);
+			Logger.error("Unable to retrieve OpenShift information", e);
 		} catch (SocketTimeoutException e) {
-			Logger.error("Unable to retrieve OpenShift Express information", e);
+			Logger.error("Unable to retrieve OpenShift information", e);
 		}
 		return new Object[0];
 	}
@@ -142,17 +142,17 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				getChildrenFor(children);
 			}
 //		} catch (OpenShiftException e) {
-//			Logger.error("Unable to retrieve OpenShift Express information", e);
+//			Logger.error("Unable to retrieve OpenShift information", e);
 //		}
 		return children;
 	}
 
 	private void launchLoadingUserJob(final UserDelegate user) {
-		Job job = new Job("Loading OpenShift Express User information...") {
+		Job job = new Job("Loading OpenShift User information...") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask("Loading OpenShift Express information...", IProgressMonitor.UNKNOWN);
+				monitor.beginTask("Loading OpenShift information...", IProgressMonitor.UNKNOWN);
 				monitor.worked(1);
 				// Get the actual children, with the delay
 				loadingUsers.add(user);

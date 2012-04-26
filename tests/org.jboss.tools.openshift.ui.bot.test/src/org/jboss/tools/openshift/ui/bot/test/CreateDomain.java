@@ -53,7 +53,7 @@ public class CreateDomain extends SWTTestExt {
 			log.info("OpenShift SWTBot Tests: Domain created.");
 			log.info("OpenShift SWTBot Tests: Waiting for 'New Application wizard'.");
 			
-			bot.waitForShell("New OpenShift Express Application", 100);
+			bot.waitForShell("New OpenShift Application", 100);
 			
 			log.info("OpenShift SWTBot Tests: 'New Application wizard' created.");
 			
