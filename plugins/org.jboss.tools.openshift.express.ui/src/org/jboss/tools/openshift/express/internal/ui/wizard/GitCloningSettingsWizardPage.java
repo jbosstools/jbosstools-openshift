@@ -194,7 +194,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dialog = new DirectoryDialog(getShell());
-				dialog.setMessage("Choose the location to store your repository clone to...");
+				dialog.setText("Git clone location");
+				dialog.setMessage("Choose the location for git clone...");
+				dialog.setFilterPath(pageModel.getRepositoryPath()); 
 				String repositoryPath = dialog.open();
 				if (repositoryPath != null) {
 					pageModel.setRepositoryPath(repositoryPath);
