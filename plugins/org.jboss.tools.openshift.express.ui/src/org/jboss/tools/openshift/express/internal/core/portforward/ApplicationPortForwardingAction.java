@@ -28,7 +28,7 @@ public class ApplicationPortForwardingAction extends AbstractAction {
 				try {
 					//TitleD
 					ApplicationPortForwardingWizard wizard = new ApplicationPortForwardingWizard(application);
-					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+					WizardDialog dialog = new ApplicationPortForwardingWizardDialog(Display.getCurrent().getActiveShell(), wizard);
 					dialog.setMinimumPageSize(700, 300);
 					dialog.create();
 					dialog.open();
