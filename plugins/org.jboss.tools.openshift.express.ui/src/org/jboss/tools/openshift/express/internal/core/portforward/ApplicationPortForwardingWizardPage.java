@@ -1,5 +1,7 @@
 package org.jboss.tools.openshift.express.internal.core.portforward;
 
+import java.util.List;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -196,6 +198,22 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 							} catch (Exception e) {
 								return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding.", e);
 							}
+							
+							try {
+								if(wizardModel.getApplication().isPortFowardingStarted()) {
+									List<IApplicationPortForwarding> forwardablePorts = wizardModel.getForwardablePorts();
+									for (IApplicationPortForwarding portfwd : forwardablePorts) {
+										if (!portfwd.isStarted(wizardModel.getApplication().getSSHSession())) {
+											return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding for one or more ports. See console for errors.");											
+										}
+									}
+								} else {
+									return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding. See console for errors.");
+								}
+							} catch (OpenShiftSSHOperationException e) {
+								return OpenShiftUIActivator.createErrorStatus("Problem checking port forward status during start. See console for errors.");
+							}
+							
 							return Status.OK_STATUS;
 						}
 					}, getContainer(), getDataBindingContext());
