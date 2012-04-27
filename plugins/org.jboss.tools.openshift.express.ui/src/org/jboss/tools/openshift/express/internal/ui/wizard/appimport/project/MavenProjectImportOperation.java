@@ -12,7 +12,10 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -42,7 +45,7 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		MavenPluginActivator mavenPlugin = MavenPluginActivator.getDefault();
 		IProjectConfigurationManager configurationManager = mavenPlugin.getProjectConfigurationManager();
 		MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
-		List<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), modelManager, monitor);
+		Set<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), modelManager, monitor);
 		ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration();
 		List<IMavenProjectImportResult> importResults =
 				configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
@@ -60,12 +63,12 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		return projects;
 	}
 
-	private List<MavenProjectInfo> getMavenProjects(File directory, MavenModelManager modelManager,
+	private Set<MavenProjectInfo> getMavenProjects(File directory, MavenModelManager modelManager,
 			IProgressMonitor monitor) throws InterruptedException {
-		LocalProjectScanner scanner = new LocalProjectScanner(directory, directory.toString(), false,
+		LocalProjectScanner scanner = new LocalProjectScanner(directory.getParentFile(), directory.toString(), false,
 				modelManager);
 		scanner.run(monitor);
-		return scanner.getProjects();
+		return collectProjects(scanner.getProjects());
 	}
 
 	public boolean isMavenProject() {
@@ -75,5 +78,21 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		}
 
 		return isReadable(new File(getProjectDirectory(), POM_FILE));
+	}
+	
+	public Set<MavenProjectInfo> collectProjects(
+			Collection<MavenProjectInfo> projects) {
+		return new LinkedHashSet<MavenProjectInfo>() {
+			private static final long serialVersionUID = 1L;
+
+			public Set<MavenProjectInfo> collectProjects(
+					Collection<MavenProjectInfo> projects) {
+				for (MavenProjectInfo projectInfo : projects) {
+					add(projectInfo);
+					collectProjects(projectInfo.getProjects());
+				}
+				return this;
+			}
+		}.collectProjects(projects);
 	}
 }
