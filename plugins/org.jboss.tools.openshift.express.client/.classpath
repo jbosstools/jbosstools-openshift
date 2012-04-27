@@ -3,7 +3,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="openshift-java-client-2.0.0-SNAPSHOT.jar" sourcepath="/openshift-java-client/src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="openshift-java-client-2.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="jboss-dmr-1.0.0.Final.jar"/>
 	<classpathentry kind="lib" path="log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="slf4j-api-1.6.1.jar"/>
