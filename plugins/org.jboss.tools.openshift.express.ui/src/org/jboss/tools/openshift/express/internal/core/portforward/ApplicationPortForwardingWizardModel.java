@@ -189,9 +189,11 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public void refreshForwardablePorts() throws OpenShiftSSHOperationException {
-		application.refreshForwardablePorts();
-		updateLocalAddressBindings(this.useDefaultLocalIpAddress);
-		updateLocalPortBindings(this.useFreePorts);
+		if(!application.isPortFowardingStarted()) { // we don't reload/refresh the ports if portforwarding is already running since we then loose the existing local ip/ports.
+			application.refreshForwardablePorts();
+			updateLocalAddressBindings(this.useDefaultLocalIpAddress);
+			updateLocalPortBindings(this.useFreePorts);
+		}
 	}
 
 }
