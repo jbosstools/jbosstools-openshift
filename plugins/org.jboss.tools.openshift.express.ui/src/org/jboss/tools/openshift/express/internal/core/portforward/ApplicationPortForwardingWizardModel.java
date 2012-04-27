@@ -148,7 +148,9 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	 * @throws OpenShiftSSHOperationException
 	 */
 	public void setUseFreePorts(Boolean useFreePorts) throws OpenShiftSSHOperationException {
-		updateLocalPortBindings(useFreePorts);
+		if(!application.isPortFowardingStarted()) { // do not change the current bindings if port forwarding is already started. 
+			updateLocalPortBindings(useFreePorts);
+		}
 		firePropertyChange(PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS, this.useFreePorts, this.useFreePorts = useFreePorts);
 	}
 
@@ -164,14 +166,19 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		final List<String> bindings = new ArrayList<String>();
 		// update local bindings while avoiding duplicates
 		for (IApplicationPortForwarding port : ports) {
-			// find duplicate
-			port.setLocalPort(port.getRemotePort());
-			String key = computeKey(port);
-			while (bindings.contains(key)) {
+			if(useFreePorts) {
+				// find free port for every port
 				port.setLocalPort(SocketUtil.findFreePort());
-				key = computeKey(port);
+			} else {
+				// find duplicates and if match we find free port for those until stops.
+				port.setLocalPort(port.getRemotePort());
+				String key = computeKey(port);
+				while (bindings.contains(key)) {
+					port.setLocalPort(SocketUtil.findFreePort());
+					key = computeKey(port);
+				}
+				bindings.add(key);
 			}
-			bindings.add(key);
 		}
 	}
 
