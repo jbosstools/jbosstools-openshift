@@ -30,6 +30,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	private NewServerWizardBehaviourCallback  callback;
 	
 	public ExpressWizardFragment() {
+		System.out.println("NEW FRAGMENT");
 	}
 	
 	public boolean hasComposite() {
@@ -40,7 +41,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	}
 
 	public boolean isComplete() {
-		return composite.getErrorString() == null;
+		return composite != null && composite.getErrorString() == null;
 	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
@@ -71,5 +72,10 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
 		composite.finish(monitor);
+		composite = null;
 	}
+	public void performCancel(IProgressMonitor monitor) throws CoreException {
+		composite = null;
+	}
+
 }
