@@ -25,9 +25,11 @@ import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -40,7 +42,10 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 	public static final String APPLICATION = "application";
 	public static final String APPLICATION_NAME = "applicationName";
 	public static final String APPLICATION_CARTRIDGE = "applicationCartridge";
-	public static final String USE_EXISTING_APPLICATION = "uswizardModel.getApplicationName()eExistingApplication";
+	public static final String APPLICATION_GEAR_PROFILE = "applicationGearProfile";
+	public static final String APPLICATION_SCALE = "applicationScale";
+	//public static final String USE_EXISTING_APPLICATION = "uswizardModel.getApplicationName()eExistingApplication";
+	public static final String USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String REMOTE_NAME = "remoteName";
 	public static final String REPOSITORY_PATH = "repositoryPath";
 	public static final String PROJECT_NAME = "projectName";
@@ -196,5 +201,13 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges);
 
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges();
+
+	IGearProfile getApplicationGearProfile();
+
+	IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
+
+	ApplicationScale getApplicationScale();
+
+	ApplicationScale setApplicationScale(final ApplicationScale scale);
 
 }

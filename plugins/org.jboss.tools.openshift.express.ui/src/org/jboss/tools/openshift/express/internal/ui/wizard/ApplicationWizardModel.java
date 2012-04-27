@@ -18,8 +18,10 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.client.OpenShiftException;
 
@@ -40,6 +42,8 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	private IApplication application;
 	private String name;
 	private ICartridge cartridge;
+	private ApplicationScale scale;
+	private IGearProfile gearProfile;
 
 	public ApplicationWizardModel(UserDelegate user) {
 		this(null, user);
@@ -54,12 +58,22 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		return user;
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	public String setName(String name) {
 		return this.name = name;
+	}
+
+	/**
+	 * @param scale the scale to set
+	 */
+	public final void setScale(ApplicationScale scale) {
+		this.scale = scale;
+	}
+
+	/**
+	 * @param gearProfile the gearProfile to set
+	 */
+	public final void setGearProfile(IGearProfile gearProfile) {
+		this.gearProfile = gearProfile;
 	}
 
 	public void setCartridge(ICartridge cartridge) {
@@ -76,12 +90,12 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	}
 
 	public void createApplication(IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException {
-		IApplication application = createApplication(name, cartridge, monitor);
+		IApplication application = createApplication(this.name, this.cartridge, this.scale , this.gearProfile, monitor);
 		setApplication(application);
 	}
-	public IApplication createApplication(String name, ICartridge cartridge, IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException {
+	public IApplication createApplication(final String name, final ICartridge cartridge, final ApplicationScale scale, final IGearProfile gearProfile, IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException {
 //		monitor.subTask("creating application...");
-		IApplication application = getUser().createApplication(name, cartridge);
+		IApplication application = getUser().createApplication(name, cartridge, scale, gearProfile);
 		waitForAccessible(application, monitor);
 		return application;
 	}

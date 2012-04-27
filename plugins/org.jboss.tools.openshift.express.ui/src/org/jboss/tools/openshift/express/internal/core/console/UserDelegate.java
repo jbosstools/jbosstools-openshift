@@ -23,10 +23,12 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectToOpenShiftWizard;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
 
@@ -111,10 +113,10 @@ public class UserDelegate {
 		return (delegate.getPassword() != null  && !"".equals(delegate.getPassword()));
 	}
 	
-	public IApplication createApplication(String applicationName, ICartridge applicationType)
+	public IApplication createApplication(final String applicationName, final ICartridge applicationType, final ApplicationScale scale, final IGearProfile gearProfile)
 			throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getDefaultDomain().createApplication(applicationName, applicationType);
+			return delegate.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
 		}
 		return null;
 	}

@@ -88,9 +88,11 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 
@@ -106,10 +108,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Text existingAppNameText;
 	private Button browseAppsButton;
 	private Group newAppConfigurationGroup;
-	private Label newAppNameLabel;
 	private Text newAppNameText;
-	private Label newAppTypeLabel;
 	private Combo newAppCartridgeCombo;
+	private Button enableScalingButton;
+	private Combo gearProfilesCombo;
 	private Group newAppEmbeddableCartridgesGroup;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
@@ -232,7 +234,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		this.newAppConfigurationGroup = new Group(parent, SWT.NONE);
 		newAppConfigurationGroup.setText("New application");
 		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(newAppConfigurationGroup);
+				.numColumns(3).margins(6, 6).applyTo(newAppConfigurationGroup);
 		GridDataFactory.fillDefaults()
 				.grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(newAppConfigurationGroup);
 
@@ -242,11 +244,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				onUseExistingApplication(
 						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
 
-		this.newAppNameLabel = new Label(newAppConfigurationGroup, SWT.NONE);
+		final Label newAppNameLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		newAppNameLabel.setText("Name:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(newAppNameLabel);
 		this.newAppNameText = new Text(newAppConfigurationGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(newAppNameText);
+		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).align(SWT.FILL, SWT.FILL).applyTo(newAppNameText);
 		UIUtils.selectAllOnFocus(newAppNameText);
 		final IObservableValue applicationNameTextObservable =
 				WidgetProperties.text(SWT.Modify).observe(newAppNameText);
@@ -255,13 +257,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						pageModel);
 		ValueBindingBuilder.bind(applicationNameTextObservable).to(applicationNameModelObservable).in(dbc);
 
-		this.newAppTypeLabel = new Label(newAppConfigurationGroup, SWT.NONE);
+		final Label newAppTypeLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		newAppTypeLabel.setText("Type:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(newAppTypeLabel);
 		this.newAppCartridgeCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(newAppCartridgeCombo);
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(newAppCartridgeCombo);
 		fillCartridgesCombo(dbc, newAppCartridgeCombo);
 		final ISWTObservableValue selectedCartridgeComboObservable =
 				WidgetProperties.selection().observe(newAppCartridgeCombo);
@@ -285,10 +287,39 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
 				new CustomControlDecorationUpdater());
 
+		// gear size
+		final Label gearProfileLabel = new Label(newAppConfigurationGroup, SWT.NONE);
+		gearProfileLabel.setText("Gear profile:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(gearProfileLabel);
+		this.gearProfilesCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(gearProfilesCombo);
+		fillGearProfilesCombo(dbc, gearProfilesCombo);
+		final ISWTObservableValue gearSizeComboObservable =
+				WidgetProperties.selection().observe(gearProfilesCombo);
+		final IObservableValue selectedGearProfileModelObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_GEAR_PROFILE).observe(pageModel);
+		ValueBindingBuilder.bind(gearSizeComboObservable)
+				.converting(new StringToGearProfileConverter())
+				.to(selectedGearProfileModelObservable)
+				.converting(new GearProfileToStringConverter())
+				.in(dbc);
+		
+		// scaling
+		this.enableScalingButton = new Button(newAppConfigurationGroup, SWT.CHECK);
+		enableScalingButton.setText("Enable scaling");
+		IObservableValue enableScalingModelObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_SCALE).observe(pageModel);
+		final IObservableValue enableScalingButtonSelection = WidgetProperties.selection().observe(enableScalingButton);
+		ValueBindingBuilder.bind(enableScalingButtonSelection).converting(new BooleanToApplicationScaleConverter())
+				.to(enableScalingModelObservable).converting(new ApplicationScaleToBooleanConverter()).in(dbc);
+		
+		
 		// embeddable cartridges
 		this.newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
 		newAppEmbeddableCartridgesGroup.setText("Embeddable Cartridges");
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(2, 1)
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1)
 				.applyTo(newAppEmbeddableCartridgesGroup);
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(newAppEmbeddableCartridgesGroup);
 
@@ -374,6 +405,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new UpdateListStrategy().setConverter(new CartridgeToStringConverter()));
 	}
 
+	private void fillGearProfilesCombo(DataBindingContext dbc, Combo gearSizesCombo) {
+		dbc.bindList(WidgetProperties.items().observe(gearSizesCombo),
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
+				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
+				new UpdateListStrategy().setConverter(new GearProfileToStringConverter()));
+	}
+	
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
@@ -581,7 +619,69 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return null;
 		}
 	}
+	
+	private static final class GearProfileToStringConverter extends Converter {
+		private GearProfileToStringConverter() {
+			super(Object.class, String.class);
+		}
 
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof IGearProfile)) {
+				return null;
+			}
+			return ((IGearProfile) fromObject).getName();
+		}
+	}
+
+	private final class StringToGearProfileConverter extends Converter {
+		private StringToGearProfileConverter() {
+			super(String.class, IGearProfile.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (fromObject instanceof String) {
+				return pageModel.getGearProfileByName((String) fromObject);
+			}
+			return null;
+		}
+	}
+	
+	private static final class ApplicationScaleToBooleanConverter extends Converter {
+		private ApplicationScaleToBooleanConverter() {
+			super(Object.class, Boolean.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof ApplicationScale)) {
+				return null;
+			}
+			switch((ApplicationScale)fromObject) {
+			case SCALE:
+				return Boolean.TRUE;
+			default:
+				return Boolean.FALSE;
+			}
+		}
+	}
+
+	private final class BooleanToApplicationScaleConverter extends Converter {
+		private BooleanToApplicationScaleConverter() {
+			super(Boolean.class, ApplicationScale.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (fromObject instanceof Boolean) {
+				return ((Boolean) fromObject).booleanValue() ? ApplicationScale.SCALE : ApplicationScale.NO_SCALE;
+			}
+			return null;
+		}
+	}
+	
+	
 	private static class JenkinsApplicationDialog extends InputDialog {
 
 		public JenkinsApplicationDialog(Shell shell) {
@@ -738,6 +838,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						return OpenShiftUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
+					}
+				}
+			}, getContainer(), dbc);
+			WizardUtils.runInWizard(new Job("Loading gear sizes...") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						pageModel.loadGearProfiles();
+						return Status.OK_STATUS;
+					} catch (NotFoundOpenShiftException e) {
+						return Status.OK_STATUS;
+					} catch (Exception e) {
+						return OpenShiftUIActivator.createErrorStatus("Could not load gear sizes", e);
 					}
 				}
 			}, getContainer(), dbc);

@@ -22,10 +22,12 @@ import org.eclipse.core.databinding.observable.list.ListDiffEntry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -89,7 +91,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException {
-		return wizardModel.createApplication(name, ICartridge.JENKINS_14, monitor);
+		return wizardModel.createApplication(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE, IGearProfile.SMALL, monitor);
 	}
 	
 	/**

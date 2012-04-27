@@ -15,35 +15,31 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
-import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ServerAdapterFactory;
-import org.osgi.service.prefs.BackingStoreException;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.client.OpenShiftException;
 
@@ -234,6 +230,9 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setUseExistingApplication(application);
 		setApplicationCartridge(application);
 		setApplicationName(application);
+		setApplicationScaling(application);
+		setApplicationGearProfile(application);
+		
 	}
 
 	@Override
@@ -368,6 +367,22 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setUseExistingApplication(application != null);
 	}
 
+	@Override
+	public ApplicationScale getApplicationScale() {
+		return (ApplicationScale) getProperty(APPLICATION_SCALE);
+	}
+
+	@Override
+	public ApplicationScale setApplicationScale(final ApplicationScale scale) {
+		return  (ApplicationScale) setProperty(APPLICATION_SCALE, scale);
+	}
+
+	protected void setApplicationScaling(IApplication application) {
+		if(application != null) {
+			setApplicationScale(application.getApplicationScale());
+		}
+	}
+
 	private void waitForAccessible(IApplication application, IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
 		// monitor.subTask("waiting for application to become accessible...");
@@ -377,7 +392,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		}
 	}
 
-	protected IApplication createApplication(final String name, final ICartridge cartridge, final IProgressMonitor monitor)
+	protected IApplication createApplication(final String name, final ICartridge cartridge, final ApplicationScale scale, final IGearProfile gearProfile, final IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
 		final UserDelegate user = getUser();
 		if (user == null) {
@@ -392,7 +407,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 							monitor.setTaskName("Creating application \"" + name + "\"...");
 							Logger.debug("creating application...");
 							final IApplication application
-							= user.createApplication(name, cartridge);
+							= user.createApplication(name, cartridge, scale, gearProfile);
 							monitor.beginTask("Waiting for application to be reachable...",
 									IProgressMonitor.UNKNOWN);
 							Logger.debug("Waiting for application to be reachable...");
@@ -420,7 +435,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
 			OpenShiftException {
-		IApplication application = createApplication(getApplicationName(), getApplicationCartridge(), monitor);
+		IApplication application = createApplication(getApplicationName(), getApplicationCartridge(), getApplicationScale(), getApplicationGearProfile(), monitor);
 		setApplication(application);
 	}
 
@@ -453,6 +468,22 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 			return;
 		}
 		setApplicationCartridge(application.getCartridge());
+	}
+
+	@Override
+	public IGearProfile getApplicationGearProfile() {
+		return (IGearProfile) getProperty(APPLICATION_GEAR_PROFILE);
+	}
+	
+	@Override
+	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile) {
+		return (IGearProfile) setProperty(APPLICATION_GEAR_PROFILE, gearProfile);
+	}
+
+	protected void setApplicationGearProfile(IApplication application) {
+		if (application != null) {
+			setApplicationGearProfile(application.getGearProfile());
+		}
 	}
 
 	@Override
@@ -493,4 +524,5 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		Assert.isNotNull(user);
 		UserModel.getDefault().addUser(user);
 	}
+
 }

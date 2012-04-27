@@ -23,9 +23,11 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -36,14 +38,19 @@ import com.openshift.client.OpenShiftException;
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
+	public static final String PROPERTY_APPLICATION_SCALE = "applicationScale";
 	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
 	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
+	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
 	public static final String PROPERTY_EXISTING_APPLICATIONS_LOADED = "existingApplicationsLoaded";
+	public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
+	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
+	
 
 	private final OpenShiftExpressApplicationWizardModel wizardModel;
 
@@ -51,6 +58,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	// first pass validation)
 	private List<IApplication> existingApplications = new ArrayList<IApplication>();
 	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
+	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;;
@@ -106,6 +114,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				, wizardModel.isUseExistingApplication()
 				, wizardModel.setUseExistingApplication(useExistingApplication));
 	}
+	
+	public ApplicationScale getApplicationScale() {
+		return wizardModel.getApplicationScale();
+	}
+
+	public void setApplicationScale(ApplicationScale scale) {
+		firePropertyChange(PROPERTY_APPLICATION_SCALE
+				, wizardModel.getApplicationScale()
+				, wizardModel.setApplicationScale(scale));
+	}
+
 
 	protected void setUseExistingApplication(IApplication application) {
 		setUseExistingApplication(application != null);
@@ -190,6 +209,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
 	}
 
+
 	public List<ICartridge> getCartridges() {
 		return cartridges;
 	}
@@ -213,6 +233,47 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public ICartridge getSelectedCartridge() {
 		return wizardModel.getApplicationCartridge();
+	}
+
+	public void loadGearProfiles() throws OpenShiftException, SocketTimeoutException {
+		setGearProfiles(getUser().getDefaultDomain().getAvailableGearProfiles());
+		//refreshSelectedCartridge();
+	}
+	
+	
+	public void setGearProfiles(List<IGearProfile> gearProfiles) {
+		firePropertyChange(PROPERTY_GEAR_PROFILES, this.gearProfiles, this.gearProfiles = gearProfiles);
+	}
+	
+	public List<IGearProfile> getGearProfiles() {
+		return gearProfiles;
+	}
+	
+	public IGearProfile getSelectedGearProfile() {
+		return wizardModel.getApplicationGearProfile();
+	}
+
+	public void setSelectedGearProfile(IGearProfile gearProfile) {
+		firePropertyChange(PROPERTY_SELECTED_GEAR_PROFILE
+				, wizardModel.getApplicationGearProfile()
+				, wizardModel.setApplicationGearProfile(gearProfile));
+	}
+
+	public IGearProfile getGearProfileByName(String name) {
+		List<IGearProfile> gearProfiles = getGearProfiles();
+		if (gearProfiles == null) {
+			return null;
+		}
+		
+		IGearProfile matchingGearProfile = null; 
+		for (IGearProfile gearProfile : gearProfiles) {
+			if (name.equals(gearProfile.getName())) {
+				matchingGearProfile = gearProfile;
+				break;
+			}
+		}
+		
+		return matchingGearProfile;
 	}
 
 	/**
@@ -342,7 +403,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
-		return wizardModel.createApplication(name, ICartridge.JENKINS_14, monitor);
+		return wizardModel.createApplication(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE, IGearProfile.SMALL, monitor);
 	}
 
 }
