@@ -4,9 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.views.IViewDescriptor;
+import org.eclipse.ui.views.IViewRegistry;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 
@@ -54,8 +60,8 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		if (this.application.isPortFowardingStarted()) {
 			return;
 		}
-		final MessageConsole console = ConsoleUtils.findMessageConsole(application.getUUID());
-		ConsoleUtils.displayConsoleView(console);
+		
+		final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
 		MessageConsoleStream stream = console.newMessageStream();
 		stream.println("Starting port-forwarding...");
 		this.application.startPortForwarding();
@@ -63,15 +69,22 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 			stream.println(" " + getPortStatus(port));
 		}
 		stream.println("done.");
+		ConsoleUtils.displayConsoleView(console);
 		firePropertyChange(PROPERTY_PORT_FORWARDING, false, this.application.isPortFowardingStarted());
+	}
+
+	/**
+	 * @return
+	 */
+	private String getMessageConsoleName() {
+		return "Port forwarding for application '" + application.getName() + "' (" + application.getDomain().getId() + ")";
 	}
 
 	public void stopPortForwarding() throws OpenShiftSSHOperationException {
 		if (!this.application.isPortFowardingStarted()) {
 			return;
 		}
-		final MessageConsole console = ConsoleUtils.findMessageConsole(application.getUUID());
-		ConsoleUtils.displayConsoleView(console);
+		final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
 		MessageConsoleStream stream = console.newMessageStream();
 		stream.println("Stopping port-forwarding...");
 		this.application.stopPortForwarding();
@@ -79,6 +92,7 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 			stream.println(" " + getPortStatus(port));
 		}
 		stream.println("done.");
+		ConsoleUtils.displayConsoleView(console);
 
 		firePropertyChange(PROPERTY_PORT_FORWARDING, true, this.application.isPortFowardingStarted());
 	}
@@ -144,19 +158,22 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		// update local bindings while avoiding duplicates
 		for (IApplicationPortForwarding port : ports) {
 			// find duplicate
-			String key = null;
-			int remotePort = port.getRemotePort();
-			while (key == null || bindings.contains(key)) {
-				if (useFreePorts) {
-					port.setLocalPort(SocketUtil.findFreePort());
-				} else {
-					port.setLocalPort(remotePort);
-				}
-				key = port.getRemotePort() + ":" + port.getLocalPort();
-				remotePort++;
+			port.setLocalPort(port.getRemotePort());
+			String key = computeKey(port);
+			while (bindings.contains(key)) {
+				port.setLocalPort(SocketUtil.findFreePort());
+				key = computeKey(port);
 			}
 			bindings.add(key);
 		}
+	}
+
+	/**
+	 * @param port
+	 * @return
+	 */
+	private String computeKey(IApplicationPortForwarding port) {
+		return port.getLocalAddress() + ":" + port.getLocalPort();
 	}
 
 	public void loadForwardablePorts() throws OpenShiftSSHOperationException {
