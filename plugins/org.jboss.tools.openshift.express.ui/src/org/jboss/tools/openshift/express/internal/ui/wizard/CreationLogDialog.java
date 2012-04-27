@@ -73,7 +73,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 	private void setupDialog(Composite parent) {
 		parent.getShell().setText("Embedded Cartridges");
-		setTitle("Please make note of the credentials and url that were reported when your cartridges were embedded / application was created. ");
+		setTitle("Please make note of the credentials and url that were reported\nwhen your cartridges were embedded / application was created. ");
 		setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 		setDialogHelpAvailable(false);
 	}

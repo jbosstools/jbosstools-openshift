@@ -23,7 +23,6 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectToOpenShiftWizard;
 
-import com.openshift.client.EnumApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
@@ -115,7 +114,7 @@ public class UserDelegate {
 	public IApplication createApplication(String applicationName, ICartridge applicationType)
 			throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
-			return delegate.getDefaultDomain().createApplication(applicationName, applicationType, EnumApplicationScale.DEFAULT, null);
+			return delegate.getDefaultDomain().createApplication(applicationName, applicationType);
 		}
 		return null;
 	}
