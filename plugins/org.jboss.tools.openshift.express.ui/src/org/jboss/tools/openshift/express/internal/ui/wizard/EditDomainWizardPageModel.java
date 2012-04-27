@@ -14,8 +14,10 @@ import java.net.SocketTimeoutException;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -57,6 +59,20 @@ public class EditDomainWizardPageModel extends ObservableUIPojo {
 			user.getDefaultDomain().rename(domainId);
 		} else {
 			Logger.warn("Attempting to rename missing user domain...");
+		}
+	}
+	
+	public boolean isCurrentDomainId(String domainId) {
+		IDomain domain;
+		try {
+			domain = user.getDefaultDomain();
+			if (domain == null) {
+				return false;
+			} 
+			return domain.getId().equals(domainId);
+		} catch (Exception e) {
+			OpenShiftUIActivator.log(e);
+			return true;
 		}
 	}
 }

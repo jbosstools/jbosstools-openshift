@@ -86,6 +86,9 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		@Override
 		protected IStatus validate() {
 			final String domainName = (String) domainNameObservable.getValue();
+			if (pageModel.isCurrentDomainId(domainName)) {
+				return ValidationStatus.cancel(getDescription());
+			}
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
 						"Enter a domain name with lower-case letters and digits only. Max length is 16 characters.");
