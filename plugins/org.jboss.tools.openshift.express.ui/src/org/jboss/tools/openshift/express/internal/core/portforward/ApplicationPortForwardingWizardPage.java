@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
+import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -85,6 +87,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		startButton.setEnabled(true);
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(startButton);
 		startButton.addSelectionListener(onStartPortForwarding());
+		
 
 		stopButton = new Button(container, SWT.PUSH);
 		stopButton.setText("Stop All");
@@ -93,11 +96,11 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		stopButton.addSelectionListener(onStopPortForwarding());
 
 		// checkbox to use the default "127.0.0.1" local IP address
-		Button useLocalIpAddressButton = new Button(container, SWT.CHECK);
-		useLocalIpAddressButton.setText("Use '127.0.0.1' as the local address for all ports");
-		GridDataFactory.fillDefaults().span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
+		final Button useLocalIpAddressButton = new Button(container, SWT.CHECK);
+		useLocalIpAddressButton.setText("Use '127.0.0.1' as the local address for all Services");
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
 				.applyTo(useLocalIpAddressButton);
-		IObservableValue useLocalIpAddressObservable = BeanProperties.value(
+		final IObservableValue useLocalIpAddressObservable = BeanProperties.value(
 				ApplicationPortForwardingWizardModel.PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS).observe(wizardModel);
 		final IObservableValue useLocalIpAddressButtonSelection = WidgetProperties.selection().observe(
 				useLocalIpAddressButton);
@@ -108,6 +111,36 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 				refreshViewerInput();
 			}
 		});
+
+		// checkbox to use the default "127.0.0.1" local IP address
+		final Button findFreesPortButton = new Button(container, SWT.CHECK);
+		findFreesPortButton.setText("Find free ports for all Services");
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
+				.applyTo(findFreesPortButton);
+		final IObservableValue findFreePortsButtonObservable = BeanProperties.value(
+				ApplicationPortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
+		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(
+				findFreesPortButton);
+		dbc.bindValue(findFreePortsButtonSelection, findFreePortsButtonObservable);
+		findFreePortsButtonObservable.addValueChangeListener(new IValueChangeListener() {
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				refreshViewerInput();
+			}
+		});
+		
+		// enabling/disabling controls
+		IObservableValue portForwardingStartedObservable = BeanProperties.value(
+				ApplicationPortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
+				.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(stopButton))
+				.notUpdating(portForwardingStartedObservable).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(useLocalIpAddressButton))
+				.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
+				.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+
 	}
 
 	/*
@@ -128,6 +161,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
+								verifyApplicationSSHSession();
 								wizardModel.refreshForwardablePorts();
 								refreshViewerInput();
 							} catch (Exception e) {
@@ -153,8 +187,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
 								verifyApplicationSSHSession();
-								wizardModel.getApplication().startPortForwarding();
-								wizardModel.getApplication().getForwardablePorts();
+								wizardModel.startPortForwarding();
 								refreshViewerInput();
 							} catch (Exception e) {
 								Logger.error("Failed to start port-forwarding", e);
@@ -187,7 +220,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
 								verifyApplicationSSHSession();
-								wizardModel.getApplication().stopPortForwarding();
+								wizardModel.stopPortForwarding();
 								refreshViewerInput();
 							} catch (Exception e) {
 								Logger.error("Failed to stop Port-forwarding", e);
@@ -233,7 +266,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 			@Override
 			public void update(ViewerCell cell) {
 				IApplicationPortForwarding port = (IApplicationPortForwarding) cell.getElement();
-				cell.setText(port.getLocalPort());
+				cell.setText(Integer.toString(port.getLocalPort()));
 			}
 		}, viewer, tableLayout);
 
@@ -249,7 +282,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 			@Override
 			public void update(ViewerCell cell) {
 				IApplicationPortForwarding port = (IApplicationPortForwarding) cell.getElement();
-				cell.setText(port.getRemotePort());
+				cell.setText(Integer.toString(port.getRemotePort()));
 			}
 		}, viewer, tableLayout);
 
@@ -260,7 +293,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 				IApplicationPortForwarding port = (IApplicationPortForwarding) cell.getElement();
 				try {
 					final boolean started = port.isStarted(wizardModel.getApplication().getSSHSession());
-					cell.setText(started ? "Enabled" : "Disabled");
+					cell.setText(started ? "Started" : "Stopped");
 				} catch (OpenShiftSSHOperationException e) {
 					cell.setText("Unknown");
 				}
@@ -295,10 +328,10 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						monitor.worked(1);
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load forwardable ports for application", e);
+						return OpenShiftUIActivator.createErrorStatus(
+								"Could not load forwardable ports for application", e);
 					}
 				}
-
 
 			}, getContainer(), getDataBindingContext());
 		} catch (Exception e) {
@@ -307,13 +340,14 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 	}
 
 	/**
-	 * @param monitor 
+	 * @param monitor
 	 * @throws JSchException
 	 */
+	//TODO : move this method into the WizardModel ?
 	private void verifyApplicationSSHSession() throws JSchException {
 		final boolean hasSSHSession = wizardModel.getApplication().hasSSHSession();
-		if(!hasSSHSession) {
-			Logger.info("Opening a new SSH Session for application '" + wizardModel.getApplication().getName() + "'");
+		if (!hasSSHSession) {
+			Logger.debug("Opening a new SSH Session for application '" + wizardModel.getApplication().getName() + "'");
 			final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
 					getSshUri(wizardModel.getApplication()));
 			wizardModel.getApplication().setSSHSession(session);
