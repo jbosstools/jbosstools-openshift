@@ -297,7 +297,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
 		dbc.bindSet(ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
-				BeanProperties.set(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDED_CARTRIDGES)
+				BeanProperties.set(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
 						.observe(pageModel));
 
 		this.checkAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
@@ -437,7 +437,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException,
 			SocketTimeoutException {
 		if (pageModel.hasApplicationOfType(ICartridge.JENKINS_14)) {
-			pageModel.getSelectedEmbeddedCartridges().add(cartridge);
+			pageModel.getSelectedEmbeddableCartridges().add(cartridge);
 		} else {
 			final JenkinsApplicationDialog dialog = new JenkinsApplicationDialog(getShell());
 			if (dialog.open() == Dialog.OK) {
@@ -455,7 +455,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						IApplication jenkinsApplication = pageModel.createJenkinsApplication(name, monitor);
-						pageModel.getSelectedEmbeddedCartridges().add(cartridge);
+						pageModel.getSelectedEmbeddableCartridges().add(cartridge);
 						openLogDialog(jenkinsApplication);
 						return Status.OK_STATUS;
 					} catch (Exception e) {
@@ -486,16 +486,16 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				viewer.setChecked(cartridge, false);
 			}
 		} else {
-			pageModel.getSelectedEmbeddedCartridges().add(cartridge);
+			pageModel.getSelectedEmbeddableCartridges().add(cartridge);
 		}
 	}
 
 	private void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		pageModel.getSelectedEmbeddedCartridges().add(cartridge);
+		pageModel.getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
 	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		Set<IEmbeddableCartridge> checkedCartridges = pageModel.getSelectedEmbeddedCartridges();
+		Set<IEmbeddableCartridge> checkedCartridges = pageModel.getSelectedEmbeddableCartridges();
 		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
 					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
@@ -511,7 +511,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	private void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		pageModel.getSelectedEmbeddedCartridges().remove(cartridge);
+		pageModel.getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
 	private SelectionListener onCheckAll() {
