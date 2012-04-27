@@ -4,15 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.views.IViewDescriptor;
-import org.eclipse.ui.views.IViewRegistry;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 
