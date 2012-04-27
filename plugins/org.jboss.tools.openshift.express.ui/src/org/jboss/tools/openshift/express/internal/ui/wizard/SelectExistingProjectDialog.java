@@ -35,7 +35,8 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		super(shell, new ProjectLabelProvider());
 		setTitle("Select Existing Project");
 		setMessage(NLS.bind(
-				"Select an existing project for {0}.\nOnly Dynamic Web/Eclipse WTP projects can be used.",
+//				"Select an existing project for {0}.\nOnly Dynamic Web/Eclipse WTP projects can be used.",
+				"Select an existing project for {0}.\nOnly Git shared projects can be used.",
 				openShiftAppName));
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
@@ -59,9 +60,10 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 			}
 		}
 
-		if (!hasModuleNature(project)) {
-			return false;
-		}
+// we now accept all projects, not just WTP
+//		if (!hasModuleNature(project)) {
+//			return false;
+//		}
 
 		return true;
 	}
