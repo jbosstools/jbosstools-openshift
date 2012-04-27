@@ -16,9 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
@@ -38,11 +41,12 @@ import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IOpenShiftExpressWizardModel;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -54,19 +58,31 @@ import com.openshift.client.OpenShiftException;
  */
 @SuppressWarnings("restriction")
 public class ExpressServerUtils {
+	/* Server Settings */
 	public static final String ATTRIBUTE_EXPRESS_MODE = "org.jboss.tools.openshift.express.internal.core.behaviour.ExpressMode";
 	public static final String EXPRESS_BINARY_MODE =  "publishBinary";
 	public static final String EXPRESS_SOURCE_MODE =  "publishSource";
+	public static final String ATTRIBUTE_DEPLOY_PROJECT =  "org.jboss.tools.openshift.binary.deployProject";
+	
+	/* Legacy Server Settings: Please usage scan before removal */
+	public static final String ATTRIBUTE_DEPLOY_PROJECT_LEGACY =  "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";
+	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
 	public static final String ATTRIBUTE_APPLICATION_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";
 	public static final String ATTRIBUTE_APPLICATION_ID =  "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";
-	public static final String ATTRIBUTE_DEPLOY_PROJECT =  "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";
 	public static final String ATTRIBUTE_DOMAIN =  "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
 	public static final String ATTRIBUTE_USERNAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
 	public static final String ATTRIBUTE_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.DEPLOY_FOLDER_LOC";
-	
+
+	/* New Settings inside the project */
+	public static final String SETTING_REMOTE_NAME =  "org.jboss.tools.openshift.RemoteName";
+	public static final String SETTING_APPLICATION_NAME =  "org.jboss.tools.openshift.ApplicationName";
+	public static final String SETTING_APPLICATION_ID =  "org.jboss.tools.openshift.ApplicationId";
+	public static final String SETTING_DOMAIN =  "org.jboss.tools.openshift.Domain";
+	public static final String SETTING_USERNAME =  "org.jboss.tools.openshift.Username";
+	public static final String SETTING_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.DeployFolder";
+
 	// Legacy, not to be used
 	//public static final String ATTRIBUTE_PASSWORD =  "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
-	public static final String ATTRIBUTE_REMOTE_NAME =  "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT =  "origin";
 	public static final String ATTRIBUTE_DEPLOY_FOLDER_DEFAULT = "deployments";
 	
@@ -81,81 +97,55 @@ public class ExpressServerUtils {
 	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
 	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
 	
-	
-	public static String getExpressMode(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_EXPRESS_MODE, EXPRESS_SOURCE_MODE);
-	}
-	
-	public static String getExpressModeAsString(IServerAttributes attributes) {
-		String mode = getExpressMode(attributes);
-		if( mode.equals(EXPRESS_SOURCE_MODE))
-			return "Source";
-		return "Binary";
-	}
-	
-	public static IServer setExpressMode(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, val);
-		return wc.save(false, new NullProgressMonitor());
-	}
-	
-	public static String getExpressApplicationName(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String)null);
-	}
-
-	public static IServer setExpressApplication(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, val);
-		return wc.save(false, new NullProgressMonitor());
-	}
-
 	public static String getExpressDeployProject(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_DEPLOY_PROJECT, (String)null);
+		return attributes.getAttribute(ATTRIBUTE_DEPLOY_PROJECT, 
+				attributes.getAttribute(ATTRIBUTE_DEPLOY_PROJECT_LEGACY, (String)null));
 	}
-	public static IServer setExpressDeployProject(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, val);
-		return wc.save(false, new NullProgressMonitor());
+
+	private static IProject getExpressDeployProject2(IServerAttributes attributes) {
+		String name = getExpressDeployProject(attributes);
+		return name == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+	}
+	
+	public static String getProjectAttribute(IProject project, String attributeName, String defaultVal) {
+		if( project == null )
+			return defaultVal;
+		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
+		IScopeContext context = new ProjectScope(project);
+		IEclipsePreferences node = context.getNode(qualifier);
+		return node.get(attributeName, defaultVal);
+	}
+
+	public static String getExpressApplicationName(IServerAttributes attributes ) {
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_APPLICATION_NAME, 
+				attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String)null));
 	}
 
 	public static String getExpressApplicationId(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String)null);
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_APPLICATION_ID, 
+				attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String)null));
 	}
 
 	public static String getExpressDomain(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_DOMAIN, (String)null);
-	}
-
-	public static IServer setExpressDomain(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_DOMAIN, val);
-		return wc.save(false, new NullProgressMonitor());
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DOMAIN, 
+				attributes.getAttribute(ATTRIBUTE_DOMAIN, (String)null));
 	}
 
 	public static String getExpressDeployFolder(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DEPLOY_FOLDER_NAME, 
+				attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, (String)null));
 	}
 	
 	public static String getExpressRemoteName(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
-	}
-
-	public static IServer setExpressRemoteName(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
-		return wc.save(false, new NullProgressMonitor());
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_REMOTE_NAME, 
+				attributes.getAttribute(ATTRIBUTE_REMOTE_NAME,(String)null));
 	}
 
 	public static String getExpressUsername(IServerAttributes attributes ) {
-		return attributes.getAttribute(ATTRIBUTE_USERNAME, (String)null);
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_USERNAME, 
+				attributes.getAttribute(ATTRIBUTE_USERNAME, (String)null));
 	}
 
-	public static IServer setExpressUsername(IServer server, String val) throws CoreException {
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		wc.setAttribute(ATTRIBUTE_USERNAME, val);
-		return wc.save(false, new NullProgressMonitor());
-	}
-	
 	public static boolean getIgnoresContextRoot(IServerAttributes server) {
 		return server.getAttribute(PREFERENCE_IGNORE_CONTEXT_ROOT, true);
 	}
@@ -164,27 +154,6 @@ public class ExpressServerUtils {
 		IServerWorkingCopy wc = server.createWorkingCopy();
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
 		return wc.save(false, new NullProgressMonitor());
-	}
-	
-	/*
-	public static IServer fillServerWithOpenShiftDetails(IServer server, IApplication application, 
-			IUser user, String deployProject, String projectRelativeFolder,
-			String mode, String remoteName) throws CoreException, OpenShiftException {
-		return fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
-				user.getRhlogin(), user.getPassword(), user.getDomain().getNamespace(), 
-				application.getName(), application.getUUID(), deployProject, projectRelativeFolder, mode, remoteName);
-	}*/
-	
-	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, IApplication application, 
-			UserDelegate user, IDomain domain, String mode, String deployProject, 
-			String projectRelativeFolder, String remoteName) throws OpenShiftException {
-		fillServerWithOpenShiftDetails(wc, 
-				application == null ? null : application.getApplicationUrl(),
-				user == null ? null : user.getRhlogin(), 
-				domain == null ? null : domain.getId(), 
-				application == null ? null : application.getName(), 
-				application == null ? null : application.getUUID(), 
-				deployProject, projectRelativeFolder, mode, remoteName);
 	}
 
 	/**
@@ -202,20 +171,16 @@ public class ExpressServerUtils {
 	 */
 	@SuppressWarnings("restriction")
 	public static IServer fillServerWithOpenShiftDetails(IServer server, String host, 
-			String username, String password, String domain, String appName, String appId,
-			String deployProject, String projectRelativeFolder,
-			String mode, String remoteName) throws CoreException {
+			String deployProject) throws CoreException {
 		ServerWorkingCopy wc = (ServerWorkingCopy)server.createWorkingCopy();
-		fillServerWithOpenShiftDetails(wc, host, username, domain, appName, appId, 
-				deployProject, projectRelativeFolder, mode, remoteName);
+		fillServerWithOpenShiftDetails((IServerWorkingCopy)wc, host, deployProject);
 		IServer saved = wc.save(true, new NullProgressMonitor());
 		return saved;
 	}
 	
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host, 
-			String username, String domain, String appName, String appId, 
-			String deployProject, String projectRelativeFolder,
-			String mode, String remoteName)  {
+			String deployProject)  {
+
 		if( host != null ) {
 			if( host.indexOf("://") != -1)
 				host = host.substring(host.indexOf("://") + 3);
@@ -224,14 +189,14 @@ public class ExpressServerUtils {
 		}
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
-		wc.setAttribute(ATTRIBUTE_USERNAME, username);
-		wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
-		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
-		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
-		wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, projectRelativeFolder);
-		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
-		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remoteName);
+//		wc.setAttribute(ATTRIBUTE_USERNAME, username);
+//		wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
+//		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
+//		wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
+//		wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, projectRelativeFolder);
+//		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
+//		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remoteName);
 		((ServerWorkingCopy)wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
 		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
@@ -352,4 +317,67 @@ public class ExpressServerUtils {
 			return null;
 		}
 	}
+	
+	public static void updateOpenshiftProjectSettings(IProject project, IApplication app, UserDelegate user, 
+			String remoteName, String deployFolder) {
+		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
+		IScopeContext context = new ProjectScope(project);
+		IEclipsePreferences node = context.getNode(qualifier);
+		node.put(ExpressServerUtils.SETTING_APPLICATION_ID, app.getUUID());
+		node.put(ExpressServerUtils.SETTING_APPLICATION_NAME, app.getName());
+		node.put(ExpressServerUtils.SETTING_USERNAME, user.getRhlogin());
+		node.put(ExpressServerUtils.SETTING_DOMAIN, app.getDomain().getId());
+		node.put(ExpressServerUtils.SETTING_REMOTE_NAME, remoteName);
+		node.put(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);
+		try {
+			node.flush();
+		} catch (BackingStoreException e) {
+			OpenShiftUIActivator.log(e);
+		}
+	}
+	
+	
+	/* Deprecated */
+	public static IServer setExpressMode(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+	public static IServer setExpressApplication(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+	public static IServer setExpressDeployProject(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+	public static IServer setExpressDomain(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_DOMAIN, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+	public static IServer setExpressUsername(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_USERNAME, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+	
+	public static IServer setExpressRemoteName(IServer server, String val) throws CoreException {
+		IServerWorkingCopy wc = server.createWorkingCopy();
+		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
+		return wc.save(false, new NullProgressMonitor());
+	}
+	public static String getExpressMode(IServerAttributes attributes ) {
+		return attributes.getAttribute(ATTRIBUTE_EXPRESS_MODE, EXPRESS_SOURCE_MODE);
+	}
+	
+	public static String getExpressModeAsString(IServerAttributes attributes) {
+		String mode = getExpressMode(attributes);
+		if( mode.equals(EXPRESS_SOURCE_MODE))
+			return "Source";
+		return "Binary";
+	}
+
 }

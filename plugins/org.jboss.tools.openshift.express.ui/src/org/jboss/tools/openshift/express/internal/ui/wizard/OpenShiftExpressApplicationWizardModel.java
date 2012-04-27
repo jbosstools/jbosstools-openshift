@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -14,25 +15,31 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
+import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ServerAdapterFactory;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
@@ -87,7 +94,25 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 						, getRemoteName()
 						, getRepositoryFile())
 						.execute(monitor);
+		addSettingsFiles(importedProjects);
 		createServerAdapter(monitor, importedProjects);
+	}
+	
+	private void addSettingsFiles(List<IProject> imported) {
+		Iterator<IProject> i = imported.iterator();
+		while(i.hasNext()) {
+			IProject p = i.next();
+			if( p.getFolder(".git").exists()) {
+				// This is our project
+				IApplication app = getApplication();
+				IProject project = p;
+				// Add the settings here!
+				ExpressServerUtils.updateOpenshiftProjectSettings(project, app,
+						getUser(), getRemoteName(), 
+						ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+				return;
+			}
+		}
 	}
 	
 	/**

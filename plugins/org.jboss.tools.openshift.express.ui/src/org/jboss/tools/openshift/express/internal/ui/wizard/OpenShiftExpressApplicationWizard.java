@@ -15,10 +15,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -150,11 +154,10 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		if (success) {
 			success = importProject();
 		}
-
 		wizardModel.addUserToModel();
 		return success;
 	}
-
+	
 	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();

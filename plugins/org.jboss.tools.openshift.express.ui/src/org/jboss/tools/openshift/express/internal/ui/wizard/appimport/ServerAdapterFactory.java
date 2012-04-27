@@ -114,10 +114,8 @@ public class ServerAdapterFactory {
 		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);
 
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(server, application.getApplicationUrl(),
-				user.getRhlogin(), user.getPassword(), user.getDefaultDomain().getId(), 
-				application.getName(), application.getUUID(), deployProject, 
-				ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT, mode, remoteName);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(server, 
+				application.getApplicationUrl(), deployProject);
 		return server;
 	}
 	

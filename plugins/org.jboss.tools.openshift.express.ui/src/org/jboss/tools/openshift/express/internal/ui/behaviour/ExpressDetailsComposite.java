@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
@@ -114,11 +115,16 @@ public class ExpressDetailsComposite {
 		this.composite = fill;
 		this.showVerify = showVerify;
 		this.showImportLink = showVerify;
-		initModel();
-		createWidgets(fill);
-		fillWidgets();
-		addListeners();
-		quickValidate();
+		try {
+			initModel();
+			createWidgets(fill);
+			fillWidgets();
+			addListeners();
+			quickValidate();
+		} catch(RuntimeException e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	public Composite getComposite() {
@@ -168,7 +174,9 @@ public class ExpressDetailsComposite {
 		
 		this.pass = this.user == null ? null : UserModel.getDefault().getPasswordFromSecureStorage(this.user);
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
+		this.deployFolder = this.deployFolder == null ? ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT : this.deployFolder;
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+		this.remote = this.remote == null ? ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT : this.remote;
 	}
 	
 	/* Set widgets initial values */
@@ -268,10 +276,16 @@ public class ExpressDetailsComposite {
 			GridData gd = GridDataFactory.fillDefaults().span(2, 1).create();
 			importLink.setLayoutData(gd);
 		}
-		Label zipDestLabel = new Label(composite, SWT.NONE);
+		
+		
+		Group projectSettings = new Group(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2,1).applyTo(projectSettings);
+		projectSettings.setLayout(new GridLayout(2, false));
+		
+		Label zipDestLabel = new Label(projectSettings, SWT.NONE);
 		zipDestLabel.setText("Output Directory: ");
 		
-		Composite zipDestComposite = new Composite(composite, SWT.NONE);
+		Composite zipDestComposite = new Composite(projectSettings, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
 		browseDestButton = new Button(zipDestComposite, SWT.PUSH);
@@ -282,12 +296,13 @@ public class ExpressDetailsComposite {
 		
 		
 		
-		Label remoteLabel = new Label(composite, SWT.NONE);
+		Label remoteLabel = new Label(projectSettings, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
-		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+		remoteText = new Text(projectSettings, SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
 
 		// Text
+		projectSettings.setText("Project Settings");
 		userLabel.setText("Username: ");
 		if( passLabel != null ) passLabel.setText("Password: ");
 		remoteLabel.setText("Remote: ");
@@ -392,8 +407,40 @@ public class ExpressDetailsComposite {
 				}
 			});
 		}
+		
+		deployProjectCombo.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				deployProjectChanged();
+			}
+		});
 	}
 
+	private void deployProjectChanged() {
+		System.out.println("HEEEEEEEEEEY!");
+		int i = deployProjectCombo.getSelectionIndex();
+		if( i != -1 ) {
+			IProject depProj = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
+			if( depProj != null && depProj.isAccessible() ) {
+				String remote = ExpressServerUtils.getProjectAttribute(depProj, 
+						ExpressServerUtils.SETTING_REMOTE_NAME, null);
+						//ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+				String depFolder = ExpressServerUtils.getProjectAttribute(depProj, 
+						ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null); 
+						//ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+				if( remote == null ) {
+					remoteText.setText(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+				}
+				if( depFolder == null )
+					deployFolderText.setText(ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+				
+				boolean enabled = remote == null && depFolder == null;
+				remoteText.setEnabled(enabled);
+				deployFolderText.setEnabled(enabled);
+				browseDestButton.setEnabled(enabled);
+			}
+		}
+	}
+	
 	private void browsePressed() {
 		IFolder f = chooseFolder();
 		if( f != null ) {
@@ -569,6 +616,7 @@ public class ExpressDetailsComposite {
 				UserModel.getDefault().clearPasswordInSecureStorage(fuser.getRhlogin());
 			}
 			fillServerWithDetails();
+			updateProjectSettings();
 		} catch(OpenShiftException ose) {
 			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, ose.getMessage(), ose));
 		}
@@ -577,8 +625,21 @@ public class ExpressDetailsComposite {
 		// Fill the server working copy
 		// update the values
 		IServerWorkingCopy wc = callback.getServer();
-		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, fapplication, 
-				fuser, fdomain, mode, deployProject, deployFolder, remote);
+		String host = fapplication == null ? null : fapplication.getApplicationUrl();
+		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProject);
+	}
+	
+	private void updateProjectSettings() {
+		IProject depProj = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
+
+		String projRemote = ExpressServerUtils.getProjectAttribute(depProj, 
+				ExpressServerUtils.SETTING_REMOTE_NAME, null);
+		String projDepFolder = ExpressServerUtils.getProjectAttribute(depProj, 
+				ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null); 
+		if( projRemote == null && projDepFolder == null ) {
+			ExpressServerUtils.updateOpenshiftProjectSettings(
+					depProj, fapplication, fuser, remote, deployFolder);
+		}
 	}
 
 	private String[] getAppNamesAsStrings(List<IApplication> allApps) {
