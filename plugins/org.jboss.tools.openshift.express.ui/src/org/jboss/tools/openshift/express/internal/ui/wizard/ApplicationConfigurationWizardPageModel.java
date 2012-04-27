@@ -39,7 +39,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
-	public static final String PROPERTY_SELECTED_EMBEDDED_CARTRIDGES = "selectedEmbeddedCartridges";
+	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
@@ -315,7 +315,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return embeddedCartridges;
 	}
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddedCartridges() throws OpenShiftException {
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
@@ -324,7 +324,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDED_CARTRIDGES,
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES,
 				wizardModel.getSelectedEmbeddableCartridges(),
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
 	}
