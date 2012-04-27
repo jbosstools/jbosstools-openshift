@@ -194,7 +194,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 								wizardModel.startPortForwarding();
 								refreshViewerInput();
 							} catch (Exception e) {
-								Logger.error("Failed to start port-forwarding", e);
+								return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding.", e);
 							}
 							return Status.OK_STATUS;
 						}
@@ -227,7 +227,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 								wizardModel.stopPortForwarding();
 								refreshViewerInput();
 							} catch (Exception e) {
-								Logger.error("Failed to stop Port-forwarding", e);
+								return OpenShiftUIActivator.createErrorStatus("Failed to stop port-forwarding.", e);
 							}
 							return Status.OK_STATUS;
 						}
