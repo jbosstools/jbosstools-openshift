@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -18,7 +19,9 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.OpenShiftSSHOperationException;
 
 /**
  * @author Xavier Coulon
@@ -43,7 +46,7 @@ public class ApplicationPropertySource implements IPropertySource {
 				new PropertyDescriptor("6.UUID", "UUID"), 
 				new PropertyDescriptor("5.Git URI", "Git URI"), 
 				new PropertyDescriptor("2.Type", "Type"), 
-				new PropertyDescriptor("4.Created on", "Created on") };
+				new PropertyDescriptor("4.Created on", "Created on"), new PropertyDescriptor("7.Port Forward", "Port Forward") }; 
 	}
 
 	@Override
@@ -67,6 +70,18 @@ public class ApplicationPropertySource implements IPropertySource {
 		}
 		if (id.equals("5.Git URI")) {
 			return application.getGitUrl();
+		}
+		if(id.equals("7.Port Forward")) {
+			try {
+				StringBuffer bf = new StringBuffer();
+				List<IApplicationPortForwarding> forwardablePorts = application.getForwardablePorts();
+				for (IApplicationPortForwarding iApplicationPortForwarding : forwardablePorts) {
+					bf.append(iApplicationPortForwarding);
+				}
+				return bf.toString();
+			} catch (OpenShiftSSHOperationException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return null;

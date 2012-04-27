@@ -157,7 +157,8 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				// Get the actual children, with the delay
 				loadingUsers.add(user);
 				try {
-					getChildrenForElement(user, false);
+					getChildrenForElement(user, Boolean.valueOf(System.getProperty("org.jboss.tools.openshift.express.ui.eagerloading", "true"))); // JBIDE-11680 false = fast, but blocks ui while loading cartridges, true = slow, but no blocking since cartridges is forced loaded.
+
 				} catch(OpenShiftException e) {
 					errors.put(user, e);
 				} catch(SocketTimeoutException e) {
