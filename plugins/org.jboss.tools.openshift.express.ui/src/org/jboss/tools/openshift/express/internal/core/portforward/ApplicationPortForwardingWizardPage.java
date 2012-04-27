@@ -60,6 +60,11 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 	}
 
 	@Override
+	public boolean isPageComplete() {
+		return true;
+	}
+
+	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(parent);
 		Composite container = new Composite(parent, SWT.NONE);
@@ -87,7 +92,6 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		startButton.setEnabled(true);
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(startButton);
 		startButton.addSelectionListener(onStartPortForwarding());
-		
 
 		stopButton = new Button(container, SWT.PUSH);
 		stopButton.setText("Stop All");
@@ -119,8 +123,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 				.applyTo(findFreesPortButton);
 		final IObservableValue findFreePortsButtonObservable = BeanProperties.value(
 				ApplicationPortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
-		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(
-				findFreesPortButton);
+		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(findFreesPortButton);
 		dbc.bindValue(findFreePortsButtonSelection, findFreePortsButtonObservable);
 		findFreePortsButtonObservable.addValueChangeListener(new IValueChangeListener() {
 			@Override
@@ -128,7 +131,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 				refreshViewerInput();
 			}
 		});
-		
+
 		// enabling/disabling controls
 		IObservableValue portForwardingStartedObservable = BeanProperties.value(
 				ApplicationPortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
@@ -343,7 +346,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 	 * @param monitor
 	 * @throws JSchException
 	 */
-	//TODO : move this method into the WizardModel ?
+	// TODO : move this method into the WizardModel ?
 	private void verifyApplicationSSHSession() throws JSchException {
 		final boolean hasSSHSession = wizardModel.getApplication().hasSSHSession();
 		if (!hasSSHSession) {
