@@ -46,7 +46,7 @@ public class ApplicationPropertySource implements IPropertySource {
 				new PropertyDescriptor("6.UUID", "UUID"), 
 				new PropertyDescriptor("5.Git URI", "Git URI"), 
 				new PropertyDescriptor("2.Type", "Type"), 
-				new PropertyDescriptor("4.Created on", "Created on"), new PropertyDescriptor("7.Port Forward", "Port Forward") }; 
+				new PropertyDescriptor("4.Created on", "Created on"), new PropertyDescriptor("7.Port Forwarding", "Port Forwarding") }; 
 	}
 
 	@Override
@@ -71,16 +71,19 @@ public class ApplicationPropertySource implements IPropertySource {
 		if (id.equals("5.Git URI")) {
 			return application.getGitUrl();
 		}
-		if(id.equals("7.Port Forward")) {
+		if(id.equals("7.Port Forwarding")) {
 			try {
 				StringBuffer bf = new StringBuffer();
-				List<IApplicationPortForwarding> forwardablePorts = application.getForwardablePorts();
-				for (IApplicationPortForwarding iApplicationPortForwarding : forwardablePorts) {
-					bf.append(iApplicationPortForwarding);
+				boolean portFowardingStarted = application.isPortFowardingStarted();
+				
+				if (portFowardingStarted == true) {
+					return bf.append("Yes");
+				} else if (portFowardingStarted == false) {
+					return	bf.append("No");
 				}
-				return bf.toString();
+				
 			} catch (OpenShiftSSHOperationException e) {
-				e.printStackTrace();
+				return "Unknown"; //e.printStackTrace();
 			}
 		}
 
