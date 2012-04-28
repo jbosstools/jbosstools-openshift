@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,11 +33,11 @@ import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.openshift.client.IApplication;
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.OpenShiftSSHOperationException;
 
@@ -224,14 +223,6 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		};
 	}
 
-	static URIish getSshUri(IApplication application) {
-		final String host = application.getName() + "-" + application.getDomain().getId() + "."
-				+ application.getDomain().getSuffix();
-		final String user = application.getUUID();
-		final URIish uri = new URIish().setHost(host).setPort(22).setUser(user);
-		return uri;
-	}
-
 	private SelectionListener onStopPortForwarding() {
 		return new SelectionAdapter() {
 			@Override
@@ -371,7 +362,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		if (!hasSSHSession) {
 			Logger.debug("Opening a new SSH Session for application '" + wizardModel.getApplication().getName() + "'");
 			final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
-					getSshUri(wizardModel.getApplication()));
+					wizardModel.getApplication());
 			wizardModel.getApplication().setSSHSession(session);
 		}
 	}

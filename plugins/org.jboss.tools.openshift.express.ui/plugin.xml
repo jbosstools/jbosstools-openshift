@@ -491,7 +491,18 @@
               </or>
            </enablement>
         </actionProvider>
-        
+        <actionProvider
+              appearsBefore="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.showPropertiesActionProvider"
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ShowEnvironmentActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.showEnvironmentActionProvider">
+           <enablement>
+              <or>
+                 <instanceof
+                       value="com.openshift.client.IApplication">
+                 </instanceof>
+              </or> 
+           </enablement>
+        </actionProvider>
      </extension>
      
      <extension

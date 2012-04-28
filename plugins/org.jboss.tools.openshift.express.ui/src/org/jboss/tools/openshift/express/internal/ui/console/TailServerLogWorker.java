@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.express.internal.ui.action;
+package org.jboss.tools.openshift.express.internal.ui.console;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

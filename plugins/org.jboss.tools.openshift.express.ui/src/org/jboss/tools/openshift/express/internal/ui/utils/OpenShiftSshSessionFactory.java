@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.portforward;
+package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +30,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+import com.openshift.client.IApplication;
 
 /**
  * Same as EclipseSshSessinFactory, but provides a mean to retrieve the pure Jsch Session, not a RemoteSession.
@@ -65,7 +66,8 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 		this.provider = (IJSchService) context.getService(ssh);
 	}
 
-	public Session createSession(final URIish uri) throws JSchException {
+	public Session createSession(final IApplication application) throws JSchException {
+		final URIish uri = getSshUri(application);
 		final Session session = cache.get(uri);
 		if (session == null || !session.isConnected()) {
 			final FS fs = FS.DETECTED;
@@ -82,6 +84,14 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 		return cache.get(uri);
 	}
 
+	static URIish getSshUri(IApplication application) {
+		final String host = application.getName() + "-" + application.getDomain().getId() + "."
+				+ application.getDomain().getSuffix();
+		final String user = application.getUUID();
+		final URIish uri = new URIish().setHost(host).setPort(22).setUser(user);
+		return uri;
+	}
+	
 	@Override
 	protected Session createSession(final OpenSshConfig.Host hc, final String user, final String host, final int port,
 			FS fs) throws JSchException {
