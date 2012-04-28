@@ -217,10 +217,10 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	protected IFile setupGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
 		GitIgnore gitIgnore = new GitIgnore(project);
 		gitIgnore.add("target")
-				.add(".settings")
+				.add(".settings/*")
+				.add("!.settings/.jsdtscope")//To prevent nasty JSDT bugs
 				.add(".project")
-				.add(".classpath")
-				.add(".factorypath");
+				.add(".classpath");
 		return gitIgnore.write(monitor);
 	}
 

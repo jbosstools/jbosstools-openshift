@@ -94,7 +94,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		IProject project = getProject();
 
 		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
-		createGitIgnore(project, monitor);
+		setupGitIgnore(project, monitor);
 		setupOpenShiftMavenProfile(project, monitor);
 		shareProject(project, monitor);
 		addRemoteRepo(getRemoteName(), getApplication().getGitUrl(), EGitUtils.getRepository(project));
@@ -148,25 +148,6 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 
 		FileUtil.safeDelete(tmpFolder);
 
-	}
-
-	/**
-	 * Adds a predefined set of entries to the gitignore file in (root of) the
-	 * given project. If no .gitignore exists yet, a fresh one is created.
-	 * 
-	 * @param project
-	 *            the project to which the .gitignore shall be configured
-	 * @throws IOException
-	 * @throws CoreException
-	 */
-	private void createGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
-		GitIgnore gitIgnore = new GitIgnore(project);
-		gitIgnore.add("target")
-				.add(".settings")
-				.add(".project")
-				.add(".classpath")
-				.add(".factorypath");
-		gitIgnore.write(monitor);
 	}
 
 	// private void mergeWithApplicationRepository(Repository repository,
