@@ -305,17 +305,18 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.to(selectedGearProfileModelObservable)
 				.converting(new GearProfileToStringConverter())
 				.in(dbc);
-		
+
 		// scaling
 		this.enableScalingButton = new Button(newAppConfigurationGroup, SWT.CHECK);
 		enableScalingButton.setText("Enable scaling");
 		IObservableValue enableScalingModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_SCALE).observe(pageModel);
 		final IObservableValue enableScalingButtonSelection = WidgetProperties.selection().observe(enableScalingButton);
-		ValueBindingBuilder.bind(enableScalingButtonSelection).converting(new BooleanToApplicationScaleConverter())
-				.to(enableScalingModelObservable).converting(new ApplicationScaleToBooleanConverter()).in(dbc);
-		
-		
+		ValueBindingBuilder
+				.bind(enableScalingButtonSelection).converting(new BooleanToApplicationScaleConverter())
+				.to(enableScalingModelObservable).converting(new ApplicationScaleToBooleanConverter())
+				.in(dbc);
+
 		// embeddable cartridges
 		this.newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
 		newAppEmbeddableCartridgesGroup.setText("Embeddable Cartridges");
@@ -411,7 +412,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
 				new UpdateListStrategy().setConverter(new GearProfileToStringConverter()));
 	}
-	
+
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
@@ -619,7 +620,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return null;
 		}
 	}
-	
+
 	private static final class GearProfileToStringConverter extends Converter {
 		private GearProfileToStringConverter() {
 			super(Object.class, String.class);
@@ -647,7 +648,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return null;
 		}
 	}
-	
+
 	private static final class ApplicationScaleToBooleanConverter extends Converter {
 		private ApplicationScaleToBooleanConverter() {
 			super(Object.class, Boolean.class);
@@ -658,7 +659,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			if (!(fromObject instanceof ApplicationScale)) {
 				return null;
 			}
-			switch((ApplicationScale)fromObject) {
+			switch ((ApplicationScale) fromObject) {
 			case SCALE:
 				return Boolean.TRUE;
 			default:
@@ -680,8 +681,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return null;
 		}
 	}
-	
-	
+
 	private static class JenkinsApplicationDialog extends InputDialog {
 
 		public JenkinsApplicationDialog(Shell shell) {
