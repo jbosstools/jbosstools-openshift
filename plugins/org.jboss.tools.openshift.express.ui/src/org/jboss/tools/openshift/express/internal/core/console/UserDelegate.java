@@ -29,8 +29,11 @@ import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IOpenShiftSSHKey;
+import com.openshift.client.ISSHPublicKey;
 import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
 
 public class UserDelegate {
 	private IUser delegate;
@@ -232,4 +235,13 @@ public class UserDelegate {
 	public void setConnected(boolean connected) {
 		this.connected = connected;
 	}
+
+	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws SocketTimeoutException, OpenShiftUnknonwSSHKeyTypeException, OpenShiftException {
+		return delegate.getSSHKeyByPublicKey(publicKey);
+	}
+	
+	public IOpenShiftSSHKey putSSHKey(String name, ISSHPublicKey key) throws OpenShiftException, SocketTimeoutException {
+		return delegate.putSSHKey(name, key);
+	}
+	
 }
