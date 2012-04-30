@@ -48,8 +48,6 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 
 	private IUserAwareModel wizardModel;
 
-	private OpenShiftPasswordStorageKey key;
-	
 	public CredentialsWizardPageModel(IUserAwareModel wizardModel) {
 		this.wizardModel = wizardModel;
 		this.rhLoginPreferenceValue = new StringPreferenceValue(RHLOGIN_PREFS_KEY, OpenShiftUIActivator.PLUGIN_ID);
