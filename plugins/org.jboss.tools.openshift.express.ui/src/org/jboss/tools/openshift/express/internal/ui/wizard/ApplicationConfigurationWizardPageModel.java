@@ -341,6 +341,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
 			setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(application.getEmbeddedCartridges()));
+			setSelectedGearProfile(application.getGearProfile());
 			wizardModel.setApplication(application);
 		}
 	}
