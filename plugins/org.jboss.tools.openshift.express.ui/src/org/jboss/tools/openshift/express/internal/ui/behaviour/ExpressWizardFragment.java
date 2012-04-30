@@ -30,7 +30,6 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	private NewServerWizardBehaviourCallback  callback;
 	
 	public ExpressWizardFragment() {
-		System.out.println("NEW FRAGMENT");
 	}
 	
 	public boolean hasComposite() {
@@ -61,7 +60,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
 		this.composite = new ExpressDetailsComposite(
-				composite, callback,ExpressServerUtils.EXPRESS_SOURCE_MODE, true);
+				composite, callback, true);
 		return this.composite.getComposite();
 	}
 		

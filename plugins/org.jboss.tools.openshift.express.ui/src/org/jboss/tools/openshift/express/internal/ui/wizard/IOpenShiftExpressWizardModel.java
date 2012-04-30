@@ -23,7 +23,6 @@ import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -52,9 +51,6 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 	public static final String MERGE_URI = "mergeUri";
 	public static final String RUNTIME_DELEGATE = "runtimeDelegate";
 	public static final String CREATE_SERVER_ADAPTER = "createServerAdapter";
-	public static final String PUBLICATION_MODE = "serverMode";
-	public static final String PUBLISH_SOURCE = ExpressServerUtils.EXPRESS_SOURCE_MODE;
-	public static final String PUBLISH_BINARY = ExpressServerUtils.EXPRESS_BINARY_MODE;
 	public static final String SERVER_TYPE = "serverType";
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
@@ -182,8 +178,6 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 	public String getMergeUri();
 
 	public IRuntime getRuntime();
-
-	public String getMode();
 
 	public boolean isCreateServerAdapter();
 

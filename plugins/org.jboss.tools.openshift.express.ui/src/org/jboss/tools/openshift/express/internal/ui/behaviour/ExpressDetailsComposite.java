@@ -104,14 +104,12 @@ public class ExpressDetailsComposite {
 	private List<IApplication> appList;
 	private String[] appListNames;
 	private IServerWorkingCopy server;
-	private String mode;
 	private HashMap<IApplication, IProject[]> projectsPerApp = new HashMap<IApplication, IProject[]>();
 	private boolean credentialsFailed = false;
 	
-	public ExpressDetailsComposite(Composite fill, IServerModeUICallback callback, String mode, boolean showVerify) {
+	public ExpressDetailsComposite(Composite fill, IServerModeUICallback callback, boolean showVerify) {
 		this.callback = callback;
 		this.server = callback.getServer();
-		this.mode = mode;
 		this.composite = fill;
 		this.showVerify = showVerify;
 		this.showImportLink = showVerify;
@@ -277,6 +275,10 @@ public class ExpressDetailsComposite {
 			importLink.setLayoutData(gd);
 		}
 		
+		Label remoteLabel = new Label(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
+		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
 		
 		Group projectSettings = new Group(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2,1).applyTo(projectSettings);
@@ -293,13 +295,6 @@ public class ExpressDetailsComposite {
 		browseDestButton.setLayoutData(UIUtil.createFormData2(0,5,100,-5,null,0,100,0));
 		deployFolderText = new Text(zipDestComposite, SWT.SINGLE | SWT.BORDER);
 		deployFolderText.setLayoutData(UIUtil.createFormData2(0,5,100,-5,0,0,browseDestButton,-5));
-		
-		
-		
-		Label remoteLabel = new Label(projectSettings, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
-		remoteText = new Text(projectSettings, SWT.SINGLE | SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
 
 		// Text
 		projectSettings.setText("Project Settings");
@@ -416,27 +411,17 @@ public class ExpressDetailsComposite {
 	}
 
 	private void deployProjectChanged() {
-		System.out.println("HEEEEEEEEEEY!");
 		int i = deployProjectCombo.getSelectionIndex();
 		if( i != -1 ) {
 			IProject depProj = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
 			if( depProj != null && depProj.isAccessible() ) {
-				String remote = ExpressServerUtils.getProjectAttribute(depProj, 
-						ExpressServerUtils.SETTING_REMOTE_NAME, null);
-						//ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 				String depFolder = ExpressServerUtils.getProjectAttribute(depProj, 
 						ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null); 
 						//ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
-				if( remote == null ) {
-					remoteText.setText(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
-				}
 				if( depFolder == null )
 					deployFolderText.setText(ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
-				
-				boolean enabled = remote == null && depFolder == null;
-				remoteText.setEnabled(enabled);
-				deployFolderText.setEnabled(enabled);
-				browseDestButton.setEnabled(enabled);
+				deployFolderText.setEnabled(depFolder == null);
+				browseDestButton.setEnabled(depFolder == null);
 			}
 		}
 	}
@@ -626,7 +611,7 @@ public class ExpressDetailsComposite {
 		// update the values
 		IServerWorkingCopy wc = callback.getServer();
 		String host = fapplication == null ? null : fapplication.getApplicationUrl();
-		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProject);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProject,remote);
 	}
 	
 	private void updateProjectSettings() {

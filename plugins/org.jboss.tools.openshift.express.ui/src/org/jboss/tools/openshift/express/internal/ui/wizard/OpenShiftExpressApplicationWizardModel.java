@@ -65,7 +65,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setRepositoryPath(DEFAULT_REPOSITORY_PATH);
 		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
-		setPublicationMode(PUBLISH_SOURCE);
 	}
 
 	/**
@@ -104,8 +103,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				IProject project = p;
 				// Add the settings here!
 				ExpressServerUtils.updateOpenshiftProjectSettings(project, app,
-						getUser(), getRemoteName(), 
-						ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+						getUser(), getRemoteName(), ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
 				return;
 			}
 		}
@@ -328,11 +326,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public String getMode() {
-		return (String) getProperty(PUBLICATION_MODE);
-	}
-
-	@Override
 	public boolean isCreateServerAdapter() {
 		Boolean isCreateServer = (Boolean) getProperty(CREATE_SERVER_ADAPTER);
 		return isCreateServer != null && isCreateServer.booleanValue();
@@ -346,10 +339,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public IServerType setServerType(IServerType serverType) {
 		return (IServerType) setProperty(SERVER_TYPE, serverType);
-	}
-
-	private void setPublicationMode(String mode) {
-		setProperty(PUBLICATION_MODE, mode);
 	}
 
 	@Override
