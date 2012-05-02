@@ -144,6 +144,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				, getRemoteName()
 				, getUser())
 				.execute(monitor);
+		addSettingsFiles(importedProjects);
 		createServerAdapter(monitor, importedProjects);
 	}
 
