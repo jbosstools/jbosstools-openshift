@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.Set;
@@ -213,16 +214,27 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (result == IDialogConstants.OK_ID) {
 					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
 					if (selectedApplication != null) {
+						// This setter may be long-running
+						Job j = new Job("Setting Application") {
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									pageModel.setExistingApplicationName(selectedApplication.getName());
+								} catch (OpenShiftException ex) {
+									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+											"Could not get embedded cartridges for application {0}",
+											selectedApplication.getName()), ex));
+								} catch (SocketTimeoutException ex) {
+									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+											"Could not get embedded cartridges for application {0}",
+											selectedApplication.getName()), ex));
+								}
+								return Status.OK_STATUS;
+							}
+						};
 						try {
-							pageModel.setExistingApplicationName(selectedApplication.getName());
-						} catch (OpenShiftException ex) {
-							OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
-									"Could not get embedded cartridges for application {0}",
-									selectedApplication.getName()), ex));
-						} catch (SocketTimeoutException ex) {
-							OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
-									"Could not get embedded cartridges for application {0}",
-									selectedApplication.getName()), ex));
+							WizardUtils.runInWizard(j, getContainer());
+						} catch(InvocationTargetException ite) {
+						} catch(InterruptedException ie) {
 						}
 					}
 				}
