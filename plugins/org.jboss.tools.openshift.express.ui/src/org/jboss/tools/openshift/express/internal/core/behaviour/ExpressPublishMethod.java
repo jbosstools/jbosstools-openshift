@@ -178,6 +178,11 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 				ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		PushOperationResult result = null;
 		boolean committed = false;
+		Repository repo = EGitUtils.getRepository(p);
+		if( repo == null ) {
+			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
+					NLS.bind("No repository found for project {0}. Please ensure it is shared via git.", p.getName())));
+		}
 		try {
 			if( changed != 0 && requestCommitAndPushApproval(p.getName(), changed)) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
@@ -188,7 +193,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			if( committed || (changed == 0 && requestPushApproval(p.getName()))) {
 				if( !committed )
 					monitor.beginTask("Publishing " + p.getName(), 200);
-				result = EGitUtils.push(remoteName, EGitUtils.getRepository(p), new SubProgressMonitor(monitor, 100));
+				result = EGitUtils.push(remoteName, repo, new SubProgressMonitor(monitor, 100));
 				monitor.done();
 			}
 		} catch(CoreException ce) {
@@ -197,8 +202,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 				return null;
 			
 			try {
-				Repository repository = EGitUtils.getRepository(p);
-				result = EGitUtils.pushForce(remoteName, repository, new SubProgressMonitor(monitor, 100));
+				result = EGitUtils.pushForce(remoteName, repo, new SubProgressMonitor(monitor, 100));
 				monitor.done();
 			} catch(CoreException ce2) {
 				// even the push force failed, and we don't have a valid result to check :( 
