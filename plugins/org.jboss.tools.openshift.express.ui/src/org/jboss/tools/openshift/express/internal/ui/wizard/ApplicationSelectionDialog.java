@@ -1,5 +1,3 @@
-package org.jboss.tools.openshift.express.internal.ui.wizard;
-
 /*******************************************************************************
  * Copyright (c) 2011 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
@@ -10,6 +8,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
+package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.Collection;
 
