@@ -119,7 +119,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
 		super("Setup OpenShift Application",
-				"Enter a name and select a type for your new OpenShift application.",
+				"Select an existing or create a new OpenShift Application.",
 				"Setup OpenShift Application", wizard);
 		try {
 			this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
@@ -947,8 +947,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.ok();
 			}
 			if (applicationName.isEmpty()) {
-				return ValidationStatus.cancel(
-						"Select an alphanumerical name and a type for the application to create.");
+				return ValidationStatus.cancel(getDescription());
 			}
 			if (!StringUtils.isAlphaNumeric(applicationName)) {
 				return ValidationStatus.error(
@@ -997,8 +996,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.ok();
 			}
 			if (StringUtils.isEmpty(cartridge)) {
-				return OpenShiftUIActivator
-						.createCancelStatus("Select an alphanumerical name and a type for the application to create.");
+				return ValidationStatus.cancel(getDescription());
 			}
 			return ValidationStatus.ok();
 		}
