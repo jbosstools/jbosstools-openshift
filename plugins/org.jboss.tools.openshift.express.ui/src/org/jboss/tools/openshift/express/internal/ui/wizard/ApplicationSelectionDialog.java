@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -190,6 +191,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		tableContainer.setLayout(tableLayout);
 		TableViewer viewer = new TableViewer(table);
 		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setSorter(new ViewerSorter());
 		createTableColumn("Name", 1, new CellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
