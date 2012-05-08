@@ -29,6 +29,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
@@ -37,12 +38,12 @@ import org.jboss.ide.eclipse.as.core.util.DeploymentPreferenceLoader;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
-import org.jboss.ide.eclipse.as.core.util.ServerCreationUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
@@ -249,12 +250,23 @@ public class ExpressServerUtils {
 	}
 	
 	public static IServer createServer(IRuntime runtime, String serverID) throws CoreException {
-		return ServerCreationUtils.createServer2(runtime, serverID, serverID, "openshift");
+		return createServer2(runtime, ServerCore.findServerType(serverID), serverID);
 	}
 	
 	public static IServer createServer(IRuntime runtime, IServerType serverType, String serverName) throws CoreException {
-		return ServerCreationUtils.createServer2(runtime, serverType, serverName, "openshift");
+		return createServer2(runtime, serverType, serverName);
 	}
+	
+	public static IServer createServer2(IRuntime currentRuntime, IServerType serverType, String serverName) throws CoreException {
+		IServerWorkingCopy serverWC = serverType.createServer(null, null,
+				new NullProgressMonitor());
+		serverWC.setRuntime(currentRuntime);
+		serverWC.setName(serverName);
+		serverWC.setServerConfiguration(null);
+		serverWC.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID); 
+		return serverWC.save(true, new NullProgressMonitor());
+	}
+
 	
 	/**
 	 * Returns true if the given server is an OpenShift one, false otherwise.
