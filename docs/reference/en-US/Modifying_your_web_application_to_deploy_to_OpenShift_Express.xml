@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
    <chapter id="chap-OpenSift_Tools_Reference_Guide-Modifying_your_web_application_to_deploy_to_OpenShift_Express">
-	   <title>Modifying your Maven web application to deploy to OpenShift Express</title>
+	   <title>Modifying your Maven Web Application to Deploy to OpenShift</title>
 	<para>
 		Open the <filename>pom.xml</filename> file of your web application in the editor by double-clicking on the file in your <guilabel>Project Explorer</guilabel> and selecting the <guilabel>pom.xml</guilabel> tab in your workbench.
 	</para>
@@ -9,10 +9,10 @@
 		Create <code>profiles</code> tags within the <code>project</code> tags of the <filename>pom.xml</filename> file. Within the <code>profiles</code> tags, press <keycap>Ctrl</keycap> and <keysym>Spacebar</keysym> together to trigger auto-completion.
 	</para>
 	<para>
-		From the auto-completion menu, select <guimenuitem>OpenShift Express profile</guimenuitem>. The profile information to connect to OpenShift Express will be inserted.
+		From the auto-completion menu, select <guimenuitem>OpenShift profile</guimenuitem>. The profile information to connect to OpenShift will be inserted.
 	</para>
 	<figure id="openshift_express_profile_01">
-		<title>Selecting the OpenShift Express Profile</title>
+		<title>Selecting the OpenShift Profile</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/OpenShift_Express_Profile/openshift_express_profile_01.png" format="PNG" />

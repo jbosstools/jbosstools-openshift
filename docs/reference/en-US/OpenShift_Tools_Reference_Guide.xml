@@ -6,6 +6,7 @@
 	<xi:include href="Preface.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 	<xi:include href="Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 	<xi:include href="Creating_an_OpenShift_Express_Application.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Viewing_the_remote_console.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 	<xi:include href="Modifying_your_web_application_to_deploy_to_OpenShift_Express.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 	<xi:include href="Feedback.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 	<xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />

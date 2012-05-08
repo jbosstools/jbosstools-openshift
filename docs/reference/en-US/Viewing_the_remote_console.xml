@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<chapter id="chap-OpenSift_Tools_Reference_Guide-Viewing_the_remote_console">
+	<title>Viewing the Remote Console</title>
+	<note>
+		<para>
+			If you have not yet created an OpenShift server adapter, follow the instructions in <xref linkend="chap-OpenSift_Tools_Reference_Guide-Creating_an_OpenShift_Application" />.
+		</para>
+	</note>
+	<para>
+		Similar to when you are running a server locally, you are also able to see console output for your remote OpenShift server. To have this output displayed to you, right-click on your OpenShift server in the <guilabel>Servers</guilabel> tab and select <menuchoice><guimenuitem>Show In</guimenuitem><guimenuitem>Remote console</guimenuitem></menuchoice>.   
+	</para>
+	<figure id="openshift_remote_console_01">
+		<title>Selecting the OpenShift Profile</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/OpenShift_Remote_Console/openshift_remote_console_01.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Selecting the remote console for the OpenShift server adapter.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		A new tab will open called <guilabel>Console</guilabel> and display the last 100 lines of the servers <filename>boot.log</filename> and <filename>server.log</filename> files. This <guilabel>Console</guilabel> tab will now tail the content of these files on the server, outputing any updates to you, as they occur.
+	</para>
+	<figure id="openshift_remote_console_02">
+		<title>Selecting the OpenShift Profile</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/OpenShift_Remote_Console/openshift_remote_console_02.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The Openshift remote console tab.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		This information can be useful in debugging the remote server and ensuring processes are occuring as expected. 
+	</para>
+</chapter>
+
