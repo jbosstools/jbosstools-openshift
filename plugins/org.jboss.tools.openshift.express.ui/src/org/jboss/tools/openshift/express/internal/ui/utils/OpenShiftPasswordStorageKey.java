@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore.IStorageKey;
 
@@ -23,25 +26,37 @@ import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore.I
 public class OpenShiftPasswordStorageKey implements IStorageKey {
 
 	private static final char SEPARATOR = '/';
-	
-	private static final String PREFERNCES_BASEKEY = OpenShiftUIActivator.PLUGIN_ID.replace('.', SEPARATOR);
+	private static final Pattern SCHEME_PATTERN = Pattern.compile(".+://(.*)"); 
+	private static final String PREFERNCES_BASEKEY = OpenShiftUIActivator.PLUGIN_ID;
+
 	private String platform;
 	private String userName;
 
 	public OpenShiftPasswordStorageKey(String platform, String userName) {
-		this.platform = platform;
+		this.platform = stripScheme(platform);
 		this.userName = userName;
 	}
 
 	@Override
 	public String getKey() {
 		return new StringBuilder(PREFERNCES_BASEKEY)
+				.append(SEPARATOR)
 				.append(platform)
 				.append(SEPARATOR)
 				.append(userName)
 				.toString();
 	}
 
+	private String stripScheme(String value) {
+		Matcher matcher = SCHEME_PATTERN.matcher(value);
+		if (matcher.find()
+			&& matcher.groupCount() == 1) {
+			return matcher.group(1);
+		} else {
+			return value;
+		}
+	}
+	
 	@Override
 	public boolean equals(IStorageKey key) {
 		if (!key.getClass().isAssignableFrom(OpenShiftPasswordStorageKey.class)) {

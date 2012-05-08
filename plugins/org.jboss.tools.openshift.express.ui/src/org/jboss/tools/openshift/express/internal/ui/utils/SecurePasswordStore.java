@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import org.eclipse.equinox.security.storage.EncodingUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -24,8 +23,6 @@ import org.eclipse.equinox.security.storage.StorageException;
  * 
  */
 public class SecurePasswordStore {
-
-	private static final String ENCODING = "UTF-8";
 
 	public static interface IStorageKey {
 		public String getKey();
@@ -115,7 +112,6 @@ public class SecurePasswordStore {
 		}
 
 		ISecurePreferences root = SecurePreferencesFactory.getDefault();
-		String keyString = URLEncoder.encode(key.getKey(), ENCODING);
-		return root.node(keyString);
+		return root.node(key.getKey());
 	}
 }
