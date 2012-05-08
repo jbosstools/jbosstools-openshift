@@ -3,7 +3,7 @@
    <chapter id="chap-OpenSift_Tools_Reference_Guide-Creating_an_OpenShift_Application">
 	<title>Creating an OpenShift Application</title>
 	<para>
-		From the workbench go to <menuchoice><guimenuitem>File</guimenuitem><guimenuitem>New</guimenuitem><guimenuitem>Other</guimenuitem></menuchoice>. 
+		The <guilabel>OpenShift Application</guilabel> creation wizard is accessed through <guilabel>JBoss Central</guilabel> or by navigating to <menuchoice><guimenuitem>File</guimenuitem><guimenuitem>New</guimenuitem><guimenuitem>Other</guimenuitem></menuchoice>. 
 	</para>
 	<figure id="application_creation_01">
 		<title>Selecting the OpenShift Application wizard</title>
@@ -13,13 +13,13 @@
 			</imageobject>
 			<textobject>
 				<phrase>
-					Wizard selection screen with the OpenShift Application wizard selected.
+					JBoss Central home screen.
 				</phrase>
 			</textobject>
 		</mediaobject>
 	</figure>
 	<para>
-		In the wizard, go to and select <menuchoice><guimenuitem>OpenShift</guimenuitem><guimenuitem>OpenShift Application</guimenuitem></menuchoice>. With the wizard choice selected, click on the <guibutton>Next</guibutton> button.
+		After clicking on the <guilabel>OpenShift Application</guilabel> link, the creation wizard will launch.
 	</para>
 	<figure id="application_creation_02">
 		<title>Validating OpenShift credentials</title>
