@@ -17,5 +17,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: JBoss by Red Hat
 Export-Package: org.jboss.tools.openshift.egit.core,
- org.jboss.tools.openshift.egit.core.internal,
- org.jboss.tools.openshift.egit.core.module
+ org.jboss.tools.openshift.egit.core.internal

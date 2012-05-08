@@ -18,7 +18,7 @@ import org.osgi.framework.BundleContext;
 
 public class EGitCoreActivator implements BundleActivator {
 
-	public static final String PLUGIN_ID = "org.jboss.ide.eclipse.as.egit.core";
+	public static final String PLUGIN_ID = "org.jboss.tools.openshift.egit.core";
 	
 	private static BundleContext context;
 
