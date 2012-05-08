@@ -174,7 +174,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
 		browseAppsButton.setText("Browse...");
-		browseAppsButton.addSelectionListener(onBrowseApps());
+		browseAppsButton.addSelectionListener(onBrowseApps(dbc));
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
 				.applyTo(browseAppsButton);
 		// observe the list of application, get notified once they have been
@@ -203,7 +203,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		adapter.setProposals(pageModel.getApplicationNames());
 	}
 
-	private SelectionListener onBrowseApps() {
+	private SelectionListener onBrowseApps(final DataBindingContext dbc) {
 		return new SelectionAdapter() {
 
 			@Override
@@ -232,7 +232,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 							}
 						};
 						try {
-							WizardUtils.runInWizard(j, getContainer());
+							WizardUtils.runInWizard(j, getContainer(), dbc);
 						} catch(InvocationTargetException ite) {
 						} catch(InterruptedException ie) {
 						}
