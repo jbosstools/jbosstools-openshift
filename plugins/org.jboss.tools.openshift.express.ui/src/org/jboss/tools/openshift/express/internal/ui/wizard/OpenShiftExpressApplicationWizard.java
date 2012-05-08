@@ -15,14 +15,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -274,11 +270,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					wizardModel.importProject(delegatingMonitor);
 				} else if (!wizardModel.isGitSharedProject()) {
 					if (!askForConfirmation(
-							NLS.bind("OpenShift application {0} will be enabled on project {1} by "
-									+ "copying OpenShift configuration and enabling Git for the project.\n "
-									+ "This cannot be undone. \n" 
+							NLS.bind("OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
+									+ "copying OpenShift configuration and enabling Git for the project.\n"
+									+ "This cannot be undone.\n" 
 									+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n" 
-									+ "Do you wish to continue ?",
+									+ "\nDo you wish to continue ?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
