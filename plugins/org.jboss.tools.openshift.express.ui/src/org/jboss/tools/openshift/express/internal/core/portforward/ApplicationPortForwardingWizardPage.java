@@ -162,7 +162,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					WizardUtils.runInWizard(new Job("Refresh lis of ports...") {
+					WizardUtils.runInWizard(new Job("Refreshing list of ports...") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
