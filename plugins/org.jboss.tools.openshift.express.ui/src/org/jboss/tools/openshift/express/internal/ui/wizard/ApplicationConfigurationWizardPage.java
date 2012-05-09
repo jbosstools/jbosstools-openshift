@@ -520,7 +520,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					}
 				}
 
-			}, getContainer(), getDataBindingContext());
+			}, getContainer());
 		} catch (Exception e) {
 			// ignore
 		}
