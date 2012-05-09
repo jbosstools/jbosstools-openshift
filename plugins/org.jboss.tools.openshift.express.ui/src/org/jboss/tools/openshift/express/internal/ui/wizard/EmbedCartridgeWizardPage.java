@@ -42,10 +42,6 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
@@ -88,20 +84,21 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		Composite tableContainer = new Composite(embedGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
-				.span(3, 1).hint(200, 150).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		viewer.addCheckStateListener(onCartridgeChecked());
 
-		Button checkAllButton = new Button(embedGroup, SWT.PUSH);
-		checkAllButton.setText("Embed A&ll");
-		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(checkAllButton);
-		checkAllButton.addSelectionListener(onCheckAll());
+// hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
+//		Button checkAllButton = new Button(embedGroup, SWT.PUSH);
+//		checkAllButton.setText("Embed A&ll");
+//		GridDataFactory.fillDefaults()
+//				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(checkAllButton);
+//		checkAllButton.addSelectionListener(onCheckAll());
 
-		Button uncheckAllButton = new Button(embedGroup, SWT.PUSH);
-		uncheckAllButton.setText("Embed N&one");
-		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(uncheckAllButton);
-		uncheckAllButton.addSelectionListener(onUncheckAll());
+//		Button uncheckAllButton = new Button(embedGroup, SWT.PUSH);
+//		uncheckAllButton.setText("Embed N&one");
+//		GridDataFactory.fillDefaults()
+//				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(uncheckAllButton);
+//		uncheckAllButton.addSelectionListener(onUncheckAll());
 	}
 
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
@@ -248,34 +245,34 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		model.getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
-	private SelectionListener onCheckAll() {
-		return new SelectionAdapter() {
+//	private SelectionListener onCheckAll() {
+//		return new SelectionAdapter() {
+//
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				viewer.setAllChecked(true);
+//				try {
+//					addJenkinsCartridge(IEmbeddedCartridge.JENKINS_14);
+//				} catch (OpenShiftException ex) {
+//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+//				} catch (SocketTimeoutException ex) {
+//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+//				}
+//			}
+//
+//		};
+//	}
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				viewer.setAllChecked(true);
-				try {
-					addJenkinsCartridge(IEmbeddedCartridge.JENKINS_14);
-				} catch (OpenShiftException ex) {
-					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-				} catch (SocketTimeoutException ex) {
-					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-				}
-			}
-
-		};
-	}
-
-	private SelectionListener onUncheckAll() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				viewer.setAllChecked(false);
-			}
-
-		};
-	}
+//	private SelectionListener onUncheckAll() {
+//		return new SelectionAdapter() {
+//
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				viewer.setAllChecked(false);
+//			}
+//
+//		};
+//	}
 
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
