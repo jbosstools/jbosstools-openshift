@@ -55,26 +55,19 @@ import com.openshift.client.OpenShiftException;
  */
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
-	private boolean skipCredentialsPage;
+	private final boolean skipCredentialsPage;
 	
-	private OpenShiftExpressApplicationWizardModel wizardModel;
+	private final OpenShiftExpressApplicationWizardModel wizardModel;
 
-	public OpenShiftExpressApplicationWizard(boolean useExistingApplication, String wizardTitle) {
+	OpenShiftExpressApplicationWizard(final boolean useExistingApplication, final String wizardTitle) {
 		this(null, null, null, useExistingApplication, wizardTitle);
 	}
-	public OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
-		this(user, project, application, useExistingApplication, false, wizardTitle);
-	}
-
-	public OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, boolean skipCredentialsPage, String wizardTitle) {
-		setWizardModel(new OpenShiftExpressApplicationWizardModel(user, project, application, useExistingApplication));
+	
+	OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
-		this.skipCredentialsPage = skipCredentialsPage;
-	}
-
-	void setWizardModel(OpenShiftExpressApplicationWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
+		this.wizardModel = new OpenShiftExpressApplicationWizardModel(user, project, application, useExistingApplication);
+		this.skipCredentialsPage = (user != null);
 	}
 
 	OpenShiftExpressApplicationWizardModel getWizardModel() {

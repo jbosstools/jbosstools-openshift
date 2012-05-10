@@ -21,17 +21,13 @@ public class ImportOpenShiftExpressApplicationWizard extends OpenShiftExpressApp
 		super(true, "Import OpenShift Application");
 	}
 
-	public ImportOpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application) {
-		this(user, project, application, false);
-	}
-
 	/**
 	 * Constructor
 	 * @param user
 	 * @param project
 	 * @param application
 	 */
-	public ImportOpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean skipCredentialsPage) {
-		super(user, project, application, true, skipCredentialsPage, "Import OpenShift Application");
+	public ImportOpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application) {
+		super(user, project, application, true, "Import OpenShift Application");
 	}
 }
