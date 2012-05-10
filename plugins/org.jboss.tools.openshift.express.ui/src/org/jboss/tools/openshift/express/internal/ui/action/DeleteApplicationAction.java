@@ -67,7 +67,7 @@ public class DeleteApplicationAction extends AbstractAction {
 							Display.getCurrent().getActiveShell(),
 							"Application deletion",
 							NLS.bind(
-									"You are about to destroy the \"{0}\" application.\n."
+									"You are about to destroy the \"{0}\" application.\n"
 											+
 											"This is NOT reversible, all remote data for this application will be removed.",
 									appsToDelete.get(0)));
