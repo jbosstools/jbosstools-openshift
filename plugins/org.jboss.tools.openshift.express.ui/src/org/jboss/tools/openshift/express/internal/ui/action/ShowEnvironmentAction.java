@@ -46,6 +46,7 @@ public class ShowEnvironmentAction extends AbstractAction {
 				}
 				List<String> props = application.getEnvironmentProperties();
 				final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName(application));
+				console.clearConsole();
 				MessageConsoleStream stream = console.newMessageStream();
 				for (String prop : props) {
 					stream.println(prop);
