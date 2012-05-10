@@ -204,4 +204,6 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 
 	ApplicationScale setApplicationScale(final ApplicationScale scale);
 
+	IProject getProject();
+
 }

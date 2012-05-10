@@ -122,12 +122,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// 'Use default location' option.
 		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
-		dbc.addValidationStatusProvider(
-				new RepoPathValidationStatusProvider(
-						isDefaultRepoObservable
-						, repoPathObservable
-						, BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(
-								pageModel)));
+		final IObservableValue applicationNameModelObservable = BeanProperties.value(
+				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
+		
+		dbc.addValidationStatusProvider(new RepoPathValidationStatusProvider(repoPathObservable,
+				applicationNameModelObservable));
 
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
@@ -240,47 +239,32 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	 */
 	class RepoPathValidationStatusProvider extends MultiValidator {
 
-		private final IObservableValue isDefaultRepoPathObservable;
 		private final IObservableValue repoPathObservable;
-		private IObservableValue applicationNameObservable;
+		private final IObservableValue applicationNameModelObservable;
 
-		public RepoPathValidationStatusProvider(IObservableValue isDefaultRepoPathObservable,
-				IObservableValue repoPathObservable, IObservableValue applicationNameObservable) {
-			this.isDefaultRepoPathObservable = isDefaultRepoPathObservable;
+		public RepoPathValidationStatusProvider(IObservableValue repoPathObservable,
+				IObservableValue applicationNameModelObservable) {
 			this.repoPathObservable = repoPathObservable;
-			this.applicationNameObservable = applicationNameObservable;
+			this.applicationNameModelObservable = applicationNameModelObservable;
 		}
 
+		// Validator is also be called when application name is set..
 		@Override
 		protected IStatus validate() {
-			Boolean isDefaultRepoPath = (Boolean) isDefaultRepoPathObservable.getValue();
-			String repoPath = (String) repoPathObservable.getValue();
-			String applicationName = (String) applicationNameObservable.getValue();
-
-			// skip the validation if the user wants to create a new project.
-			// The
-			// name and state of the existing project do
-			// not matter...
-			if (applicationName == null
-					|| applicationName.length() == 0) {
-				return OpenShiftUIActivator
-						.createCancelStatus("You have to choose an application name / existing application");
+			final String repoPath = (String) repoPathObservable.getValue();
+			final String applicationName = (String) applicationNameModelObservable.getValue();
+			
+			final IPath repoResourcePath = new Path(repoPath);
+			if (repoResourcePath.isEmpty()
+					|| !repoResourcePath.isAbsolute()
+					|| !repoResourcePath.toFile().canWrite()) {
+				return OpenShiftUIActivator.createErrorStatus("The location '" + repoResourcePath.toOSString() + "' does not exist or is not writeable.");
 			}
-
-			if (isDefaultRepoPath == null
-					|| !isDefaultRepoPath) {
-				final IPath repoResourcePath = new Path(repoPath);
-				if (repoResourcePath.isEmpty()
-						|| !repoResourcePath.isAbsolute()
-						|| !repoResourcePath.toFile().canWrite()) {
-					return OpenShiftUIActivator.createErrorStatus("The path does not exist or is not writeable.");
-				}
-				final IPath applicationPath = repoResourcePath.append(new Path(applicationName));
-				if (applicationPath.toFile().exists()) {
-					return OpenShiftUIActivator.createErrorStatus(
-							NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
-									repoResourcePath.toOSString(), applicationName));
-				}
+			final IPath applicationPath = applicationName != null ? repoResourcePath.append(new Path(applicationName)) : null;
+			if (applicationPath != null && applicationPath.toFile().exists()) {
+				return OpenShiftUIActivator.createErrorStatus(
+						NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
+								repoResourcePath.toOSString(), applicationName));
 			}
 
 			return ValidationStatus.ok();

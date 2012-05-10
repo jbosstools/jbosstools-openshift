@@ -44,15 +44,44 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public GitCloningSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.APPLICATION_NAME, onWizardApplicationNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROJECT_NAME, onWizardProjectNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.NEW_PROJECT, onWizardProjectNameChanged());
 		setRepositoryPath(getDefaultRepositoryPath());
 	}
 
+
+	/**
+	 * Listener to propagate the application name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
+	 * @return
+	 */
 	private PropertyChangeListener onWizardApplicationNameChanged() {
 		return new PropertyChangeListener() {
-			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				firePropertyChange(PROPERTY_APPLICATION_NAME, evt.getOldValue(), evt.getNewValue());
+				if(wizardModel.isNewProject() && isUseDefaultRepoPath()) {
+					setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
+				} 
+			}
+		};
+	}
+
+	/**
+	 * Listener to propagate the project name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
+	 * @return
+	 */
+	private PropertyChangeListener onWizardProjectNameChanged() {
+		return new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if(!wizardModel.isNewProject() && isUseDefaultRepoPath()) {
+					final IProject project = wizardModel.getProject();
+					if(project != null && project.exists()) {
+						setRepositoryPath(project.getLocation().toOSString());
+					} else {
+						setRepositoryPath("");
+					}
+				} 
 			}
 		};
 	}
@@ -61,16 +90,17 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		return wizardModel.isNewProject();
 	}
 
-	public void setApplicationName(String name) {
+	
+	/*public void setApplicationName(String name) {
 		firePropertyChange(PROPERTY_APPLICATION_NAME
 				, wizardModel.getApplicationName()
 				, wizardModel.setApplicationName(name));
-	}
+	}*/
 
 	public String getApplicationName() {
 		return wizardModel.getApplicationName();
 	}
-
+	
 	public boolean isJBossAS7Application() {
 		IApplication application = wizardModel.getApplication();
 		if (application == null) {

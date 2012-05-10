@@ -291,13 +291,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.addValidationStatusProvider(newApplicationNameValidator);
 		ControlDecorationSupport.create(
 				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
-		final NewApplicationTypeValidator newApplicationTypeValidator =
-				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeComboObservable);
-		dbc.addValidationStatusProvider(newApplicationTypeValidator);
-		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
-				new CustomControlDecorationUpdater());
-
-		// gear size
+		// gear profile
 		final Label gearProfileLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		gearProfileLabel.setText("Gear profile:");
 		GridDataFactory.fillDefaults()
@@ -306,11 +300,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(gearProfilesCombo);
 		fillGearProfilesCombo(dbc, gearProfilesCombo);
-		final ISWTObservableValue gearSizeComboObservable =
+		final ISWTObservableValue selectedGearProfileComboObservable =
 				WidgetProperties.selection().observe(gearProfilesCombo);
 		final IObservableValue selectedGearProfileModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_GEAR_PROFILE).observe(pageModel);
-		ValueBindingBuilder.bind(gearSizeComboObservable)
+		ValueBindingBuilder.bind(selectedGearProfileComboObservable)
 				.converting(new StringToGearProfileConverter())
 				.to(selectedGearProfileModelObservable)
 				.converting(new GearProfileToStringConverter())
@@ -327,6 +321,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.to(enableScalingModelObservable).converting(new ApplicationScaleToBooleanConverter())
 				.in(dbc);
 
+		final NewApplicationTypeValidator newApplicationTypeValidator =
+				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeComboObservable);
+		dbc.addValidationStatusProvider(newApplicationTypeValidator);
+		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
+				new CustomControlDecorationUpdater());
+		
 		// embeddable cartridges
 		this.newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
 		newAppEmbeddableCartridgesGroup.setText("Embeddable Cartridges");
@@ -849,25 +849,30 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
+	/**
+	 * Validates that the new application type is selected
+	 * @author Xavier Coulon
+	 *
+	 */
 	class NewApplicationTypeValidator extends MultiValidator {
 
 		private final IObservableValue useExistingAppBtnbservable;
-		private final IObservableValue selectedCartridgeObservable;
+		private final IObservableValue selectedApplicationTypeObservable;
 
 		public NewApplicationTypeValidator(IObservableValue useExistingAppBtnbservable,
-				IObservableValue selectedCartridgeObservable) {
+				IObservableValue selectedApplicationTypeObservable) {
 			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
-			this.selectedCartridgeObservable = selectedCartridgeObservable;
+			this.selectedApplicationTypeObservable = selectedApplicationTypeObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
 			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
-			final String cartridge = (String) selectedCartridgeObservable.getValue();
+			final String applicationType = (String) selectedApplicationTypeObservable.getValue();
 			if (useExistingApp) {
 				return ValidationStatus.ok();
 			}
-			if (StringUtils.isEmpty(cartridge)) {
+			if (StringUtils.isEmpty(applicationType)) {
 				return ValidationStatus.cancel(getDescription());
 			}
 			return ValidationStatus.ok();
@@ -876,7 +881,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
-			targets.add(selectedCartridgeObservable);
+			targets.add(selectedApplicationTypeObservable);
 			return targets;
 		}
 	}

@@ -297,7 +297,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return EGitUtils.isSharedWithGit(getProject());
 	}
 
-	private IProject getProject() {
+	@Override
+	public IProject getProject() {
+		String projectName = getProjectName();
+		if(projectName == null || projectName.isEmpty()) {
+			return null;
+		}
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
 	}
 
