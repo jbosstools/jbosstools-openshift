@@ -22,26 +22,23 @@
 		After clicking on the <guilabel>OpenShift Application</guilabel> link, the creation wizard will launch.
 	</para>
 	<figure id="application_creation_02">
-		<title>Validating OpenShift credentials</title>
+		<title>Input OpenShift credentials</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_02.png" format="PNG" />
 			</imageobject>
 			<textobject>
 				<phrase>
-					Sever connection screen where you will validate your username and password for OpenShift or you can sign up for an account.
+					Sever connection screen where you will input your username and password for OpenShift or you can sign up for an account.
 				</phrase>
 			</textobject>
 		</mediaobject>
 	</figure>
 	<para>
-		If you have already signed up for an OpenShift account then you can input your <guilabel>Username</guilabel> and <guilabel>Password</guilabel> here and click <guilabel>Validate</guilabel>. If validation is successful you will see the button is now unavailable and no error was presented. 
+		If you have already signed up for an OpenShift account then you can input your <guilabel>Username</guilabel> and <guilabel>Password</guilabel> here and click the <guibutton>Next</guibutton> button. If validation is successful you will see the <guilabel>Setup OpenShift Application<guilabel> screen. 
 	</para>
 	<para>
 		If you do not have an OpenShift account, you can create one through the link at the top of the wizard screen. This will open the OpenShift sign-up page within your workbench. Once you have created an account you will need to relaunch the <guilabel>OpenShift Application</guilabel> wizard and input your new username and password.
-	</para>
-	<para>
-		Click the <guibutton>Next</guibutton> button to proceed. 
 	</para>
 	<figure id="application_creation_03">
 		<title>Setting the domain name</title>
@@ -81,7 +78,7 @@
 		</para>
 	</note>
 	<para>
-		Click the <guibutton>New</guibutton> in the <guilabel>Available Applications</guilabel> section of the wizard to begin creating your first OpenShift application for the specified domain.
+		Click the <guibutton>New</guibutton> button in the <guilabel>Available Applications</guilabel> section of the wizard to begin creating your first OpenShift application, for the specified domain.
 	</para>
 	<figure id="application_creation_05">
 		<title>Creating a new OpenShift application</title>
