@@ -382,8 +382,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
-	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) {
-		
+	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException {
+		getSelectedEmbeddableCartridges().add(cartridge);
+	}
+
+	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException {
+		getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
 	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {

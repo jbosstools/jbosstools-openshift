@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
-import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
@@ -39,9 +38,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -76,7 +72,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -116,6 +111,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Group newAppEmbeddableCartridgesGroup;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
+	private EmbeddedCartridgeWizardStrategy embeddedCartridgeWizardStrategy;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
 		super("Setup OpenShift Application",
@@ -140,6 +136,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
 		createApplicationSelectionGroup(container, dbc);
 		createApplicationConfigurationGroup(container, dbc);
+
+		this.embeddedCartridgeWizardStrategy = new EmbeddedCartridgeWizardStrategy(viewer, this, pageModel);
 	}
 
 	private Composite createApplicationSelectionGroup(Composite container, DataBindingContext dbc) {
@@ -233,8 +231,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						};
 						try {
 							WizardUtils.runInWizard(j, getContainer(), dbc);
-						} catch(InvocationTargetException ite) {
-						} catch(InterruptedException ie) {
+						} catch (InvocationTargetException ite) {
+						} catch (InterruptedException ie) {
 						}
 					}
 				}
@@ -462,19 +460,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				try {
 					IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
 					if (event.getChecked()) {
-						if (IEmbeddableCartridge.PHPMYADMIN_34.equals(cartridge)) {
-							addPhpMyAdminCartridge(cartridge);
-						} else if (IEmbeddableCartridge.JENKINS_14.equals(cartridge)) {
-							addJenkinsCartridge(cartridge);
-						} else {
-							addCartridge(cartridge);
-						}
+						embeddedCartridgeWizardStrategy.addCartridge(cartridge);
 					} else {
-						if (IEmbeddableCartridge.MYSQL_51.equals(cartridge)) {
-							removeMySQLCartridge(cartridge);
-						} else {
-							removeCartridge(cartridge);
-						}
+						embeddedCartridgeWizardStrategy.removeCartridge(cartridge);
 					}
 				} catch (OpenShiftException e) {
 					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
@@ -485,99 +473,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException,
-			SocketTimeoutException {
-		if (pageModel.hasApplicationOfType(ICartridge.JENKINS_14)) {
-			pageModel.getSelectedEmbeddableCartridges().add(cartridge);
-		} else {
-			final JenkinsApplicationDialog dialog = new JenkinsApplicationDialog(getShell());
-			if (dialog.open() == Dialog.OK) {
-				createJenkinsApplication(cartridge, dialog.getValue());
-			} else {
-				viewer.setChecked(cartridge, false);
-			}
-		}
-	}
-
-	private void createJenkinsApplication(final IEmbeddableCartridge cartridge, final String name) {
-		try {
-			WizardUtils.runInWizard(new Job(NLS.bind("Creating jenkins application \"{0}\"...", name)) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						IApplication jenkinsApplication = pageModel.createJenkinsApplication(name, monitor);
-						pageModel.getSelectedEmbeddableCartridges().add(cartridge);
-						openLogDialog(jenkinsApplication);
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						getShell().getDisplay().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								viewer.setChecked(cartridge, false);
-							}
-						});
-						return OpenShiftUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
-					}
-				}
-
-			}, getContainer());
-		} catch (Exception e) {
-			// ignore
-		}
-	}
-
-	private void addPhpMyAdminCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		if (!viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
-			if (MessageDialog.openQuestion(getShell(), "Embed mysql cartridge",
-					"To embed phpmyadmin, you'd also have to embed mysql.")) {
-				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
-				pageModel.selectEmbeddedCartridges(cartridge);
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
-			} else {
-				viewer.setChecked(cartridge, false);
-			}
-		} else {
-			pageModel.getSelectedEmbeddableCartridges().add(cartridge);
-		}
-	}
-
-	private void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		pageModel.getSelectedEmbeddableCartridges().add(cartridge);
-	}
-
-	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		Set<IEmbeddableCartridge> checkedCartridges = pageModel.getSelectedEmbeddableCartridges();
-		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
-			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
-					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
-				checkedCartridges.remove(IEmbeddableCartridge.PHPMYADMIN_34);
-				checkedCartridges.remove(cartridge);
-				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
-			} else {
-				viewer.setChecked(cartridge, true);
-			}
-		} else {
-			checkedCartridges.remove(cartridge);
-		}
-	}
-
-	private void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		pageModel.getSelectedEmbeddableCartridges().remove(cartridge);
-	}
 
 	private SelectionListener onCheckAll() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				viewer.setAllChecked(true);
-				try {
-					addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
-				} catch (OpenShiftException ex) {
-					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-				} catch (SocketTimeoutException ex) {
-					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-				}
+//				viewer.setAllChecked(true);
+//				try {
+//					addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
+//				} catch (OpenShiftException ex) {
+//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+//				} catch (SocketTimeoutException ex) {
+//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+//				}
 			}
 
 		};
@@ -692,43 +601,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			return null;
 		}
-	}
-
-	private static class JenkinsApplicationDialog extends InputDialog {
-
-		public JenkinsApplicationDialog(Shell shell) {
-			super(
-					shell,
-					"New Jenkins application",
-					"To embed Jenkins into your application, you first have to create a separate Jenkins application. "
-							+ "Please provide a name for this new Jenkins application (lower-case letters and digits only):"
-					, null, new JenkinsNameValidator());
-		}
-
-		private static class JenkinsNameValidator implements IInputValidator {
-
-			@Override
-			public String isValid(String input) {
-				if (StringUtils.isEmpty(input)) {
-					return "You have to provide a name for the jenkins application";
-				}
-
-				if (!StringUtils.isAlphaNumeric(input)) {
-					return "The name may only contain lower-case letters and digits.";
-				}
-				return null;
-			}
-		}
-	}
-
-	private void openLogDialog(final IApplication application) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				new CreationLogDialog(getShell(), application).open();
-			}
-		});
 	}
 
 	/**
