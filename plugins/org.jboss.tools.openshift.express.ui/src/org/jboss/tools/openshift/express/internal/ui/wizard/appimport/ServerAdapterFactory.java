@@ -80,7 +80,6 @@ public class ServerAdapterFactory {
 			IRuntime runtime, IApplication application, UserDelegate user, 
 			String deployProject, String remoteName, IProgressMonitor monitor) {
 		try {
-			renameWebContextRoot(importedProjects);
 			IServer server = doCreateServerAdapter(serverType, runtime, application, user, deployProject, remoteName);
 			addModules(getModules(importedProjects), server, monitor);
 		} catch (CoreException ce) {
@@ -93,12 +92,6 @@ public class ServerAdapterFactory {
 			IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 					"Cannot create openshift server adapter", ste);
 			OpenShiftUIActivator.getDefault().getLog().log(s);
-		}
-	}
-
-	private void renameWebContextRoot(List<IProject> importedProjects) {
-		for (IProject project : importedProjects) {
-			ComponentUtilities.setServerContextRoot(project, "/");
 		}
 	}
 
