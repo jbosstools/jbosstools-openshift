@@ -40,6 +40,9 @@ import com.openshift.client.OpenShiftException;
  * A UI strategy that is able to add and remove embedded cartridges while
  * fullfilling requirements and resolving conflicts (ex. mutual exclusivity
  * etc.)
+ * <p>
+ * TODO: replaced this manual code by a generic dependency-tree analysis
+ * mechanism as soon as OpenShift completed design of cartridge metamodel
  * 
  * @author Andre Dietisheim
  */
@@ -49,7 +52,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
 
-	public EmbedCartridgeStrategy(CheckboxTableViewer viewer, 
+	public EmbedCartridgeStrategy(CheckboxTableViewer viewer,
 			IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
 		this.viewer = viewer;
 		this.wizardPage = wizardPage;
@@ -191,8 +194,9 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 
 	private void removeMySQL() throws OpenShiftException, SocketTimeoutException {
 		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
-			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
-					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.\n\nRemove phpMyAdmin and MySQL?")) {
+			if (MessageDialog
+					.openQuestion(getShell(), "Remove phpmyadmin cartridge",
+							"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.\n\nRemove phpMyAdmin and MySQL?")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
@@ -229,8 +233,8 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 			} else {
 				removeMongoDb = false;
 			}
-		} 
-		
+		}
+
 		if (removeMongoDb // mongo to be removed?
 				&& viewer.getChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
@@ -241,7 +245,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 				removeMongoDb = false;
 			}
 		}
-		
+
 		viewer.setChecked(IEmbeddableCartridge.MONGODB_20, !removeMongoDb);
 		if (removeMongoDb) { // mongo to be removed?
 			pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
@@ -263,7 +267,6 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 		}
 	}
 
-	
 	private Shell getShell() {
 		return viewer.getControl().getShell();
 	}
