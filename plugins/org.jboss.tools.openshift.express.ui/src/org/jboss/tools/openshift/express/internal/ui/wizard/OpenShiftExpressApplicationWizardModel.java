@@ -9,27 +9,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.CreateApplicationOperation;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.ImportNewProject;
@@ -47,14 +41,14 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	private static final int APP_CREATION_TIMEOUT = 180;
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
 	public OpenShiftExpressApplicationWizardModel(UserDelegate user) {
 		this(user, null, null, false);
 	}
 
-	public OpenShiftExpressApplicationWizardModel(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication) {
+	public OpenShiftExpressApplicationWizardModel(UserDelegate user, IProject project, IApplication application,
+			boolean useExistingApplication) {
 		// default value(s)
 		setUser(user);
 		setProject(project);
@@ -92,12 +86,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		addSettingsFiles(importedProjects);
 		createServerAdapter(monitor, importedProjects);
 	}
-	
+
 	private void addSettingsFiles(List<IProject> imported) {
 		Iterator<IProject> i = imported.iterator();
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			IProject p = i.next();
-			if( p.getFolder(".git").exists()) {
+			if (p.getFolder(".git").exists()) {
 				// This is our project
 				IApplication app = getApplication();
 				IProject project = p;
@@ -108,7 +102,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 			}
 		}
 	}
-	
+
 	/**
 	 * Enables the user chosen, unshared project to be used on the chosen
 	 * OpenShift application. Clones the application git repository, copies the
@@ -189,13 +183,13 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	private void createServerAdapter(IProgressMonitor monitor, List<IProject> importedProjects)
 			throws OpenShiftException {
 		Assert.isTrue(importedProjects.size() > 0);
-		if (isCreateServerAdapter()) {	
+		if (isCreateServerAdapter()) {
 			Assert.isTrue(importedProjects.size() > 0);
 			IProject project = importedProjects.get(0);
 			new ServerAdapterFactory().create(project, this, monitor);
 		}
 	}
-	
+
 	@Override
 	public File getRepositoryFile() {
 		String repositoryPath = getRepositoryPath();
@@ -231,7 +225,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setApplicationName(application);
 		setApplicationScaling(application);
 		setApplicationGearProfile(application);
-		
+
 	}
 
 	@Override
@@ -300,7 +294,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public IProject getProject() {
 		String projectName = getProjectName();
-		if(projectName == null || projectName.isEmpty()) {
+		if (projectName == null || projectName.isEmpty()) {
 			return null;
 		}
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
@@ -369,68 +363,24 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public ApplicationScale setApplicationScale(final ApplicationScale scale) {
-		return  (ApplicationScale) setProperty(APPLICATION_SCALE, scale);
+		return (ApplicationScale) setProperty(APPLICATION_SCALE, scale);
 	}
 
 	protected void setApplicationScaling(IApplication application) {
-		if(application != null) {
+		if (application != null) {
 			setApplicationScale(application.getApplicationScale());
-		}
-	}
-
-	private void waitForAccessible(IApplication application, IProgressMonitor monitor)
-			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		// monitor.subTask("waiting for application to become accessible...");
-		if (!application.waitForAccessible(APP_CREATION_TIMEOUT * 1000)) {
-			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
-					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING, application.getApplicationUrl()));
-		}
-	}
-
-	protected IApplication createApplication(final String name, final ICartridge cartridge, final ApplicationScale scale, final IGearProfile gearProfile, final IProgressMonitor monitor)
-			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		final UserDelegate user = getUser();
-		if (user == null) {
-			throw new OpenShiftException("Could not create application, have no valid user credentials");
-		}
-		ExecutorService executor = Executors.newFixedThreadPool(1);
-		try {
-			FutureTask<IApplication> future = new FutureTask<IApplication>(
-					new Callable<IApplication>() {
-						@Override
-						public IApplication call() throws Exception {
-							monitor.setTaskName("Creating application \"" + name + "\"...");
-							Logger.debug("creating application...");
-							final IApplication application
-							= user.createApplication(name, cartridge, scale, gearProfile);
-							monitor.beginTask("Waiting for application to be reachable...",
-									IProgressMonitor.UNKNOWN);
-							Logger.debug("Waiting for application to be reachable...");
-							waitForAccessible(application, monitor);
-							return application;
-						}
-					});
-			executor.execute(future);
-			while (!future.isDone()) {
-				if(monitor.isCanceled()) {
-					throw new OpenShiftException("Operation was cancelled by user.");
-				}
-				Thread.sleep(1000);
-			}
-			final IApplication application = future.get();
-			return application;
-		} catch (Exception e) { // InterruptedException and ExecutionException
-			Throwable cause = e.getCause() !=null ?e.getCause() : e;
-			Logger.error("Failed to create application", cause);
-			throw new OpenShiftException("Failed to create application: {0}", cause.getMessage());
-		} finally {
-			executor.shutdown();
 		}
 	}
 
 	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
 			OpenShiftException {
-		IApplication application = createApplication(getApplicationName(), getApplicationCartridge(), getApplicationScale(), getApplicationGearProfile(), monitor);
+		IApplication application =
+				new CreateApplicationOperation(getUser()).execute(
+						getApplicationName(),
+						getApplicationCartridge(),
+						getApplicationScale(),
+						getApplicationGearProfile(),
+						monitor);
 		setApplication(application);
 	}
 
@@ -469,7 +419,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public IGearProfile getApplicationGearProfile() {
 		return (IGearProfile) getProperty(APPLICATION_GEAR_PROFILE);
 	}
-	
+
 	@Override
 	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile) {
 		return (IGearProfile) setProperty(APPLICATION_GEAR_PROFILE, gearProfile);

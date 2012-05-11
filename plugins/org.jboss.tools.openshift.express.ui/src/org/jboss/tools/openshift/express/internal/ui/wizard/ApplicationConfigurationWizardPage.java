@@ -49,10 +49,8 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -111,7 +109,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Group newAppEmbeddableCartridgesGroup;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
-	private EmbeddedCartridgeWizardStrategy embeddedCartridgeWizardStrategy;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
 		super("Setup OpenShift Application",
@@ -136,8 +133,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
 		createApplicationSelectionGroup(container, dbc);
 		createApplicationConfigurationGroup(container, dbc);
-
-		this.embeddedCartridgeWizardStrategy = new EmbeddedCartridgeWizardStrategy(viewer, this, pageModel);
 	}
 
 	private Composite createApplicationSelectionGroup(Composite container, DataBindingContext dbc) {
@@ -338,6 +333,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
 				.applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
+		viewer.addCheckStateListener(new EmbedCartridgeListener(viewer, pageModel, this));
 		dbc.bindSet(ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
 						.observe(pageModel));
@@ -432,7 +428,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
 		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.addCheckStateListener(onCartridgeChecked());
 		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
 
 			@Override
@@ -451,28 +446,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		column.setLabelProvider(cellLabelProvider);
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
-
-	private ICheckStateListener onCartridgeChecked() {
-		return new ICheckStateListener() {
-
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				try {
-					IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-					if (event.getChecked()) {
-						embeddedCartridgeWizardStrategy.addCartridge(cartridge);
-					} else {
-						embeddedCartridgeWizardStrategy.removeCartridge(cartridge);
-					}
-				} catch (OpenShiftException e) {
-					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
-				} catch (SocketTimeoutException e) {
-					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
-				}
-			}
-		};
-	}
-
 
 	private SelectionListener onCheckAll() {
 		return new SelectionAdapter() {

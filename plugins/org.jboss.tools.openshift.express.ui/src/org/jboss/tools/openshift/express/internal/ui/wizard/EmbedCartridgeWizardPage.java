@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,19 +22,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -44,14 +38,10 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
-import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.OpenShiftException;
@@ -61,13 +51,13 @@ import com.openshift.client.OpenShiftException;
  */
 public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
-	private EmbedCartridgeWizardPageModel model;
+	private EmbedCartridgeWizardPageModel pageModel;
 	private CheckboxTableViewer viewer;
 
 	public EmbedCartridgeWizardPage(ApplicationWizardModel wizardModel, IWizard wizard) {
 		super("Embed Cartridges", "Please select the cartridges to embed into your application",
 				"EmbedCartridgePage", wizard);
-		this.model = new EmbedCartridgeWizardPageModel(wizardModel);
+		this.pageModel = new EmbedCartridgeWizardPageModel(wizardModel);
 	}
 
 	@Override
@@ -85,8 +75,8 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		viewer.addCheckStateListener(onCartridgeChecked());
-
+		viewer.addCheckStateListener(new EmbedCartridgeListener(viewer, pageModel, this));
+		
 // hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
 //		Button checkAllButton = new Button(embedGroup, SWT.PUSH);
 //		checkAllButton.setText("Embed A&ll");
@@ -130,121 +120,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-	private ICheckStateListener onCartridgeChecked() {
-		return new ICheckStateListener() {
-
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				try {
-					IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-					if (event.getChecked()) {
-						if (IEmbeddedCartridge.PHPMYADMIN_34.equals(cartridge)) {
-							addPhpMyAdminCartridge(cartridge);
-						} else if (IEmbeddedCartridge.JENKINS_14.equals(cartridge)) {
-							addJenkinsCartridge(cartridge);
-						} else {
-							addCartridge(cartridge);
-						}
-					} else {
-						if (IEmbeddedCartridge.MYSQL_51.equals(cartridge)) {
-							removeMySQLCartridge(cartridge);
-						} else {
-							removeCartridge(cartridge);
-						}
-					}
-				} catch (OpenShiftException e) {
-					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
-				} catch (SocketTimeoutException e) {
-					OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
-				}
-			}
-		};
-	}
-
-	private void addJenkinsCartridge(final IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
-		if (model.hasApplication(ICartridge.JENKINS_14)) {
-			model.getSelectedEmbeddableCartridges().add(cartridge);
-		} else {
-			final JenkinsApplicationDialog dialog = new JenkinsApplicationDialog(getShell());
-			if (dialog.open() == Dialog.OK) {
-				createJenkinsApplication(cartridge, dialog.getValue());
-			} else {
-				viewer.setChecked(cartridge, false);
-			}
-		}
-	}
-
-	private void createJenkinsApplication(final IEmbeddableCartridge cartridge, final String name) {
-		try {
-			WizardUtils.runInWizard(new Job(
-					NLS.bind("Creating jenkins application \"{0}\"...", name)) {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						IApplication jenkinsApplication = model.createJenkinsApplication(name, monitor);
-						model.getSelectedEmbeddableCartridges().add(cartridge);
-
-						openLogDialog(jenkinsApplication);
-
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						getShell().getDisplay().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								viewer.setChecked(cartridge, false);
-							}
-						});
-						return OpenShiftUIActivator
-								.createErrorStatus("Could not load embeddable cartridges", e);
-					}
-				}
-
-			}, getContainer(), getDataBindingContext());
-		} catch (Exception e) {
-			// ignore
-		}
-	}
-
-	private void addPhpMyAdminCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
-		if (!viewer.getChecked(IEmbeddedCartridge.MYSQL_51)) {
-			if (MessageDialog.openQuestion(getShell(), "Embed mysql cartridge",
-					"To embed phpmyadmin, you'd also have to embed mysql.")) {
-				model.getSelectedEmbeddableCartridges().add(IEmbeddedCartridge.MYSQL_51);
-				model.getSelectedEmbeddableCartridges().add(cartridge);
-				viewer.setChecked(IEmbeddedCartridge.MYSQL_51, true);
-			} else {
-				viewer.setChecked(cartridge, false);
-			}
-		} else {
-			model.getSelectedEmbeddableCartridges().add(cartridge);
-		}
-	}
-
-	private void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
-		model.getSelectedEmbeddableCartridges().add(cartridge);
-	}
-
-	private void removeMySQLCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
-		List<IEmbeddableCartridge> checkedCartridges = model.getSelectedEmbeddableCartridges();
-		if (viewer.getChecked(IEmbeddedCartridge.PHPMYADMIN_34)) {
-			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
-					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
-				checkedCartridges.remove(IEmbeddedCartridge.PHPMYADMIN_34);
-				checkedCartridges.remove(cartridge);
-				viewer.setChecked(IEmbeddedCartridge.PHPMYADMIN_34, false);
-			} else {
-				viewer.setChecked(cartridge, true);
-			}
-		} else {
-			checkedCartridges.remove(cartridge);
-		}
-	}
-
-	private void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
-		model.getSelectedEmbeddableCartridges().remove(cartridge);
-	}
-
 //	private SelectionListener onCheckAll() {
 //		return new SelectionAdapter() {
 //
@@ -282,8 +157,8 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						setViewerInput(model.loadEmbeddableCartridges());
-						setViewerCheckedElements(model.getSelectedEmbeddableCartridges());
+						setViewerInput(pageModel.loadEmbeddableCartridges());
+						setViewerCheckedElements(pageModel.getSelectedEmbeddableCartridges());
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						clearViewer();
@@ -321,52 +196,29 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		});
 	}
 
-	private static class JenkinsApplicationDialog extends InputDialog {
-
-		public JenkinsApplicationDialog(Shell shell) {
-			super(shell
-					, "New Jenkins application"
-					, "To embed jenkins into your application, you'd first have to create a jenkins application.\n" 
-							+ "Please provide a name for your jenkins application:"
-					, null
-					, new JenkinsNameValidator());
-		}
-
-		private static class JenkinsNameValidator implements IInputValidator {
-
-			@Override
-			public String isValid(String input) {
-				if (StringUtils.isEmpty(input)) {
-					return "You have to provide a name for the jenkins application";
-				}
-				return null;
-			}
-		}
-	}
-
 	public boolean processCartridges() {
 		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
 		try {
 			WizardUtils.runInWizard(
 					new Job(NLS.bind("Adding/Removing embedded cartridges for application {0}...",
-							model.getApplication().getName())) {
+							pageModel.getApplication().getName())) {
 
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								List<IEmbeddedCartridge> addedCartridges = model.embedCartridges();
+								List<IEmbeddedCartridge> addedCartridges = pageModel.embedCartridges();
 								openLogDialog(addedCartridges);
 								queue.offer(true);
 							} catch (OpenShiftException e) {
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",
-												model.getApplication().getName()), e);
+												pageModel.getApplication().getName()), e);
 							} catch (SocketTimeoutException e) {
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",
-												model.getApplication().getName()), e);
+												pageModel.getApplication().getName()), e);
 							}
 							return Status.OK_STATUS;
 						}
@@ -388,16 +240,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			public void run() {
 				new CreationLogDialog(getShell(), cartridges).open();
 
-			}
-		});
-	}
-
-	private void openLogDialog(final IApplication application) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				new CreationLogDialog(getShell(), application).open();
 			}
 		});
 	}

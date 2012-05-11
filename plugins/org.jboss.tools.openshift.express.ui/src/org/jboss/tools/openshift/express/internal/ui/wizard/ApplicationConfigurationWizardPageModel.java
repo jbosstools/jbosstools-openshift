@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.core.CreateApplicationOperation;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -35,10 +36,11 @@ import com.openshift.client.OpenShiftException;
  * @author Xavier Coulon
  * 
  */
-public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
+public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo implements
+		IEmbedCartridgesWizardPageModel {
 
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
-	public static final String PROPERTY_APPLICATION_SCALE = "applicationScale";
+	public static final String PROPERTY_APPLICATION_SCALE = "scale";
 	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
@@ -50,7 +52,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_EXISTING_APPLICATIONS_LOADED = "existingApplicationsLoaded";
 	public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
 	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
-	
 
 	private final OpenShiftExpressApplicationWizardModel wizardModel;
 
@@ -114,17 +115,16 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				, wizardModel.isUseExistingApplication()
 				, wizardModel.setUseExistingApplication(useExistingApplication));
 	}
-	
-	public ApplicationScale getApplicationScale() {
+
+	public ApplicationScale getScale() {
 		return wizardModel.getApplicationScale();
 	}
 
-	public void setApplicationScale(ApplicationScale scale) {
+	public void setScale(ApplicationScale scale) {
 		firePropertyChange(PROPERTY_APPLICATION_SCALE
 				, wizardModel.getApplicationScale()
 				, wizardModel.setApplicationScale(scale));
 	}
-
 
 	protected void setUseExistingApplication(IApplication application) {
 		setUseExistingApplication(application != null);
@@ -141,7 +141,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * 
 	 * @param applicationName
 	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException 
+	 * @throws SocketTimeoutException
 	 * 
 	 * @see #doSetExistingApplication(IApplication)
 	 */
@@ -209,25 +209,24 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
 	}
 
-
 	public List<ICartridge> getCartridges() {
 		return cartridges;
 	}
-	
+
 	public ICartridge getCartridgeByName(String name) {
 		List<ICartridge> cartridges = getCartridges();
 		if (cartridges == null) {
 			return null;
 		}
-		
-		ICartridge matchingCartridge = null; 
+
+		ICartridge matchingCartridge = null;
 		for (ICartridge cartridge : cartridges) {
 			if (name.equals(cartridge.getName())) {
 				matchingCartridge = cartridge;
 				break;
 			}
 		}
-		
+
 		return matchingCartridge;
 	}
 
@@ -237,18 +236,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	public void loadGearProfiles() throws OpenShiftException, SocketTimeoutException {
 		setGearProfiles(getUser().getDefaultDomain().getAvailableGearProfiles());
-		//refreshSelectedCartridge();
+		// refreshSelectedCartridge();
 	}
-	
-	
+
 	public void setGearProfiles(List<IGearProfile> gearProfiles) {
 		firePropertyChange(PROPERTY_GEAR_PROFILES, this.gearProfiles, this.gearProfiles = gearProfiles);
 	}
-	
+
 	public List<IGearProfile> getGearProfiles() {
 		return gearProfiles;
 	}
-	
+
 	public IGearProfile getSelectedGearProfile() {
 		return wizardModel.getApplicationGearProfile();
 	}
@@ -264,15 +262,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		if (gearProfiles == null) {
 			return null;
 		}
-		
-		IGearProfile matchingGearProfile = null; 
+
+		IGearProfile matchingGearProfile = null;
 		for (IGearProfile gearProfile : gearProfiles) {
 			if (name.equals(gearProfile.getName())) {
 				matchingGearProfile = gearProfile;
 				break;
 			}
 		}
-		
+
 		return matchingGearProfile;
 	}
 
@@ -308,7 +306,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * 
 	 * @param application
 	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException 
+	 * @throws SocketTimeoutException
 	 * 
 	 * @see #setExistingApplicationName(String)
 	 * @see #setApplicationName(IApplication)
@@ -329,7 +327,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * 
 	 * @param application
 	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException 
+	 * @throws SocketTimeoutException
 	 * 
 	 * @see #setApplicationName(IApplication)
 	 * @see #setSelectedCartridge(IApplication)
@@ -342,7 +340,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			setSelectedCartridge(application.getCartridge());
 			setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(application.getEmbeddedCartridges()));
 			setSelectedGearProfile(application.getGearProfile());
-			setApplicationScale(application.getApplicationScale());
+			setScale(application.getApplicationScale());
 			wizardModel.setApplication(application);
 		}
 	}
@@ -378,14 +376,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return embeddedCartridges;
 	}
 
+	@Override
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
+	@Override
 	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException {
 		getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
+	@Override
 	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException {
 		getSelectedEmbeddableCartridges().remove(cartridge);
 	}
@@ -396,6 +397,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
 	}
 
+	@Override
 	public boolean hasApplicationOfType(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
 		return getUser().hasApplicationOfType(cartridge);
 	}
@@ -409,7 +411,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
-		return wizardModel.createApplication(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE, IGearProfile.SMALL, monitor);
+		IApplication application =
+				new CreateApplicationOperation(getUser()).execute(
+						name,
+						ICartridge.JENKINS_14,
+						ApplicationScale.NO_SCALE,
+						IGearProfile.SMALL,
+						monitor);
+		return application;
 	}
 
 }

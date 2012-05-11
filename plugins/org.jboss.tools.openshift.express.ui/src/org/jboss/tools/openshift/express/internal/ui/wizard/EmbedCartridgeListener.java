@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,7 +20,9 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
@@ -41,20 +43,35 @@ import com.openshift.client.OpenShiftException;
  * 
  * @author Andre Dietisheim
  */
-public class EmbeddedCartridgeWizardStrategy {
+public class EmbedCartridgeListener implements ICheckStateListener {
 
 	private CheckboxTableViewer viewer;
-	private ApplicationConfigurationWizardPageModel pageModel;
+	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
 
-	public EmbeddedCartridgeWizardStrategy(CheckboxTableViewer viewer, IWizardPage wizardPage,
-			ApplicationConfigurationWizardPageModel pageModel) {
+	public EmbedCartridgeListener(CheckboxTableViewer viewer, 
+			IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
 		this.viewer = viewer;
 		this.wizardPage = wizardPage;
 		this.pageModel = pageModel;
 	}
 
-	public void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	public void checkStateChanged(CheckStateChangedEvent event) {
+		try {
+			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
+			if (event.getChecked()) {
+				addCartridge(cartridge);
+			} else {
+				removeCartridge(cartridge);
+			}
+		} catch (OpenShiftException e) {
+			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+		} catch (SocketTimeoutException e) {
+			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+		}
+	}
+
+	private void addCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		if (IEmbeddableCartridge.PHPMYADMIN_34.equals(cartridge)) {
 			addPhpMyAdmin();
 		} else if (IEmbeddableCartridge.JENKINS_14.equals(cartridge)) {
@@ -72,7 +89,7 @@ public class EmbeddedCartridgeWizardStrategy {
 		}
 	}
 
-	public void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
+	private void removeCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		if (IEmbeddableCartridge.MYSQL_51.equals(cartridge)) {
 			removeMySQL();
 		} else if (IEmbeddableCartridge.MONGODB_20.equals(cartridge)) {
@@ -123,16 +140,14 @@ public class EmbeddedCartridgeWizardStrategy {
 		}
 	}
 
-	private void addPhpMyAdmin() throws OpenShiftException {
+	private void addPhpMyAdmin() throws OpenShiftException, SocketTimeoutException {
 		if (!viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed phpMyAdmin Cartridge",
 					"To embed phpMyAdmin, you'd also have to embed MySQL. \n\nAlso embed MySQL?")) {
-				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
+				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
 			} else {
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, false);
-				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
 			}
 		} else {
@@ -146,8 +161,9 @@ public class EmbeddedCartridgeWizardStrategy {
 			if (MessageDialog
 					.openQuestion(getShell(), "Remove PostgreSQL Cartridge",
 							"MySQL and PostgreSQL are mutually exclusive. To embed MySQL, you have to remove PostgreSQL. \n\nRemove PostgreSQL?")) {
-				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
 				viewer.setChecked(IEmbeddableCartridge.POSTGRESQL_84, false);
+				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
+				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, false);
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
@@ -162,9 +178,10 @@ public class EmbeddedCartridgeWizardStrategy {
 		if (viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
 			if (MessageDialog
 					.openQuestion(getShell(), "Remove MySQL Cartridge",
-							"MySQL and PostgreSQL are mutually exclusive. To embed PostgreSQL, you have to remove MySQL. \n\nRemove MySQL?")) {
-				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
+							"MySQL and PostgreSQL are mutually exclusive. To embed PostgreSQL, you have to remove MySQL.\n\nRemove MySQL?")) {
 				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, false);
+				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
+				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.POSTGRESQL_84, false);
 			}
@@ -173,11 +190,12 @@ public class EmbeddedCartridgeWizardStrategy {
 		}
 	}
 
-	private void removeMySQL() throws OpenShiftException {
+	private void removeMySQL() throws OpenShiftException, SocketTimeoutException {
 		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove phpmyadmin cartridge",
-					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.")) {
+					"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.\n\nRemove phpMyAdmin and MySQL?")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
+				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
@@ -187,24 +205,22 @@ public class EmbeddedCartridgeWizardStrategy {
 		}
 	}
 
-	private void addRockMongo() throws OpenShiftException {
+	private void addRockMongo() throws OpenShiftException, SocketTimeoutException {
 		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed MongoDB Cartridge",
 					"To embed RockMongo, you'd also have to embed MongoDB. \n\nAlso embed MongoDB?")) {
-				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
+				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.ROCKMONGO_11);
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, false);
-				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
-				viewer.setChecked(IEmbeddableCartridge.ROCKMONGO_11, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
 		}
 	}
 
-	private void removeMongoDb() throws OpenShiftException {
+	private void removeMongoDb() throws OpenShiftException, SocketTimeoutException {
 		if (viewer.getChecked(IEmbeddableCartridge.ROCKMONGO_11)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
 					"If you remove the MongoDB cartridge, you'd also have to remove RockMongo.")) {
@@ -218,7 +234,7 @@ public class EmbeddedCartridgeWizardStrategy {
 		}
 	}
 
-	private void add10gen() throws OpenShiftException {
+	private void add10gen() throws OpenShiftException, SocketTimeoutException {
 		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed 10gen Cartridge",
 					"To embed 10gen cartridge, you'd also have to embed MongoDB. \n\nAlso embed MongoDB?")) {

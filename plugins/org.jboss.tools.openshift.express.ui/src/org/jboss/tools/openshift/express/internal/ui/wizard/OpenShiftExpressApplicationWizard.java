@@ -38,6 +38,7 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgesOperation;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -56,17 +57,19 @@ import com.openshift.client.OpenShiftException;
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
 	private final boolean skipCredentialsPage;
-	
+
 	private final OpenShiftExpressApplicationWizardModel wizardModel;
 
 	OpenShiftExpressApplicationWizard(final boolean useExistingApplication, final String wizardTitle) {
 		this(null, null, null, useExistingApplication, wizardTitle);
 	}
-	
-	OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application, boolean useExistingApplication, String wizardTitle) {
+
+	OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application,
+			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
-		this.wizardModel = new OpenShiftExpressApplicationWizardModel(user, project, application, useExistingApplication);
+		this.wizardModel = new OpenShiftExpressApplicationWizardModel(user, project, application,
+				useExistingApplication);
 		this.skipCredentialsPage = (user != null);
 	}
 
@@ -135,7 +138,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	public boolean performFinish() {
 		boolean success = getWizardModel().isUseExistingApplication();
 		if (!success) {
-			if(createApplication()) {
+			if (createApplication()) {
 				success = addRemoveCartridges(
 						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
 			}
@@ -146,7 +149,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		wizardModel.addUserToModel();
 		return success;
 	}
-	
+
 	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
@@ -174,7 +177,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 								return Status.OK_STATUS;
 							} catch (OpenShiftEndpointException e) {
 								// TODO: refresh user
-								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\": {1}",
+								return OpenShiftUIActivator.createErrorStatus(
+										"Could not create application \"{0}\": {1}",
 										e, applicationName, e.getRestResponseMessages());
 							} catch (OpenShiftException e) {
 								// TODO: refresh user
@@ -193,7 +197,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private boolean addRemoveCartridges(final IApplication application,
 			final Set<IEmbeddableCartridge> selectedCartridges) {
 		try {
-			final String applicationName = getWizardModel().getApplication().getName();
+			final String applicationName = application.getName();
 			IStatus status = WizardUtils.runInWizard(
 					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", applicationName)) {
 
@@ -201,15 +205,17 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
 								if (selectedCartridges != null && !selectedCartridges.isEmpty()) {
-									List<IEmbeddableCartridge> embeddableCartridges = new ArrayList<IEmbeddableCartridge>();
-									embeddableCartridges.addAll(selectedCartridges);
-									final List<IEmbeddedCartridge> embeddedCartridges = application.addEmbeddableCartridges(embeddableCartridges);
+									final List<IEmbeddedCartridge> embeddedCartridges =
+											new EmbedCartridgesOperation(application).execute(
+													new ArrayList<IEmbeddableCartridge>(selectedCartridges)
+													, monitor);
 									openCreationLogDialog(embeddedCartridges);
 								}
 							} catch (OpenShiftEndpointException e) {
 								// TODO: refresh user
 								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-										"Could not embed cartridges to application {0}: {1}", applicationName, e.getRestResponseMessages()));
+										"Could not embed cartridges to application {0}: {1}", applicationName,
+										e.getRestResponseMessages()));
 							} catch (OpenShiftException e) {
 								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
 										"Could not embed cartridges to application {0}", getWizardModel()
@@ -243,7 +249,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	}
 
 	/**
-	 * A workspace job that will create a new project or enable the selected project to be used with OpenShift.
+	 * A workspace job that will create a new project or enable the selected
+	 * project to be used with OpenShift.
 	 */
 	class ImportJob extends WorkspaceJob {
 
@@ -263,11 +270,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					wizardModel.importProject(delegatingMonitor);
 				} else if (!wizardModel.isGitSharedProject()) {
 					if (!askForConfirmation(
-							NLS.bind("OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
-									+ "copying OpenShift configuration and enabling Git for the project.\n"
-									+ "This cannot be undone.\n" 
-									+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n" 
-									+ "\nDo you wish to continue ?",
+							NLS.bind(
+									"OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
+											+ "copying OpenShift configuration and enabling Git for the project.\n"
+											+ "This cannot be undone.\n"
+											+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n"
+											+ "\nDo you wish to continue ?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
@@ -275,11 +283,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					getWizardModel().configureUnsharedProject(delegatingMonitor);
 				} else {
 					if (!askForConfirmation(
-							NLS.bind("OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
-									+ "copying OpenShift configuration and enabling Git for the project.\n"
-									+ "This cannot be undone.\n" 
-									+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n" 
-									+ "\nDo you wish to continue ?",
+							NLS.bind(
+									"OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
+											+ "copying OpenShift configuration and enabling Git for the project.\n"
+											+ "This cannot be undone.\n"
+											+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n"
+											+ "\nDo you wish to continue ?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
