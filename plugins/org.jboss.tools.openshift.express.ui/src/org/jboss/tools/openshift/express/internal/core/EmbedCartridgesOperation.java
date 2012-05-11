@@ -27,6 +27,8 @@ import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.OpenShiftException;
 
 /**
+ * An operation that embeds/removes cartridges from a given application.
+ * 
  * @author Andre Dietisheim
  */
 public class EmbedCartridgesOperation {
@@ -37,10 +39,23 @@ public class EmbedCartridgesOperation {
 		this.application = application;
 	}
 
-	public List<IEmbeddedCartridge> execute(final List<IEmbeddableCartridge> enabledCartridges, final IProgressMonitor monitor) throws SocketTimeoutException, OpenShiftException {
+	/**
+	 * Embeds and removes cartridges from the given application so that it
+	 * matches the given list of enabled cartridges.
+	 * 
+	 * @param enabledCartridges
+	 * @param monitor
+	 * @return
+	 * @throws SocketTimeoutException
+	 * @throws OpenShiftException
+	 */
+	public List<IEmbeddedCartridge> execute(final List<IEmbeddableCartridge> enabledCartridges,
+			final IProgressMonitor monitor)
+			throws SocketTimeoutException, OpenShiftException {
 		if (enabledCartridges == null) {
 			return Collections.emptyList();
 		}
+
 		List<IEmbeddableCartridge> cartridgesToAdd = new ArrayList<IEmbeddableCartridge>();
 		List<IEmbeddableCartridge> cartridgesToRemove = new ArrayList<IEmbeddableCartridge>();
 		computeAdditionsAndRemovals(
@@ -48,18 +63,18 @@ public class EmbedCartridgesOperation {
 				cartridgesToRemove,
 				enabledCartridges,
 				application.getEmbeddedCartridges());
+
 		removeEmbeddedCartridges(cartridgesToRemove, application);
 		final List<IEmbeddedCartridge> addedCartridges = addEmbeddedCartridges(cartridgesToAdd, application);
 		return addedCartridges;
-
 	}
 
-	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove, final IApplication application) throws OpenShiftException,
-			SocketTimeoutException {
+	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove, final IApplication application)
+			throws OpenShiftException,SocketTimeoutException {
 		if (cartridgesToRemove.isEmpty()) {
 			return;
 		}
-		// Collections.sort(removedCartridges, new CartridgeComparator());
+		Collections.sort(cartridgesToRemove, new CartridgeAddRemovePriorityComparator());
 		for (IEmbeddableCartridge cartridgeToRemove : cartridgesToRemove) {
 			final IEmbeddedCartridge embeddedCartridge = application.getEmbeddedCartridge(cartridgeToRemove);
 			if (embeddedCartridge != null) {
@@ -68,12 +83,13 @@ public class EmbedCartridgesOperation {
 		}
 	}
 
-	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToAdd, final IApplication application)
+	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToAdd,
+			final IApplication application)
 			throws OpenShiftException, SocketTimeoutException {
 		if (cartridgesToAdd.isEmpty()) {
 			return Collections.emptyList();
 		}
-		// Collections.sort(addedCartridges, new CartridgeComparator());
+		Collections.sort(cartridgesToAdd, new CartridgeAddRemovePriorityComparator());
 		return application.addEmbeddableCartridges(cartridgesToAdd);
 	}
 
@@ -89,11 +105,9 @@ public class EmbedCartridgesOperation {
 				removedCartridges.add((IEmbeddableCartridge) entry.getElement());
 			}
 		}
-		Collections.sort(addedCartridges, new CartridgeComparator());
-		Collections.sort(removedCartridges, new CartridgeComparator());
 	}
 
-	private static class CartridgeComparator implements Comparator<IEmbeddableCartridge> {
+	private static class CartridgeAddRemovePriorityComparator implements Comparator<IEmbeddableCartridge> {
 
 		@Override
 		public int compare(IEmbeddableCartridge thisCartridge, IEmbeddableCartridge thatCartridge) {
@@ -114,5 +128,5 @@ public class EmbedCartridgesOperation {
 			return 0;
 		}
 	}
-	
+
 }
