@@ -386,6 +386,20 @@
            </enablement>
         </actionProvider>
         <actionProvider
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RefreshElementActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RefreshElementActionProvider">
+           <enablement>
+              <or>
+                 <instanceof
+                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                 </instanceof>
+                 <instanceof
+                       value="com.openshift.client.IApplication">
+                 </instanceof>
+              </or>
+           </enablement>
+        </actionProvider>
+        <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider">
            <enablement>

@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.express.internal.ui.viewer;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,7 +27,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -60,15 +61,19 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 	}
 
 	// Keep track of what's loading and what's finished
-	private ArrayList<UserDelegate> loadedUsers = new ArrayList<UserDelegate>();
-	private ArrayList<UserDelegate> loadingUsers = new ArrayList<UserDelegate>();
-	private HashMap<UserDelegate, Exception> errors = new HashMap<UserDelegate, Exception>();
+	private List<Object> loadedElements = new ArrayList<Object>();
+	private List<Object> loadingElements = new ArrayList<Object>();
+	
+	private Map<Object, Exception> errors = new HashMap<Object, Exception>();
 
+	/**
+	 * Called to obtain the root elements of the tree viewer, ie, the Users
+	 */
 	@Override
 	public Object[] getElements(final Object parentElement) {
 		// A refresh on the whole model... clear our cache
-		loadedUsers.clear();
-		loadingUsers.clear();
+		loadedElements.clear();
+		loadingElements.clear();
 		errors.clear();
 		if (parentElement instanceof IWorkspaceRoot) {
 			return UserModel.getDefault().getUsers();
@@ -80,6 +85,9 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 		return new Object[0];
 	}
 	
+	/**
+	 * Called to obtain the children of any element in the tree viewer, ie, from a user or an application
+	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof UserDelegate) {
@@ -87,45 +95,39 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			if(!user.isConnected() && !user.canPromptForPassword()) {
 				return new Object[]{new NotConnectedUserStub()};
 			}
-			if (!loadedUsers.contains(parentElement)) {
-				if (!loadingUsers.contains(parentElement)) {
-					// Load the data
-					launchLoadingUserJob((UserDelegate) parentElement);
-				}
-				// return a stub object that says loading...
-				return new Object[] { new LoadingStub() };
-			}
-			Exception ose = errors.get((UserDelegate)parentElement);
-			if( ose != null ) {
-				return new Object[]{ose};
-			}
+			return loadChildren(parentElement);
+		} else if(parentElement instanceof IApplication) {
+			return loadChildren(parentElement);
 		}
-		return getChildrenForElement_LogException(parentElement, false);
+		return getChildrenForElement(parentElement);
 	}
 
-	// Force the children to load completely
-	private void getChildrenFor(Object[] parentElements) {
-		for (int i = 0; i < parentElements.length; i++) {
-			getChildrenForElement_LogException(parentElements[i], true);
+	/**
+	 * @param parentElement
+	 * @return 
+	 */
+	private Object[] loadChildren(Object parentElement) {
+		if (!loadedElements.contains(parentElement)) {
+			if (!loadingElements.contains(parentElement)) {
+				// Load the data
+				launchLoadingJob(parentElement);
+			}
+			// return a stub object that says loading...
+			return new Object[] { new LoadingStub() };
 		}
+		Exception ose = errors.get(parentElement);
+		if( ose != null ) {
+			return new Object[]{ose};
+		}
+		return getChildrenForElement(parentElement);
 	}
 
-	// Get the children without the protection of a "loading..." situation
-	private Object[] getChildrenForElement_LogException(Object parentElement, boolean recurse) {
-		try {
-			return getChildrenForElement(parentElement, recurse);
-		} catch (OpenShiftException e) {
-			Logger.error("Unable to retrieve OpenShift information", e);
-		} catch (SocketTimeoutException e) {
-			Logger.error("Unable to retrieve OpenShift information", e);
-		}
-		return new Object[0];
-	}
 	
-	private Object[] getChildrenForElement(Object parentElement, boolean recurse) throws OpenShiftException, SocketTimeoutException {
+	
+	private Object[] getChildrenForElement(Object parentElement) {
 		// .... the actual work is done here...
 		Object[] children = new Object[0];
-//		try {
+		try {
 			if (parentElement instanceof OpenShiftExpressConsoleContentCategory) {
 				UserDelegate user = ((OpenShiftExpressConsoleContentCategory) parentElement).getUser();
 				children = new Object[] { user };
@@ -137,36 +139,28 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 			} else if (parentElement instanceof IApplication) {
 				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
 			}
+		} catch(OpenShiftException e) {
+			errors.put(parentElement, e);
+		} catch(SocketTimeoutException e) {
+			errors.put(parentElement, e);
+		}
 
-			if (recurse) {
-				getChildrenFor(children);
-			}
-//		} catch (OpenShiftException e) {
-//			Logger.error("Unable to retrieve OpenShift information", e);
-//		}
 		return children;
 	}
 
-	private void launchLoadingUserJob(final UserDelegate user) {
-		Job job = new Job("Loading OpenShift User information...") {
+	private void launchLoadingJob(final Object element) {
+		Job job = new Job("Loading OpenShift information...") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Loading OpenShift information...", IProgressMonitor.UNKNOWN);
 				monitor.worked(1);
 				// Get the actual children, with the delay
-				loadingUsers.add(user);
-				try {
-					getChildrenForElement(user, Boolean.valueOf(System.getProperty("org.jboss.tools.openshift.express.ui.eagerloading", "true"))); // JBIDE-11680 false = fast, but blocks ui while loading cartridges, true = slow, but no blocking since cartridges is forced loaded.
-
-				} catch(OpenShiftException e) {
-					errors.put(user, e);
-				} catch(SocketTimeoutException e) {
-					errors.put(user, e);
-				}
-				loadedUsers.add(user);
-				loadingUsers.remove(user);
-				refreshViewerObject(user); 
+				loadingElements.add(element);
+				getChildrenForElement(element); //Boolean.valueOf(System.getProperty("org.jboss.tools.openshift.express.ui.eagerloading", "true"))); // JBIDE-11680 false = fast, but blocks ui while loading cartridges, true = slow, but no blocking since cartridges is forced loaded.
+				loadedElements.add(element);
+				loadingElements.remove(element);
+				refreshViewerObject(element); 
 				monitor.done();
 				return Status.OK_STATUS;
 			}

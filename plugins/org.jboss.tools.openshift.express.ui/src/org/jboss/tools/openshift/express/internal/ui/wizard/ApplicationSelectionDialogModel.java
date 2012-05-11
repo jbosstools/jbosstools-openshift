@@ -44,6 +44,8 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 			getUser().refresh();
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to refresh User's account", e);
+		} catch (SocketTimeoutException e) {
+			Logger.error("Failed to refresh User's account", e);
 		}
 	}
 	

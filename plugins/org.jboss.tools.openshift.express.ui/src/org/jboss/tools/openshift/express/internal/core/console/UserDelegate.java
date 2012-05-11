@@ -216,7 +216,7 @@ public class UserDelegate {
 		return false;
 	}
 	
-	public void refresh() throws OpenShiftException {
+	public void refresh() throws OpenShiftException, SocketTimeoutException {
 		if(checkForPassword()) {
 			delegate.refresh();
 		} 
