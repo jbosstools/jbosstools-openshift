@@ -56,6 +56,11 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		selectedCartridges.addAll(application.getEmbeddedCartridges());
 	}
 
+	protected void setSelectedEmbeddedCartridges(List<IEmbeddedCartridge> cartridges) {
+		selectedCartridges.clear();
+		selectedCartridges.addAll(cartridges);
+	}
+	
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
 		List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
@@ -88,15 +93,21 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	}
 
 	@Override
-	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException,
-			SocketTimeoutException {
+	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
+			throws OpenShiftException,SocketTimeoutException {
 		getSelectedEmbeddableCartridges().add(cartridge);
 	}
 
 	@Override
-	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException,
-			SocketTimeoutException {
+	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
+			throws OpenShiftException,SocketTimeoutException {
 		getSelectedEmbeddableCartridges().remove(cartridge);
+	}
+
+	public Set<IEmbeddableCartridge> resetSelectedEmbeddedCartridges() 
+			throws OpenShiftException, SocketTimeoutException {
+		setSelectedEmbeddedCartridges(getApplication().getEmbeddedCartridges());
+		return selectedCartridges;
 	}
 
 	/**

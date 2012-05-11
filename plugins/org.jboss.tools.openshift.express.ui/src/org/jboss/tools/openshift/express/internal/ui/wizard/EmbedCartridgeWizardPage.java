@@ -14,6 +14,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -186,6 +187,22 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		});
 	}
 
+	private void safeResetSelectedEmbeddedCartridges() {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					Set<IEmbeddableCartridge> selectedEmbeddableCartridges = pageModel.resetSelectedEmbeddedCartridges();
+					viewer.setCheckedElements(
+							selectedEmbeddableCartridges.toArray());
+				} catch (Exception e) {
+					OpenShiftUIActivator.log(e);
+				}
+			}
+		});
+	}
+
 	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
@@ -210,11 +227,13 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 								openLogDialog(addedCartridges);
 								queue.offer(true);
 							} catch (OpenShiftException e) {
+								safeResetSelectedEmbeddedCartridges();
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",
 												pageModel.getApplication().getName()), e);
 							} catch (SocketTimeoutException e) {
+								safeResetSelectedEmbeddedCartridges();
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",

@@ -124,13 +124,13 @@ public class EmbedCartridgeListener implements ICheckStateListener {
 						openLogDialog(jenkinsApplication);
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						getShell().getDisplay().syncExec(new Runnable() {
+						viewer.getControl().getDisplay().syncExec(new Runnable() {
 							@Override
 							public void run() {
 								viewer.setChecked(cartridge, false);
 							}
 						});
-						return OpenShiftUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
+						return OpenShiftUIActivator.createErrorStatus("Could not create jenkins application", e);
 					}
 				}
 
@@ -166,7 +166,6 @@ public class EmbedCartridgeListener implements ICheckStateListener {
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, false);
-				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
@@ -238,13 +237,11 @@ public class EmbedCartridgeListener implements ICheckStateListener {
 		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed 10gen Cartridge",
 					"To embed 10gen cartridge, you'd also have to embed MongoDB. \n\nAlso embed MongoDB?")) {
-				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
+				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, false);
-				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
-				viewer.setChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
@@ -261,7 +258,7 @@ public class EmbedCartridgeListener implements ICheckStateListener {
 	}
 
 	private void openLogDialog(final IApplication application) {
-		getShell().getDisplay().syncExec(new Runnable() {
+		viewer.getControl().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
