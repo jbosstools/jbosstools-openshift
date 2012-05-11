@@ -76,7 +76,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		viewer.addCheckStateListener(new EmbedCartridgeListener(viewer, pageModel, this));
+		viewer.addCheckStateListener(new EmbedCartridgeStrategy(viewer, pageModel, this));
 		
 // hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
 //		Button checkAllButton = new Button(embedGroup, SWT.PUSH);

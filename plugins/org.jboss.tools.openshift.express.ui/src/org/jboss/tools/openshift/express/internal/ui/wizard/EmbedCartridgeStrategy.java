@@ -43,13 +43,13 @@ import com.openshift.client.OpenShiftException;
  * 
  * @author Andre Dietisheim
  */
-public class EmbedCartridgeListener implements ICheckStateListener {
+public class EmbedCartridgeStrategy implements ICheckStateListener {
 
 	private CheckboxTableViewer viewer;
 	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
 
-	public EmbedCartridgeListener(CheckboxTableViewer viewer, 
+	public EmbedCartridgeStrategy(CheckboxTableViewer viewer, 
 			IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
 		this.viewer = viewer;
 		this.wizardPage = wizardPage;
