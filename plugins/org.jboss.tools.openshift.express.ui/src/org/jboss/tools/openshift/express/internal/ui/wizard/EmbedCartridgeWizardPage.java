@@ -187,13 +187,13 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		});
 	}
 
-	private void safeResetSelectedEmbeddedCartridges() {
+	private void safeRefreshSelectedEmbeddedCartridges() {
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					Set<IEmbeddableCartridge> selectedEmbeddableCartridges = pageModel.resetSelectedEmbeddedCartridges();
+					Set<IEmbeddableCartridge> selectedEmbeddableCartridges = pageModel.refreshSelectedEmbeddedCartridges();
 					viewer.setCheckedElements(
 							selectedEmbeddableCartridges.toArray());
 				} catch (Exception e) {
@@ -227,13 +227,13 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 								openLogDialog(addedCartridges);
 								queue.offer(true);
 							} catch (OpenShiftException e) {
-								safeResetSelectedEmbeddedCartridges();
+								safeRefreshSelectedEmbeddedCartridges();
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",
 												pageModel.getApplication().getName()), e);
 							} catch (SocketTimeoutException e) {
-								safeResetSelectedEmbeddedCartridges();
+								safeRefreshSelectedEmbeddedCartridges();
 								queue.offer(false);
 								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 										NLS.bind("Could not embed cartridges to application {0}",

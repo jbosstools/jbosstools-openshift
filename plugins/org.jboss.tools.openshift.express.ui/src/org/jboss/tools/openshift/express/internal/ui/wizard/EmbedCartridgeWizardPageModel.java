@@ -104,10 +104,11 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
-	public Set<IEmbeddableCartridge> resetSelectedEmbeddedCartridges() 
+	public Set<IEmbeddableCartridge> refreshSelectedEmbeddedCartridges() 
 			throws OpenShiftException, SocketTimeoutException {
+		getApplication().refresh();
 		setSelectedEmbeddedCartridges(getApplication().getEmbeddedCartridges());
-		return selectedCartridges;
+		return getSelectedEmbeddableCartridges();
 	}
 
 	/**
