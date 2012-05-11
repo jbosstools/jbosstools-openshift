@@ -228,7 +228,9 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
 			}
-		} if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)
+		} 
+		
+		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20) // mongo to be removed?
 				&& viewer.getChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
 					"If you remove the MongoDB cartridge, you'd also have to remove 10gen MMS agent.")) {
@@ -238,7 +240,8 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
 			}
 		}
-		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
+		
+		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) { // mongo to be removed?
 			pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 		}
 	}
