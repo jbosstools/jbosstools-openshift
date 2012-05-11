@@ -220,28 +220,30 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	}
 
 	private void removeMongoDb() throws OpenShiftException, SocketTimeoutException {
+		boolean removeMongoDb = true;
 		if (viewer.getChecked(IEmbeddableCartridge.ROCKMONGO_11)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
 					"If you remove the MongoDB cartridge, you'd also have to remove RockMongo.")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.ROCKMONGO_11);
 				viewer.setChecked(IEmbeddableCartridge.ROCKMONGO_11, false);
 			} else {
-				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
+				removeMongoDb = false;
 			}
 		} 
 		
-		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20) // mongo to be removed?
+		if (removeMongoDb // mongo to be removed?
 				&& viewer.getChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
 					"If you remove the MongoDB cartridge, you'd also have to remove 10gen MMS agent.")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
 				viewer.setChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01, false);
 			} else {
-				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
+				removeMongoDb = false;
 			}
 		}
 		
-		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) { // mongo to be removed?
+		viewer.setChecked(IEmbeddableCartridge.MONGODB_20, !removeMongoDb);
+		if (removeMongoDb) { // mongo to be removed?
 			pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 		}
 	}
