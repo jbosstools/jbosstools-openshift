@@ -212,7 +212,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.ROCKMONGO_11);
 			} else {
-				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, false);
+				viewer.setChecked(IEmbeddableCartridge.ROCKMONGO_11, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
@@ -228,7 +228,17 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 			} else {
 				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
 			}
-		} else {
+		} if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)
+				&& viewer.getChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01)) {
+			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
+					"If you remove the MongoDB cartridge, you'd also have to remove 10gen MMS agent.")) {
+				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
+				viewer.setChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01, false);
+			} else {
+				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
+			}
+		}
+		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
 			pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 		}
 	}
@@ -241,7 +251,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
 			} else {
-				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, false);
+				viewer.setChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
