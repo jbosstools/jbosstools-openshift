@@ -87,7 +87,6 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		rhLoginText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
-		UIUtils.selectAllOnFocus(rhLoginText);
 		final IObservableValue rhLoginObservable =
 				BeanProperties.value(CredentialsWizardPageModel.PROPERTY_RHLOGIN).observe(pageModel);
 		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(rhLoginText), rhLoginObservable);
@@ -99,7 +98,6 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 		passwordText = new Text(container, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(passwordText);
-		UIUtils.selectAllOnFocus(passwordText);
 		final IObservableValue passwordModelObservable =
 				BeanProperties.value(CredentialsWizardPageModel.PROPERTY_PASSWORD).observe(pageModel);
 		final ISWTObservableValue passwordTextObservable = WidgetProperties.text(SWT.Modify).observe(passwordText);
