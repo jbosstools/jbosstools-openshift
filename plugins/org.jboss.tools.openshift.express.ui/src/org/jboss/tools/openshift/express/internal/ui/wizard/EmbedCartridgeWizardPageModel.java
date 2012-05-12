@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +39,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 
 	private ApplicationWizardModel wizardModel;
-
+	
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private Set<IEmbeddableCartridge> selectedCartridges;
 
@@ -54,11 +55,6 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 			return;
 		}
 		selectedCartridges.addAll(application.getEmbeddedCartridges());
-	}
-
-	protected void setSelectedEmbeddedCartridges(List<IEmbeddedCartridge> cartridges) {
-		selectedCartridges.clear();
-		selectedCartridges.addAll(cartridges);
 	}
 	
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
@@ -84,6 +80,21 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return selectedCartridges;
 	}
 
+	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges) throws SocketTimeoutException, OpenShiftException {
+		setSelectedEmbeddableCartridges(cartridges);
+	}
+
+	protected void setSelectedEmbeddedCartridges(Collection<IEmbeddedCartridge> cartridges) throws SocketTimeoutException, OpenShiftException {
+		Set<IEmbeddableCartridge> oldValue = getSelectedEmbeddableCartridges();
+		selectedCartridges.clear();
+		selectedCartridges.addAll(cartridges);
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, selectedCartridges);
+	}
+
+	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+		return getSelectedEmbeddableCartridges().contains(cartridge);
+	}
+	
 	public boolean hasApplication(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
 		return wizardModel.getUser().hasApplicationOfType(cartridge);
 	}
@@ -95,13 +106,17 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	@Override
 	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
 			throws OpenShiftException,SocketTimeoutException {
+		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
 		getSelectedEmbeddableCartridges().add(cartridge);
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
 	}
 
 	@Override
 	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
 			throws OpenShiftException,SocketTimeoutException {
+		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
 		getSelectedEmbeddableCartridges().remove(cartridge);
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
 	}
 
 	public Set<IEmbeddableCartridge> refreshSelectedEmbeddedCartridges() 

@@ -16,6 +16,7 @@ import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
+import org.eclipse.core.databinding.UpdateSetStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -321,7 +322,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.addValidationStatusProvider(newApplicationTypeValidator);
 		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
 				new CustomControlDecorationUpdater());
-		
+
 		// embeddable cartridges
 		this.newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
 		newAppEmbeddableCartridgesGroup.setText("Embeddable Cartridges");
@@ -333,10 +334,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
 				.applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
-		viewer.addCheckStateListener(new EmbedCartridgeStrategy(viewer, pageModel, this));
-		dbc.bindSet(ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
-				BeanProperties.set(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
-						.observe(pageModel));
+		viewer.addCheckStateListener(new EmbedCartridgeStrategy(pageModel, this));
+		dbc.bindSet(
+				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
+				BeanProperties.set(
+						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
+						.observe(pageModel),
+						new UpdateSetStrategy(UpdateSetStrategy.POLICY_NEVER),
+						null);
 
 		this.checkAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");
@@ -452,14 +457,16 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				viewer.setAllChecked(true);
-//				try {
-//					addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
-//				} catch (OpenShiftException ex) {
-//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-//				} catch (SocketTimeoutException ex) {
-//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-//				}
+				// viewer.setAllChecked(true);
+				// try {
+				// addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
+				// } catch (OpenShiftException ex) {
+				// OpenShiftUIActivator.log("Could not select jenkins cartridge",
+				// ex);
+				// } catch (SocketTimeoutException ex) {
+				// OpenShiftUIActivator.log("Could not select jenkins cartridge",
+				// ex);
+				// }
 			}
 
 		};
@@ -824,8 +831,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	/**
 	 * Validates that the new application type is selected
+	 * 
 	 * @author Xavier Coulon
-	 *
+	 * 
 	 */
 	class NewApplicationTypeValidator extends MultiValidator {
 

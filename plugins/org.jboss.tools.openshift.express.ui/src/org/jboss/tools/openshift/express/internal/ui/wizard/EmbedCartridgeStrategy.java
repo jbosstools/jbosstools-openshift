@@ -21,7 +21,6 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -48,17 +47,15 @@ import com.openshift.client.OpenShiftException;
  */
 public class EmbedCartridgeStrategy implements ICheckStateListener {
 
-	private CheckboxTableViewer viewer;
 	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
 
-	public EmbedCartridgeStrategy(CheckboxTableViewer viewer,
-			IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
-		this.viewer = viewer;
+	public EmbedCartridgeStrategy(IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
 		this.wizardPage = wizardPage;
 		this.pageModel = pageModel;
 	}
 
+	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		try {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
@@ -111,7 +108,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 			if (dialog.open() == Dialog.OK) {
 				createJenkinsApplication(cartridge, dialog.getValue());
 			} else {
-				viewer.setChecked(cartridge, false);
+				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.JENKINS_14);
 			}
 		}
 	}
@@ -123,16 +120,15 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						IApplication jenkinsApplication = pageModel.createJenkinsApplication(name, monitor);
-						pageModel.getSelectedEmbeddableCartridges().add(cartridge);
+						pageModel.selectEmbeddedCartridges(cartridge);
 						openLogDialog(jenkinsApplication);
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						viewer.getControl().getDisplay().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								viewer.setChecked(cartridge, false);
-							}
-						});
+						try {
+							pageModel.selectEmbeddedCartridges(cartridge);
+						} catch (Exception ex) {
+							OpenShiftUIActivator.log(ex);
+						}
 						return OpenShiftUIActivator.createErrorStatus("Could not create jenkins application", e);
 					}
 				}
@@ -144,14 +140,11 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	}
 
 	private void addPhpMyAdmin() throws OpenShiftException, SocketTimeoutException {
-		if (!viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
+		if (!pageModel.isSelected(IEmbeddableCartridge.MYSQL_51)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed phpMyAdmin Cartridge",
 					"To embed phpMyAdmin, you'd also have to embed MySQL. \n\nAlso embed MySQL?")) {
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
-			} else {
-				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
@@ -160,15 +153,12 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 
 	private void addMySql()
 			throws OpenShiftException, SocketTimeoutException {
-		if (viewer.getChecked(IEmbeddableCartridge.POSTGRESQL_84)) {
+		if (pageModel.isSelected(IEmbeddableCartridge.POSTGRESQL_84)) {
 			if (MessageDialog
 					.openQuestion(getShell(), "Remove PostgreSQL Cartridge",
 							"MySQL and PostgreSQL are mutually exclusive. To embed MySQL, you have to remove PostgreSQL. \n\nRemove PostgreSQL?")) {
-				viewer.setChecked(IEmbeddableCartridge.POSTGRESQL_84, false);
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
-			} else {
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
@@ -177,15 +167,12 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 
 	private void addPostgreSql()
 			throws OpenShiftException, SocketTimeoutException {
-		if (viewer.getChecked(IEmbeddableCartridge.MYSQL_51)) {
+		if (pageModel.isSelected(IEmbeddableCartridge.MYSQL_51)) {
 			if (MessageDialog
 					.openQuestion(getShell(), "Remove MySQL Cartridge",
 							"MySQL and PostgreSQL are mutually exclusive. To embed PostgreSQL, you have to remove MySQL.\n\nRemove MySQL?")) {
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, false);
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
-			} else {
-				viewer.setChecked(IEmbeddableCartridge.POSTGRESQL_84, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.POSTGRESQL_84);
@@ -193,15 +180,12 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	}
 
 	private void removeMySQL() throws OpenShiftException, SocketTimeoutException {
-		if (viewer.getChecked(IEmbeddableCartridge.PHPMYADMIN_34)) {
+		if (pageModel.isSelected(IEmbeddableCartridge.PHPMYADMIN_34)) {
 			if (MessageDialog
 					.openQuestion(getShell(), "Remove phpmyadmin cartridge",
 							"If you remove the mysql cartridge, you'd also have to remove phpmyadmin.\n\nRemove phpMyAdmin and MySQL?")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
-				viewer.setChecked(IEmbeddableCartridge.PHPMYADMIN_34, false);
-			} else {
-				viewer.setChecked(IEmbeddableCartridge.MYSQL_51, true);
 			}
 		} else {
 			pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MYSQL_51);
@@ -209,14 +193,11 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	}
 
 	private void addRockMongo() throws OpenShiftException, SocketTimeoutException {
-		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
+		if (!pageModel.isSelected(IEmbeddableCartridge.MONGODB_20)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed MongoDB Cartridge",
 					"To embed RockMongo, you'd also have to embed MongoDB. \n\nAlso embed MongoDB?")) {
-				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.ROCKMONGO_11);
-			} else {
-				viewer.setChecked(IEmbeddableCartridge.ROCKMONGO_11, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
@@ -225,42 +206,36 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 
 	private void removeMongoDb() throws OpenShiftException, SocketTimeoutException {
 		boolean removeMongoDb = true;
-		if (viewer.getChecked(IEmbeddableCartridge.ROCKMONGO_11)) {
+		if (pageModel.isSelected(IEmbeddableCartridge.ROCKMONGO_11)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
 					"If you remove the MongoDB cartridge, you'd also have to remove RockMongo.")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.ROCKMONGO_11);
-				viewer.setChecked(IEmbeddableCartridge.ROCKMONGO_11, false);
 			} else {
 				removeMongoDb = false;
 			}
 		}
 
 		if (removeMongoDb // mongo to be removed?
-				&& viewer.getChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01)) {
+				&& pageModel.isSelected(IEmbeddableCartridge._10GEN_MMS_AGENT_01)) {
 			if (MessageDialog.openQuestion(getShell(), "Remove MongoDB cartridge",
 					"If you remove the MongoDB cartridge, you'd also have to remove 10gen MMS agent.")) {
 				pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
-				viewer.setChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01, false);
 			} else {
 				removeMongoDb = false;
 			}
 		}
 
-		viewer.setChecked(IEmbeddableCartridge.MONGODB_20, !removeMongoDb);
 		if (removeMongoDb) { // mongo to be removed?
 			pageModel.unselectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 		}
 	}
 
 	private void add10gen() throws OpenShiftException, SocketTimeoutException {
-		if (!viewer.getChecked(IEmbeddableCartridge.MONGODB_20)) {
+		if (!pageModel.isSelected(IEmbeddableCartridge.MONGODB_20)) {
 			if (MessageDialog.openQuestion(getShell(), "Embed 10gen Cartridge",
 					"To embed 10gen cartridge, you'd also have to embed MongoDB. \n\nAlso embed MongoDB?")) {
-				viewer.setChecked(IEmbeddableCartridge.MONGODB_20, true);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.MONGODB_20);
 				pageModel.selectEmbeddedCartridges(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
-			} else {
-				viewer.setChecked(IEmbeddableCartridge._10GEN_MMS_AGENT_01, false);
 			}
 		} else {
 			pageModel.selectEmbeddedCartridges(IEmbeddableCartridge.PHPMYADMIN_34);
@@ -268,7 +243,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	}
 
 	private Shell getShell() {
-		return viewer.getControl().getShell();
+		return wizardPage.getControl().getShell();
 	}
 
 	private IWizardContainer getContainer() {
@@ -276,7 +251,7 @@ public class EmbedCartridgeStrategy implements ICheckStateListener {
 	}
 
 	private void openLogDialog(final IApplication application) {
-		viewer.getControl().getDisplay().syncExec(new Runnable() {
+		wizardPage.getControl().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {

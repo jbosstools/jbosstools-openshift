@@ -44,7 +44,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_EXISTING_APPLICATION_NAME = "existingApplicationName";
 	public static final String PROPERTY_CARTRIDGES = "cartridges";
 	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
-	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
@@ -376,25 +375,36 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return embeddedCartridges;
 	}
 
+
+	@Override
+	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
+			throws OpenShiftException,SocketTimeoutException {
+		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
+		getSelectedEmbeddableCartridges().add(cartridge);
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
+	}
+
+	@Override
+	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
+			throws OpenShiftException,SocketTimeoutException {
+		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
+		getSelectedEmbeddableCartridges().remove(cartridge);
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
+	}
+
 	@Override
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
-	}
-
-	@Override
-	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		getSelectedEmbeddableCartridges().add(cartridge);
-	}
-
-	@Override
-	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		getSelectedEmbeddableCartridges().remove(cartridge);
 	}
 
 	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
 		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES,
 				wizardModel.getSelectedEmbeddableCartridges(),
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
+	}
+
+	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 
 	@Override

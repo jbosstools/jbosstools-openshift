@@ -25,13 +25,20 @@ import com.openshift.client.OpenShiftException;
  */
 public interface IEmbedCartridgesWizardPageModel {
 
+	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException;
 
 	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
 
 	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
 
+	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) throws SocketTimeoutException, OpenShiftException;
+	
+	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
+
 	public boolean hasApplicationOfType(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException;
 
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException;
+
 }
