@@ -31,6 +31,19 @@ public class StringUtils {
 				|| value.length() == 0;
 	}
 
+	public static <T> String toString(List<T> elements) {
+		return toString(elements, new ToStringConverter<T>() {
+
+			@Override
+			public String toString(T object) {
+				if (object == null) {
+					return null;
+				}
+				return String.valueOf(object);
+			}
+		});
+	}
+	
 	public static <T> String toString(List<T> elements, ToStringConverter<T> converter) {
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < elements.size(); i++) {
@@ -42,7 +55,7 @@ public class StringUtils {
 		}
 		return builder.toString();
 	}
-	
+		
 	public static interface ToStringConverter<T> {
 		public String toString(T object);
 	}

@@ -337,7 +337,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		if (application != null) {
 			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
-			setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(application.getEmbeddedCartridges()));
+			setSelectedEmbeddableCartridges(application.getEmbeddedCartridges());
 			setSelectedGearProfile(application.getGearProfile());
 			setScale(application.getApplicationScale());
 			wizardModel.setApplication(application);
@@ -397,6 +397,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
+	protected void setSelectedEmbeddableCartridges(List<? extends IEmbeddableCartridge> cartridges) {
+		setSelectedEmbeddableCartridges(cartridges);
+	}
+	
 	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
 		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES,
 				wizardModel.getSelectedEmbeddableCartridges(),
@@ -405,11 +409,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
 		return getSelectedEmbeddableCartridges().contains(cartridge);
-	}
-
-	@Override
-	public boolean hasApplicationOfType(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
-		return getUser().hasApplicationOfType(cartridge);
 	}
 
 	public boolean hasApplication(String applicationName) throws SocketTimeoutException, OpenShiftException {

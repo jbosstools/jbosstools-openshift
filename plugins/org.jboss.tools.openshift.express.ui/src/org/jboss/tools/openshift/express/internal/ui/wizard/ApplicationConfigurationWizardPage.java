@@ -16,7 +16,6 @@ import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
-import org.eclipse.core.databinding.UpdateSetStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -334,14 +333,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
 				.applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
-		viewer.addCheckStateListener(new EmbedCartridgeStrategy(pageModel, this));
+		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(
 						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
-						.observe(pageModel),
-						new UpdateSetStrategy(UpdateSetStrategy.POLICY_NEVER),
-						null);
+						.observe(pageModel));
 
 		this.checkAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");

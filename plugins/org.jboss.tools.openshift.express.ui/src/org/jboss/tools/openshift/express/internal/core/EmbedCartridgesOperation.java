@@ -16,9 +16,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.Diffs;
-import org.eclipse.core.databinding.observable.list.ListDiff;
-import org.eclipse.core.databinding.observable.list.ListDiffEntry;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.openshift.client.IApplication;
@@ -43,26 +40,23 @@ public class EmbedCartridgesOperation {
 	 * Embeds and removes cartridges from the given application so that it
 	 * matches the given list of enabled cartridges.
 	 * 
-	 * @param enabledCartridges
+	 * @param selectedCartridges
 	 * @param monitor
 	 * @return
 	 * @throws SocketTimeoutException
 	 * @throws OpenShiftException
 	 */
-	public List<IEmbeddedCartridge> execute(final List<IEmbeddableCartridge> enabledCartridges,
+	public List<IEmbeddedCartridge> execute(final List<IEmbeddableCartridge> selectedCartridges,
 			final IProgressMonitor monitor)
 			throws SocketTimeoutException, OpenShiftException {
-		if (enabledCartridges == null) {
+		if (selectedCartridges == null) {
 			return Collections.emptyList();
 		}
 
 		List<IEmbeddableCartridge> cartridgesToAdd = new ArrayList<IEmbeddableCartridge>();
 		List<IEmbeddableCartridge> cartridgesToRemove = new ArrayList<IEmbeddableCartridge>();
-		computeAdditionsAndRemovals(
-				cartridgesToAdd,
-				cartridgesToRemove,
-				enabledCartridges,
-				application.getEmbeddedCartridges());
+		computeRemovals(selectedCartridges, application.getEmbeddedCartridges(), cartridgesToRemove);
+		computeAdditions(selectedCartridges, application.getEmbeddedCartridges(), cartridgesToAdd);
 
 		removeEmbeddedCartridges(cartridgesToRemove, application);
 		final List<IEmbeddedCartridge> addedCartridges = addEmbeddedCartridges(cartridgesToAdd, application);
@@ -70,7 +64,7 @@ public class EmbedCartridgesOperation {
 	}
 
 	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove, final IApplication application)
-			throws OpenShiftException,SocketTimeoutException {
+			throws OpenShiftException, SocketTimeoutException {
 		if (cartridgesToRemove.isEmpty()) {
 			return;
 		}
@@ -93,16 +87,20 @@ public class EmbedCartridgesOperation {
 		return application.addEmbeddableCartridges(cartridgesToAdd);
 	}
 
-	private void computeAdditionsAndRemovals(List<IEmbeddableCartridge> addedCartridges,
-			List<IEmbeddableCartridge> removedCartridges, List<IEmbeddableCartridge> selectedCartridges,
-			List<IEmbeddedCartridge> embeddedCartidges)
-			throws OpenShiftException, SocketTimeoutException {
-		ListDiff listDiff = Diffs.computeListDiff(embeddedCartidges, selectedCartridges);
-		for (ListDiffEntry entry : listDiff.getDifferences()) {
-			if (entry.isAddition()) {
-				addedCartridges.add((IEmbeddableCartridge) entry.getElement());
-			} else {
-				removedCartridges.add((IEmbeddableCartridge) entry.getElement());
+	private void computeAdditions(List<IEmbeddableCartridge> selectedCartridges,
+			List<IEmbeddedCartridge> embeddedCartridges, List<IEmbeddableCartridge> addedCartridges) {
+		for (IEmbeddableCartridge cartridge : selectedCartridges){
+			if (!embeddedCartridges.contains(cartridge)){
+				addedCartridges.add(cartridge);
+			}
+		}
+	}
+
+	private void computeRemovals(List<IEmbeddableCartridge> selectedCartridges,
+			List<IEmbeddedCartridge> embeddedCartridges, List<IEmbeddableCartridge> removedCartridges) {
+		for (IEmbeddableCartridge cartridge : embeddedCartridges){
+			if (!selectedCartridges.contains(cartridge)){
+				removedCartridges.add(cartridge);
 			}
 		}
 	}

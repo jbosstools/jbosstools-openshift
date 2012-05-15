@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,7 +53,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 				|| application.getEmbeddedCartridges() == null) {
 			return;
 		}
-		selectedCartridges.addAll(application.getEmbeddedCartridges());
+		setSelectedEmbeddableCartridges(application.getEmbeddedCartridges());
 	}
 	
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
@@ -80,14 +79,16 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return selectedCartridges;
 	}
 
-	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges) throws SocketTimeoutException, OpenShiftException {
-		setSelectedEmbeddableCartridges(cartridges);
+	protected void setSelectedEmbeddableCartridges(List<? extends IEmbeddableCartridge> cartridges) throws SocketTimeoutException, OpenShiftException {
+		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(cartridges));
 	}
-
-	protected void setSelectedEmbeddedCartridges(Collection<IEmbeddedCartridge> cartridges) throws SocketTimeoutException, OpenShiftException {
-		Set<IEmbeddableCartridge> oldValue = getSelectedEmbeddableCartridges();
-		selectedCartridges.clear();
-		selectedCartridges.addAll(cartridges);
+	
+	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges) throws SocketTimeoutException, OpenShiftException {
+		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
+		if (cartridges != selectedCartridges) {
+			selectedCartridges.clear();
+			selectedCartridges.addAll(cartridges);
+		}
 		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, selectedCartridges);
 	}
 
@@ -99,6 +100,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return wizardModel.getUser().hasApplicationOfType(cartridge);
 	}
 
+	@Override
 	public IApplication getApplication() {
 		return wizardModel.getApplication();
 	}
@@ -106,23 +108,21 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	@Override
 	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
 			throws OpenShiftException,SocketTimeoutException {
-		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
 		getSelectedEmbeddableCartridges().add(cartridge);
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, null, getSelectedEmbeddableCartridges());
 	}
 
 	@Override
 	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
 			throws OpenShiftException,SocketTimeoutException {
-		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
 		getSelectedEmbeddableCartridges().remove(cartridge);
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, null, getSelectedEmbeddableCartridges());
 	}
 
 	public Set<IEmbeddableCartridge> refreshSelectedEmbeddedCartridges() 
 			throws OpenShiftException, SocketTimeoutException {
 		getApplication().refresh();
-		setSelectedEmbeddedCartridges(getApplication().getEmbeddedCartridges());
+		setSelectedEmbeddableCartridges(getApplication().getEmbeddedCartridges());
 		return getSelectedEmbeddableCartridges();
 	}
 
@@ -138,12 +138,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return new EmbedCartridgesOperation(getApplication())
 				.execute(new ArrayList<IEmbeddableCartridge>(selectedCartridges), null);
 	}
-
-	@Override
-	public boolean hasApplicationOfType(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
-		return wizardModel.getUser().hasApplicationOfType(cartridge);
-	}
-
+	
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
 		IApplication application =
 				new CreateApplicationOperation(wizardModel.getUser()).execute(

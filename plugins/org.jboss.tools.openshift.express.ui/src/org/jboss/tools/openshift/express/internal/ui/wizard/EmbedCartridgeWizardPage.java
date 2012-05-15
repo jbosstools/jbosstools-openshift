@@ -19,7 +19,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateSetStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,7 +70,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		Group embedGroup = new Group(parent, SWT.NONE);
 		embedGroup.setText("Embeddable Cartridges");
 		GridDataFactory.fillDefaults()
-				.hint(200, 200).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(embedGroup);
+				.hint(200, 300).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(embedGroup);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(3).margins(6, 6).applyTo(embedGroup);
 
@@ -79,15 +78,12 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-//		viewer.addCheckStateListener(new EmbedCartridgeStrategy(viewer, pageModel, this));
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(
 						EmbedCartridgeWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
-						.observe(pageModel),
-				new UpdateSetStrategy(UpdateSetStrategy.POLICY_NEVER),
-				null);
-		viewer.addCheckStateListener(new EmbedCartridgeStrategy(pageModel, this));
+						.observe(pageModel));;
+		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
 		
 // hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
 //		Button checkAllButton = new Button(embedGroup, SWT.PUSH);

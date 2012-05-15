@@ -16,7 +16,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.OpenShiftException;
 
@@ -37,8 +36,8 @@ public interface IEmbedCartridgesWizardPageModel {
 	
 	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
 
-	public boolean hasApplicationOfType(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException;
-
+	public IApplication getApplication();
+	
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException;
 
 }
