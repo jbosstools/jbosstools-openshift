@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -42,19 +43,25 @@ public class RefreshElementAction extends AbstractAction {
 	@Override
 	public void run() {
 		if (selection != null && selection instanceof ITreeSelection
-				&& ((ITreeSelection) selection).getFirstElement() instanceof IOpenShiftResource) {
-			refresh((IOpenShiftResource) ((ITreeSelection) selection).getFirstElement());
+				&& (((ITreeSelection) selection).getFirstElement() instanceof UserDelegate)
+				|| (((ITreeSelection) selection).getFirstElement() instanceof IOpenShiftResource)){
+			refresh( ((ITreeSelection) selection).getFirstElement());
 		}
 	}
 
-	private void refresh(final IOpenShiftResource element) {
+	private void refresh(final Object element) {
 		Job job = new Job("Loading OpenShift information...") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					monitor.beginTask("Loading OpenShift information...", IProgressMonitor.UNKNOWN);
-					element.refresh();
+					if(element instanceof UserDelegate) {
+						((UserDelegate)element).refresh();
+					} else if (element instanceof IOpenShiftResource) {
+						((IOpenShiftResource)element).refresh();
+					}
+
 					//List<IApplication> applications = user.getApplications();
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
