@@ -53,14 +53,10 @@ public class EmbedCartridgesOperation {
 			return Collections.emptyList();
 		}
 
-		List<IEmbeddableCartridge> cartridgesToAdd = new ArrayList<IEmbeddableCartridge>();
-		List<IEmbeddableCartridge> cartridgesToRemove = new ArrayList<IEmbeddableCartridge>();
-		computeRemovals(selectedCartridges, application.getEmbeddedCartridges(), cartridgesToRemove);
-		computeAdditions(selectedCartridges, application.getEmbeddedCartridges(), cartridgesToAdd);
-
-		removeEmbeddedCartridges(cartridgesToRemove, application);
-		final List<IEmbeddedCartridge> addedCartridges = addEmbeddedCartridges(cartridgesToAdd, application);
-		return addedCartridges;
+		removeEmbeddedCartridges(
+				getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
+		return addEmbeddedCartridges(
+				getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
 	}
 
 	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove, final IApplication application)
@@ -87,22 +83,26 @@ public class EmbedCartridgesOperation {
 		return application.addEmbeddableCartridges(cartridgesToAdd);
 	}
 
-	private void computeAdditions(List<IEmbeddableCartridge> selectedCartridges,
-			List<IEmbeddedCartridge> embeddedCartridges, List<IEmbeddableCartridge> addedCartridges) {
-		for (IEmbeddableCartridge cartridge : selectedCartridges){
-			if (!embeddedCartridges.contains(cartridge)){
-				addedCartridges.add(cartridge);
+	private List<IEmbeddableCartridge> getAddedCartridges(List<IEmbeddableCartridge> selectedCartridges,
+			List<IEmbeddedCartridge> embeddedCartridges) {
+		List<IEmbeddableCartridge> cartridgesToAdd = new ArrayList<IEmbeddableCartridge>();
+		for (IEmbeddableCartridge cartridge : selectedCartridges) {
+			if (!embeddedCartridges.contains(cartridge)) {
+				cartridgesToAdd.add(cartridge);
 			}
 		}
+		return cartridgesToAdd;
 	}
 
-	private void computeRemovals(List<IEmbeddableCartridge> selectedCartridges,
-			List<IEmbeddedCartridge> embeddedCartridges, List<IEmbeddableCartridge> removedCartridges) {
-		for (IEmbeddableCartridge cartridge : embeddedCartridges){
-			if (!selectedCartridges.contains(cartridge)){
-				removedCartridges.add(cartridge);
+	private List<IEmbeddableCartridge> getRemovedCartridges(List<IEmbeddableCartridge> selectedCartridges,
+			List<IEmbeddedCartridge> embeddedCartridges) {
+		List<IEmbeddableCartridge> cartridgesToRemove = new ArrayList<IEmbeddableCartridge>();
+		for (IEmbeddableCartridge cartridge : embeddedCartridges) {
+			if (!selectedCartridges.contains(cartridge)) {
+				cartridgesToRemove.add(cartridge);
 			}
 		}
+		return cartridgesToRemove;
 	}
 
 	private static class CartridgeAddRemovePriorityComparator implements Comparator<IEmbeddableCartridge> {
