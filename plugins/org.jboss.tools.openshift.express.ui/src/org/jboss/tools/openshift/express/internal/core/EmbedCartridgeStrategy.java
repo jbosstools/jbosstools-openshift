@@ -20,6 +20,7 @@ import java.util.Set;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.OpenShiftException;
 
@@ -54,10 +55,10 @@ public class EmbedCartridgeStrategy {
 	private Map<IEmbeddableCartridge, EmbeddableCartridgeRelations> dependenciesByCartridge;
 	private HashMap<IEmbeddableCartridge, Set<IEmbeddableCartridge>> dependantsByCartridge;
 
-	private IApplication application;
+	private IDomain domain;
 
-	public EmbedCartridgeStrategy(IApplication application) {
-		this.application = application;
+	public EmbedCartridgeStrategy(IDomain domain) {
+		this.domain = domain;
 		initDependencyMaps(dependencies);
 	}
 
@@ -115,7 +116,7 @@ public class EmbedCartridgeStrategy {
 	private void addRequiredApplication(EmbeddableCartridgeDiff diff,
 			EmbeddableCartridgeRelations relation) throws OpenShiftException {
 		if (relation.getRequiredApplication() != null
-				&& !application.getDomain().hasApplicationByCartridge(relation.getRequiredApplication())) {
+				&& !domain.hasApplicationByCartridge(relation.getRequiredApplication())) {
 			diff.addApplicationAddition(relation.getRequiredApplication());
 		}
 	}
@@ -155,9 +156,9 @@ public class EmbedCartridgeStrategy {
 
 	private static class EmbeddableCartridgeRelations {
 
+		private IEmbeddableCartridge subject;
 		private IEmbeddableCartridge conflicting;
 		private IEmbeddableCartridge required;
-		private IEmbeddableCartridge subject;
 		private ICartridge requiredApplication;
 
 		protected EmbeddableCartridgeRelations(IEmbeddableCartridge cartridge,

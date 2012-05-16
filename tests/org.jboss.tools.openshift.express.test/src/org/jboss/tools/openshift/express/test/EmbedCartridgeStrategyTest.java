@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -52,8 +52,7 @@ public class EmbedCartridgeStrategyTest {
 	@Before
 	public void setUp() throws SocketTimeoutException, OpenShiftException {
 		this.domainFake = new DomainFake();
-		IApplication applicationFake = domainFake.createApplication("adietish", ICartridge.JBOSSAS_7);
-		this.embedStrategy = new EmbedCartridgeStrategy(applicationFake);
+		this.embedStrategy = new EmbedCartridgeStrategy(domainFake);
 	}
 
 	@Test

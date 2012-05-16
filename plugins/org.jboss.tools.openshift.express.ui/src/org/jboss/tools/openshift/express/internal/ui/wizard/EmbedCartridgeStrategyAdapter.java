@@ -64,7 +64,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		try {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
 			EmbeddableCartridgeDiff diff = null;
-			EmbedCartridgeStrategy embedCartridgeStrategy = new EmbedCartridgeStrategy(pageModel.getApplication());
+			EmbedCartridgeStrategy embedCartridgeStrategy = new EmbedCartridgeStrategy(pageModel.getDomain());
 			diff = createEmbeddableCartridgeDiff(event.getChecked(), cartridge, embedCartridgeStrategy);
 
 			if (diff.hasChanges()) {

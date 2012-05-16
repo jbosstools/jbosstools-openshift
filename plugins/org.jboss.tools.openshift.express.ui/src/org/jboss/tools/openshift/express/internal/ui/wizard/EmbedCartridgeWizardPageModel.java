@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgesOperation;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.IGearProfile;
@@ -100,9 +101,13 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return wizardModel.getUser().hasApplicationOfType(cartridge);
 	}
 
-	@Override
 	public IApplication getApplication() {
 		return wizardModel.getApplication();
+	}
+
+	@Override
+	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
+		return wizardModel.getUser().getDefaultDomain();
 	}
 
 	@Override

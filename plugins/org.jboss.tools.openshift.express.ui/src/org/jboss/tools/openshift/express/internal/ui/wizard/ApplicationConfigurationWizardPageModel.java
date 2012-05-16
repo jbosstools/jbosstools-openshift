@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
@@ -415,8 +416,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return getUser().hasApplication(applicationName);
 	}
 
-	public IApplication getApplication() {
-		return wizardModel.getApplication();
+	@Override
+	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
+		return wizardModel.getUser().getDefaultDomain();
 	}
 
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
