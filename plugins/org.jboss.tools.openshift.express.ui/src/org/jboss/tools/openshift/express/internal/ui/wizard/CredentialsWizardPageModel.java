@@ -184,12 +184,20 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		UserDelegate user = null;
 		try {
-			user = new UserDelegate(UserModel.getDefault().createUser(rhLogin, password), rememberPassword, password != null);
-			if (user.isValid()) {
-				storeUser(user);
+			// reuse previous user if it was properly logged in
+			user = UserModel.getDefault().findUser(rhLogin);
+			// check user credentials if not logged before or if input password changed
+			if(user != null && user.getPassword().equals(password)) {
+				wizardModel.setUser(user);
 			} else {
-				status = OpenShiftUIActivator.createErrorStatus(
-						NLS.bind("The credentials for user {0} are not valid", user.getRhlogin()));
+				user = new UserDelegate(UserModel.getDefault().createUser(rhLogin, password), rememberPassword,
+						password != null);
+				if (user.isValid()) {
+					storeUser(user);
+				} else {
+					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
+							"The credentials for user {0} are not valid", user.getRhlogin()));
+				}
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
