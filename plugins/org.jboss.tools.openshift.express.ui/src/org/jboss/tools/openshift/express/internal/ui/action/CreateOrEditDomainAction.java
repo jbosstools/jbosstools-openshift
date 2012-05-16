@@ -41,31 +41,30 @@ public class CreateOrEditDomainAction extends AbstractAction {
 		if (selection instanceof ITreeSelection
 				&& treeSelection.getFirstElement() instanceof UserDelegate) {
 			final UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
-			IWizard domainDialog = createDomainWizard(user);
-			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), domainDialog);
+			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), createDomainWizard(user));
 			dialog.create();
 			dialog.open();
 		}
 	}
 
 	private IWizard createDomainWizard(final UserDelegate user) {
-		IWizard domainDialog;
+		IWizard domainWizard;
 		try {
 			if (user.getDefaultDomain() == null || user.getDefaultDomain().getId() == null) {
-				domainDialog = new NewDomainDialog(user);
+				domainWizard = new NewDomainDialog(user);
 			} else {
-				domainDialog = new EditDomainDialog(user);
+				domainWizard = new EditDomainDialog(user);
 			}
 		} catch (OpenShiftException e) {
 			Logger.warn("Failed to retrieve User domain, prompting for creation", e);
 			// let's use the domain creation wizard, then.
-			domainDialog = new NewDomainDialog(user);
-		}  catch (SocketTimeoutException e) {
+			domainWizard = new NewDomainDialog(user);
+		} catch (SocketTimeoutException e) {
 			Logger.warn("Failed to retrieve User domain, prompting for creation", e);
 			// let's use the domain creation wizard, then.
-			domainDialog = new NewDomainDialog(user);
+			domainWizard = new NewDomainDialog(user);
 		}
-		return domainDialog;
+		return domainWizard;
 	}
 
 }
