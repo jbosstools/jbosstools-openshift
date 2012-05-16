@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jsch.internal.core.IConstants;
@@ -106,8 +108,15 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		ISSHPublicKey sshKey = loadSshKey();
 		IOpenShiftSSHKey sshKeyResource = user.getSSHKeyByPublicKey(sshKey.getPublicKey());
 		if (sshKeyResource == null) {
-			user.putSSHKey(SSHKEY_DEFAULT_NAME, sshKey);
+			user.putSSHKey(getTimestampKeyname(), sshKey);
 		}
+	}
+
+	private String getTimestampKeyname() {
+		return new StringBuilder(
+				SSHKEY_DEFAULT_NAME)
+				.append(new SimpleDateFormat("yyyyMMddhmS").format(new Date()))
+				.toString();
 	}
 
 	public String getSshKey() {
