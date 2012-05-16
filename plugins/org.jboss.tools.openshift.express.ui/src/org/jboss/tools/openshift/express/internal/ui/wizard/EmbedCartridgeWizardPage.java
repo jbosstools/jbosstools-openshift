@@ -83,6 +83,8 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				BeanProperties.set(
 						EmbedCartridgeWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
 						.observe(pageModel));;
+		// strategy has to be attached after the binding, so that the binding
+		// can still add the checked cartridge and the strategy can correct
 		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
 		
 // hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399

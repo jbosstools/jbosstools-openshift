@@ -337,7 +337,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(
 						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
-						.observe(pageModel));;
+						.observe(pageModel));
+		// strategy has to be attached after the binding, so that the binding
+		// can still add the checked cartridge and the strategy can correct
 		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
 
 		this.checkAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
