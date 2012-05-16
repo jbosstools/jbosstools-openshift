@@ -136,18 +136,22 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			IResource[] resource = new IResource[]{changedResource};
 			
 			if( deltaKind == ServerBehaviourDelegate.REMOVED) {
-				changedResource.delete(false, monitor);
+				changedResource.delete(false, monitor); // uses resource api
 			} else {
-				IStatus status = util.publishModule(behaviour.getServer(), dest.toString(), module, publishType, delta, monitor);
+				monitor.beginTask("Moving module to " + destFolder.getName(), 100);
+				IStatus status = util.publishModule(behaviour.getServer(), dest.toString(), module, publishType, delta, 
+						new SubProgressMonitor(monitor,20));
+				// util used file api, so a folder refresh is required
+				destFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor,20));
 				final AddToIndexOperation operation = new AddToIndexOperation(resource);
 				try {
-					operation.execute(monitor);
+					operation.execute(new SubProgressMonitor(monitor,60));
 				} catch (CoreException e) {
 					OpenShiftUIActivator.log(e.getStatus());
 				}
 			}
 		} catch( Exception e ) {
-			e.printStackTrace();
+			OpenShiftUIActivator.log(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,e.getMessage(), e));
 		}
 		return IServer.PUBLISH_STATE_NONE;
 	}
