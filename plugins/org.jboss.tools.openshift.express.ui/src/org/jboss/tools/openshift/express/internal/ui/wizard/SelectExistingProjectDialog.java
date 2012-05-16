@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
@@ -23,7 +22,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.ide.IDE.SharedImages;
-import org.eclipse.wst.common.componentcore.internal.util.IModuleConstants;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 
 /**
@@ -35,7 +33,6 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		super(shell, new ProjectLabelProvider());
 		setTitle("Select Existing Project");
 		setMessage(NLS.bind(
-//				"Select an existing project for {0}.\nOnly Dynamic Web/Eclipse WTP projects can be used.",
 				"Select an existing project for {0}.\nOnly non-shared projects or Git projects allowed.",
 				openShiftAppName));
 		setMultipleSelection(false);
@@ -60,20 +57,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 			}
 		}
 
-// we now accept all projects, not just WTP
-//		if (!hasModuleNature(project)) {
-//			return false;
-//		}
-
 		return true;
-	}
-
-	private boolean hasModuleNature(IProject project) {
-		try {
-			return project.hasNature(IModuleConstants.MODULE_NATURE_ID);
-		} catch (CoreException e) {
-			return false;
-		}
 	}
 
 	private static class ProjectLabelProvider extends LabelProvider {
