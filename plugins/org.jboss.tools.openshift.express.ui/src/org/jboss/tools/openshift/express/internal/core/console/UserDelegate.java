@@ -146,7 +146,7 @@ public class UserDelegate {
 		return null;
 	}
 	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
-		if(checkForPassword()) {
+		if(checkForPassword() && delegate.hasDomain()) {
 			return delegate.getDefaultDomain().getApplications();
 		} 
 		return null;
