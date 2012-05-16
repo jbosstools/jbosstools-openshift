@@ -67,8 +67,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		final IObservableValue namespaceModelObservable = BeanProperties.value(
 				EditDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
-
-		}
+	}
 
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
