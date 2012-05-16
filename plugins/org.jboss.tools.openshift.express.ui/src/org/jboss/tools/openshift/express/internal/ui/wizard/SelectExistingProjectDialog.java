@@ -36,7 +36,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		setTitle("Select Existing Project");
 		setMessage(NLS.bind(
 //				"Select an existing project for {0}.\nOnly Dynamic Web/Eclipse WTP projects can be used.",
-				"Select an existing project for {0}.\nOnly Git shared projects can be used.",
+				"Select an existing project for {0}.\nOnly non-shared projects or Git projects allowed.",
 				openShiftAppName));
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
