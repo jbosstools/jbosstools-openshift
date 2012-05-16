@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -380,17 +379,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	@Override
 	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
 			throws OpenShiftException,SocketTimeoutException {
-		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
 		getSelectedEmbeddableCartridges().add(cartridge);
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, null, getSelectedEmbeddableCartridges());
 	}
 
 	@Override
 	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
 			throws OpenShiftException,SocketTimeoutException {
-		Set<IEmbeddableCartridge> oldValue = new HashSet<IEmbeddableCartridge>(getSelectedEmbeddableCartridges());
 		getSelectedEmbeddableCartridges().remove(cartridge);
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, oldValue, getSelectedEmbeddableCartridges());
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, null, getSelectedEmbeddableCartridges());
 	}
 
 	@Override
