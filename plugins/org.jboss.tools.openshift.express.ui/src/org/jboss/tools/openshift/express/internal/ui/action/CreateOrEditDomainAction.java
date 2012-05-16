@@ -40,27 +40,32 @@ public class CreateOrEditDomainAction extends AbstractAction {
 		final ITreeSelection treeSelection = (ITreeSelection) selection;
 		if (selection instanceof ITreeSelection
 				&& treeSelection.getFirstElement() instanceof UserDelegate) {
-			IWizard domainDialog = null;
 			final UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
-			try {
-				if (user.getDefaultDomain() == null || user.getDefaultDomain().getId() == null) {
-					domainDialog = new NewDomainDialog(user);
-				} else {
-					domainDialog = new EditDomainDialog(user);
-				}
-			} catch (OpenShiftException e) {
-				Logger.warn("Failed to retrieve User domain, prompting for creation", e);
-				// let's use the domain creation wizard, then.
-				domainDialog = new NewDomainDialog(user);
-			}  catch (SocketTimeoutException e) {
-				Logger.warn("Failed to retrieve User domain, prompting for creation", e);
-				// let's use the domain creation wizard, then.
-				domainDialog = new NewDomainDialog(user);
-			}
+			IWizard domainDialog = createDomainWizard(user);
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), domainDialog);
 			dialog.create();
 			dialog.open();
 		}
+	}
+
+	private IWizard createDomainWizard(final UserDelegate user) {
+		IWizard domainDialog;
+		try {
+			if (user.getDefaultDomain() == null || user.getDefaultDomain().getId() == null) {
+				domainDialog = new NewDomainDialog(user);
+			} else {
+				domainDialog = new EditDomainDialog(user);
+			}
+		} catch (OpenShiftException e) {
+			Logger.warn("Failed to retrieve User domain, prompting for creation", e);
+			// let's use the domain creation wizard, then.
+			domainDialog = new NewDomainDialog(user);
+		}  catch (SocketTimeoutException e) {
+			Logger.warn("Failed to retrieve User domain, prompting for creation", e);
+			// let's use the domain creation wizard, then.
+			domainDialog = new NewDomainDialog(user);
+		}
+		return domainDialog;
 	}
 
 }
