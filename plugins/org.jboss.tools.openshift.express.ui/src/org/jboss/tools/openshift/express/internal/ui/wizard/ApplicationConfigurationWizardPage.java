@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -54,7 +55,9 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -109,6 +112,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Group newAppEmbeddableCartridgesGroup;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
+	//private ModifyListener modifyListener;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
 		super("Setup OpenShift Application",
@@ -244,7 +248,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(newAppConfigurationGroup);
 
 		IObservableValue useExistingApplication = WidgetProperties.selection().observe(useExistingAppBtn);
-
 		useExistingApplication.addValueChangeListener(
 				onUseExistingApplication(
 						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
@@ -279,7 +282,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.to(selectedCartridgeModelObservable)
 				.converting(new CartridgeToStringConverter())
 				.in(dbc);
-
+		        
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
 		final NewApplicationNameValidator newApplicationNameValidator =
 				new NewApplicationNameValidator(useExistingAppBtnSelection, applicationNameTextObservable);
@@ -430,6 +433,16 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
 		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
+		viewer.setSorter(new ViewerSorter(){
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if(e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge){
+					return ((IEmbeddableCartridge)e1).getName().compareTo(((IEmbeddableCartridge)e2).getName());
+				}
+				return super.compare(viewer, e1, e2);
+			}
+		});
+
 		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
 		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
@@ -627,6 +640,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						// reacting to model changes while wizard runnable is
 						// run. We force another update
 						dbc.updateModels();
+						// sort
+						String[] items = newAppCartridgeCombo.getItems();
+						Arrays.sort(items);
+						newAppCartridgeCombo.setItems(items);
 					}
 				});
 			}

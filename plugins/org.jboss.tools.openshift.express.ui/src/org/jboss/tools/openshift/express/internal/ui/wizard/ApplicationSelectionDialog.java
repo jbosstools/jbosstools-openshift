@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
@@ -136,7 +137,18 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 						}
 					}
 				}), null);
+		
+		tableViewer.setSorter(new ViewerSorter(){
 
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if(e1 instanceof IApplication && e2 instanceof IApplication){
+					return ((IApplication)e1).getName().compareTo(((IApplication)e2).getName());
+				}
+				return super.compare(viewer, e1, e2);
+			}
+			
+		});
 		/*Button refreshButton = new Button(dialogArea, SWT.PUSH);
 		refreshButton.setText("R&efresh");
 		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.TOP).grab(false, false).hint(80, SWT.DEFAULT)

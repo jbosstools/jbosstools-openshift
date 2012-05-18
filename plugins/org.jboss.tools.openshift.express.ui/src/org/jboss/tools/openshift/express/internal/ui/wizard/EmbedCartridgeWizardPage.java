@@ -35,7 +35,9 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -110,6 +112,18 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
 		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
+		
+		viewer.setSorter(new ViewerSorter(){
+
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if(e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge){
+					return ((IEmbeddableCartridge)e1).getName().compareTo(((IEmbeddableCartridge)e2).getName());
+				}
+				return super.compare(viewer, e1, e2);
+			}
+			
+		});
 
 		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
 
