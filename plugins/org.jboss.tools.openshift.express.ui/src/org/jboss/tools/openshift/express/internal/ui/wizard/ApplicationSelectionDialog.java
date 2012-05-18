@@ -239,6 +239,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
+	@SuppressWarnings("unused")
 	private SelectionAdapter onRefresh(final DataBindingContext dbc) {
 		return new SelectionAdapter() {
 
