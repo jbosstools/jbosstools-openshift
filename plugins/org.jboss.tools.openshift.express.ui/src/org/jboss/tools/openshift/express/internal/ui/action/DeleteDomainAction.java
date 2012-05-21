@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
@@ -40,7 +40,7 @@ public class DeleteDomainAction extends AbstractAction {
 				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE));
 	}
 
-	/*@Override
+	@Override
 	public void validate() {
 		boolean enable = false;
 		if (selection instanceof ITreeSelection
@@ -65,7 +65,7 @@ public class DeleteDomainAction extends AbstractAction {
 			}
 		}
 		setEnabled(enable);
-	}*/
+	}
 
 	@Override
 	public void run() {

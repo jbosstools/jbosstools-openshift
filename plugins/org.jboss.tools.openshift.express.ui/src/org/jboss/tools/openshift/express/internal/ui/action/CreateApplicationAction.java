@@ -56,6 +56,7 @@ public class CreateApplicationAction extends AbstractAction {
 		}
 	}
 
+	/**
 	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		super.selectionChanged(event);
@@ -68,9 +69,7 @@ public class CreateApplicationAction extends AbstractAction {
 		enableWhenDomainExists();
 	}
 
-	/**
 	 * Enables the current action if the selected User has a default domain. Otherwise, the action is disabled. 
-	 */
 	private void enableWhenDomainExists() {
 		if (selection != null && selection instanceof ITreeSelection) {
 			Object sel = ((ITreeSelection) selection).getFirstElement();
@@ -87,6 +86,7 @@ public class CreateApplicationAction extends AbstractAction {
 			}
 		}
 	}
+	 */
 
 
 }

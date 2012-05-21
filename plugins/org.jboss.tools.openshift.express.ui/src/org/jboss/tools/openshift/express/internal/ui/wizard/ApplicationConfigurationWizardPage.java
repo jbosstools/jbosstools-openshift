@@ -627,27 +627,27 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		// This is needed for some strange freezing issues when
-		// launching the wizard from the console view. The UI seems to freeze
-		new Thread() {
-			public void run() {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						loadOpenshiftResources(dbc);
-						enableApplicationWidgets(pageModel.isUseExistingApplication());
-						createExistingAppNameContentAssist();
-						// this is needed because of weird issues with UI not
-						// reacting to model changes while wizard runnable is
-						// run. We force another update
-						dbc.updateModels();
-						// sort
-						String[] items = newAppCartridgeCombo.getItems();
-						Arrays.sort(items);
-						newAppCartridgeCombo.setItems(items);
-					}
-				});
-			}
-		}.start();
+		if(checkForDomainExistance()) {
+			new Thread() {
+				public void run() {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							loadOpenshiftResources(dbc);
+							enableApplicationWidgets(pageModel.isUseExistingApplication());
+							createExistingAppNameContentAssist();
+							// this is needed because of weird issues with UI not
+							// reacting to model changes while wizard runnable is
+							// run. We force another update
+							dbc.updateModels();
+							// sort
+							String[] items = newAppCartridgeCombo.getItems();
+							Arrays.sort(items);
+							newAppCartridgeCombo.setItems(items);
+						}
+					});
+				}
+			}.start();
+		}
 	}
 
 	@Override
@@ -655,6 +655,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
+		//event.doit = checkForDomainExistance();
+	}
+
+	/**
+	 * Checks that the user has a domain, opens the creation dialog in case he hasn't, closes the wizard if the user
+	 * does not create a domain (required for any application creation). Otherwise, returns true.
+	 */
+	private boolean checkForDomainExistance() {
 		try {
 			final UserDelegate user = this.pageModel.getUser();
 			if (user != null && !user.hasDomain()) {
@@ -666,16 +674,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (result != Dialog.OK) {
 					final IWizardContainer container = getWizard().getContainer();
 					if (container instanceof WizardDialog) {
-						event.doit = false;
 						((WizardDialog) container).close();
+						return false;
 					}
 				}
 			}
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
 		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
 		}
+		return true;
 	}
 
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
