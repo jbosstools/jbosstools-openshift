@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -33,7 +33,7 @@ public class RefreshElementAction extends AbstractAction {
 
 	public RefreshElementAction() {
 		super(OpenShiftExpressUIMessages.REFRESH_USER_ACTION, true);
-		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("refresh.gif"));
+		setImageDescriptor(OpenShiftImages.REFRESH);
 	}
 
 	/*

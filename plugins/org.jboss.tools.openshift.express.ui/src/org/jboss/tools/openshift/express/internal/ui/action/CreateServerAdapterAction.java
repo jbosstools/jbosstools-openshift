@@ -31,6 +31,7 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
@@ -48,7 +49,7 @@ public class CreateServerAdapterAction extends AbstractAction {
 
 	public CreateServerAdapterAction() {
 		super(OpenShiftExpressUIMessages.CREATE_SERVER_ADAPTER_ACTION, true);
-		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("edit.gif"));
+		setImageDescriptor(OpenShiftImages.EDIT);
 	}
 
 	@Override

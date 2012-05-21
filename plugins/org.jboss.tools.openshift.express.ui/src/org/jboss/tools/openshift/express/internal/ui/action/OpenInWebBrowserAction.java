@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.action;
 
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.jboss.tools.common.ui.BrowserUtil;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
@@ -24,7 +25,7 @@ public class OpenInWebBrowserAction extends AbstractAction {
 
 	public OpenInWebBrowserAction() {
 		super(OpenShiftExpressUIMessages.SHOW_IN_BROWSER_ACTION, true);
-		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("open-browser.gif"));
+		setImageDescriptor(OpenShiftImages.OPEN_BROWSER);
 	}
 
 	/**

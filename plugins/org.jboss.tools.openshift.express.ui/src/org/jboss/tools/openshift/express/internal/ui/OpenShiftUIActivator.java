@@ -92,30 +92,4 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	public static IStatus createErrorStatus(String message, Throwable throwable, Object... arguments) {
 		return createErrorStatus(NLS.bind(message, arguments), throwable);
 	}
-
-	
-	/**
-	 * Creates an image by loading it from a file in the plugin's images
-	 * directory.
-	 * 
-	 * @param imagePath path to the image, relative to the /icons directory of the plugin
-	 * @return The image object loaded from the image file
-	 */
-	public final Image createImage(final String imagePath) {
-		return createImageDescriptor(imagePath).createImage();
-	}
-	
-	/**
-	 * Creates an image descriptor by loading it from a file in the plugin's images
-	 * directory.
-	 * 
-	 * @param imagePath path to the image, relative to the /icons directory of the plugin
-	 * @return The image object loaded from the image file
-	 */
-	public final ImageDescriptor createImageDescriptor(final String imagePath) {
-		IPath imageFilePath = new Path("/icons/" + imagePath);
-		URL imageFileUrl = FileLocator.find(this.getBundle(), imageFilePath, null);
-		return ImageDescriptor.createFromURL(imageFileUrl);
-	}
-
 }

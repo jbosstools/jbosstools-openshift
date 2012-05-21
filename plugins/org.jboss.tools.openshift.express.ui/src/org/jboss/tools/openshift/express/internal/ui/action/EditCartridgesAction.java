@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.EmbedCartridgeWizard;
 
@@ -29,7 +29,7 @@ public class EditCartridgesAction extends AbstractAction {
 
 	public EditCartridgesAction() {
 		super(OpenShiftExpressUIMessages.EDIT_CARTRIDGES_ACTION, true);
-		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("task-repository-new.gif"));
+		setImageDescriptor(OpenShiftImages.TASK_REPO_NEW);
 	}
 	
 	@Override

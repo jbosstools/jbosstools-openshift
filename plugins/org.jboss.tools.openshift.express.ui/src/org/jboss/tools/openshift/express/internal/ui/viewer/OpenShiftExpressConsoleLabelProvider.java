@@ -18,7 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.LoadingStub;
 import org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider.NotConnectedUserStub;
@@ -59,16 +59,16 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof UserDelegate) {
-			return OpenShiftUIActivator.getDefault().createImage("repository-middle.gif");
+			return OpenShiftImages.REPO_MIDDLE_IMG;
 		}
 		if (element instanceof IApplication) {
-			return OpenShiftUIActivator.getDefault().createImage("query.gif");
+			return OpenShiftImages.QUERY_IMG;
 		}
 		if (element instanceof IEmbeddedCartridge) {
-			return OpenShiftUIActivator.getDefault().createImage("task-repository.gif");
+			return OpenShiftImages.TASK_REPO_IMG;
 		}
 		if (element instanceof LoadingStub) {
-			return OpenShiftUIActivator.getDefault().createImage("systemprocess.gif");
+			return OpenShiftImages.SYSTEM_PROCESS_IMG;
 		}
 		if (element instanceof OpenShiftException ) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);

@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
@@ -31,7 +31,7 @@ public class ImportApplicationAction extends AbstractAction {
 
 	public ImportApplicationAction() {
 		super(OpenShiftExpressUIMessages.IMPORT_APPLICATION_ACTION, true);
-		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("go-into.gif"));
+		setImageDescriptor(OpenShiftImages.GO_INTO);
 	}
 	
 	@Override

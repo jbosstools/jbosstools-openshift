@@ -17,7 +17,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.EditDomainDialog;
@@ -32,7 +32,7 @@ public class CreateOrEditDomainAction extends AbstractAction {
 
 	public CreateOrEditDomainAction() {
 		super(OpenShiftExpressUIMessages.CREATE_OR_EDIT_DOMAIN_ACTION);
-		setImageDescriptor(OpenShiftUIActivator.getDefault().createImageDescriptor("edit.gif"));
+		setImageDescriptor(OpenShiftImages.EDIT);
 	}
 
 	@Override
