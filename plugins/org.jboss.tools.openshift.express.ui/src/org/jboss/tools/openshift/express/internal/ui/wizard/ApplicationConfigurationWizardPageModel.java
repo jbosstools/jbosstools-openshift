@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -396,7 +397,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	protected void setSelectedEmbeddableCartridges(List<? extends IEmbeddableCartridge> cartridges) {
-		setSelectedEmbeddableCartridges(cartridges);
+		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(cartridges));
 	}
 	
 	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
