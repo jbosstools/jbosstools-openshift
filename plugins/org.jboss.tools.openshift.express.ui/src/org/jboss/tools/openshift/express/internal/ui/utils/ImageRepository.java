@@ -22,6 +22,9 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
+/**
+ * @author Andre Dietisheim
+ */
 public class ImageRepository {
 
 	private ImageRegistry imageRegistry;
