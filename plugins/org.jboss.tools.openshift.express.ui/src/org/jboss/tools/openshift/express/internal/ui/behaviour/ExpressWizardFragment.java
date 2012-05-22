@@ -23,7 +23,6 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
 	private ExpressDetailsComposite composite;
@@ -51,7 +50,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 				// depends on COMMON, DAMN
 				IWizardContainer container = ((WizardPage)handle).getWizard().getContainer();
 				try {
-					WizardUtils.runInWizard(j, null, container);
+					WizardUtils.runInWizard(j, container);
 				} catch(Exception e) {
 					// TODO clean
 				}
