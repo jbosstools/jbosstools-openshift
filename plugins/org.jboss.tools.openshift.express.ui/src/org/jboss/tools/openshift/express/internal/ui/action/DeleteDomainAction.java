@@ -51,7 +51,7 @@ public class DeleteDomainAction extends AbstractAction {
 			try {
 				IDomain domain = user.getDefaultDomain();
 
-				if (domain != null && user.getApplications().size() == 0) {
+				if (domain != null) {
 					enable = true;
 				}
 			} catch (OpenShiftException e) {
