@@ -16,9 +16,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -57,6 +54,7 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyButtonCommand
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
 public class ExpressDetailsSection extends ServerEditorSection {
 	private IEditorInput input;
@@ -79,9 +77,9 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.EXPANDED|ExpandableComposite.TITLE_BAR);
 		section.setText("Openshift Server");
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL| GridData.GRAB_VERTICAL));
-		Composite c = new Composite(section, SWT.NONE);
+		Composite c = toolkit.createComposite(section, SWT.NONE);
 		c.setLayout(new GridLayout(2,true));
-		createWidgets(c);
+		createWidgets(c, toolkit);
 		toolkit.paintBordersFor(c);
 		toolkit.adapt(c);
 		section.setClient(c);
@@ -131,14 +129,14 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	}
 	
 	protected Composite createComposite(Section section) {
-		createWidgets(section);
+		createWidgets(section, new FormToolkit(section.getDisplay()));
 		return section;
 	}
 	
-	private void createWidgets(Composite composite) {
+	private void createWidgets(Composite composite, FormToolkit toolkit) {
 		composite.setLayout(new GridLayout(2, false));
-		
-		Label deployLocationLabel = new Label(composite, SWT.NONE);
+
+		Label deployLocationLabel = toolkit.createLabel(composite, OpenshiftUIMessages.EditorSectionDeployLocLabel, SWT.NONE);
 		deployProjectCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
 		
@@ -146,45 +144,35 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		projectSettingGroup = new Group(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(projectSettingGroup);
 		projectSettingGroup.setLayout(new GridLayout(2, false));
+		projectSettingGroup.setText(OpenshiftUIMessages.EditorSectionProjectSettingsGroup);
 		
-		overrideProjectSettings = new Button(projectSettingGroup, SWT.CHECK);
+		overrideProjectSettings = toolkit.createButton(projectSettingGroup, OpenshiftUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
 
-		Label userLabel = new Label(projectSettingGroup, SWT.NONE);
+		Label userLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionUserLabel, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(userLabel);
-		userText = new Text(projectSettingGroup, SWT.SINGLE | SWT.BORDER);
+		userText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(userText);
-		Label appNameLabel = new Label(projectSettingGroup, SWT.NONE);
+		
+		Label appNameLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionAppNameLabel, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
-		appNameText = new Text(projectSettingGroup, SWT.SINGLE | SWT.BORDER);
+		appNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameText);
 
-		Label zipDestLabel = new Label(projectSettingGroup, SWT.NONE);
-		Composite zipDestComposite = new Composite(projectSettingGroup, SWT.NONE);
+		Label zipDestLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionZipDestLabel, SWT.NONE);
+		Composite zipDestComposite = toolkit.createComposite(projectSettingGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
-		browseDestButton = new Button(zipDestComposite, SWT.PUSH);
+		browseDestButton = toolkit.createButton(zipDestComposite, OpenshiftUIMessages.EditorSectionBrowseDestButton, SWT.PUSH);
 		browseDestButton.setLayoutData(UIUtil.createFormData2(0,5,100,-5,null,0,100,0));
-		deployFolderText = new Text(zipDestComposite, SWT.SINGLE | SWT.BORDER);
+		deployFolderText = toolkit.createText(zipDestComposite, "", SWT.SINGLE | SWT.BORDER);
 		deployFolderText.setLayoutData(UIUtil.createFormData2(0,5,100,-5,0,0,browseDestButton,-5));
 		
-		Label remoteLabel = new Label(projectSettingGroup, SWT.NONE);
+		Label remoteLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionRemoteLabel, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
-		remoteText = new Text(projectSettingGroup, SWT.SINGLE | SWT.BORDER);
+		remoteText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
-		
-		
-
-		// Text
-		appNameLabel.setText("Application Name: ");
-		deployLocationLabel.setText("Deploy Project: " );
-		zipDestLabel.setText("Output Directory: ");
-		userLabel.setText("Username: ");
-		remoteLabel.setText("Remote: ");
-		browseDestButton.setText("Browse...");
-		projectSettingGroup.setText("Project Settings:");
-		overrideProjectSettings.setText("Override Project Settings");
 	}
 	
 	ModifyListener remoteModifyListener, deployDestinationModifyListener, deployProjectListener;
