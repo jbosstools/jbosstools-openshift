@@ -33,11 +33,8 @@ import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.OpenShiftSSHOperationException;
 
@@ -166,10 +163,10 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								verifyApplicationSSHSession();
+								wizardModel.verifyApplicationSSHSession();
 								wizardModel.refreshForwardablePorts();
 								refreshViewerInput();
-							} catch (Exception e) {
+							} catch (OpenShiftSSHOperationException e) {
 								Logger.error("Failed to refresh list of ports", e);
 							}
 							return Status.OK_STATUS;
@@ -191,10 +188,10 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								verifyApplicationSSHSession();
+								wizardModel.verifyApplicationSSHSession();
 								wizardModel.startPortForwarding();
 								refreshViewerInput();
-							} catch (Exception e) {
+							} catch (OpenShiftSSHOperationException e) {
 								return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding.", e);
 							}
 							
@@ -232,10 +229,10 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								verifyApplicationSSHSession();
+								wizardModel.verifyApplicationSSHSession();
 								wizardModel.stopPortForwarding();
 								refreshViewerInput();
-							} catch (Exception e) {
+							} catch (OpenShiftSSHOperationException e) {
 								return OpenShiftUIActivator.createErrorStatus("Failed to stop port-forwarding.", e);
 							}
 							return Status.OK_STATUS;
@@ -327,43 +324,31 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
-			WizardUtils.runInWizard(new Job("Retrieving application's forwardable ports...") {
+			IStatus status = WizardUtils.runInWizard(new Job("Retrieving application's forwardable ports...") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						monitor.beginTask("Checking Application SSH session...", 1);
-						verifyApplicationSSHSession();
+						wizardModel.verifyApplicationSSHSession();
 						monitor.worked(1);
 						monitor.beginTask("Retrieving ports...", 1);
 						wizardModel.loadForwardablePorts();
 						refreshViewerInput();
 						monitor.worked(1);
 						return Status.OK_STATUS;
-					} catch (Exception e) {
+					} catch (OpenShiftSSHOperationException e) {
 						return OpenShiftUIActivator.createErrorStatus(
-								"Could not load forwardable ports for application", e);
+								"Could not load forwardable ports for application ''{0}''", e, wizardModel.getApplication().getName());
 					}
 				}
 
 			}, getContainer(), getDataBindingContext());
+			if(!status.isOK()) {
+				getWizard().getContainer().getShell().close();
+			}
 		} catch (Exception e) {
 			// ignore
-		}
-	}
-
-	/**
-	 * @param monitor
-	 * @throws JSchException
-	 */
-	// TODO : move this method into the WizardModel ?
-	private void verifyApplicationSSHSession() throws JSchException {
-		final boolean hasSSHSession = wizardModel.getApplication().hasSSHSession();
-		if (!hasSSHSession) {
-			Logger.debug("Opening a new SSH Session for application '" + wizardModel.getApplication().getName() + "'");
-			final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
-					wizardModel.getApplication());
-			wizardModel.getApplication().setSSHSession(session);
 		}
 	}
 

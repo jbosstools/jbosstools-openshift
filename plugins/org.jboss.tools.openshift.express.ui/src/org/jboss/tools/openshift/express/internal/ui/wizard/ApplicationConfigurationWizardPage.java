@@ -643,12 +643,23 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 							String[] items = newAppCartridgeCombo.getItems();
 							Arrays.sort(items);
 							newAppCartridgeCombo.setItems(items);
+							selectJBossAS7();
 						}
 					});
 				}
 			}.start();
 		}
 	}
+		
+		private void selectJBossAS7(){
+			String[] items = newAppCartridgeCombo.getItems();
+			for(int index = 0; index < items.length; index++){
+				if("jbossas-7".equals(items[index])){
+					newAppCartridgeCombo.select(index);
+				}
+			}
+		}
+		
 
 	@Override
 	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {

@@ -38,8 +38,4 @@ public class ApplicationPortForwardingWizard extends Wizard {
 		addPage(new ApplicationPortForwardingWizardPage(wizardModel, this));
 	}
 
-	public IApplication getApplication() {
-		return wizardModel.getApplication();
-	}
-
 }

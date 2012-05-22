@@ -19,8 +19,11 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.openshift.client.IApplication;
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.OpenShiftSSHOperationException;
@@ -200,6 +203,27 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 			application.refreshForwardablePorts();
 			updateLocalAddressBindings(this.useDefaultLocalIpAddress);
 			updateLocalPortBindings(this.useFreePorts);
+		}
+	}
+
+	/**
+	 * @param monitor
+	 * @throws OpenShiftSSHOperationException 
+	 * @throws JSchException
+	 */
+	// TODO : move this method into the WizardModel ?
+	void verifyApplicationSSHSession() throws OpenShiftSSHOperationException {
+		final boolean hasSSHSession = getApplication().hasSSHSession();
+		if (!hasSSHSession) {
+			Logger.debug("Opening a new SSH Session for application '" + getApplication().getName() + "'");
+			try {
+				final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
+						getApplication());
+				getApplication().setSSHSession(session);
+			} catch (JSchException e) {
+				throw new OpenShiftSSHOperationException(e, "Failed to open a new SSH session for application ''{0}''", getApplication().getName());
+				
+			}
 		}
 	}
 

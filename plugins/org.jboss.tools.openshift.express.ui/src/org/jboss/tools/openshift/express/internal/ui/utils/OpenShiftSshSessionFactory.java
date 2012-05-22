@@ -38,6 +38,7 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  * 
  */
+@SuppressWarnings("restriction")
 public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 
 	private static OpenShiftSshSessionFactory INSTANCE = new OpenShiftSshSessionFactory();
