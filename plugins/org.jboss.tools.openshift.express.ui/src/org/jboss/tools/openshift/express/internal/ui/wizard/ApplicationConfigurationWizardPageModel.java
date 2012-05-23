@@ -207,33 +207,13 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
-		sort(cartridges);
-		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
-	}
-
-	private void sort(List<ICartridge> cartridges) {
 		Collections.sort(cartridges, new CartridgeNameComparator());
+		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
+		setSelectedCartridge(ICartridge.JBOSSAS_7);
 	}
 
 	public List<ICartridge> getCartridges() {
 		return cartridges;
-	}
-
-	public ICartridge getCartridgeByName(String name) {
-		List<ICartridge> cartridges = getCartridges();
-		if (cartridges == null) {
-			return null;
-		}
-
-		ICartridge matchingCartridge = null;
-		for (ICartridge cartridge : cartridges) {
-			if (name.equals(cartridge.getName())) {
-				matchingCartridge = cartridge;
-				break;
-			}
-		}
-
-		return matchingCartridge;
 	}
 
 	public ICartridge getSelectedCartridge() {

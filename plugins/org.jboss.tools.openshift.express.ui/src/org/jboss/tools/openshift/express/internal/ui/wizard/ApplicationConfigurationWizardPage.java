@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
@@ -111,7 +112,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Group newAppEmbeddableCartridgesGroup;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
-	//private ModifyListener modifyListener;
+
+	// private ModifyListener modifyListener;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
 		super("Setup OpenShift Application",
@@ -254,6 +256,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final Label newAppNameLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		newAppNameLabel.setText("Name:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(newAppNameLabel);
+
+		// application name
 		this.newAppNameText = new Text(newAppConfigurationGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).align(SWT.FILL, SWT.FILL).applyTo(newAppNameText);
 		UIUtils.selectAllOnFocus(newAppNameText);
@@ -262,8 +266,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final IObservableValue applicationNameModelObservable =
 				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME).observe(
 						pageModel);
-		ValueBindingBuilder.bind(applicationNameTextObservable).to(applicationNameModelObservable).in(dbc);
+		ValueBindingBuilder
+				.bind(applicationNameTextObservable).
+				to(applicationNameModelObservable)
+				.in(dbc);
 
+		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
+		final NewApplicationNameValidator newApplicationNameValidator =
+				new NewApplicationNameValidator(useExistingAppBtnSelection, applicationNameTextObservable);
+		dbc.addValidationStatusProvider(newApplicationNameValidator);
+		ControlDecorationSupport.create(
+				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
+
+		// application type
 		final Label newAppTypeLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		newAppTypeLabel.setText("Type:");
 		GridDataFactory.fillDefaults()
@@ -271,23 +286,23 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		this.newAppCartridgeCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(newAppCartridgeCombo);
-		fillCartridgesCombo(dbc, newAppCartridgeCombo);
-		final ISWTObservableValue selectedCartridgeComboObservable =
-				WidgetProperties.selection().observe(newAppCartridgeCombo);
-		final IObservableValue selectedCartridgeModelObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
-		ValueBindingBuilder.bind(selectedCartridgeComboObservable)
-				.converting(new StringToCartridgeConverter())
+
+		dbc.bindList(WidgetProperties.items().observe(newAppCartridgeCombo),
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_CARTRIDGES).observe(pageModel),
+				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
+				new UpdateListStrategy().setConverter(new CartridgeToStringConverter()));
+
+		final ISWTObservableValue selectedCartridgeIndexObservable =
+				WidgetProperties.singleSelectionIndex().observe(newAppCartridgeCombo);
+		final IObservableValue selectedCartridgeModelObservable =
+				BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
+		ValueBindingBuilder.bind(selectedCartridgeIndexObservable)
+				.converting(new CartridgesIndexToCartridge())
 				.to(selectedCartridgeModelObservable)
-				.converting(new CartridgeToStringConverter())
-				.in(dbc);
-		        
-		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
-		final NewApplicationNameValidator newApplicationNameValidator =
-				new NewApplicationNameValidator(useExistingAppBtnSelection, applicationNameTextObservable);
-		dbc.addValidationStatusProvider(newApplicationNameValidator);
-		ControlDecorationSupport.create(
-				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
+				.converting(new CartridgeToCartridgesIndex()
+				).in(dbc);
+
 		// gear profile
 		final Label gearProfileLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		gearProfileLabel.setText("Gear profile:");
@@ -319,7 +334,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.in(dbc);
 
 		final NewApplicationTypeValidator newApplicationTypeValidator =
-				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeComboObservable);
+				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeIndexObservable);
 		dbc.addValidationStatusProvider(newApplicationTypeValidator);
 		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
 				new CustomControlDecorationUpdater());
@@ -411,13 +426,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}, newAppConfigurationGroup);
 	}
 
-	private void fillCartridgesCombo(DataBindingContext dbc, Combo cartridgesCombo) {
-		dbc.bindList(WidgetProperties.items().observe(cartridgesCombo),
-				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_CARTRIDGES).observe(pageModel),
-				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy().setConverter(new CartridgeToStringConverter()));
-	}
-
 	private void fillGearProfilesCombo(DataBindingContext dbc, Combo gearSizesCombo) {
 		dbc.bindList(WidgetProperties.items().observe(gearSizesCombo),
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
@@ -432,11 +440,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
 		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
-		viewer.setSorter(new ViewerSorter(){
+		viewer.setSorter(new ViewerSorter() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				if(e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge){
-					return ((IEmbeddableCartridge)e1).getName().compareTo(((IEmbeddableCartridge)e2).getName());
+				if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
+					return ((IEmbeddableCartridge) e1).getName().compareTo(((IEmbeddableCartridge) e2).getName());
 				}
 				return super.compare(viewer, e1, e2);
 			}
@@ -519,17 +527,42 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
-	private final class StringToCartridgeConverter extends Converter {
-		private StringToCartridgeConverter() {
-			super(String.class, ICartridge.class);
+	private final class CartridgesIndexToCartridge extends Converter {
+
+		public CartridgesIndexToCartridge() {
+			super(Integer.class, ICartridge.class);
 		}
 
 		@Override
 		public Object convert(Object fromObject) {
-			if (fromObject instanceof String) {
-				return pageModel.getCartridgeByName((String) fromObject);
+			if (!(fromObject instanceof Integer)) {
+				return null;
 			}
-			return null;
+
+			int index = ((Integer) fromObject).intValue();
+			List<ICartridge> cartridges = pageModel.getCartridges();
+			if (index >= cartridges.size()) {
+				return null;
+			}
+			return cartridges.get(index);
+		}
+	}
+
+	private final class CartridgeToCartridgesIndex extends Converter {
+
+		public CartridgeToCartridgesIndex() {
+			super(ICartridge.class, Integer.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof ICartridge)) {
+				return null;
+			}
+
+			ICartridge cartridge = ((ICartridge) fromObject);
+			List<ICartridge> cartridges = pageModel.getCartridges();
+			return cartridges.indexOf(cartridge);
 		}
 	}
 
@@ -626,7 +659,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		if(checkForDomainExistance()) {
+		if (checkForDomainExistance()) {
 			new Thread() {
 				public void run() {
 					Display.getDefault().asyncExec(new Runnable() {
@@ -634,8 +667,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 							loadOpenshiftResources(dbc);
 							enableApplicationWidgets(pageModel.isUseExistingApplication());
 							createExistingAppNameContentAssist();
-							// this is needed because of weird issues with UI not
-							// reacting to model changes while wizard runnable is
+							// this is needed because of weird issues with UI
+							// not
+							// reacting to model changes while wizard runnable
+							// is
 							// run. We force another update
 							dbc.updateModels();
 						}
@@ -650,12 +685,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
-		//event.doit = checkForDomainExistance();
+		// event.doit = checkForDomainExistance();
 	}
 
 	/**
-	 * Checks that the user has a domain, opens the creation dialog in case he hasn't, closes the wizard if the user
-	 * does not create a domain (required for any application creation). Otherwise, returns true.
+	 * Checks that the user has a domain, opens the creation dialog in case he
+	 * hasn't, closes the wizard if the user does not create a domain (required
+	 * for any application creation). Otherwise, returns true.
 	 */
 	private boolean checkForDomainExistance() {
 		try {
@@ -871,11 +907,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		@Override
 		protected IStatus validate() {
 			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
-			final String applicationType = (String) selectedApplicationTypeObservable.getValue();
+			final Integer selectedCartridgeIndex = (Integer) selectedApplicationTypeObservable.getValue();
 			if (useExistingApp) {
 				return ValidationStatus.ok();
 			}
-			if (StringUtils.isEmpty(applicationType)) {
+			if (selectedCartridgeIndex == null
+					|| selectedCartridgeIndex == -1) {
 				return ValidationStatus.cancel(getDescription());
 			}
 			return ValidationStatus.ok();
