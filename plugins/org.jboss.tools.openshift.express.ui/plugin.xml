@@ -162,7 +162,7 @@
     	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
 	       <includes>
 	          <actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.*"/>
+	                pattern="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.tailServerLogActionProvider"/>
 	       </includes>
 	    </viewerActionBinding>
 	</extension>
