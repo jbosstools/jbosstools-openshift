@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -639,27 +638,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 							// reacting to model changes while wizard runnable is
 							// run. We force another update
 							dbc.updateModels();
-							// sort
-							String[] items = newAppCartridgeCombo.getItems();
-							Arrays.sort(items);
-							newAppCartridgeCombo.setItems(items);
-							selectJBossAS7();
 						}
 					});
 				}
 			}.start();
 		}
 	}
-		
-		private void selectJBossAS7(){
-			String[] items = newAppCartridgeCombo.getItems();
-			for(int index = 0; index < items.length; index++){
-				if("jbossas-7".equals(items[index])){
-					newAppCartridgeCombo.select(index);
-				}
-			}
-		}
-		
 
 	@Override
 	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {

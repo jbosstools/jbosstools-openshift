@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.core.CartridgeNameComparator;
 import org.jboss.tools.openshift.express.internal.core.CreateApplicationOperation;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -206,7 +207,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
+		sort(cartridges);
 		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
+	}
+
+	private void sort(List<ICartridge> cartridges) {
+		Collections.sort(cartridges, new CartridgeNameComparator());
 	}
 
 	public List<ICartridge> getCartridges() {
@@ -419,6 +425,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel.getUser().getDefaultDomain();
 	}
 
+	@Override
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
 		IApplication application =
 				new CreateApplicationOperation(getUser()).execute(
@@ -429,5 +436,4 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 						monitor);
 		return application;
 	}
-
 }
