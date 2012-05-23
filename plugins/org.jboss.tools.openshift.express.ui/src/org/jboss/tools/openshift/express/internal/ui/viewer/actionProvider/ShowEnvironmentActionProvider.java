@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.ShowEnvironmentActio
 public class ShowEnvironmentActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public ShowEnvironmentActionProvider() {
-		super(new ShowEnvironmentAction(), "group.properties");
+		super(new ShowEnvironmentAction(), "group.showIn");
 	}
 
 }
