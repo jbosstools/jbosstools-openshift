@@ -125,10 +125,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
 			OpenShiftUIActivator.log(status);
 			ErrorDialog.openError(getShell(), "Error", "Error initializing application configuration page", status);
-		} catch (SocketTimeoutException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
-			OpenShiftUIActivator.log(status);
-			ErrorDialog.openError(getShell(), "Error", "Error initializing application configuration page", status);
 		}
 	}
 
@@ -218,10 +214,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 								try {
 									pageModel.setExistingApplicationName(selectedApplication.getName());
 								} catch (OpenShiftException ex) {
-									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
-											"Could not get embedded cartridges for application {0}",
-											selectedApplication.getName()), ex));
-								} catch (SocketTimeoutException ex) {
 									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
 											"Could not get embedded cartridges for application {0}",
 											selectedApplication.getName()), ex));

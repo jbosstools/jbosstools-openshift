@@ -66,7 +66,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private boolean existingApplicationsLoaded = false;;
 
 	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
 	}
@@ -146,7 +146,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	 * 
 	 * @see #doSetExistingApplication(IApplication)
 	 */
-	public void setExistingApplicationName(String applicationName) throws OpenShiftException, SocketTimeoutException {
+	public void setExistingApplicationName(String applicationName) throws OpenShiftException {
 		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME
 				, this.existingApplicationName, this.existingApplicationName = applicationName);
 
@@ -300,7 +300,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	 * @see #setSelectedEmbeddableCartridges(Set)
 	 * @see #wizardModel#setApplication
 	 */
-	public void setExistingApplication(IApplication application) throws OpenShiftException, SocketTimeoutException {
+	public void setExistingApplication(IApplication application) throws OpenShiftException {
 		if (application != null) {
 			setExistingApplicationName(application.getName());
 			doSetExistingApplication(application);
@@ -320,7 +320,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	 * @see #setSelectedEmbeddableCartridges(Set)
 	 * @see #wizardModel#setApplication
 	 */
-	protected void doSetExistingApplication(IApplication application) throws OpenShiftException, SocketTimeoutException {
+	protected void doSetExistingApplication(IApplication application) throws OpenShiftException {
 		if (application != null) {
 			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
