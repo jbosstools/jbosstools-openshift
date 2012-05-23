@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.ImportApplicationAct
 /**
  * @author Xavier Coulon
  */
-public class ImportApplicationActionProvider extends AbstractActionProvider {
+public class ImportApplicationActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public ImportApplicationActionProvider() {
 		super(new ImportApplicationAction(), "group.server");

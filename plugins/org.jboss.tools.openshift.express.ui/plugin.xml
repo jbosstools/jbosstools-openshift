@@ -162,16 +162,16 @@
     	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
 	       <includes>
 	          <actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.tailServerLogActionProvider"/>
+	                pattern="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.*"/>
 	       </includes>
 	    </viewerActionBinding>
 	</extension>
-
+	
     <!-- Extensions to Server View to provide 'tail' of the remote server.log file -->
 	<extension point="org.eclipse.ui.navigator.navigatorContent">
 		<actionProvider
-				class="org.jboss.tools.openshift.express.internal.ui.console.TailServerLogActionProvider"
-				id="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider">
+				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.TailServerLogActionProvider"
+				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.tailServerLogActionProvider">
 			<enablement>
               <and>
            <instanceof
@@ -182,17 +182,6 @@
 			</enablement>
 		</actionProvider>
     </extension>
-	
-	<extension point="org.eclipse.ui.navigator.viewer">
-		<viewerContentBinding viewerId="org.eclipse.wst.server.ui.ServersView">
-		</viewerContentBinding>
-    	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
-	       <includes>
-	          <actionExtension
-	                pattern="org.jboss.tools.openshift.express.ui.internal.ui.console.tailServerLogActionProvider"/>
-	       </includes>
-	    </viewerActionBinding>
-	</extension>
 	
     <extension
           point="org.eclipse.ui.console.consolePageParticipants">
@@ -358,7 +347,7 @@
            <enablement>
               <and>
                  <instanceof
-                       value=" org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
               </and>
            </enablement>

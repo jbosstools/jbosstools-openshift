@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.EditCartridgesAction
 /**
  * @author Xavier Coulon
  */
-public class EditCartridgesActionProvider extends AbstractActionProvider {
+public class EditCartridgesActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public EditCartridgesActionProvider() {
 		super(new EditCartridgesAction(), "group.edition");

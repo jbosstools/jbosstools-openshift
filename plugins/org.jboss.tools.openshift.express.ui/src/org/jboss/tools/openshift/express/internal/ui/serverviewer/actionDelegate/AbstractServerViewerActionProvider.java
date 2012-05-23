@@ -8,29 +8,30 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider;
+package org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate;
 
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
+import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.action.AbstractAction;
 
 /**
  * @author Xavier Coulon
  */
-public abstract class AbstractActionProvider extends CommonActionProvider {
+public abstract class AbstractServerViewerActionProvider extends CommonActionProvider {
 
 	protected final AbstractAction action;
-	
+
 	protected ICommonActionExtensionSite actionExtensionSite;
 
-	private final String group;
-	
-	public AbstractActionProvider(AbstractAction action, String group) {
+	public AbstractServerViewerActionProvider(AbstractAction action) {
 		this.action = action;
-		this.group = group;
 	}
 
 	public void init(ICommonActionExtensionSite actionExtensionSite) {
@@ -46,10 +47,31 @@ public abstract class AbstractActionProvider extends CommonActionProvider {
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
-		action.validate();
-		if (action != null/* && action.isEnabled()*/) {
-			menu.appendToGroup(group, action);
+		Object sel = getSelection();
+		if (sel instanceof IServer) {
+			IServer server = (IServer) sel;
+			if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
+				action.validate();
+				if (action != null/* && action.isEnabled() */) {
+					MenuManager openshiftMenu = new MenuManager("Openshift...",
+							"org.jboss.tools.openshift.express.serverviewer.menu");
+					openshiftMenu.add(action);
+					menu.add(openshiftMenu);
+				}
+			}
 		}
+	}
+
+	protected Object getSelection() {
+		ICommonViewerSite site = actionExtensionSite.getViewSite();
+		IStructuredSelection selection = null;
+		if (site instanceof ICommonViewerWorkbenchSite) {
+			ICommonViewerWorkbenchSite wsSite = (ICommonViewerWorkbenchSite) site;
+			selection = (IStructuredSelection) wsSite.getSelectionProvider().getSelection();
+			Object first = selection.getFirstElement();
+			return first;
+		}
+		return null;
 	}
 
 }

@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.RefreshElementAction
 /**
  * @author Xavier Coulon
  */
-public class RefreshElementActionProvider extends AbstractActionProvider {
+public class RefreshElementActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public RefreshElementActionProvider() {
 		super(new RefreshElementAction(), "group.properties");

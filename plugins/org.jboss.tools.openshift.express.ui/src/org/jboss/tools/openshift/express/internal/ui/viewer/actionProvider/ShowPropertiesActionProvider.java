@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.ShowPropertiesAction
 /**
  * @author Xavier Coulon
  */
-public class ShowPropertiesActionProvider extends AbstractActionProvider {
+public class ShowPropertiesActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public ShowPropertiesActionProvider() {
 		super(new ShowPropertiesAction(), "group.properties");

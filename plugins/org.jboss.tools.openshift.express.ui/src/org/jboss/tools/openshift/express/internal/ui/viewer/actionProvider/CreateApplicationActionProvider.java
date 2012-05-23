@@ -16,7 +16,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.CreateApplicationAct
 /**
  * @author Xavier Coulon
  */
-public class CreateApplicationActionProvider extends AbstractActionProvider {
+public class CreateApplicationActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public CreateApplicationActionProvider() {
 		super(new CreateApplicationAction(), "group.edition");

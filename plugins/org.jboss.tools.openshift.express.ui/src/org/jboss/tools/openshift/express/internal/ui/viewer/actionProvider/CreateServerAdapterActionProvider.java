@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.CreateServerAdapterA
 /**
  * @author Xavier Coulon
  */
-public class CreateServerAdapterActionProvider extends AbstractActionProvider {
+public class CreateServerAdapterActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public CreateServerAdapterActionProvider() {
 		super(new CreateServerAdapterAction(), "group.server");

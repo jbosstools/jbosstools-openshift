@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.OpenInWebBrowserActi
 /**
  * @author Xavier Coulon
  */
-public class OpenInWebBrowserActionProvider extends AbstractActionProvider {
+public class OpenInWebBrowserActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public OpenInWebBrowserActionProvider() {
 		super(new OpenInWebBrowserAction(), "group.showIn");

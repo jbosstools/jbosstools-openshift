@@ -17,7 +17,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.DeleteConnectionActi
 /**
  * @author Rob Stryker
  */
-public class DeleteConnectionActionProvider extends AbstractActionProvider {
+public class DeleteConnectionActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	
 	

@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogAction
 /**
  * @author Xavier Coulon
  */
-public class TailServerLogActionProvider extends AbstractActionProvider {
+public class TailServerLogActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public TailServerLogActionProvider() {
 		super(new TailServerLogAction(), "group.showIn");

@@ -15,7 +15,7 @@ import org.jboss.tools.openshift.express.internal.ui.action.DeleteApplicationAct
 /**
  * @author Xavier Coulon
  */
-public class DeleteApplicationActionProvider extends AbstractActionProvider {
+public class DeleteApplicationActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public DeleteApplicationActionProvider() {
 		super(new DeleteApplicationAction(), "group.edition");

@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider;
 
 import org.jboss.tools.openshift.express.internal.ui.action.DeleteDomainAction;
 
-public class DeleteDomainActionProvider extends AbstractActionProvider {
+public class DeleteDomainActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 
 	public DeleteDomainActionProvider() {
 		super(new DeleteDomainAction(), "group.edition");
