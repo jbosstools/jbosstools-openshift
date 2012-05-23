@@ -25,8 +25,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -89,11 +89,9 @@ public class DeleteApplicationAction extends AbstractAction {
 							try {
 								application.destroy();
 							} catch (OpenShiftException e) {
-								MessageDialog.openError(Display.getCurrent().getActiveShell(), NLS.bind("Failed to delete application \"{0}\"", appName), e.getMessage());
-								Logger.error(NLS.bind("Failed to delete application \"{0}\"", appName), e);
+								return OpenShiftUIActivator.createErrorStatus(NLS.bind("Failed to delete application \"{0}\"", appName), e);
 							} catch (SocketTimeoutException e) {
-								MessageDialog.openError(Display.getCurrent().getActiveShell(), NLS.bind("Failed to delete application \"{0}\"", appName), e.getMessage());
-								Logger.error(NLS.bind("Failed to delete application \"{0}\"", appName), e);
+								return OpenShiftUIActivator.createErrorStatus(NLS.bind("Failed to delete application \"{0}\"", appName), e);
 							}
 						}
 					} finally {
