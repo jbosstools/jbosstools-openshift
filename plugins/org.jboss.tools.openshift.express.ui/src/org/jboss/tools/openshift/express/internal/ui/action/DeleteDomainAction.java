@@ -46,22 +46,17 @@ public class DeleteDomainAction extends AbstractAction {
 		if (selection instanceof ITreeSelection
 				&& ((IStructuredSelection) selection).getFirstElement() instanceof UserDelegate
 				&& ((ITreeSelection) selection).size() == 1) {
-			UserDelegate user = (UserDelegate) ((IStructuredSelection) selection)
-					.getFirstElement();
-			try {
-				IDomain domain = user.getDefaultDomain();
-
-				if (domain != null) {
-					enable = true;
+			UserDelegate user = (UserDelegate) ((IStructuredSelection) selection).getFirstElement();
+			if (user.isConnected()) {
+				try {
+					if (user.getDefaultDomain() != null) {
+						enable = true;
+					}
+				} catch (OpenShiftException e) {
+					Logger.warn("Failed to retrieve User domain, prompting for creation", e);
+				} catch (SocketTimeoutException e) {
+					Logger.warn("Failed to retrieve User domain, prompting for creation", e);
 				}
-			} catch (OpenShiftException e) {
-				Logger.warn(
-						"Failed to retrieve User domain, prompting for creation",
-						e);
-			} catch (SocketTimeoutException e) {
-				Logger.warn(
-						"Failed to retrieve User domain, prompting for creation",
-						e);
 			}
 		}
 		setEnabled(enable);
@@ -75,7 +70,9 @@ public class DeleteDomainAction extends AbstractAction {
 			UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
 			try {
 				final IDomain domain = user.getDefaultDomain();
-				if (domain != null) {
+				if (domain == null) {
+					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Delete Domain", "User has no domain");
+				} else {
 					boolean confirm = false;
 					MessageDialog dialog = new CheckboxMessageDialog(Display.getCurrent()
 							.getActiveShell(), "Domain deletion", NLS.bind(

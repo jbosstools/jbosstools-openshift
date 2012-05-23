@@ -84,7 +84,7 @@ public class OpenShiftExpressConsoleLabelProvider implements IStyledLabelProvide
 	@Override
 	public StyledString getStyledText(Object element) {
 		if (element instanceof UserDelegate) {
-			String message = ((UserDelegate) element).getRhlogin();
+			String message = ((UserDelegate) element).getUsername();
 			StyledString styledString = new StyledString(message);
 			styledString.setStyle(0, message.length(), StyledString.DECORATIONS_STYLER);
 			return new StyledString(message);

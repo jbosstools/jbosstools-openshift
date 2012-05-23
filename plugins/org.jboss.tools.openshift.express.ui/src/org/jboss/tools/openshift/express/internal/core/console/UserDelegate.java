@@ -36,15 +36,23 @@ import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
 
 public class UserDelegate {
+	private String username;
+	private String password;
 	private IUser delegate;
 	private boolean rememberPassword;
 	private boolean connected;
 	private boolean alreadyPromptedForPassword;
 	
-	public UserDelegate(IUser user, boolean rememberPassword, boolean connected) {
-		this.delegate = user;
+	public UserDelegate(String username, String password) {
+		this.username = username;
+		this.password = password;
+		this.rememberPassword = (password != null);
+		this.setConnected(false);
+	}
+	
+	public UserDelegate(IUser user, boolean rememberPassword) {
+		setDelegate(user);
 		this.rememberPassword = rememberPassword;
-		this.setConnected(connected);
 	}
 	
 	/**
@@ -59,13 +67,16 @@ public class UserDelegate {
 	 */
 	protected final void setDelegate(IUser delegate) {
 		this.delegate = delegate;
+		this.username = delegate.getRhlogin();
+		this.password = delegate.getPassword();
+		this.setConnected(true);
 	} 
 
-	public String getRhlogin() {
-		return delegate.getRhlogin();
+	public String getUsername() {
+		return username;
 	}
 	public String getPassword() {
-		return delegate.getPassword();
+		return password;
 	}
 	
 	public boolean isRememberPassword() {
@@ -75,7 +86,7 @@ public class UserDelegate {
 	/**
 	 * @param rememberPassword the rememberPassword to set
 	 */
-	protected final void setRememberPassword(boolean rememberPassword) {
+	public final void setRememberPassword(boolean rememberPassword) {
 		this.rememberPassword = rememberPassword;
 	}
 
@@ -88,7 +99,7 @@ public class UserDelegate {
 	 * @return true if user entered credentials, false otherwise.
 	 */
 	public boolean checkForPassword() {
-		if( delegate.getPassword() == null || "".equals(delegate.getPassword())) {
+		if(delegate == null) {
 			try {
 				this.alreadyPromptedForPassword = true;
 				Display.getDefault().syncExec(new Runnable() { public void run() {
@@ -113,7 +124,7 @@ public class UserDelegate {
 				Logger.error("Failed to retrieve User's password", e);
 			}
 		}
-		return (delegate.getPassword() != null  && !"".equals(delegate.getPassword()));
+		return (delegate != null);
 	}
 	
 	public IApplication createApplication(final String applicationName, final ICartridge applicationType, final ApplicationScale scale, final IGearProfile gearProfile)

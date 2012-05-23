@@ -46,7 +46,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -152,6 +151,8 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			passwordText.setFocus();
 		}
 	}
+	
+	
 
 	@Override
 	protected void onPageWillGetDeactivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {

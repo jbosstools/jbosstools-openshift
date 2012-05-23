@@ -15,9 +15,9 @@ import org.jboss.tools.openshift.express.internal.ui.action.CreateOrEditDomainAc
 /**
  * @author Xavier Coulon
  */
-public class EditDomainActionProvider extends AbstractActionProvider {
+public class CreateOrEditDomainActionProvider extends AbstractActionProvider {
 
-	public EditDomainActionProvider() {
+	public CreateOrEditDomainActionProvider() {
 		super(new CreateOrEditDomainAction(), "group.edition");
 	}
 

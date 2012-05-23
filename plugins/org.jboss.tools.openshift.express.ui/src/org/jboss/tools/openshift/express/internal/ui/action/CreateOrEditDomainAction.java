@@ -38,12 +38,18 @@ public class CreateOrEditDomainAction extends AbstractAction {
 	@Override
 	public void run() {
 		final ITreeSelection treeSelection = (ITreeSelection) selection;
-		if (selection instanceof ITreeSelection
-				&& treeSelection.getFirstElement() instanceof UserDelegate) {
+		if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof UserDelegate) {
 			final UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
-			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), createDomainWizard(user));
-			dialog.create();
-			dialog.open();
+			boolean connected = user.isConnected();
+			if (!connected) {
+				connected = user.checkForPassword();
+			}
+			// do not show the dialog if the user was not connected or did not provide valid credentials.
+			if (connected) {
+				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), createDomainWizard(user));
+				dialog.create();
+				dialog.open();
+			}
 		}
 	}
 

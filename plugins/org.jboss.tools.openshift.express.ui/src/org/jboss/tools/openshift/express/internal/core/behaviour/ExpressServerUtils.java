@@ -404,7 +404,7 @@ public class ExpressServerUtils {
 		IEclipsePreferences node = context.getNode(qualifier);
 		node.put(ExpressServerUtils.SETTING_APPLICATION_ID, app.getUUID());
 		node.put(ExpressServerUtils.SETTING_APPLICATION_NAME, app.getName());
-		node.put(ExpressServerUtils.SETTING_USERNAME, user.getRhlogin());
+		node.put(ExpressServerUtils.SETTING_USERNAME, user.getUsername());
 		node.put(ExpressServerUtils.SETTING_DOMAIN, app.getDomain().getId());
 		node.put(ExpressServerUtils.SETTING_REMOTE_NAME, remoteName);
 		node.put(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);

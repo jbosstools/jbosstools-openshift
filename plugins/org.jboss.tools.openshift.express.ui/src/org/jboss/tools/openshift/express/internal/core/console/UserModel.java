@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.console;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,8 +34,8 @@ import com.openshift.client.OpenShiftException;
 import com.openshift.client.configuration.OpenShiftConfiguration;
 
 public class UserModel {
-	private static final String USER_ID = OpenShiftUIActivator.PLUGIN_ID + " " +
-			OpenShiftUIActivator.getDefault().getBundle().getVersion();
+	private static final String USER_ID = OpenShiftUIActivator.PLUGIN_ID + " "
+			+ OpenShiftUIActivator.getDefault().getBundle().getVersion();
 	private static UserModel model;
 
 	public static UserModel getDefault() {
@@ -66,10 +68,15 @@ public class UserModel {
 	 * @param password
 	 * @return
 	 * @throws OpenShiftException
+	 * @throws FileNotFoundException
+	 * @throws SocketTimeoutException
 	 * @throws IOException
 	 */
-	public IUser createUser(String username, String password) throws OpenShiftException, IOException {
-		return new OpenShiftConnectionFactory().getConnection(USER_ID, username, password).getUser();
+	public IUser createUser(String username, String password) throws OpenShiftException, SocketTimeoutException {
+		IUser user = new OpenShiftConnectionFactory().getConnection(USER_ID, username, password).getUser();
+		// force domain loading so that there is no 'lazy domain loading' cost after that.
+		user.getDefaultDomain();
+		return user;
 	}
 
 	private static final int ADDED = 0;
@@ -77,13 +84,13 @@ public class UserModel {
 	private static final int CHANGED = 2;
 
 	public void addUser(UserDelegate user) {
-		allUsers.put(user.getRhlogin(), user);
+		allUsers.put(user.getUsername(), user);
 		this.recentUser = user;
 		fireModelChange(user, ADDED);
 	}
 
 	public void removeUser(UserDelegate user) {
-		allUsers.remove(user.getRhlogin());
+		allUsers.remove(user.getUsername());
 		if (this.recentUser == user)
 			this.recentUser = null;
 		fireModelChange(user, REMOVED);
@@ -136,14 +143,13 @@ public class UserModel {
 				OpenShiftUIActivator.PLUGIN_ID);
 		String[] users = pref.get();
 		for (int i = 0; i < users.length; i++) {
+			String password = getPasswordFromSecureStorage(users[i]);
 			try {
-				String password = getPasswordFromSecureStorage(users[i]);
-				UserDelegate u = new UserDelegate(createUser(users[i], password), password != null, password != null);
-				addUser(u);
-			} catch (OpenShiftException ose) {
-				// TODO
-			} catch (IOException ioe) {
-				// TODO
+				addUser(new UserDelegate(createUser(users[i], password), true));
+			} catch (OpenShiftException e) {
+				addUser(new UserDelegate(users[i], password));
+			} catch (SocketTimeoutException e) {
+				addUser(new UserDelegate(users[i], password));
 			}
 		}
 	}
@@ -163,8 +169,7 @@ public class UserModel {
 		for (Entry<String, UserDelegate> entry : allUsers.entrySet()) {
 			UserDelegate user = entry.getValue();
 			if (user.isRememberPassword()) {
-				setPasswordInSecureStorage(user.getRhlogin(),
-						user.getPassword());
+				setPasswordInSecureStorage(user.getUsername(), user.getPassword());
 			}
 		}
 	}
@@ -208,8 +213,7 @@ public class UserModel {
 	}
 
 	/*
-	 * Return a password from secure storage, or null if platform not found, or
-	 * password not stored
+	 * Return a password from secure storage, or null if platform not found, or password not stored
 	 */
 	public String getPasswordFromSecureStorage(final String rhLogin) {
 		if (rhLogin == null)

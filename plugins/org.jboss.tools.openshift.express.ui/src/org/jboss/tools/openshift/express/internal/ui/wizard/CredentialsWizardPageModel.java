@@ -19,7 +19,6 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.NotFoundOpenShiftException;
@@ -74,7 +73,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			user = UserModel.getDefault().getRecentUser();
 		}
 		if (user != null) {
-			rhLogin = user.getRhlogin();
+			rhLogin = user.getUsername();
 		} else {
 			rhLogin = rhLoginPreferenceValue.get();
 			if (rhLogin == null 
@@ -97,7 +96,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void storePassword(UserDelegate user) {
-		UserModel.getDefault().setPasswordInSecureStorage(user.getRhlogin(), password);
+		UserModel.getDefault().setPasswordInSecureStorage(user.getUsername(), password);
 	}
 
 	private void erasePasswordStore() {
@@ -187,16 +186,17 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			// reuse previous user if it was properly logged in
 			user = UserModel.getDefault().findUser(rhLogin);
 			// check user credentials if not logged before or if input password changed
-			if(user != null && user.getPassword().equals(password)) {
+			if(user != null && user.isConnected()) {
+				user.setRememberPassword(rememberPassword);
 				wizardModel.setUser(user);
+				storeUser(user);
 			} else {
-				user = new UserDelegate(UserModel.getDefault().createUser(rhLogin, password), rememberPassword,
-						password != null);
+				user = new UserDelegate(UserModel.getDefault().createUser(rhLogin, password), rememberPassword);
 				if (user.isValid()) {
 					storeUser(user);
 				} else {
 					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-							"The credentials for user {0} are not valid", user.getRhlogin()));
+							"The credentials for user {0} are not valid", user.getUsername()));
 				}
 			}
 		} catch (NotFoundOpenShiftException e) {

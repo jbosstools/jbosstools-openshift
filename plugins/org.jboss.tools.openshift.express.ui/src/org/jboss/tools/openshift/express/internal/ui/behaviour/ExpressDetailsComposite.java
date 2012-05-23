@@ -167,7 +167,7 @@ public class ExpressDetailsComposite {
 		} else {
 			// we may or may not have a user, clearly no app
 			this.fuser = tmpUser == null ? UserModel.getDefault().getRecentUser() : tmpUser;
-			this.user = fuser == null ? null : fuser.getRhlogin();
+			this.user = fuser == null ? null : fuser.getUsername();
 		}
 		
 		this.pass = this.user == null ? null : UserModel.getDefault().getPasswordFromSecureStorage(this.user);
@@ -579,7 +579,7 @@ public class ExpressDetailsComposite {
 		this.appListNames = appNames == null ? new String[0] : appNames;
 		this.fapplication = application;
 		this.fuser = user;
-		this.user = fuser.getRhlogin();
+		this.user = fuser.getUsername();
 		
 		for( int i = 0; i < appList.size(); i++ ) {
 			projectsPerApp.put(appList.get(i), ExpressServerUtils.findProjectsForApplication(appList.get(i)));
@@ -596,9 +596,9 @@ public class ExpressDetailsComposite {
 		try {
 			UserModel.getDefault().addUser(fuser);
 			if( rememberPassword ) {
-				UserModel.getDefault().setPasswordInSecureStorage(fuser.getRhlogin(), fuser.getPassword());
+				UserModel.getDefault().setPasswordInSecureStorage(fuser.getUsername(), fuser.getPassword());
 			} else {
-				UserModel.getDefault().clearPasswordInSecureStorage(fuser.getRhlogin());
+				UserModel.getDefault().clearPasswordInSecureStorage(fuser.getUsername());
 			}
 			fillServerWithDetails();
 			updateProjectSettings();

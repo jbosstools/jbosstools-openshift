@@ -364,7 +364,7 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditDomainActionProvider"
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateOrEditDomainActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editDomainActionProvider">
            <enablement>
               <and>
