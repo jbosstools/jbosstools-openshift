@@ -541,7 +541,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			int index = ((Integer) fromObject).intValue();
 			List<ICartridge> cartridges = pageModel.getCartridges();
-			if (index >= cartridges.size()) {
+			if (index < 0 || index > cartridges.size()) {
 				return null;
 			}
 			return cartridges.get(index);
