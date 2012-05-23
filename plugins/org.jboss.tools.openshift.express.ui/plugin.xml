@@ -485,9 +485,10 @@
                  <instanceof
                        value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
                  </instanceof>
-                 <instanceof
+                 <!-- Not showing it for IApp since it has show details -->
+                <!-- <instanceof
                        value="com.openshift.client.IApplication">
-                 </instanceof>
+                 </instanceof> -->
                  <instanceof
                        value="com.openshift.client.IEmbeddableCartridge">
                  </instanceof>
