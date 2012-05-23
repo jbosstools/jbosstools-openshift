@@ -18,9 +18,11 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.EmbedCartridgeWizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
@@ -36,12 +38,16 @@ public class EditCartridgesAction extends AbstractAction {
 	public void run() {
 		final ITreeSelection treeSelection = (ITreeSelection)selection;
 		if (selection != null && selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
-			final IApplication application = (IApplication) treeSelection.getFirstElement();
-			final UserDelegate user = UserModel.getDefault().getRecentUser();
-			EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
-			int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
-			if(result == Dialog.OK) {
-				viewer.refresh(application);
+			try {
+				final IApplication application = (IApplication) treeSelection.getFirstElement();
+				final UserDelegate user = UserModel.getDefault().findUser(application.getDomain().getUser().getRhlogin());
+				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
+				int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
+				if(result == Dialog.OK) {
+					viewer.refresh(application);
+				}
+			} catch (OpenShiftException e) {
+				Logger.error("Failed to edit cartridges", e);
 			}
 			
 		}
