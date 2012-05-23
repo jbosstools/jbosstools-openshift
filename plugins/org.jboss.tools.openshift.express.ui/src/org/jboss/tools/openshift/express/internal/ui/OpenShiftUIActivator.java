@@ -1,15 +1,8 @@
 package org.jboss.tools.openshift.express.internal.ui;
 
-import java.net.URL;
-
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.osgi.framework.BundleContext;
@@ -79,6 +72,10 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 
 	public static IStatus createCancelStatus(String message) {
 		return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, message);
+	}
+
+	public static IStatus createCancelStatus(String message, Object... arguments) {
+		return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(message, arguments));
 	}
 
 	public static IStatus createErrorStatus(String message) {

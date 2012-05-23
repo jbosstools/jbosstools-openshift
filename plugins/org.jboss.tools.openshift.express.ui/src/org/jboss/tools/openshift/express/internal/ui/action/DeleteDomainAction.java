@@ -99,9 +99,6 @@ public class DeleteDomainAction extends AbstractAction {
 										return Status.OK_STATUS;
 									} catch (OpenShiftException e) {
 										return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Failed to delete domain \"{0}\"", domain.getId()), e);
-										
-									} catch (SocketTimeoutException e) {
-										return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Failed to delete domain \"{0}\"", domain.getId()), e);
 									}
 								} finally {
 									monitor.done();

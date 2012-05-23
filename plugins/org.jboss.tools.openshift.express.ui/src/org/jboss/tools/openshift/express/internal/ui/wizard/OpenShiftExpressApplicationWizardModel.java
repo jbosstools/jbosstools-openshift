@@ -372,7 +372,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		}
 	}
 
-	public void createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
+	public IApplication createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
 			OpenShiftException {
 		IApplication application =
 				new CreateApplicationOperation(getUser()).execute(
@@ -382,6 +382,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 						getApplicationGearProfile(),
 						monitor);
 		setApplication(application);
+		return application;
 	}
 
 	@Override

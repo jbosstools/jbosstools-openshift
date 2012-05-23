@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -70,8 +69,6 @@ public class CreateServerAdapterAction extends AbstractAction {
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
 				dialog.open();
 			}
-		} catch (SocketTimeoutException e) {
-			OpenShiftUIActivator.log("Could not create OpenShift server", e);
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not create OpenShift server", e);
 		}

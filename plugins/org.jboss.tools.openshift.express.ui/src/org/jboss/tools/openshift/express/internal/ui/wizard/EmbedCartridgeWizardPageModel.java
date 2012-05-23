@@ -144,6 +144,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 				.execute(new ArrayList<IEmbeddableCartridge>(selectedCartridges), null);
 	}
 	
+	@Override
 	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
 		IApplication application =
 				new CreateApplicationOperation(wizardModel.getUser()).execute(

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +82,7 @@ public class EmbedCartridgeStrategy {
 	}
 
 	public EmbeddableCartridgeDiff add(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		EmbeddableCartridgeDiff cartridgeDiff = new EmbeddableCartridgeDiff(cartridge);
 		add(cartridge, currentCartridges, cartridgeDiff);
 		return cartridgeDiff;
@@ -91,7 +90,7 @@ public class EmbedCartridgeStrategy {
 
 	private void add(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges,
 			EmbeddableCartridgeDiff diff)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		EmbeddableCartridgeRelations relation = dependenciesByCartridge.get(cartridge);
 		if (relation == null) {
 			return;
@@ -102,8 +101,7 @@ public class EmbedCartridgeStrategy {
 	}
 
 	private void addRequired(Set<IEmbeddableCartridge> currentCartridges, EmbeddableCartridgeDiff diff,
-			IEmbeddableCartridge requiredCartridge) throws OpenShiftException,
-			SocketTimeoutException {
+			IEmbeddableCartridge requiredCartridge) throws OpenShiftException {
 		if (requiredCartridge != null
 				&& !currentCartridges.contains(requiredCartridge)) {
 			// recurse
@@ -121,7 +119,7 @@ public class EmbedCartridgeStrategy {
 	}
 
 	private void removeConflicting(Set<IEmbeddableCartridge> currentCartridges, EmbeddableCartridgeDiff cartridgeDiff,
-			EmbeddableCartridgeRelations relation) throws OpenShiftException, SocketTimeoutException {
+			EmbeddableCartridgeRelations relation) throws OpenShiftException {
 		IEmbeddableCartridge conflictingCartridge = relation.getConflicting();
 		if (conflictingCartridge != null) {
 			remove(conflictingCartridge, currentCartridges, cartridgeDiff);
@@ -132,7 +130,7 @@ public class EmbedCartridgeStrategy {
 	}
 
 	public EmbeddableCartridgeDiff remove(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		EmbeddableCartridgeDiff cartridgeDiff = new EmbeddableCartridgeDiff(cartridge);
 		remove(cartridge, currentCartridges, cartridgeDiff);
 		return cartridgeDiff;
@@ -140,7 +138,7 @@ public class EmbedCartridgeStrategy {
 
 	private void remove(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges,
 			EmbeddableCartridgeDiff cartridgeDiff)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		Set<IEmbeddableCartridge> dependantCartridges = dependantsByCartridge.get(cartridge);
 		if (dependantCartridges == null) {
 			return;

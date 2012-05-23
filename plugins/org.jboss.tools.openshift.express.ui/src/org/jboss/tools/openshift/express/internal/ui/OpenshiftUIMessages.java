@@ -14,6 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class OpenshiftUIMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages"; //$NON-NLS-1$
+	public static final String CREATING_APPLICATION = null;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OpenshiftUIMessages.class);
 	}

@@ -128,7 +128,7 @@ public class UserDelegate {
 	}
 	
 	public IApplication createApplication(final String applicationName, final ICartridge applicationType, final ApplicationScale scale, final IGearProfile gearProfile)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
 		}

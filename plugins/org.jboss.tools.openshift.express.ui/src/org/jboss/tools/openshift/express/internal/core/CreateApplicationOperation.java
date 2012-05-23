@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,10 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.net.SocketTimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
@@ -29,65 +26,34 @@ import com.openshift.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.client.OpenShiftException;
 
 /**
+ * @author Xavier Coulon
  * @author Andre Dietisheim
  */
 public class CreateApplicationOperation {
 
-	private static final int APP_CREATION_TIMEOUT = 180;
 	private UserDelegate user;
 
 	public CreateApplicationOperation(UserDelegate user) {
 		this.user = user;
 	}
 
-	public IApplication execute(final String name, final ICartridge cartridge,
-			final ApplicationScale scale, final IGearProfile gearProfile, final IProgressMonitor monitor)
+	public IApplication execute(final String name, final ICartridge cartridge, final ApplicationScale scale,
+			final IGearProfile gearProfile, final IProgressMonitor monitor)
 			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
 		if (user == null) {
-			throw new OpenShiftException("Could not create application, have no valid user credentials");
+			throw new OpenShiftException(OpenShiftExpressUIMessages.CANNOT_CREATE_NO_USER);
 		}
-		ExecutorService executor = Executors.newFixedThreadPool(1);
-		try {
-			FutureTask<IApplication> future = new FutureTask<IApplication>(
-					new Callable<IApplication>() {
-						@Override
-						public IApplication call() throws Exception {
-							monitor.setTaskName("Creating application \"" + name + "\"...");
-							Logger.debug("creating application...");
-							final IApplication application =
-									user.createApplication(name, cartridge, scale, gearProfile);
-							monitor.beginTask(
-									"Waiting for application to be reachable...", IProgressMonitor.UNKNOWN);
-							Logger.debug("Waiting for application to be reachable...");
-							waitForAccessible(application, monitor);
-							return application;
-						}
-					});
-			executor.execute(future);
-			while (!future.isDone()) {
-				if (monitor.isCanceled()) {
-					throw new OpenShiftException("Operation was cancelled by user.");
-				}
-				Thread.sleep(1000);
-			}
-			final IApplication application = future.get();
-			return application;
-		} catch (Exception e) { // InterruptedException and ExecutionException
-			Throwable cause = e.getCause() != null ? e.getCause() : e;
-			Logger.error("Failed to create application", cause);
-			throw new OpenShiftException("Failed to create application: {0}", cause.getMessage());
-		} finally {
-			executor.shutdown();
-		}
+
+		monitor.setTaskName(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
+		Logger.debug(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
+		return createApplication(name, cartridge, scale, gearProfile, monitor);
 	}
 
-	private void waitForAccessible(IApplication application, IProgressMonitor monitor)
-			throws OpenShiftApplicationNotAvailableException, OpenShiftException {
-		// monitor.subTask("waiting for application to become accessible...");
-		if (!application.waitForAccessible(APP_CREATION_TIMEOUT * 1000)) {
-			throw new OpenShiftApplicationNotAvailableException(NLS.bind(
-					OpenShiftExpressUIMessages.HOSTNAME_NOT_ANSWERING, application.getApplicationUrl()));
-		}
+	private IApplication createApplication(final String name, final ICartridge cartridge,
+			final ApplicationScale scale, final IGearProfile gearProfile, final IProgressMonitor monitor)
+			throws OpenShiftException {
+		monitor.setTaskName(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
+		Logger.debug(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
+		return user.createApplication(name, cartridge, scale, gearProfile);
 	}
-
 }

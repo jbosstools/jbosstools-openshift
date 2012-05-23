@@ -15,7 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -50,13 +49,13 @@ public class EmbedCartridgeStrategyTest {
 	private DomainFake domainFake;
 
 	@Before
-	public void setUp() throws SocketTimeoutException, OpenShiftException {
+	public void setUp() throws OpenShiftException {
 		this.domainFake = new DomainFake();
 		this.embedStrategy = new EmbedCartridgeStrategy(domainFake);
 	}
 
 	@Test
-	public void shouldNotAddMySql() throws SocketTimeoutException, OpenShiftException{
+	public void shouldNotAddMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(IEmbeddableCartridge.MYSQL_51);
@@ -72,7 +71,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldAddMySql() throws SocketTimeoutException, OpenShiftException{
+	public void shouldAddMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		
@@ -88,7 +87,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldAddPhpMyAdminAndMySql() throws SocketTimeoutException, OpenShiftException{
+	public void shouldAddPhpMyAdminAndMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		
@@ -105,7 +104,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePhpMyAdmin() throws SocketTimeoutException, OpenShiftException{
+	public void shouldRemovePhpMyAdmin() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(IEmbeddableCartridge.MYSQL_51);
@@ -123,7 +122,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePhpMyAdminAndMySql() throws SocketTimeoutException, OpenShiftException{
+	public void shouldRemovePhpMyAdminAndMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(IEmbeddableCartridge.MYSQL_51);
@@ -142,7 +141,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePostgresAndAddMySql() throws SocketTimeoutException, OpenShiftException{
+	public void shouldRemovePostgresAndAddMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(IEmbeddableCartridge.POSTGRESQL_84);
@@ -160,7 +159,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePostgresAndAddPhpMyAdminAndMySql() throws SocketTimeoutException, OpenShiftException{
+	public void shouldRemovePostgresAndAddPhpMyAdminAndMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(IEmbeddableCartridge.POSTGRESQL_84);
@@ -179,7 +178,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldAddRockmongoAndMongoDb() throws SocketTimeoutException, OpenShiftException{
+	public void shouldAddRockmongoAndMongoDb() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 
@@ -196,7 +195,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws SocketTimeoutException, OpenShiftException{
+	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(IEmbeddableCartridge.MONGODB_20);
@@ -217,7 +216,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldNotAddJenkinsApplication() throws SocketTimeoutException, OpenShiftException{
+	public void shouldNotAddJenkinsApplication() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		domainFake.createApplication("adietish", ICartridge.JENKINS_14);
@@ -236,7 +235,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 	
 	@Test
-	public void shouldAddJenkinsApplication() throws SocketTimeoutException, OpenShiftException{
+	public void shouldAddJenkinsApplication() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		
@@ -316,53 +315,52 @@ public class EmbedCartridgeStrategyTest {
 
 		@Override
 		public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge) 
-				throws OpenShiftException,SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public List<IEmbeddedCartridge> addEmbeddableCartridges(List<IEmbeddableCartridge> cartridge)
-				throws OpenShiftException, SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException, SocketTimeoutException {
+		public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public boolean hasEmbeddedCartridge(IEmbeddableCartridge cartridge) 
-				throws OpenShiftException,SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public boolean hasEmbeddedCartridge(String cartridgeName) throws OpenShiftException, SocketTimeoutException {
+		public boolean hasEmbeddedCartridge(String cartridgeName) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public IEmbeddedCartridge getEmbeddedCartridge(String cartridgeName) 
-				throws OpenShiftException,SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public IEmbeddedCartridge getEmbeddedCartridge(IEmbeddableCartridge cartridge) 
-				throws OpenShiftException,SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void removeEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException,
-				SocketTimeoutException {
+		public void removeEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
 			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public List<IApplicationGear> getGears() throws OpenShiftException, SocketTimeoutException {
+		public List<IApplicationGear> getGears() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -372,27 +370,27 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public void destroy() throws OpenShiftException, SocketTimeoutException {
+		public void destroy() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void start() throws OpenShiftException, SocketTimeoutException {
+		public void start() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void restart() throws OpenShiftException, SocketTimeoutException {
+		public void restart() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void stop() throws OpenShiftException, SocketTimeoutException {
+		public void stop() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void stop(boolean force) throws OpenShiftException, SocketTimeoutException {
+		public void stop(boolean force) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -407,32 +405,32 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public void exposePort() throws SocketTimeoutException, OpenShiftException {
+		public void exposePort() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void concealPort() throws SocketTimeoutException, OpenShiftException {
+		public void concealPort() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void showPort() throws SocketTimeoutException, OpenShiftException {
+		public void showPort() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void scaleDown() throws SocketTimeoutException, OpenShiftException {
+		public void scaleDown() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void scaleUp() throws SocketTimeoutException, OpenShiftException {
+		public void scaleUp() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void addAlias(String string) throws SocketTimeoutException, OpenShiftException {
+		public void addAlias(String string) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -447,12 +445,12 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public void removeAlias(String alias) throws SocketTimeoutException, OpenShiftException {
+		public void removeAlias(String alias) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void refresh() throws SocketTimeoutException, OpenShiftException {
+		public void refresh() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -519,7 +517,7 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public void refresh() throws OpenShiftException, SocketTimeoutException {
+		public void refresh() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -534,22 +532,22 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public void rename(String id) throws OpenShiftException, SocketTimeoutException {
+		public void rename(String id) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public IUser getUser() throws SocketTimeoutException, OpenShiftException {
+		public IUser getUser() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void destroy() throws OpenShiftException, SocketTimeoutException {
+		public void destroy() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void destroy(boolean force) throws OpenShiftException, SocketTimeoutException {
+		public void destroy(boolean force) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -560,19 +558,19 @@ public class EmbedCartridgeStrategyTest {
 
 		@Override
 		public IApplication createApplication(String name, ICartridge cartridge, ApplicationScale scale,
-				IGearProfile gearProfile) throws OpenShiftException, SocketTimeoutException {
+				IGearProfile gearProfile) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public IApplication createApplication(String name, ICartridge cartridge, ApplicationScale scale)
-				throws OpenShiftException, SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public IApplication createApplication(String name, ICartridge cartridge, IGearProfile gearProfile)
-				throws OpenShiftException, SocketTimeoutException {
+				throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -584,22 +582,22 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
+		public List<IApplication> getApplications() throws OpenShiftException {
 			return applications;
 		}
 
 		@Override
-		public List<String> getAvailableCartridgeNames() throws OpenShiftException, SocketTimeoutException {
+		public List<String> getAvailableCartridgeNames() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public IApplication getApplicationByName(String name) throws OpenShiftException, SocketTimeoutException {
+		public IApplication getApplicationByName(String name) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public boolean hasApplicationByName(String name) throws OpenShiftException, SocketTimeoutException {
+		public boolean hasApplicationByName(String name) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 
@@ -621,7 +619,7 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		@Override
-		public List<IGearProfile> getAvailableGearProfiles() throws SocketTimeoutException, OpenShiftException {
+		public List<IGearProfile> getAvailableGearProfiles() throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 		

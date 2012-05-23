@@ -43,18 +43,25 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
+import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.OpenShiftEndpointException;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.OpenShiftTimeoutException;
 
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
+
+	private static final int APP_CREATE_TIMEOUT = 2 * 60 * 1000;
+	private static final int APP_WAIT_TIMEOUT = 2 * 60 * 1000;
+	private static final int IMPORT_TIMEOUT = 1 * 60 * 1000;
 
 	private final boolean skipCredentialsPage;
 
@@ -139,8 +146,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		boolean success = getWizardModel().isUseExistingApplication();
 		if (!success) {
 			if (createApplication()) {
-				success = addRemoveCartridges(
-						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
+				if (success = waitForApplication(wizardModel.getApplication())) {
+					success = addRemoveCartridges(
+							getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
+				} else {
+					getContainer().getShell().close();
+				}
 			}
 		}
 		if (success) {
@@ -150,11 +161,22 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		return success;
 	}
 
+	private boolean waitForApplication(IApplication application) {
+		try {
+			AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
+			IStatus status = WizardUtils.runInWizard(
+					job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
+			return status.isOK();
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
-					getContainer(), 300);
+			IStatus jobResult = WizardUtils.runInWizard(
+					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer(), IMPORT_TIMEOUT);
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", OpenShiftUIActivator
@@ -166,13 +188,13 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private boolean createApplication() {
 		try {
 			final String applicationName = wizardModel.getApplicationName();
-			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus status = WizardUtils.runInWizard(
-					new Job(NLS.bind("Creating application \"{0}\"...", applicationName)) {
+			AbstractDelegatingMonitorJob job =
+					new AbstractDelegatingMonitorJob(
+							NLS.bind("Creating application \"{0}\"...",applicationName)) {
+
 						@Override
-						protected IStatus run(IProgressMonitor monitor) {
+						protected IStatus doRun(DelegatingProgressMonitor monitor) {
 							try {
-								delegatingMonitor.add(monitor);
 								getWizardModel().createApplication(delegatingMonitor);
 								return Status.OK_STATUS;
 							} catch (OpenShiftEndpointException e) {
@@ -180,14 +202,19 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 								return OpenShiftUIActivator.createErrorStatus(
 										"Could not create application \"{0}\": {1}",
 										e, applicationName, e.getRestResponseMessages());
+							} catch (OpenShiftTimeoutException e) {
+								// TODO: refresh user
+								return OpenShiftUIActivator.
+										createCancelStatus("Could not create application {0}. Connection timeouted", applicationName);
 							} catch (OpenShiftException e) {
 								// TODO: refresh user
-								return OpenShiftUIActivator.createErrorStatus("Could not create application \"{0}\"",
-										e, applicationName);
+								return OpenShiftUIActivator.createErrorStatus(
+										"Could not create application \"{0}\"", e, applicationName);
 							}
 						}
-
-					}, delegatingMonitor, getContainer(), 300);
+					};
+			IStatus status = WizardUtils.runInWizard(
+					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			return status.isOK();
 		} catch (Exception e) {
 			return false;

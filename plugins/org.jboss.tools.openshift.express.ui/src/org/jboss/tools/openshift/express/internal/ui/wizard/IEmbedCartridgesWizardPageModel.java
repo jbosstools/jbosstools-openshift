@@ -39,6 +39,6 @@ public interface IEmbedCartridgesWizardPageModel {
 
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException;
 	
-	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException;
+	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException;
 
 }

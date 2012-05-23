@@ -311,7 +311,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		this.gearProfilesCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(gearProfilesCombo);
-		fillGearProfilesCombo(dbc, gearProfilesCombo);
+		dbc.bindList(WidgetProperties.items().observe(gearProfilesCombo),
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
+				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
+				new UpdateListStrategy().setConverter(new GearProfileToStringConverter()));
+		
 		final ISWTObservableValue selectedGearProfileComboObservable =
 				WidgetProperties.selection().observe(gearProfilesCombo);
 		final IObservableValue selectedGearProfileModelObservable = BeanProperties.value(
@@ -426,13 +430,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}, newAppConfigurationGroup);
 	}
 
-	private void fillGearProfilesCombo(DataBindingContext dbc, Combo gearSizesCombo) {
-		dbc.bindList(WidgetProperties.items().observe(gearSizesCombo),
-				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
-				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy().setConverter(new GearProfileToStringConverter()));
-	}
-
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
@@ -541,7 +538,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			int index = ((Integer) fromObject).intValue();
 			List<ICartridge> cartridges = pageModel.getCartridges();
-			if (index < 0 || index > cartridges.size()) {
+			if (index >= cartridges.size()
+					|| index == -1) {
 				return null;
 			}
 			return cartridges.get(index);
