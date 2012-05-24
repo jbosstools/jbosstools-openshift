@@ -266,7 +266,7 @@ public class ExpressDetailsComposite {
 		deployLocationLabel.setText("Deploy Project: " );
 		
 		if( showImportLink ) {
-			importLink = new Link(composite, SWT.DEFAULT);
+			importLink = new Link(composite, SWT.None);
 			importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
 			//  if we show verify, start import link disabled (wait for verify pressed to enable)
 			//  Otherwise, not showing verify means we're inside new wizard fragment with no suitable projects
