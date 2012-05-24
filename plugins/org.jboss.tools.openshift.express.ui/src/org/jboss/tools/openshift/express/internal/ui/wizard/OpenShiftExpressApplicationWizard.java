@@ -143,18 +143,26 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	public boolean performFinish() {
 		boolean success = getWizardModel().isUseExistingApplication();
 		if (!success) {
-			if (createApplication()) {
-				if (success = waitForApplication(wizardModel.getApplication())) {
-					success = addRemoveCartridges(
-							getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
-				} else {
-					getContainer().getShell().close();
-				}
+
+			IStatus status = createApplication();
+			if (JobUtils.isCancel(status)) {
+				getContainer().getShell().close();
+			} else if (!JobUtils.isOk(status)) {
+				return false;
+			}
+
+			if (success = waitForApplication(wizardModel.getApplication())) {
+				success = addRemoveCartridges(
+						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
+			} else {
+				getContainer().getShell().close();
 			}
 		}
+
 		if (success) {
 			success = importProject();
 		}
+
 		wizardModel.addUserToModel();
 		return success;
 	}
@@ -183,7 +191,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
-	private boolean createApplication() {
+	private IStatus createApplication() {
 		try {
 			CreateApplicationJob job = new CreateApplicationJob(
 					wizardModel.getApplicationName()
@@ -194,9 +202,10 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			wizardModel.setApplication(job.getApplication());
-			return status.isOK();
+			return status;
 		} catch (Exception e) {
-			return false;
+			return OpenShiftUIActivator.createErrorStatus(
+					NLS.bind("Could not create application {0}", wizardModel.getApplicationName()), e);
 		}
 	}
 
