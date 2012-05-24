@@ -40,8 +40,6 @@ public class EditDomainWizardPageModel extends ObservableUIPojo {
 			}
 		} catch (OpenShiftException e) {
 			Logger.error("Fail to retrieve OpenShift domain", e);
-		} catch (SocketTimeoutException e) {
-			Logger.error("Fail to retrieve OpenShift domain", e);
 		}
 	}
 

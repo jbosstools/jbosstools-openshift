@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,7 +38,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -307,7 +305,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
 				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
 				new UpdateListStrategy().setConverter(new GearProfileToStringConverter()));
-		
+
 		final ISWTObservableValue selectedGearProfileComboObservable =
 				WidgetProperties.selection().observe(gearProfilesCombo);
 		final IObservableValue selectedGearProfileModelObservable = BeanProperties.value(
@@ -649,7 +647,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		if (checkForDomainExistance()) {
+		if (ensureHasDomain()) {
 			new Thread() {
 				public void run() {
 					Display.getDefault().asyncExec(new Runnable() {
@@ -658,10 +656,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 							enableApplicationWidgets(pageModel.isUseExistingApplication());
 							createExistingAppNameContentAssist();
 							// this is needed because of weird issues with UI
-							// not
-							// reacting to model changes while wizard runnable
-							// is
-							// run. We force another update
+							// not reacting to model changes while wizard
+							// runnable is run. We force another update
 							dbc.updateModels();
 						}
 					});
@@ -670,20 +666,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
-	@Override
-	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
-		if (direction == Direction.BACKWARDS) {
-			return;
-		}
-		// event.doit = checkForDomainExistance();
-	}
-
 	/**
 	 * Checks that the user has a domain, opens the creation dialog in case he
 	 * hasn't, closes the wizard if the user does not create a domain (required
 	 * for any application creation). Otherwise, returns true.
 	 */
-	private boolean checkForDomainExistance() {
+	private boolean ensureHasDomain() {
 		try {
 			final UserDelegate user = this.pageModel.getUser();
 			if (user != null && !user.hasDomain()) {
@@ -701,9 +689,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				}
 			}
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to refresh OpenShift account info", e);
-			return false;
-		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to refresh OpenShift account info", e);
 			return false;
 		}
@@ -806,9 +791,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					if (!pageModel.hasApplication(appName)) {
 						return ValidationStatus.error(NLS.bind("The application \"{0}\" does not exist.", appName));
 					}
-				} catch (SocketTimeoutException e) {
-					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.",
-							appName));
 				} catch (OpenShiftException e) {
 					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.",
 							appName));

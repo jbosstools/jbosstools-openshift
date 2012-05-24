@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
-import java.net.SocketTimeoutException;
-
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -64,8 +62,6 @@ public class UserPropertySource implements IPropertySource {
 			}
 		} catch (OpenShiftException e) {
 		 	Logger.error("Could not get selected object's property '" + id + "'.", e);
-		} catch (SocketTimeoutException e) {
-			Logger.error("Could not get selected object's property '" + id + "'.", e);
 		}
 		return null;
 	}

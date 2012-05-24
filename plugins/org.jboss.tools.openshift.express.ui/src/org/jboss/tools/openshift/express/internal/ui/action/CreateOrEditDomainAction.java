@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import java.net.SocketTimeoutException;
-
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -62,10 +60,6 @@ public class CreateOrEditDomainAction extends AbstractAction {
 				domainWizard = new EditDomainDialog(user);
 			}
 		} catch (OpenShiftException e) {
-			Logger.warn("Failed to retrieve User domain, prompting for creation", e);
-			// let's use the domain creation wizard, then.
-			domainWizard = new NewDomainDialog(user);
-		} catch (SocketTimeoutException e) {
 			Logger.warn("Failed to retrieve User domain, prompting for creation", e);
 			// let's use the domain creation wizard, then.
 			domainWizard = new NewDomainDialog(user);

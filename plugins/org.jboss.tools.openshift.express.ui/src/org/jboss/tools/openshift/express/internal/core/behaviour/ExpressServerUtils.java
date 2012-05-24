@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +42,6 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
@@ -389,9 +387,6 @@ public class ExpressServerUtils {
 			IApplication app = user2 == null ? null : user2.getApplicationByName(appName);
 			return app;
 		} catch(OpenShiftException ose) {
-			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
-			return null;
-		} catch(SocketTimeoutException ose) {
 			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
 			return null;
 		}

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,8 +43,6 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 			getUser().refresh();
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to refresh User's account", e);
-		} catch (SocketTimeoutException e) {
-			Logger.error("Failed to refresh User's account", e);
 		}
 	}
 	
@@ -57,8 +54,6 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 			}
 			return user.getApplications();
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve User's applications", e);
-		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to retrieve User's applications", e);
 		}
 		return Collections.emptyList();

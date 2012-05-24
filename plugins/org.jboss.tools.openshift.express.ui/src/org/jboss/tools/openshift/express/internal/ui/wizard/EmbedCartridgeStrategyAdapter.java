@@ -13,10 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -31,12 +27,17 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.ToStringConverter;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -50,6 +51,9 @@ import com.openshift.client.OpenShiftException;
  * @author Andre Dietisheim
  */
 public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
+
+	private static final int APP_CREATE_TIMEOUT = 2 * 60 * 1000;
+	private static final int APP_WAIT_TIMEOUT = 2 * 60 * 1000;
 
 	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
@@ -83,7 +87,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 					}
 				}
 			}
-			
+
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		} catch (SocketTimeoutException e) {
@@ -147,25 +151,21 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 	private void createJenkinsApplication(final ICartridge cartridge) {
 		final String name = openJenkinsApplicationDialog();
 		try {
-			WizardUtils.runInWizard(new Job(NLS.bind("Creating application \"{0}\"...", name)) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						IApplication application = pageModel.createJenkinsApplication(name, monitor);
-						openLogDialog(application);
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						try {
-							// TODO: unselect failed embeddable cartridge
-							// pageModel.unselectEmbeddedCartridges(cartridge);
-						} catch (Exception ex) {
-							OpenShiftUIActivator.log(ex);
-						}
-						return OpenShiftUIActivator.createErrorStatus("Could not create application {0}", e);
-					}
-				}
+			CreateApplicationJob createJob =
+					new CreateApplicationJob(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE,
+							IGearProfile.SMALL, pageModel.getUser());
+			WizardUtils.runInWizard(
+					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 
-			}, getContainer());
+			if (createJob.getResult().isOK()) {
+				IApplication application = createJob.getApplication();
+				openLogDialog(application);
+
+				AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
+				WizardUtils.runInWizard(
+						job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
+			}
+
 		} catch (Exception e) {
 			// ignore
 		}

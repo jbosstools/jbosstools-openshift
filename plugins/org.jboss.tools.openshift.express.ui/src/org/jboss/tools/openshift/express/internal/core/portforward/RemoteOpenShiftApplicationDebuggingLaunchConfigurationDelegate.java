@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.portforward;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -82,8 +79,6 @@ public class RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate exte
 				}
 			}
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve applications from user", e);
-		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to retrieve applications from user", e);
 		}
 		return null;

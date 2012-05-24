@@ -13,9 +13,8 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.net.SocketTimeoutException;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
-import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.OpenShiftException;
@@ -38,7 +37,6 @@ public interface IEmbedCartridgesWizardPageModel {
 	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
 
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException;
-	
-	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException, SocketTimeoutException;
 
+	public UserDelegate getUser();
 }

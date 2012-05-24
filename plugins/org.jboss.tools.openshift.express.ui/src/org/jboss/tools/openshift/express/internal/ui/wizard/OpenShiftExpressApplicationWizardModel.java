@@ -20,7 +20,6 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.CreateApplicationOperation;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
@@ -34,7 +33,6 @@ import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
-import com.openshift.client.OpenShiftApplicationNotAvailableException;
 import com.openshift.client.OpenShiftException;
 
 public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
@@ -370,19 +368,6 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		if (application != null) {
 			setApplicationScale(application.getApplicationScale());
 		}
-	}
-
-	public IApplication createApplication(IProgressMonitor monitor) throws OpenShiftApplicationNotAvailableException,
-			OpenShiftException {
-		IApplication application =
-				new CreateApplicationOperation(getUser()).execute(
-						getApplicationName(),
-						getApplicationCartridge(),
-						getApplicationScale(),
-						getApplicationGearProfile(),
-						monitor);
-		setApplication(application);
-		return application;
 	}
 
 	@Override

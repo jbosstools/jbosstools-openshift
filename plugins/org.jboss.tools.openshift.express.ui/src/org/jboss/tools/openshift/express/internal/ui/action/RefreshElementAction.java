@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import java.net.SocketTimeoutException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -69,8 +67,6 @@ public class RefreshElementAction extends AbstractAction {
 						}
 					});
 				} catch (OpenShiftException e) {
-					Logger.error("Failed to refresh element", e);
-				} catch (SocketTimeoutException e) {
 					Logger.error("Failed to refresh element", e);
 				} finally {
 					monitor.done();

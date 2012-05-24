@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.console;
 
-import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
@@ -143,20 +142,20 @@ public class UserDelegate {
 	 * @throws SocketTimeoutException 
 	 */
 	public IDomain createDomain(String id)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.createDomain(id);
 		} 
 		return null;
 	}
 	public IApplication getApplicationByName(String arg0)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		if(checkForPassword() && delegate.hasDomain()) {
 			return delegate.getDefaultDomain().getApplicationByName(arg0);
 		} 
 		return null;
 	}
-	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
+	public List<IApplication> getApplications() throws OpenShiftException {
 		if(checkForPassword() && delegate.hasDomain()) {
 			return delegate.getDefaultDomain().getApplications();
 		} 
@@ -177,14 +176,14 @@ public class UserDelegate {
 		return null;
 	}
 	
-	public List<ICartridge> getStandaloneCartridgeNames() throws OpenShiftException, SocketTimeoutException {
+	public List<ICartridge> getStandaloneCartridgeNames() throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.getConnection().getStandaloneCartridges();
 		} 
 		return null;
 	}
 	
-	public IDomain getDefaultDomain() throws OpenShiftException, SocketTimeoutException {
+	public IDomain getDefaultDomain() throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.getDefaultDomain();
 		} 
@@ -192,28 +191,28 @@ public class UserDelegate {
 	}
 	
 	public List<IEmbeddableCartridge> getEmbeddableCartridges()
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.getConnection().getEmbeddableCartridges();
 		} 
 		return null;
 	}
 	
-	public boolean hasApplication(String name) throws OpenShiftException, SocketTimeoutException {
+	public boolean hasApplication(String name) throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.getDefaultDomain().hasApplicationByName(name);
 		} 
 		return false;
 	}
 	
-	public boolean hasApplicationOfType(ICartridge type) throws OpenShiftException, SocketTimeoutException {
+	public boolean hasApplicationOfType(ICartridge type) throws OpenShiftException {
 		if(hasDomain()) {
 			return delegate.getDefaultDomain().hasApplicationByCartridge(type);
 		} 
 		return false;
 	}
 	
-	public boolean hasDomain() throws OpenShiftException, SocketTimeoutException {
+	public boolean hasDomain() throws OpenShiftException {
 		if(checkForPassword()) {
 			return delegate.hasDomain();
 		}
@@ -222,12 +221,12 @@ public class UserDelegate {
 	
 	public boolean isValid() throws OpenShiftException {
 		if(checkForPassword()) {
-			return true;//delegate.isValid();
+			return true;
 		} 
 		return false;
 	}
 	
-	public void refresh() throws OpenShiftException, SocketTimeoutException {
+	public void refresh() throws OpenShiftException {
 		if(checkForPassword()) {
 			delegate.refresh();
 		} 
@@ -247,11 +246,11 @@ public class UserDelegate {
 		this.connected = connected;
 	}
 
-	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws SocketTimeoutException, OpenShiftUnknonwSSHKeyTypeException, OpenShiftException {
+	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException, OpenShiftException {
 		return delegate.getSSHKeyByPublicKey(publicKey);
 	}
 	
-	public IOpenShiftSSHKey putSSHKey(String name, ISSHPublicKey key) throws OpenShiftException, SocketTimeoutException {
+	public IOpenShiftSSHKey putSSHKey(String name, ISSHPublicKey key) throws OpenShiftException {
 		return delegate.putSSHKey(name, key);
 	}
 	

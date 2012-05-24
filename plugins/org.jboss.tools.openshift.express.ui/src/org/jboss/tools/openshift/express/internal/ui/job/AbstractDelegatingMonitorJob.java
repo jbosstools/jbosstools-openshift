@@ -37,5 +37,5 @@ public abstract class AbstractDelegatingMonitorJob extends Job {
 		return delegatingMonitor;
 	}
 
-	protected abstract IStatus doRun(DelegatingProgressMonitor monitor);
+	protected abstract IStatus doRun(IProgressMonitor monitor);
 }

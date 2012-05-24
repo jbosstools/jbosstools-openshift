@@ -15,13 +15,16 @@ public class OpenShiftExpressUIMessages extends NLS {
 	}
 
 	public static String CANNOT_CREATE_NO_USER;
-	public static String OPERATION_CANCELLED;
 	public static String CREATING_APPLICATION;
+	public static String COULD_NOT_CREATE_APPLICATION;
+	public static String OPERATION_CANCELLED;
 	public static String WAITING_FOR_REACHABLE;
 	public static String APPLICATION_NOT_ANSWERING;
 	public static String APPLICATION_NOT_ANSWERING_CONTINUE_WAITING;
 	public static String BTN_KEEP_WAITING;
 	public static String BTN_CLOSE_WIZARD;
+	
+	public static String ADDING_REMOVING_CARTRIDGES;
 	
 	public static String TAIL_SERVER_LOG_ACTION;
 	public static String CREATE_OR_EDIT_DOMAIN_ACTION;

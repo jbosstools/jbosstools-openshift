@@ -10,13 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -39,23 +36,23 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
-import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
  */
 public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
+	private static final long EMBED_CARTRIDGES_TIMEOUT = 2 * 60 * 1000;
 	private EmbedCartridgeWizardPageModel pageModel;
 	private CheckboxTableViewer viewer;
 
@@ -84,23 +81,26 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(
 						EmbedCartridgeWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
-						.observe(pageModel));;
+						.observe(pageModel));
+		;
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
 		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
-		
-// hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
-//		Button checkAllButton = new Button(embedGroup, SWT.PUSH);
-//		checkAllButton.setText("Embed A&ll");
-//		GridDataFactory.fillDefaults()
-//				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(checkAllButton);
-//		checkAllButton.addSelectionListener(onCheckAll());
 
-//		Button uncheckAllButton = new Button(embedGroup, SWT.PUSH);
-//		uncheckAllButton.setText("Embed N&one");
-//		GridDataFactory.fillDefaults()
-//				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.CENTER).applyTo(uncheckAllButton);
-//		uncheckAllButton.addSelectionListener(onUncheckAll());
+		// hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
+		// Button checkAllButton = new Button(embedGroup, SWT.PUSH);
+		// checkAllButton.setText("Embed A&ll");
+		// GridDataFactory.fillDefaults()
+		// .hint(110, SWT.DEFAULT).align(SWT.FILL,
+		// SWT.CENTER).applyTo(checkAllButton);
+		// checkAllButton.addSelectionListener(onCheckAll());
+
+		// Button uncheckAllButton = new Button(embedGroup, SWT.PUSH);
+		// uncheckAllButton.setText("Embed N&one");
+		// GridDataFactory.fillDefaults()
+		// .hint(110, SWT.DEFAULT).align(SWT.FILL,
+		// SWT.CENTER).applyTo(uncheckAllButton);
+		// uncheckAllButton.addSelectionListener(onUncheckAll());
 	}
 
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
@@ -112,17 +112,17 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
 		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
-		
-		viewer.setSorter(new ViewerSorter(){
+
+		viewer.setSorter(new ViewerSorter() {
 
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				if(e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge){
-					return ((IEmbeddableCartridge)e1).getName().compareTo(((IEmbeddableCartridge)e2).getName());
+				if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
+					return ((IEmbeddableCartridge) e1).getName().compareTo(((IEmbeddableCartridge) e2).getName());
 				}
 				return super.compare(viewer, e1, e2);
 			}
-			
+
 		});
 
 		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
@@ -144,34 +144,34 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-//	private SelectionListener onCheckAll() {
-//		return new SelectionAdapter() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				viewer.setAllChecked(true);
-//				try {
-//					addJenkinsCartridge(IEmbeddedCartridge.JENKINS_14);
-//				} catch (OpenShiftException ex) {
-//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-//				} catch (SocketTimeoutException ex) {
-//					OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
-//				}
-//			}
-//
-//		};
-//	}
+	// private SelectionListener onCheckAll() {
+	// return new SelectionAdapter() {
+	//
+	// @Override
+	// public void widgetSelected(SelectionEvent e) {
+	// viewer.setAllChecked(true);
+	// try {
+	// addJenkinsCartridge(IEmbeddedCartridge.JENKINS_14);
+	// } catch (OpenShiftException ex) {
+	// OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+	// } catch (SocketTimeoutException ex) {
+	// OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+	// }
+	// }
+	//
+	// };
+	// }
 
-//	private SelectionListener onUncheckAll() {
-//		return new SelectionAdapter() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				viewer.setAllChecked(false);
-//			}
-//
-//		};
-//	}
+	// private SelectionListener onUncheckAll() {
+	// return new SelectionAdapter() {
+	//
+	// @Override
+	// public void widgetSelected(SelectionEvent e) {
+	// viewer.setAllChecked(false);
+	// }
+	//
+	// };
+	// }
 
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
@@ -216,7 +216,8 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void run() {
 				try {
-					Set<IEmbeddableCartridge> selectedEmbeddableCartridges = pageModel.refreshSelectedEmbeddedCartridges();
+					Set<IEmbeddableCartridge> selectedEmbeddableCartridges = pageModel
+							.refreshSelectedEmbeddedCartridges();
 					viewer.setCheckedElements(
 							selectedEmbeddableCartridges.toArray());
 				} catch (Exception e) {
@@ -237,40 +238,22 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	public boolean processCartridges() {
-		final ArrayBlockingQueue<Boolean> queue = new ArrayBlockingQueue<Boolean>(1);
 		try {
-			WizardUtils.runInWizard(
-					new Job(NLS.bind("Adding/Removing embedded cartridges for application {0}...",
-							pageModel.getApplication().getName())) {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							try {
-								List<IEmbeddedCartridge> addedCartridges = pageModel.embedCartridges();
-								openLogDialog(addedCartridges);
-								queue.offer(true);
-							} catch (OpenShiftException e) {
-								safeRefreshSelectedEmbeddedCartridges();
-								queue.offer(false);
-								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-										NLS.bind("Could not embed cartridges to application {0}",
-												pageModel.getApplication().getName()), e);
-							} catch (SocketTimeoutException e) {
-								safeRefreshSelectedEmbeddedCartridges();
-								queue.offer(false);
-								return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-										NLS.bind("Could not embed cartridges to application {0}",
-												pageModel.getApplication().getName()), e);
-							}
-							return Status.OK_STATUS;
-						}
-					}, getContainer());
-			return queue.poll(10, TimeUnit.SECONDS);
+			EmbedCartridgesJob job = new EmbedCartridgesJob(
+					new ArrayList<IEmbeddableCartridge>(pageModel.getSelectedEmbeddableCartridges()), 
+					pageModel.getApplication());
+			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
+			if (!result.isOK()) {
+				safeRefreshSelectedEmbeddedCartridges();
+			} else {
+				openLogDialog(job.getAddedCartridges());
+			}
+			return result.isOK();
 		} catch (Exception e) {
 			return false;
 		}
 	}
-	
+
 	private void openLogDialog(final List<IEmbeddedCartridge> cartridges) {
 		if (cartridges.size() == 0) {
 			return;

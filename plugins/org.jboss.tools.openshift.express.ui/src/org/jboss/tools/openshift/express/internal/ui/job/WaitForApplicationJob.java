@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.job;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -19,22 +20,19 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftTimeoutException;
 
 /**
  * @author Andre Dietisheim
  */
 public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 
-//	private static final int APP_REACHABLE_TIMEOUT = 180 * 1000;
-	private static final int APP_REACHABLE_TIMEOUT = 1 * 1000;
+	private static final int APP_REACHABLE_TIMEOUT = 180 * 1000;
 	private IApplication application;
 	private Shell shell;
 
@@ -45,7 +43,7 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 	}
 
 	@Override
-	protected IStatus doRun(DelegatingProgressMonitor monitor) {
+	protected IStatus doRun(IProgressMonitor monitor) {
 		Logger.debug(OpenShiftExpressUIMessages.WAITING_FOR_REACHABLE);
 		try {
 			while (!application.waitForAccessible(APP_REACHABLE_TIMEOUT)) {

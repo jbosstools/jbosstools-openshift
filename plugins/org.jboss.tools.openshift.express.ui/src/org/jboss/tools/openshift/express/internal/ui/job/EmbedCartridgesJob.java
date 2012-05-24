@@ -8,15 +8,19 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core;
+package org.jboss.tools.openshift.express.internal.ui.job;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IEmbeddableCartridge;
@@ -24,43 +28,40 @@ import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.OpenShiftException;
 
 /**
- * An operation that embeds/removes cartridges from a given application.
- * 
  * @author Andre Dietisheim
  */
-public class EmbedCartridgesOperation {
+public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 
+	private List<IEmbeddableCartridge> selectedCartridges;
 	private IApplication application;
+	private List<IEmbeddedCartridge> addedCartridges;
 
-	public EmbedCartridgesOperation(IApplication application) {
+	public EmbedCartridgesJob(List<IEmbeddableCartridge> selectedCartridges, IApplication application) {
+		super(NLS.bind(OpenShiftExpressUIMessages.ADDING_REMOVING_CARTRIDGES, application.getName()));
+		this.selectedCartridges = selectedCartridges;
 		this.application = application;
 	}
 
-	/**
-	 * Embeds and removes cartridges from the given application so that it
-	 * matches the given list of enabled cartridges.
-	 * 
-	 * @param selectedCartridges
-	 * @param monitor
-	 * @return
-	 * @throws SocketTimeoutException
-	 * @throws OpenShiftException
-	 */
-	public List<IEmbeddedCartridge> execute(final List<IEmbeddableCartridge> selectedCartridges,
-			final IProgressMonitor monitor)
-			throws SocketTimeoutException, OpenShiftException {
-		if (selectedCartridges == null) {
-			return Collections.emptyList();
+	@Override
+	protected IStatus doRun(IProgressMonitor monitor) {
+		try {
+			removeEmbeddedCartridges(
+					getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
+			this.addedCartridges = addEmbeddedCartridges(
+					getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
+			return Status.OK_STATUS;
+		} catch (OpenShiftException e) {
+			return OpenShiftUIActivator.createErrorStatus("Could not embed cartridges for application {0}", e,
+					application.getName());
 		}
+	}
 
-		removeEmbeddedCartridges(
-				getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
-		return addEmbeddedCartridges(
-				getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
+	public List<IEmbeddedCartridge> getAddedCartridges() {
+		return addedCartridges;
 	}
 
 	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove, final IApplication application)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		if (cartridgesToRemove.isEmpty()) {
 			return;
 		}
@@ -74,8 +75,7 @@ public class EmbedCartridgesOperation {
 	}
 
 	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToAdd,
-			final IApplication application)
-			throws OpenShiftException, SocketTimeoutException {
+			final IApplication application) throws OpenShiftException {
 		if (cartridgesToAdd.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -126,5 +126,4 @@ public class EmbedCartridgesOperation {
 			return 0;
 		}
 	}
-
 }

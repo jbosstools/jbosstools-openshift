@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import java.net.SocketTimeoutException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -53,8 +51,6 @@ public class DeleteDomainAction extends AbstractAction {
 						enable = true;
 					}
 				} catch (OpenShiftException e) {
-					Logger.warn("Failed to retrieve User domain, prompting for creation", e);
-				} catch (SocketTimeoutException e) {
 					Logger.warn("Failed to retrieve User domain, prompting for creation", e);
 				}
 			}
@@ -113,12 +109,7 @@ public class DeleteDomainAction extends AbstractAction {
 				}
 			} catch (OpenShiftException e) {
 				Logger.warn(
-						"Failed to retrieve User domain, prompting for creation",
-						e);
-			} catch (SocketTimeoutException e) {
-				Logger.warn(
-						"Failed to retrieve User domain, prompting for creation",
-						e);
+						"Failed to retrieve User domain, prompting for creation", e);
 			}
 
 		}

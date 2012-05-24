@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,20 +36,19 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgesOperation;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
-import com.openshift.client.OpenShiftEndpointException;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftTimeoutException;
 
 /**
  * @author Andre Dietisheim
@@ -61,6 +58,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	private static final int APP_CREATE_TIMEOUT = 2 * 60 * 1000;
 	private static final int APP_WAIT_TIMEOUT = 2 * 60 * 1000;
+	private static final long EMBED_CARTRIDGES_TIMEOUT = 2 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 1 * 60 * 1000;
 
 	private final boolean skipCredentialsPage;
@@ -187,81 +185,37 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	private boolean createApplication() {
 		try {
-			final String applicationName = wizardModel.getApplicationName();
-			AbstractDelegatingMonitorJob job =
-					new AbstractDelegatingMonitorJob(
-							NLS.bind("Creating application \"{0}\"...",applicationName)) {
-
-						@Override
-						protected IStatus doRun(DelegatingProgressMonitor monitor) {
-							try {
-								getWizardModel().createApplication(delegatingMonitor);
-								return Status.OK_STATUS;
-							} catch (OpenShiftEndpointException e) {
-								// TODO: refresh user
-								return OpenShiftUIActivator.createErrorStatus(
-										"Could not create application \"{0}\": {1}",
-										e, applicationName, e.getRestResponseMessages());
-							} catch (OpenShiftTimeoutException e) {
-								// TODO: refresh user
-								return OpenShiftUIActivator.
-										createCancelStatus("Could not create application {0}. Connection timeouted", applicationName);
-							} catch (OpenShiftException e) {
-								// TODO: refresh user
-								return OpenShiftUIActivator.createErrorStatus(
-										"Could not create application \"{0}\"", e, applicationName);
-							}
-						}
-					};
+			CreateApplicationJob job = new CreateApplicationJob(
+					wizardModel.getApplicationName()
+					, wizardModel.getApplicationCartridge() 
+					, wizardModel.getApplicationScale()
+					, wizardModel.getApplicationGearProfile()
+					, wizardModel.getUser());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
+			wizardModel.setApplication(job.getApplication());
 			return status.isOK();
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	private boolean addRemoveCartridges(final IApplication application,
-			final Set<IEmbeddableCartridge> selectedCartridges) {
-		try {
-			final String applicationName = application.getName();
-			IStatus status = WizardUtils.runInWizard(
-					new Job(NLS.bind("Adding selected embedded cartridges for application {0}...", applicationName)) {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							try {
-								if (selectedCartridges != null && !selectedCartridges.isEmpty()) {
-									final List<IEmbeddedCartridge> embeddedCartridges =
-											new EmbedCartridgesOperation(application).execute(
-													new ArrayList<IEmbeddableCartridge>(selectedCartridges)
-													, monitor);
-									openCreationLogDialog(embeddedCartridges);
-								}
-							} catch (OpenShiftEndpointException e) {
-								// TODO: refresh user
-								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-										"Could not embed cartridges to application {0}: {1}", applicationName,
-										e.getRestResponseMessages()));
-							} catch (OpenShiftException e) {
-								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-										"Could not embed cartridges to application {0}", getWizardModel()
-												.getApplication().getName()), e);
-							} catch (SocketTimeoutException e) {
-								return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-										"Could not embed cartridges to application {0}", getWizardModel()
-												.getApplication().getName()), e);
-							}
-							return Status.OK_STATUS;
-						}
-					}, getContainer());
-			return status.isOK();
-		} catch (Exception e) {
-			return false;
-		}
+	private boolean addRemoveCartridges(final IApplication application,final Set<IEmbeddableCartridge> selectedCartridges) {
+			try {
+				EmbedCartridgesJob job = new EmbedCartridgesJob(
+						new ArrayList<IEmbeddableCartridge>(wizardModel.getSelectedEmbeddableCartridges()), 
+						wizardModel.getApplication());
+				IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
+				if (result.isOK()) {
+					openLogDialog(job.getAddedCartridges());
+				}
+				return result.isOK();
+			} catch (Exception e) {
+				return false;
+			}
 	}
 
-	private void openCreationLogDialog(final List<IEmbeddedCartridge> embeddableCartridges) {
+	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges) {
 		if (embeddableCartridges == null
 				|| embeddableCartridges.isEmpty()) {
 			return;

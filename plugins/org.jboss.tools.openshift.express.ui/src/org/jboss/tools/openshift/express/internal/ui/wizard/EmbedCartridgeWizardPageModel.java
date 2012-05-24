@@ -16,18 +16,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.CreateApplicationOperation;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgesOperation;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
-import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
-import com.openshift.client.IEmbeddedCartridge;
-import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -131,28 +126,9 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return getSelectedEmbeddableCartridges();
 	}
 
-	/**
-	 * Embeds/removes the cartridges that were added/removed in this wizard
-	 * page.
-	 * 
-	 * @return the cartridges that were added (embedded).
-	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException
-	 */
-	public List<IEmbeddedCartridge> embedCartridges() throws OpenShiftException, SocketTimeoutException {
-		return new EmbedCartridgesOperation(getApplication())
-				.execute(new ArrayList<IEmbeddableCartridge>(selectedCartridges), null);
+	@Override
+	public UserDelegate getUser() {
+		return wizardModel.getUser();
 	}
 	
-	@Override
-	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
-		IApplication application =
-				new CreateApplicationOperation(wizardModel.getUser()).execute(
-						name,
-						ICartridge.JENKINS_14,
-						ApplicationScale.NO_SCALE,
-						IGearProfile.SMALL,
-						monitor);
-		return application;
-	}
 }

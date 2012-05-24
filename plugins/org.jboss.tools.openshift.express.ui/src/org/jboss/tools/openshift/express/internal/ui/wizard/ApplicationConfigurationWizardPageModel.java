@@ -17,10 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.CartridgeNameComparator;
-import org.jboss.tools.openshift.express.internal.core.CreateApplicationOperation;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -396,24 +394,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 
-	public boolean hasApplication(String applicationName) throws SocketTimeoutException, OpenShiftException {
+	public boolean hasApplication(String applicationName) throws OpenShiftException {
 		return getUser().hasApplication(applicationName);
 	}
 
 	@Override
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
 		return wizardModel.getUser().getDefaultDomain();
-	}
-
-	@Override
-	public IApplication createJenkinsApplication(String name, IProgressMonitor monitor) throws OpenShiftException {
-		IApplication application =
-				new CreateApplicationOperation(getUser()).execute(
-						name,
-						ICartridge.JENKINS_14,
-						ApplicationScale.NO_SCALE,
-						IGearProfile.SMALL,
-						monitor);
-		return application;
 	}
 }

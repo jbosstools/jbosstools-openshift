@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.portforward;
 
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,8 +21,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.debug.ui.launchConfigurations.JavaLaunchTab;
-import org.eclipse.jdt.internal.debug.ui.launcher.AbstractJavaMainTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -170,8 +167,6 @@ public class RemoteOpenShiftApplicationConfigurationTab extends AbstractLaunchCo
 				}
 			}
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve applications from user", e);
-		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to retrieve applications from user", e);
 		}
 		return false;

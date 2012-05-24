@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -140,8 +139,6 @@ public class OpenShiftExpressConsoleContentProvider implements ITreeContentProvi
 				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
 			}
 		} catch(OpenShiftException e) {
-			errors.put(parentElement, e);
-		} catch(SocketTimeoutException e) {
 			errors.put(parentElement, e);
 		}
 
