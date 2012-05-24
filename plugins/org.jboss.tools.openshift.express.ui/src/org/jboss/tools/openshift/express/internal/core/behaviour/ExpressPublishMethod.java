@@ -62,6 +62,14 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 				OpenShiftUIActivator.PLUGIN_ID, 
 				NLS.bind(ExpressMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
 		}
+		
+		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
+		IContainer destFolder = "".equals(destinationFolder) ? magicProject : (IContainer)magicProject.findMember(new Path(destinationFolder));
+		if( destFolder == null || !destFolder.isAccessible()) {
+			throw new CoreException(new Status(IStatus.ERROR, 
+					OpenShiftUIActivator.PLUGIN_ID, 
+					NLS.bind(ExpressMessages.publishFailMissingFolder, behaviour.getServer().getName(), destFolder.getProjectRelativePath())));
+		}
 	}
 
 	@Override
