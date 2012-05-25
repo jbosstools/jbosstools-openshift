@@ -11,16 +11,12 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IApplicationPortForwarding;
-import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
 
 /**
