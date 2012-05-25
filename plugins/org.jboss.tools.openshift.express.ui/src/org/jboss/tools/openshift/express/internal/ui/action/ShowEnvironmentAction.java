@@ -27,14 +27,13 @@ import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 
-import com.jcraft.jsch.JSchException;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftSSHOperationException;
 
 /**
  * @author Xavier Coulon
  */
-public class ShowEnvironmentAction extends AbstractAction {
+public class ShowEnvironmentAction extends AbstractSSHAction {
 
 	public ShowEnvironmentAction() {
 		super(OpenShiftExpressUIMessages.SHOW_ENVIRONMENT_ACTION, true);
@@ -66,7 +65,7 @@ public class ShowEnvironmentAction extends AbstractAction {
 	 * @param server
 	 */
 	private void showEnvironmentProperties(final IServer server) {
-		Job job = new Job("Retrieving application's forwardable ports...") {
+		Job job = new Job("Identifying OpenShift Application from selected Server...") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final IApplication application = ExpressServerUtils.getApplication(server);
@@ -82,12 +81,31 @@ public class ShowEnvironmentAction extends AbstractAction {
 		job.schedule();
 	}
 
+	private void showEnvironmentProperties(final IApplication application) {
+			Job job = new Job("Retrieving selected OpenShift Application's environment variables...") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					verifyApplicationSSHSession(application);
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							runAsync(application);
+						}
+					});
+					return Status.OK_STATUS;
+				} catch (OpenShiftSSHOperationException e) {
+					return OpenShiftUIActivator.createErrorStatus(e.getMessage(), e.getCause());
+				}
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+	}
+	
 	/**
 	 * @param application
-	 * @throws JSchException
-	 * @throws OpenShiftSSHOperationException
 	 */
-	private void showEnvironmentProperties(final IApplication application) {
+	private void runAsync(final IApplication application) {
 		try {
 			if (!application.hasSSHSession()) {
 				application.setSSHSession(OpenShiftSshSessionFactory.getInstance().createSession(application));

@@ -70,7 +70,7 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		if (this.application.isPortFowardingStarted()) {
 			return;
 		}
-		
+
 		final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
 		MessageConsoleStream stream = console.newMessageStream();
 		stream.println("Starting port-forwarding...");
@@ -87,7 +87,8 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	 * @return
 	 */
 	private String getMessageConsoleName() {
-		return "Port forwarding for application '" + application.getName() + "' (" + application.getDomain().getId() + ")";
+		return "Port forwarding for application '" + application.getName() + "' (" + application.getDomain().getId()
+				+ ")";
 	}
 
 	public void stopPortForwarding() throws OpenShiftSSHOperationException {
@@ -151,7 +152,10 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	 * @throws OpenShiftSSHOperationException
 	 */
 	public void setUseFreePorts(Boolean useFreePorts) throws OpenShiftSSHOperationException {
-		if(!application.isPortFowardingStarted()) { // do not change the current bindings if port forwarding is already started. 
+		if (!application.isPortFowardingStarted()) { // do not change the
+														// current bindings if
+														// port forwarding is
+														// already started.
 			updateLocalPortBindings(useFreePorts);
 		}
 		firePropertyChange(PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS, this.useFreePorts, this.useFreePorts = useFreePorts);
@@ -169,11 +173,12 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		final List<String> bindings = new ArrayList<String>();
 		// update local bindings while avoiding duplicates
 		for (IApplicationPortForwarding port : ports) {
-			if(useFreePorts) {
+			if (useFreePorts) {
 				// find free port for every port
 				port.setLocalPort(SocketUtil.findFreePort());
 			} else {
-				// find duplicates and if match we find free port for those until stops.
+				// find duplicates and if match we find free port for those
+				// until stops.
 				port.setLocalPort(port.getRemotePort());
 				String key = computeKey(port);
 				while (bindings.contains(key)) {
@@ -199,7 +204,13 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public void refreshForwardablePorts() throws OpenShiftSSHOperationException {
-		if(!application.isPortFowardingStarted()) { // we don't reload/refresh the ports if portforwarding is already running since we then loose the existing local ip/ports.
+		if (!application.isPortFowardingStarted()) { // we don't reload/refresh
+														// the ports if
+														// portforwarding is
+														// already running since
+														// we then loose the
+														// existing local
+														// ip/ports.
 			application.refreshForwardablePorts();
 			updateLocalAddressBindings(this.useDefaultLocalIpAddress);
 			updateLocalPortBindings(this.useFreePorts);
@@ -208,18 +219,20 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 
 	/**
 	 * @param monitor
-	 * @throws OpenShiftSSHOperationException 
+	 * @throws OpenShiftSSHOperationException
 	 * @throws JSchException
 	 */
 	// TODO : move this method into the WizardModel ?
-	void verifyApplicationSSHSession() throws OpenShiftSSHOperationException {
-		final boolean hasSSHSession = getApplication().hasSSHSession();
-		if (!hasSSHSession) {
+	boolean verifyApplicationSSHSession() throws OpenShiftSSHOperationException {
+		final boolean hasAlreadySSHSession = getApplication().hasSSHSession();
+		if (!hasAlreadySSHSession) {
 			Logger.debug("Opening a new SSH Session for application '" + getApplication().getName() + "'");
 			final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
 					getApplication());
-			getApplication().setSSHSession(session);
+				getApplication().setSSHSession(session);
 		}
+		// now, check if the session is valid (ie, not null and still connected)
+		return getApplication().hasSSHSession();
 	}
 
 }

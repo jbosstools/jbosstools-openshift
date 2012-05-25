@@ -84,7 +84,7 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 			try {
 				cache.put(uri, createSession(hc, user, host, port, fs));
 			} catch (JSchException e) {
-				throw new OpenShiftSSHOperationException(e, "Unable to create SSH session for application ''{0}}''", application);
+				throw new OpenShiftSSHOperationException(e, "Unable to create SSH session for application ''{0}''", application);
 			}
 		}
 		return cache.get(uri);

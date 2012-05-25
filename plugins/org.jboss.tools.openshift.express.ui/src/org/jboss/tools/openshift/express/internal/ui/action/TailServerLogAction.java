@@ -132,9 +132,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 					Thread thread = new Thread(tailServerLogWorker);
 					thread.start();
 				} catch (IOException e) {
-					String message = NLS.bind("Failed to tail files for application ''{0}''.\n" +
-							"Please make sure your SSH key is confugred to the SSH2 workbench preferences", appName);
-					return OpenShiftUIActivator.createErrorStatus(message, e);
+					return OpenShiftUIActivator.createErrorStatus(NLS.bind("Failed to tail files for application ''{0}''", appName), e);
 				}
 				return Status.OK_STATUS;
 			}

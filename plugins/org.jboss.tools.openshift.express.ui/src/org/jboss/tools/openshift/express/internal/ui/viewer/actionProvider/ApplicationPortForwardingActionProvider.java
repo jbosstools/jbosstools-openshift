@@ -1,6 +1,6 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider;
 
-import org.jboss.tools.openshift.express.internal.core.portforward.ApplicationPortForwardingAction;
+import org.jboss.tools.openshift.express.internal.ui.action.ApplicationPortForwardingAction;
 
 public class ApplicationPortForwardingActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
 

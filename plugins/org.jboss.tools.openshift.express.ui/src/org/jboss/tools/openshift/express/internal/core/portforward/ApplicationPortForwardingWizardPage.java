@@ -163,7 +163,9 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								wizardModel.verifyApplicationSSHSession();
+								if(!wizardModel.verifyApplicationSSHSession()) {
+									return Status.CANCEL_STATUS;
+								}
 								wizardModel.refreshForwardablePorts();
 								refreshViewerInput();
 							} catch (OpenShiftSSHOperationException e) {
@@ -188,7 +190,10 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								wizardModel.verifyApplicationSSHSession();
+								if(!wizardModel.verifyApplicationSSHSession()) {
+									return Status.CANCEL_STATUS;
+								}
+
 								wizardModel.startPortForwarding();
 								refreshViewerInput();
 							} catch (OpenShiftSSHOperationException e) {
@@ -229,7 +234,10 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try {
-								wizardModel.verifyApplicationSSHSession();
+								if(!wizardModel.verifyApplicationSSHSession()) {
+									return Status.CANCEL_STATUS;
+								}
+
 								wizardModel.stopPortForwarding();
 								refreshViewerInput();
 							} catch (OpenShiftSSHOperationException e) {
