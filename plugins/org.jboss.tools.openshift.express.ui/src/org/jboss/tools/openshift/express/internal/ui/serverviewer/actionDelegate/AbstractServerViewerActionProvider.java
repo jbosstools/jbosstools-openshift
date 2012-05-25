@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate;
 
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -18,13 +19,17 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.ui.internal.cnf.ServerActionProvider;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.action.AbstractAction;
 
 /**
  * @author Xavier Coulon
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractServerViewerActionProvider extends CommonActionProvider {
+
+	private static final String OPENSHIFT_SERVER_ADAPTER_MENU = "org.jboss.tools.openshift.express.serverviewer.menu";
 
 	protected final AbstractAction action;
 
@@ -52,14 +57,30 @@ public abstract class AbstractServerViewerActionProvider extends CommonActionPro
 			IServer server = (IServer) sel;
 			if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
 				action.validate();
-				if (action != null/* && action.isEnabled() */) {
-					MenuManager openshiftMenu = new MenuManager("Openshift...",
-							"org.jboss.tools.openshift.express.serverviewer.menu");
+				if (action != null) {
+					MenuManager openshiftMenu = getOpenShiftMenuManager(menu);
 					openshiftMenu.add(action);
-					menu.add(openshiftMenu);
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param menu
+	 * @return
+	 */
+	private MenuManager getOpenShiftMenuManager(IMenuManager menu) {
+		for(IContributionItem item : menu.getItems()) {
+			// make this call in this way, since item id can be null
+			if(OPENSHIFT_SERVER_ADAPTER_MENU.equals(item.getId())) {
+				return (MenuManager) item;
+			}
+		}
+		MenuManager openshiftMenu = new MenuManager("Openshift...",
+				OPENSHIFT_SERVER_ADAPTER_MENU);
+		menu.add(openshiftMenu);
+		menu.insertBefore(ServerActionProvider.TOP_SECTION_END_SEPARATOR, openshiftMenu);
+		return openshiftMenu;
 	}
 
 	protected Object getSelection() {

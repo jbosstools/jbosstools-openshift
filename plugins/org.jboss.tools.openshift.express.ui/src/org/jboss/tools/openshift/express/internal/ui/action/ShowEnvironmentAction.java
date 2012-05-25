@@ -20,7 +20,9 @@ import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 
+import com.jcraft.jsch.JSchException;
 import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftSSHOperationException;
 
 /**
  * @author Xavier Coulon
@@ -41,23 +43,32 @@ public class ShowEnvironmentAction extends AbstractAction {
 			final ITreeSelection treeSelection = (ITreeSelection) selection;
 			if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
 				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				if(!application.hasSSHSession()) {
-					application.setSSHSession(OpenShiftSshSessionFactory.getInstance().createSession(application));
-				}
-				List<String> props = application.getEnvironmentProperties();
-				final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName(application));
-				console.clearConsole();
-				MessageConsoleStream stream = console.newMessageStream();
-				for (String prop : props) {
-					stream.println(prop);
-				}
-				ConsoleUtils.displayConsoleView(console);
-				
+				showEnvironmentProperties(application);
 			}
 		} catch (Exception e) {
 			OpenShiftUIActivator.createErrorStatus("Failed to display remote environment variables", e);
 		}
 
+	}
+
+	/**
+	 * @param application
+	 * @throws JSchException
+	 * @throws OpenShiftSSHOperationException
+	 */
+	private void showEnvironmentProperties(final IApplication application) throws JSchException,
+			OpenShiftSSHOperationException {
+		if(!application.hasSSHSession()) {
+			application.setSSHSession(OpenShiftSshSessionFactory.getInstance().createSession(application));
+		}
+		List<String> props = application.getEnvironmentProperties();
+		final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName(application));
+		console.clearConsole();
+		MessageConsoleStream stream = console.newMessageStream();
+		for (String prop : props) {
+			stream.println(prop);
+		}
+		ConsoleUtils.displayConsoleView(console);
 	}
 	
 	/**

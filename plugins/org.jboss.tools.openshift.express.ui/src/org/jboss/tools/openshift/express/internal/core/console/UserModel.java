@@ -129,6 +129,9 @@ public class UserModel {
 	}
 
 	public UserDelegate findUser(String username) {
+		if(username == null) {
+			return null;
+		}
 		return allUsers.get(username);
 	}
 

@@ -75,7 +75,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		setNeedsProgressMonitor(true);
 		this.wizardModel = new OpenShiftExpressApplicationWizardModel(user, project, application,
 				useExistingApplication);
-		this.skipCredentialsPage = (user != null);
+		this.skipCredentialsPage = (user != null && user.isConnected());
 	}
 
 	OpenShiftExpressApplicationWizardModel getWizardModel() {

@@ -162,7 +162,7 @@
     	<viewerActionBinding viewerId="org.eclipse.wst.server.ui.ServersView">
 	       <includes>
 	          <actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.tailServerLogActionProvider"/>
+	                pattern="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.*"/>
 	       </includes>
 	    </viewerActionBinding>
 	</extension>
@@ -174,11 +174,32 @@
 				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.tailServerLogActionProvider">
 			<enablement>
               <and>
-           <instanceof
-                 value="org.eclipse.wst.server.core.IServer">
-           </instanceof>
-        </and>
-		      
+		           <instanceof
+		                 value="org.eclipse.wst.server.core.IServer">
+		           </instanceof>
+		        </and>
+			</enablement>
+		</actionProvider>
+		<actionProvider
+				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.ShowEnvironmentActionProvider"
+				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.showEnvironmentActionProvider">
+			<enablement>
+              <and>
+		           <instanceof
+		                 value="org.eclipse.wst.server.core.IServer">
+		           </instanceof>
+		        </and>
+			</enablement>
+		</actionProvider>
+		<actionProvider
+				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.ApplicationPortForwardingActionProvider"
+				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.applicationPortForwardingActionProvider">
+			<enablement>
+              <and>
+		           <instanceof
+		                 value="org.eclipse.wst.server.core.IServer">
+		           </instanceof>
+		        </and>
 			</enablement>
 		</actionProvider>
     </extension>
@@ -318,8 +339,8 @@
 	       <includes>
            	  <actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.*"/>
-           	  <actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/>
+           	  <!--actionExtension
+	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/-->
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
@@ -422,8 +443,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.core.portforward.ApplicationPortForwardingActionProvider"
-              id="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ApplicationPortForwardingActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.applicationPortForwardingActionProvider">
            <enablement>
               <and>
                  <instanceof

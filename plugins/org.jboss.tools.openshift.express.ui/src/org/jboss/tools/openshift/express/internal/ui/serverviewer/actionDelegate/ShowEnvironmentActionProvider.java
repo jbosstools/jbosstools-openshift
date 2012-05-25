@@ -8,16 +8,17 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider;
+package org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate;
 
-import org.jboss.tools.openshift.express.internal.ui.action.TailServerLogAction;
+import org.jboss.tools.openshift.express.internal.ui.action.ShowEnvironmentAction;
 
 /**
  * @author Xavier Coulon
  */
-public class TailServerLogActionProvider extends AbstractOpenShiftExplorerViewerActionProvider {
+public class ShowEnvironmentActionProvider extends AbstractServerViewerActionProvider {
 
-	public TailServerLogActionProvider() {
-		super(new TailServerLogAction(), "group.showIn");
+	public ShowEnvironmentActionProvider() {
+		super(new ShowEnvironmentAction());
 	}
+
 }
