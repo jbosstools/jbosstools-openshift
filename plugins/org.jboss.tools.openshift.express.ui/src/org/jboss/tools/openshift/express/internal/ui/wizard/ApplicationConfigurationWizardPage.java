@@ -695,6 +695,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		return true;
 	}
 
+	/**
+	 * 
+	 * @return
+	private boolean ensureHasSshKey() {
+		
+	}
+	 */
+	
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new Job("Loading existing applications...") {

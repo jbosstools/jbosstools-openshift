@@ -17,6 +17,7 @@ import org.eclipse.jgit.transport.RemoteSession;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
@@ -27,6 +28,7 @@ import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
@@ -37,6 +39,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.OpenShiftSSHOperationException;
 import com.openshift.client.utils.Base64Coder;
 
 /**
@@ -128,10 +131,10 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 					consoleWorkers.put(console.getName(), tailServerLogWorker);
 					Thread thread = new Thread(tailServerLogWorker);
 					thread.start();
-				} catch (Exception e) {
-					Logger.error("Failed to retrieve remote server logs", e);
-					console.newMessageStream().println("Failed to retrieve remote server logs: " + e.getMessage());
-					console.newMessageStream().println("Please make sure your ssh key is added to your ssh preferences");
+				} catch (IOException e) {
+					String message = NLS.bind("Failed to tail files for application ''{0}''.\n" +
+							"Please make sure your SSH key is confugred to the SSH2 workbench preferences", appName);
+					return OpenShiftUIActivator.createErrorStatus(message, e);
 				}
 				return Status.OK_STATUS;
 			}
@@ -149,29 +152,29 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	 * @param console
 	 *            the console into which the tail should be writtent
 	 * @return the Worker that encapsulate the established RemoteSession, the tail Process and the output console
+	 * @throws OpenShiftSSHOperationException 
 	 * @throws JSchException
 	 *             in case of underlying exception
 	 * @throws IOException
 	 *             in case of underlying exception
 	 */
 	private TailServerLogWorker startTailProcess(final String host, final String appId, final String appName,
-			final MessageConsole console) throws JSchException, IOException {
+			final MessageConsole console) throws IOException {
 		final String logFilePath = appName + "/logs/*.log";
 		final String options = "-f -n 100";
 
 		JSch.setLogger(new JschToEclipseLogger());
 		final SshSessionFactory sshSessionFactory = SshSessionFactory.getInstance();
 		final URIish uri = new URIish().setHost(host).setUser(appId);
-		RemoteSession remoteSession = sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED,
+		RemoteSession remoteSession;
+		remoteSession = sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED,
 				0);
-
 		// the rhc-tail-files command template
 		// ssh_cmd =
 		// "ssh -t #{app_uuid}@#{app}-#{namespace}.#{rhc_domain} 'tail#{opt['opts'] ? ' --opts ' + Base64::encode64(opt['opts']).chomp : ''} #{file_glob}'"
 		final String command = buildCommand(logFilePath, options);
 		Process process = remoteSession.exec(command, 0);
 		return new TailServerLogWorker(console, process, remoteSession);
-
 	}
 
 	/**
