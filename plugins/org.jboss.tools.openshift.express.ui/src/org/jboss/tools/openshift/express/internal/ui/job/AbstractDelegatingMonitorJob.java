@@ -20,6 +20,8 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
  */
 public abstract class AbstractDelegatingMonitorJob extends Job {
 
+	public static final int TIMEOUTED_CANCELLED = 1;
+
 	protected DelegatingProgressMonitor delegatingMonitor;
 
 	public AbstractDelegatingMonitorJob(String name) {

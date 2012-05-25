@@ -145,26 +145,19 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		if (!useExistingApp) {
 
 			IStatus status = createApplication();
-			if (JobUtils.isCancel(status)
-				&& CreateApplicationJob.TIMEOUTED_CANCELLED == status.getCode()) {
-					getContainer().getShell().close();
-			} else if (!JobUtils.isOk(status)) {
-				safeRefreshUser();
+			if(!processStatus("Creating the application", status)) {
 				return false;
 			}
-
+			
 			status = waitForApplication(wizardModel.getApplication());
-			if (JobUtils.isCancel(status) 
-					&& WaitForApplicationJob.TIMEOUTED_CANCELLED == status.getCode()) {
-				getContainer().getShell().close();
-			} else if (!JobUtils.isOk(status)) {
-				safeRefreshUser();
+			if(!processStatus("Waiting to become reachable", status)) {
 				return false;
 			}
-
+			
 			if (!addRemoveCartridges(
-					getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges())) {
-				return false;
+					getWizardModel().getApplication(), 
+					getWizardModel().getSelectedEmbeddableCartridges())) {
+					return false;
 			}
 		}
 
@@ -174,6 +167,26 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 		wizardModel.addUserToModel();
 		return useExistingApp;
+	}
+
+	private boolean processStatus(String operation, IStatus status) {
+		if (JobUtils.isCancel(status)) {
+			if (AbstractDelegatingMonitorJob.TIMEOUTED_CANCELLED == status.getCode()) {
+				getContainer().getShell().close();
+			} else {
+				new ErrorDialog(getShell(), 
+						NLS.bind("{0} was cancelled", operation), 
+						NLS.bind("{0} timeouted and was canceled", operation), 
+						status, 
+						IStatus.ERROR | IStatus.WARNING | IStatus.CANCEL | IStatus.INFO)
+				.open();
+				return true;
+			}
+		} else if (!JobUtils.isOk(status)) {
+			safeRefreshUser();
+			return false;
+		}
+		return true;
 	}
 
 	private IStatus waitForApplication(IApplication application) {

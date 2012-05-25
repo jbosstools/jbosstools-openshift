@@ -37,8 +37,6 @@ import com.openshift.client.OpenShiftTimeoutException;
  */
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
-	public static final int TIMEOUTED_CANCELLED = 1;
-
 	private UserDelegate user;
 	private String name;
 	private ICartridge cartridge;
