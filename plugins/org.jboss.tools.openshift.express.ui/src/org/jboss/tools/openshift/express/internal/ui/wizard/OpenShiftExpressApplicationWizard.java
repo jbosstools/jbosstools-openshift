@@ -26,7 +26,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
@@ -56,8 +58,8 @@ import com.openshift.client.OpenShiftException;
  */
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
-	private static final int APP_CREATE_TIMEOUT = 2 * 60 * 1000;
-	private static final int APP_WAIT_TIMEOUT = 3 * 60 * 1000;
+	private static final int APP_CREATE_TIMEOUT = 5 * 60 * 1000;
+	private static final int APP_WAIT_TIMEOUT = 5 * 60 * 1000;
 	private static final long EMBED_CARTRIDGES_TIMEOUT = 2 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 1 * 60 * 1000;
 
@@ -170,7 +172,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private boolean processStatus(String operation, IStatus status) {
 		if (JobUtils.isCancel(status)) {
 			if (AbstractDelegatingMonitorJob.TIMEOUTED_CANCELLED == status.getCode()) {
-				getContainer().getShell().close();
+				closeWizard();
 			} else {
 				new ErrorDialog(getShell(),
 						NLS.bind("Operation was cancelled", operation),
@@ -186,6 +188,13 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			return false;
 		}
 		return true;
+	}
+
+	private void closeWizard() {
+		IWizardContainer container = getContainer();
+		if (container instanceof WizardDialog) {
+			((WizardDialog) container).close();
+		}
 	}
 
 	private IStatus waitForApplication(IApplication application) {
