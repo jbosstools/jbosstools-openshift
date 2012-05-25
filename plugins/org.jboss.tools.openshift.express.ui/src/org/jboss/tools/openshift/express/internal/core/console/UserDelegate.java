@@ -14,7 +14,6 @@ import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
