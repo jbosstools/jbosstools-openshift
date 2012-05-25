@@ -32,6 +32,8 @@ import com.openshift.client.OpenShiftException;
  */
 public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 
+	public static final int TIMEOUTED_CANCELLED = 1;
+
 	private static final int APP_REACHABLE_TIMEOUT = 180 * 1000;
 	private IApplication application;
 	private Shell shell;
@@ -48,8 +50,12 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 		try {
 			while (!application.waitForAccessible(APP_REACHABLE_TIMEOUT)) {
 				if (!openKeepWaitingDialog()) {
-					return OpenShiftUIActivator.createCancelStatus(NLS.bind(
-							OpenShiftExpressUIMessages.APPLICATION_NOT_ANSWERING, application.getName()));
+					return new Status(
+							IStatus.CANCEL,
+							OpenShiftUIActivator.PLUGIN_ID,
+							TIMEOUTED_CANCELLED,
+							NLS.bind(OpenShiftExpressUIMessages.APPLICATION_NOT_ANSWERING, application.getName()),
+							null);
 				}
 			}
 		} catch (OpenShiftException e) {

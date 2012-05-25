@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.job;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,7 +37,7 @@ import com.openshift.client.OpenShiftTimeoutException;
  */
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
-	public static final int CLOSE_WIZARD = 2;
+	public static final int TIMEOUTED_CANCELLED = 1;
 
 	private UserDelegate user;
 	private String name;
@@ -46,7 +45,6 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	private ApplicationScale scale;
 	private IGearProfile gear;
 	private IApplication application;
-	private ReentrantLock lock = new ReentrantLock();
 
 	public CreateApplicationJob(final String name, final ICartridge cartridge, final ApplicationScale scale,
 			final IGearProfile gear, UserDelegate user) {
@@ -61,7 +59,6 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
-			lock.lock();
 			try {
 				this.application = user.createApplication(name, cartridge, scale, gear);
 			} catch (OpenShiftTimeoutException e) {
@@ -69,21 +66,23 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 			}
 
 			if (application == null) {
-				int errorCode = monitor.isCanceled() ? CLOSE_WIZARD : 0;
+				int errorCode = monitor.isCanceled() ? TIMEOUTED_CANCELLED : 0;
 				return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, errorCode,
 						NLS.bind("User cancelled creation of application {0}", name), null);
 			} else {
 				return Status.OK_STATUS;
 			}
 		} catch (Exception e) {
+			safeRefreshDomain();
 			return OpenShiftUIActivator.createErrorStatus(
 					OpenShiftExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, name);
-		} finally {
-			lock.unlock();
 		}
 	}
 
 	private IApplication refreshAndCreateApplication(IProgressMonitor monitor) throws OpenShiftException {
+		if (monitor.isCanceled()) {
+			return null;
+		}
 		IApplication application = null;
 		do {
 			try {
@@ -103,13 +102,17 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		return application;
 	}
 
-	public IApplication getApplication() {
+	private void safeRefreshDomain() {
 		try {
-			lock.lock();
-			return application;
-		} finally {
-			lock.unlock();
+			IDomain domain = user.getDefaultDomain();
+			domain.refresh();
+		} catch (OpenShiftException e) {
+			OpenShiftUIActivator.log(e);
 		}
+	}
+	
+	public IApplication getApplication() {
+		return application;
 	}
 
 	protected boolean openKeepTryingDialog() {

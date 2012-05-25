@@ -141,42 +141,50 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	@Override
 	public boolean performFinish() {
-		boolean success = getWizardModel().isUseExistingApplication();
-		if (!success) {
+		boolean useExistingApp = getWizardModel().isUseExistingApplication();
+		if (!useExistingApp) {
 
 			IStatus status = createApplication();
 			if (JobUtils.isCancel(status)
-					&& CreateApplicationJob.CLOSE_WIZARD == status.getCode()) {
+				&& CreateApplicationJob.TIMEOUTED_CANCELLED == status.getCode()) {
+					getContainer().getShell().close();
+			} else if (!JobUtils.isOk(status)) {
+				safeRefreshUser();
+				return false;
+			}
+
+			status = waitForApplication(wizardModel.getApplication());
+			if (JobUtils.isCancel(status) 
+					&& WaitForApplicationJob.TIMEOUTED_CANCELLED == status.getCode()) {
 				getContainer().getShell().close();
 			} else if (!JobUtils.isOk(status)) {
 				safeRefreshUser();
 				return false;
 			}
 
-			if (success = waitForApplication(wizardModel.getApplication())) {
-				success = addRemoveCartridges(
-						getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges());
-			} else {
-				getContainer().getShell().close();
+			if (!addRemoveCartridges(
+					getWizardModel().getApplication(), getWizardModel().getSelectedEmbeddableCartridges())) {
+				return false;
 			}
 		}
 
-		if (success) {
-			success = importProject();
+		if (useExistingApp) {
+			useExistingApp = importProject();
 		}
 
 		wizardModel.addUserToModel();
-		return success;
+		return useExistingApp;
 	}
 
-	private boolean waitForApplication(IApplication application) {
+	private IStatus waitForApplication(IApplication application) {
 		try {
 			AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
-			return status.isOK();
+			return status;
 		} catch (Exception e) {
-			return false;
+			return OpenShiftUIActivator.createErrorStatus(
+					NLS.bind("Could not wait for application {0} to become reachable", application.getName()), e);
 		}
 	}
 
@@ -197,7 +205,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		try {
 			CreateApplicationJob job = new CreateApplicationJob(
 					wizardModel.getApplicationName()
-					, wizardModel.getApplicationCartridge() 
+					, wizardModel.getApplicationCartridge()
 					, wizardModel.getApplicationScale()
 					, wizardModel.getApplicationGearProfile()
 					, wizardModel.getUser());
@@ -211,19 +219,21 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
-	private boolean addRemoveCartridges(final IApplication application,final Set<IEmbeddableCartridge> selectedCartridges) {
-			try {
-				EmbedCartridgesJob job = new EmbedCartridgesJob(
-						new ArrayList<IEmbeddableCartridge>(wizardModel.getSelectedEmbeddableCartridges()), 
-						wizardModel.getApplication());
-				IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
-				if (result.isOK()) {
-					openLogDialog(job.getAddedCartridges());
-				}
-				return result.isOK();
-			} catch (Exception e) {
-				return false;
+	private boolean addRemoveCartridges(final IApplication application,
+			final Set<IEmbeddableCartridge> selectedCartridges) {
+		try {
+			EmbedCartridgesJob job = new EmbedCartridgesJob(
+					new ArrayList<IEmbeddableCartridge>(wizardModel.getSelectedEmbeddableCartridges()),
+					wizardModel.getApplication());
+			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(),
+					EMBED_CARTRIDGES_TIMEOUT);
+			if (result.isOK()) {
+				openLogDialog(job.getAddedCartridges());
 			}
+			return result.isOK();
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges) {
@@ -247,7 +257,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			OpenShiftUIActivator.log(e);
 		}
 	}
-	
+
 	/**
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
