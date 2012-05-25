@@ -323,33 +323,37 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
-		try {
-			IStatus status = WizardUtils.runInWizard(new Job("Retrieving application's forwardable ports...") {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						monitor.beginTask("Checking Application SSH session...", 1);
-						wizardModel.verifyApplicationSSHSession();
-						monitor.worked(1);
-						monitor.beginTask("Retrieving ports...", 1);
-						wizardModel.loadForwardablePorts();
-						refreshViewerInput();
-						monitor.worked(1);
-						return Status.OK_STATUS;
-					} catch (OpenShiftSSHOperationException e) {
-						return OpenShiftUIActivator.createErrorStatus(
-								"Could not load forwardable ports for application ''{0}''", e, wizardModel.getApplication().getName());
-					}
+		final Job j = new Job("Retrieving application's forwardable ports...") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					monitor.beginTask("Checking Application SSH session...", 1);
+					wizardModel.verifyApplicationSSHSession();
+					monitor.worked(1);
+					monitor.beginTask("Retrieving ports...", 1);
+					wizardModel.loadForwardablePorts();
+					refreshViewerInput();
+					monitor.worked(1);
+					return Status.OK_STATUS;
+				} catch (OpenShiftSSHOperationException e) {
+					return OpenShiftUIActivator.createErrorStatus(
+							"Could not load forwardable ports for application ''{0}''", e, wizardModel.getApplication().getName());
 				}
-
-			}, getContainer(), getDataBindingContext());
-			if(!status.isOK()) {
-				getWizard().getContainer().getShell().close();
 			}
-		} catch (Exception e) {
-			// ignore
-		}
+		};
+
+		getContainer().getShell().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				try {
+					IStatus status = WizardUtils.runInWizard(j, getContainer(), getDataBindingContext());
+					if(!status.isOK()) {
+						getWizard().getContainer().getShell().close();
+					}
+				} catch(Exception e) {
+					// ignore
+				}
+			}
+		});
 	}
 
 	private void refreshViewerInput() {
