@@ -38,6 +38,8 @@ import com.openshift.client.OpenShiftTimeoutException;
  */
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
+	public static final int CLOSE_WIZARD = 2;
+
 	private UserDelegate user;
 	private String name;
 	private ICartridge cartridge;
@@ -65,9 +67,11 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
 			}
+
 			if (application == null) {
-				return OpenShiftUIActivator.createCancelStatus(NLS.bind(
-						"User cancelled creation of application {0}", name));
+				int errorCode = monitor.isCanceled() ? CLOSE_WIZARD : 0;
+				return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, errorCode,
+						NLS.bind("User cancelled creation of application {0}", name), null);
 			} else {
 				return Status.OK_STATUS;
 			}

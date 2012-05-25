@@ -145,9 +145,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		if (!success) {
 
 			IStatus status = createApplication();
-			if (JobUtils.isCancel(status)) {
+			if (JobUtils.isCancel(status)
+					&& CreateApplicationJob.CLOSE_WIZARD == status.getCode()) {
 				getContainer().getShell().close();
 			} else if (!JobUtils.isOk(status)) {
+				safeRefreshUser();
 				return false;
 			}
 
@@ -238,6 +240,14 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		});
 	}
 
+	private void safeRefreshUser() {
+		try {
+			wizardModel.getUser().refresh();
+		} catch (OpenShiftException e) {
+			OpenShiftUIActivator.log(e);
+		}
+	}
+	
 	/**
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
