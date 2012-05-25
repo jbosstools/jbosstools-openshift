@@ -44,11 +44,14 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
+		if (monitor.isCanceled()) {
+			return Status.CANCEL_STATUS;
+		}
 		try {
 			removeEmbeddedCartridges(
-					getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
+					getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application, monitor);
 			this.addedCartridges = addEmbeddedCartridges(
-					getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application);
+					getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application, monitor);
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
 			return OpenShiftUIActivator.createErrorStatus("Could not embed cartridges for application {0}", e,
@@ -60,13 +63,16 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		return addedCartridges;
 	}
 
-	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove, final IApplication application)
-			throws OpenShiftException {
+	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove,
+			final IApplication application, IProgressMonitor monitor) throws OpenShiftException {
 		if (cartridgesToRemove.isEmpty()) {
 			return;
 		}
 		Collections.sort(cartridgesToRemove, new CartridgeAddRemovePriorityComparator());
 		for (IEmbeddableCartridge cartridgeToRemove : cartridgesToRemove) {
+			if (monitor.isCanceled()) {
+				return;
+			}
 			final IEmbeddedCartridge embeddedCartridge = application.getEmbeddedCartridge(cartridgeToRemove);
 			if (embeddedCartridge != null) {
 				embeddedCartridge.destroy();
@@ -75,8 +81,9 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 	}
 
 	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToAdd,
-			final IApplication application) throws OpenShiftException {
-		if (cartridgesToAdd.isEmpty()) {
+			final IApplication application, IProgressMonitor monitor) throws OpenShiftException {
+		if (cartridgesToAdd.isEmpty()
+				|| monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
 		Collections.sort(cartridgesToAdd, new CartridgeAddRemovePriorityComparator());

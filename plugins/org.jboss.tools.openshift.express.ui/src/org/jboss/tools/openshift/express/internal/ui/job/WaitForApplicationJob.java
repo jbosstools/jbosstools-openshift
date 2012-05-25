@@ -49,6 +49,10 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 		Logger.debug(OpenShiftExpressUIMessages.WAITING_FOR_REACHABLE);
 		try {
 			while (!application.waitForAccessible(APP_REACHABLE_TIMEOUT)) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				
 				if (!openKeepWaitingDialog()) {
 					return new Status(
 							IStatus.CANCEL,
