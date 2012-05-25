@@ -57,7 +57,7 @@ import com.openshift.client.OpenShiftException;
 public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
 	private static final int APP_CREATE_TIMEOUT = 2 * 60 * 1000;
-	private static final int APP_WAIT_TIMEOUT = 2 * 60 * 1000;
+	private static final int APP_WAIT_TIMEOUT = 3 * 60 * 1000;
 	private static final long EMBED_CARTRIDGES_TIMEOUT = 2 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 1 * 60 * 1000;
 
@@ -141,32 +141,30 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	@Override
 	public boolean performFinish() {
-		boolean useExistingApp = getWizardModel().isUseExistingApplication();
-		if (!useExistingApp) {
+		if (!getWizardModel().isUseExistingApplication()) {
 
 			IStatus status = createApplication();
-			if(!processStatus("Creating the application", status)) {
+			if (!processStatus("creating the application", status)) {
 				return false;
 			}
-			
+
 			status = waitForApplication(wizardModel.getApplication());
-			if(!processStatus("Waiting to become reachable", status)) {
+			if (!processStatus("waiting to become reachable", status)) {
 				return false;
 			}
-			
-			if (!addRemoveCartridges(
-					getWizardModel().getApplication(), 
+
+			if (!addCartridges(
+					getWizardModel().getApplication(),
 					getWizardModel().getSelectedEmbeddableCartridges())) {
-					return false;
+				return false;
 			}
 		}
 
-		if (useExistingApp) {
-			useExistingApp = importProject();
-		}
+		boolean success = importProject();
 
 		wizardModel.addUserToModel();
-		return useExistingApp;
+
+		return success;
 	}
 
 	private boolean processStatus(String operation, IStatus status) {
@@ -174,15 +172,16 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			if (AbstractDelegatingMonitorJob.TIMEOUTED_CANCELLED == status.getCode()) {
 				getContainer().getShell().close();
 			} else {
-				new ErrorDialog(getShell(), 
-						NLS.bind("{0} was cancelled", operation), 
-						NLS.bind("{0} timeouted and was canceled", operation), 
-						status, 
+				new ErrorDialog(getShell(),
+						NLS.bind("Operation was cancelled", operation),
+						NLS.bind("we timeouted while {0}. We therefore cancelled the operation", operation),
+						status,
 						IStatus.ERROR | IStatus.WARNING | IStatus.CANCEL | IStatus.INFO)
-				.open();
-				return true;
+						.open();
 			}
-		} else if (!JobUtils.isOk(status)) {
+		}
+
+		if (!JobUtils.isOk(status)) {
 			safeRefreshUser();
 			return false;
 		}
@@ -232,11 +231,12 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
-	private boolean addRemoveCartridges(final IApplication application,
+	private boolean addCartridges(final IApplication application,
 			final Set<IEmbeddableCartridge> selectedCartridges) {
 		try {
 			EmbedCartridgesJob job = new EmbedCartridgesJob(
 					new ArrayList<IEmbeddableCartridge>(wizardModel.getSelectedEmbeddableCartridges()),
+					true, // dont remove cartridges
 					wizardModel.getApplication());
 			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(),
 					EMBED_CARTRIDGES_TIMEOUT);
