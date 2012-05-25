@@ -11,8 +11,10 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
+import org.w3c.dom.UserDataHandler;
 
 /**
  * @author Xavier Coulon
@@ -36,5 +38,9 @@ public class ConnectToOpenShiftWizard extends Wizard {
 	@Override
 	public void addPages() {
 		addPage(page);
+	}
+	
+	public UserDelegate getUser() {
+		return page.getUser();
 	}
 }

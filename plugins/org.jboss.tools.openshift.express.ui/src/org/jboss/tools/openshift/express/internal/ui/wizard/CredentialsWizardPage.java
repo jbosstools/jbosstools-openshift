@@ -42,10 +42,12 @@ import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.w3c.dom.UserDataHandler;
 
 /**
  * @author Andre Dietisheim
@@ -241,5 +243,9 @@ public class CredentialsWizardPage extends AbstractOpenShiftWizardPage {
 			targets.add(passwordTextObservable);
 			return targets;
 		}
+	}
+	
+	public UserDelegate getUser() {
+		return pageModel.getUser();
 	}
 }

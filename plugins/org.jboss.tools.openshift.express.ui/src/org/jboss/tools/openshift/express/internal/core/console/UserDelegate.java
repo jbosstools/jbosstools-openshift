@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.console;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
@@ -99,31 +100,60 @@ public class UserDelegate {
 	 */
 	public boolean checkForPassword() {
 		if(delegate == null) {
-			try {
-				this.alreadyPromptedForPassword = true;
-				Display.getDefault().syncExec(new Runnable() { public void run() {
-					final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-					final Shell shell = activeWorkbenchWindow != null ? activeWorkbenchWindow.getShell() : null;
-					if(shell == null) {
-						Logger.error("Could not open Credentials Wizard: no shell available");
-						return;
-					}
-					final IWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard();
-					int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
-					if (returnCode == Window.OK) {
-						Logger.debug("OpenShift Auth succeeded.");
-						setDelegate(UserModel.getDefault().getRecentUser().getDelegate());
-						setConnected(true);
-						setRememberPassword(UserModel.getDefault().getRecentUser().isRememberPassword());
-					} else {
-						setConnected(false);
-					}
-				}});
-			} catch( Exception e ) {
-				Logger.error("Failed to retrieve User's password", e);
+			if( username != null && password != null ) {
+				if( checkCurrentCredentials() )
+					return true;
 			}
+			return promptForCredentials();
 		}
-		return (delegate != null);
+		return true;
+	}
+	
+	private boolean checkCurrentCredentials() {
+		// First check if the current username / pw work
+		IUser user = null;
+		try {
+			user = UserModel.getDefault().createUser(username, password);
+			setDelegate(user);
+			setConnected(true);
+			return true;
+		} catch( OpenShiftException ose ) {
+			// ignore
+		} catch( SocketTimeoutException ste ) {
+			// ignore
+		}
+		return false;
+	}
+	
+	private boolean promptForCredentials() {
+		// The auto-login failed. Try to prompt
+		try {
+			this.alreadyPromptedForPassword = true;
+			Display.getDefault().syncExec(new Runnable() { public void run() {
+				final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				final Shell shell = activeWorkbenchWindow != null ? activeWorkbenchWindow.getShell() : null;
+				if(shell == null) {
+					Logger.error("Could not open Credentials Wizard: no shell available");
+					return;
+				}
+				final ConnectToOpenShiftWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard();
+				int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
+				if (returnCode == Window.OK) {
+					Logger.debug("OpenShift Auth succeeded.");
+					UserDelegate created = connectToOpenShiftWizard.getUser();
+					if( created != null ) {
+						setDelegate(created.getDelegate());
+						setConnected(true);
+						setRememberPassword(created.isRememberPassword());
+					}
+				} else {
+					setConnected(false);
+				}
+			}});
+		} catch( Exception e ) {
+			Logger.error("Failed to retrieve User's password", e);
+		}
+		return delegate != null;
 	}
 	
 	public IApplication createApplication(final String applicationName, final ICartridge applicationType, final ApplicationScale scale, final IGearProfile gearProfile)

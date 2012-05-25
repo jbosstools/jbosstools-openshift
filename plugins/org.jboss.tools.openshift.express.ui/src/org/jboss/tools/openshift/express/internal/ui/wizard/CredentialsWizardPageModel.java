@@ -217,5 +217,9 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			erasePasswordStore();
 		}
 	}
+	
+	public UserDelegate getUser() {
+		return wizardModel.getUser();
+	}
 
 }

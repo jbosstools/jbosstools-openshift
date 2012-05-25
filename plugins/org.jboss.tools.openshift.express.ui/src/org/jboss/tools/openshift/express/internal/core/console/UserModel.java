@@ -62,7 +62,10 @@ public class UserModel {
 	}
 
 	/**
-	 * Create a user for temporary external use
+	 * Create a user for temporary external use.
+	 * 
+	 * This method WILL be long-running and should not be called directly
+	 * from the UI thread unless proper care is taken. 
 	 * 
 	 * @param username
 	 * @param password
@@ -144,13 +147,7 @@ public class UserModel {
 		String[] users = pref.get();
 		for (int i = 0; i < users.length; i++) {
 			String password = getPasswordFromSecureStorage(users[i]);
-			try {
-				addUser(new UserDelegate(createUser(users[i], password), true));
-			} catch (OpenShiftException e) {
-				addUser(new UserDelegate(users[i], password));
-			} catch (SocketTimeoutException e) {
-				addUser(new UserDelegate(users[i], password));
-			}
+			addUser(new UserDelegate(users[i], password));
 		}
 	}
 
