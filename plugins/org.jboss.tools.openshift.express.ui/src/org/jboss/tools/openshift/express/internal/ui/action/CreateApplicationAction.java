@@ -10,22 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import java.net.SocketTimeoutException;
-
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.NewOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
-
-import com.openshift.client.IDomain;
-import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
