@@ -31,6 +31,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 import com.openshift.client.IApplication;
+import com.openshift.client.OpenShiftSSHOperationException;
 
 /**
  * Same as EclipseSshSessinFactory, but provides a mean to retrieve the pure Jsch Session, not a RemoteSession.
@@ -67,7 +68,7 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 		this.provider = (IJSchService) context.getService(ssh);
 	}
 
-	public Session createSession(final IApplication application) throws JSchException {
+	public Session createSession(final IApplication application) throws OpenShiftSSHOperationException {
 		final URIish uri = getSshUri(application);
 		final Session session = cache.get(uri);
 		if (session == null || !session.isConnected()) {
@@ -80,7 +81,11 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 			int port = uri.getPort();
 			JSch.setLogger(new JschToEclipseLogger());
 			final OpenSshConfig.Host hc = config.lookup(host);
-			cache.put(uri, createSession(hc, user, host, port, fs));
+			try {
+				cache.put(uri, createSession(hc, user, host, port, fs));
+			} catch (JSchException e) {
+				throw new OpenShiftSSHOperationException(e, "Unable to create SSH session for application ''{0}}''", application);
+			}
 		}
 		return cache.get(uri);
 	}

@@ -31,21 +31,20 @@ public class ApplicationPortForwardingAction extends AbstractAction {
 	public void run() {
 		if (selection != null && selection instanceof ITreeSelection) {
 			Object sel = ((ITreeSelection) selection).getFirstElement();
-			IApplication application = null;
 			if (sel instanceof IApplication) {
-				application = (IApplication) sel;
+				openPortForwarding((IApplication) sel);
 			} else if (sel instanceof IServer) {
 				openPortForwarding((IServer) sel);
-			}
-			if (application != null) {
-				openPortForwarding(application);
 			}
 		}
 	}
 
 	/**
-	 * @param sel
-	 * @return
+	 * Retrieves the application from the given server, then opens the dialog.
+	 * Since retrieving the application can be time consuming, the task is
+	 * performed in a separate job (ie, in a background thread).
+	 * 
+	 * @param server
 	 */
 	private void openPortForwarding(final IServer server) {
 		Job job = new Job("Retrieving application's forwardable ports...") {

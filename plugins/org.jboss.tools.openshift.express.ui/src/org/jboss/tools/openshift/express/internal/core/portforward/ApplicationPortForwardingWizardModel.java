@@ -216,14 +216,9 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		final boolean hasSSHSession = getApplication().hasSSHSession();
 		if (!hasSSHSession) {
 			Logger.debug("Opening a new SSH Session for application '" + getApplication().getName() + "'");
-			try {
-				final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
-						getApplication());
-				getApplication().setSSHSession(session);
-			} catch (JSchException e) {
-				throw new OpenShiftSSHOperationException(e, "Failed to open a new SSH session for application ''{0}''", getApplication().getName());
-				
-			}
+			final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
+					getApplication());
+			getApplication().setSSHSession(session);
 		}
 	}
 
