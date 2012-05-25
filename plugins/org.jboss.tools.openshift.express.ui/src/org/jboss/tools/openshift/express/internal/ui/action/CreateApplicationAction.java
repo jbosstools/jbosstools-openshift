@@ -43,6 +43,7 @@ public class CreateApplicationAction extends AbstractAction {
 			Object sel = ((ITreeSelection) selection).getFirstElement();
 			if (sel instanceof UserDelegate) {
 				final UserDelegate user = (UserDelegate) sel;
+				user.checkForPassword();
 				final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(user);
 				final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
 				wizardDialog.open();

@@ -76,7 +76,7 @@ public abstract class AbstractServerViewerActionProvider extends CommonActionPro
 				return (MenuManager) item;
 			}
 		}
-		MenuManager openshiftMenu = new MenuManager("Openshift...",
+		MenuManager openshiftMenu = new MenuManager("OpenShift",
 				OPENSHIFT_SERVER_ADAPTER_MENU);
 		menu.add(openshiftMenu);
 		menu.insertBefore(ServerActionProvider.TOP_SECTION_END_SEPARATOR, openshiftMenu);
