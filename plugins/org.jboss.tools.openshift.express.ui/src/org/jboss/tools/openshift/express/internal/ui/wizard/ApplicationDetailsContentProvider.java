@@ -56,8 +56,8 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 		ContainerElement cartridgesContainer = new ContainerElement("Cartridges");
 		for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
 			cartridgesContainer.add(
-					new StringElement(cartridge.getName(), cartridge.getUrl().toString(), true,
-							cartridgesContainer));
+					new StringElement(
+							cartridge.getName(), String.valueOf(cartridge.getUrl()), true, cartridgesContainer));
 		}
 		return cartridgesContainer;
 	}
