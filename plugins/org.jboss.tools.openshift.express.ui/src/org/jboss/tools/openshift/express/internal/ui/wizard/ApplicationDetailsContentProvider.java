@@ -3,6 +3,9 @@
  */
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import static org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.null2emptyString;
+import static org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.toStringOrNull;
+
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,7 +60,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 		for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
 			cartridgesContainer.add(
 					new StringElement(
-							cartridge.getName(), String.valueOf(cartridge.getUrl()), true, cartridgesContainer));
+							cartridge.getName(), null2emptyString(toStringOrNull(cartridge.getUrl())), true, cartridgesContainer));
 		}
 		return cartridgesContainer;
 	}
