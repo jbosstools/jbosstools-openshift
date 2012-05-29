@@ -45,7 +45,7 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 		if (StringUtils.isEmpty(property.getValue())) {
 			return;
 		}
-		final Hyperlink link = new Hyperlink((Tree) cell.getControl(),SWT.NONE); //SWT.NO_BACKGROUND
+		final Hyperlink link = new Hyperlink((Tree) cell.getControl(), SWT.NONE); // SWT.NO_BACKGROUND
 		link.setBackground(cell.getBackground());
 		link.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
 		link.setFont(cell.getFont());
@@ -65,7 +65,7 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 				textStyle.underline = true;
 			}
 		};
-		StyledString styledString = new StyledString(property.getValue(), style);
+		StyledString styledString = new StyledString(StringUtils.null2emptyString(property.getValue()), style);
 		cell.setStyleRanges(styledString.getStyleRanges());
 		cell.setText(styledString.getString());
 	}
