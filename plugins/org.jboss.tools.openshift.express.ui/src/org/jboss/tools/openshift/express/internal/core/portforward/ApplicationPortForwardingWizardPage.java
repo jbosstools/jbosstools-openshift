@@ -331,7 +331,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
-		final Job j = new Job("Retrieving application's forwardable ports...") {
+		final Job j = new Job("Loading application's forwardable ports...") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -350,18 +350,11 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 			}
 		};
 
-		getContainer().getShell().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				try {
-					IStatus status = WizardUtils.runInWizard(j, getContainer(), getDataBindingContext());
-					if(!status.isOK()) {
-						getWizard().getContainer().getShell().close();
-					}
-				} catch(Exception e) {
-					// ignore
-				}
-			}
-		});
+		try {
+			WizardUtils.runInWizard(j, getContainer(), getDataBindingContext());
+		} catch (Exception e) {
+			Logger.error("Failed to load application's forwardable ports", e);
+		}
 	}
 
 	private void refreshViewerInput() {
