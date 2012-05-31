@@ -26,6 +26,13 @@ public class StringUtils {
 		return "";
 	}
 
+	public static String toStringOrNull(Object value) {
+		if (value == null) {
+			return null;
+		}
+		return String.valueOf(value);
+	}
+	
 	public static boolean isEmpty(String value) {
 		return value == null
 				|| value.length() == 0;

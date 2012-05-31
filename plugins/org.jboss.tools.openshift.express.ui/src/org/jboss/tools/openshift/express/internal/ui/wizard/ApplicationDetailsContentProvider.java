@@ -3,6 +3,8 @@
  */
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
+import static org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.toStringOrNull;
+
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,10 +56,10 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 	private ContainerElement createCartridges(IApplication application)
 			throws OpenShiftException, SocketTimeoutException {
 		ContainerElement cartridgesContainer = new ContainerElement("Cartridges");
-		for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
+				for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
 			cartridgesContainer.add(
-					new StringElement(cartridge.getName(), cartridge.getUrl().toString(), true,
-							cartridgesContainer));
+					new StringElement(
+							cartridge.getName(), toStringOrNull(cartridge.getUrl()), true, cartridgesContainer));
 		}
 		return cartridgesContainer;
 	}
