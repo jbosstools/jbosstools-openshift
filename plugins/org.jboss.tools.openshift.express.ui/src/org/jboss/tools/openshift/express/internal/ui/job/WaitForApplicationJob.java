@@ -32,7 +32,7 @@ import com.openshift.client.OpenShiftException;
  */
 public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 
-	private static final int APP_REACHABLE_TIMEOUT = 1 * 60 * 1000;
+	private static final int APP_REACHABLE_TIMEOUT = 3 * 60 * 1000;
 	
 	private IApplication application;
 	private Shell shell;
