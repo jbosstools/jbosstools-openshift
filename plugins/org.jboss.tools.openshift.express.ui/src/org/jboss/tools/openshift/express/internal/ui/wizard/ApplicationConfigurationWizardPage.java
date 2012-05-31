@@ -906,6 +906,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
+	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(
 				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
