@@ -10,34 +10,21 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 public class PassphraseDialog extends InputDialog {
 
 	public PassphraseDialog(Shell shell) {
 		super(shell
 				, "New ssh key"
-				, "Please pick a passphrase for your new ssh key pair"
+				, "Please pick a passphrase for your new ssh key pair. A passphrase is recommended but not required."
 				, null
-				, new PassphraseValidator());
+				, null);
 	}
 
 	protected int getInputTextStyle() {
 		return SWT.SINGLE | SWT.BORDER | SWT.PASSWORD;
-	}
-
-	private static class PassphraseValidator implements IInputValidator {
-
-		@Override
-		public String isValid(String input) {
-			if (StringUtils.isEmpty(input)) {
-				return "You have to provide a pass phrase";
-			}
-			return null;
-		}
 	}
 }

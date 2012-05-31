@@ -54,6 +54,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.OpenShiftException;
@@ -123,7 +124,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		}
 
 		Button browseButton = new Button(container, SWT.PUSH);
-		browseButton.setText("Browse");
+		browseButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseButton);
 		browseButton.addSelectionListener(onBrowse());
@@ -150,10 +151,10 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 
 				try {
-					if (pageModel.libraPublicKeyExists()) {
+					if (pageModel.publicKeyExists()) {
 						MessageDialog.openInformation(getShell(), 
 								"Libra Key already present", 
-								"You already have a key at \"" + pageModel.getLibraPublicKey() + "\". Please move it or use it.");
+								"You already have a key at \"" + pageModel.getPublicKey() + "\". Please move it or use it.");
 						return;
 					} 
 
@@ -220,7 +221,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(IStatus.ERROR, this, dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
 	}
 
 	private class SSHKeyValidator implements IValidator {
@@ -232,10 +233,14 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 					|| !FileUtils.canRead((String) value)) {
 				return ValidationStatus.error("You have to provide a valid ssh public key");
 			}
-			if (!isKeyKnownToSsh((String) value)) {
+			if (pageModel.hasConfiguredFixedPrivateKeys()) {
 				return ValidationStatus.warning(
-						NLS.bind("Could not find the private portion for your public key. "
-								+ "Make sure it is listed in the ssh2 preferences.", value));
+						NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift servers. " +
+								"This can override any Eclipse specific SSH key preferences.", new SSHUserConfig(pageModel.getSSH2Home()).getFile()));
+			} else if (!isKeyKnownToSsh((String) value)) {
+					return ValidationStatus.warning(
+							NLS.bind("Could not find the private portion for your public key in the preferences. "
+									+ "Make sure it is listed in the ssh2 preferences.", value));
 			}
 			return ValidationStatus.ok();
 		}
@@ -244,14 +249,15 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			if (StringUtils.isEmpty(publicKeyPath)) {
 				return false;
 			}
-			for (String preferencesKey : SshPrivateKeysPreferences.getKeys()) {
+			for (String preferencesKey : pageModel.getPrivateKeysFromPreferences()) {
 				try {
 					File privateKey = SshPrivateKeysPreferences.getKeyFile(preferencesKey);
 					if (privateKey == null
 							|| !FileUtils.canRead(privateKey)) {
 						continue;
 					}
-					if (publicKeyPath.startsWith(privateKey.getAbsolutePath() + ".")) {
+					if (publicKeyPath.startsWith(privateKey.getAbsolutePath() + ".")
+							|| publicKeyPath.startsWith(privateKey.getPath() + ".")) {
 						return true;
 					}
 				} catch (FileNotFoundException e) {

@@ -22,6 +22,7 @@ import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftSSHKey;
@@ -35,8 +36,10 @@ import com.openshift.client.SSHPublicKey;
  */
 public class NewDomainWizardPageModel extends ObservableUIPojo {
 
-	public static final String LIBRA_KEY = "libra_id_rsa";
+	public static final String ID_RSA_FILENAME = "id_rsa";
+	public static final String LIBRA_ID_RSA_FILENAME = "libra_id_rsa";
 	private static final String PUBLIC_KEY_SUFFIX = ".pub";
+	private static final String KEYS_SEPARATOR = ",";
 
 	private static final String SSHKEY_DEFAULT_NAME = "jbosstools"; //$NON-NLS-1$
 
@@ -53,21 +56,22 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void initSshKey() throws OpenShiftException {
-		if (!libraPublicKeyExists()) {
+		if (!publicKeyExists()) {
 			return;
 		}
-		File libraPublicKey = getLibraPublicKey();
+		File libraPublicKey = getPublicKey();
 		setSshKey(libraPublicKey.getAbsolutePath());
 	}
 
+	
 	/**
 	 * Returns the file of the libra public key. It is not checking if the file exists.
 	 *  
 	 * @return the libra public key 
 	 * @throws OpenShiftException 
 	 */
-	public File getLibraPublicKey() throws OpenShiftException {
-		File libraPrivateKey = getLibraPrivateKey();
+	public File getPublicKey() throws OpenShiftException {
+		File libraPrivateKey = getPrivateKey();
 		return new File(libraPrivateKey.getParent(), getPublicKeyPath(libraPrivateKey.getName()));
 	}
 
@@ -75,29 +79,38 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return privateKeyPath + PUBLIC_KEY_SUFFIX;
 	}
 
-	public File getLibraPrivateKey() throws OpenShiftException {
-		String ssh2Home = getSSH2Home();
-		File ssh2HomeFile = new File(ssh2Home);
-		if (!FileUtils.canRead(ssh2HomeFile)) {
-			try {
-				ssh2HomeFile.createNewFile();
-			} catch(IOException e) {
-				throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
-			}
+	public File getPrivateKey() throws OpenShiftException {
+		String ssh2Home = checkedGetSSH2Home();
+		ensureSSHHomeExists(ssh2Home);
+		if (hasConfiguredFixedPrivateKeys()) {
+			return new File(ssh2Home, LIBRA_ID_RSA_FILENAME);
+		} else {
+			return new File(ssh2Home, ID_RSA_FILENAME);
 		}
-		
-		return new File(ssh2Home, LIBRA_KEY);
 	}
 
-	private String getSSH2Home() throws OpenShiftException {
-		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
-		String ssh2Home = preferences.getString(IConstants.KEY_SSH2HOME);
+	private String checkedGetSSH2Home() throws OpenShiftException {
+		String ssh2Home = getSSH2Home();
 		if (ssh2Home == null 
 				|| ssh2Home.trim().length() == 0) {
 			throw new OpenShiftException("Could not determine your ssh2 home directory");
 		}
 		return ssh2Home;
 	}
+	
+	public String getSSH2Home() {
+		return JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_SSH2HOME);
+	}
+
+	public boolean hasConfiguredFixedPrivateKeys() {
+		try {
+			SSHUserConfig sshUserConfig = new SSHUserConfig(checkedGetSSH2Home());
+			return sshUserConfig.hasLibraIdentifyFile();
+		} catch (OpenShiftException e) {
+			return false;
+		}
+	}
+
 
 	public String getDomainId() {
 		return this.domainId;
@@ -123,25 +136,25 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return sshKey;
 	}
 	
-	public boolean libraPublicKeyExists() throws OpenShiftException {
-		return FileUtils.canRead(getLibraPublicKey());
+	public boolean publicKeyExists() throws OpenShiftException {
+		return FileUtils.canRead(getPublicKey());
 	}
 
 	public void createLibraKeyPair(String passPhrase) throws FileNotFoundException, OpenShiftException {
-		File libraPublicKey = getLibraPublicKey();
+		File libraPublicKey = getPublicKey();
 		if (libraPublicKey.canRead()) {
 			// key already exists
 			return;
 		}
-		createSSHHome(getSSH2Home());
-		File libraPrivateKey = getLibraPrivateKey();
+		ensureSSHHomeExists(checkedGetSSH2Home());
+		File libraPrivateKey = getPrivateKey();
 		SSHKeyPair keyPair = SSHKeyPair.create(passPhrase, libraPrivateKey.getAbsolutePath(), libraPublicKey.getAbsolutePath());
 		setFilePermissions(libraPrivateKey);
 		addToPrivateKeysPreferences(keyPair);
 		setSshKey(keyPair.getPublicKeyPath());
 	}
 	
-	private void createSSHHome(String ssh2Home)
+	private void ensureSSHHomeExists(String ssh2Home)
 			throws OpenShiftException {
 		File ssh2HomeFile = new File(ssh2Home);
 		if (FileUtils.canRead(ssh2HomeFile)) {
@@ -171,6 +184,17 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		file.setWritable(true, true);
 	}
 
+	public String[] getPrivateKeysFromPreferences() {
+		String privateKeys = 
+				JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_PRIVATEKEY);
+		if (privateKeys != null 
+				&& privateKeys.trim().length() > 0) {
+			return privateKeys.split(KEYS_SEPARATOR);
+		} else {
+			return new String[0];
+		}
+	}
+	
 	private void addToPrivateKeysPreferences(SSHKeyPair keyPair) {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
 		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
