@@ -149,8 +149,7 @@ public class UserModel {
 				OpenShiftUIActivator.PLUGIN_ID);
 		String[] users = pref.get();
 		for (int i = 0; i < users.length; i++) {
-			String password = getPasswordFromSecureStorage(users[i]);
-			addUser(new UserDelegate(users[i], password));
+			addUser(new UserDelegate(users[i]));
 		}
 	}
 

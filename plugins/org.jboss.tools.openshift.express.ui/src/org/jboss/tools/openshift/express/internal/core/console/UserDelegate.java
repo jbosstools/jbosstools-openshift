@@ -41,16 +41,16 @@ public class UserDelegate {
 	private boolean rememberPassword;
 	private boolean connected;
 	private boolean alreadyPromptedForPassword;
-	
-	public UserDelegate(String username, String password) {
+	private boolean passwordLoaded = false;
+
+	public UserDelegate(String username) {
 		this.username = username;
-		this.password = password;
-		this.rememberPassword = (password != null);
 		this.setConnected(false);
 	}
-	
+
 	public UserDelegate(IUser user, boolean rememberPassword) {
 		setDelegate(user);
+		this.passwordLoaded = true;
 		this.rememberPassword = rememberPassword;
 	}
 	
@@ -69,15 +69,30 @@ public class UserDelegate {
 		this.username = delegate.getRhlogin();
 		this.password = delegate.getPassword();
 		this.setConnected(true);
-	} 
+	}
 
 	public String getUsername() {
 		return username;
 	}
 	public String getPassword() {
+		if (!this.passwordLoaded) {
+			loadPassword();
+		}
 		return password;
 	}
-	
+
+	/**
+	 * Attempts to load the password from the secure storage, only at first
+	 * time it is called.
+	 */
+	private void loadPassword() {
+		if (!passwordLoaded) {
+			this.password = UserModel.getDefault().getPasswordFromSecureStorage(username);
+			this.rememberPassword = (password != null);
+			this.passwordLoaded = true;
+		}
+	}
+
 	public boolean isRememberPassword() {
 		return rememberPassword;
 	}
@@ -99,7 +114,10 @@ public class UserDelegate {
 	 */
 	public boolean checkForPassword() {
 		if(delegate == null) {
-			if( username != null && password != null ) {
+			if(!passwordLoaded) {
+				loadPassword();
+			}
+			if(username != null && password != null) {
 				if( checkCurrentCredentials() )
 					return true;
 			}
