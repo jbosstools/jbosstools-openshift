@@ -82,7 +82,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
 		UserDelegate user = getUser();
-		if (user == null || !user.hasDomain()) {
+		if (user == null || !user.isConnected() || !user.hasDomain()) {
 			return Collections.emptyList();
 		}
 		return user.getApplications();
