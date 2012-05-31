@@ -155,6 +155,7 @@ public class FileUtils {
 
 	public static final void writeTo(String content, File destination) throws FileNotFoundException {
 		PrintWriter writer = new PrintWriter(destination);
+		writer.write(content);
 		writer.flush();
 		writer.close();
 	}
