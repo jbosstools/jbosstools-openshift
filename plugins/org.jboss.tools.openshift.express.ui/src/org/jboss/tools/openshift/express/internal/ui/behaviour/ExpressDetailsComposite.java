@@ -479,7 +479,7 @@ public class ExpressDetailsComposite {
 	private void postVerifyUpdateWidgets() {
 		importLink.setEnabled(false);
 		verifyButton.setEnabled(true);
-		if (appNameCombo != null) {
+		if (appNameCombo != null && fuser != null) {
 			appNameCombo.setItems(appListNames);
 			int index = Arrays.asList(appListNames).indexOf(app);
 			if (index != -1)
@@ -533,7 +533,7 @@ public class ExpressDetailsComposite {
 	private Runnable getVerifyingCredentialsJob() {
 		final ConnectToOpenShiftWizardModel inner = new ConnectToOpenShiftWizardModel() {
 			public UserDelegate setUser(UserDelegate user) {
-				created = user;
+				this.user = user;
 				return user;
 			}
 		};

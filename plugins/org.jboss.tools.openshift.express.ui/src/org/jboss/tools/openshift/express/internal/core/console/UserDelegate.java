@@ -135,7 +135,7 @@ public class UserDelegate {
 					Logger.error("Could not open Credentials Wizard: no shell available");
 					return;
 				}
-				final ConnectToOpenShiftWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard();
+				final ConnectToOpenShiftWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard(UserDelegate.this);
 				int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
 				if (returnCode == Window.OK) {
 					Logger.debug("OpenShift Auth succeeded.");

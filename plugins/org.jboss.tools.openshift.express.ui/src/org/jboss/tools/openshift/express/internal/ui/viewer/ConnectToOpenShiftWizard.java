@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
 
@@ -20,9 +21,20 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPag
  */
 public class ConnectToOpenShiftWizard extends Wizard {
 
-	private final CredentialsWizardPage page = new CredentialsWizardPage(this, new ConnectToOpenShiftWizardModel());
+	private final CredentialsWizardPage page;
 	
+	/**
+	 * Constructor to use when connecting with the default user.
+	 */
 	public ConnectToOpenShiftWizard() {
+		this(UserModel.getDefault().getRecentUser());
+	}
+	
+	/**
+	 * Constructor to use when user to connect is known.
+	 */
+	public ConnectToOpenShiftWizard(final UserDelegate user) {
+		this.page = new CredentialsWizardPage(this, new ConnectToOpenShiftWizardModel(user));
 		setNeedsProgressMonitor(true);
 	}
 	
