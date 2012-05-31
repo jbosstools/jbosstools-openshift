@@ -17,7 +17,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 		OpenShiftMavenProfileTests.class,
-		EmbedCartridgeStrategyTest.class
+		EmbedCartridgeStrategyTest.class,
+		SSHUserConfigTest.class
 		
 })
 /**
