@@ -25,8 +25,6 @@ import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -847,16 +845,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.error(
 						"An application with the same name already exists on OpenShift.");
 			}
-			if (isExistingProject(applicationName)) {
-				return ValidationStatus
-						.warning("A project already exists with the same application name. This can cause problems when importing.");
-			}
 			return ValidationStatus.ok();
-		}
-
-		private boolean isExistingProject(String name) {
-			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-			return project.exists();
 		}
 
 		@Override
