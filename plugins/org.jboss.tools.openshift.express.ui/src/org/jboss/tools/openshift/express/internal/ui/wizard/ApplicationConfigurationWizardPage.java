@@ -302,7 +302,23 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindList(WidgetProperties.items().observe(gearProfilesCombo),
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
 				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy().setConverter(new GearProfileToStringConverter()));
+				new UpdateListStrategy() {
+
+					/**
+					 * Needed to avoid buggy list update strategy in
+					 * ListBinding. The bug appears if the model list changes
+					 * its ordering and the strategy then tries to apply the
+					 * move in the target (widget). It does not apply the
+					 * conversion and ends up in a class cast exception when
+					 * updating the target (widget) items list.
+					 * 
+					 * @see https://issues.jboss.org/browse/JBIDE-11954
+					 */
+					protected boolean useMoveAndReplace() {
+						return false;
+					}
+
+				}.setConverter(new GearProfileToStringConverter()));
 
 		final ISWTObservableValue selectedGearProfileComboObservable =
 				WidgetProperties.selection().observe(gearProfilesCombo);
@@ -695,12 +711,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	/**
 	 * 
-	 * @return
-	private boolean ensureHasSshKey() {
-		
-	}
+	 * @return private boolean ensureHasSshKey() {
+	 * 
+	 *         }
 	 */
-	
+
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new Job("Loading existing applications...") {
