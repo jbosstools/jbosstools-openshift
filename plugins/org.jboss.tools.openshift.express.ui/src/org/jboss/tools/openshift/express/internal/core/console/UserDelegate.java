@@ -158,7 +158,8 @@ public class UserDelegate {
 				if (returnCode == Window.OK) {
 					Logger.debug("OpenShift Auth succeeded.");
 					UserDelegate created = connectToOpenShiftWizard.getUser();
-					if( created != null ) {
+					// make sure this delegate gets the underlying user if auth succeeded and username was not changed in the wizard (ie, login with another account)
+					if( created != null && getUsername().equals(created.getUsername()) ) {
 						setDelegate(created.getDelegate());
 						setConnected(true);
 						setRememberPassword(created.isRememberPassword());
