@@ -303,11 +303,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 				} else if (!wizardModel.isGitSharedProject()) {
 					if (!askForConfirmation(
 							NLS.bind(
-									"OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
-											+ "copying OpenShift configuration and enabling Git for the project.\n"
-											+ "This cannot be undone.\n"
-											+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n"
-											+ "\nDo you wish to continue ?",
+									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
+									"from server to local project and connecting local project to OpenShift Git repository.\n" +
+									"The local project will be automatically committed to local Git repository and further publishing will " +
+									"eventually override existing remote content.\n\n" +
+									"This cannot be undone. Do you wish to continue?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
@@ -316,11 +316,11 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 				} else {
 					if (!askForConfirmation(
 							NLS.bind(
-									"OpenShift application \"{0}\" will be enabled on project \"{1}\" by "
-											+ "copying OpenShift configuration and enabling Git for the project.\n"
-											+ "This cannot be undone.\n"
-											+ "Furthermore publishing to your OpenShift app will eventually override existing content.\n"
-											+ "\nDo you wish to continue ?",
+									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
+									"from server to local project and connecting local project to OpenShift Git repository.\n" +
+									"The local project will be automatically committed to local Git repository and further publishing will " +
+									"eventually override existing remote content.\n\n" +
+									"This cannot be undone. Do you wish to continue?",
 									wizardModel.getApplicationName(), wizardModel.getProjectName()),
 							wizardModel.getApplicationName())) {
 						return Status.CANCEL_STATUS;
