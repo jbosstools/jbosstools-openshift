@@ -186,7 +186,7 @@ public class CredentialsWizardPageModel extends ObservableUIPojo {
 			// reuse previous user if it was properly logged in
 			user = UserModel.getDefault().findUser(rhLogin);
 			// check user credentials if not logged before or if input password changed
-			if(user != null && user.isConnected()) {
+			if(user != null && user.isConnected() && user.getPassword().equals(password)) {
 				user.setRememberPassword(rememberPassword);
 				wizardModel.setUser(user);
 				storeUser(user);
