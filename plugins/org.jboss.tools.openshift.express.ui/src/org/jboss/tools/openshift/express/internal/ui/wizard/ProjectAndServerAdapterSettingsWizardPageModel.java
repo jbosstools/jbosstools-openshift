@@ -48,6 +48,9 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 
 	public void setNewProject(boolean newProject) {
 		firePropertyChange(PROPERTY_IS_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(newProject));
+		if(wizardModel.isNewProject()) {
+			setProjectName(null);
+		}
 		validateExistingProject();
 	}
 

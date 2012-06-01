@@ -79,7 +79,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 					if(project != null && project.exists()) {
 						setRepositoryPath(project.getLocation().toOSString());
 					} else {
-						setRepositoryPath("");
+						setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
 					}
 				} 
 			}
