@@ -124,9 +124,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 		final IObservableValue applicationNameModelObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
+		final IObservableValue newProjectModelObservable = BeanProperties.value(
+				GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel);
 		
 		dbc.addValidationStatusProvider(new RepoPathValidationStatusProvider(repoPathObservable,
-				applicationNameModelObservable));
+				applicationNameModelObservable, newProjectModelObservable));
 
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
@@ -241,11 +243,13 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 		private final IObservableValue repoPathObservable;
 		private final IObservableValue applicationNameModelObservable;
+		private final IObservableValue newProjectModelObservable;
 
 		public RepoPathValidationStatusProvider(IObservableValue repoPathObservable,
-				IObservableValue applicationNameModelObservable) {
+				IObservableValue applicationNameModelObservable, IObservableValue newProjectModelObservable) {
 			this.repoPathObservable = repoPathObservable;
 			this.applicationNameModelObservable = applicationNameModelObservable;
+			this.newProjectModelObservable = newProjectModelObservable;
 		}
 
 		// Validator is also be called when application name is set..
@@ -253,7 +257,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		protected IStatus validate() {
 			final String repoPath = (String) repoPathObservable.getValue();
 			final String applicationName = (String) applicationNameModelObservable.getValue();
+			final boolean newProject = (Boolean) newProjectModelObservable.getValue();
 			
+			if(newProject) {
 			final IPath repoResourcePath = new Path(repoPath);
 			if (repoResourcePath.isEmpty()
 					|| !repoResourcePath.isAbsolute()
@@ -266,7 +272,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 						NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
 								repoResourcePath.toOSString(), applicationName));
 			}
-
+			}
 			return ValidationStatus.ok();
 		}
 
