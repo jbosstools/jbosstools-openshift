@@ -32,6 +32,7 @@ import com.openshift.client.ICartridge;
 public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
+	public static final String PROPERTY_NEW_PROJECT = "newProject";
 	public static final String PROPERTY_REPO_PATH = "repositoryPath";
 	public static final String PROPERTY_REMOTE_NAME = "remoteName";
 	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
