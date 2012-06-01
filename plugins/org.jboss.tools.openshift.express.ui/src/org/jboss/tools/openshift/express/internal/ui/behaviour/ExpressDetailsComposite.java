@@ -540,7 +540,7 @@ public class ExpressDetailsComposite {
 		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(inner);
 		model.setPassword(pass);
 		model.setRhLogin(user);
-		model.setRememberPassword(false);
+		model.setRememberPassword(rememberPassword);
 		return new Runnable() {
 			public void run() {
 				final IStatus s = model.validateCredentials();
