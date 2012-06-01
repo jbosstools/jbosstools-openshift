@@ -94,5 +94,6 @@ public class ApplicationPortForwardingAction extends AbstractAction {
 				dialog.open();
 			}
 		});
+		
 	}
 }
