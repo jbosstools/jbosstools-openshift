@@ -74,12 +74,12 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		return new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				if(!wizardModel.isNewProject() && isUseDefaultRepoPath()) {
+				if(isUseDefaultRepoPath()) {
 					final IProject project = wizardModel.getProject();
 					if(project != null && project.exists()) {
 						setRepositoryPath(project.getLocation().toOSString());
 					} else {
-						setRepositoryPath("");
+						setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
 					}
 				} 
 			}
