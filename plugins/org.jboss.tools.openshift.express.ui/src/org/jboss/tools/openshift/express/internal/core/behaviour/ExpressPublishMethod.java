@@ -62,22 +62,6 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 				OpenShiftUIActivator.PLUGIN_ID, 
 				NLS.bind(ExpressMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
 		}
-		
-		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-		IContainer destFolder = "".equals(destinationFolder) ? magicProject : (IContainer)magicProject.findMember(new Path(destinationFolder));
-		if( destFolder == null || !destFolder.isAccessible()) {
-			StringBuffer missingPath = new StringBuffer("");
-			if(destFolder==null) {
-				missingPath.append(magicProject.getName());
-				missingPath.append("/");
-				missingPath.append(destinationFolder);
-			} else {
-				missingPath.append(destFolder.getName());
-			}
-			throw new CoreException(new Status(IStatus.ERROR, 
-					OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind(ExpressMessages.publishFailMissingFolder, behaviour.getServer().getName(), missingPath)));
-		}
 	}
 
 	@Override
@@ -135,6 +119,21 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
 		
 		IContainer destFolder = "".equals(destinationFolder) ? destProj : (IContainer)destProj.findMember(new Path(destinationFolder));
+		
+		if( destFolder == null || !destFolder.isAccessible()) {
+			StringBuffer missingPath = new StringBuffer("");
+			if(destFolder==null) {
+				missingPath.append(destProj.getName());
+				missingPath.append("/");
+				missingPath.append(destinationFolder);
+			} else {
+				missingPath.append(destFolder.getName());
+			}
+			throw new CoreException(new Status(IStatus.ERROR, 
+					OpenShiftUIActivator.PLUGIN_ID, 
+					NLS.bind(ExpressMessages.publishFailMissingFolder, behaviour.getServer().getName(), missingPath)));
+		}
+		
 		IPath dest = destFolder.getLocation();
 		
 		if( module.length == 0 ) return IServer.PUBLISH_STATE_NONE;
