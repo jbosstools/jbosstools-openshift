@@ -65,7 +65,7 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 				textStyle.underline = true;
 			}
 		};
-		StyledString styledString = new StyledString(property.getValue(), style);
+		StyledString styledString = new StyledString(StringUtils.null2emptyString(property.getValue()), style);
 		cell.setStyleRanges(styledString.getStyleRanges());
 		cell.setText(styledString.getString());
 	}
