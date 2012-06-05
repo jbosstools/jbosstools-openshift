@@ -70,14 +70,18 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
-		if( destProj != null ) {
-			if( destProj.exists() ) {
+		boolean allSubModulesPublished = areAllPublished(behaviour);
+		if( destProj != null && destProj.exists()) {
+			String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
+			IContainer destFolder = "".equals(destinationFolder) ? destProj : (IContainer)destProj.findMember(new Path(destinationFolder));
+			if( allSubModulesPublished || (destFolder != null && destFolder.isAccessible())) {
 				refreshProject(destProj, submon(monitor, 100));
 				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
-			}
+			} // else ignore. (one or more modules not published AND magic folder doesn't exist
+			  // The previous exception will be propagated. 
 		}
 
-        return areAllPublished(behaviour) ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
+        return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
     }
 	
 	protected boolean areAllPublished(DeployableServerBehavior behaviour) {
@@ -104,22 +108,20 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return -1;
 		
 		if( module.length > 1 )
-			return 0;
+			return IServer.PUBLISH_STATE_UNKNOWN;
 		
 		// Magic Project
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
 		if( isInDestProjectTree(destProjName, module))
 			return IServer.PUBLISH_STATE_NONE;
 		
+		// Cannot be null, checked for in publishStart
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
-		
 		if( destProj.equals(module[module.length-1].getProject()))
-			return 0;
+			return IServer.PUBLISH_STATE_NONE;
 		
 		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-		
 		IContainer destFolder = "".equals(destinationFolder) ? destProj : (IContainer)destProj.findMember(new Path(destinationFolder));
-		
 		if( destFolder == null || !destFolder.isAccessible()) {
 			StringBuffer missingPath = new StringBuffer("");
 			if(destFolder==null) {
@@ -289,10 +291,11 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		return ret[0];
 	}
 	
-	@Override
 	public IPublishCopyCallbackHandler getCallbackHandler(IPath path,
 			IServer server) {
-		// TODO Auto-generated method stub
+		return null;
+	}
+	public IPublishCopyCallbackHandler getCallbackHandler(IPath deployPath, IPath tmpFolder, IServer server) {
 		return null;
 	}
 
@@ -313,5 +316,4 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
             final int ticks, final int style ) {
     	return ( parent == null ? new NullProgressMonitor() : new SubProgressMonitor( parent, ticks, style ) );
     }
-
 }
