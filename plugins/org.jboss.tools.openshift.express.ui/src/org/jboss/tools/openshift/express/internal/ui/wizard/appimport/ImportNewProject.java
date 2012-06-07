@@ -25,6 +25,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.project.GeneralProjectImportOperation;
@@ -41,8 +42,8 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	private File cloneDestination;
 
 	public ImportNewProject(String projectName, IApplication application, String remoteName,
-			File cloneDestination) {
-		super(projectName, application, remoteName);
+			File cloneDestination, UserDelegate user) {
+		super(projectName, application, remoteName, user);
 		this.cloneDestination = cloneDestination;
 	}
 
@@ -58,7 +59,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	 * @throws InvocationTargetException
 	 * @throws IOException 
 	 */
-	public List<IProject> execute(IProgressMonitor monitor)
+	public IProject execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException, IOException {
 		if (cloneDestinationExists()) {
@@ -82,11 +83,12 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 		// TODO: handle multiple projects (is this really possible?)
-		IProject project = importedProjects.get(0);
+		IProject project = getSettingsProject(importedProjects);
 		addToModified(setupGitIgnore(project, monitor));
+		addSettingsFile(project, monitor);
 		addAndCommitModifiedResource(project, monitor);
 		
-		return importedProjects;
+		return getSettingsProject(importedProjects);
 	}
 	
 	@SuppressWarnings("unused")

@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.appimport;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -28,6 +26,6 @@ public interface IImportApplicationStrategy {
 	 * @return the list of projects that were imported to the workspace.
 	 * @throws Exception
 	 */
-	public List<IProject> execute(IProgressMonitor monitor) throws Exception;
+	public IProject execute(IProgressMonitor monitor) throws Exception;
 
 }

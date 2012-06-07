@@ -61,7 +61,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private static final int APP_CREATE_TIMEOUT = 6 * 60 * 1000;
 	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
 	private static final long EMBED_CARTRIDGES_TIMEOUT = 2 * 60 * 1000;
-	private static final int IMPORT_TIMEOUT = 1 * 60 * 1000;
+	private static final int IMPORT_TIMEOUT = 5 * 60 * 1000;
 
 	private final boolean skipCredentialsPage;
 

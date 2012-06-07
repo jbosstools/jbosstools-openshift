@@ -16,8 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
@@ -50,7 +48,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 
 	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
 			UserDelegate user) {
-		super(projectName, application, remoteName);
+		super(projectName, application, remoteName, user);
 	}
 
 	/**
@@ -89,7 +87,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 * @see #createServerAdapterIfRequired
 	 */
 	@Override
-	public List<IProject> execute(IProgressMonitor monitor)
+	public IProject execute(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
 		IProject project = getProject();
@@ -103,11 +101,13 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		addToModified(setupGitIgnore(project, monitor));
 		addToModified(setupOpenShiftMavenProfile(project, monitor));
+		addSettingsFile(project, monitor);
+
 		addRemote(getRemoteName(), getApplication().getUUID(), project);
 
 		addAndCommitModifiedResource(project, monitor);
 
-		return Collections.singletonList(project);
+		return project;
 	}
 
 	private void addRemote(String remoteName, String uuid, IProject project)

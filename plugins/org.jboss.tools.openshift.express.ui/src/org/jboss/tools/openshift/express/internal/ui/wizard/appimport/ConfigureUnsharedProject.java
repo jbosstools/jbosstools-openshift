@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -41,7 +39,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 
 	public ConfigureUnsharedProject(String projectName, IApplication application, String remoteName,
 			UserDelegate user) {
-		super(projectName, application, remoteName);
+		super(projectName, application, remoteName, user);
 	}
 
 	/**
@@ -80,7 +78,7 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 	 * @see #createServerAdapterIfRequired
 	 */
 	@Override
-	public List<IProject> execute(IProgressMonitor monitor)
+	public IProject execute(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
 		// File repositoryFile =
@@ -95,10 +93,11 @@ public class ConfigureUnsharedProject extends AbstractImportApplicationOperation
 		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
 		setupGitIgnore(project, monitor);
 		setupOpenShiftMavenProfile(project, monitor);
+		addSettingsFile(project, monitor);
 		shareProject(project, monitor);
 		addRemoteRepo(getRemoteName(), getApplication().getGitUrl(), EGitUtils.getRepository(project));
 
-		return Collections.singletonList(project);
+		return project;
 	}
 
 	private void shareProject(IProject project, IProgressMonitor monitor) throws CoreException {
