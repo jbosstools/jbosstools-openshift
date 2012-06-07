@@ -17,7 +17,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 
@@ -82,7 +81,12 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 					} else {
 						setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
 					}
-				} 
+				}
+				if(wizardModel.isExistingProject()) {
+					setRemoteName(IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
+				} else {
+					setRemoteName(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+				}
 			}
 		};
 	}
@@ -168,15 +172,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public boolean isUseDefaultRemoteName() {
 		return useDefaultRemoteName;
-	}
-
-	public IProject getProject() {
-		String projectName = wizardModel.getProjectName();
-		if (projectName == null) {
-			return null;
-		}
-
-		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 
 }

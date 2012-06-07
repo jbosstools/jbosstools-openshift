@@ -33,6 +33,8 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.client.IApplication;
@@ -47,12 +49,15 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	private IApplication application;
 	private String remoteName;
 	protected List<IResource> modifiedResources;
+	private UserDelegate user;
 
-	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName) {
+	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName,
+			UserDelegate user) {
 		this.projectName = projectName;
 		this.application = application;
 		this.remoteName = remoteName;
 		this.modifiedResources = new ArrayList<IResource>();
+		this.user = user;
 	}
 
 	/**
@@ -148,6 +153,10 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		return remoteName;
 	}
 
+	protected UserDelegate getUser() {
+		return user;
+	}
+
 	/**
 	 * Marks the given resources as modified.
 	 * 
@@ -225,7 +234,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	}
 
 	protected IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
-		if(!OpenShiftMavenProfile.isMavenProject(project)) {
+		if (!OpenShiftMavenProfile.isMavenProject(project)) {
 			return null;
 		}
 
@@ -235,5 +244,36 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		}
 		profile.addToPom(project.getName());
 		return profile.savePom(monitor);
+	}
+
+	protected IResource addSettingsFile(IProject project, IProgressMonitor monitor) {
+		monitor.subTask(NLS.bind("Adding settings to project {0}", project.getName()));
+		// This is our project
+		IApplication app = getApplication();
+		// Add the settings here!
+		ExpressServerUtils.updateOpenshiftProjectSettings(
+				project, app, getUser(), getRemoteName(), ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+		return (IResource) project.getFolder(".settings");
+	}
+
+	protected IProject getSettingsProject(List<IProject> importedProjects) {
+		if (importedProjects == null) {
+			return null;
+		}
+		IProject mainProject = null;
+		if (importedProjects.size() == 1) {
+			if (EGitUtils.hasDotGitFolder(importedProjects.get(0))) {
+				mainProject = importedProjects.get(0);
+			}
+		} else {
+			for (IProject project : importedProjects) {
+				if (EGitUtils.hasDotGitFolder(project)) {
+					mainProject = project;
+					break;
+				}
+			}
+		}
+
+		return mainProject;
 	}
 }

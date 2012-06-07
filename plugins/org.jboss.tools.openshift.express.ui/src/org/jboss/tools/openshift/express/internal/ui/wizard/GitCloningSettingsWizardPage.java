@@ -18,6 +18,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -57,17 +58,19 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage implements IWizardPage {
 
 	private GitCloningSettingsWizardPageModel pageModel;
+	private IOpenShiftExpressWizardModel wizardModel;
 	private Button useDefaultRemoteNameButton;
 	private Button useDefaultRepoPathButton;
 	private Text remoteNameText;
 	private Label remoteNameLabel;
 
-	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard, IOpenShiftExpressWizardModel model) {
+	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard, IOpenShiftExpressWizardModel wizardModel) {
 		super(
 				"Import an existing OpenShift application",
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
 				"Cloning settings", wizard);
-		this.pageModel = new GitCloningSettingsWizardPageModel(model);
+		this.pageModel = new GitCloningSettingsWizardPageModel(wizardModel);
+		this.wizardModel = wizardModel;
 	}
 
 	@Override
@@ -166,10 +169,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// move focus to the project name text control when choosing the 'Use an
 		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
+		final IObservableValue projectNameModelObservable =
+				BeanProperties.value(IOpenShiftExpressWizardModel.PROJECT_NAME).observe(wizardModel);
 
 		dbc.addValidationStatusProvider(
-				new RemoteNameValidationStatusProvider(
-						useDefaultRemoteNameObservable, remoteNameTextObservable));
+				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
 
 		Link sshPrefsLink = new Link(parent, SWT.NONE);
 		sshPrefsLink.setText("Make sure your SSH key used with the domain is listed in <a>SSH2 Preferences</a>.");
@@ -291,40 +295,43 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	 */
 	class RemoteNameValidationStatusProvider extends MultiValidator {
 
-		private final IObservableValue isDefaultRemoteNameObservable;
 		private final IObservableValue remoteNameObservable;
+		private final IObservableValue projectNameObservable;
 
-		public RemoteNameValidationStatusProvider(IObservableValue isDefaultRemoteName,
-				IObservableValue remoteNameTextObservable) {
-			this.isDefaultRemoteNameObservable = isDefaultRemoteName;
+		public RemoteNameValidationStatusProvider(final IObservableValue remoteNameTextObservable, final IObservableValue projectNameObservable) {
 			this.remoteNameObservable = remoteNameTextObservable;
+			this.projectNameObservable = projectNameObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
 			IStatus status = Status.OK_STATUS;
-			Boolean isDefaultRemoteName = (Boolean) isDefaultRemoteNameObservable.getValue();
 			String remoteName = (String) remoteNameObservable.getValue();
+			String projectName = (String) projectNameObservable.getValue();
 
 			// skip the validation if the user wants to create a new project.
 			// The name and state of the existing project do
 			// not matter...
-			if (isDefaultRemoteName == null
-					|| !isDefaultRemoteName) {
-				if (StringUtils.isEmpty(remoteName)) {
-					return OpenShiftUIActivator.createErrorStatus(
-							"The custom remote name must not be empty.");
-				} else if (!remoteName.matches("\\S+")) {
-					return OpenShiftUIActivator.createErrorStatus(
-							"The custom remote name must not contain spaces.");
-				} else if (hasRemoteName(remoteName, pageModel.getProject())) {
-					return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-							"The existing project already has a remote named {0}.", remoteName));
-				}
+			if (StringUtils.isEmpty(remoteName)) {
+				return OpenShiftUIActivator.createErrorStatus(
+						"The custom remote name must not be empty.");
+			} else if (!remoteName.matches("\\S+")) {
+				return OpenShiftUIActivator.createErrorStatus(
+						"The custom remote name must not contain spaces.");
+			} else if (hasRemoteName(remoteName, getProject(projectName))) {
+				return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+						"The existing project already has a remote named {0}.", remoteName));
 			}
 			return status;
 		}
 
+		public IProject getProject(final String projectName) {
+			if (StringUtils.isEmpty(projectName)) {
+				return null;
+			}
+			return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		}
+		
 		private boolean hasRemoteName(String remoteName, IProject project) {
 			try {
 				if (project == null

@@ -6,8 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -74,31 +72,15 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException, IOException {
-		List<IProject> importedProjects =
+		IProject importedProject =
 				new ImportNewProject(
 						getProjectName()
 						, getApplication()
 						, getRemoteName()
-						, getRepositoryFile())
+						, getRepositoryFile()
+						, getUser())
 						.execute(monitor);
-		addSettingsFiles(importedProjects);
-		createServerAdapter(monitor, importedProjects);
-	}
-
-	private void addSettingsFiles(List<IProject> imported) {
-		Iterator<IProject> i = imported.iterator();
-		while (i.hasNext()) {
-			IProject p = i.next();
-			if (p.getFolder(".git").exists()) {
-				// This is our project
-				IApplication app = getApplication();
-				IProject project = p;
-				// Add the settings here!
-				ExpressServerUtils.updateOpenshiftProjectSettings(project, app,
-						getUser(), getRemoteName(), ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
-				return;
-			}
-		}
+		createServerAdapter(monitor, importedProject);
 	}
 
 	/**
@@ -130,14 +112,13 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public void configureUnsharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		List<IProject> importedProjects = new ConfigureUnsharedProject(
+		IProject importedProject = new ConfigureUnsharedProject(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
 				, getUser())
 				.execute(monitor);
-		addSettingsFiles(importedProjects);
-		createServerAdapter(monitor, importedProjects);
+		createServerAdapter(monitor, importedProject);
 	}
 
 	/**
@@ -169,21 +150,23 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public void configureGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		List<IProject> importedProjects = new ConfigureGitSharedProject(
+		IProject project = new ConfigureGitSharedProject(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
 				, getUser())
 				.execute(monitor);
-		createServerAdapter(monitor, importedProjects);
+		createServerAdapter(monitor, project);
 	}
 
-	private void createServerAdapter(IProgressMonitor monitor, List<IProject> importedProjects)
+	private void createServerAdapter(IProgressMonitor monitor, IProject project)
 			throws OpenShiftException {
-		Assert.isTrue(importedProjects.size() > 0);
 		if (isCreateServerAdapter()) {
-			Assert.isTrue(importedProjects.size() > 0);
-			IProject project = importedProjects.get(0);
+			if (project == null) {
+				throw new OpenShiftException(
+						"Could not create a server adapter for your application {0}. No project was found when importing",
+						getApplication().getName());
+			}
 			new ServerAdapterFactory().create(project, this, monitor);
 		}
 	}
