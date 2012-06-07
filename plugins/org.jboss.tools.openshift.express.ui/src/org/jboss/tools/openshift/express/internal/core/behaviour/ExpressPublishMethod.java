@@ -195,8 +195,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		} catch( CoreException ce) {
 			// What to do in this situation?? 
 		}
-		String remoteName = behaviour.getServer().getAttribute(ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, 
-				ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+		String remoteName = ExpressServerUtils.getExpressRemoteName(behaviour.getServer().createWorkingCopy());
 		PushOperationResult result = null;
 		boolean committed = false;
 		Repository repo = EGitUtils.getRepository(p);
