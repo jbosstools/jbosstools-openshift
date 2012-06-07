@@ -21,6 +21,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.CartridgeNameComparator;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.ApplicationScale;
@@ -61,7 +62,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String existingApplicationName;
-	private boolean existingApplicationsLoaded = false;;
+	private boolean existingApplicationsLoaded = false;
+	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 
 	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel)
 			throws OpenShiftException {
@@ -207,7 +209,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public void setCartridges(List<ICartridge> cartridges) {
 		Collections.sort(cartridges, new CartridgeNameComparator());
 		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
-		setSelectedCartridge(ICartridge.JBOSSAS_7);
+		final String lastSelectedCartridgeName = openShiftUserPreferencesProvider.getLastSelectedCartridgeName();
+		final ICartridge selectedCartridge = getCartridgeByName(lastSelectedCartridgeName);
+		setSelectedCartridge(selectedCartridge);
 	}
 
 	public List<ICartridge> getCartridges() {
@@ -243,7 +247,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	public IGearProfile getGearProfileByName(String name) {
 		List<IGearProfile> gearProfiles = getGearProfiles();
-		if (gearProfiles == null) {
+		if (gearProfiles == null || name == null) {
 			return null;
 		}
 
@@ -258,6 +262,23 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return matchingGearProfile;
 	}
 
+	public ICartridge getCartridgeByName(String name) {
+		List<ICartridge> cartridges = getCartridges();
+		if (cartridges == null || name == null) {
+			return null;
+		}
+
+		ICartridge matchingCartridge = null;
+		for (ICartridge cartridge : cartridges) {
+			if (name.equals(cartridge.getName())) {
+				matchingCartridge = cartridge;
+				break;
+			}
+		}
+
+		return matchingCartridge;
+	}
+	
 	/**
 	 * forces property change listeners to update their value
 	 */
@@ -271,6 +292,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE
 				, wizardModel.getApplicationCartridge()
 				, wizardModel.setApplicationCartridge(cartridge));
+		if(cartridge != null) {
+			openShiftUserPreferencesProvider.setLastSelectedCartridgeName(cartridge.getName());
+		}
 	}
 
 	protected void setSelectedCartridge(IApplication application) {
