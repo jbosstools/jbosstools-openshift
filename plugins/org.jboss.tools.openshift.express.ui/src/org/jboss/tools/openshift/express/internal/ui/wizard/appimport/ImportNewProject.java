@@ -85,7 +85,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		// TODO: handle multiple projects (is this really possible?)
 		IProject project = getSettingsProject(importedProjects);
 		addToModified(setupGitIgnore(project, monitor));
-		addSettingsFile(project, monitor);
+		addToModified(addSettingsFile(project, monitor));
 		addAndCommitModifiedResource(project, monitor);
 		
 		return getSettingsProject(importedProjects);
