@@ -131,6 +131,9 @@ public class ConsoleUtils {
 		Iterator<URIish> i = uris.iterator();
 		while(i.hasNext()) {
 			URIish uri = i.next();
+			if (pushOperationResult.getPushResult(uri) == null) {
+				continue;
+			}
 			for (RemoteRefUpdate update : pushOperationResult.getPushResult(uri).getRemoteUpdates()) {
 				result.append(getOneResultAsString(pushOperationResult, uri, update));
 			}
