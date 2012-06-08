@@ -15,12 +15,14 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
-import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -33,6 +35,7 @@ import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jgit.util.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -46,6 +49,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
  * @author Andre Dietisheim
@@ -146,10 +150,10 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseProjectsButton))
 				.notUpdating(newProjectObservable).converting(new InvertingBooleanConverter()).in(dbc);
 
-		final IObservableValue existingProjectValidityObservable = BeanProperties.value(
-				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_EXISTING_PROJECT_VALIDITY).observe(pageModel);
-		final UseExistingOpenProjectValidator existingProjectValidator = new UseExistingOpenProjectValidator(
-				existingProjectValidityObservable);
+		final IObservableValue applicationNameModelObservable = BeanProperties.value(
+				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
+		final UseExistingOpenProjectValidator existingProjectValidator = 
+				new UseExistingOpenProjectValidator(applicationNameModelObservable, newProjectObservable, projectNameModelObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
@@ -255,27 +259,60 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 	class UseExistingOpenProjectValidator extends MultiValidator {
 
-		private final IObservableValue existingProjectValidityObservable;
+		private final IObservableValue applicationNameObservable;
+		private final IObservableValue newProjectObservable;
+		private final IObservableValue projectNameObservable;
 
-		public UseExistingOpenProjectValidator(IObservableValue existingProjectValidityObservable) {
-			this.existingProjectValidityObservable = existingProjectValidityObservable;
+		public UseExistingOpenProjectValidator(IObservableValue applicationNameObservable, IObservableValue newProjectObservable, IObservableValue projectNameObservable) {
+			this.applicationNameObservable = applicationNameObservable;
+			this.newProjectObservable = newProjectObservable;
+			this.projectNameObservable = projectNameObservable;
 		}
 
 		@Override
-		protected IStatus validate() {
-			final IStatus existingProjectValidityStatus = (IStatus) existingProjectValidityObservable.getValue();
-
-			if (existingProjectValidityStatus == null) {
-				return ValidationStatus.ok();
+		public IStatus validate() {
+			IStatus status = Status.OK_STATUS;
+			final String projectName = (String) projectNameObservable.getValue();
+			final Boolean isNewProject = (Boolean) newProjectObservable.getValue();
+			if (isNewProject) {
+				final String applicationName = (String) applicationNameObservable.getValue();
+				if (StringUtils.isEmptyOrNull(applicationName)) {
+					status = OpenShiftUIActivator.createErrorStatus("You have to choose an application name");
+				} else {
+					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
+					if(project.exists()) {
+						status = OpenShiftUIActivator.createErrorStatus(
+								NLS.bind("A project named {0} already exists in the workspace.", applicationName));
+					}
+				}
+			} else {
+				if (projectName == null || projectName.isEmpty()) {
+					status = OpenShiftUIActivator.createErrorStatus("Select an open project in the workspace.");
+				} else {
+					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+					if (!project.exists()) {
+						status = OpenShiftUIActivator.createErrorStatus(
+								NLS.bind("The project {0} does not exist in your workspace.", projectName));
+					} else if (!project.isOpen()) {
+						status = OpenShiftUIActivator.createErrorStatus(
+								NLS.bind("The project {0} is not open.", projectName));
+					}
+				}
 			}
-			return existingProjectValidityStatus;
+			return status;
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(projectNameObservable);
+			return targets;
 		}
 	}
 
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		setPageTitle();
-		pageModel.validateExistingProject();
 	}
 
 	private void setPageTitle() {
