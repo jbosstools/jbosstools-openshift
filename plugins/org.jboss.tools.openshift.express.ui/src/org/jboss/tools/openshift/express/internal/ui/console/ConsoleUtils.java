@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.console;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
@@ -184,7 +186,13 @@ public class ConsoleUtils {
 	public static void appendToConsole(IServer server, String message ) {
 		if (ExpressServerUtils.isOpenShiftRuntime(server)) {
 			final MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
-			console.newMessageStream().print(message);
+			MessageConsoleStream newMessageStream = console.newMessageStream();
+			newMessageStream.print(message);
+			try {
+				newMessageStream.close();
+			} catch (IOException e) {
+				// ignore 
+			}
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					ConsoleUtils.displayConsoleView(console);

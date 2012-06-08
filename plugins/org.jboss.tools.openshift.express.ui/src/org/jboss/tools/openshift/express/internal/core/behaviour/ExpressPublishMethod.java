@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -203,31 +204,53 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
 					NLS.bind("No repository found for project {0}. Please ensure it is shared via git.", p.getName())));
 		}
-		try {
+			
+			
 			if( changed != 0 && requestCommitAndPushApproval(p.getName(), changed)) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
 				committed = true;
 			} 
-			
+		
+		try {
+					
 			if( committed || (changed == 0 && requestPushApproval(p.getName()))) {
 				if( !committed )
 					monitor.beginTask("Publishing " + p.getName(), 200);
 				result = EGitUtils.push(remoteName, repo, new SubProgressMonitor(monitor, 100));
 				monitor.done();
+				
+				
 			}
+			
+			
 		} catch(CoreException ce) {
-			// Comes if either commit or push has failed
-			if( ce.getMessage().contains("UP_TO_DATE"))
+			// Comes if push has failed
+			if( ce.getMessage()!=null && ce.getMessage().contains("UP_TO_DATE")) {
+				ConsoleUtils.appendToConsole(behaviour.getServer(), "\n\nRepository already uptodate.");
 				return null;
+			}
 			
 			try {
-				result = EGitUtils.pushForce(remoteName, repo, new SubProgressMonitor(monitor, 100));
+				if(requestApproval("Error: '" + ce.getMessage() + "' occurred while pushing.\n\nIf the commit history is not correct on the remote repository, a forced push (git push -f) might be the right thing to do. This will though overwrite the remote repository!\n\n Do you want to do a forced push and overwrite any remote changes ? ", 
+						"Attempt push force ?", false)) {
+					result = EGitUtils.pushForce(remoteName, repo, new SubProgressMonitor(monitor, 100));
+				 } else {
+					 // printing out variation of the standard git output meesage.
+					 ConsoleUtils.appendToConsole(behaviour.getServer(), "\n\nERROR: " + ce.getLocalizedMessage() + "\n\n" + 
+				 "To prevent you from losing history, non-fast-forward updates were rejected" +
+				 "\nMerge the remote changes (e.g. 'Team > Fetch from Upstream' in Eclipse or 'git pull' on command line ) before pushing again. " +
+				 "\nSee the 'Note about fast-forwards' section of 'git push --help' for details.");
+				 }
 				monitor.done();
 			} catch(CoreException ce2) {
-				// even the push force failed, and we don't have a valid result to check :( 
-				// can only throw it i guess
-				throw ce2;  
+				if( ce.getMessage()!=null && ce.getMessage().contains("UP_TO_DATE")) {
+					ConsoleUtils.appendToConsole(behaviour.getServer(), "\n(Forced push) Repository already uptodate.");
+					return null;
+				} else {
+					// even the push force failed, and we don't have a valid result to check :( 
+					throw ce2;
+				}
 			}
 		}
 		
@@ -236,7 +259,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		}
 		return result;
 	}
-	
+	 
 	
 	private void shareProjects(final IProject[] projects) {
 		Display.getDefault().asyncExec(new Runnable() { 
@@ -273,7 +296,29 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		final boolean[] b = new boolean[1];
 		Display.getDefault().syncExec(new Runnable() { 
 			public void run() {
-		        b[0] = MessageDialog.openQuestion(getActiveShell(), title, message);
+		        b[0] = openQuestion(getActiveShell(), title, message, true);
+			}
+		});
+		return b[0];
+	}
+
+	private boolean openQuestion(Shell shell, String title, String message, boolean defaultAnswer) {
+		String[] labels = new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL };
+		int defaultValue = defaultAnswer ? 0 : 1;
+		MessageDialog dialog = new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, labels, defaultValue);
+        return dialog.open() == 0;
+	}
+	
+	/** Opens question dialog where you can control what will be the default button activated.
+	 * 
+	 *  @parem defaultAnswer if true Yes is the default answer, if false No 
+	 *  
+	 **/
+	protected boolean requestApproval(final String message, final String title, final boolean defaultAnswer) {
+		final boolean[] b = new boolean[1];
+		Display.getDefault().syncExec(new Runnable() { 
+			public void run() {
+				b[0] = openQuestion(getActiveShell(), title, message, defaultAnswer);
 			}
 		});
 		return b[0];
@@ -309,7 +354,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 
     public static IProgressMonitor submon( final IProgressMonitor parent, final int ticks ) {
-    	return submon( parent, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL );
+    	return submon( parent, ticks, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
     }
     public static IProgressMonitor submon( final IProgressMonitor parent,
             final int ticks, final int style ) {
