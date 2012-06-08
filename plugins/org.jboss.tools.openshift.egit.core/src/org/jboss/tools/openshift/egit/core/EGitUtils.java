@@ -565,6 +565,10 @@ public class EGitUtils {
 
 	private static Collection<RemoteRefUpdate> getFailedUpdates(PushResult pushResult) {
 		List<RemoteRefUpdate> failedRefUpdates = new ArrayList<RemoteRefUpdate>();
+		if (pushResult == null
+				|| pushResult.getRemoteUpdates() == null) {
+			return failedRefUpdates;
+		}
 		for (RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
 			if (org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK
 				!= update.getStatus()) {
