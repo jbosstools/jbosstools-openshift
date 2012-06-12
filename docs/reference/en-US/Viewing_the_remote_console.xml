@@ -8,7 +8,7 @@
 		</para>
 	</note>
 	<para>
-		Similar to when you are running a server locally, you are also able to see console output for your remote OpenShift server. To have this output displayed to you, right-click on your OpenShift server in the <guilabel>Servers</guilabel> tab and select <menuchoice><guimenuitem>Show In</guimenuitem><guimenuitem>Remote console</guimenuitem></menuchoice>.   
+		Similar to when you are running a server locally, you are also able to see console output for your remote OpenShift server. To have this output displayed to you, right-click on your OpenShift server in the <guilabel>Servers</guilabel> tab and select <menuchoice><guimenuitem>OpenShift</guimenuitem><guimenuitem>Tail files</guimenuitem></menuchoice>.   
 	</para>
 	<figure id="openshift_remote_console_01">
 		<title>Selecting the OpenShift Profile</title>

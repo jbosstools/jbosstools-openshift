@@ -78,7 +78,10 @@
 		</mediaobject>
 	</figure>
 	<para>
-		Now ready to create your OpenShift application, you will need to specify a name, the platform type to deploy for, from the <guilabel>Type</guilabel> drop-down list, and the <guilabel>Gear profile</guilabel> to be used. <!--Further gear profile information to go here-->
+		Now ready to create your OpenShift application, you will need to specify a name, the platform type to deploy for, from the <guilabel>Type</guilabel> drop-down list, and the <guilabel>Gear profile</guilabel> to be used.
+	</para>
+	<para>
+		The <guilabel>Gear profile</guilabel> option concerns the amount of physical space that will be allocated for use by the application. If you are running a trial version of OpenShift only the <guimenuitem>small</guimenuitem> <guilabel>Gear profile</guilabel> will be available to you.
 	</para>
 	<note>
 		<para>
