@@ -11,14 +11,14 @@
 		Similar to when you are running a server locally, you are also able to see console output for your remote OpenShift server. To have this output displayed to you, right-click on your OpenShift server in the <guilabel>Servers</guilabel> tab and select <menuchoice><guimenuitem>OpenShift</guimenuitem><guimenuitem>Tail files</guimenuitem></menuchoice>.   
 	</para>
 	<figure id="openshift_remote_console_01">
-		<title>Selecting the OpenShift Profile</title>
+		<title>Tailing OpenShift server output</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/OpenShift_Remote_Console/openshift_remote_console_01.png" format="PNG" />
 			</imageobject>
 			<textobject>
 				<phrase>
-					Selecting the remote console for the OpenShift server adapter.
+					Selecting OpenShift server console viewing.
 				</phrase>
 			</textobject>
 		</mediaobject>
@@ -27,7 +27,7 @@
 		A new tab will open called <guilabel>Console</guilabel> and display the last 100 lines of the servers <filename>boot.log</filename> and <filename>server.log</filename> files. This <guilabel>Console</guilabel> tab will now tail the content of these files on the server, outputing any updates to you, as they occur.
 	</para>
 	<figure id="openshift_remote_console_02">
-		<title>Selecting the OpenShift Profile</title>
+		<title>Viewing OpenShift server console output</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/OpenShift_Remote_Console/openshift_remote_console_02.png" format="PNG" />

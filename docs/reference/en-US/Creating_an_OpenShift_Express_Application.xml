@@ -99,7 +99,7 @@
 			</imageobject>
 			<textobject>
 				<phrase>
-					Configuring the project and server adaptor settings.
+					Configuring the project and server adapter settings.
 				</phrase>
 			</textobject>
 		</mediaobject>
@@ -165,7 +165,7 @@
 		The OpenShift application that you created through the wizard, will appear in your <guilabel>Package Explorer</guilabel> tab. 
 	</para>
 	<figure id="application_creation_11">
-		<title>Publising your project through the server adaptor</title>
+		<title>Publising your project through the server adapter</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_11.png" format="PNG" />
@@ -178,7 +178,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		The wizard has also created a server adaptor that connects to your OpenShift service. In the <guilabel>Servers</guilabel> tab there will be an OpenShift server available that contains your application. Any changes you make locally to the application can be published to your OpenShift instance by right-clicking on the application under the server in the <guilabel>Servers</guilabel> view, and selecting <guimenuitem>Full Publish</guimenuitem>.
+		The wizard has also created a server adapter that connects to your OpenShift service. In the <guilabel>Servers</guilabel> tab there will be an OpenShift server available that contains your application. Any changes you make locally to the application can be published to your OpenShift instance by right-clicking on the application under the server in the <guilabel>Servers</guilabel> view, and selecting <guimenuitem>Full Publish</guimenuitem>.
 	</para>
 	<figure id="application_creation_12">
 	<title>OpenShift server overview and settings</title>
