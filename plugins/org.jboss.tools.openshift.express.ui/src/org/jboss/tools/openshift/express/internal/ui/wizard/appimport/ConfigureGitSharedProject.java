@@ -101,7 +101,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		addToModified(setupGitIgnore(project, monitor));
 		addToModified(setupOpenShiftMavenProfile(project, monitor));
-		addToModified(addSettingsFile(project, monitor));
+		addSettingsFile(project, monitor);
 
 		addRemote(getRemoteName(), getApplication().getUUID(), project);
 
