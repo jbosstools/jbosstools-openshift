@@ -8,7 +8,7 @@
 	<section>
 		<title>Deleting an application</title>
 		<para>
-			Deleting an application will remove it from your workbench and the OpenShift server.
+			Deleting an application will only remove it from the OpenShift server. The application and OpenShift server adapter will remain in your workbench.
 		</para>
 		<para>
 			To remove an application right-click on it in the <guilabel>OpenShift Explorer</guilabel> view tab and select <menuchoice><guimenuitem>Delete Application(s)</guimenuitem></menuchoice> from the context menu.
@@ -62,7 +62,7 @@
 	<section>
 		<title>Deleting a domain</title>
 		<para>
-			To delete a domain right-click on your server in the <guilabel>OpenShift Explorer</guilabel> view tab and select <menuchoice><guimenuitem>Delete Domain</guimenuitem></menuchoice> from the context menu.
+			To delete a domain right-click on your server connection in the <guilabel>OpenShift Explorer</guilabel> view tab and select <menuchoice><guimenuitem>Delete Domain</guimenuitem></menuchoice> from the context menu.
 		</para>
 		<figure id="delete_application_and_domain_04">
 			<title>Delete Domain menu item</title>
@@ -102,7 +102,7 @@
 			</mediaobject>
 		</figure>
 		<para>
-			Once the domain has been deleted the OpenShift server will remain, however the <menuchoice><guimenuitem>Delete Domain</guimenuitem></menuchoice> option will not be available from the context menu.
+			Once the domain has been deleted the connection to OpenShift will remain, however the <menuchoice><guimenuitem>Delete Domain</guimenuitem></menuchoice> option will not be available from the context menu.
 		</para>
 		<figure id="delete_application_and_domain_06">
 			<title>Delete Domain option not available</title>

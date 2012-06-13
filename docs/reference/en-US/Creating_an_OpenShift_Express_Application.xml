@@ -89,7 +89,7 @@
 		</para>
 	</note>
 	<para>
-		You can also select to embed cartridges into your applicaiton. By embedding a cartridge, you allow your application the ability to use the asociated technology. For example, embedding the <guilabel>mysql</guilabel> cartridge will grant your application the capability to use a MySQL database.
+		You can also select to embed cartridges into your applicaiton. By embedding a cartridge, you allow your application the ability to use the associated technology. For example, embedding the <guilabel>mysql</guilabel> cartridge will grant your application the capability to use a MySQL database.
 	</para>
 	<figure id="application_creation_06">
 		<title>Application setup</title>
@@ -133,7 +133,7 @@
 		Click the <guibutton>Finish</guibutton> to begin the cloning of the Git repository.
 	</para>
 	<figure id="application_creation_09">
-		<title>Importing the project</title>
+		<title>Project added to available Git repositories</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_09.png" format="PNG" />
@@ -149,20 +149,20 @@
 		After the Git repository has been cloned, it will be available through the <guilabel>Git Repositories</guilabel> view. You can open it by navigating to <menuchoice><guimenuitem>Window</guimenuitem><guimenuitem>Show View</guimenuitem><guimenuitem>Other</guimenuitem><guimenuitem>Git</guimenuitem><guimenuitem>Git Repositories</guimenuitem></menuchoice>. With the <guilabel>Git Repositories</guilabel> option selected, click <guibutton>OK</guibutton>.
 	</para>
 	<figure id="application_creation_10">
-		<title>Project in Package Explorer</title>
+		<title>Project in Project Explorer</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_10.png" format="PNG" />
 			</imageobject>
 			<textobject>
 				<phrase>
-					The project you just created is now available within the Package Explorer.
+					The project you just created is now available within the Project Explorer.
 				</phrase>
 			</textobject>
 		</mediaobject>
 	</figure>
 	<para>
-		The OpenShift application that you created through the wizard, will appear in your <guilabel>Package Explorer</guilabel> tab. 
+		The OpenShift application that you created through the wizard, will appear in your <guilabel>Project Explorer</guilabel> tab. 
 	</para>
 	<figure id="application_creation_11">
 		<title>Publising your project through the server adapter</title>

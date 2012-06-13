@@ -54,7 +54,7 @@
 		A dialog will open where you will see all your OpenShift applications listed, for the current domain.
 	</para>
 	<figure id="import_existing_application_02">
-		<title>Setup OpenShift Application screen</title>
+		<title>Existing applications on OpenShift</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/Import_Existing_Application/import_existing_application_02.png" format="PNG" />
@@ -70,7 +70,7 @@
 		By selecting an application from the list and clicking the <guibutton>Details</guibutton> button you can see all relevant application information. Click the <guibutton>OK</guibutton> to return to the application selection screen.
 	</para>
 	<figure id="import_existing_application_03">
-		<title>Setup OpenShift Application screen</title>
+		<title>Details of OpenShift application</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/Import_Existing_Application/import_existing_application_03.png" format="PNG" />
@@ -102,7 +102,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		To complete importing the application click the <guibutton>Next</guibutton> button and continue follow the instructions after the <guilabel>Setup OpenShift Application</guilabel> screen that are available in the <emphasis>Creating an OpenShift Express Application</emphasis> chapter: <xref linkend="application_creation_07" />.
+		To complete importing the application click the <guibutton>Next</guibutton> button and continue follow the instructions after the <guilabel>Setup OpenShift Application</guilabel> screen that are available in the <emphasis>Creating an OpenShift Application</emphasis> chapter: <xref linkend="application_creation_07" />.
 	</para>
 </chapter>
 
