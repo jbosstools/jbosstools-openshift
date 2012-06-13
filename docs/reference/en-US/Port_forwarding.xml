@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<chapter id="chap-OpenSift_Tools_Reference_Guide-Port_forwarding">
+	<title>Port Forwarding</title>
+	<para>
+		Port forwarding is available for each OpenShift application. To access port forwarding for an application right-click on an application in the <guilabel>OpenShift Explorer</guilabel> view tab and select <menuchoice><guimenuitem>Port forwarding</guimenuitem></menuchoice> from the context menu.   
+	</para>
+	<figure id="port_forwarding_01">
+		<title>Port forwarding option</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Port_Forwarding/port_forwarding_01.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Selecting OpenShift application port forwarding.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The <guilabel>Application port forward</guilabel> dialog will display ports that can be forwarded. To forward all ports click the <guibutton>Start All</guibutton> and the <guibutton>Stop All</guibutton> button will stop port forwarding for all listed ports.
+	</para>
+	<para>
+		If you do not wish to use the remote port numbers selected by default, click the checkbox beside the <guilabel>Find free ports for all Services</guilabel> option.
+	</para>
+	<para>
+		The default local address is set to 127.0.0.1 and if the remote port is not available a random one will be generated. If your operating system supports it, you can uncheck <guilabel>Use 127.0.0.1 as the local address for all services</guilabel> and the local address will become the same as the remote address.
+	</para>
+	<figure id="port_forwarding_02">
+		<title>Port forwarding dialog</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Port_Forwarding/port_forwarding_02.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The Application port forward dialog window.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+</chapter>
+

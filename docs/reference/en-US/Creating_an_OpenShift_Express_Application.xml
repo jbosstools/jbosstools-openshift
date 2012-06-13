@@ -196,5 +196,21 @@
 	<para>
 		As with a local server, double-clicking on the OpenShift server instance in the <guilabel>Servers</guilabel> tab will open the server overview page in your workbench.
 	</para>
+	<figure id="application_creation_13">
+		<title>OpenShift server overview and settings</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_13.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The OpenShift view.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The OpenShift application will also be available under your domain in the <guilabel>OpenShift</guilabel> view. 
+	</para>
 </chapter>
 

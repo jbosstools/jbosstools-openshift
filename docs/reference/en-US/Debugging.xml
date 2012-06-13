@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<chapter id="chap-OpenSift_Tools_Reference_Guide-Debugging">
+	<title>Debugging</title>
+	<para>
+		This chapter covers useful tools for debugging OpenShift servers and applications.
+	</para>
+	<xi:include href="Viewing_the_remote_console.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Viewing_environment_variables.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+</chapter>
+

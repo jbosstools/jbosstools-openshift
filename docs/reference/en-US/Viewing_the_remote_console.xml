@@ -1,17 +1,12 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<chapter id="chap-OpenSift_Tools_Reference_Guide-Viewing_the_remote_console">
+<section id="chap-OpenSift_Tools_Reference_Guide-Debugging-Viewing_the_remote_console">
 	<title>Viewing the Remote Console</title>
-	<note>
-		<para>
-			If you have not yet created an OpenShift server adapter, follow the instructions in <xref linkend="chap-OpenSift_Tools_Reference_Guide-Creating_an_OpenShift_Application" />.
-		</para>
-	</note>
 	<para>
-		Similar to when you are running a server locally, you are also able to see console output for your remote OpenShift server. To have this output displayed to you, right-click on your OpenShift server in the <guilabel>Servers</guilabel> tab and select <menuchoice><guimenuitem>OpenShift</guimenuitem><guimenuitem>Tail files</guimenuitem></menuchoice>.   
+		Similar to when you are running a server locally, you are also able to see console output for your remote OpenShift server. To have this output displayed to you, right-click on your OpenShift application in the <guilabel>OpenShift</guilabel> view tab, and select <menuchoice><guimenuitem>Tail files</guimenuitem></menuchoice>.   
 	</para>
 	<figure id="openshift_remote_console_01">
-		<title>Tailing OpenShift server output</title>
+		<title>Tailing OpenShift server option</title>
 		<mediaobject>
 			<imageobject>
 				<imagedata fileref="images/OpenShift_Remote_Console/openshift_remote_console_01.png" format="PNG" />
@@ -40,7 +35,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		This information can be useful in debugging the remote server and ensuring processes are occuring as expected. 
+		This information can be useful in ensuring processes are executing as expected. 
 	</para>
-</chapter>
+</section>
 
