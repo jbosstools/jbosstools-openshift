@@ -1,0 +1,7 @@
+<!ENTITY PRODUCT "JBoss">
+<!ENTITY BOOKID "OpenShift_Tools_Reference_Guide">
+<!ENTITY YEAR "2011">
+<!ENTITY HOLDER "Red Hat">
+<!ENTITY BZPRODUCT "JBoss Developer Studio">
+<!ENTITY BZCOMPONENT "OpenShift Tools Reference Guide">
+<!ENTITY BZURL "<ulink url='https://bugzilla.redhat.com/enter_bug.cgi?product=JBoss&percnt;20Developer&percnt;20Studio&percnt;205&amp;component=OpenShift&percnt;20Tools&percnt;20Reference&percnt;20Guide&amp;version=5.0.0&amp;short_desc=Error&percnt;20in&percnt;20OpenShift&percnt;20Tools&percnt;20Reference&percnt;20Guide'>http://bugzilla.redhat.com/</ulink>">
