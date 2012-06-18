@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+]>
+<book>
+	<xi:include href="Book_Info.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Preface.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Creating_an_OpenShift_Express_Application.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Import_existing_application.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Modifying_your_web_application_to_deploy_to_OpenShift_Express.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Port_forwarding.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Debugging.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Deleting_applications_and_domains.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Feedback.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+</book>
+

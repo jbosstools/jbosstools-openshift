@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+   <chapter id="chap-OpenSift_Tools_Reference_Guide-Creating_an_OpenShift_Application">
+	<title>Creating an OpenShift Application</title>
+	<para>
+		The <guilabel>OpenShift Application</guilabel> creation wizard is accessed through <guilabel>JBoss Central</guilabel> or by navigating to <menuchoice><guimenuitem>File</guimenuitem><guimenuitem>New</guimenuitem><guimenuitem>Other</guimenuitem></menuchoice>. 
+	</para>
+	<figure id="application_creation_01">
+		<title>Selecting the OpenShift Application wizard</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_01.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					JBoss Central home screen.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		After clicking on the <guilabel>OpenShift Application</guilabel> link, the creation wizard will launch.
+	</para>
+	<figure id="application_creation_02">
+		<title>Input OpenShift credentials</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_02.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Sever connection screen where you will input your username and password for OpenShift or you can sign up for an account.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		If you have already signed up for an OpenShift account then you can input your <guilabel>Username</guilabel> and <guilabel>Password</guilabel> here and click the <guibutton>Next</guibutton> button. If validation is successful you will see the <guilabel>Setup OpenShift Application</guilabel> screen. 
+	</para>
+	<para>
+		If you do not have an OpenShift account, you can create one through the link at the top of the wizard screen. This will open the OpenShift sign-up page within your workbench. Once you have created an account you will need to relaunch the <guilabel>OpenShift Application</guilabel> wizard and input your new username and password.
+	</para>
+	<figure id="application_creation_03">
+		<title>Creating a domain</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_03.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Creating a domain for your OpenShift account.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		If you need to create a domain, type the name you wish to have into the <guilabel>Domain name</guilabel> field. You will also need to provide your public SSH key. Ensure that the paired private key is listed within the SSH2 Preferences. If you are unsure, click the <guilabel>SSH2 Preferences</guilabel> link. Click <guibutton>Finish</guibutton> to complete domain creation.
+	</para>
+	<para>
+		If you already have a domain name then you will not see the <guilabel>Domain Creation</guilabel> screen.
+	</para>
+	<note>
+		<para>
+			If you ever wish to rename your domain, this can be done through the <guilabel>OpenShift Explorer</guilabel>. <!--put xref here -->
+		</para>
+	</note>
+	<figure id="application_creation_05">
+		<title>Creating a new OpenShift application</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_05.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Specifying the name and cartridge for the new OpenShift application.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		Now ready to create your OpenShift application, you will need to specify a name, the platform type to deploy for, from the <guilabel>Type</guilabel> drop-down list, and the <guilabel>Gear profile</guilabel> to be used.
+	</para>
+	<para>
+		The <guilabel>Gear profile</guilabel> option concerns the amount of physical space that will be allocated for use by the application. If you are running a trial version of OpenShift only the <guimenuitem>small</guimenuitem> <guilabel>Gear profile</guilabel> will be available to you.
+	</para>
+	<note>
+		<para>
+			No underscores or special characters are allowed in the application name.
+		</para>
+	</note>
+	<para>
+		You can also select to embed cartridges into your applicaiton. By embedding a cartridge, you allow your application the ability to use the associated technology. For example, embedding the <guilabel>mysql</guilabel> cartridge will grant your application the capability to use a MySQL database.
+	</para>
+	<figure id="application_creation_06">
+		<title>Application setup</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_06.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Configuring the project and server adapter settings.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		Since you are creating a new project, leave the <guilabel>Create a new project</guilabel> checkbox ticked. 
+	</para>
+	<para>
+		For easy interaction with the OpenShift server and your domain it is recommended that you leave the <guilabel>Create and setup a server for easy publishing</guilabel> checkbox ticked. Doing so will create an OpenShift server instance in the <guilabel>Servers</guilabel> view, upon completing the wizard. 
+	</para>
+	<para>
+		Click the <guibutton>Next</guibutton> button to progress in the wizard.
+	</para>
+	<figure id="application_creation_07">
+		<title>Cloning settings</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_07.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Clone settings for the project from the Git repository.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The final screen of the <guilabel>OpenShift application wizard</guilabel> specifies <guilabel>Cloning settings</guilabel>. Here you can set the properties for creating a local copy of your application. The <guilabel>Location</guilabel> and <guilabel>Remote name</guilabel> options will be set to automatically, however you are able to change these by deselecting the <property>default</property> option and specifying custom settings in the fields provided. 
+	</para>
+	<para>
+		Click the <guibutton>Finish</guibutton> to begin the cloning of the Git repository.
+	</para>
+	<figure id="application_creation_09">
+		<title>Project added to available Git repositories</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_09.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The cloned Git Repository is now available within your workbench.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		After the Git repository has been cloned, it will be available through the <guilabel>Git Repositories</guilabel> view. You can open it by navigating to <menuchoice><guimenuitem>Window</guimenuitem><guimenuitem>Show View</guimenuitem><guimenuitem>Other</guimenuitem><guimenuitem>Git</guimenuitem><guimenuitem>Git Repositories</guimenuitem></menuchoice>. With the <guilabel>Git Repositories</guilabel> option selected, click <guibutton>OK</guibutton>.
+	</para>
+	<figure id="application_creation_10">
+		<title>Project in Project Explorer</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_10.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The project you just created is now available within the Project Explorer.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The OpenShift application that you created through the wizard, will appear in your <guilabel>Project Explorer</guilabel> tab. 
+	</para>
+	<figure id="application_creation_11">
+		<title>Publising your project through the server adapter</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_11.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Selecting Full Publish to the OpenShift server, from the context menu of the project.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The wizard has also created a server adapter that connects to your OpenShift service. In the <guilabel>Servers</guilabel> tab there will be an OpenShift server available that contains your application. Any changes you make locally to the application can be published to your OpenShift instance by right-clicking on the application under the server in the <guilabel>Servers</guilabel> view, and selecting <guimenuitem>Full Publish</guimenuitem>.
+	</para>
+	<figure id="application_creation_12">
+	<title>OpenShift server overview and settings</title>
+	<mediaobject>
+		<imageobject>
+			<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_12.png" format="PNG" />
+		</imageobject>
+		<textobject>
+			<phrase>
+				The OpenShift overview and settings are displayed within your workbench.
+			</phrase>
+		</textobject>
+	</mediaobject>
+	</figure>
+	<para>
+		As with a local server, double-clicking on the OpenShift server instance in the <guilabel>Servers</guilabel> tab will open the server overview page in your workbench.
+	</para>
+	<figure id="application_creation_13">
+		<title>OpenShift server overview and settings</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Creating_an_OpenShift_Express_Application/application_creation_13.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The OpenShift view.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The OpenShift application will also be available under your domain in the <guilabel>OpenShift</guilabel> view. 
+	</para>
+</chapter>
+
