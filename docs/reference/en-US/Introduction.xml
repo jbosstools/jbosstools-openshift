@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='utf-8' ?>
-
-   <chapter id="chap-OpenSift_Tools_Reference_Guide-Introduction">
-	<title>Introduction</title>
-	<para>
-		OpenShift is a cloud solution for your application server requirements. OpenShift is a cloud-based application platform for Java, Perl, PHP, Python, and Ruby applications. JBoss Developer Studio supports OpenShift deployments and this guide will show you how to connect, create and deploy with OpenShift from your JBoss Developer Studio workbench.
-	</para>
-</chapter>
-
