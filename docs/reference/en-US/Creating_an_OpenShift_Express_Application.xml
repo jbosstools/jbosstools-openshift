@@ -127,7 +127,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		The final screen of the <guilabel>OpenShift application wizard</guilabel> specifies <guilabel>Cloning settings</guilabel>. Here you can set the properties for creating a local copy of your application. The <guilabel>Location</guilabel> and <guilabel>Remote name</guilabel> options will be set to automatically, however you are able to change these by deselecting the <property>default</property> option and specifying custom settings in the fields provided. 
+		The final screen of the <guilabel>OpenShift application wizard</guilabel> specifies <guilabel>Cloning settings</guilabel>. Here you can set the properties for creating a local copy of your application. The <guilabel>Location</guilabel> and <guilabel>Remote name</guilabel> options will be set automatically, however, you are able to change these by deselecting the <property>default</property> option and specifying custom settings in the fields provided. 
 	</para>
 	<para>
 		Click the <guibutton>Finish</guibutton> to begin the cloning of the Git repository.
