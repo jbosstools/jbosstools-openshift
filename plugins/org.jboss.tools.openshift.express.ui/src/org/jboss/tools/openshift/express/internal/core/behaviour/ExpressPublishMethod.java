@@ -99,15 +99,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	public int publishModule(DeployableServerBehavior behaviour, int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
-		
-		// If this action is not user-initiated, bail!
-		IAdaptable a = ((ExpressBehaviour)behaviour).getPublishAdaptableInfo();
-		if( a == null )
-			return -1;
-		String s = (String)a.getAdapter(String.class);
-		if( s == null || !s.equals("user"))
-			return -1;
-		
+				
 		if( module.length > 1 )
 			return IServer.PUBLISH_STATE_UNKNOWN;
 		
@@ -347,6 +339,12 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		IDeployableServer s = ServerConverter.getDeployableServer(server);
 		return s.getDeployFolder();
 	}
+	
+	public String getPublishDefaultRootTempFolder(IServer server) {
+		IDeployableServer s = ServerConverter.getDeployableServer(server);
+		return s.getTempDeployFolder();
+	}
+	
 	protected void refreshProject(final IProject project,IProgressMonitor monitor) throws CoreException {
 		// Already inside a workspace scheduling rule
 		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
