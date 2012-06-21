@@ -10,8 +10,8 @@
 
 	<properties>
 		<translation>en-US</translation>
-		<docname>OpenShift_Reference_Guide</docname>
-		<bookname>OpenShift Reference Guide</bookname>
+		<docname>OpenShift_Tools_Reference_Guide</docname>
+		<bookname>OpenShift Tools Reference Guide</bookname>
 	</properties>
 
 	<profiles>
@@ -30,11 +30,6 @@
 						<version>2.3.4</version>
 						<extensions>true</extensions>
 						<configuration>
-						   <profiling> 
-						      <enabled>true</enabled> 
-						      <attributeName>condition</attributeName> 
-						      <attributeValue>jbt</attributeValue> 
-						   </profiling>
 							<formats>
 								<format>
 									<formatName>pdf</formatName>
