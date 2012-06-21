@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
-]>
+
 <bookinfo id="book-OpenShift_Tools_Reference_Guide-OpenShift_Tools_Reference_Guide">
   <title>OpenShift Tools Reference Guide</title> 
   <subtitle>
