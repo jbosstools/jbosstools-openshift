@@ -19,6 +19,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.databinding.IObservablePojo;
@@ -124,10 +126,12 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 	 *             clone to the user project
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
+	 * @throws GitAPIException 
+	 * @throws NoWorkTreeException 
 	 */
 	public void configureGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException;
+			URISyntaxException, NoWorkTreeException, GitAPIException;
 
 	public File getRepositoryFile();
 

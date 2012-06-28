@@ -17,6 +17,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -196,7 +198,7 @@ public class EGitUtilsTest {
 	}
 	
 	@Test
-	public void addedButNotCommittedIsDirty() throws IOException {
+	public void addedButNotCommittedIsDirty() throws IOException, NoWorkTreeException, GitAPIException {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
 		File file = testRepository.createFile("a.txt", "protoculture");
 		testRepository.add(file);

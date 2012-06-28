@@ -23,6 +23,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
@@ -80,6 +82,8 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	 *             clone to the user project
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
+	 * @throws GitAPIException 
+	 * @throws NoWorkTreeException 
 	 * 
 	 * @see #cloneRepository
 	 * @see #copyOpenshiftConfiguration
@@ -89,7 +93,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 	@Override
 	public IProject execute(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException {
+			URISyntaxException, NoWorkTreeException, GitAPIException {
 		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 

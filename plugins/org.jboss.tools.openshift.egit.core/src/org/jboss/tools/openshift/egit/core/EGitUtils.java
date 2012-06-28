@@ -47,6 +47,7 @@ import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.NotSupportedException;
@@ -173,6 +174,11 @@ public class EGitUtils {
 			Git git = init.call();
 			return git.getRepository();
 		} catch (JGitInternalException e) {
+			throw new CoreException(EGitCoreActivator.createErrorStatus(
+					NLS.bind("Could not initialize a git repository at {0}: {1}",
+							getRepositoryPathFor(project),
+							e.getMessage()), e));
+		} catch (GitAPIException e) {
 			throw new CoreException(EGitCoreActivator.createErrorStatus(
 					NLS.bind("Could not initialize a git repository at {0}: {1}",
 							getRepositoryPathFor(project),
@@ -873,8 +879,9 @@ public class EGitUtils {
 	 * @return
 	 * @throws IOException
 	 * @throws NoWorkTreeException
+	 * @throws GitAPIException 
 	 */
-	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException {
+	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException, GitAPIException {
 		boolean hasChanges = false;
 		org.eclipse.jgit.api.Status repoStatus = new Git(repository).status().call();
 		hasChanges |= !repoStatus.getAdded().isEmpty();

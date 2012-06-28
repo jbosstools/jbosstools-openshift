@@ -13,6 +13,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
@@ -145,11 +147,13 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 *             clone to the user project
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
+	 * @throws GitAPIException 
+	 * @throws NoWorkTreeException 
 	 */
 	@Override
 	public void configureGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException {
+			URISyntaxException, NoWorkTreeException, GitAPIException {
 		IProject project = new ConfigureGitSharedProject(
 				getProjectName()
 				, getApplication()
