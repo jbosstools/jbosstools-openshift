@@ -281,11 +281,11 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			final String domainName = (String) domainNameObservable.getValue();
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Select an alphanumerical name and a type for the domain to edit.");
+						"Select an alphanumerical name for the domain to edit.");
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
-						"The name may only contain lower-case letters and digits.");
+						"The domain name may only contain lower-case letters and digits.");
 			}
 			return ValidationStatus.ok();
 		}
