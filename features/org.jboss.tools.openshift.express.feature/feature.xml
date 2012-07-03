@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feature id="org.jboss.tools.openshift.express.feature" label="%featureName" version="2.3.0.qualifier" provider-name="%providerName" plugin="org.jboss.tools.openshift.express.ui">
+<feature id="org.jboss.tools.openshift.express.feature" label="%featureName" version="2.3.1.qualifier" provider-name="%providerName" plugin="org.jboss.tools.openshift.express.ui">
 
 	<description url="http://www.jboss.org/tools">
       %description
