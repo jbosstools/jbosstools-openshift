@@ -14,5 +14,5 @@ Bundle-ClassPath: .,
 Export-Package: com.openshift.client,
  com.openshift.client.configuration,
  com.openshift.client.utils
-Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44"
+Require-Bundle: com.jcraft.jsch;bundle-version="0.1.41"
 Import-Package: org.jboss.dmr
