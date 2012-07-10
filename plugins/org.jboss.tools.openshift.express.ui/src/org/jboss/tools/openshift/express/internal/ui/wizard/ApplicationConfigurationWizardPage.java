@@ -36,6 +36,7 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -161,6 +162,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		ValueBindingBuilder.bind(existingAppNameTextObservable).to(existingAppNameModelObservable).in(dbc);
 		UIUtils.focusOnSelection(useExistingAppBtn, existingAppNameText);
 		createExistingAppNameContentAssist();
+		useExistingAppBtnSelection.addValueChangeListener(
+				onUseExistingApplication(
+						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
 
 		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
 		browseAppsButton.setText("Browse...");
@@ -235,11 +239,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.numColumns(3).margins(6, 6).applyTo(newAppConfigurationGroup);
 		GridDataFactory.fillDefaults()
 				.grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(newAppConfigurationGroup);
-
-		IObservableValue useExistingApplication = WidgetProperties.selection().observe(useExistingAppBtn);
-		useExistingApplication.addValueChangeListener(
-				onUseExistingApplication(
-						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
 
 		final Label newAppNameLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		newAppNameLabel.setText("Name:");
@@ -662,21 +661,30 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
 		if (ensureHasDomain()) {
-			new Thread() {
-				public void run() {
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							loadOpenshiftResources(dbc);
-							enableApplicationWidgets(pageModel.isUseExistingApplication());
-							createExistingAppNameContentAssist();
-							// this is needed because of weird issues with UI
-							// not reacting to model changes while wizard
-							// runnable is run. We force another update
-							dbc.updateModels();
-						}
-					});
-				}
-			}.start();
+			enableApplicationWidgets(pageModel.isUseExistingApplication());
+			createExistingAppNameContentAssist();
+			// this is needed because of weird issues with UI
+			// not reacting to model changes while wizard
+			// runnable is run. We force another update
+			// dbc.updateModels();
+			this.newAppNameText.setFocus();
+		}
+	}
+
+	@Override
+	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
+		if (direction == Direction.FORWARDS) {
+			try {
+				pageModel.reset(); 
+				// needs to be done before loading resources,
+				// otherwise: dbc.updateModels() will be
+				// called and old data could be restored
+				loadOpenshiftResources(dbc);
+				dbc.updateTargets();
+				setPageComplete(false);
+			} catch (OpenShiftException e) {
+				Logger.error("Failed to reset page fields", e);
+			}
 		}
 	}
 
@@ -709,66 +717,25 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		return true;
 	}
 
-	/**
-	 * 
-	 * @return private boolean ensureHasSshKey() {
-	 * 
-	 *         }
-	 */
-
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
-			WizardUtils.runInWizard(new Job("Loading existing applications...") {
+			WizardUtils.runInWizard(new Job("Loading applications, cartridges and gears...") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
+						monitor.setTaskName("Loading existing applications...");
 						pageModel.loadExistingApplications();
-						return Status.OK_STATUS;
-					} catch (NotFoundOpenShiftException e) {
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load applications", e);
-					}
-				}
-
-			}, getContainer(), dbc);
-
-			WizardUtils.runInWizard(new Job("Loading application cartridges...") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
+						monitor.setTaskName("Loading application cartridges...");
 						pageModel.loadStandaloneCartridges();
-						return Status.OK_STATUS;
-					} catch (NotFoundOpenShiftException e) {
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load application cartridges", e);
-					}
-				}
-			}, getContainer(), dbc);
-			WizardUtils.runInWizard(new Job("Loading embeddable cartridges...") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
+						monitor.setTaskName("Loading embeddable cartridges...");
 						setViewerInput(pageModel.loadEmbeddedCartridges());
-						return Status.OK_STATUS;
-					} catch (NotFoundOpenShiftException e) {
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
-					}
-				}
-			}, getContainer(), dbc);
-			WizardUtils.runInWizard(new Job("Loading gear sizes...") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
+						monitor.setTaskName("Loading gear profiles...");
 						pageModel.loadGearProfiles();
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load gear sizes", e);
+						return OpenShiftUIActivator.createErrorStatus("Could not load applications, cartridges and gears", e);
 					}
 				}
 			}, getContainer(), dbc);
@@ -821,14 +788,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return ValidationStatus.ok();
 
 		}
-
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(existingAppNameTextObservable);
-			return targets;
-		}
-
 	}
 
 	class NewApplicationNameValidator extends MultiValidator {
@@ -862,13 +821,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			return ValidationStatus.ok();
 		}
-
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(applicationNameObservable);
-			return targets;
-		}
 	}
 
 	/**
@@ -879,18 +831,18 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 */
 	class NewApplicationTypeValidator extends MultiValidator {
 
-		private final IObservableValue useExistingAppBtnbservable;
+		private final IObservableValue useExistingAppBtnObservable;
 		private final IObservableValue selectedApplicationTypeObservable;
 
 		public NewApplicationTypeValidator(IObservableValue useExistingAppBtnbservable,
 				IObservableValue selectedApplicationTypeObservable) {
-			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
+			this.useExistingAppBtnObservable = useExistingAppBtnbservable;
 			this.selectedApplicationTypeObservable = selectedApplicationTypeObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
-			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
+			final boolean useExistingApp = (Boolean) useExistingAppBtnObservable.getValue();
 			final Integer selectedCartridgeIndex = (Integer) selectedApplicationTypeObservable.getValue();
 			if (useExistingApp) {
 				return ValidationStatus.ok();
@@ -900,13 +852,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.cancel(getDescription());
 			}
 			return ValidationStatus.ok();
-		}
-
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(selectedApplicationTypeObservable);
-			return targets;
 		}
 	}
 

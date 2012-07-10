@@ -40,7 +40,10 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
-
+	private static final String DEFAULT_APPLICATION = "default_application";
+	private static final String DEFAULT_PROJECT = "default_project";
+	private static final String DEFAULT_USE_EXISTING_APPLICATION = "default_useExistingApplication";
+	
 	public OpenShiftExpressApplicationWizardModel(UserDelegate user) {
 		this(user, null, null, false);
 	}
@@ -48,15 +51,10 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	public OpenShiftExpressApplicationWizardModel(UserDelegate user, IProject project, IApplication application,
 			boolean useExistingApplication) {
 		// default value(s)
+		setDefaultProject(project);
+		setDefaultApplication(application);
+		setDefaultUseExistingApplication(useExistingApplication);
 		setUser(user);
-		setProject(project);
-		setNewProject(true);
-		setApplication(application);
-		setUseExistingApplication(useExistingApplication);
-		setCreateServerAdapter(true);
-		setRepositoryPath(DEFAULT_REPOSITORY_PATH);
-		setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
 	}
 
 	/**
@@ -202,6 +200,15 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return (IApplication) getProperty(APPLICATION);
 	}
 
+	public void setDefaultApplication(IApplication application) {
+		setProperty(DEFAULT_APPLICATION, application);
+		setApplication(application);
+	}
+
+	public IApplication getDefaultApplication() {
+		return (IApplication) getProperty(DEFAULT_APPLICATION);
+	}		
+
 	@Override
 	public void setApplication(IApplication application) {
 		setProperty(APPLICATION, application);
@@ -259,6 +266,16 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		return (String) setProperty(PROJECT_NAME, projectName);
 	}
 
+	public IProject setDefaultProject(IProject project) {
+		setProperty(DEFAULT_PROJECT, project);
+		setProject(project);
+		return project;
+	}
+
+	public IProject getDefaultProject() {
+		return (IProject) getProperty(DEFAULT_PROJECT);
+	}		
+		
 	@Override
 	public IProject setProject(IProject project) {
 		if (project != null && project.exists()) {
@@ -329,6 +346,20 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public boolean isUseExistingApplication() {
 		return (Boolean) getProperty(USE_EXISTING_APPLICATION);
+	}
+
+	public boolean setDefaultUseExistingApplication(boolean useExistingApplication) {
+		setProperty(DEFAULT_USE_EXISTING_APPLICATION, useExistingApplication);
+		setUseExistingApplication(useExistingApplication);
+		return useExistingApplication;
+	}
+
+	public boolean getDefaultUseExistingApplication() {
+		Object useExistingApp = getProperty(DEFAULT_USE_EXISTING_APPLICATION);
+		if (useExistingApp != null) {
+			return (Boolean) useExistingApp;
+		}
+		return false;
 	}
 
 	@Override
@@ -433,9 +464,21 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public UserDelegate setUser(UserDelegate user) {
-		UserDelegate oldValue = (UserDelegate) getProperty(USER);
-		return (UserDelegate) setProperty(USER, user);
+		setProperty(USER, user);
+		resetWizardModel();
+		return user;
 	}
+
+	public void resetWizardModel() {
+		setApplication(getDefaultApplication());
+		setUseExistingApplication(getDefaultUseExistingApplication());
+		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+		setNewProject(true);
+		setCreateServerAdapter(true);
+		setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
+		setRemoteName(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
+	}			
 
 	@Override
 	public void addUserToModel() {

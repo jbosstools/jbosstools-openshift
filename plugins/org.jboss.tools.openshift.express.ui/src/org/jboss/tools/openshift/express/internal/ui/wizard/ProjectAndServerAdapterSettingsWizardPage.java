@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.resources.IProject;
@@ -27,6 +25,7 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -301,18 +300,19 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 			}
 			return status;
 		}
-
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(projectNameObservable);
-			return targets;
-		}
 	}
 
 	@Override
+	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
+		if (direction == Direction.FORWARDS) {
+			pageModel.reset();
+		}
+	}	
+	
+	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		setPageTitle();
+		dbc.updateTargets();
 	}
 
 	private void setPageTitle() {

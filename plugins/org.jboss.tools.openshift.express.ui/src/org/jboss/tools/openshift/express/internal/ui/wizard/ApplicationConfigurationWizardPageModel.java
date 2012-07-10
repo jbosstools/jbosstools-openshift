@@ -325,7 +325,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public void setExistingApplication(IApplication application) throws OpenShiftException {
 		if (application != null) {
 			setExistingApplicationName(application.getName());
-			doSetExistingApplication(application);
+			// already called within setExistingApplicationName(String) above
+			// doSetExistingApplication(application); 
+		} else {
+			setExistingApplicationName(null);
 		}
 	}
 
@@ -351,10 +354,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 			setScale(application.getApplicationScale());
 			wizardModel.setApplication(application);
 		}
-	}
-
-	public void resetExistingApplication() throws OpenShiftException, SocketTimeoutException {
-		setExistingApplication((IApplication) null);
 	}
 
 	public void setApplicationName(String applicationName) {
@@ -426,4 +425,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
 		return wizardModel.getUser().getDefaultDomain();
 	}
+	
+	public void reset() throws OpenShiftException {
+		setApplicationName(wizardModel.getApplication());
+		setExistingApplication(wizardModel.getApplication());
+		setUseExistingApplication(wizardModel.isUseExistingApplication());
+		setSelectedEmbeddableCartridges(wizardModel.getSelectedEmbeddableCartridges());
+	}
+	
 }

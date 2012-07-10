@@ -85,4 +85,10 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	public String getApplicationName() {
 		return wizardModel.getApplicationName();
 	}
+
+	public void reset() {
+		setNewProject(!wizardModel.isExistingProject());
+		setProjectName(wizardModel.getProjectName());
+		setCreateServerAdapter(wizardModel.isCreateServerAdapter());
+	}
 }
