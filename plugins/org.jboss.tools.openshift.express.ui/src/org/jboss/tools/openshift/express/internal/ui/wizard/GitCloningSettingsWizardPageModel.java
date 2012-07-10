@@ -173,5 +173,10 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public boolean isUseDefaultRemoteName() {
 		return useDefaultRemoteName;
 	}
+	
+	public void reset() {
+		setRemoteName(wizardModel.getRemoteName());
+		setRepositoryPath(wizardModel.getRepositoryPath());
+	}
 
 }

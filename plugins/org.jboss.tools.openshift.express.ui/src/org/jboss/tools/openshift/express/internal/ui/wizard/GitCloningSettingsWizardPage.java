@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -24,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -223,6 +222,16 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	protected void onPageActivated(DataBindingContext dbc) {
 		enableWidgets(pageModel.isNewProject());
 	}
+	
+	
+
+	@Override
+	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
+		if(direction == Direction.FORWARDS) {
+			pageModel.reset();
+			dbc.updateTargets();
+		}
+	}
 
 	private void enableWidgets(boolean isNewProject) {
 		if (isNewProject) {
@@ -280,13 +289,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			return ValidationStatus.ok();
 		}
 
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(repoPathObservable);
-			return targets;
-		}
-
 	}
 
 	/**
@@ -334,12 +336,13 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		
 		private boolean hasRemoteName(String remoteName, IProject project) {
 			try {
-				if (project == null
-						|| !project.isAccessible()) {
+				if (project == null || !project.isAccessible()) {
 					return false;
 				}
-
 				Repository repository = EGitUtils.getRepository(project);
+				if(repository == null) {
+					return false;
+				}
 				return EGitUtils.hasRemote(remoteName, repository);
 			} catch (Exception e) {
 				OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
@@ -347,12 +350,6 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			}
 		}
 
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(remoteNameObservable);
-			return targets;
-		}
 	}
 
 }
