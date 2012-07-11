@@ -34,7 +34,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -658,26 +657,17 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		
 		if (ensureHasDomain()) {
-			enableApplicationWidgets(pageModel.isUseExistingApplication());
-			createExistingAppNameContentAssist();
-			// this is needed because of weird issues with UI
-			// not reacting to model changes while wizard
-			// runnable is run. We force another update
-			//dbc.updateModels();
-			this.newAppNameText.setFocus();
-		}
-	}
-
-	@Override
-	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
-		if(direction == Direction.FORWARDS) {
 			try {
-				pageModel.reset(); // needs to be done before loading resources, otherwise: dbc.updateModels() will be called and old data could be restored
+				pageModel.reset();
+				// needs to be done before loading resources, otherwise:
+				// dbc.updateModels() will be called and old data could be
+				// restored
 				loadOpenshiftResources(dbc);
 				dbc.updateTargets();
-				setPageComplete(false);
+				enableApplicationWidgets(pageModel.isUseExistingApplication());
+				createExistingAppNameContentAssist();
+				this.newAppNameText.setFocus();
 			} catch (OpenShiftException e) {
 				Logger.error("Failed to reset page fields", e);
 			}
@@ -712,13 +702,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 		return true;
 	}
-
-	/**
-	 * 
-	 * @return private boolean ensureHasSshKey() {
-	 * 
-	 *         }
-	 */
 
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {

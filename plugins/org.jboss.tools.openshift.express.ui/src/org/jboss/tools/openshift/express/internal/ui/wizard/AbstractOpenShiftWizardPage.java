@@ -113,6 +113,15 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	protected void onPageDeactivated(DataBindingContext dbc) {
 	}
 
+	/**
+	 * Callback that gets called before the page changes. 
+	 * <p>
+	 * Attention: this is not called when the very first wizard page gets shown for the first time.
+	 * 
+	 * @param direction
+	 * @param event
+	 * @param dbc
+	 */
 	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
 	}
 	
