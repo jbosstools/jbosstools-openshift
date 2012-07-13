@@ -149,12 +149,12 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 			}
 			
 		});
-		/*Button refreshButton = new Button(dialogArea, SWT.PUSH);
+		Button refreshButton = new Button(dialogArea, SWT.PUSH);
 		refreshButton.setText("R&efresh");
-		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.TOP).grab(false, false).hint(80, SWT.DEFAULT)
-				.applyTo(refreshButton);
+		GridDataFactory.fillDefaults()
+				.align(SWT.RIGHT, SWT.TOP).grab(false, false).hint(80, SWT.DEFAULT).applyTo(refreshButton);
 		refreshButton.addSelectionListener(onRefresh(dbc));
-		*/
+
 		Button detailsButton = new Button(dialogArea, SWT.PUSH);
 		detailsButton.setText("De&tails...");
 		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.TOP).grab(false, true).hint(80, SWT.DEFAULT)
