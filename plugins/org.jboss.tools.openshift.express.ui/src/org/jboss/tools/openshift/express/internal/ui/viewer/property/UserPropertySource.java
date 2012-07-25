@@ -10,6 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer.property;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -50,8 +57,10 @@ public class UserPropertySource implements IPropertySource {
 			if(!user.isConnected() && !user.canPromptForPassword()) {
 				return OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL;
 			}
-			if(!user.isConnected() && user.canPromptForPassword()) {
-				user.checkForPassword();
+				
+			boolean requiresConnect = !user.isConnected() && user.canPromptForPassword();
+			if( requiresConnect || !user.isDomainLoaded()) {
+				loadRemoteDetails();
 			}
 			
 			if (id.equals(PROPERTY_USERNAME)) {
@@ -66,6 +75,33 @@ public class UserPropertySource implements IPropertySource {
 		return null;
 	}
 
+	private void loadRemoteDetails() throws OpenShiftException  {
+		IRunnableWithProgress longRunning = new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException  {
+				monitor.beginTask("Checking Remote Details", 200);
+				try {
+					if( !user.isConnected() && user.canPromptForPassword())
+						user.checkForPassword();
+					monitor.worked(100);
+					if( user.isConnected())
+						user.getDefaultDomain();
+					monitor.worked(100);
+				} catch(OpenShiftException ose) {
+					throw new InvocationTargetException(ose);
+				} finally {
+					monitor.done();
+				}
+			}
+		};
+		try {
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(longRunning);
+		} catch( InvocationTargetException ite ) {
+			Throwable t = ite.getCause();
+			throw (OpenShiftException)t;
+		} catch( InterruptedException ie ) {
+		}
+	}
+	
 	@Override
 	public void resetPropertyValue(Object id) {
 		// TODO Auto-generated method stub

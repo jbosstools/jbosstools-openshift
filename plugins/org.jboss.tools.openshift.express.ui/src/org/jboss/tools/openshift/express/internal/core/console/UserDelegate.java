@@ -38,6 +38,7 @@ public class UserDelegate {
 	private String username;
 	private String password;
 	private IUser delegate;
+	private boolean isDomainLoaded = false;
 	private boolean rememberPassword;
 	private boolean connected;
 	private boolean alreadyPromptedForPassword;
@@ -233,11 +234,17 @@ public class UserDelegate {
 	
 	public IDomain getDefaultDomain() throws OpenShiftException {
 		if(checkForPassword()) {
-			return delegate.getDefaultDomain();
+			IDomain d = delegate.getDefaultDomain();
+			isDomainLoaded = true;
+			return d;
 		} 
 		return null;
 	}
-	
+
+	public boolean isDomainLoaded() throws OpenShiftException {
+		return isDomainLoaded;
+	}
+
 	public List<IEmbeddableCartridge> getEmbeddableCartridges()
 			throws OpenShiftException {
 		if(checkForPassword()) {
@@ -275,6 +282,7 @@ public class UserDelegate {
 	}
 	
 	public void refresh() throws OpenShiftException {
+		isDomainLoaded = false;
 		if(checkForPassword()) {
 			delegate.refresh();
 		} 
