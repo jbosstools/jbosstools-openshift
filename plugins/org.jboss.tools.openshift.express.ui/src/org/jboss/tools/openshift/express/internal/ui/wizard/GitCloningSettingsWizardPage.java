@@ -63,6 +63,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private Button useDefaultRepoPathButton;
 	private Text remoteNameText;
 	private Label remoteNameLabel;
+	private RepoPathValidationStatusProvider repoPathValidator;
 
 	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard, IOpenShiftExpressWizardModel wizardModel) {
 		super(
@@ -129,11 +130,10 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
 		final IObservableValue newProjectModelObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel);
-		RepoPathValidationStatusProvider repoPathValidator = 
+		this.repoPathValidator = 
 				new RepoPathValidationStatusProvider(repoPathObservable, applicationNameModelObservable, newProjectModelObservable);
 		dbc.addValidationStatusProvider(repoPathValidator);
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
-		
 
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
@@ -224,10 +224,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 	protected void onPageActivated(DataBindingContext dbc) {
 		enableWidgets(pageModel.isNewProject());
+		repoPathValidator.forceRevalidate();
 	}
 	
-	
-
 	@Override
 	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
 		if(direction == Direction.FORWARDS) {
@@ -292,7 +291,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			return ValidationStatus.ok();
 		}
 		
-		
+		public void forceRevalidate() {
+			revalidate();
+		}
 
 	}
 
