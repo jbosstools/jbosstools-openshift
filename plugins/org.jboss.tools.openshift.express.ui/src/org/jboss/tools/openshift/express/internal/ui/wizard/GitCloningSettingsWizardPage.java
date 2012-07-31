@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -128,9 +129,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
 		final IObservableValue newProjectModelObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel);
+		RepoPathValidationStatusProvider repoPathValidator = 
+				new RepoPathValidationStatusProvider(repoPathObservable, applicationNameModelObservable, newProjectModelObservable);
+		dbc.addValidationStatusProvider(repoPathValidator);
+		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 		
-		dbc.addValidationStatusProvider(new RepoPathValidationStatusProvider(repoPathObservable,
-				applicationNameModelObservable, newProjectModelObservable));
 
 		// Remote Name Management
 		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
@@ -288,6 +291,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			}
 			return ValidationStatus.ok();
 		}
+		
+		
 
 	}
 
