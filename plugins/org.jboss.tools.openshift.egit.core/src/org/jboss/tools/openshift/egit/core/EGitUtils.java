@@ -47,7 +47,7 @@ import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -142,6 +142,7 @@ public class EGitUtils {
 	 * @param monitor
 	 * @return
 	 * @throws CoreException
+	 * @throws GitAPIException 
 	 */
 	public static Repository share(IProject project, IProgressMonitor monitor) throws CoreException {
 		Repository repository = createRepository(project, monitor);
@@ -172,7 +173,9 @@ public class EGitUtils {
 			init.setBare(false).setDirectory(project.getLocation().toFile());
 			Git git = init.call();
 			return git.getRepository();
-		} catch (JGitInternalException e) {
+		} catch (Exception e) {
+			// ugly workaround to allow us to use egit 2.0 while staying
+			// compatible
 			throw new CoreException(EGitCoreActivator.createErrorStatus(
 					NLS.bind("Could not initialize a git repository at {0}: {1}",
 							getRepositoryPathFor(project),
@@ -874,16 +877,29 @@ public class EGitUtils {
 	 * @throws IOException
 	 * @throws NoWorkTreeException
 	 */
-	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException {
-		boolean hasChanges = false;
-		org.eclipse.jgit.api.Status repoStatus = new Git(repository).status().call();
-		hasChanges |= !repoStatus.getAdded().isEmpty();
-		hasChanges |= !repoStatus.getChanged().isEmpty();
-		hasChanges |= !repoStatus.getModified().isEmpty();
-		hasChanges |= !repoStatus.getRemoved().isEmpty();
-		hasChanges |= !repoStatus.getConflicting().isEmpty();
-		hasChanges |= !repoStatus.getMissing().isEmpty();
-		return hasChanges;
+	public static boolean isDirty(Repository repository)
+			throws NoWorkTreeException, IOException {
+		try {
+			boolean hasChanges = false;
+			org.eclipse.jgit.api.Status repoStatus = new Git(repository)
+					.status().call();
+			hasChanges |= !repoStatus.getAdded().isEmpty();
+			hasChanges |= !repoStatus.getChanged().isEmpty();
+			hasChanges |= !repoStatus.getModified().isEmpty();
+			hasChanges |= !repoStatus.getRemoved().isEmpty();
+			hasChanges |= !repoStatus.getConflicting().isEmpty();
+			hasChanges |= !repoStatus.getMissing().isEmpty();
+			return hasChanges;
+		} catch (Exception e) {
+			// ugly workaround to allow us to use egit 2.0 while staying
+			// compatible
+			if (e instanceof NoWorkTreeException) {
+				throw (NoWorkTreeException) e;
+			} else if (e instanceof IOException) {
+				throw (IOException) e;
+			}
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {

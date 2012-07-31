@@ -34,12 +34,10 @@ import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.op.DisconnectProviderOperation;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.NoMessageException;
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.errors.UnmergedPathException;
@@ -132,15 +130,11 @@ public class TestRepository {
 	 *            commit message
 	 * @return commit object
 	 * @throws IOException
-	 * @throws NoHeadException
-	 * @throws NoMessageException
-	 * @throws ConcurrentRefUpdateException
 	 * @throws JGitInternalException
-	 * @throws WrongRepositoryStateException
+	 * @throws GitAPIException 
 	 */
 	public RevCommit createInitialCommit(String message) throws IOException,
-			NoHeadException, NoMessageException, ConcurrentRefUpdateException,
-			JGitInternalException, WrongRepositoryStateException {
+			JGitInternalException, GitAPIException {
 		String repoPath = repository.getWorkTree().getAbsolutePath();
 		File file = new File(repoPath, "dummy");
 		if (!file.exists())
@@ -252,17 +246,14 @@ public class TestRepository {
 	 *            commit message
 	 * @return commit object
 	 * 
-	 * @throws NoHeadException
-	 * @throws NoMessageException
 	 * @throws UnmergedPathException
-	 * @throws ConcurrentRefUpdateException
 	 * @throws JGitInternalException
-	 * @throws WrongRepositoryStateException
+	 * @throws GitAPIException 
+	 * @throws UnmergedPathsException 
 	 */
-	public RevCommit commit(String message) throws NoHeadException,
-			NoMessageException, UnmergedPathException,
-			ConcurrentRefUpdateException, JGitInternalException,
-			WrongRepositoryStateException {
+	public RevCommit commit(String message) throws UnmergedPathException,
+			JGitInternalException,
+			UnmergedPathsException, GitAPIException {
 		Git git = new Git(repository);
 		CommitCommand commitCommand = git.commit();
 		commitCommand.setAuthor("J. Git", "j.git@egit.org");
@@ -271,7 +262,7 @@ public class TestRepository {
 		return commitCommand.call();
 	}
 
-	public void add(IFile file) throws IOException {
+	public void add(IFile file) throws IOException, GitAPIException {
 		add(new File(file.getLocation().toOSString()));
 	}
 
@@ -280,8 +271,9 @@ public class TestRepository {
 	 * 
 	 * @param file
 	 * @throws IOException
+	 * @throws GitAPIException 
 	 */
-	public void add(File file) throws IOException {
+	public void add(File file) throws IOException, GitAPIException {
 		String repoPath =
 				getRepoRelativePath(file.getAbsolutePath());
 		try {

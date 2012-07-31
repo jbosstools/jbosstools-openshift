@@ -1,9 +1,9 @@
 package org.jboss.tools.openshift.egit.internal.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -196,7 +197,7 @@ public class EGitUtilsTest {
 	}
 	
 	@Test
-	public void addedButNotCommittedIsDirty() throws IOException {
+	public void addedButNotCommittedIsDirty() throws IOException, GitAPIException {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
 		File file = testRepository.createFile("a.txt", "protoculture");
 		testRepository.add(file);
