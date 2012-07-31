@@ -18,6 +18,8 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -775,7 +777,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			return ValidationStatus.ok();
 		}
-
 	}
 
 	class NewApplicationNameValidator extends MultiValidator {
@@ -808,6 +809,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						"An application with the same name already exists on OpenShift.");
 			}
 			return ValidationStatus.ok();
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(applicationNameObservable);
+			return targets;
 		}
 
 	}
