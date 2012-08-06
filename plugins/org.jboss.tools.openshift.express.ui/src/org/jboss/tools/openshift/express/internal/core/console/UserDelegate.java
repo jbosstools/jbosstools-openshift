@@ -147,27 +147,34 @@ public class UserDelegate {
 		// The auto-login failed. Try to prompt
 		try {
 			this.alreadyPromptedForPassword = true;
-			Display.getDefault().syncExec(new Runnable() { public void run() {
-				final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				final Shell shell = activeWorkbenchWindow != null ? activeWorkbenchWindow.getShell() : null;
-				if(shell == null) {
-					Logger.error("Could not open Credentials Wizard: no shell available");
-					return;
-				}
-				final ConnectToOpenShiftWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard(UserDelegate.this);
-				int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
-				if (returnCode == Window.OK) {
-					Logger.debug("OpenShift Auth succeeded.");
-					UserDelegate created = connectToOpenShiftWizard.getUser();
-					// make sure this delegate gets the underlying user if auth succeeded and username was not changed in the wizard (ie, login with another account)
-					if( created != null && getUsername().equals(created.getUsername()) ) {
-						setDelegate(created.getDelegate());
-						setConnected(true);
-						setRememberPassword(created.isRememberPassword());
-					}
-				} else {
-					setConnected(false);
-				}
+			Display.getDefault().syncExec(
+					new Runnable() {
+						public void run() {
+							final IWorkbenchWindow activeWorkbenchWindow = 
+									PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+							final Shell shell = activeWorkbenchWindow != null ? activeWorkbenchWindow.getShell() : null;
+							if (shell == null) {
+								Logger.error("Could not open Credentials Wizard: no shell available");
+								return;
+							}
+							final ConnectToOpenShiftWizard connectToOpenShiftWizard = 
+									new ConnectToOpenShiftWizard(UserDelegate.this);
+							int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
+							if (returnCode == Window.OK) {
+								Logger.debug("OpenShift Auth succeeded.");
+								UserDelegate created = connectToOpenShiftWizard.getUser();
+								// make sure this delegate gets the underlying
+								// user if auth succeeded and username was not
+								// changed in the wizard (ie, login with another
+								// account)
+								if (created != null && getUsername().equals(created.getUsername())) {
+									setDelegate(created.getDelegate());
+									setConnected(true);
+									setRememberPassword(created.isRememberPassword());
+								}
+							} else {
+								setConnected(false);
+							}
 			}});
 		} catch( Exception e ) {
 			Logger.error("Failed to retrieve User's password", e);
