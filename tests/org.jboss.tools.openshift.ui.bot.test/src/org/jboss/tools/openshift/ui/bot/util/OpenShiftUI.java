@@ -20,7 +20,7 @@ public class OpenShiftUI {
 	 * Class representing OpenShift Console View
 	 *
 	 */
-	public static class Console {
+	public static class Explorer {
 
 		public static final IView iView = new IView() {
 			@Override
@@ -91,5 +91,28 @@ public class OpenShiftUI {
 		public static final String PHPMYADMIN = "phpmyadmin-3.4";
 		public static final String METRICS = "metrics-0.1";
 		public static final String ROCKMONGO = "rockmongo-1.1";
+	}
+	
+	public static class Labels {
+		
+		public static final String CONNECT_TO_OPENSHIFT = "Connect to OpenShift";
+		public static final String EXPLORER_NEW_APP = "New OpenShift Application...";
+		public static final String EXPLORER_CREATE_EDIT_DOMAIN = "Create or Edit Domain...";
+		public static final String EXPLORER_DELETE_DOMAIN = "Delete Domain";
+		public static final String EXPLORER_CREATE_SERVER = "Create a Server Adapter";
+		public static final String EXPLORER_DELETE_APP = "Delete Application(s)";
+		public static final String EDIT_CARTRIDGES = "Edit Embedded Cartridges...";
+		
+	}
+	
+	public static class Shell {
+		
+		public static final String NO_TITLE = "";
+		public static final String NEW_APP = "New OpenShift Application";
+		public static final String DOMAIN = "";
+		public static final String CREDENTIALS = "";
+		public static final String NEW_SSH = "New ssh key";
+		public static final String DELETE_APP = "Application deletion";
+		
 	}
 }

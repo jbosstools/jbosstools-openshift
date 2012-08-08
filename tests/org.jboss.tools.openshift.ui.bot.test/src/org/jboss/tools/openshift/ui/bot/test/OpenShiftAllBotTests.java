@@ -10,6 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test;
 
+import org.jboss.tools.openshift.ui.bot.test.explorer.CreateApp;
+import org.jboss.tools.openshift.ui.bot.test.explorer.CreateDomain;
+import org.jboss.tools.openshift.ui.bot.test.explorer.DeleteApp;
+import org.jboss.tools.openshift.ui.bot.test.explorer.DeleteDomain;
+import org.jboss.tools.openshift.ui.bot.test.explorer.EmbedCartrides;
+import org.jboss.tools.openshift.ui.bot.test.explorer.RenameDomain;
+import org.jboss.tools.openshift.ui.bot.test.explorer.Connection;
+import org.jboss.tools.openshift.ui.bot.test.wizard.RepublishApp;
 import org.jboss.tools.ui.bot.ext.RequirementAwareSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -19,35 +27,17 @@ import org.junit.runners.Suite.SuiteClasses;
  * <br>
  * This bot test will try to demonstrate a new OpenShift Application and domain life cycle. 
  * 
- * <br>
- * TestSuite covers following test cases :
- * <ul>
- * <li>JBDS50_XXXX User credentials validation</li>
- * <li></li>
- * <li>JBDS50_XXXX Domain is created, renamed correctly</li>
- * <li>JBDS50_XXXX App with JBossAS7 cartridge is created correctly via
- * OpenShift wizards</li>
- * <li>JBDS50_XXXX Embed jenkins etc. into OpenShift applications</li>
- * <li>JBDS50_XXXX App with JBossAS7 cartridge can be deleted</li>
- * <li>JBDS50_XXXX JBoss server adapter is created successfully</li>
- * <li>JBDS50_XXXX App with JBossAS7 cartridge can be modified and republished</li>
- * <li>JBDS50_XXXX SSH keys management</li>
- * </ul>
- * 
  * @author sbunciak
  */
 @SuiteClasses({
-
-ValidateCredentials.class, 
-SSHKeyManagement.class,
+Connection.class,
 CreateDomain.class,
-CreateAppAS7.class,
-EmbeddCartrides.class,
-RepublishAppASS7.class,
+CreateApp.class,
+EmbedCartrides.class,
+RepublishApp.class,
 RenameDomain.class,
-DeleteAppAS7.class, 
-DestroyDomain.class
-
+DeleteApp.class, 
+DeleteDomain.class
 })
 @RunWith(RequirementAwareSuite.class)
 public class OpenShiftAllBotTests {

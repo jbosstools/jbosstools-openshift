@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.ui.bot.test;
+package org.jboss.tools.openshift.ui.bot.test.explorer;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -16,32 +16,33 @@ public class RenameDomain extends SWTTestExt {
 	@Test
 	public void canRenameDomain() {
 
-		SWTBotView openshiftConsole = open.viewOpen(OpenShiftUI.Console.iView);
+		SWTBotView explorer = open.viewOpen(OpenShiftUI.Explorer.iView);
 
-		openshiftConsole.bot().tree()
-				.getTreeItem(TestProperties.getProperty("openshift.user.name"))
-				.contextMenu("Create or Edit Domain").click();
+		explorer.bot().tree()
+				.getTreeItem(TestProperties.get("openshift.user.name"))
+				.contextMenu(OpenShiftUI.Labels.EXPLORER_CREATE_EDIT_DOMAIN)
+				.click();
 
 		bot.waitForShell("");
-		
+
 		SWTBotText domainText = bot.text(0);
 
 		assertTrue(
 				"Domain should be set correctly at this stage!",
 				domainText.getText().equals(
-						TestProperties.getProperty("openshift.domain")));
+						TestProperties.get("openshift.domain")));
 
-		domainText.setText(TestProperties.getProperty("openshift.domain.new"));
+		domainText.setText(TestProperties.get("openshift.domain.new"));
 
 		bot.button(IDELabel.Button.FINISH).click();
 		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S);
-		
+
 		HttpClient client = new HttpClient();
 		GetMethod method = new GetMethod("https://"
-				+ TestProperties.getProperty("openshift.jbossapp.name") + "-"
-				+ TestProperties.getProperty("openshift.domain.new")
-				+ ".rhcloud.com/Test.html");
-		
+				+ TestProperties.get("openshift.jbossapp.name") + "-"
+				+ TestProperties.get("openshift.domain.new")
+				+ ".rhcloud.com");
+
 		try {
 			assertTrue(client.executeMethod(method) == 200);
 		} catch (Exception e) {
