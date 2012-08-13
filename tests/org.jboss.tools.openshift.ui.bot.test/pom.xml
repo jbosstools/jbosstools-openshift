@@ -16,6 +16,7 @@
 
 	<properties>
 		<systemProperties>-Dtest.configurations.dir=${configurations.dir}</systemProperties>
+		<surefire.timeout>10800</surefire.timeout>
 	</properties>
 
 	<build>
@@ -24,8 +25,6 @@
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<configuration>
-					<!-- Kill swt bot test take more than 3 hours minutes (10800 seconds) to finish -->
-					<forkedProcessTimeoutInSeconds>10800</forkedProcessTimeoutInSeconds>
 					<skip>${swtbot.test.skip}</skip>
 					<useUIThread>false</useUIThread>
 					<testSuite>org.jboss.tools.openshift.ui.bot.test</testSuite>
