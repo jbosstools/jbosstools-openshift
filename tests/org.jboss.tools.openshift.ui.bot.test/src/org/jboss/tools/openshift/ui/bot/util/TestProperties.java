@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
 /**
@@ -34,14 +33,8 @@ public class TestProperties {
 
     }
 
-    public static String getProperty(String key) {
-        return props.getProperty(key);
-    }
-
-    public static String getPassphrase() {
-    	String passphrase = new String(new Base64().decode(TestProperties.getProperty(
-				"openshift.ssh.passphrase").getBytes()));
-    	return passphrase;
+    public static String get(String key) {
+    	return props.getProperty(key);
     }
     
 }
