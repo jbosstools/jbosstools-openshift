@@ -2,6 +2,7 @@ package org.jboss.tools.openshift.ui.bot.test.explorer;
 
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.jboss.tools.openshift.ui.bot.util.OpenShiftUI;
 import org.jboss.tools.openshift.ui.bot.util.TestProperties;
 import org.jboss.tools.ui.bot.ext.SWTTestExt;
@@ -22,7 +23,7 @@ public class Connection extends SWTTestExt {
 				.click();
 
 		// open credentials dialog
-		bot.waitForShell(OpenShiftUI.Shell.CREDENTIALS);
+		SWTBotShell shell = bot.waitForShell(OpenShiftUI.Shell.CREDENTIALS);
 
 		// set wrong user credentials
 		bot.text(0).setText(TestProperties.get("openshift.user.name"));
@@ -34,7 +35,7 @@ public class Connection extends SWTTestExt {
 		finishButton.click();
 
 		// wait for credentials validation
-		bot.waitUntil(new NonSystemJobRunsCondition());
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_20S);
 
 		assertFalse("Finish button shouldn't be enabled.",
 				finishButton.isEnabled());
@@ -46,7 +47,9 @@ public class Connection extends SWTTestExt {
 		// create connection to OpenShift account
 		finishButton.click();
 
-		bot.waitUntil(Conditions.shellCloses(bot.activeShell()));
+		// wait for credentials validation
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_20S);
+		bot.waitUntil(Conditions.shellCloses(shell));
 
 		log.info("*** OpenShift SWTBot Tests: Credentials validated. ***");
 		log.info("*** OpenShift SWTBot Tests: Connection to OpenShift established. ***");

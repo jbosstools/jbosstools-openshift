@@ -102,6 +102,7 @@ public class OpenShiftUI {
 		public static final String EXPLORER_CREATE_SERVER = "Create a Server Adapter";
 		public static final String EXPLORER_DELETE_APP = "Delete Application(s)";
 		public static final String EDIT_CARTRIDGES = "Edit Embedded Cartridges...";
+		public static final String REFRESH = "Refresh";
 		
 	}
 	

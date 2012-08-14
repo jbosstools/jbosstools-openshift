@@ -1,7 +1,5 @@
 package org.jboss.tools.openshift.ui.bot.test.explorer;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
@@ -35,21 +33,8 @@ public class RenameDomain extends SWTTestExt {
 		domainText.setText(TestProperties.get("openshift.domain.new"));
 
 		bot.button(IDELabel.Button.FINISH).click();
-		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S);
+		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S + TIME_30S);
 
-		HttpClient client = new HttpClient();
-		GetMethod method = new GetMethod("https://"
-				+ TestProperties.get("openshift.jbossapp.name") + "-"
-				+ TestProperties.get("openshift.domain.new")
-				+ ".rhcloud.com");
-
-		try {
-			assertTrue(client.executeMethod(method) == 200);
-		} catch (Exception e) {
-			log.error("File has not been published to the server!", e);
-		} finally {
-			method.releaseConnection();
-		}
 	}
 
 }

@@ -35,8 +35,8 @@ CreateDomain.class,
 CreateApp.class,
 EmbedCartrides.class,
 RepublishApp.class,
+DeleteApp.class,
 RenameDomain.class,
-DeleteApp.class, 
 DeleteDomain.class
 })
 @RunWith(RequirementAwareSuite.class)

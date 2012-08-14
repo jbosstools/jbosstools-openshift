@@ -14,15 +14,21 @@ public class DeleteDomain extends SWTTestExt {
 
 		SWTBotView explorer = open.viewOpen(OpenShiftUI.Explorer.iView);
 
+		// refresh first
+		explorer.bot().tree()
+				.getTreeItem(TestProperties.get("openshift.user.name"))
+				.contextMenu(OpenShiftUI.Labels.REFRESH).click();
+
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_UNLIMITED);
+		
+		// delete
 		explorer.bot().tree()
 				.getTreeItem(TestProperties.get("openshift.user.name"))
 				.contextMenu(OpenShiftUI.Labels.EXPLORER_DELETE_DOMAIN).click();
 
-		
-		bot.wait(TIME_5S);
-		
-		bot.waitUntil(new NonSystemJobRunsCondition());
-		
-		
+		bot.checkBox().select();
+		bot.button("OK").click();
+
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S + TIME_30S);		
 	}
 }

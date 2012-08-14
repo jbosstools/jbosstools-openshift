@@ -22,8 +22,10 @@ public class EmbedCartrides extends SWTTestExt {
 		SWTBotView explorer = open.viewOpen(OpenShiftUI.Explorer.iView);
 
 		account = explorer.bot().tree()
-				.expandNode(TestProperties.get("openshift.user.name"))
+				.getTreeItem(TestProperties.get("openshift.user.name"))
 				.doubleClick();
+
+		bot.toolbarButtonWithTooltip("Collapse All").click();
 
 		// custom condition to wait for app to show
 		bot.waitUntil(new ICondition() {
@@ -62,7 +64,7 @@ public class EmbedCartrides extends SWTTestExt {
 
 		bot.button(IDELabel.Button.FINISH).click();
 
-		bot.waitForShell("Embedded Cartridges");
+		bot.waitForShell("Embedded Cartridges", TIME_60S + TIME_30S);
 		bot.button(IDELabel.Button.OK).click();
 	}
 
@@ -72,13 +74,11 @@ public class EmbedCartrides extends SWTTestExt {
 	private void selectCartridges(SWTBotTable cartridgeTable) {
 
 		StringTokenizer tokenizer = new StringTokenizer(
-				TestProperties.get("openshift.jbossapp.cartridges"),
-				";");
+				TestProperties.get("openshift.jbossapp.cartridges"), ";");
 
 		while (tokenizer.hasMoreTokens()) {
 
 			String cartridge = tokenizer.nextToken();
-			System.out.println(cartridge);
 
 			if (cartridge.equals("mysql")) {
 				cartridgeTable.getTableItem(OpenShiftUI.Cartridge.MYSQL)

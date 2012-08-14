@@ -8,7 +8,6 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.jboss.tools.openshift.ui.bot.util.OpenShiftUI;
 import org.jboss.tools.openshift.ui.bot.util.TestProperties;
 import org.jboss.tools.ui.bot.ext.SWTTestExt;
-import org.jboss.tools.ui.bot.ext.condition.NonSystemJobRunsCondition;
 import org.jboss.tools.ui.bot.ext.types.IDELabel;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,8 +84,6 @@ public class CreateDomain extends SWTTestExt {
 		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S);
 
 		log.info("*** OpenShift SWTBot Tests: Domain created. ***");
-
-		bot.waitUntil(new NonSystemJobRunsCondition(), TIME_20S);
 	}
 
 }
