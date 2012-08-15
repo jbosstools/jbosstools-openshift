@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.jboss.tools.openshift.ui.bot.util.OpenShiftUI;
 import org.jboss.tools.openshift.ui.bot.util.TestProperties;
@@ -25,15 +26,16 @@ public class CreateDomain extends SWTTestExt {
 
 	@Before
 	public void prepareSSHPrefs() {
-		// clear dir from libra stuff
-
+		// clear dir from libra stuff so wizard can create new
 		File sshDir = new File(System.getProperty("user.home") + "/.ssh");
 
 		if (sshDir.exists() && sshDir.isDirectory()
 				&& sshDir.listFiles().length > 0) {
 			for (File file : sshDir.listFiles()) {
 				if (file.getName().contains("id_rsa"))
-					keyAvailable = true;
+					file.delete();
+				if (file.getName().contains("known_hosts"))
+					file.delete();
 			}
 		}
 
@@ -60,25 +62,26 @@ public class CreateDomain extends SWTTestExt {
 		domainText.setText(TestProperties.get("openshift.domain"));
 		log.info("*** OpenShift SWTBot Tests: Domain name set. ***");
 
+		SWTBotButton finishBtn = bot.button(IDELabel.Button.FINISH);
+		
 		if (keyAvailable) {
 
-			assertTrue("SSH key should be set!",bot.text(1).getText().contains("id_rsa"));
-			
+			assertTrue("SSH key should be set!", bot.text(1).getText()
+					.contains("id_rsa"));
+
 		} else {
-			throw new UnsupportedOperationException(
-					"Creation of ssh key not implemented yet.");
-			/*
-			 * bot.button(IDELabel.Shell.NEW).click();
-			 * bot.waitForShell(OpenShiftUI.Shell.NEW_SSH);
-			 * bot.text(0).setText(TestProperties.getPassphrase());
-			 * bot.button(IDELabel.Button.OK).click();
-			 * bot.waitForShell(OpenShiftUI.Shell.DOMAIN);
-			 * 
-			 * log.info("*** OpenShift SWTBot Tests: SSH Keys created. ***");
-			 */
+
+			bot.button(IDELabel.Shell.NEW).click();
+			bot.waitForShell(OpenShiftUI.Shell.NEW_SSH);
+			bot.text(0).setText(TestProperties.get("openshift.user.pwd"));
+			bot.button(IDELabel.Button.OK).click();
+			bot.waitForShell(OpenShiftUI.Shell.DOMAIN);
+
+			log.info("*** OpenShift SWTBot Tests: SSH Keys created. ***");
 		}
 
-		bot.button(IDELabel.Button.FINISH).click();
+		bot.waitUntil(Conditions.widgetIsEnabled(finishBtn));
+		finishBtn.click();
 
 		// wait while the domain is being created
 		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S);

@@ -19,7 +19,7 @@ public class DeleteDomain extends SWTTestExt {
 				.getTreeItem(TestProperties.get("openshift.user.name"))
 				.contextMenu(OpenShiftUI.Labels.REFRESH).click();
 
-		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_UNLIMITED);
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S * 3, TIME_1S);
 		
 		// delete
 		explorer.bot().tree()
@@ -29,6 +29,6 @@ public class DeleteDomain extends SWTTestExt {
 		bot.checkBox().select();
 		bot.button("OK").click();
 
-		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S + TIME_30S);		
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S * 3, TIME_1S);		
 	}
 }
