@@ -72,17 +72,22 @@ public class CreateApp extends SWTTestExt {
 
 		log.info("*** OpenShift SWTBot Tests: Application creation started. ***");
 
-		// only for the 1st time
-		// bot.waitForShell("Question", 500);
-		// bot.button(IDELabel.Button.YES).click();
+		// only for the 1st time - with known_hosts deleting it will appear every time
+		// add to known_hosts
+		bot.waitForShell("Question", TIME_60S * 3);
+		bot.button(IDELabel.Button.YES).click();
+		// create known_hosts since it does not exists any more
+		bot.waitForShell("Question", TIME_60S * 3);
+		bot.button(IDELabel.Button.YES).click();
+		
 
-		bot.waitForShell("Information", 500);
+		bot.waitForShell("Information", TIME_60S * 3);
 		bot.text(0).setText(TestProperties.get("openshift.user.pwd"));
 		bot.button(IDELabel.Button.OK).click();
 
 		log.info("*** OpenShift SWTBot Tests: SSH passphrase given. ***");
 
-		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S);
+		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S, TIME_1S);
 
 		log.info("*** OpenShift SWTBot Tests: New Application wizard closed. ***");
 
