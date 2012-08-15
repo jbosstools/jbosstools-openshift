@@ -4,10 +4,13 @@
 <stringAttribute key="M2_GOALS" value="clean install"/>
 <booleanAttribute key="M2_NON_RECURSIVE" value="false"/>
 <booleanAttribute key="M2_OFFLINE" value="false"/>
-<stringAttribute key="M2_PROFILES" value="default"/>
+<stringAttribute key="M2_PROFILES" value="default, jbosstools-staging-aggregate"/>
 <listAttribute key="M2_PROPERTIES">
 <listEntry value="swtbot.test.skip=false"/>
 <listEntry value="configurations.dir=${project_loc}/resources"/>
+<listEntry value="jbosstools-nightly=http://rewok.brq.redhat.com:8081/nexus/content/repositories/jbosstools-nightly-core-3.3/"/>
+<listEntry value="jbosstools-nightly-tests=http://rewok.brq.redhat.com:8081/nexus/content/repositories/jbosstools-nightly-tests-3.3/"/>
+<listEntry value="jbosstools-target-site=http://rewok.brq.redhat.com:8081/nexus/content/repositories/jbosstools-target-site-3.3/"/>
 </listAttribute>
 <stringAttribute key="M2_RUNTIME" value="EMBEDDED"/>
 <booleanAttribute key="M2_SKIP_TESTS" value="false"/>
