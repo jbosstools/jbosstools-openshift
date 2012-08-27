@@ -25,7 +25,8 @@ public class EmbedCartrides extends SWTTestExt {
 				.getTreeItem(TestProperties.get("openshift.user.name"))
 				.doubleClick();
 
-		bot.toolbarButtonWithTooltip("Collapse All").click();
+		// TODO: cannot find widget, not needed actually
+		// bot.toolbarButtonWithTooltip("Collapse All").click();
 
 		// custom condition to wait for app to show
 		bot.waitUntil(new ICondition() {

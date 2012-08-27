@@ -15,7 +15,7 @@
 	<packaging>eclipse-test-plugin</packaging>
 
 	<properties>
-		<systemProperties>-Dtest.configurations.dir=${configurations.dir}</systemProperties>
+		<systemProperties>-Dtest.configurations.dir=${configurations.dir} -Dcom.openshift.httpclient.timeout=${http.timeout} -Dsun.net.client.defaultReadTimeout=${read.timeout}</systemProperties>
 	</properties>
 
 	<build>

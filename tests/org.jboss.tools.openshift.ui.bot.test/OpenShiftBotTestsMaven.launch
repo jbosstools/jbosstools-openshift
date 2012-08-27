@@ -7,7 +7,9 @@
 <stringAttribute key="M2_PROFILES" value="default, jbosstools-staging-aggregate"/>
 <listAttribute key="M2_PROPERTIES">
 <listEntry value="swtbot.test.skip=false"/>
-<listEntry value="configurations.dir=${project_loc}/resources"/>
+<listEntry value="http.timeout=600000"/>
+<listEntry value="read.timeout=600000"/>
+<listEntry value="configurations.dir=${project_loc}/tests/org.jboss.tools.openshift.ui.bot.test/resources"/>
 <listEntry value="jbosstools-nightly=http://rewok.brq.redhat.com:8081/nexus/content/repositories/jbosstools-nightly-core-3.3/"/>
 <listEntry value="jbosstools-nightly-tests=http://rewok.brq.redhat.com:8081/nexus/content/repositories/jbosstools-nightly-tests-3.3/"/>
 <listEntry value="jbosstools-target-site=http://rewok.brq.redhat.com:8081/nexus/content/repositories/jbosstools-target-site-3.3/"/>
