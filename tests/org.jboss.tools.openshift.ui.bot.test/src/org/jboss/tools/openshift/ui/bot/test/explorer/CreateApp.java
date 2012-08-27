@@ -21,7 +21,9 @@ public class CreateApp extends SWTTestExt {
 	public void cleanUpProject() {
 		File gitDir = new File(System.getProperty("user.home") + "/git");
 
-		if (gitDir.exists() && gitDir.isDirectory()
+		boolean exists = gitDir.exists() ?  true : gitDir.mkdir(); 
+		
+		if (exists && gitDir.isDirectory()
 				&& gitDir.listFiles().length > 0) {
 			for (File file : gitDir.listFiles()) {
 				if (file.getName().contains(
