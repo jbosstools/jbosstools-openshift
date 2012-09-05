@@ -8,10 +8,6 @@
             id="org.jboss.ide.eclipse.as.egit.ui.commands.CommitAndPushCommand"
             name="pushAndCommit">
       </command>
-      <command
-            id="org.jboss.ide.eclipse.as.egit.ui.commands.EGitUtilsCommitAndPushCommand"
-            name="EGit Utils commit and push">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
