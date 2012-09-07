@@ -81,4 +81,8 @@ public class StringUtils {
 		return true;
 	}
 	
+	public static boolean isEmptyOrNull(String value) {
+		return value == null
+				|| value.isEmpty();
+	}
 }

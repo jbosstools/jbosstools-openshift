@@ -34,7 +34,6 @@ import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jgit.util.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,6 +48,7 @@ import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author Andre Dietisheim
@@ -277,9 +277,12 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 				final String applicationName = (String) applicationNameObservable.getValue();
 				if (StringUtils.isEmptyOrNull(applicationName)) {
 					status = OpenShiftUIActivator.createErrorStatus("You have to choose an application name");
+				} else if (!StringUtils.isAlphaNumeric(applicationName)) {
+					status = OpenShiftUIActivator.createErrorStatus(
+							"The name may only contain lower-case letters and digits.");
 				} else {
 					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
-					if(project.exists()) {
+					if (project.exists()) {
 						status = OpenShiftUIActivator.createErrorStatus(
 								NLS.bind("A project named {0} already exists in the workspace.", applicationName));
 					}
