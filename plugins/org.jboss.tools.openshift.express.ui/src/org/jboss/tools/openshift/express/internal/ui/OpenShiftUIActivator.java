@@ -1,6 +1,9 @@
 package org.jboss.tools.openshift.express.internal.ui;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -71,22 +74,47 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	}
 
 	public static IStatus createCancelStatus(String message) {
-		return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, message);
+		return new Status(IStatus.CANCEL, PLUGIN_ID, message);
 	}
 
 	public static IStatus createCancelStatus(String message, Object... arguments) {
-		return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(message, arguments));
+		return new Status(IStatus.CANCEL, PLUGIN_ID, NLS.bind(message, arguments));
 	}
 
 	public static IStatus createErrorStatus(String message) {
-		return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, message);
+		return new Status(IStatus.ERROR, PLUGIN_ID, message);
 	}
 
 	public static IStatus createErrorStatus(String message, Throwable throwable) {
-		return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, throwable);
+		return new Status(IStatus.ERROR, PLUGIN_ID, message, throwable);
 	}
 
 	public static IStatus createErrorStatus(String message, Throwable throwable, Object... arguments) {
 		return createErrorStatus(NLS.bind(message, arguments), throwable);
 	}
+	
+	public static MultiStatus createMultiStatus(String message, Throwable t, Object... arguments) {
+		MultiStatus multiStatus = new MultiStatus(PLUGIN_ID, IStatus.ERROR, NLS.bind(message, arguments), t);
+		addStatuses(t, multiStatus);
+		return multiStatus;
+	}
+
+	private static void addStatuses(Throwable t, MultiStatus multiStatus) {
+		Throwable wrapped = getWrappedThrowable(t);
+		if (wrapped != null) {
+			multiStatus.add(createErrorStatus(wrapped.getMessage(), wrapped));
+			addStatuses(wrapped, multiStatus);
+		}
+	}
+	
+	private static Throwable getWrappedThrowable(Throwable t) {
+		if (t instanceof InvocationTargetException) {
+			return ((InvocationTargetException) t).getTargetException();
+		} else if (t instanceof Exception) {
+			return ((Exception) t).getCause();
+		}
+		return null;
+
+	}
+	
 }

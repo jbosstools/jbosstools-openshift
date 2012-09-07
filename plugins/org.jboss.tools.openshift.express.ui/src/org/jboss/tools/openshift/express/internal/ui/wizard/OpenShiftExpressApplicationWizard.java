@@ -30,7 +30,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
@@ -84,19 +83,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	OpenShiftExpressApplicationWizardModel getWizardModel() {
 		return wizardModel;
 	}
-
-	protected boolean isTransportException(InvocationTargetException e) {
-		return e.getTargetException() instanceof JGitInternalException
-				&& e.getTargetException().getCause() instanceof TransportException;
-	}
-
-	protected TransportException getTransportException(InvocationTargetException e) {
-		if (isTransportException(e)) {
-			return (TransportException) ((JGitInternalException) e.getTargetException()).getCause();
-		}
-		return null;
-	}
-
+	
 	protected void openError(final String title, final String message) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
@@ -345,8 +332,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			} catch (URISyntaxException e) {
 				return OpenShiftUIActivator.createErrorStatus("The url of the remote git repository is not valid", e);
 			} catch (InvocationTargetException e) {
-				if (isTransportException(e)) {
-					TransportException te = getTransportException(e);
+				TransportException te = getTransportException(e);
+				if (te != null) {
 					return OpenShiftUIActivator.createErrorStatus(
 							"Could not clone the repository. Authentication failed.\n"
 									+ " Please make sure that you added your private key to the ssh preferences.", te);
@@ -360,6 +347,17 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 				delegatingMonitor.done();
 			}
 		}
+	}
+
+	protected TransportException getTransportException(Throwable t) {
+		if (t instanceof TransportException) {
+			return (TransportException) t;
+		} else if (t instanceof InvocationTargetException) {
+			return getTransportException(((InvocationTargetException) t).getTargetException());
+		} else if (t instanceof Exception) {
+			return getTransportException(((Exception) t).getCause());
+		}
+		return null;
 	}
 
 	@Override
