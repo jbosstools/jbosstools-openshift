@@ -478,11 +478,10 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
 	}
 	
-	@Override
-	public void addUserToModel() {
+	public void refreshUser() {
 		UserDelegate user = getUser();
 		Assert.isNotNull(user);
-		UserModel.getDefault().addUser(user);
+		UserModel.getDefault().fireUserChanged(user);
 	}
 
 }

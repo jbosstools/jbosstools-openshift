@@ -92,6 +92,10 @@ public class UserModel {
 		fireModelChange(user, ADDED);
 	}
 
+	public void fireUserChanged(UserDelegate user) {
+		fireModelChange(user, CHANGED);
+	}
+	
 	public void removeUser(UserDelegate user) {
 		allUsers.remove(user.getUsername());
 		if (this.recentUser == user)
