@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
@@ -61,11 +60,7 @@ public class RefreshElementAction extends AbstractAction {
 					}
 
 					//List<IApplication> applications = user.getApplications();
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							viewer.refresh(element);
-						}
-					});
+					RefreshViewerJob.refresh(viewer);
 				} catch (OpenShiftException e) {
 					Logger.error("Failed to refresh element", e);
 				} finally {

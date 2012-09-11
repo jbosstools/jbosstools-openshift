@@ -44,7 +44,7 @@ public class EditCartridgesAction extends AbstractAction {
 				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
 				int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
 				if(result == Dialog.OK) {
-					viewer.refresh(application);
+					RefreshViewerJob.refresh(viewer);
 				}
 			} catch (OpenShiftException e) {
 				Logger.error("Failed to edit cartridges", e);
