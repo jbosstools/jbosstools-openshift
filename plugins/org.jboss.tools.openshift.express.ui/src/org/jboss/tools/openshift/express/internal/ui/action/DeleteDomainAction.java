@@ -98,6 +98,7 @@ public class DeleteDomainAction extends AbstractAction {
 									}
 								} finally {
 									monitor.done();
+									RefreshViewerJob.refresh(viewer);
 								}
 
 							}

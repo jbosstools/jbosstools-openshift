@@ -95,7 +95,7 @@ public class DeleteApplicationAction extends AbstractAction {
 							}
 						}
 					} finally {
-						refreshViewer();
+						RefreshViewerJob.refresh(viewer);
 						monitor.done();
 					}
 
@@ -123,17 +123,4 @@ public class DeleteApplicationAction extends AbstractAction {
 	private boolean isApplication(Object selection) {
 		return selection instanceof IApplication;
 	}
-
-	private void refreshViewer() {
-		if (viewer == null) {
-			return;
-		}
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				viewer.refresh();
-			}
-		});
-	}
-
 }
