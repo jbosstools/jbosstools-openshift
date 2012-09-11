@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -480,11 +479,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
 	}			
 
-	@Override
-	public void addUserToModel() {
-		UserDelegate user = getUser();
-		Assert.isNotNull(user);
-		UserModel.getDefault().addUser(user);
+	public void fireUserChanged() {
+		UserModel.getDefault().fireUserChanged(getUser());
 	}
 
 }

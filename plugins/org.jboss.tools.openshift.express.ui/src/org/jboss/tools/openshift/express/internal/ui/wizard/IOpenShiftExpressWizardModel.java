@@ -193,8 +193,6 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 
 	public boolean setUseExistingApplication(boolean useExistingApplication);
 
-	public void addUserToModel();
-
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges);
 
