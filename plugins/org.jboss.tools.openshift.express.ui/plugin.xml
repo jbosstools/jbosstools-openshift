@@ -310,7 +310,8 @@
       <viewer
             viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
          <popupMenu
-               allowsPlatformContributions="false">
+               allowsPlatformContributions="true"
+               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView.popup">
             <insertionPoint
                   name="group.showIn"
                   separator="true">
@@ -678,5 +679,39 @@
                id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
          </view>
       	</perspectiveExtension> 
+     </extension>
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.manageKeys"
+              name="%openshift.command.managekeys">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.ManageSSHKeysHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.manageKeys">
+              <enabledWhen>
+				<with variable="selection">
+         			<iterate ifEmpty="false" operator="or">
+            			<instanceof
+                       		value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate" />
+                    </iterate>
+                </with>
+              </enabledWhen>
+        </handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.viewer.expressConsoleView.popup?before=group.server">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.manageKeys"
+                icon="icons/key-icon.png"
+                id="org.jboss.tools.openshift.express.ui.command.manageKeys"
+                mnemonic="K">
+          </command>
+        </menuContribution>
      </extension>
 </plugin>

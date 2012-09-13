@@ -309,6 +309,10 @@ public class UserDelegate {
 		this.connected = connected;
 	}
 
+	public List<IOpenShiftSSHKey> getSSHKeys() {
+		return delegate.getSSHKeys();
+	}
+
 	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException, OpenShiftException {
 		return delegate.getSSHKeyByPublicKey(publicKey);
 	}
