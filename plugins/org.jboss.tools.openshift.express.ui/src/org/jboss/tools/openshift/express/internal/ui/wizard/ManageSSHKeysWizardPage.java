@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
@@ -62,21 +63,36 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		Group embedGroup = new Group(parent, SWT.NONE);
-		embedGroup.setText("SSH Public Keys");
+		Group sshKeysGroup = new Group(parent, SWT.NONE);
+		sshKeysGroup.setText("SSH Public Keys");
 		GridDataFactory.fillDefaults()
-				.hint(200, 300).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(embedGroup);
+				.hint(200, 300).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sshKeysGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(3).margins(6, 6).applyTo(embedGroup);
+				.numColumns(2).margins(6, 6).applyTo(sshKeysGroup);
 
-		Composite tableContainer = new Composite(embedGroup, SWT.NONE);
+		Composite tableContainer = new Composite(sshKeysGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+				.span(1, 4).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ViewerSupport.bind(
 				viewer,
 				BeanProperties.list(ManageSSHKeysWizardPageModel.PROPERTY_SSH_KEYS).observe(pageModel), 
 				BeanProperties.values(new String[]{"name", "keyType", "publicKey"}));
+
+		Button addButton = new Button(sshKeysGroup, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
+		addButton.setText("Add Existing...");
+
+		Button newButton = new Button(sshKeysGroup, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
+		newButton.setText("New...");
+
+		Button removeButton = new Button(sshKeysGroup, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+		removeButton.setText("Remove...");
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
