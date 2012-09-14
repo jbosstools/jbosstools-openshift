@@ -14,12 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -42,7 +40,6 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IOpenShiftSSHKey;
 
 /**
@@ -74,11 +71,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(1, 4).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		ViewerSupport.bind(
-				viewer,
-				BeanProperties.list(ManageSSHKeysWizardPageModel.PROPERTY_SSH_KEYS).observe(pageModel), 
-				BeanProperties.values(new String[]{"name", "keyType", "publicKey"}));
-
+		
 		Button addButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
@@ -111,7 +104,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			public int compare(Viewer viewer, Object thisKey, Object thatKey) {
 				if (thisKey instanceof IOpenShiftSSHKey 
 						&& thatKey instanceof IOpenShiftSSHKey) {
-					return ((IOpenShiftSSHKey) thisKey).getName().compareTo(((IEmbeddableCartridge) thatKey).getName());
+					return ((IOpenShiftSSHKey) thisKey).getName().compareTo(((IOpenShiftSSHKey) thatKey).getName());
 				}
 				return super.compare(viewer, thisKey, thatKey);
 			}
@@ -131,7 +124,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void update(ViewerCell cell) {
 				IOpenShiftSSHKey key = (IOpenShiftSSHKey) cell.getElement();
-				cell.setText(key.getName());
+				cell.setText(key.getKeyType().getTypeId());
 			}
 		}, viewer, tableLayout);
 		createTableColumn("Public Key", 1, new CellLabelProvider() {
@@ -161,7 +154,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-//						setViewerInput(pageModel.loadSSHKeys());
+						setViewerInput(pageModel.loadSSHKeys());
 						pageModel.loadSSHKeys();
 						return Status.OK_STATUS;
 					} catch (Exception e) {

@@ -310,7 +310,10 @@ public class UserDelegate {
 	}
 
 	public List<IOpenShiftSSHKey> getSSHKeys() {
-		return delegate.getSSHKeys();
+		if(checkForPassword()) {
+			return delegate.getSSHKeys();
+		}
+		return null;
 	}
 
 	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException, OpenShiftException {
