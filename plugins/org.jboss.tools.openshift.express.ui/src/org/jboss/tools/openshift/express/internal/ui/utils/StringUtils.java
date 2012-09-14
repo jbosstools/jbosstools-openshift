@@ -18,7 +18,8 @@ import java.util.List;
 public class StringUtils {
 	
 	private static final String LINE_SEPARATOR_KEY = "line.separator";
-
+	private static final String SHORTENING_MARKER = "...";
+	
 	public static String null2emptyString(String value) {
 		if (value != null) {
 			return value;
@@ -85,4 +86,15 @@ public class StringUtils {
 		return value == null
 				|| value.isEmpty();
 	}
+
+	public static String shorten(String text, int maxLength) {
+		if (text.length() < maxLength) {
+			return text;
+		}
+
+		return new StringBuilder(text.substring(0, maxLength - SHORTENING_MARKER.length()))
+				.append(SHORTENING_MARKER)
+				.toString();
+	}
+
 }

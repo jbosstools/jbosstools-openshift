@@ -20,13 +20,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -36,8 +32,9 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.ICellValueProvider;
+import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -62,15 +59,15 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		Group sshKeysGroup = new Group(parent, SWT.NONE);
 		sshKeysGroup.setText("SSH Public Keys");
 		GridDataFactory.fillDefaults()
-				.hint(200, 300).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sshKeysGroup);
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sshKeysGroup);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(6, 6).applyTo(sshKeysGroup);
 
 		Composite tableContainer = new Composite(sshKeysGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
-				.span(1, 4).align(SWT.FILL, SWT.FILL).hint(500, 260).applyTo(tableContainer);
-		
+				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+
 		Button addButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
@@ -85,7 +82,16 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
-	}
+
+		Composite filler = new Composite(sshKeysGroup, SWT.None);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(filler);
+
+		Button refreshButton = new Button(sshKeysGroup, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
+		refreshButton.setText("Refresh...");
+}
 
 	protected TableViewer createTable(Composite tableContainer) {
 		Table table =
@@ -93,42 +99,33 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		this.viewer = new TableViewerBuilder(table, tableContainer)
-			.contentProvider(new ArrayContentProvider())
-			.column(new ICellValueProvider<IOpenShiftSSHKey>() {
+				.contentProvider(new ArrayContentProvider())
+				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
-				@Override
-				public String getValue(IOpenShiftSSHKey key) {
-					return key.getName();
-				}
-			})
-			.name("Name")
-			.align(SWT.LEFT)
-			.weight(2)
-			.buildColumn()
-			.column(new ICellValueProvider<IOpenShiftSSHKey>() {
+					@Override
+					public String getValue(IOpenShiftSSHKey key) {
+						return key.getName();
+					}
+				})
+				.name("Name").align(SWT.LEFT).weight(2).minWidth(200).buildColumn()
+				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
-				@Override
-				public String getValue(IOpenShiftSSHKey key) {
-					return key.getKeyType().getTypeId();
-				}
-			})
-			.name("Type")
-			.align(SWT.LEFT)
-			.weight(1)
-			.buildColumn()
-			.column(new ICellValueProvider<IOpenShiftSSHKey>() {
+					@Override
+					public String getValue(IOpenShiftSSHKey key) {
+						return key.getKeyType().getTypeId();
+					}
+				})
+				.name("Type").align(SWT.LEFT).weight(1).minWidth(50).buildColumn()
+				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
-				@Override
-				public String getValue(IOpenShiftSSHKey key) {
-					return key.getPublicKey();
-				}
-			})
-			.name("Type")
-			.align(SWT.LEFT)
-			.weight(4)
-			.buildColumn()
-			.buildViewer();
-			
+					@Override
+					public String getValue(IOpenShiftSSHKey key) {
+						return StringUtils.shorten(key.getPublicKey(), 24);
+					}
+				})
+				.name("Type").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
+				.buildViewer();
+
 		return viewer;
 	}
 
@@ -167,34 +164,5 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				viewer.setInput(keys);
 			}
 		});
-	}
-
-	/**
-	 * Viewer element comparer based on #equals(). The default implementation in
-	 * CheckboxTableViewer compares elements based on instance identity.
-	 * <p>
-	 * We need this since the available cartridges (item listed in the viewer)
-	 * are not the same instance as the ones in the embedded application (items
-	 * to check in the viewer).
-	 */
-	private static class EqualityComparer implements IElementComparer {
-
-		@Override
-		public boolean equals(Object thisObject, Object thatObject) {
-			if (thisObject == null) {
-				return thatObject != null;
-			}
-
-			if (thatObject == null) {
-				return false;
-			}
-
-			return thisObject.equals(thatObject);
-		}
-
-		@Override
-		public int hashCode(Object element) {
-			return element.hashCode();
-		}
 	}
 }

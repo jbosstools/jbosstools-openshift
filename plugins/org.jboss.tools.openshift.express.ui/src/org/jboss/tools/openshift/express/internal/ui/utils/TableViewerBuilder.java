@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.utils;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -34,6 +35,7 @@ public class TableViewerBuilder {
 
 	public TableViewerBuilder(TableViewer viewer, Composite tableContainer) {
 		this.viewer = viewer;
+		viewer.setComparer(new EqualityComparer());
 		this.tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
 	}
@@ -43,10 +45,19 @@ public class TableViewerBuilder {
 		return this;
 	}
 	
-	public <V> ColumnBuilder<V> column(ICellValueProvider<V> valueProvider) {
-		return new ColumnBuilder<V>(valueProvider);
+	public TableViewerBuilder comparer(IElementComparer sorter) {
+		viewer.setComparer(sorter);
+		return this;
 	}
 	
+	public <E>ColumnBuilder<E> column(String name) {
+		return new ColumnBuilder<E>().name(name);
+	}
+	
+	public <E>ColumnBuilder<E> column(IColumnLabelProvider<E> columnLabelProvider) {
+		return new ColumnBuilder<E>().labelProvider(columnLabelProvider);
+	}
+
 	public TableViewer buildViewer() {
 		return viewer;
 	}
@@ -54,12 +65,17 @@ public class TableViewerBuilder {
 	public class ColumnBuilder<E> {
 		
 		private int alignement;
-		private ICellValueProvider<E> cellValueProvider;
+		private IColumnLabelProvider<E> columnLabelProvider;
 		private String name;
 		private int weight;
+		private int minWidth = ColumnWeightData.MINIMUM_WIDTH;
 
-		private ColumnBuilder(ICellValueProvider<E> valueProvider) {
-			this.cellValueProvider = valueProvider;
+		private ColumnBuilder() {
+		}
+		
+		public ColumnBuilder<E> labelProvider(IColumnLabelProvider<E> labelProvider) {
+			this.columnLabelProvider = labelProvider;
+			return this;
 		}
 
 		public ColumnBuilder<E> align(int alignement) {
@@ -77,6 +93,11 @@ public class TableViewerBuilder {
 			return this;
 		}
 		
+		public ColumnBuilder<E> minWidth(int minWidth) {
+			this.minWidth = minWidth;
+			return this;
+		}
+
 		public TableViewerBuilder buildColumn() {
 			TableViewerColumn column = new TableViewerColumn(viewer, alignement);
 			column.getColumn().setText(name);
@@ -85,17 +106,46 @@ public class TableViewerBuilder {
 				@Override
 				public void update(ViewerCell cell) {
 					@SuppressWarnings("unchecked")
-					String cellValue = cellValueProvider.getValue((E) cell.getElement());
+					String cellValue = columnLabelProvider.getValue((E) cell.getElement());
 					cell.setText(cellValue);
 				}
 			});
-			tableLayout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
+			tableLayout.setColumnData(column.getColumn(), new ColumnWeightData(weight, minWidth, true));
 			return TableViewerBuilder.this;
 		}
 	}
 
-	public static interface ICellValueProvider<E> {
+	public static interface IColumnLabelProvider<E> {
 		public String getValue(E e);
 	}
-	
+
+	/**
+	 * Viewer element comparer based on #equals(). The default implementation in
+	 * CheckboxTableViewer compares elements based on instance identity.
+	 * <p>
+	 * We need this since the available cartridges (item listed in the viewer)
+	 * are not the same instance as the ones in the embedded application (items
+	 * to check in the viewer).
+	 */
+	public static class EqualityComparer implements IElementComparer {
+
+		@Override
+		public boolean equals(Object thisObject, Object thatObject) {
+			if (thisObject == null) {
+				return thatObject != null;
+			}
+
+			if (thatObject == null) {
+				return false;
+			}
+
+			return thisObject.equals(thatObject);
+		}
+
+		@Override
+		public int hashCode(Object element) {
+			return element.hashCode();
+		}
+	}
+
 }
