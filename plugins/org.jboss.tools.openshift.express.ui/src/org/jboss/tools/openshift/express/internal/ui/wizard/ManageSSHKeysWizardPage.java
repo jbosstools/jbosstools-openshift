@@ -27,9 +27,6 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -39,6 +36,8 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
+import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.ICellValueProvider;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -70,7 +69,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		Composite tableContainer = new Composite(sshKeysGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
-				.span(1, 4).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+				.span(1, 4).align(SWT.FILL, SWT.FILL).hint(500, 260).applyTo(tableContainer);
 		
 		Button addButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -92,58 +91,45 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
-		TableColumnLayout tableLayout = new TableColumnLayout();
-		tableContainer.setLayout(tableLayout);
-		TableViewer viewer = new TableViewer(table);
-		viewer.setComparer(new EqualityComparer());
-		viewer.setContentProvider(new ArrayContentProvider());
+		table.setHeaderVisible(true);
+		this.viewer = new TableViewerBuilder(table, tableContainer)
+			.contentProvider(new ArrayContentProvider())
+			.column(new ICellValueProvider<IOpenShiftSSHKey>() {
 
-		viewer.setSorter(new ViewerSorter() {
-
-			@Override
-			public int compare(Viewer viewer, Object thisKey, Object thatKey) {
-				if (thisKey instanceof IOpenShiftSSHKey 
-						&& thatKey instanceof IOpenShiftSSHKey) {
-					return ((IOpenShiftSSHKey) thisKey).getName().compareTo(((IOpenShiftSSHKey) thatKey).getName());
+				@Override
+				public String getValue(IOpenShiftSSHKey key) {
+					return key.getName();
 				}
-				return super.compare(viewer, thisKey, thatKey);
-			}
+			})
+			.name("Name")
+			.align(SWT.LEFT)
+			.weight(2)
+			.buildColumn()
+			.column(new ICellValueProvider<IOpenShiftSSHKey>() {
 
-		});
+				@Override
+				public String getValue(IOpenShiftSSHKey key) {
+					return key.getKeyType().getTypeId();
+				}
+			})
+			.name("Type")
+			.align(SWT.LEFT)
+			.weight(1)
+			.buildColumn()
+			.column(new ICellValueProvider<IOpenShiftSSHKey>() {
 
-		createTableColumn("Name", 1, new CellLabelProvider() {
-
-			@Override
-			public void update(ViewerCell cell) {
-				IOpenShiftSSHKey key = (IOpenShiftSSHKey) cell.getElement();
-				cell.setText(key.getName());
-			}
-		}, viewer, tableLayout);
-		createTableColumn("Type", 1, new CellLabelProvider() {
-
-			@Override
-			public void update(ViewerCell cell) {
-				IOpenShiftSSHKey key = (IOpenShiftSSHKey) cell.getElement();
-				cell.setText(key.getKeyType().getTypeId());
-			}
-		}, viewer, tableLayout);
-		createTableColumn("Public Key", 1, new CellLabelProvider() {
-
-			@Override
-			public void update(ViewerCell cell) {
-				IOpenShiftSSHKey key = (IOpenShiftSSHKey) cell.getElement();
-				cell.setText(key.getPublicKey());
-			}
-		}, viewer, tableLayout);
+				@Override
+				public String getValue(IOpenShiftSSHKey key) {
+					return key.getPublicKey();
+				}
+			})
+			.name("Type")
+			.align(SWT.LEFT)
+			.weight(4)
+			.buildColumn()
+			.buildViewer();
+			
 		return viewer;
-	}
-
-	private void createTableColumn(String name, int weight, CellLabelProvider cellLabelProvider, TableViewer viewer,
-			TableColumnLayout layout) {
-		TableViewerColumn column = new TableViewerColumn(viewer, SWT.LEFT);
-		column.getColumn().setText(name);
-		column.setLabelProvider(cellLabelProvider);
-		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
 	@Override
