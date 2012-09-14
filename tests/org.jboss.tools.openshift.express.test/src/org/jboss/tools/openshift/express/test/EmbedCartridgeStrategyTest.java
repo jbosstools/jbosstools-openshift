@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.junit.Before;
@@ -355,8 +356,7 @@ public class EmbedCartridgeStrategyTest {
 
 		@Override
 		public void removeEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-			// TODO Auto-generated method stub
-			
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -494,6 +494,11 @@ public class EmbedCartridgeStrategyTest {
 		}
 
 		public Session getSSHSession() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Future<Boolean> waitForAccessibleAsync(long timeout) throws OpenShiftException {
 			throw new UnsupportedOperationException();
 		}
 	}
