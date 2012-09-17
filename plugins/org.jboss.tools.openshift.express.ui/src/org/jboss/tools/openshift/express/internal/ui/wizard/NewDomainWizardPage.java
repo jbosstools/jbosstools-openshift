@@ -93,10 +93,6 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		final IObservableValue namespaceModelObservable = BeanProperties.value(
 				NewDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
-
-		/*DataBindingUtils.bindMandatoryTextField(
-				namespaceText, "Domain name", NewDomainWizardPageModel.PROPERTY_NAMESPACE, model, dbc);
-		*/
 		
 		Label sshKeyLabel = new Label(container, SWT.NONE);
 		sshKeyLabel.setText("SSH Public Key");
