@@ -692,14 +692,6 @@
         <handler
               class="org.jboss.tools.openshift.express.internal.ui.command.ManageSSHKeysHandler"
               commandId="org.jboss.tools.openshift.express.ui.command.manageKeys">
-              <enabledWhen>
-				<with variable="selection">
-         			<iterate ifEmpty="false" operator="or">
-            			<instanceof
-                       		value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate" />
-                    </iterate>
-                </with>
-              </enabledWhen>
         </handler>
      </extension>
      <extension
@@ -711,6 +703,14 @@
                 icon="icons/key-icon.png"
                 id="org.jboss.tools.openshift.express.ui.command.manageKeys"
                 mnemonic="K">
+              <visibleWhen>
+				<with variable="selection">
+         			<iterate ifEmpty="false" operator="or">
+            			<instanceof
+                       		value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate" />
+                    </iterate>
+                </with>
+              </visibleWhen>
           </command>
         </menuContribution>
      </extension>
