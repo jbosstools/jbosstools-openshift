@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard;
+package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,20 +21,25 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUpdatingJob;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -72,7 +77,8 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
 		addButton.setText("Add Existing...");
-
+		addButton.addSelectionListener(onAdd());
+		
 		Button newButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
@@ -91,7 +97,18 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
 		refreshButton.setText("Refresh...");
-}
+		refreshButton.addSelectionListener(onRefresh());
+	}
+
+	private SelectionListener onAdd() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WizardUtils.openWizardDialog(new AddSSHKeyWizard(pageModel.getUser()), getShell());
+			}
+		};
+	}
 
 	protected TableViewer createTable(Composite tableContainer) {
 		Table table =
@@ -150,6 +167,30 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		} catch (Exception e) {
 			// ignore
 		}
+	}
+
+	private SelectionListener onRefresh() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					WizardUtils.runInWizard(new UIUpdatingJob("Refreshing keys...") {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							pageModel.getUser().refresh();
+							setViewerInput(pageModel.getUser().getSSHKeys());
+							return Status.OK_STATUS;
+						}
+					}, getContainer());
+				} catch (Exception ex) {
+					StatusManager.getManager().handle(
+							OpenShiftUIActivator.createErrorStatus("Could not refresh keys.", ex), StatusManager.LOG);
+				}
+			}
+
+		};
 	}
 
 	private void clearViewer() {

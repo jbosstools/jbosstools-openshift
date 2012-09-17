@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ManageSSHKeysWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
 
 /**
  * @author Andre Dietisheim

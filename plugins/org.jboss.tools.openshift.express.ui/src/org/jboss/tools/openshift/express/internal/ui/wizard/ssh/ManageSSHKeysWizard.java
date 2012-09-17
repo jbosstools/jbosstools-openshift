@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard;
+package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
