@@ -76,6 +76,7 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -179,7 +180,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						useExistingAppBtnSelection, existingAppNameTextObservable, existingApplicationsLoaded);
 		dbc.addValidationStatusProvider(existingAppValidator);
 		ControlDecorationSupport.create(
-				existingAppValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater(false));
+				existingAppValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(false));
 		return existingAppSelectionGroup;
 	}
 
@@ -262,7 +263,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new NewApplicationNameValidator(useExistingAppBtnSelection, applicationNameTextObservable);
 		dbc.addValidationStatusProvider(newApplicationNameValidator);
 		ControlDecorationSupport.create(
-				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new CustomControlDecorationUpdater());
+				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		// application type
 		final Label newAppTypeLabel = new Label(newAppConfigurationGroup, SWT.NONE);
@@ -343,7 +344,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeIndexObservable);
 		dbc.addValidationStatusProvider(newApplicationTypeValidator);
 		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
-				new CustomControlDecorationUpdater());
+				new RequiredControlDecorationUpdater());
 
 		// embeddable cartridges
 		this.newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);

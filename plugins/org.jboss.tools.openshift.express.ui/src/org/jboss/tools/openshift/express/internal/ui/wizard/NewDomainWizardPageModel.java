@@ -23,6 +23,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftSSHKey;
@@ -90,7 +91,7 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	}
 
 	private String checkedGetSSH2Home() throws OpenShiftException {
-		String ssh2Home = getSSH2Home();
+		String ssh2Home = SSHUtils.getSSH2Home();
 		if (ssh2Home == null 
 				|| ssh2Home.trim().length() == 0) {
 			throw new OpenShiftException("Could not determine your ssh2 home directory");
@@ -98,10 +99,6 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return ssh2Home;
 	}
 	
-	public String getSSH2Home() {
-		return JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_SSH2HOME);
-	}
-
 	public boolean hasConfiguredFixedPrivateKeys() {
 		try {
 			SSHUserConfig sshUserConfig = new SSHUserConfig(checkedGetSSH2Home());

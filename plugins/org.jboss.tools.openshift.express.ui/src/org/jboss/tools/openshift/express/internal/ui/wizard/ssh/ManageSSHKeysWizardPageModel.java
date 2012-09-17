@@ -41,7 +41,6 @@ public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
 	}
 
 	public List<IOpenShiftSSHKey> setSSHKeys(List<IOpenShiftSSHKey> keys) {
-		this.keys = keys;
 		firePropertyChange(PROPERTY_SSH_KEYS, this.keys, this.keys = keys);
 		return this.keys;
 	}

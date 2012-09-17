@@ -53,8 +53,10 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.OpenShiftException;
@@ -89,7 +91,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		final NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
 		dbc.addValidationStatusProvider(namespaceValidator);
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
-				new CustomControlDecorationUpdater());
+				new RequiredControlDecorationUpdater());
 		final IObservableValue namespaceModelObservable = BeanProperties.value(
 				NewDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
@@ -232,7 +234,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			if (pageModel.hasConfiguredFixedPrivateKeys()) {
 				return ValidationStatus.warning(
 						NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift servers. " +
-								"This can override any Eclipse specific SSH key preferences.", new SSHUserConfig(pageModel.getSSH2Home()).getFile()));
+								"This can override any Eclipse specific SSH key preferences.", new SSHUserConfig(SSHUtils.getSSH2Home()).getFile()));
 			} else if (!isKeyKnownToSsh((String) value)) {
 					return ValidationStatus.warning(
 							NLS.bind("Could not find the private portion for your public key in the preferences. "

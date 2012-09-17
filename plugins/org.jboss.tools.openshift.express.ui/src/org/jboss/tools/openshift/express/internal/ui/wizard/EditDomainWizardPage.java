@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
@@ -63,7 +64,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		final NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
 		dbc.addValidationStatusProvider(namespaceValidator);
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
-				new CustomControlDecorationUpdater());
+				new RequiredControlDecorationUpdater());
 		final IObservableValue namespaceModelObservable = BeanProperties.value(
 				EditDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);

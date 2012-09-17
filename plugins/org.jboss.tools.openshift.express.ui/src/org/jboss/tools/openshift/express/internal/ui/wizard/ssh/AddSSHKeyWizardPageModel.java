@@ -10,30 +10,42 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 /**
- * @author André Dietisheim
+ * @author Andre Dietisheim
  */
-public class AddSSHKeyWizard extends Wizard {
+public class AddSSHKeyWizardPageModel extends ObservableUIPojo {
 
-	private UserDelegate user;
-	private AddSSHKeyWizardPage addSSHKeyWizardPage;
+	public static final String PROPERTY_FILEPATH = "filePath";
+	public static final String PROPERTY_NAME = "name";
 	
-	public AddSSHKeyWizard(UserDelegate user) {
+	private String name;
+	private String filePath;
+	private UserDelegate user;
+	
+	public AddSSHKeyWizardPageModel(UserDelegate user) {
 		this.user = user;
-		setNeedsProgressMonitor(true);
 	}
 
-	@Override
-	public boolean performFinish() {
-		addSSHKeyWizardPage.addConfiguredSSHKey();
-		return true;
+	public String getFilePath() {
+		return filePath;
 	}
 
-	@Override
-	public void addPages() {
-		addPage(this.addSSHKeyWizardPage = new AddSSHKeyWizardPage(user, this));
+	public String getName() {
+		return name;
 	}
+
+	public void setName(String name) {
+		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
+	}
+
+	public void setFilePath(String filePath) {
+		firePropertyChange(PROPERTY_FILEPATH, this.filePath, this.filePath = filePath);
+	}
+	
+	public void addConfiguredSSHKey() {
+	}
+	
 }
