@@ -705,10 +705,13 @@
                 mnemonic="K">
               <visibleWhen>
 				<with variable="selection">
-         			<iterate ifEmpty="false" operator="or">
-            			<instanceof
-                       		value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate" />
-                    </iterate>
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate" />
+	                    </iterate>
+					</and>
                 </with>
               </visibleWhen>
           </command>
