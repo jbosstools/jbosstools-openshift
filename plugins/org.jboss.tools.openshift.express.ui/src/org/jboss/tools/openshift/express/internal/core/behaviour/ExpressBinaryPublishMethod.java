@@ -24,13 +24,13 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
 import org.jboss.ide.eclipse.as.core.publishers.PublishUtil;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
-import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
+import org.jboss.ide.eclipse.as.core.server.IDeployableServerBehaviour;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 
 public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
 
 	@Override
-	public int publishFinish(DeployableServerBehavior behaviour,
+	public int publishFinish(IDeployableServerBehaviour behaviour,
 			IProgressMonitor monitor) throws CoreException {
 
 		String outProject = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
@@ -46,7 +46,7 @@ public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
 	}
 	
 	@Override
-	public int publishModule(DeployableServerBehavior behaviour, int kind,
+	public int publishModule(IDeployableServerBehaviour behaviour, int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
 		if( module.length > 1 )

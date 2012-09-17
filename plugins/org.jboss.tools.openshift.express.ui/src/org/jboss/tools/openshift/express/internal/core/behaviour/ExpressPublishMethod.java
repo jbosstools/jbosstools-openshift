@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -26,6 +24,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -39,9 +38,9 @@ import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
+import org.jboss.ide.eclipse.as.core.server.IDeployableServerBehaviour;
 import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
-import org.jboss.ide.eclipse.as.core.server.internal.DeployableServerBehavior;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -54,7 +53,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 
 	@Override
-	public void publishStart(DeployableServerBehavior behaviour,
+	public void publishStart(IDeployableServerBehaviour behaviour,
 			IProgressMonitor monitor) throws CoreException {
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
 		IProject magicProject = destProjName == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
@@ -66,7 +65,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 
 	@Override
-	public int publishFinish(DeployableServerBehavior behaviour,
+	public int publishFinish(IDeployableServerBehaviour behaviour,
 			IProgressMonitor monitor) throws CoreException {
 		
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
@@ -85,7 +84,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
         return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;	
     }
 	
-	protected boolean areAllPublished(DeployableServerBehavior behaviour) {
+	protected boolean areAllPublished(IDeployableServerBehaviour behaviour) {
         IModule[] modules = behaviour.getServer().getModules();
         boolean allpublished= true;
         for (int i = 0; i < modules.length; i++) {
@@ -96,7 +95,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 
 	@Override
-	public int publishModule(DeployableServerBehavior behaviour, int kind,
+	public int publishModule(IDeployableServerBehaviour behaviour, int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
 				
@@ -180,7 +179,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 
 	protected PushOperationResult commitAndPushProject(IProject p,
-			DeployableServerBehavior behaviour, IProgressMonitor monitor) throws CoreException {
+			IDeployableServerBehaviour behaviour, IProgressMonitor monitor) throws CoreException {
 		
 		int changed = 0;
 		try {
