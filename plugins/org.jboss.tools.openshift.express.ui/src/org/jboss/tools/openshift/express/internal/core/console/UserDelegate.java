@@ -324,4 +324,13 @@ public class UserDelegate {
 		return delegate.putSSHKey(name, key);
 	}
 	
+	public boolean hasSSHKeyName(String name) {
+		return delegate.hasSSHKeyName(name);
+	}
+
+	public boolean hasSSHPublicKey(String publicKey) {
+		return delegate.hasSSHPublicKey(publicKey);
+	}
+
+	
 }

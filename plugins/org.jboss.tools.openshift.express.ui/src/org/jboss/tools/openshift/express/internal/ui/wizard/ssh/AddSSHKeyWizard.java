@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
@@ -28,8 +29,8 @@ public class AddSSHKeyWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		addSSHKeyWizardPage.addConfiguredSSHKey();
-		return true;
+		IStatus status = addSSHKeyWizardPage.addConfiguredSSHKey();
+		return status.isOK();
 	}
 
 	@Override

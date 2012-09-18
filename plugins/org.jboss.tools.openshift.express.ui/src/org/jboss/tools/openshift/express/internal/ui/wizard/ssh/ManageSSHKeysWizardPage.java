@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -41,7 +39,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.JobScheduler;
+import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
@@ -79,8 +77,8 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-			.to(BeanProperties.value(ManageSSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
-			.in(dbc);
+				.to(BeanProperties.value(ManageSSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
+				.in(dbc);
 
 		Button addButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -122,13 +120,15 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 								"Are you sure that you want to remove public SSH key {0} from OpenShift?",
 								keyName)))
 					try {
-						RemoveKeyJob removeSSHKeyJob = new RemoveKeyJob();
-						new JobScheduler(removeSSHKeyJob).runWhenDone(new RefreshViewerJob());
-						setViewerInput(pageModel.getSSHKeys());
-						WizardUtils.runInWizard(removeSSHKeyJob, getContainer()) ;
+						WizardUtils.runInWizard(
+								new JobChainBuilder(
+										new RemoveKeyJob()).andRunWhenDone(new RefreshViewerJob())
+										.build()
+								, getContainer());
 					} catch (Exception ex) {
 						StatusManager.getManager().handle(
-								OpenShiftUIActivator.createErrorStatus("Could not remove key " + keyName + ".", ex), StatusManager.LOG);
+								OpenShiftUIActivator.createErrorStatus("Could not remove key " + keyName + ".", ex),
+								StatusManager.LOG);
 					}
 			}
 		};
@@ -140,6 +140,14 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				WizardUtils.openWizardDialog(new AddSSHKeyWizard(pageModel.getUser()), getShell());
+				try {
+					WizardUtils.runInWizard(
+							new RefreshViewerJob(),
+							getContainer());
+				} catch (Exception ex) {
+					StatusManager.getManager().handle(
+							OpenShiftUIActivator.createErrorStatus("Could not refresh keys.", ex), StatusManager.LOG);
+				}
 			}
 		};
 	}
@@ -184,7 +192,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
 			Job loadKeysJob = new LoadKeysJob();
-			new JobScheduler(loadKeysJob).runWhenDone(new RefreshViewerJob());
+			new JobChainBuilder(loadKeysJob).andRunWhenDone(new RefreshViewerJob());
 			WizardUtils.runInWizard(loadKeysJob, getContainer());
 		} catch (Exception e) {
 			StatusManager.getManager().handle(
@@ -199,7 +207,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					Job refreshKeysJob = new RefreshKeysJob();
-					new JobScheduler(refreshKeysJob).runWhenDone(new RefreshViewerJob());
+					new JobChainBuilder(refreshKeysJob).andRunWhenDone(new RefreshViewerJob());
 					WizardUtils.runInWizard(refreshKeysJob, getContainer());
 				} catch (Exception ex) {
 					StatusManager.getManager().handle(
@@ -210,22 +218,8 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private void clearViewer() {
-		setViewerInput(new ArrayList<IOpenShiftSSHKey>());
-	}
-
-	private void setViewerInput(final Collection<IOpenShiftSSHKey> keys) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.setInput(keys);
-			}
-		});
-	}
-
 	private class RemoveKeyJob extends Job {
-	
+
 		private RemoveKeyJob() {
 			super("Removing SSH key " + pageModel.getSelectedSSHKey().getName() + "...");
 		}
@@ -236,9 +230,9 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			return Status.OK_STATUS;
 		}
 	}
-	
+
 	private class RefreshKeysJob extends Job {
-		
+
 		private RefreshKeysJob() {
 			super("Refreshing SSH keys... ");
 		}
@@ -251,7 +245,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private class LoadKeysJob extends Job {
-		
+
 		private LoadKeysJob() {
 			super("Loading SSH keys... ");
 		}
@@ -277,4 +271,3 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 }
-

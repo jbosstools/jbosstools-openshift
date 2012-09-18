@@ -17,15 +17,15 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 /**
  * @author Andre Dietisheim
  */
-public class JobScheduler {
+public class JobChainBuilder {
 
 	private Job job;
 
-	public JobScheduler(Job job) {
+	public JobChainBuilder(Job job) {
 		this.job = job;
 	}
 
-	public JobConstraint runWhenDone(Job constrainedJob) {
+	public JobConstraint andRunWhenDone(Job constrainedJob) {
 		return new JobConstraint(job).runWhenDone(constrainedJob);
 	}
 	
@@ -47,7 +47,11 @@ public class JobScheduler {
 		}
 
 		public void schedule() {
-			JobScheduler.this.job.schedule();
+			JobChainBuilder.this.job.schedule();
+		}
+		
+		public Job build() {
+			return JobChainBuilder.this.job;
 		}
 	}
 }

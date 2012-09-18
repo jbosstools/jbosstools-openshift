@@ -10,8 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+
+import com.openshift.client.OpenShiftException;
+import com.openshift.client.SSHPublicKey;
 
 /**
  * @author Andre Dietisheim
@@ -44,8 +51,19 @@ public class AddSSHKeyWizardPageModel extends ObservableUIPojo {
 	public void setFilePath(String filePath) {
 		firePropertyChange(PROPERTY_FILEPATH, this.filePath, this.filePath = filePath);
 	}
-	
-	public void addConfiguredSSHKey() {
+		
+	public boolean hasKeyName(String name) {
+		return user.hasSSHKeyName(name);
 	}
+
+	public boolean hasPublicKey(String publicKeyContent) {
+		return user.hasSSHPublicKey(publicKeyContent);
+	}
+
+	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+		SSHPublicKey sshPublicKey = new SSHPublicKey(new File(filePath));
+		user.putSSHKey(name, sshPublicKey);
+	}
+
 	
 }
