@@ -10,28 +10,31 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 /**
  * @author André Dietisheim
  */
-public class ManageSSHKeysWizard extends Wizard {
+public class NewSSHKeyWizard extends Wizard {
 
 	private UserDelegate user;
-
-	public ManageSSHKeysWizard(UserDelegate user) {
+	private NewSSHKeyWizardPage newSSHKeyWizardPage;
+	
+	public NewSSHKeyWizard(UserDelegate user) {
 		this.user = user;
 		setNeedsProgressMonitor(true);
 	}
 
 	@Override
 	public boolean performFinish() {
-		return true;
+		IStatus status = newSSHKeyWizardPage.addConfiguredSSHKey();
+		return status.isOK();
 	}
 
 	@Override
 	public void addPages() {
-		addPage(new ManageSSHKeysWizardPage(user, this));
+		addPage(this.newSSHKeyWizardPage = new NewSSHKeyWizardPage(user, this));
 	}
 }

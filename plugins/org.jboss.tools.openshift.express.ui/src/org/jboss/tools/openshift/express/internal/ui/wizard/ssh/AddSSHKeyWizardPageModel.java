@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,7 +25,7 @@ import com.openshift.client.SSHPublicKey;
  */
 public class AddSSHKeyWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_FILEPATH = "filePath";
+	public static final String PROPERTY_PUBLICKEY_PATH = "publicKeyPath";
 	public static final String PROPERTY_NAME = "name";
 	
 	private String name;
@@ -36,8 +36,12 @@ public class AddSSHKeyWizardPageModel extends ObservableUIPojo {
 		this.user = user;
 	}
 
-	public String getFilePath() {
+	public String getPublicKeyPath() {
 		return filePath;
+	}
+
+	public void setPublicKeyPath(String filePath) {
+		firePropertyChange(PROPERTY_PUBLICKEY_PATH, this.filePath, this.filePath = filePath);
 	}
 
 	public String getName() {
@@ -48,10 +52,6 @@ public class AddSSHKeyWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
 	}
 
-	public void setFilePath(String filePath) {
-		firePropertyChange(PROPERTY_FILEPATH, this.filePath, this.filePath = filePath);
-	}
-		
 	public boolean hasKeyName(String name) {
 		return user.hasSSHKeyName(name);
 	}

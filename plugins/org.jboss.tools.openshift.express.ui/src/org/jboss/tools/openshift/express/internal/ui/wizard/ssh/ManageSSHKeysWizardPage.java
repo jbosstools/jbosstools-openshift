@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -80,17 +81,18 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(ManageSSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
 				.in(dbc);
 
-		Button addButton = new Button(sshKeysGroup, SWT.PUSH);
+		Button addExistingButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
-		addButton.setText("Add Existing...");
-		addButton.addSelectionListener(onAdd());
+				.align(SWT.FILL, SWT.FILL).applyTo(addExistingButton);
+		addExistingButton.setText("Add Existing...");
+		addExistingButton.addSelectionListener(onAddExisting());
 
-		Button newButton = new Button(sshKeysGroup, SWT.PUSH);
+		Button addNewButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
-		newButton.setText("New...");
-
+				.align(SWT.FILL, SWT.FILL).applyTo(addNewButton);
+		addNewButton.setText("New...");
+		addNewButton.addSelectionListener(onAddNew());
+		
 		Button removeButton = new Button(sshKeysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
@@ -134,12 +136,38 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private SelectionListener onAdd() {
+	private SelectionListener onAddExisting() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WizardUtils.openWizardDialog(new AddSSHKeyWizard(pageModel.getUser()), getShell());
+				if (WizardUtils.openWizardDialog(new AddSSHKeyWizard(pageModel.getUser()), getShell())
+						== Dialog.CANCEL) {
+					return;
+				}
+
+				try {
+					WizardUtils.runInWizard(
+							new RefreshViewerJob(),
+							getContainer());
+				} catch (Exception ex) {
+					StatusManager.getManager().handle(
+							OpenShiftUIActivator.createErrorStatus("Could not refresh keys.", ex), StatusManager.LOG);
+				}
+			}
+		};
+	}
+
+	private SelectionListener onAddNew() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(WizardUtils.openWizardDialog(new NewSSHKeyWizard(pageModel.getUser()), getShell())
+						== Dialog.CANCEL) {
+					return;
+				}
+		
 				try {
 					WizardUtils.runInWizard(
 							new RefreshViewerJob(),

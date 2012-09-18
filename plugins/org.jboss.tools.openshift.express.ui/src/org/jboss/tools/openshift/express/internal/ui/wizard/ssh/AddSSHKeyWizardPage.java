@@ -10,26 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.MultiValidator;
-import org.eclipse.core.databinding.validation.ValidationStatus;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -44,14 +35,9 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.databinding.AlphanumericStringValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
-
-import com.openshift.client.OpenShiftException;
-import com.openshift.client.SSHPublicKey;
 
 /**
  * @author André Dietisheim
@@ -88,42 +74,27 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
-				.validatingAfterConvert(new AlphanumericStringValidator("key name") {
-
-					@Override
-					public IStatus validate(Object value) {
-						IStatus validationStatus = super.validate(value);
-						if (!validationStatus.isOK()) {
-							return validationStatus;
-						}
-						String keyName = (String) value;
-						if (pageModel.hasKeyName(keyName)) {
-							return ValidationStatus.error("There's already a key with the name " + keyName);
-						}
-						return ValidationStatus.ok();
-					}
-
-				})
+				.validatingAfterConvert(new SSHPublicKeyNameValidator(pageModel))
 				.to(BeanProperties.value(AddSSHKeyWizardPageModel.PROPERTY_NAME).observe(pageModel))
 				.notUpdatingParticipant()
 				.in(dbc);
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		Label fileLabel = new Label(addSSHKeyGroup, SWT.NONE);
+		Label publicKeyLabel = new Label(addSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(fileLabel);
-		fileLabel.setText("SSH Key:");
+				.align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
+		publicKeyLabel.setText("Public Key:");
 
-		Text fileText = new Text(addSSHKeyGroup, SWT.BORDER);
-		fileText.setEditable(false);
+		Text publicKeyText = new Text(addSSHKeyGroup, SWT.BORDER);
+		publicKeyText.setEditable(false);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(fileText);
-		IObservableValue filePathObservable =
-				WidgetProperties.text(SWT.Modify).observe(fileText);
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(publicKeyText);
+		IObservableValue publicKeyObservable =
+				WidgetProperties.text(SWT.Modify).observe(publicKeyText);
 		ValueBindingBuilder
-				.bind(filePathObservable)
-				.to(BeanProperties.value(AddSSHKeyWizardPageModel.PROPERTY_FILEPATH).observe(pageModel))
+				.bind(publicKeyObservable)
+				.to(BeanProperties.value(AddSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_PATH).observe(pageModel))
 				.in(dbc);
 
 		Button browseButton = new Button(addSSHKeyGroup, SWT.PUSH);
@@ -132,7 +103,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(browseButton);
 
-		ValidationStatusProvider sshPublicKeyValidator = new SSHPublicKeyValidator(filePathObservable);
+		ValidationStatusProvider sshPublicKeyValidator = new SSHPublicKeyValidator(publicKeyObservable, pageModel);
 		dbc.addValidationStatusProvider(sshPublicKeyValidator);
 		ControlDecorationSupport.create(
 				sshPublicKeyValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -147,7 +118,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				dialog.setFilterPath(SSHUtils.getSSH2Home());
 				String filePath = null;
 				if ((filePath = dialog.open()) != null) {
-					pageModel.setFilePath(filePath);
+					pageModel.setPublicKeyPath(filePath);
 				}
 			}
 		};
@@ -155,60 +126,9 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 	public IStatus addConfiguredSSHKey() {
 		try {
-			return WizardUtils.runInWizard(new AddSSHKeyJob(), getContainer());
+			return WizardUtils.runInWizard(new AddSSHKeyJob(pageModel), getContainer());
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus("Could not add ssh key " + pageModel.getName() + ".");
 		}
 	}
-
-	private class AddSSHKeyJob extends Job {
-
-		public AddSSHKeyJob() {
-			super("Adding SSH key " + pageModel.getName() + "...");
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			try {
-				pageModel.addConfiguredSSHKey();
-				return Status.OK_STATUS;
-			} catch (Exception e) {
-				return OpenShiftUIActivator.createErrorStatus(
-						NLS.bind("Could not add SSH key {0} to OpenShift", pageModel.getName()), e);
-			}
-		}
-	}
-
-	public class SSHPublicKeyValidator extends MultiValidator {
-
-		private IObservableValue filePathObservable;
-
-		public SSHPublicKeyValidator(IObservableValue filePathObservable) {
-			this.filePathObservable = filePathObservable;
-		}
-
-		@Override
-		protected IStatus validate() {
-			String filePath = (String) filePathObservable.getValue();
-			if (StringUtils.isEmpty(filePath)) {
-				return ValidationStatus.cancel("You have to supply a public SSH key.");
-			}
-			try {
-				SSHPublicKey sshPublicKey = new SSHPublicKey(filePath);
-				if (pageModel.hasPublicKey(sshPublicKey.getPublicKey())) {
-					return ValidationStatus.error("The public key in " + filePath + " is already in use on OpenShift. Choose another key.");
-				}
-			} catch (FileNotFoundException e) {
-				return ValidationStatus.error("Could not load file: " + e.getMessage());
-			} catch (OpenShiftException e) {
-				return ValidationStatus.error(filePath + "is not a valid public SSH key: " + e.getMessage());
-			} catch (IOException e) {
-				return ValidationStatus.error("Could not load file: " + e.getMessage());
-			}
-
-			return Status.OK_STATUS;
-		}
-
-	}
-
 }
