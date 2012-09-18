@@ -16,8 +16,11 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,6 +40,8 @@ import org.jboss.tools.openshift.express.internal.ui.databinding.NonEmptyStringV
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+
+import com.openshift.client.SSHKeyType;
 
 /**
  * @author André Dietisheim
@@ -79,6 +84,24 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		Label typeLabel = new Label(newSSHKeyGroup, SWT.NONE);
+		typeLabel.setText("Key Type:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(typeLabel);
+
+		ComboViewer typeCombo = new ComboViewer(newSSHKeyGroup, SWT.DEFAULT);
+		typeCombo.setContentProvider(ArrayContentProvider.getInstance());
+		typeCombo.setInput(SSHKeyType.values());
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(typeCombo.getControl());
+		ValueBindingBuilder.bind(
+				ViewerProperties.singleSelection().observe(typeCombo))
+				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_TYPE).observe(typeCombo))
+				.in(dbc);
+		Label fillerLabel = new Label(newSSHKeyGroup, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(fillerLabel);
 
 		Label ssh2HomeLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()

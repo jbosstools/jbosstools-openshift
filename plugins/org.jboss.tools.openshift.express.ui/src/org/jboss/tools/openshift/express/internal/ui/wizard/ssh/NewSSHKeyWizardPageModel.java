@@ -24,7 +24,7 @@ public class NewSSHKeyWizardPageModel extends AddSSHKeyWizardPageModel {
 	public static final String PROPERTY_PRIVATEKEY_PATH = "privateKeyPath";
 	public static final String PROPERTY_PRIVATEKEY_PASSPHRASE = "privateKeyPassphrase";
 
-	private SSHKeyType type;
+	private SSHKeyType type = SSHKeyType.SSH_RSA;
 	private String ssh2Home;
 	private String privateKeyPath;
 	private String privateKeyPathphrase;
