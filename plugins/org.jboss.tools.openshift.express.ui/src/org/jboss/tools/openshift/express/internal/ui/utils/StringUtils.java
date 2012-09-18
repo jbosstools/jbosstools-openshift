@@ -91,9 +91,10 @@ public class StringUtils {
 		if (text.length() < maxLength) {
 			return text;
 		}
-
-		return new StringBuilder(text.substring(0, maxLength - SHORTENING_MARKER.length()))
+		int availableCharacters = maxLength - SHORTENING_MARKER.length();
+		return new StringBuilder(text.substring(0, availableCharacters / 2))
 				.append(SHORTENING_MARKER)
+				.append(text.substring(text.length() - availableCharacters / 2, text.length()))
 				.toString();
 	}
 

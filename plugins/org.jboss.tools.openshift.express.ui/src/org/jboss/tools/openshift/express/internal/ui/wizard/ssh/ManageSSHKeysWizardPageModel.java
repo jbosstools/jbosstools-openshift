@@ -24,9 +24,11 @@ import com.openshift.client.IOpenShiftSSHKey;
 public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SSH_KEYS = "SSHKeys";
+	public static final String PROPERTY_SELECTED_KEY = "selectedSSHKey";
 
 	private UserDelegate user;
 	private List<IOpenShiftSSHKey> keys = new ArrayList<IOpenShiftSSHKey>();
+	private IOpenShiftSSHKey selectedKey;
 
 	public ManageSSHKeysWizardPageModel(UserDelegate user) {
 		this.user = user;
@@ -45,8 +47,30 @@ public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
 		return this.keys;
 	}
 
+	public IOpenShiftSSHKey getSelectedSSHKey() {
+		return selectedKey;
+	}
+	
+	public void setSelectedSSHKey(IOpenShiftSSHKey key) {
+		firePropertyChange(PROPERTY_SELECTED_KEY, this.selectedKey, this.selectedKey = key);
+	}
+
+	public void removeKey() {
+		if (selectedKey == null) {
+			return;
+		}
+		selectedKey.destroy();
+		setSSHKeys(user.getSSHKeys());
+	}
+
+	public void refresh() {
+		user.refresh();
+		setSSHKeys(user.getSSHKeys());
+	}
+	
 	public UserDelegate getUser() {
 		return user;
 	}
+
 
 }

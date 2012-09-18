@@ -25,21 +25,29 @@ public class JobScheduler {
 		this.job = job;
 	}
 
-	public class ChainedJob {
+	public JobConstraint runWhenDone(Job constrainedJob) {
+		return new JobConstraint(job).runWhenDone(constrainedJob);
+	}
+	
+	public class JobConstraint {
 		private Job job;
 
-		private ChainedJob(Job job) {
+		private JobConstraint(Job job) {
 			this.job = job;
 		}
 
-		public ChainedJob andWhenDone(final Job constrainedJob) {
+		public JobConstraint runWhenDone(final Job constrainedJob) {
 			job.addJobChangeListener(new JobChangeAdapter() {
 
 				@Override
 				public void done(IJobChangeEvent event) {
 					constrainedJob.schedule();
 				}});
-			return new ChainedJob(constrainedJob);
+			return new JobConstraint(constrainedJob);
+		}
+
+		public void schedule() {
+			JobScheduler.this.job.schedule();
 		}
 	}
 }
