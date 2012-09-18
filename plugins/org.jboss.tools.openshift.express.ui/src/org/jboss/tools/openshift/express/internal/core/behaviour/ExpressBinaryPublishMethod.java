@@ -53,8 +53,7 @@ public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
 			return 0;
 		
 		IDeployableServer depServ = ServerConverter.getDeployableServer(behaviour.getServer());
-		IPath dest = PublishUtil.getDeployRootFolder(module, depServ);
-				//PublishUtil.getDeployPath(this, module, depServ);
+		IPath dest = depServ.getDeploymentLocation(module, false); 
 		
 		if( module.length == 0 ) return IServer.PUBLISH_STATE_NONE;
 		int modulePublishState = behaviour.getServer().getModulePublishState(module);
