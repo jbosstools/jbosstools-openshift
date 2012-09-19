@@ -18,11 +18,11 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 /**
  * @author Andre Dietisheim
  */
-public class NonEmptyStringValidator implements IValidator {
+public class RequiredStringValidator implements IValidator {
 
 	private String fieldName;
 
-	public NonEmptyStringValidator(String fieldName) {
+	public RequiredStringValidator(String fieldName) {
 		this.fieldName = fieldName;
 	}
 
@@ -32,6 +32,10 @@ public class NonEmptyStringValidator implements IValidator {
 		if (StringUtils.isEmpty(name)) {
 			return ValidationStatus.cancel("You have to provide a " + fieldName);
 		}
+		return validateString((String)value);
+	}
+	
+	public IStatus validateString(String value) {
 		return ValidationStatus.ok();
 	}
 

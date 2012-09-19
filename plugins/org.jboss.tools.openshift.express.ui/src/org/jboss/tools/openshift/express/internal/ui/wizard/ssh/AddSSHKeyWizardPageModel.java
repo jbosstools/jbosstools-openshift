@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 
 import com.openshift.client.OpenShiftException;
@@ -23,47 +22,34 @@ import com.openshift.client.SSHPublicKey;
 /**
  * @author Andre Dietisheim
  */
-public class AddSSHKeyWizardPageModel extends ObservableUIPojo {
+public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 
 	public static final String PROPERTY_PUBLICKEY_PATH = "publicKeyPath";
-	public static final String PROPERTY_NAME = "name";
 	
-	private String name;
-	private String filePath;
-	private UserDelegate user;
+	private String keyPath;
 	
 	public AddSSHKeyWizardPageModel(UserDelegate user) {
-		this.user = user;
+		super(user);
 	}
 
 	public String getPublicKeyPath() {
-		return filePath;
+		return keyPath;
 	}
 
-	public void setPublicKeyPath(String filePath) {
-		firePropertyChange(PROPERTY_PUBLICKEY_PATH, this.filePath, this.filePath = filePath);
+	public File getPublicKey() {
+		return new File(keyPath);
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
-	}
-
-	public boolean hasKeyName(String name) {
-		return user.hasSSHKeyName(name);
+	public void setPublicKeyPath(String keyPath) {
+		firePropertyChange(PROPERTY_PUBLICKEY_PATH, this.keyPath, this.keyPath = keyPath);
 	}
 
 	public boolean hasPublicKey(String publicKeyContent) {
-		return user.hasSSHPublicKey(publicKeyContent);
-	}
-
-	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
-		SSHPublicKey sshPublicKey = new SSHPublicKey(new File(filePath));
-		user.putSSHKey(name, sshPublicKey);
-	}
-
+		return getUser().hasSSHPublicKey(publicKeyContent);
+	}	
 	
+	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+		SSHPublicKey sshPublicKey = new SSHPublicKey(getPublicKey());
+		getUser().putSSHKey(getName(), sshPublicKey);
+	}
 }

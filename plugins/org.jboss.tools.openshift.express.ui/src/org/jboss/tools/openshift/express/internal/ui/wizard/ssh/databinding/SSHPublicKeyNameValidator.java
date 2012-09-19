@@ -8,29 +8,35 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.databinding;
+package org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding;
 
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.databinding.AlphanumericStringValidator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ISSHKeyWizardPageModel;
 
 /**
  * @author Andre Dietisheim
  */
-public class AlphanumericStringValidator extends RequiredStringValidator {
+public class SSHPublicKeyNameValidator extends AlphanumericStringValidator {
 
-	private String fieldName;
+	private ISSHKeyWizardPageModel model;
 
-	public AlphanumericStringValidator(String fieldName) {
-		super(fieldName);
+	public SSHPublicKeyNameValidator(ISSHKeyWizardPageModel model) {
+		super("key name");
+		this.model = model;
 	}
 
 	@Override
 	public IStatus validateString(String value) {
-		if (!StringUtils.isAlphaNumeric(value)) {
-			return ValidationStatus.error("You have to provide an alphanumeric " + fieldName);
+		IStatus validationStatus = super.validateString(value);
+		if (!validationStatus.isOK()) {
+			return validationStatus;
+		}
+		if (model.hasKeyName(value)) {
+			return ValidationStatus.error("There's already a key with the name " + value);
 		}
 		return ValidationStatus.ok();
-	}
 
+	}
 }

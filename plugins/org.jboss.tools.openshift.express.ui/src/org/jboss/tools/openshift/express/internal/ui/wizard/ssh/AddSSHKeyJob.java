@@ -22,9 +22,9 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
  */
 public class AddSSHKeyJob extends Job {
 
-	private AddSSHKeyWizardPageModel model;
+	private ISSHKeyWizardPageModel model;
 
-	public AddSSHKeyJob(AddSSHKeyWizardPageModel model) {
+	public AddSSHKeyJob(ISSHKeyWizardPageModel model) {
 		super("Adding SSH key " + model.getName() + "...");
 		this.model = model;
 	}

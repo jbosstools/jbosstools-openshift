@@ -10,24 +10,35 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
+import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+
+import com.openshift.client.OpenShiftException;
+import com.openshift.client.SSHKeyPair;
 import com.openshift.client.SSHKeyType;
 
 /**
  * @author Andre Dietisheim
  */
-public class NewSSHKeyWizardPageModel extends AddSSHKeyWizardPageModel {
+public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 
 	public static final String PROPERTY_TYPE = "type";
-	public static final String PROPERTY_SSH2_HOME = "SSH22Home";
-	public static final String PROPERTY_PRIVATEKEY_PATH = "privateKeyPath";
+	public static final String PROPERTY_SSH2_HOME = "SSH2Home";
+	public static final String PROPERTY_PRIVATEKEY_FILENAME = "privateKeyName";
 	public static final String PROPERTY_PRIVATEKEY_PASSPHRASE = "privateKeyPassphrase";
+	public static final String PROPERTY_PUBLICKEY_FILENAME = "publicKeyName";
+	private static final String PUBLICKEY_SUFFIX = ".pub";
 
 	private SSHKeyType type = SSHKeyType.SSH_RSA;
-	private String ssh2Home;
-	private String privateKeyPath;
+	private String ssh2Home = SSHUtils.getSSH2Home();
+	private String privateKeyName;
 	private String privateKeyPathphrase;
+	private String publicKeyName;
 
 	public NewSSHKeyWizardPageModel(UserDelegate user) {
 		super(user);
@@ -50,12 +61,32 @@ public class NewSSHKeyWizardPageModel extends AddSSHKeyWizardPageModel {
 				this.privateKeyPathphrase, this.privateKeyPathphrase = privateKeyPathphrase);
 	}
 
-	public String getPrivateKeyPath() {
-		return privateKeyPath;
+	public String getPrivateKeyName() {
+		return privateKeyName;
 	}
 
-	public void setPrivateKeyPath(String privateKeyPath) {
-		firePropertyChange(PROPERTY_PRIVATEKEY_PATH, this.privateKeyPath, this.privateKeyPath = privateKeyPath);
+	public void setPrivateKeyName(String privateKeyName) {
+		firePropertyChange(PROPERTY_PRIVATEKEY_FILENAME, this.privateKeyName, this.privateKeyName = privateKeyName);
+		updatePublicKeyNameFromPrivateKey(privateKeyName);
+	}
+
+	private void updatePublicKeyNameFromPrivateKey(String privateKeyName) {
+		if (StringUtils.isEmpty(publicKeyName)) {
+			setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
+		} else {
+			String publicKeyNameNoSuffix = StringUtils.getWithoutSuffix(publicKeyName, PUBLICKEY_SUFFIX); 
+			if (privateKeyName.startsWith(publicKeyNameNoSuffix)) {
+				setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
+			}			
+		}
+	}
+
+	public String getPublicKeyName() {
+		return publicKeyName;
+	}
+
+	public void setPublicKeyName(String publicKeyName) {
+		firePropertyChange(PROPERTY_PUBLICKEY_FILENAME, this.publicKeyName, this.publicKeyName = publicKeyName);
 	}
 
 	public String getSSH2Home() {
@@ -65,5 +96,17 @@ public class NewSSHKeyWizardPageModel extends AddSSHKeyWizardPageModel {
 	public void setSSH2Home(String ssh2Home) {
 		firePropertyChange(PROPERTY_SSH2_HOME, this.ssh2Home, this.ssh2Home = ssh2Home);
 	}
+	
+	public File getPublicKey() {
+		return new File(ssh2Home, publicKeyName);
+	}
+	
+	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+		String privateKeyPath = new File(ssh2Home, privateKeyName).getAbsolutePath();
+		String publicKeyPath = new File(ssh2Home, publicKeyName).getAbsolutePath();
+		SSHKeyPair keyPair = SSHKeyPair.create(privateKeyPathphrase, privateKeyPath, publicKeyPath);
+		getUser().putSSHKey(getName(), keyPair);
+	}
+
 
 }

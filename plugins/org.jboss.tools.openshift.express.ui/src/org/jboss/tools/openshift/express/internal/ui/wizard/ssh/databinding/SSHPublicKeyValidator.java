@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
+package org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.AddSSHKeyWizardPageModel;
 
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.SSHPublicKey;

@@ -10,27 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.databinding;
 
+import java.io.File;
+
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
+ * Validates a given String positively if it is non-empty and has no separator
+ * chars (it's a file name, not a path)
+ * 
  * @author Andre Dietisheim
  */
-public class AlphanumericStringValidator extends RequiredStringValidator {
+public class FileNameValidator extends RequiredStringValidator implements IValidator {
 
-	private String fieldName;
-
-	public AlphanumericStringValidator(String fieldName) {
-		super(fieldName);
+	public FileNameValidator() {
+		super("private key file name");
 	}
 
 	@Override
 	public IStatus validateString(String value) {
-		if (!StringUtils.isAlphaNumeric(value)) {
-			return ValidationStatus.error("You have to provide an alphanumeric " + fieldName);
+		if (value.indexOf(File.separator) >= 0) {
+			ValidationStatus.error("You may only provide a file name, not a path.");
 		}
 		return ValidationStatus.ok();
 	}
-
 }

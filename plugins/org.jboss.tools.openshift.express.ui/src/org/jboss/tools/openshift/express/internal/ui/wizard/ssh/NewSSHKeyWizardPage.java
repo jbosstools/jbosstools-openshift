@@ -36,10 +36,13 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.databinding.NonEmptyStringValidator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.FileNameValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.DirectoryValidator;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyNameValidator;
 
 import com.openshift.client.SSHKeyType;
 
@@ -66,7 +69,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(newSSHKeyGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(3).margins(6, 6).applyTo(newSSHKeyGroup);
+				.numColumns(4).margins(6, 6).applyTo(newSSHKeyGroup);
 
 		Label nameLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		nameLabel.setText("Name:");
@@ -75,7 +78,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 		Text nameText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(nameText);
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
 				.validatingAfterConvert(new SSHPublicKeyNameValidator(pageModel))
@@ -90,18 +93,19 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(typeLabel);
 
-		ComboViewer typeCombo = new ComboViewer(newSSHKeyGroup, SWT.DEFAULT);
+		ComboViewer typeCombo = new ComboViewer(newSSHKeyGroup, SWT.READ_ONLY);
 		typeCombo.setContentProvider(ArrayContentProvider.getInstance());
 		typeCombo.setInput(SSHKeyType.values());
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(typeCombo.getControl());
-		ValueBindingBuilder.bind(
-				ViewerProperties.singleSelection().observe(typeCombo))
-				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_TYPE).observe(typeCombo))
+		ValueBindingBuilder
+				.bind(ViewerProperties.singleSelection().observe(typeCombo))
+				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_TYPE).observe(pageModel))
 				.in(dbc);
+
 		Label fillerLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(fillerLabel);
+				.align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(fillerLabel);
 
 		Label ssh2HomeLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -114,17 +118,25 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(ssh2HomeText);
 		Binding ssh2HomeBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(ssh2HomeText))
-				.validatingAfterConvert(new NonEmptyStringValidator("ssh2 home directory"))
+				.validatingAfterConvert(new DirectoryValidator("ssh2 home directory"))
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_SSH2_HOME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				ssh2HomeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		Button ss2HomeBrowseButton = new Button(newSSHKeyGroup, SWT.PUSH);
-		ss2HomeBrowseButton.setText("Browse...");
-		ss2HomeBrowseButton.addSelectionListener(onBrowse());
+		Button ssh2HomeBrowseButton = new Button(newSSHKeyGroup, SWT.PUSH);
+		ssh2HomeBrowseButton.setText("Browse...");
+		ssh2HomeBrowseButton.addSelectionListener(onBrowse(ssh2HomeText));
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(ss2HomeBrowseButton);
+				.align(SWT.FILL, SWT.CENTER).applyTo(ssh2HomeBrowseButton);
+
+		Button defaultSSH2HomeHomeButton = new Button(newSSHKeyGroup, SWT.CHECK);
+		defaultSSH2HomeHomeButton.setText("Default");
+		defaultSSH2HomeHomeButton.addSelectionListener(onDefault(ssh2HomeText, ssh2HomeBrowseButton));
+		defaultSSH2HomeHomeButton.setSelection(true);
+		updateSSH2HomeWidgets(true, ssh2HomeText, ssh2HomeBrowseButton);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).applyTo(ssh2HomeBrowseButton);
 
 		Label privateKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -133,11 +145,11 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 		Text privateKeyText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(privateKeyText);
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(privateKeyText);
 		Binding privateKeyBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(privateKeyText))
-				.validatingAfterConvert(new NonEmptyStringValidator("private key file name"))
-				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_PATH).observe(pageModel))
+				.validatingAfterConvert(new FileNameValidator())
+				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_FILENAME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				privateKeyBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -149,10 +161,9 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 		Text passphraseText = new Text(newSSHKeyGroup, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(passphraseText);
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(passphraseText);
 		ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(passphraseText))
-				.validatingAfterConvert(new NonEmptyStringValidator("pass phrase"))
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_PASSPHRASE).observe(pageModel))
 				.in(dbc);
 
@@ -163,29 +174,55 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 		Text publicKeyText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(publicKeyText);
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(publicKeyText);
 		Binding publicKeyBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(publicKeyText))
-				.validatingAfterConvert(new NonEmptyStringValidator("public key file name"))
-				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_PATH).observe(pageModel))
+				.validatingAfterConvert(new FileNameValidator())
+				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_FILENAME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				publicKeyBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 
-	private SelectionListener onBrowse() {
+	private SelectionListener onBrowse(final Text ssh2HomeText) {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-				dialog.setFilterPath(SSHUtils.getSSH2Home());
-				String filePath = null;
-				if ((filePath = dialog.open()) != null) {
-					pageModel.setPublicKeyPath(filePath);
+				dialog.setFilterPath(getFilterPath(ssh2HomeText.getText()));
+				String ssh2HomePath = null;
+				if ((ssh2HomePath = dialog.open()) != null) {
+					pageModel.setSSH2Home(ssh2HomePath);
+				}
+			}
+
+			private String getFilterPath(String currentFilterPath) {
+				if (StringUtils.isEmpty(currentFilterPath)) {
+					return currentFilterPath;
+				} else {
+					return SSHUtils.getSSH2Home();
 				}
 			}
 		};
+	}
+
+	private SelectionListener onDefault(final Text ssh2HomeText, final Button ssh2HomeBrowseButton) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateSSH2HomeWidgets(((Button) e.widget).getSelection(), ssh2HomeText, ssh2HomeBrowseButton);
+			}
+		};
+	}
+
+	private void updateSSH2HomeWidgets(boolean isDefault, final Text ssh2HomeText, final Button ssh2HomeBrowseButton) {
+		ssh2HomeText.setEnabled(!isDefault);
+		ssh2HomeBrowseButton.setEnabled(!isDefault);
+		if (isDefault) {
+			ssh2HomeText.setText(SSHUtils.getSSH2Home());
+		}
 	}
 
 	public IStatus addConfiguredSSHKey() {

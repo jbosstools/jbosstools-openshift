@@ -98,4 +98,12 @@ public class StringUtils {
 				.toString();
 	}
 
+	public static String getWithoutSuffix(String string, String suffix) {
+		String stringNoSuffix = string;
+		int suffixIndex = string.indexOf(suffix);
+		if (suffixIndex >= 0) {
+			stringNoSuffix = string.substring(0, suffixIndex);
+		}
+		return stringNoSuffix;
+	}
 }
