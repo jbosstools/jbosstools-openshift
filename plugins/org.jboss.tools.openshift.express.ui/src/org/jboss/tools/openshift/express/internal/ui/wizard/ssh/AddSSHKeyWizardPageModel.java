@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
 
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.SSHPublicKey;
@@ -48,7 +49,7 @@ public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return getUser().hasSSHPublicKey(publicKeyContent);
 	}	
 	
-	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+	public void addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
 		SSHPublicKey sshPublicKey = new SSHPublicKey(getPublicKey());
 		getUser().putSSHKey(getName(), sshPublicKey);
 	}

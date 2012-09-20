@@ -32,7 +32,7 @@ public class AddSSHKeyJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try {
-			model.addConfiguredSSHKey();
+			model.addSSHKey();
 			return Status.OK_STATUS;
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(

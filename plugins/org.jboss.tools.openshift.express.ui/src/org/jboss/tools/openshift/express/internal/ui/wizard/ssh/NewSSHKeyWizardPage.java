@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -182,6 +183,14 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 				publicKeyBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		Link sshPrefsLink = new Link(parent, SWT.NONE);
+		sshPrefsLink
+				.setText("The private key of your new SSH key pair will get added to the \n<a>SSH2 Preferences</a>");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
+		sshPrefsLink.addSelectionListener(onSshPrefs());
+
 	}
 
 	private SelectionListener onBrowse(final Text ssh2HomeText) {
@@ -232,4 +241,15 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 			return OpenShiftUIActivator.createErrorStatus("Could not add ssh key " + pageModel.getName() + ".");
 		}
 	}
+
+	private SelectionAdapter onSshPrefs() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SSHUtils.openPreferencesPage(getShell());
+			}
+		};
+	}
+
 }

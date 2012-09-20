@@ -74,10 +74,10 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		if (StringUtils.isEmpty(publicKeyName)) {
 			setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
 		} else {
-			String publicKeyNameNoSuffix = StringUtils.getWithoutSuffix(publicKeyName, PUBLICKEY_SUFFIX); 
+			String publicKeyNameNoSuffix = StringUtils.getWithoutSuffix(publicKeyName, PUBLICKEY_SUFFIX);
 			if (privateKeyName.startsWith(publicKeyNameNoSuffix)) {
 				setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
-			}			
+			}
 		}
 	}
 
@@ -96,17 +96,24 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	public void setSSH2Home(String ssh2Home) {
 		firePropertyChange(PROPERTY_SSH2_HOME, this.ssh2Home, this.ssh2Home = ssh2Home);
 	}
-	
+
 	public File getPublicKey() {
 		return new File(ssh2Home, publicKeyName);
 	}
-	
-	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
-		String privateKeyPath = new File(ssh2Home, privateKeyName).getAbsolutePath();
-		String publicKeyPath = new File(ssh2Home, publicKeyName).getAbsolutePath();
-		SSHKeyPair keyPair = SSHKeyPair.create(privateKeyPathphrase, privateKeyPath, publicKeyPath);
+
+	public void addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+		SSHKeyPair keyPair = createSSHKey();
+		SSHUtils.addToPrivateKeysPreferences(new File(keyPair.getPrivateKeyPath()));
 		getUser().putSSHKey(getName(), keyPair);
 	}
 
+	private SSHKeyPair createSSHKey() {
+		File privateKey = new File(ssh2Home, privateKeyName);
+		File publicKey = new File(ssh2Home, publicKeyName);
+		SSHKeyPair keyPair =
+				SSHKeyPair.create(privateKeyPathphrase, privateKey.getAbsolutePath(), publicKey.getAbsolutePath());
+		SSHUtils.setPrivateKeyPermissions(privateKey);
+		return keyPair;
+	}
 
 }

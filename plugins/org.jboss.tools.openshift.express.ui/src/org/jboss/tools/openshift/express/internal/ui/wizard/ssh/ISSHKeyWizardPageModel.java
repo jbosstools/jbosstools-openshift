@@ -31,7 +31,7 @@ public interface ISSHKeyWizardPageModel {
 
 	public boolean hasPublicKey(String publicKeyContent);
 
-	public void addConfiguredSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
+	public void addSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
 
 	public File getPublicKey();
 }

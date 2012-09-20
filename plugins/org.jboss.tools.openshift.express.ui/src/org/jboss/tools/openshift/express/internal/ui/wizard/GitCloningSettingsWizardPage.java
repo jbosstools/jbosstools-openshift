@@ -178,7 +178,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
 
 		Link sshPrefsLink = new Link(parent, SWT.NONE);
-		sshPrefsLink.setText("Make sure your SSH key used with the domain is listed in <a>SSH2 Preferences</a>.");
+		sshPrefsLink.setText("Make sure your SSH key used with your user " + wizardModel.getUser().getUsername() + "\nis listed in <a>SSH2 Preferences</a>.");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0)
 				.applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs());

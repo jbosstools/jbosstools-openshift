@@ -14,10 +14,12 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,6 +35,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
@@ -41,6 +44,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
@@ -57,7 +61,8 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	private TableViewer viewer;
 
 	public ManageSSHKeysWizardPage(UserDelegate user, IWizard wizard) {
-		super("Manage SSH Keys", "Manage the SSH keys that are available to your OpenShift account",
+		super("Manage SSH Keys",
+				"Manage the SSH keys that are available to your OpenShift user\n" + user.getUsername(),
 				"ManageSSHKeysPage", wizard);
 		this.pageModel = new ManageSSHKeysWizardPageModel(user);
 	}
@@ -98,7 +103,19 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove());
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(removeButton))
+			.to(ViewerProperties.singleSelection().observe(viewer))
+			.converting(new Converter(IOpenShiftSSHKey.class, Boolean.class) {
 
+				@Override
+				public Object convert(Object fromObject) {
+					IOpenShiftSSHKey key = (IOpenShiftSSHKey) fromObject;
+					return key != null;
+				}
+		})
+		.in(dbc);
+		
 		Composite filler = new Composite(sshKeysGroup, SWT.None);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(filler);
@@ -108,6 +125,13 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
 		refreshButton.setText("Refresh...");
 		refreshButton.addSelectionListener(onRefresh());
+		
+		Link sshPrefsLink = new Link(parent, SWT.NONE);
+		sshPrefsLink
+				.setText("Please make sure that your private keys for these public keys are listed in the\n<a>SSH2 Preferences</a>");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
+		sshPrefsLink.addSelectionListener(onSshPrefs());
 	}
 
 	private SelectionListener onRemove() {
@@ -163,11 +187,11 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(WizardUtils.openWizardDialog(new NewSSHKeyWizard(pageModel.getUser()), getShell())
+				if (WizardUtils.openWizardDialog(new NewSSHKeyWizard(pageModel.getUser()), getShell())
 						== Dialog.CANCEL) {
 					return;
 				}
-		
+
 				try {
 					WizardUtils.runInWizard(
 							new RefreshViewerJob(),
@@ -243,6 +267,16 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 
+		};
+	}
+
+	private SelectionAdapter onSshPrefs() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SSHUtils.openPreferencesPage(getShell());
+			}
 		};
 	}
 

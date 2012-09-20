@@ -235,7 +235,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 				return ValidationStatus.warning(
 						NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift servers. " +
 								"This can override any Eclipse specific SSH key preferences.", new SSHUserConfig(SSHUtils.getSSH2Home()).getFile()));
-			} else if (!isKeyKnownToSsh((String) value)) {
+			} else if (!SSHUtils.publicKeyMatchesPrivateKeyInPreferences(new File((String) value))) {
 					return ValidationStatus.warning(
 							NLS.bind("Could not find the private portion for your public key in the preferences. "
 									+ "Make sure it is listed in the ssh2 preferences.", value));
@@ -243,27 +243,6 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			return ValidationStatus.ok();
 		}
 
-		private boolean isKeyKnownToSsh(String publicKeyPath) {
-			if (StringUtils.isEmpty(publicKeyPath)) {
-				return false;
-			}
-			for (String preferencesKey : pageModel.getPrivateKeysFromPreferences()) {
-				try {
-					File privateKey = SshPrivateKeysPreferences.getKeyFile(preferencesKey);
-					if (privateKey == null
-							|| !FileUtils.canRead(privateKey)) {
-						continue;
-					}
-					if (publicKeyPath.startsWith(privateKey.getAbsolutePath() + ".")
-							|| publicKeyPath.startsWith(privateKey.getPath() + ".")) {
-						return true;
-					}
-				} catch (FileNotFoundException e) {
-					continue;
-				}
-			}
-			return false;
-		}
 	}
 	
 	private class NamespaceValidator extends MultiValidator {

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,7 +18,9 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.AddSSHKeyWizardPageModel;
 
@@ -51,12 +54,32 @@ public class SSHPublicKeyValidator extends MultiValidator {
 		} catch (FileNotFoundException e) {
 			return ValidationStatus.error("Could not load file: " + e.getMessage());
 		} catch (OpenShiftException e) {
-			return ValidationStatus.error(filePath + "is not a valid public SSH key: " + e.getMessage());
+			return ValidationStatus.error(filePath + " is not a valid public SSH key: " + e.getMessage());
 		} catch (IOException e) {
 			return ValidationStatus.error("Could not load file: " + e.getMessage());
 		}
 
-		return Status.OK_STATUS;
+		if (hasSSHConfigurationIdentityKey()) {
+			return ValidationStatus.warning(
+					NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift servers. " +
+							"This can override any Eclipse specific SSH key preferences.", new SSHUserConfig(SSHUtils.getSSH2Home()).getFile()));
+		} else if (!SSHUtils.publicKeyMatchesPrivateKeyInPreferences(new File(filePath))) {
+			return ValidationStatus.warning(
+					NLS.bind("Could not find the private key for your public key in the preferences. "
+							+ "Make sure it is listed in the ssh2 preferences.", filePath));
+		}
+			
+		
+		return ValidationStatus.ok();
+	}
+
+	public boolean hasSSHConfigurationIdentityKey() {
+		try {
+			SSHUserConfig sshUserConfig = new SSHUserConfig(SSHUtils.getSSH2Home());
+			return sshUserConfig.hasLibraIdentifyFile();
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }

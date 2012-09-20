@@ -30,8 +30,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -49,7 +51,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 	private AddSSHKeyWizardPageModel pageModel;
 
 	public AddSSHKeyWizardPage(UserDelegate user, IWizard wizard) {
-		super("Add existing SSH Key", "Add an exiting SSH key to your OpenShift account",
+		super("Add existing SSH Key", "Add an exiting SSH key to your OpenShift user " + user.getUsername(),
 				"AddSSHKeysPage", wizard);
 		this.pageModel = new AddSSHKeyWizardPageModel(user);
 	}
@@ -109,6 +111,14 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		dbc.addValidationStatusProvider(sshPublicKeyValidator);
 		ControlDecorationSupport.create(
 				sshPublicKeyValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		Link sshPrefsLink = new Link(parent, SWT.NONE);
+		sshPrefsLink
+				.setText("Please make sure that your private key for this public key is listed in the\n<a>SSH2 Preferences</a>");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
+		sshPrefsLink.addSelectionListener(onSshPrefs(dbc));
+
 	}
 
 	private SelectionListener onBrowse() {
@@ -126,11 +136,30 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	private SelectionAdapter onSshPrefs(final DataBindingContext dbc) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SSHUtils.openPreferencesPage(getShell());
+				// trigger revalidation after prefs were changed
+				dbc.updateTargets();
+			}
+		};
+	}
+
 	public IStatus addConfiguredSSHKey() {
 		try {
 			return WizardUtils.runInWizard(new AddSSHKeyJob(pageModel), getContainer());
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus("Could not add ssh key " + pageModel.getName() + ".");
 		}
+	}
+
+	@Override
+	protected void setupWizardPageSupport(DataBindingContext dbc) {
+		ParametrizableWizardPageSupport.create(
+				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
+				dbc);
 	}
 }

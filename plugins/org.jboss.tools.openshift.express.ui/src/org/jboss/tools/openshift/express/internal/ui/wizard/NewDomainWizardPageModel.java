@@ -180,17 +180,6 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		file.setReadable(true, true); 
 		file.setWritable(true, true);
 	}
-
-	public String[] getPrivateKeysFromPreferences() {
-		String privateKeys = 
-				JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_PRIVATEKEY);
-		if (privateKeys != null 
-				&& privateKeys.trim().length() > 0) {
-			return privateKeys.split(KEYS_SEPARATOR);
-		} else {
-			return new String[0];
-		}
-	}
 	
 	private void addToPrivateKeysPreferences(SSHKeyPair keyPair) {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
