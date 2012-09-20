@@ -273,20 +273,22 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			final String repoPath = (String) repoPathObservable.getValue();
 			final String applicationName = (String) applicationNameModelObservable.getValue();
 			final boolean newProject = (Boolean) newProjectModelObservable.getValue();
-			
-			if(newProject) {
-			final IPath repoResourcePath = new Path(repoPath);
-			if (repoResourcePath.isEmpty()
-					|| !repoResourcePath.isAbsolute()
-					|| !repoResourcePath.toFile().canWrite()) {
-				return OpenShiftUIActivator.createErrorStatus("The location '" + repoResourcePath.toOSString() + "' does not exist or is not writeable.");
-			}
-			final IPath applicationPath = applicationName != null ? repoResourcePath.append(new Path(applicationName)) : null;
-			if (applicationPath != null && applicationPath.toFile().exists()) {
-				return OpenShiftUIActivator.createErrorStatus(
-						NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
-								repoResourcePath.toOSString(), applicationName));
-			}
+
+			if (newProject) {
+				final IPath repoResourcePath = new Path(repoPath);
+				if (repoResourcePath.isEmpty()
+						|| !repoResourcePath.isAbsolute()
+						|| !repoResourcePath.toFile().canWrite()) {
+					return OpenShiftUIActivator.createErrorStatus("The location '" + repoResourcePath.toOSString()
+							+ "' does not exist or is not writeable.");
+				}
+				final IPath applicationPath = applicationName != null ? repoResourcePath.append(new Path(
+						applicationName)) : null;
+				if (applicationPath != null && applicationPath.toFile().exists()) {
+					return OpenShiftUIActivator.createErrorStatus(
+							NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
+									repoResourcePath.toOSString(), applicationName));
+				}
 			}
 			return ValidationStatus.ok();
 		}
