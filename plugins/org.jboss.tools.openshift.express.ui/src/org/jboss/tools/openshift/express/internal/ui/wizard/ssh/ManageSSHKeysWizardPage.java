@@ -43,6 +43,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -243,7 +244,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
-			Job loadKeysJob = new LoadKeysJob();
+			Job loadKeysJob = new LoadKeysJob(pageModel.getUser());
 			new JobChainBuilder(loadKeysJob).andRunWhenDone(new RefreshViewerJob());
 			WizardUtils.runInWizard(loadKeysJob, getContainer());
 		} catch (Exception e) {
@@ -302,19 +303,6 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			pageModel.refresh();
-			return Status.OK_STATUS;
-		}
-	}
-
-	private class LoadKeysJob extends Job {
-
-		private LoadKeysJob() {
-			super("Loading SSH keys... ");
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			pageModel.loadSSHKeys();
 			return Status.OK_STATUS;
 		}
 	}

@@ -11,22 +11,27 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -41,13 +46,19 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.statushandlers.StatusManager;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
 
 /**
  * @author Andre Dietisheim
@@ -65,7 +76,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private Label remoteNameLabel;
 	private RepoPathValidationStatusProvider repoPathValidator;
 
-	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard, IOpenShiftExpressWizardModel wizardModel) {
+	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard,
+			IOpenShiftExpressWizardModel wizardModel) {
 		super(
 				"Import an existing OpenShift application",
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
@@ -130,8 +142,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
 		final IObservableValue newProjectModelObservable = BeanProperties.value(
 				GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel);
-		this.repoPathValidator = 
-				new RepoPathValidationStatusProvider(repoPathObservable, applicationNameModelObservable, newProjectModelObservable);
+		this.repoPathValidator =
+				new RepoPathValidationStatusProvider(repoPathObservable, applicationNameModelObservable,
+						newProjectModelObservable);
 		dbc.addValidationStatusProvider(repoPathValidator);
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
@@ -178,11 +191,43 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
 
 		Link sshPrefsLink = new Link(parent, SWT.NONE);
-		sshPrefsLink.setText("Make sure your SSH key used with your user " + wizardModel.getUser().getUsername() + "\nis listed in <a>SSH2 Preferences</a>.");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0)
-				.applyTo(sshPrefsLink);
+		sshPrefsLink.setText("Make sure your SSH key used with your user " + wizardModel.getUser().getUsername()
+				+ "\nis listed in <a>SSH2 Preferences</a>.");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs());
 
+		Link sshManagementLink = new Link(parent, SWT.NONE);
+		sshManagementLink.setText(
+				"Please make sure that you have SSH keys added to your OpenShift account.\n" +
+						"You may check them in the <a>SSH2 keys wizard</a>");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10,0).applyTo(sshManagementLink);
+		sshManagementLink.addSelectionListener(onManageSSHKeys());
+
+		ValueBindingBuilder
+				.bind(WidgetProperties.text().observe(sshManagementLink))
+				.notUpdating(BeanProperties.value(
+						GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
+				.withStrategy(new UpdateValueStrategy(UpdateValueStrategy.POLICY_CONVERT))
+				.validatingAfterGet(new IValidator() {
+
+					@Override
+					public IStatus validate(Object value) {
+						if (!(value instanceof Boolean)) {
+							return ValidationStatus.ok();
+						}
+						Boolean hasRemoteKeys = (Boolean) value;
+						if (hasRemoteKeys) {
+							return ValidationStatus.ok();
+						} else {
+							return ValidationStatus
+									.error("You have not added any SSH public keys to OpenShift yet. Please use the SSH2 keys wizard.");
+						}
+					}
+				})
+				.in(dbc);
+		refreshHasRemoteKeys();
 		return cloneGroup;
 	}
 
@@ -203,7 +248,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				DirectoryDialog dialog = new DirectoryDialog(getShell());
 				dialog.setText("Git clone location");
 				dialog.setMessage("Choose the location for git clone...");
-				dialog.setFilterPath(pageModel.getRepositoryPath()); 
+				dialog.setFilterPath(pageModel.getRepositoryPath());
 				String repositoryPath = dialog.open();
 				if (repositoryPath != null) {
 					pageModel.setRepositoryPath(repositoryPath);
@@ -225,6 +270,25 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	protected void onPageActivated(DataBindingContext dbc) {
 		enableWidgets(pageModel.isNewProject());
 		repoPathValidator.forceRevalidate();
+		refreshHasRemoteKeys();
+	}
+
+	private void refreshHasRemoteKeys() {
+		try {
+			final LoadKeysJob loadKeysJob = new LoadKeysJob(wizardModel.getUser());
+			new JobChainBuilder(loadKeysJob).andRunWhenDone(new UIJob("") {
+
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					pageModel.setHasRemoteKeys(loadKeysJob.getKeys().size() > 0);
+					return Status.OK_STATUS;
+				}
+			});
+			WizardUtils.runInWizard(loadKeysJob, getContainer());
+		} catch (Exception e) {
+			StatusManager.getManager().handle(
+					OpenShiftUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
+		}
 	}
 
 	@Override
@@ -234,7 +298,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			dbc.updateTargets();
 		}
 	}
-	
+
 	private void enableWidgets(boolean isNewProject) {
 		if (isNewProject) {
 			useDefaultRepoPathButton.setEnabled(true);
@@ -296,7 +360,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		public void forceRevalidate() {
 			revalidate();
 		}
-	
+
 	}
 
 	/**
@@ -308,7 +372,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		private final IObservableValue remoteNameObservable;
 		private final IObservableValue projectNameObservable;
 
-		public RemoteNameValidationStatusProvider(final IObservableValue remoteNameTextObservable, final IObservableValue projectNameObservable) {
+		public RemoteNameValidationStatusProvider(final IObservableValue remoteNameTextObservable,
+				final IObservableValue projectNameObservable) {
 			this.remoteNameObservable = remoteNameTextObservable;
 			this.projectNameObservable = projectNameObservable;
 		}
@@ -341,7 +406,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			}
 			return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		}
-		
+
 		private boolean hasRemoteName(String remoteName, IProject project) {
 			try {
 				if (project == null
@@ -359,6 +424,20 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				return false;
 			}
 		}
+	}
+
+	private SelectionAdapter onManageSSHKeys() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WizardDialog manageSSHKeysWizard =
+						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(wizardModel.getUser()));
+				if (manageSSHKeysWizard.open() == Dialog.OK) {
+					refreshHasRemoteKeys();
+				}
+			}
+		};
 	}
 
 }

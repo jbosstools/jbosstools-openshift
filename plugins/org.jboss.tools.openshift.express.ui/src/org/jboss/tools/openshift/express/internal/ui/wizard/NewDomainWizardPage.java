@@ -70,13 +70,13 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
 
 		new Label(container, SWT.NONE); // spacer
-		Link sshPrefsLink = new Link(container, SWT.NONE);
-		sshPrefsLink.setText(
+		Link sshManagementLink = new Link(container, SWT.NONE);
+		sshManagementLink.setText(
 				"Please make sure that you have SSH keys added to your OpenShift account.\n" +
 						"You may check them in the <a>SSH2 keys wizard</a>");
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
-		sshPrefsLink.addSelectionListener(onManageSSHKeys());
+				.span(3, 1).align(SWT.FILL, SWT.CENTER).applyTo(sshManagementLink);
+		sshManagementLink.addSelectionListener(onManageSSHKeys());
 	}
 
 	private SelectionAdapter onManageSSHKeys() {

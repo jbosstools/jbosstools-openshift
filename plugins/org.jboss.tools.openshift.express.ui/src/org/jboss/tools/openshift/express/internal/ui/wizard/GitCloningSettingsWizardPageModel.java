@@ -36,10 +36,12 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_REMOTE_NAME = "remoteName";
 	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
 	public static final String PROPERTY_USE_DEFAULT_REMOTE_NAME = "useDefaultRemoteName";
+	public static final String PROPERTY_HAS_REMOTEKEYS = "hasRemoteKeys";
 
 	private IOpenShiftExpressWizardModel wizardModel;
 	private boolean useDefaultRepoPath = true;
 	private boolean useDefaultRemoteName = true;
+	private boolean hasRemoteKeys;
 
 	public GitCloningSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
@@ -172,6 +174,14 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public boolean isUseDefaultRemoteName() {
 		return useDefaultRemoteName;
+	}
+
+	public boolean getHasRemoteKeys() {
+		return hasRemoteKeys;
+	}
+	
+	public void setHasRemoteKeys(boolean hasRemoteKeys) {
+		firePropertyChange(PROPERTY_HAS_REMOTEKEYS, this.hasRemoteKeys, this.hasRemoteKeys = hasRemoteKeys);
 	}
 
 	public void reset() {

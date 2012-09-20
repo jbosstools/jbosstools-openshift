@@ -14,12 +14,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftSSHOperationException;
