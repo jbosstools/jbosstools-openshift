@@ -200,7 +200,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		Link sshManagementLink = new Link(parent, SWT.NONE);
 		sshManagementLink.setText(
 				"Please make sure that you have SSH keys added to your OpenShift account.\n" +
-						"You may check them in the <a>SSH2 keys wizard</a>");
+						"You may check them in the <a>SSH2 keys wizard</a>.");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10,0).applyTo(sshManagementLink);
 		sshManagementLink.addSelectionListener(onManageSSHKeys());
