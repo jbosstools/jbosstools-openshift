@@ -56,6 +56,7 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
+import org.jboss.tools.openshift.express.internal.ui.utils.LinkSelectionAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
@@ -190,23 +191,16 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		dbc.addValidationStatusProvider(
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
 
-		Link sshPrefsLink = new Link(parent, SWT.NONE);
-		sshPrefsLink.setText("Make sure your SSH key used with your user " + wizardModel.getUser().getUsername()
-				+ "\nis listed in <a>SSH2 Preferences</a>.");
+		Link sshLink = new Link(parent, SWT.NONE);
+		sshLink.setText("Make sure that you have SSH keys added to your OpenShift account " + wizardModel.getUser().getUsername() +"\n" 
+				+ "via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshPrefsLink);
-		sshPrefsLink.addSelectionListener(onSshPrefs());
-
-		Link sshManagementLink = new Link(parent, SWT.NONE);
-		sshManagementLink.setText(
-				"Please make sure that you have SSH keys added to your OpenShift account.\n" +
-						"You may check them in the <a>SSH2 keys wizard</a>.");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10,0).applyTo(sshManagementLink);
-		sshManagementLink.addSelectionListener(onManageSSHKeys());
-
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
+		sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
+		sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard"));
+		
 		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(sshManagementLink))
+				.bind(WidgetProperties.text().observe(sshLink))
 				.notUpdating(BeanProperties.value(
 						GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
 				.withStrategy(new UpdateValueStrategy(UpdateValueStrategy.POLICY_CONVERT))
@@ -222,7 +216,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 							return ValidationStatus.ok();
 						} else {
 							return ValidationStatus
-									.error("You have not added any SSH public keys to OpenShift yet. Please use the SSH2 keys wizard.");
+									.error("No public keys found in your account. Please use the SSH keys wizard.");
 						}
 					}
 				})
@@ -257,12 +251,26 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		};
 	}
 
-	private SelectionAdapter onSshPrefs() {
-		return new SelectionAdapter() {
+	private SelectionAdapter onSshPrefs(String text) {
+		return new LinkSelectionAdapter(text) {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void doWidgetSelected(SelectionEvent e) {
 				SshPrivateKeysPreferences.openPreferencesPage(getShell());
+			}
+		};
+	}
+
+	private SelectionAdapter onManageSSHKeys(String text) {
+		return new LinkSelectionAdapter(text) {
+
+			@Override
+			public void doWidgetSelected(SelectionEvent e) {
+				WizardDialog manageSSHKeysWizard =
+						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(wizardModel.getUser()));
+				if (manageSSHKeysWizard.open() == Dialog.OK) {
+					refreshHasRemoteKeys();
+				}
 			}
 		};
 	}
@@ -425,19 +433,4 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			}
 		}
 	}
-
-	private SelectionAdapter onManageSSHKeys() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				WizardDialog manageSSHKeysWizard =
-						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(wizardModel.getUser()));
-				if (manageSSHKeysWizard.open() == Dialog.OK) {
-					refreshHasRemoteKeys();
-				}
-			}
-		};
-	}
-
 }
