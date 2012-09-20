@@ -48,6 +48,9 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHP
  */
 public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
+	private static final String FILTEREXPRESSION_PUBLIC_SSH_KEY = "*.pub";
+	private static final String FILTERNAME_PUBLIC_SSH_KEY = "Public ssh key file (*.pub)";
+
 	private AddSSHKeyWizardPageModel pageModel;
 
 	public AddSSHKeyWizardPage(UserDelegate user, IWizard wizard) {
@@ -128,6 +131,8 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
 				dialog.setFilterPath(SSHUtils.getSSH2Home());
+				dialog.setFilterExtensions(new String[] {FILTEREXPRESSION_PUBLIC_SSH_KEY });
+				dialog.setFilterNames(new String[]{FILTERNAME_PUBLIC_SSH_KEY});
 				String filePath = null;
 				if ((filePath = dialog.open()) != null) {
 					pageModel.setPublicKeyPath(filePath);
