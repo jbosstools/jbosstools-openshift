@@ -34,6 +34,7 @@ public class EditDomainDialog extends Wizard {
 	public EditDomainDialog(UserDelegate user) {
 		this.model = new EditDomainWizardPageModel(user);
 		setNeedsProgressMonitor(true);
+		setWindowTitle("Edit Domain");
 	}
 
 	@Override

@@ -33,6 +33,7 @@ public class NewDomainDialog extends Wizard {
 	public NewDomainDialog(UserDelegate user) {
 		this.model = new NewDomainWizardPageModel(user);
 		setNeedsProgressMonitor(true);
+		setWindowTitle("Create Domain");
 	}
 
 	@Override
