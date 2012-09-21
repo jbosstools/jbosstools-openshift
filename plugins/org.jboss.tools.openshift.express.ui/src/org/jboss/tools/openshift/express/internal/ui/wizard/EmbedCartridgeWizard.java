@@ -26,6 +26,7 @@ public class EmbedCartridgeWizard extends Wizard {
 	public EmbedCartridgeWizard(IApplication application, UserDelegate user) {
 		this.wizardModel = new ApplicationWizardModel(application, user);
 		setNeedsProgressMonitor(true);
+		setWindowTitle("Edit Embedded Cartridges");
 	}
 
 	@Override
