@@ -198,15 +198,31 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 	private void addToPrivateKeysPreferences(SSHKeyPair keyPair) {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
 		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
-		if (privateKeys != null 
+		String privateKeyPath = getKeyPath(new File(keyPair.getPrivateKeyPath()));
+		
+		if (privateKeys != null
 				&& privateKeys.trim().length() > 0) {
-			privateKeys = privateKeys + ","	+ keyPair.getPrivateKeyPath();
+			privateKeys = privateKeys + "," + privateKeyPath;
 		} else {
-			privateKeys = keyPair.getPrivateKeyPath();
+			privateKeys = privateKeyPath;
 		}
 		preferences.setValue(IConstants.KEY_PRIVATEKEY, privateKeys);
-	    JSchCorePlugin.getPlugin().setNeedToLoadKeys(true);
-	    JSchCorePlugin.getPlugin().savePluginPreferences();
+		JSchCorePlugin.getPlugin().setNeedToLoadKeys(true);
+		JSchCorePlugin.getPlugin().savePluginPreferences();
+	}
+
+	private String getKeyPath(File privateKey) {
+		String ssh2Home = checkedGetSSH2Home();
+		if (ssh2Home == null
+				|| ssh2Home.isEmpty()) {
+			return privateKey.getAbsolutePath();
+		}
+		
+		if (!privateKey.getAbsolutePath().startsWith(ssh2Home)) {
+			return privateKey.getAbsolutePath(); 
+		}
+		
+		return privateKey.getName();
 	}
 		
 	public void setSshKey(String sshKey) {
