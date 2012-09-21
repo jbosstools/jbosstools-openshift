@@ -80,22 +80,37 @@ public class SSHUtils {
 	public static void addToPrivateKeysPreferences(File privateKey) {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
 		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
+		String privateKeyPath = getKeyPath(privateKey);
+		
 		if (privateKeys != null
 				&& privateKeys.trim().length() > 0) {
-			privateKeys = privateKeys + "," + privateKey.getAbsolutePath();
+			privateKeys = privateKeys + "," + privateKeyPath;
 		} else {
-			privateKeys = privateKey.getAbsolutePath();
+			privateKeys = privateKeyPath;
 		}
 		preferences.setValue(IConstants.KEY_PRIVATEKEY, privateKeys);
 		JSchCorePlugin.getPlugin().setNeedToLoadKeys(true);
 		JSchCorePlugin.getPlugin().savePluginPreferences();
 	}
 
+	private static String getKeyPath(File privateKey) {
+		String ssh2Home = getSSH2Home();
+		if (ssh2Home == null
+				|| ssh2Home.isEmpty()) {
+			return privateKey.getAbsolutePath();
+		}
+		
+		if (!privateKey.getAbsolutePath().startsWith(ssh2Home)) {
+			return privateKey.getAbsolutePath(); 
+		}
+		
+		return privateKey.getName();
+	}
+
 	public static int openPreferencesPage(Shell shell) {
 		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
 				shell, SSH_PREFERENCE_PAGE_ID, null, null);
 		return dialog.open();
-
 	}
 
 	/**
