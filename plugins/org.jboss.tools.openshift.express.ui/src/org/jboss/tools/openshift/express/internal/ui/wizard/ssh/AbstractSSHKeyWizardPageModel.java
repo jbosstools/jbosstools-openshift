@@ -60,5 +60,4 @@ public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo imp
 		}
 		return ssh2Home;
 	}
-
 }

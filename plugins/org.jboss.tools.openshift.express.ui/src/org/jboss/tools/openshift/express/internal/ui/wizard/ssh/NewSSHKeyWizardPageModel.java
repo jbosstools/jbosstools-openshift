@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
@@ -108,6 +109,7 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	}
 
 	private SSHKeyPair createSSHKey() {
+		ensureSSHHomeExists(ssh2Home);
 		File privateKey = new File(ssh2Home, privateKeyName);
 		File publicKey = new File(ssh2Home, publicKeyName);
 		SSHKeyPair keyPair =
@@ -116,4 +118,25 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return keyPair;
 	}
 
+	private void ensureSSHHomeExists(String ssh2Home)
+			throws OpenShiftException {
+		File ssh2HomeFile = new File(ssh2Home);
+		if (FileUtils.canRead(ssh2HomeFile)) {
+			if (!FileUtils.isDirectory(ssh2HomeFile)) {
+				throw new OpenShiftException(
+						ssh2Home + " is a file instead of a directory. This prevents creation and usage of ssh keys");
+			}
+			return;
+		}
+
+		try {
+			if(!ssh2HomeFile.mkdirs()) {
+				throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
+			}
+		} catch(SecurityException e) {
+			throw new OpenShiftException(e, "Could not create ssh2 home directory at {0}", ssh2Home);
+		}
+	}
+
+	
 }
