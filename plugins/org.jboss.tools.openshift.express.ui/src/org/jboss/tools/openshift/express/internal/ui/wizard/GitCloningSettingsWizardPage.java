@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -199,11 +198,14 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
 		sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard"));
 		
+		// we need a binding to have validation setting wizard validation status
+		Label dummyLabel = new Label(parent, SWT.None);
+		dummyLabel.setVisible(false);
+		GridDataFactory.fillDefaults().exclude(true).applyTo(dummyLabel);
 		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(sshLink))
+				.bind(WidgetProperties.text().observe(dummyLabel))
 				.notUpdating(BeanProperties.value(
 						GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
-				.withStrategy(new UpdateValueStrategy(UpdateValueStrategy.POLICY_CONVERT))
 				.validatingAfterGet(new IValidator() {
 
 					@Override
