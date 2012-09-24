@@ -47,4 +47,9 @@ public class ConnectToOpenShiftWizardModel implements IUserAwareModel {
 		return user;
 	}
 
+	@Override
+	public boolean hasUser() {
+		return getUser() != null;
+	}
+
 }

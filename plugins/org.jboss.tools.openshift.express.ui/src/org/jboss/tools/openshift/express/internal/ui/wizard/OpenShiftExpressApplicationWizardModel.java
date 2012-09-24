@@ -462,6 +462,11 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
+	public boolean hasUser() {
+		return getUser() != null;
+	}
+
+	@Override
 	public UserDelegate setUser(UserDelegate user) {
 		setProperty(USER, user);
 		resetWizardModel();
