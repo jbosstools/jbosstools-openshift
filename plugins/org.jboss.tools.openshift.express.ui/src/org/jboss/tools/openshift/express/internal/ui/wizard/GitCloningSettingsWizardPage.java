@@ -75,6 +75,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private Text remoteNameText;
 	private Label remoteNameLabel;
 	private RepoPathValidationStatusProvider repoPathValidator;
+	private Link sshLink;
 
 	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard,
 			IOpenShiftExpressWizardModel wizardModel) {
@@ -190,9 +191,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		dbc.addValidationStatusProvider(
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
 
-		Link sshLink = new Link(parent, SWT.NONE);
-		sshLink.setText("Make sure that you have SSH keys added to your OpenShift account " + wizardModel.getUser().getUsername() +"\n" 
-				+ "via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+		this.sshLink = new Link(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
 		sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
@@ -280,11 +279,27 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	protected void onPageActivated(DataBindingContext dbc) {
 		enableWidgets(pageModel.isNewProject());
 		repoPathValidator.forceRevalidate();
+		setSSHLinkText();
 		refreshHasRemoteKeys();
+	}
+
+	private void setSSHLinkText() {
+		if (wizardModel.hasUser()) {
+			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
+					+ wizardModel.getUser().getUsername() 
+					+ "via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+		} else {
+			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
+					+ "via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+		}
+		sshLink.getParent().layout(true, true);
 	}
 
 	private void refreshHasRemoteKeys() {
 		try {
+			if (!wizardModel.hasUser()) {
+				return;
+			}
 			final LoadKeysJob loadKeysJob = new LoadKeysJob(wizardModel.getUser());
 			new JobChainBuilder(loadKeysJob).andRunWhenDone(new UIJob("") {
 
