@@ -287,10 +287,10 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		if (wizardModel.hasUser()) {
 			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
 					+ wizardModel.getUser().getUsername() 
-					+ "via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+					+ " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
 		} else {
-			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
-					+ "via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account"
+					+ " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
 		}
 		sshLink.getParent().layout(true, true);
 	}
