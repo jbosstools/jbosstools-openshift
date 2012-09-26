@@ -117,15 +117,11 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingProjectNameText))
 				.notUpdating(newProjectObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an existing project' option.
-		newProjectRadioBtn.addSelectionListener(new SelectionListener() {
+		newProjectRadioBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				existingProjectNameText.setFocus();
 				existingProjectNameText.selectAll();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
 		// let's provide content assist on the existing project name
