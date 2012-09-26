@@ -81,5 +81,13 @@ public class SSHPublicKeyValidator extends MultiValidator {
 			return false;
 		}
 	}
+	
+	/**
+	 * Workaround since JSchUIPlugin seems not to fire property change events if
+	 * you change the private keys. Need to force revalidation manually.
+	 */
+	public void forceRevalidate() {
+		revalidate();
+	}
 
 }

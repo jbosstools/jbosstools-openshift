@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -110,7 +109,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(browseButton);
 
-		ValidationStatusProvider sshPublicKeyValidator = new SSHPublicKeyValidator(publicKeyObservable, pageModel);
+		SSHPublicKeyValidator sshPublicKeyValidator = new SSHPublicKeyValidator(publicKeyObservable, pageModel);
 		dbc.addValidationStatusProvider(sshPublicKeyValidator);
 		ControlDecorationSupport.create(
 				sshPublicKeyValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -120,7 +119,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.setText("Please make sure that your private key for this public key is listed in the\n<a>SSH2 Preferences</a>");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
-		sshPrefsLink.addSelectionListener(onSshPrefs(dbc));
+		sshPrefsLink.addSelectionListener(onSshPrefs(sshPublicKeyValidator));
 
 	}
 
@@ -141,14 +140,17 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private SelectionAdapter onSshPrefs(final DataBindingContext dbc) {
+	private SelectionAdapter onSshPrefs(final SSHPublicKeyValidator sshPublicKeyValidator) {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SSHUtils.openPreferencesPage(getShell());
 				// trigger revalidation after prefs were changed
-				dbc.updateTargets();
+				// we should be able to listen to prefs changes in jsch, but
+				// obviously they dont fire change event when changing private
+				// keys
+				sshPublicKeyValidator.forceRevalidate();
 			}
 		};
 	}
