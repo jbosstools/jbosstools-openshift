@@ -18,5 +18,29 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<module>features</module>
 		<module>site</module>
 	</modules>
+	<profiles>
+		<!-- use with github repos -->
+		<profile>
+			<id>bootstrap</id>
+			<modules>
+				<module>../base</module>
+				<module>../server</module>
+			</modules>
+		</profile>
+		<!-- deprecated; use with svn repos -->
+		<profile>
+			<id>bootstrap-svn</id>
+			<modules>
+				<module>../tests</module>
+				<module>../common</module>
+				<module>../runtime</module>
+				<module>../usage</module>
+
+				<module>../jmx</module>
+				<module>../archives</module>
+				<module>../as</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>
 	
