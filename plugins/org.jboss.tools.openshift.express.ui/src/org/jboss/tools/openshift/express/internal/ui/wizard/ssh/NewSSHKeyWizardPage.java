@@ -55,7 +55,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 	private NewSSHKeyWizardPageModel pageModel;
 
 	public NewSSHKeyWizardPage(UserDelegate user, IWizard wizard) {
-		super("Add new SSH key", "Add a new SSH key to your OpenShift account",
+		super("Add new SSH key", "Add a new SSH key to your OpenShift user " + user.getUsername(),
 				"NewSSHKeysPage", wizard);
 		this.pageModel = new NewSSHKeyWizardPageModel(user);
 	}
