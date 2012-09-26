@@ -49,7 +49,8 @@ public class SSHPublicKeyValidator extends MultiValidator {
 		try {
 			SSHPublicKey sshPublicKey = new SSHPublicKey(filePath);
 			if (model.hasPublicKey(sshPublicKey.getPublicKey())) {
-				return ValidationStatus.error("The public key in " + filePath + " is already in use on OpenShift. Choose another key.");
+				return ValidationStatus.error("The public key in " + filePath
+						+ " is already in use on OpenShift. Choose another key.");
 			}
 		} catch (FileNotFoundException e) {
 			return ValidationStatus.error("Could not load file: " + e.getMessage());
@@ -62,14 +63,14 @@ public class SSHPublicKeyValidator extends MultiValidator {
 		if (hasSSHConfigurationIdentityKey()) {
 			return ValidationStatus.warning(
 					NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift servers. " +
-							"This can override any Eclipse specific SSH key preferences.", new SSHUserConfig(SSHUtils.getSSH2Home()).getFile()));
+							"This can override any Eclipse specific SSH key preferences.",
+							new SSHUserConfig(SSHUtils.getSSH2Home()).getFile()));
 		} else if (!SSHUtils.publicKeyMatchesPrivateKeyInPreferences(new File(filePath))) {
 			return ValidationStatus.warning(
 					NLS.bind("Could not find the private key for your public key in the preferences. "
 							+ "Make sure it is listed in the ssh2 preferences.", filePath));
 		}
-			
-		
+
 		return ValidationStatus.ok();
 	}
 
@@ -80,6 +81,14 @@ public class SSHPublicKeyValidator extends MultiValidator {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	/**
+	 * Workaround since JSchUIPlugin seems not to fire property change events if
+	 * you change the private keys. Need to force revalidation manually.
+	 */
+	public void forceRevalidate() {
+		revalidate();
 	}
 
 }
