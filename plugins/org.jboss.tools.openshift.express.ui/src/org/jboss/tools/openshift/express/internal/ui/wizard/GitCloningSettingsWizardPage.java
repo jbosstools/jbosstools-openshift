@@ -195,7 +195,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
 		sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
-		sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard"));
+		sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard", dbc));
 		
 		// we need a binding to have validation setting wizard validation status
 		Label dummyLabel = new Label(parent, SWT.None);
@@ -222,7 +222,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 					}
 				})
 				.in(dbc);
-		refreshHasRemoteKeys();
+		refreshHasRemoteKeys(dbc);
 		return cloneGroup;
 	}
 
@@ -262,7 +262,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		};
 	}
 
-	private SelectionAdapter onManageSSHKeys(String text) {
+	private SelectionAdapter onManageSSHKeys(String text, final DataBindingContext dbc) {
 		return new LinkSelectionAdapter(text) {
 
 			@Override
@@ -270,7 +270,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				WizardDialog manageSSHKeysWizard =
 						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(wizardModel.getUser()));
 				if (manageSSHKeysWizard.open() == Dialog.OK) {
-					refreshHasRemoteKeys();
+					refreshHasRemoteKeys(dbc);
 				}
 			}
 		};
@@ -280,7 +280,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		enableWidgets(pageModel.isNewProject());
 		repoPathValidator.forceRevalidate();
 		setSSHLinkText();
-		refreshHasRemoteKeys();
+		refreshHasRemoteKeys(dbc);
 	}
 
 	private void setSSHLinkText() {
@@ -295,7 +295,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		sshLink.getParent().layout(true, true);
 	}
 
-	private void refreshHasRemoteKeys() {
+	private void refreshHasRemoteKeys(DataBindingContext dbc) {
 		try {
 			if (!wizardModel.hasUser()) {
 				return;
@@ -309,7 +309,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 					return Status.OK_STATUS;
 				}
 			});
-			WizardUtils.runInWizard(loadKeysJob, getContainer());
+			WizardUtils.runInWizard(loadKeysJob, getContainer(), dbc);
 		} catch (Exception e) {
 			StatusManager.getManager().handle(
 					OpenShiftUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
