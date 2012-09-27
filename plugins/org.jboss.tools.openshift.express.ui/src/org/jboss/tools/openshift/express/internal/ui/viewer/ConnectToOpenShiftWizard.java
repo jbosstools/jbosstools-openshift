@@ -14,7 +14,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.credentials.CredentialsWizardPage;
 
 /**
  * @author Xavier Coulon

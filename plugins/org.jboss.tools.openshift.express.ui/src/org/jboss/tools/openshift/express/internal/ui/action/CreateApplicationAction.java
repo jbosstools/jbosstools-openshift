@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.wizard.NewOpenShiftExpressApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
 
 /**
  * @author Xavier Coulon

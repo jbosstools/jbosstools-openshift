@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.wizard.EmbedCartridgeWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;

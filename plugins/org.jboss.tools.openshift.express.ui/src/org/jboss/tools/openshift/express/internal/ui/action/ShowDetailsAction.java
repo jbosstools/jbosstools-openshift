@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ApplicationDetailsDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.details.ApplicationDetailsDialog;
 
 import com.openshift.client.IApplication;
 

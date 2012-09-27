@@ -18,8 +18,8 @@ import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.wizard.EditDomainDialog;
-import org.jboss.tools.openshift.express.internal.ui.wizard.NewDomainDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.domain.EditDomainDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainDialog;
 
 import com.openshift.client.OpenShiftException;
 

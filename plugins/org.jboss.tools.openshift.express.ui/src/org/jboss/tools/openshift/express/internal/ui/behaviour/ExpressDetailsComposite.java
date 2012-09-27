@@ -66,9 +66,9 @@ import org.jboss.tools.openshift.express.internal.core.console.UserModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardPageModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ImportOpenShiftExpressApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.OpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.credentials.CredentialsWizardPageModel;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
