@@ -26,7 +26,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.jboss.tools.openshift.express.internal.ui.wizard.appimport.OpenShiftMavenProfile;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.OpenShiftMavenProfile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
