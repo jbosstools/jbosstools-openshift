@@ -34,6 +34,11 @@
 							<artifactId>org.jboss.tools.openshift.express.feature.feature.group</artifactId>
 							<version>0.0.0</version>
 						</dependency>
+						<dependency>
+							<type>p2-installable-unit</type>
+							<artifactId>org.eclipse.jdt.feature.group</artifactId>
+							<version>0.0.0</version>
+						</dependency>
 					</dependencies>
 				</configuration>
 			</plugin>
