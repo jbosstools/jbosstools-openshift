@@ -110,9 +110,11 @@ public class OpenShiftUI {
 		
 		public static final String NO_TITLE = "";
 		public static final String NEW_APP = "New OpenShift Application";
-		public static final String DOMAIN = "";
+		public static final String CREATE_DOMAIN = "Create Domain";
+		public static final String EDIT_DOMAIN = "Edit Domain";
 		public static final String CREDENTIALS = "";
-		public static final String NEW_SSH = "New ssh key";
+		public static final String SSH_WIZARD = "";
+		public static final String NEW_SSH = "";
 		public static final String DELETE_APP = "Application deletion";
 		
 	}

@@ -3,6 +3,7 @@ package org.jboss.tools.openshift.ui.bot.test.explorer;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.jboss.tools.openshift.ui.bot.util.OpenShiftExplorerView;
 import org.jboss.tools.openshift.ui.bot.util.OpenShiftUI;
 import org.jboss.tools.openshift.ui.bot.util.TestProperties;
 import org.jboss.tools.ui.bot.ext.SWTTestExt;
@@ -16,12 +17,11 @@ public class Connection extends SWTTestExt {
 
 	@Test
 	public void canCreateConnectionToOpenShiftAccount() {
-		// open OpenShift Explorer
-		open.viewOpen(OpenShiftUI.Explorer.iView);
-
-		bot.toolbarButtonWithTooltip(OpenShiftUI.Labels.CONNECT_TO_OPENSHIFT)
-				.click();
-
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S, TIME_1S);
+		
+		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
+		explorer.getConnectionToolButton().click();
+		
 		// open credentials dialog
 		SWTBotShell shell = bot.waitForShell(OpenShiftUI.Shell.CREDENTIALS);
 

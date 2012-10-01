@@ -82,11 +82,11 @@ public class CreateApp extends SWTTestExt {
 		bot.waitForShell("Question", TIME_60S * 3);
 		bot.button(IDELabel.Button.YES).click();
 		
-
+/*
 		bot.waitForShell("Information", TIME_60S * 3);
 		bot.text(0).setText(TestProperties.get("openshift.user.pwd"));
 		bot.button(IDELabel.Button.OK).click();
-
+*/
 		log.info("*** OpenShift SWTBot Tests: SSH passphrase given. ***");
 
 		bot.waitUntil(Conditions.shellCloses(bot.activeShell()), TIME_60S, TIME_1S);

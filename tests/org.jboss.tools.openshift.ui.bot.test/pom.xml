@@ -6,12 +6,11 @@
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>tests</artifactId>
-		<version>2.3.0-SNAPSHOT</version>
+		<version>2.4.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.tests</groupId>
 	<artifactId>org.jboss.tools.openshift.ui.bot.test</artifactId>
-	<version>2.3.0-SNAPSHOT</version>
-
+	
 	<packaging>eclipse-test-plugin</packaging>
 
 	<properties>
@@ -28,12 +27,12 @@
 					<skip>${swtbot.test.skip}</skip>
 					<useUIThread>false</useUIThread>
 					<testSuite>org.jboss.tools.openshift.ui.bot.test</testSuite>
-					<testClass>org.jboss.tools.openshift.ui.bot.test.OpenShiftAllBotTests</testClass>
+					<testClass>org.jboss.tools.openshift.ui.bot.test.OpenShift${scope}BotTests</testClass>
 					<dependencies combine.children="append">
 						<dependency>
 							<type>p2-installable-unit</type>
 							<artifactId>org.jboss.tools.openshift.express.feature.feature.group</artifactId>
-							<version>2.3.0</version>
+							<version>0.0.0</version>
 						</dependency>
 					</dependencies>
 				</configuration>

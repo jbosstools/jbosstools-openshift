@@ -8,7 +8,7 @@
 <listAttribute key="M2_PROPERTIES">
 <listEntry value="swtbot.test.skip=false"/>
 <listEntry value="configurations.dir=${project_loc}/resources"/>
-<listEntry value="scope=Jenkins"/>
+<listEntry value="scope=All"/>
 </listAttribute>
 <stringAttribute key="M2_RUNTIME" value="EMBEDDED"/>
 <booleanAttribute key="M2_SKIP_TESTS" value="false"/>
@@ -17,5 +17,5 @@
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="DISPLAY" value=":${string_prompt}"/>
 </mapAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:/org.jboss.tools.openshift.ui.bot.test}"/>
+<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:/openshift/tests/org.jboss.tools.openshift.ui.bot.test}"/>
 </launchConfiguration>
