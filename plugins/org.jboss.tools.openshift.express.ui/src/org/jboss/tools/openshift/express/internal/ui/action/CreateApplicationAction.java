@@ -32,11 +32,6 @@ public class CreateApplicationAction extends AbstractAction {
 		setImageDescriptor(OpenShiftImages.QUERY_NEW);
 	}
 
-	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no
-	 * Console/Worker existed, a new one is created, otherwise, it is displayed.
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		if (selection != null && selection instanceof ITreeSelection) {
