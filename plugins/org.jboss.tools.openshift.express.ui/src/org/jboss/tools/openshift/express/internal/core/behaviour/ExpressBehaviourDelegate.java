@@ -12,11 +12,13 @@ package org.jboss.tools.openshift.express.internal.core.behaviour;
 
 import org.jboss.ide.eclipse.as.core.server.internal.AbstractBehaviourDelegate;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressBehaviourDelegate extends AbstractBehaviourDelegate {
+	
 	public static final String OPENSHIFT_ID = "openshift";
-	public ExpressBehaviourDelegate() {
-	}
-
+	
 	@Override
 	public String getBehaviourTypeId() {
 		return OPENSHIFT_ID;

@@ -21,8 +21,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IModule;
 import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressBehaviour extends DelegatingServerBehavior {
+
 	private IAdaptable publishAdaptableInfo;
+
 	public IStatus publish(int kind, IProgressMonitor monitor) {
 		boolean shouldPublish = false;
 		if( publishAdaptableInfo != null ) {

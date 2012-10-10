@@ -22,11 +22,13 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
-import org.jboss.ide.eclipse.as.core.publishers.PublishUtil;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServerBehaviour;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
 
 	@Override

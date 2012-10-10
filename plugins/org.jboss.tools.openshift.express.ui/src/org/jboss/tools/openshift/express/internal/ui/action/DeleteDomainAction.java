@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.dialog.CheckboxMessageDialog;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -42,9 +42,9 @@ public class DeleteDomainAction extends AbstractAction {
 	public void validate() {
 		boolean enable = false;
 		if (selection instanceof ITreeSelection
-				&& ((IStructuredSelection) selection).getFirstElement() instanceof UserDelegate
+				&& ((IStructuredSelection) selection).getFirstElement() instanceof Connection
 				&& ((ITreeSelection) selection).size() == 1) {
-			UserDelegate user = (UserDelegate) ((IStructuredSelection) selection).getFirstElement();
+			Connection user = (Connection) ((IStructuredSelection) selection).getFirstElement();
 			if (user.isConnected()) {
 				try {
 					if (user.getDefaultDomain() != null) {
@@ -62,8 +62,8 @@ public class DeleteDomainAction extends AbstractAction {
 	public void run() {
 		final ITreeSelection treeSelection = (ITreeSelection) selection;
 		if (selection instanceof ITreeSelection
-				&& treeSelection.getFirstElement() instanceof UserDelegate) {
-			UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
+				&& treeSelection.getFirstElement() instanceof Connection) {
+			Connection user = (Connection) treeSelection.getFirstElement();
 			try {
 				final IDomain domain = user.getDefaultDomain();
 				if (domain == null) {

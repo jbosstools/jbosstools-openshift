@@ -28,8 +28,8 @@ import org.eclipse.wst.server.ui.internal.wizard.fragment.NewServerWizardFragmen
 import org.eclipse.wst.server.ui.internal.wizard.fragment.TasksWizardFragment;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
@@ -61,9 +61,9 @@ public class CreateServerAdapterAction extends AbstractAction {
 				final IDomain domain = application.getDomain();
 				final IUser user = domain.getUser();
 				Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
-				UserDelegate userDelegate = UserModel.getDefault().findUser(user.getRhlogin());
+				Connection connection = ConnectionsModel.getDefault().getConnection(user.getRhlogin());
 				NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, userDelegate);
+				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, connection);
 				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_DOMAIN, domain);
 				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);

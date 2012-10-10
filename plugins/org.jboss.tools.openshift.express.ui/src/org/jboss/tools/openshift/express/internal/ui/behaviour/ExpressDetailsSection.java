@@ -56,6 +56,9 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressDetailsSection extends ServerEditorSection {
 	private IEditorInput input;
 	protected Text userText, remoteText;

@@ -13,6 +13,9 @@ package org.jboss.tools.openshift.express.internal.core.behaviour;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.jboss.ide.eclipse.as.core.server.internal.launch.DelegatingStartLaunchConfiguration;
 
+/**
+ * @author Rob Stryker
+ */
 public class OpenshiftDelegatingStartLaunchConfiguration extends
 		DelegatingStartLaunchConfiguration implements
 		ILaunchConfigurationDelegate {

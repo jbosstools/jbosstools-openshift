@@ -38,8 +38,8 @@ import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.osgi.service.prefs.BackingStoreException;
@@ -125,7 +125,7 @@ public class ExpressServerUtils {
 		final String appName = getExpressApplicationName(server);
 		final String userName = getExpressUsername(server);
 		try {
-			final UserDelegate ud = UserModel.getDefault().findUser(userName);
+			final Connection ud = ConnectionsModel.getDefault().getConnection(userName);
 			if (ud != null) {
 				return ud.getApplicationByName(appName); // May be long running
 			}
@@ -415,7 +415,7 @@ public class ExpressServerUtils {
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
 			String user = ExpressServerUtils.getExpressUsername(server);
-			UserDelegate user2 = UserModel.getDefault().findUser(user);
+			Connection user2 = ConnectionsModel.getDefault().getConnection(user);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = user2 == null ? null : user2.getApplicationByName(appName);
 			return app;
@@ -426,7 +426,7 @@ public class ExpressServerUtils {
 	}
 
 	public static void updateOpenshiftProjectSettings(IProject project, IApplication app,
-			UserDelegate user, String remoteName, String deployFolder) {
+			Connection user, String remoteName, String deployFolder) {
 		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);

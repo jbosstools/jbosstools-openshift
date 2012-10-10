@@ -16,7 +16,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
 
@@ -33,8 +33,8 @@ public class ManageSSHKeysHandler extends AbstractHandler {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		if (selection instanceof IStructuredSelection) {
 			Object selectedElement = ((IStructuredSelection) selection).getFirstElement();
-			if (selectedElement instanceof UserDelegate) {
-				UserDelegate user = (UserDelegate) selectedElement;
+			if (selectedElement instanceof Connection) {
+				Connection user = (Connection) selectedElement;
 				new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), new ManageSSHKeysWizard(user)).open();
 			}
 		}

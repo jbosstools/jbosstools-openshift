@@ -35,11 +35,7 @@ public class CartridgeNameComparator implements Comparator<ICartridge> {
 				return -1;
 			}
 		} else if (thatCartridge == null) {
-			if (thisCartridge == null) {
-				return 0;
-			} else {
-				return 1;
-			}
+			return 1;
 		}
 		return collator.compare(thisCartridge.getName(), thatCartridge.getName());
 	}

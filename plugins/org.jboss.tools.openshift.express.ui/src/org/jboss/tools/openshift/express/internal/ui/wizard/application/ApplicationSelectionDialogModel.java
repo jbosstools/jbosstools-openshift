@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
@@ -48,7 +48,7 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 	
 	public List<IApplication> getApplications() {
 		try {
-			UserDelegate user = getUser();
+			Connection user = getUser();
 			if (user == null) {
 				return Collections.emptyList();
 			}
@@ -68,9 +68,9 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 				this.selectedApplication = application);
 	}
 
-	public UserDelegate getUser() {
+	public Connection getUser() {
 //		return OpenShiftUIActivator.getDefault().getUser();
-		return wizardModel.getUser();
+		return wizardModel.getConnection();
 	}
 
 }

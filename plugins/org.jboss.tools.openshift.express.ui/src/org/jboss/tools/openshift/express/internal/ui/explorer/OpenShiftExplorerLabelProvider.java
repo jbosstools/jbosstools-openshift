@@ -1,0 +1,128 @@
+/*******************************************************************************
+ * Copyright (c) 2012 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+package org.jboss.tools.openshift.express.internal.ui.explorer;
+
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
+import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
+import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+
+import com.openshift.client.IApplication;
+import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.OpenShiftException;
+
+/**
+ * @author Xavier Coulon
+ * @author Andre Dietisheim
+ */
+public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
+
+	@Override
+	public void addListener(ILabelProviderListener listener) {
+	}
+
+	@Override
+	public void dispose() {
+	}
+
+	@Override
+	public boolean isLabelProperty(Object element, String property) {
+		return false;
+	}
+
+	@Override
+	public void removeListener(ILabelProviderListener listener) {
+	}
+
+	@Override
+	public Image getImage(Object element) {
+		Image image = null;
+		if (element instanceof Connection) {
+			image = OpenShiftImages.REPO_MIDDLE_IMG;
+		} else if (element instanceof IApplication) {
+			image = OpenShiftImages.QUERY_IMG;
+		} else if (element instanceof IEmbeddedCartridge) {
+			image = OpenShiftImages.TASK_REPO_IMG;
+		} else if (element instanceof LoadingStub) {
+			image = OpenShiftImages.SYSTEM_PROCESS_IMG;
+		} else if (element instanceof OpenShiftException) {
+			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+		}
+		return image;
+	}
+
+	@Override
+	public String getText(Object element) {
+		return getStyledText(element).getString();
+	}
+
+	@Override
+	public StyledString getStyledText(Object element) {
+		StyledString styledString = null;
+		if (element instanceof Connection) {
+			styledString = createStyledString((Connection) element);
+		}
+		else if (element instanceof IApplication) {
+			styledString = createStyledString((IApplication) element);
+		}
+		else if (element instanceof IEmbeddedCartridge) {
+			styledString = createStyledString((IEmbeddedCartridge) element);
+		}
+		else if (element instanceof LoadingStub) {
+			styledString = new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
+		}
+		else if (element instanceof NotConnectedUserStub) {
+			styledString = new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
+		}
+		else if (element instanceof OpenShiftException) {
+			styledString = new StyledString(((OpenShiftException) element).getMessage());
+		}
+		return styledString;
+	}
+
+	private StyledString createStyledString(Connection connection) {
+//		String name = connection.getName();
+		String name = connection.getUsername();
+		String server = connection.getHost();
+		String label = new StringBuilder(name)
+				.append(' ')
+				.append(server)
+				.toString();
+		StyledString styledString = new StyledString(label);
+		styledString.setStyle(name.length() + 1, server.length(), StyledString.QUALIFIER_STYLER);
+		return styledString;
+	}
+
+	private StyledString createStyledString(IApplication application) {
+		String appName = application.getName();
+		String appType = application.getCartridge().getName();
+		StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
+		StyledString styledString = new StyledString(sb.toString());
+		styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);
+		return styledString;
+	}
+
+	private StyledString createStyledString(IEmbeddedCartridge cartridge) {
+		String label = cartridge.getName();
+		StyledString styledString = new StyledString(label);
+		styledString.setStyle(0, label.length(), StyledString.DECORATIONS_STYLER);
+		return new StyledString(label);
+	}
+
+}

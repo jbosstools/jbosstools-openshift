@@ -41,7 +41,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
@@ -61,7 +61,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	private ManageSSHKeysWizardPageModel pageModel;
 	private TableViewer viewer;
 
-	public ManageSSHKeysWizardPage(UserDelegate user, IWizard wizard) {
+	public ManageSSHKeysWizardPage(Connection user, IWizard wizard) {
 		super("Manage SSH Keys",
 				"Manage the SSH keys that are available to your OpenShift user\n" + user.getUsername(),
 				"ManageSSHKeysPage", wizard);

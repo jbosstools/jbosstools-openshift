@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -24,10 +24,10 @@ public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_KEY = "selectedSSHKey";
 
-	private UserDelegate user;
+	private Connection user;
 	private IOpenShiftSSHKey selectedKey;
 
-	public ManageSSHKeysWizardPageModel(UserDelegate user) {
+	public ManageSSHKeysWizardPageModel(Connection user) {
 		this.user = user;
 	}
 
@@ -58,7 +58,7 @@ public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
 		user.refresh();
 	}
 	
-	public UserDelegate getUser() {
+	public Connection getUser() {
 		return user;
 	}
 

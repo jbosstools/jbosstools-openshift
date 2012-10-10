@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
  * @author Xavier Coulon
@@ -25,7 +25,7 @@ public class NewOpenShiftExpressApplicationWizard extends OpenShiftExpressApplic
 		super(false, "New OpenShift Application");
 	}
 
-	public NewOpenShiftExpressApplicationWizard(UserDelegate user) {
+	public NewOpenShiftExpressApplicationWizard(Connection user) {
 		super(user, null, null, false, "New OpenShift Application");
 	}
 }

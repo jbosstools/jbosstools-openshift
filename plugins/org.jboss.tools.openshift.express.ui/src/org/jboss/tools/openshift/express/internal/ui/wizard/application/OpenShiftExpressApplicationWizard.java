@@ -38,7 +38,7 @@ import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -47,7 +47,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
-import org.jboss.tools.openshift.express.internal.ui.wizard.credentials.CredentialsWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IEmbeddableCartridge;
@@ -73,7 +73,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		this(null, null, null, useExistingApplication, wizardTitle);
 	}
 
-	OpenShiftExpressApplicationWizard(UserDelegate user, IProject project, IApplication application,
+	OpenShiftExpressApplicationWizard(Connection user, IProject project, IApplication application,
 			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
@@ -112,19 +112,19 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		Object o = selection.getFirstElement();
-		if (o instanceof UserDelegate) {
-			setUser((UserDelegate) o);
+		if (o instanceof Connection) {
+			setUser((Connection) o);
 		}
 	}
 
-	protected void setUser(UserDelegate user) {
-		getWizardModel().setUser(user);
+	protected void setUser(Connection user) {
+		getWizardModel().setConnection(user);
 	}
 
 	@Override
 	public void addPages() {
 		if (!skipCredentialsPage) {
-			addPage(new CredentialsWizardPage(this, getWizardModel()));
+			addPage(new ConnectionWizardPage(this, getWizardModel()));
 		}
 		addPage(new ApplicationConfigurationWizardPage(this, getWizardModel()));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, getWizardModel()));
@@ -219,7 +219,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					, wizardModel.getApplicationCartridge()
 					, wizardModel.getApplicationScale()
 					, wizardModel.getApplicationGearProfile()
-					, wizardModel.getUser());
+					, wizardModel.getConnection());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			wizardModel.setApplication(job.getApplication());
@@ -264,7 +264,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	private void safeRefreshUser() {
 		try {
-			wizardModel.getUser().refresh();
+			wizardModel.getConnection().refresh();
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log(e);
 		}

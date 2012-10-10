@@ -28,7 +28,11 @@ import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerEx
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
+
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setName(ServerUtil.getDefaultServerName(getServer().getServerType().getName()));
 		setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);

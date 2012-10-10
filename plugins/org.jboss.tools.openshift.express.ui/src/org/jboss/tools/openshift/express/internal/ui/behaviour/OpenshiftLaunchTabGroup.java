@@ -24,20 +24,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-public class OpenshiftLaunchTabGroup extends
-		AbstractLaunchConfigurationTabGroup {
+/**
+ * @author Rob Stryker
+ */
+public class OpenshiftLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		setTabs(createTabs2(dialog, mode));
 	}
-	
+
 	public ILaunchConfigurationTab[] createTabs2(ILaunchConfigurationDialog dialog, String mode) {
-		return new ILaunchConfigurationTab[]{
+		return new ILaunchConfigurationTab[] {
 				new OpenshiftDefaultLaunchTab()
 		};
 	}
-	
-	
+
 	public class OpenshiftDefaultLaunchTab extends AbstractLaunchConfigurationTab {
 
 		public void createControl(Composite parent) {
@@ -54,19 +55,19 @@ public class OpenshiftLaunchTabGroup extends
 		@Override
 		public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void initializeFrom(ILaunchConfiguration configuration) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override

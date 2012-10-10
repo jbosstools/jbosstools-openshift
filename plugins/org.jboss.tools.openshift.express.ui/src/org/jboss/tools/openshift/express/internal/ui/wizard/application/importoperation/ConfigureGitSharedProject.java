@@ -31,7 +31,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
@@ -49,7 +49,7 @@ import com.openshift.client.OpenShiftException;
 public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
 
 	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
-			UserDelegate user) {
+			Connection user) {
 		super(projectName, application, remoteName, user);
 	}
 

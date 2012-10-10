@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 import java.net.SocketTimeoutException;
 import java.util.Set;
 
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
@@ -38,5 +38,5 @@ public interface IEmbedCartridgesWizardPageModel {
 
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException;
 
-	public UserDelegate getUser();
+	public Connection getUser();
 }

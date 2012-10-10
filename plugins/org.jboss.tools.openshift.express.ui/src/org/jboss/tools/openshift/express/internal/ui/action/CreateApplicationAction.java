@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.action;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftExpressApplicationWizard;
@@ -36,9 +36,9 @@ public class CreateApplicationAction extends AbstractAction {
 	public void run() {
 		if (selection != null && selection instanceof ITreeSelection) {
 			Object sel = ((ITreeSelection) selection).getFirstElement();
-			if (sel instanceof UserDelegate) {
-				final UserDelegate user = (UserDelegate) sel;
-				if(user.checkForPassword()) {
+			if (sel instanceof Connection) {
+				final Connection user = (Connection) sel;
+				if(user.connect()) {
 					final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(user);
 					final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
 					wizardDialog.open();

@@ -10,46 +10,41 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 
 /**
  * @author Andre Dietisheim
  */
-public class ConnectToOpenShiftWizardModel implements IUserAwareModel {
+public class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
 	
-	protected UserDelegate user = null;
-	
-	/**
-	 * Default constructor.
-	 */
+	protected Connection user;
+		
 	public ConnectToOpenShiftWizardModel() {
-		super();
 	}
-	
+
 	/**
 	 * Constructor 
 	 * @param user the user to use to connect to OpenShift.
 	 */
-	public ConnectToOpenShiftWizardModel(final UserDelegate user) {
+	public ConnectToOpenShiftWizardModel(final Connection user) {
 		this.user = user;
 	}
 	
 	@Override
-	public UserDelegate getUser() {
-		return user == null ? UserModel.getDefault().getRecentUser() : user;
+	public Connection getConnection() {
+		return user == null ? ConnectionsModel.getDefault().getRecentConnection() : user;
 	}
 
 	@Override
-	public UserDelegate setUser(UserDelegate user) {
-		UserModel.getDefault().addUser(user);
+	public Connection setConnection(Connection user) {
 		this.user = user;
 		return user;
 	}
 
 	@Override
-	public boolean hasUser() {
-		return getUser() != null;
+	public boolean hasConnection() {
+		return getConnection() != null;
 	}
 
 }

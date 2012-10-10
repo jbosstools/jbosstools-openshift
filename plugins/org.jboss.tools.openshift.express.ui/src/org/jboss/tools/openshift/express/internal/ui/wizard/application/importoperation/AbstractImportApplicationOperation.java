@@ -34,7 +34,7 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.client.IApplication;
@@ -49,10 +49,10 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	private IApplication application;
 	private String remoteName;
 	protected List<IResource> modifiedResources;
-	private UserDelegate user;
+	private Connection user;
 
 	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName,
-			UserDelegate user) {
+			Connection user) {
 		this.projectName = projectName;
 		this.application = application;
 		this.remoteName = remoteName;
@@ -153,7 +153,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		return remoteName;
 	}
 
-	protected UserDelegate getUser() {
+	protected Connection getUser() {
 		return user;
 	}
 

@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -36,11 +36,11 @@ public class CreateOrEditDomainAction extends AbstractAction {
 	@Override
 	public void run() {
 		final ITreeSelection treeSelection = (ITreeSelection) selection;
-		if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof UserDelegate) {
-			final UserDelegate user = (UserDelegate) treeSelection.getFirstElement();
+		if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof Connection) {
+			final Connection user = (Connection) treeSelection.getFirstElement();
 			boolean connected = user.isConnected();
 			if (!connected) {
-				connected = user.checkForPassword();
+				connected = user.connect();
 			}
 			// do not show the dialog if the user was not connected or did not provide valid credentials.
 			if (connected) {
@@ -51,7 +51,7 @@ public class CreateOrEditDomainAction extends AbstractAction {
 		}
 	}
 
-	private IWizard createDomainWizard(final UserDelegate user) {
+	private IWizard createDomainWizard(final Connection user) {
 		IWizard domainWizard;
 		try {
 			if (user.getDefaultDomain() == null || user.getDefaultDomain().getId() == null) {

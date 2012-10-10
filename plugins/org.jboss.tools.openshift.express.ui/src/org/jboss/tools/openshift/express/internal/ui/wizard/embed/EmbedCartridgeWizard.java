@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationWizardModel;
 
 import com.openshift.client.IApplication;
@@ -24,7 +24,7 @@ public class EmbedCartridgeWizard extends Wizard {
 	private ApplicationWizardModel wizardModel;
 	private EmbedCartridgeWizardPage embedCartridgeWizardPage;
 
-	public EmbedCartridgeWizard(IApplication application, UserDelegate user) {
+	public EmbedCartridgeWizard(IApplication application, Connection user) {
 		this.wizardModel = new ApplicationWizardModel(application, user);
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Edit Embedded Cartridges");

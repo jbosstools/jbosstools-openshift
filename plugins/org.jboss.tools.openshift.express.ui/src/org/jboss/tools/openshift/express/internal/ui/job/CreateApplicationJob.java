@@ -20,7 +20,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
@@ -37,7 +37,7 @@ import com.openshift.client.OpenShiftTimeoutException;
  */
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
-	private UserDelegate user;
+	private Connection user;
 	private String name;
 	private ICartridge cartridge;
 	private ApplicationScale scale;
@@ -45,7 +45,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	private IApplication application;
 
 	public CreateApplicationJob(final String name, final ICartridge cartridge, final ApplicationScale scale,
-			final IGearProfile gear, UserDelegate user) {
+			final IGearProfile gear, Connection user) {
 		super(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
 		this.name = name;
 		this.cartridge = cartridge;

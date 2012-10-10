@@ -15,11 +15,15 @@ import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerEx
 
 import com.openshift.client.IApplication;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 
 	public ExpressServerExtendedProperties(IAdaptable adaptable) {
 		super(adaptable);
 	}
+	
 	public boolean hasWelcomePage() {
 		return true;
 	}

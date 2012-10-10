@@ -25,7 +25,7 @@ import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.IUserAwareModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -37,10 +37,10 @@ import com.openshift.client.OpenShiftException;
 /**
  * @author André Dietisheim
  */
-public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservablePojo {
+public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IObservablePojo {
 
 	public static final String NEW_PROJECT = "enableProject";
-	public static final String USER = "user";
+	public static final String CONNECTION = "user";
 	public static final String APPLICATION = "application";
 	public static final String APPLICATION_NAME = "applicationName";
 	public static final String APPLICATION_CARTRIDGE = "applicationCartridge";
@@ -199,14 +199,14 @@ public interface IOpenShiftExpressWizardModel extends IUserAwareModel, IObservab
 
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges();
 
-	IGearProfile getApplicationGearProfile();
+	public IGearProfile getApplicationGearProfile();
 
-	IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
+	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
 
-	ApplicationScale getApplicationScale();
+	public ApplicationScale getApplicationScale();
 
-	ApplicationScale setApplicationScale(final ApplicationScale scale);
+	public ApplicationScale setApplicationScale(final ApplicationScale scale);
 
-	IProject getProject();
+	public IProject getProject();
 
 }

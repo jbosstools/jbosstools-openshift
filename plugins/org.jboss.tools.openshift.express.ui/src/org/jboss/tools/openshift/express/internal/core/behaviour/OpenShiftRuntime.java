@@ -12,8 +12,8 @@ package org.jboss.tools.openshift.express.internal.core.behaviour;
 
 import org.eclipse.wst.server.core.model.RuntimeDelegate;
 
+/**
+ * @author Rob Stryker
+ */
 public class OpenShiftRuntime extends RuntimeDelegate {
-
-	public OpenShiftRuntime() {
-	}
 }

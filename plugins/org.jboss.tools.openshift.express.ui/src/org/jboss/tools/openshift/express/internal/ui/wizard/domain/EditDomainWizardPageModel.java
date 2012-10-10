@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.domain;
 import java.net.SocketTimeoutException;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -30,9 +30,9 @@ public class EditDomainWizardPageModel extends ObservableUIPojo {
 
 	private String domainId;
 
-	private final UserDelegate user;
+	private final Connection user;
 
-	public EditDomainWizardPageModel(UserDelegate user) {
+	public EditDomainWizardPageModel(Connection user) {
 		this.user = user;
 		try {
 			if (user.getDefaultDomain() != null) {

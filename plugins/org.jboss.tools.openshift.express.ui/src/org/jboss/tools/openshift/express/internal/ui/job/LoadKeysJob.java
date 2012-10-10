@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -25,10 +25,10 @@ import com.openshift.client.IOpenShiftSSHKey;
  */
 public class LoadKeysJob extends Job {
 
-	private UserDelegate user;
+	private Connection user;
 	private List<IOpenShiftSSHKey> keys;
 
-	public LoadKeysJob(UserDelegate user) {
+	public LoadKeysJob(Connection user) {
 		super("Loading SSH keys... ");
 		this.user = user;
 	}

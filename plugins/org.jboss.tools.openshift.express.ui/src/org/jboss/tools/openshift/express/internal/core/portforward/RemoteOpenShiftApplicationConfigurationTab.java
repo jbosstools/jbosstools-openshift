@@ -32,8 +32,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
@@ -160,7 +160,7 @@ public class RemoteOpenShiftApplicationConfigurationTab extends AbstractLaunchCo
 			return false;
 		}
 		try {
-			for (UserDelegate user : UserModel.getDefault().getUsers()) {
+			for (Connection user : ConnectionsModel.getDefault().getConnections()) {
 				final IApplication application = user.getApplicationByName(applicationName);
 				if (application != null) {
 					return true;

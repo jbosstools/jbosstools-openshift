@@ -16,7 +16,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
+ * A validator that handles empty strings as invalid. Non-empty strings are
+ * valid.
+ * <p>
+ * Invalid states are reported via ValidationStatus.cancel("message") so that
+ * {@link RequiredControlDecorationUpdater} may decorate in custom way.
+ * 
  * @author Andre Dietisheim
+ * 
+ * @see RequiredControlDecorationUpdater
  */
 public class RequiredStringValidator implements IValidator {
 
@@ -32,9 +40,9 @@ public class RequiredStringValidator implements IValidator {
 		if (StringUtils.isEmpty(name)) {
 			return ValidationStatus.cancel("You have to provide a " + fieldName);
 		}
-		return validateString((String)value);
+		return validateString((String) value);
 	}
-	
+
 	public IStatus validateString(String value) {
 		return ValidationStatus.ok();
 	}

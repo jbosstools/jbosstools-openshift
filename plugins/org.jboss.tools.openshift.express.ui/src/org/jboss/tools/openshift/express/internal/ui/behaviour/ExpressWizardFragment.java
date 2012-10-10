@@ -24,13 +24,14 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
 import org.jboss.tools.common.ui.WizardUtils;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
+
 	private ExpressDetailsComposite composite;
 	private NewServerWizardBehaviourCallback  callback;
-	
-	public ExpressWizardFragment() {
-	}
-	
+		
 	public boolean hasComposite() {
 		return true;
 	}

@@ -12,17 +12,17 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
  * @author André Dietisheim
  */
 public class NewSSHKeyWizard extends Wizard {
 
-	private UserDelegate user;
+	private Connection user;
 	private NewSSHKeyWizardPage newSSHKeyWizardPage;
 	
-	public NewSSHKeyWizard(UserDelegate user) {
+	public NewSSHKeyWizard(Connection user) {
 		this.user = user;
 		setNeedsProgressMonitor(true);
 	}

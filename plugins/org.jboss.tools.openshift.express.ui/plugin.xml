@@ -292,26 +292,26 @@
          point="org.eclipse.ui.views">
       <!--view
             category="org.jboss.tools.common.model.ui.views"
-            class="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftConsoleExpressView"
+            class="org.jboss.tools.openshift.express.internal.ui.explorerOpenShiftConsoleExpressView"
             icon="icons/openshift-logo-white-icon.png"
-            id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
+            id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
             name="OpenShift Explorer">
       </view-->
       <view
             category="org.jboss.tools.common.model.ui.views"
-            class="org.jboss.tools.openshift.express.internal.ui.console.ExpressConsoleView"
+            class="org.jboss.tools.openshift.express.internal.ui.console.OpenShiftConsoleView"
             icon="icons/openshift-logo-white-icon.png"
-            id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
+            id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
             name="OpenShift Explorer">
       </view>
       
    </extension>
    <extension point="org.eclipse.ui.navigator.viewer">
       <viewer
-            viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+            viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
          <popupMenu
                allowsPlatformContributions="true"
-               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView.popup">
+               id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup">
             <insertionPoint
                   name="group.showIn"
                   separator="true">
@@ -336,20 +336,20 @@
             </property>
          </options>
       </viewer>
-    	<viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+    	<viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
 	       <includes>
            	  <actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.*"/>
+	                pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
            	  <!--actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/-->
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
-              viewerId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+              viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
            <includes>
               <contentExtension
                     isRoot="false"
-                    pattern="org.jboss.tools.openshift.express.ui.viewer.expressConsoleContent">
+                    pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
               </contentExtension>
            </includes>
         </viewerContentBinding>
@@ -357,52 +357,52 @@
      <extension
            point="org.eclipse.ui.navigator.navigatorContent">
         <navigatorContent
-              contentProvider="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleContentProvider"
-              id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleContent"
-              labelProvider="org.jboss.tools.openshift.express.internal.ui.viewer.OpenShiftExpressConsoleLabelProvider"
+              contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
+              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent"
+              labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider"
               name="OpenShift Explorer Content">
            <triggerPoints></triggerPoints>
         </navigatorContent>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.createApplicationActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.createApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
                  </instanceof>
               </and>
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateOrEditDomainActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editDomainActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateOrEditDomainActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.editDomainActionProvider">
            <enablement>
               <and>
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
                  </instanceof>
               </and>
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteDomainActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.deleteDomainActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteDomainActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.deleteDomainActionProvider">
            <enablement>
               <and>
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
                  </instanceof>
               </and>
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RefreshElementActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.RefreshElementActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.RefreshElementActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.RefreshElementActionProvider">
            <enablement>
               <or>
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
                  </instanceof>
                  <instanceof
                        value="com.openshift.client.IApplication">
@@ -411,19 +411,19 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteConnectionActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteConnectionActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteConnectionActionProvider">
            <enablement>
               <and>
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
                  </instanceof>
               </and>
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.OpenInWebBrowserActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.openInWebBrowserActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.OpenInWebBrowserActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.openInWebBrowserActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -433,8 +433,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.TailServerLogActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.tailServerLogActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.TailServerLogActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.tailServerLogActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -444,8 +444,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ApplicationPortForwardingActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.applicationPortForwardingActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ApplicationPortForwardingActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.applicationPortForwardingActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -456,8 +456,8 @@
         </actionProvider>
         
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.EditCartridgesActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.editCartridgesActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.EditCartridgesActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.editCartridgesActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -467,8 +467,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ImportApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.importApplicationActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ImportApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.importApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -478,8 +478,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.DeleteApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.deleteApplicationActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteApplicationActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.deleteApplicationActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -489,8 +489,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.CreateServerAdapterActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.createServerAdapterActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateServerAdapterActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.createServerAdapterActionProvider">
            <enablement>
               <and>
                  <instanceof
@@ -500,12 +500,12 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ShowPropertiesActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.showPropertiesActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ShowPropertiesActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.showPropertiesActionProvider">
            <enablement>
               <or>
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
                  </instanceof>
                  <!-- Not showing it for IApp since it has show details -->
                 <!-- <instanceof
@@ -518,8 +518,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ShowDetailsActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.showDetailsActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ShowDetailsActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.showDetailsActionProvider">
            <enablement>
               <or>
                  <instanceof
@@ -529,8 +529,8 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.ShowEnvironmentActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.viewer.actionProvider.showEnvironmentActionProvider">
+              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ShowEnvironmentActionProvider"
+              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.showEnvironmentActionProvider">
            <enablement>
               <or>
                  <instanceof
@@ -544,10 +544,10 @@
      <extension
            point="org.eclipse.ui.viewActions">
         <viewContribution
-              id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleViewContribution"
-              targetID="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewContribution"
+              targetID="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
            <!--action
-                 class="org.jboss.tools.openshift.express.internal.ui.viewer.actionDelegate.RefreshViewerActionDelegate"
+                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.RefreshViewerActionDelegate"
                  icon="icons/refresh.gif"
                  id="org.jboss.tools.openshift.express.ui.viewActions.refreshAction"
                  label="Refresh"
@@ -555,7 +555,7 @@
                  toolbarPath="openshift">
            </action-->
            <action
-                 class="org.jboss.tools.openshift.express.internal.ui.viewer.actionDelegate.OpenConnectionDialogActionDelegate"
+                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.OpenConnectionDialogActionDelegate"
                  icon="icons/resource_obj.gif"
                  id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
                  label="Connect"
@@ -569,22 +569,22 @@
      <extension
            point="org.eclipse.core.runtime.adapters">
         <factory
-              adaptableType="org.jboss.tools.openshift.express.internal.core.console.UserDelegate"
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
+              adaptableType="org.jboss.tools.openshift.express.internal.core.connection.Connection"
+              class="org.jboss.tools.openshift.express.internal.ui.explorerproperty.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IApplication"
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.ui.explorerproperty.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IEmbeddableCartridge"
-              class="org.jboss.tools.openshift.express.internal.ui.viewer.property.PropertySourceAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.ui.explorerproperty.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
@@ -634,24 +634,24 @@
      <!--extension
            point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
         <propertyContributor
-              contributorId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView"
-              typeMapper="org.jboss.tools.openshift.express.internal.ui.viewer.TypeMapper">
+              contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
+              typeMapper="org.jboss.tools.openshift.express.internal.ui.explorerTypeMapper">
            <propertyCategory
-                 category="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTabCategory"></propertyCategory>
+                 category="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTabCategory"></propertyCategory>
         </propertyContributor>
      </extension>
      <extension
            point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
         <propertyTabs
-              contributorId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+              contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
            <propertyTab
-                 category="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTabCategory"
-                 id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleUserTab"
+                 category="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTabCategory"
+                 id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleUserTab"
                  label="Account">
            </propertyTab>
            <propertyTab
-                 category="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTabCategory"
-                 id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleApplicationsTab"
+                 category="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTabCategory"
+                 id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleApplicationsTab"
                  label="Account">
            </propertyTab>
         </propertyTabs>
@@ -659,11 +659,11 @@
      <extension
            point="org.eclipse.ui.views.properties.tabbed.propertySections">
         <propertySections
-              contributorId="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+              contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
            <propertySection
-                 class="org.jboss.tools.openshift.express.internal.ui.viewer.property.UserPropertySection"
+                 class="org.jboss.tools.openshift.express.internal.ui.explorerproperty.UserPropertySection"
                  id="org.jboss.tools.openshift.express.ui.userPropertySection"
-                 tab="org.jboss.tools.openshift.express.ui.viewer.expressConsolePropertyTab">
+                 tab="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTab">
               <input
                     type="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
               </input>
@@ -676,7 +676,7 @@
             targetID="org.jboss.tools.common.ui.JBossPerspective">
             <view relative="org.eclipse.ui.views.ProblemView"
          	   relationship="stack"
-               id="org.jboss.tools.openshift.express.ui.viewer.expressConsoleView">
+               id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
          </view>
       	</perspectiveExtension> 
      </extension>
@@ -697,7 +697,7 @@
      <extension
            point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.viewer.expressConsoleView.popup?before=group.server">
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.server">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.manageKeys"
                 icon="icons/key-icon.png"
@@ -709,7 +709,7 @@
 						<count value="1" />
 	         			<iterate ifEmpty="false" operator="or">
 	            			<instanceof
-	                       		value="org.jboss.tools.openshift.express.internal.core.console.UserDelegate" />
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
 	                    </iterate>
 					</and>
                 </with>

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationWizardModel;
 
 import com.openshift.client.IApplication;
@@ -128,7 +128,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	}
 
 	@Override
-	public UserDelegate getUser() {
+	public Connection getUser() {
 		return wizardModel.getUser();
 	}
 	

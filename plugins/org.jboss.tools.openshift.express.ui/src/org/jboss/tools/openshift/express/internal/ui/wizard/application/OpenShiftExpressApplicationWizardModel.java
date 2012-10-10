@@ -20,8 +20,8 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
@@ -42,17 +42,17 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	private static final String DEFAULT_PROJECT = "default_project";
 	private static final String DEFAULT_USE_EXISTING_APPLICATION = "default_useExistingApplication";
 	
-	public OpenShiftExpressApplicationWizardModel(UserDelegate user) {
+	public OpenShiftExpressApplicationWizardModel(Connection user) {
 		this(user, null, null, false);
 	}
 
-	public OpenShiftExpressApplicationWizardModel(UserDelegate user, IProject project, IApplication application,
+	public OpenShiftExpressApplicationWizardModel(Connection user, IProject project, IApplication application,
 			boolean useExistingApplication) {
 		// default value(s)
 		setDefaultProject(project);
 		setDefaultApplication(application);
 		setDefaultUseExistingApplication(useExistingApplication);
-		setUser(user);
+		setConnection(user);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 						, getApplication()
 						, getRemoteName()
 						, getRepositoryFile()
-						, getUser())
+						, getConnection())
 						.execute(monitor);
 		createServerAdapter(monitor, importedProject);
 	}
@@ -114,7 +114,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, getUser())
+				, getConnection())
 				.execute(monitor);
 		createServerAdapter(monitor, importedProject);
 	}
@@ -154,7 +154,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
-				, getUser())
+				, getConnection())
 				.execute(monitor);
 		createServerAdapter(monitor, project);
 	}
@@ -456,20 +456,20 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public UserDelegate getUser() {
-		return (UserDelegate) getProperty(USER);
+	public boolean hasConnection() {
+		return getConnection() != null;
 	}
 
 	@Override
-	public boolean hasUser() {
-		return getUser() != null;
-	}
-
-	@Override
-	public UserDelegate setUser(UserDelegate user) {
-		setProperty(USER, user);
+	public Connection setConnection(Connection connection) {
+		setProperty(CONNECTION, connection);
 		resetWizardModel();
-		return user;
+		return connection;
+	}
+	
+	@Override
+	public Connection getConnection() {
+		return (Connection) getProperty(CONNECTION);
 	}
 
 	public void resetWizardModel() {
@@ -484,7 +484,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}			
 
 	public void fireUserChanged() {
-		UserModel.getDefault().fireUserChanged(getUser());
+		ConnectionsModel.getDefault().fireConnectionChanged(getConnection());
 	}
 
 }

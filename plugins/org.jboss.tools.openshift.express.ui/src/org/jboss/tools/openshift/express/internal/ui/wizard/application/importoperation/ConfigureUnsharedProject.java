@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
@@ -38,7 +38,7 @@ import com.openshift.client.OpenShiftException;
 public class ConfigureUnsharedProject extends AbstractImportApplicationOperation {
 
 	public ConfigureUnsharedProject(String projectName, IApplication application, String remoteName,
-			UserDelegate user) {
+			Connection user) {
 		super(projectName, application, remoteName, user);
 	}
 

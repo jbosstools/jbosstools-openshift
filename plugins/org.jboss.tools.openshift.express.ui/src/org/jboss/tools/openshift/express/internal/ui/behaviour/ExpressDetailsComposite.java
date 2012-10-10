@@ -61,14 +61,15 @@ import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.credentials.CredentialsWizardPageModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPageModel;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -99,7 +100,7 @@ public class ExpressDetailsComposite {
 	private boolean rememberPassword = true;
 	private String user, pass, app, remote, deployProject, deployFolder;
 	private IApplication fapplication;
-	private UserDelegate fuser;
+	private Connection connection;
 	private IDomain fdomain;
 	private List<IApplication> appList;
 	private String[] appListNames;
@@ -137,9 +138,9 @@ public class ExpressDetailsComposite {
 		}
 
 		this.user = nameFromExistingServer;
-		this.fuser = UserModel.getDefault().findUser(this.user);
+		this.connection = ConnectionsModel.getDefault().getConnection(this.user);
 		this.app = ExpressServerUtils.getExpressApplicationName(server);
-		this.pass = UserModel.getDefault().getPasswordFromSecureStorage(this.user);
+		this.pass = connection.getPassword();
 		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
@@ -147,7 +148,7 @@ public class ExpressDetailsComposite {
 
 	private void initModelNewServerWizard() {
 		// We're in a new server wizard.
-		UserDelegate tmpUser = (UserDelegate) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
+		Connection tmpUser = (Connection) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
 		IApplication app = (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
 		
 		if( tmpUser != null && app != null ) {
@@ -166,11 +167,11 @@ public class ExpressDetailsComposite {
 			}
 		} else {
 			// we may or may not have a user, clearly no app
-			this.fuser = tmpUser == null ? UserModel.getDefault().getRecentUser() : tmpUser;
-			this.user = fuser == null ? null : fuser.getUsername();
+			this.connection = tmpUser == null ? ConnectionsModel.getDefault().getRecentConnection() : tmpUser;
+			this.user = connection == null ? null : connection.getUsername();
 		}
 		
-		this.pass = this.user == null ? null : UserModel.getDefault().getPasswordFromSecureStorage(this.user);
+		this.pass = this.user == null ? null : connection.getPassword();
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
 		this.deployFolder = this.deployFolder == null ? ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT : this.deployFolder;
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
@@ -307,8 +308,9 @@ public class ExpressDetailsComposite {
 		nameModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				user = userText.getText();
-				String storedPass = UserModel.getDefault().getPasswordFromSecureStorage(user);
-				if (storedPass != null && !storedPass.equals(""))
+				Connection connection = ConnectionsModel.getDefault().getConnection(user);
+				String storedPass = connection.getPassword();
+				if (!StringUtils.isEmpty(storedPass))
 					passText.setText(storedPass);
 			}
 		};
@@ -372,7 +374,7 @@ public class ExpressDetailsComposite {
 			importLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					OpenShiftExpressApplicationWizard wizard = 
-							new ImportOpenShiftExpressApplicationWizard(fuser, null, fapplication);
+							new ImportOpenShiftExpressApplicationWizard(connection, null, fapplication);
 					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 					int oldServerCount = ServerCore.getServers().length;
 					dialog.create();
@@ -461,13 +463,12 @@ public class ExpressDetailsComposite {
 	
 	private void verifyPressed() {
 		this.fapplication = null;
-		this.fuser = null;
+		this.connection = null;
 		this.appListNames = null;
 		verifyButton.setEnabled(false);
-		final Runnable runnable = getVerifyingCredentialsJob();
 		Job j = new Job("Verifying Credentials and Application") {
 			protected IStatus run(IProgressMonitor monitor) {
-				runnable.run();
+				getVerifyingCredentialsRunnable().run();
 				return Status.OK_STATUS;
 			}
 		};
@@ -479,7 +480,7 @@ public class ExpressDetailsComposite {
 	private void postVerifyUpdateWidgets() {
 		importLink.setEnabled(false);
 		verifyButton.setEnabled(true);
-		if (appNameCombo != null && fuser != null) {
+		if (appNameCombo != null && connection != null) {
 			appNameCombo.setItems(appListNames);
 			int index = Arrays.asList(appListNames).indexOf(app);
 			if (index != -1)
@@ -530,26 +531,21 @@ public class ExpressDetailsComposite {
 		return error;
 	}
 
-	private Runnable getVerifyingCredentialsJob() {
-		final ConnectToOpenShiftWizardModel inner = new ConnectToOpenShiftWizardModel() {
-			public UserDelegate setUser(UserDelegate user) {
-				this.user = user;
-				return user;
-			}
-		};
-		final CredentialsWizardPageModel model = new CredentialsWizardPageModel(inner);
+	private Runnable getVerifyingCredentialsRunnable() {
+		final ConnectToOpenShiftWizardModel credentialsWizardModel = new ConnectToOpenShiftWizardModel();
+		final ConnectionWizardPageModel model = new ConnectionWizardPageModel(credentialsWizardModel);
 		model.setPassword(pass);
-		model.setRhLogin(user);
+		model.setUsername(user);
 		model.setRememberPassword(rememberPassword);
 		return new Runnable() {
 			public void run() {
-				final IStatus s = model.validateCredentials();
+				final IStatus s = model.connect();
 				if (!s.isOK()) {
 					credentialsFailed = true;
 				} else {
 					credentialsFailed = false;
 					try {
-						updateModelForNewUser(inner.getUser());
+						updateModelForNewUser(credentialsWizardModel.getConnection());
 					} catch(NotFoundOpenShiftException nose) {
 						// Ignore this. It will be handled later
 					} catch(OpenShiftException ose) {
@@ -560,7 +556,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	private void updateModelForNewUser(UserDelegate user) throws OpenShiftException, SocketTimeoutException {
+	private void updateModelForNewUser(Connection user) throws OpenShiftException, SocketTimeoutException {
 		
 		// Updating the model, some long-running 
 		projectsPerApp.clear();
@@ -578,8 +574,8 @@ public class ExpressDetailsComposite {
 		IApplication application = index == -1 ? null : appList.get(index);
 		this.appListNames = appNames == null ? new String[0] : appNames;
 		this.fapplication = application;
-		this.fuser = user;
-		this.user = fuser.getUsername();
+		this.connection = user;
+		this.user = connection.getUsername();
 		
 		for( int i = 0; i < appList.size(); i++ ) {
 			projectsPerApp.put(appList.get(i), ExpressServerUtils.findProjectsForApplication(appList.get(i)));
@@ -594,12 +590,8 @@ public class ExpressDetailsComposite {
 	
 	public void finish(IProgressMonitor monitor) throws CoreException {
 		try {
-			UserModel.getDefault().addUser(fuser);
-			if( rememberPassword ) {
-				UserModel.getDefault().setPasswordInSecureStorage(fuser.getUsername(), fuser.getPassword());
-			} else {
-				UserModel.getDefault().clearPasswordInSecureStorage(fuser.getUsername());
-			}
+			ConnectionsModel.getDefault().addConnection(connection);
+			connection.save();
 			fillServerWithDetails();
 			updateProjectSettings();
 		} catch(OpenShiftException ose) {
@@ -623,7 +615,7 @@ public class ExpressDetailsComposite {
 				ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null); 
 		if( projRemote == null && projDepFolder == null ) {
 			ExpressServerUtils.updateOpenshiftProjectSettings(
-					depProj, fapplication, fuser, remote, deployFolder);
+					depProj, fapplication, connection, remote, deployFolder);
 		}
 	}
 

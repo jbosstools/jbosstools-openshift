@@ -18,8 +18,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.internal.launching.JavaRemoteApplicationLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
@@ -72,7 +72,7 @@ public class RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate exte
 
 	private IApplication lookupApplication(String applicationName) {
 		try {
-			for (UserDelegate user : UserModel.getDefault().getUsers()) {
+			for (Connection user : ConnectionsModel.getDefault().getConnections()) {
 				final IApplication application = user.getApplicationByName(applicationName);
 				if (application != null) {
 					return application;

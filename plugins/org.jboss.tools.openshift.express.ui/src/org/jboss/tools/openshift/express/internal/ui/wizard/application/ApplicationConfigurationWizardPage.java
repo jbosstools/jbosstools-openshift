@@ -75,7 +75,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -688,7 +688,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 */
 	private boolean ensureHasDomain() {
 		try {
-			final UserDelegate user = this.pageModel.getUser();
+			final Connection user = this.pageModel.getUser();
 			if (user != null && !user.hasDomain()) {
 				IWizard domainDialog = new NewDomainDialog(user);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), domainDialog);

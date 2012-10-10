@@ -27,8 +27,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
 
@@ -151,5 +153,16 @@ public class UIUtils {
 	public static interface IWidgetVisitor {
 		public void visit(Control control);
 	}
+	
+	public static Shell getShell() {
+		Shell shell = null;
+		final IWorkbenchWindow window =
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null) {
+			shell = window.getShell();
+		}
+		return shell;
+	}
+
 
 }

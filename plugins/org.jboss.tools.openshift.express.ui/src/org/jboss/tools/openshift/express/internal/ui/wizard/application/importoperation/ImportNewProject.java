@@ -25,7 +25,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project.GeneralProjectImportOperation;
@@ -42,7 +42,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	private File cloneDestination;
 
 	public ImportNewProject(String projectName, IApplication application, String remoteName,
-			File cloneDestination, UserDelegate user) {
+			File cloneDestination, Connection user) {
 		super(projectName, application, remoteName, user);
 		this.cloneDestination = cloneDestination;
 	}

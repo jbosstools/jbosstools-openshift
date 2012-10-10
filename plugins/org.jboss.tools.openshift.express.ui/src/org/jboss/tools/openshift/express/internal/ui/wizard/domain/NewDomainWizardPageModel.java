@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.domain;
 import java.io.IOException;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
@@ -28,9 +28,9 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 
 	private String domainId;
 	private IDomain domain;
-	private UserDelegate user;
+	private Connection user;
 
-	public NewDomainWizardPageModel(UserDelegate user) {
+	public NewDomainWizardPageModel(Connection user) {
 		this.user = user;
 	}
 	
@@ -54,7 +54,7 @@ public class NewDomainWizardPageModel extends ObservableUIPojo {
 		return domain;
 	}
 
-	public UserDelegate getUser() {
+	public Connection getUser() {
 		return user;
 	}
 }

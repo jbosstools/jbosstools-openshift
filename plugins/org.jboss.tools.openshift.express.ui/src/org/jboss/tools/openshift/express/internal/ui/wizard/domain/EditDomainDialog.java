@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -31,7 +31,7 @@ public class EditDomainDialog extends Wizard {
 
 	private EditDomainWizardPageModel model;
 
-	public EditDomainDialog(UserDelegate user) {
+	public EditDomainDialog(Connection user) {
 		this.model = new EditDomainWizardPageModel(user);
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Edit Domain");

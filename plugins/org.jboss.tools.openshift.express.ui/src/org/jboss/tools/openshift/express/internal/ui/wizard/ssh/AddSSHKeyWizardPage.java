@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
@@ -52,7 +52,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 	private AddSSHKeyWizardPageModel pageModel;
 
-	public AddSSHKeyWizardPage(UserDelegate user, IWizard wizard) {
+	public AddSSHKeyWizardPage(Connection user, IWizard wizard) {
 		super("Add existing SSH Key", "Add an exiting SSH key to your OpenShift user " + user.getUsername(),
 				"AddSSHKeysPage", wizard);
 		this.pageModel = new AddSSHKeyWizardPageModel(user);

@@ -7,7 +7,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.jboss.tools.openshift.express.internal.core.console.UserModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -47,7 +47,7 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	 * )
 	 */
 	public void stop(BundleContext context) throws Exception {
-		UserModel.getDefault().save();
+		ConnectionsModel.getDefault().save();
 		plugin = null;
 		super.stop(context);
 	}

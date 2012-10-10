@@ -46,11 +46,10 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
-
-	public ExpressPublishMethod() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@Override
 	public void publishStart(IDeployableServerBehaviour behaviour,

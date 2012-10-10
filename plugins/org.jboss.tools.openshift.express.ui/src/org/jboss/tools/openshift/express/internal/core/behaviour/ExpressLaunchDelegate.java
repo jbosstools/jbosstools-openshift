@@ -25,18 +25,15 @@ import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.core.util.LaunchCommandPreferences;
 
+/**
+ * @author Rob Stryker
+ */
 public class ExpressLaunchDelegate implements IJBossLaunchDelegate {
-
-	public ExpressLaunchDelegate() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@Override
 	public void actualLaunch(LaunchConfigurationDelegate launchConfig,
 			ILaunchConfiguration configuration, String mode, ILaunch launch,
 			IProgressMonitor monitor) throws CoreException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -65,16 +62,12 @@ public class ExpressLaunchDelegate implements IJBossLaunchDelegate {
 	@Override
 	public void postLaunch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void setupLaunchConfiguration(
 			ILaunchConfigurationWorkingCopy workingCopy, IServer server)
 			throws CoreException {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

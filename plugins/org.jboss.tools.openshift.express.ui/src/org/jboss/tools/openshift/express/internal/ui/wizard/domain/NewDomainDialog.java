@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -30,7 +30,7 @@ public class NewDomainDialog extends Wizard {
 
 	private NewDomainWizardPageModel model;
 
-	public NewDomainDialog(UserDelegate user) {
+	public NewDomainDialog(Connection user) {
 		this.model = new NewDomainWizardPageModel(user);
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Create Domain");

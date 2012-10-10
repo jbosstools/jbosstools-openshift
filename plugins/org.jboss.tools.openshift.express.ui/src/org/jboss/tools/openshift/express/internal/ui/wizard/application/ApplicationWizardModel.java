@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IApplication;
 
@@ -21,9 +21,9 @@ import com.openshift.client.IApplication;
 public class ApplicationWizardModel extends ObservableUIPojo {
 
 	private IApplication application;
-	private UserDelegate user;
+	private Connection user;
 
-	public ApplicationWizardModel(IApplication application, UserDelegate user) {
+	public ApplicationWizardModel(IApplication application, Connection user) {
 		this.application = application;
 		this.user = user;
 	}
@@ -32,7 +32,7 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 		return application;
 	}
 
-	public UserDelegate getUser() {
+	public Connection getUser() {
 		return user;
 	}
 }

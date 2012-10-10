@@ -19,7 +19,7 @@ import java.util.Set;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.CartridgeNameComparator;
-import org.jboss.tools.openshift.express.internal.core.console.UserDelegate;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -79,12 +79,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel;
 	}
 
-	public UserDelegate getUser() {
-		return wizardModel.getUser();
+	public Connection getUser() {
+		return wizardModel.getConnection();
 	}
 
 	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
-		UserDelegate user = getUser();
+		Connection user = getUser();
 		if (user == null || !user.isConnected() || !user.hasDomain()) {
 			return Collections.emptyList();
 		}
@@ -158,7 +158,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void loadExistingApplications() throws OpenShiftException, SocketTimeoutException {
-		UserDelegate user = getUser();
+		Connection user = getUser();
 		if (user != null) {
 			setExistingApplications(user.getApplications());
 			setExistingApplicationsLoaded(true);
@@ -424,7 +424,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	@Override
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
-		return wizardModel.getUser().getDefaultDomain();
+		return wizardModel.getConnection().getDefaultDomain();
 	}
 	
 	public void reset() throws OpenShiftException {
