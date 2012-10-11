@@ -54,6 +54,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.HostNameValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredStringValidator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -143,6 +144,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
 		Binding usernameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(rhLoginText))
+				.converting(new TrimmingStringConverter())
 				.validatingAfterGet(new RequiredStringValidator("username"))
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USERNAME).observe(pageModel))
 				.in(dbc);
