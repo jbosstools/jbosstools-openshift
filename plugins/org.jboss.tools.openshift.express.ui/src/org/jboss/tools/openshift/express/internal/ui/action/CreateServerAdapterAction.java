@@ -61,9 +61,9 @@ public class CreateServerAdapterAction extends AbstractAction {
 				final IDomain domain = application.getDomain();
 				final IUser user = domain.getUser();
 				Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
-				Connection connection = ConnectionsModel.getDefault().getConnection(user.getRhlogin());
 				NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_USER, connection);
+				Connection connection = ConnectionsModel.getDefault().getConnectionByUsername(user.getRhlogin());
+				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_CONNECTION, connection);
 				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_DOMAIN, domain);
 				w.getTaskModel().putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
@@ -73,6 +73,7 @@ public class CreateServerAdapterAction extends AbstractAction {
 			OpenShiftUIActivator.log("Could not create OpenShift server", e);
 		}
 	}
+
 	
 	public class NewServerWizard extends TaskWizard implements INewWizard {
 		public NewServerWizard(final String serverType) {

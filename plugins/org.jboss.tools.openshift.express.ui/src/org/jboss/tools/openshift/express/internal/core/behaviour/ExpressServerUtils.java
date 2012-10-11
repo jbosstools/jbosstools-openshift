@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -91,7 +93,7 @@ public class ExpressServerUtils {
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";
 
 	/* For use inside express wizard fragment */
-	public static final String TASK_WIZARD_ATTR_USER = "user";
+	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
 	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";
 	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
 	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
@@ -128,7 +130,7 @@ public class ExpressServerUtils {
 		final String appName = getExpressApplicationName(server);
 		final String userName = getExpressUsername(server);
 		try {
-			final Connection ud = ConnectionsModel.getDefault().getConnection(userName);
+			final Connection ud = ConnectionsModel.getDefault().getConnectionByUrl(userName);
 			if (ud != null) {
 				return ud.getApplicationByName(appName); // May be long running
 			}
@@ -165,12 +167,12 @@ public class ExpressServerUtils {
 						getExpressDeployProject2(attributes), SETTING_CONNECTIONURL, null);
 		if (connectionValue == null) {
 			String username = getExpressUsername(attributes);
-//			connectionValue = ConnectionUtils.getUrlForUsername(getExpressUsername(attributes));
 			try {
-				connectionValue = new Connection(username, null).toURLString();
+				connectionValue = ConnectionUtils.getUrlForUsername(username);
 			} catch (UnsupportedEncodingException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
-				return null;
+			} catch (MalformedURLException e) {
+				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
 			}
 		}
 
@@ -443,7 +445,7 @@ public class ExpressServerUtils {
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
 			String user = ExpressServerUtils.getExpressUsername(server);
-			Connection connection = ConnectionsModel.getDefault().getConnection(user);
+			Connection connection = ConnectionsModel.getDefault().getConnectionByUrl(user);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
 			return app;

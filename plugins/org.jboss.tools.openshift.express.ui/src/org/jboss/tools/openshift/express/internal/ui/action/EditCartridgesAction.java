@@ -40,7 +40,7 @@ public class EditCartridgesAction extends AbstractAction {
 		if (selection != null && selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
 			try {
 				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				final Connection user = ConnectionsModel.getDefault().getConnection(application.getDomain().getUser().getRhlogin());
+				final Connection user = ConnectionsModel.getDefault().getConnectionByUrl(application.getDomain().getUser().getRhlogin());
 				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
 				int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
 				if(result == Dialog.OK) {

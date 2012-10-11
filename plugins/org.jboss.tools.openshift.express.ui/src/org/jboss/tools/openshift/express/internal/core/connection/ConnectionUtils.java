@@ -33,17 +33,9 @@ public class ConnectionUtils {
 		// inhibit instantiation
 	}
 
-	public static String getUrlForUsername(String username) {
-		UrlPortions portions;
-		try {
-			portions = UrlUtils.toPortions(getDefaultHostUrl());
-			return UrlUtils.getUrlFor(username, portions.getHost(), portions.getProtocol());
-		} catch (UnsupportedEncodingException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not get default host for user {0}", username), e);
-		} catch (MalformedURLException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not get default host for user {0}", username), e);
-		}
-		return null;
+	public static String getUrlForUsername(String username) throws UnsupportedEncodingException, MalformedURLException {
+		UrlPortions portions = UrlUtils.toPortions(getDefaultHostUrl());
+		return UrlUtils.getUrlFor(username, portions.getHost(), portions.getProtocol());
 	}
 
 	/**

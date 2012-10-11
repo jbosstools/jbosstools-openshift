@@ -67,6 +67,7 @@ import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallbac
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.explorer.ConnectToOpenShiftWizard;
@@ -134,23 +135,23 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel() {
-//		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-//		if (connectionUrl == null) {
+		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		if (ConnectionUtils.getDefaultHostUrl().equals(connectionUrl)) {
 			initModelNewServerWizard();
-//			return;
-//		}
-//		
-//		this.connectionUrl = connectionUrl;
-//		this.connection = ConnectionsModel.getDefault().getConnection(this.connectionUrl);
-//		this.app = ExpressServerUtils.getExpressApplicationName(server);
-//		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
-//		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
-//		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+			return;
+		}
+		
+		this.connectionUrl = connectionUrl;
+		this.connection = ConnectionsModel.getDefault().getConnectionByUrl(connectionUrl);
+		this.app = ExpressServerUtils.getExpressApplicationName(server);
+		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
+		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
+		this.remote = ExpressServerUtils.getExpressRemoteName(server);
 	}
 
 	private void initModelNewServerWizard() {
 		// We're in a new server wizard.
-		Connection tmpConnection = (Connection) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_USER);
+		Connection tmpConnection = (Connection) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_CONNECTION);
 		IApplication app = (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
 
 		if (tmpConnection != null && app != null) {
@@ -346,12 +347,11 @@ public class ExpressDetailsComposite {
 	private void addListeners() {
 		connectionComboViewer.addSelectionChangedListener(onConnectionSelected());
 
-		if (showVerify)
-			remoteModifyListener = new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					remote = remoteText.getText();
-				}
-			};
+		remoteModifyListener = new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				remote = remoteText.getText();
+			}
+		};
 		remoteText.addModifyListener(remoteModifyListener);
 
 		if (appNameCombo != null) {

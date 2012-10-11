@@ -85,7 +85,9 @@ public class ConnectionsModel {
 				this.recentConnection = null;
 			fireModelChange(connection, REMOVED);
 		} catch (UnsupportedEncodingException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()), e);
+			OpenShiftUIActivator.log(
+					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()),
+					e);
 		}
 	}
 
@@ -114,15 +116,25 @@ public class ConnectionsModel {
 		return recentConnection;
 	}
 
-	public void setRecentUser(Connection user) {
-		this.recentConnection = user;
+	public void setRecentUser(Connection connection) {
+		this.recentConnection = connection;
 	}
 
-	public Connection getConnection(String name) {
-		if (name == null) {
+	public Connection getConnectionByUrl(String url) {
+		if (url == null) {
 			return null;
 		}
-		return allConnections.get(name);
+		return allConnections.get(url);
+	}
+
+	public Connection getConnectionByUsername(String username) {
+		try {
+			String url = new Connection(username, null).toURLString();
+			return getConnectionByUrl(url);
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get url for connection {0}", username), e);
+			return null;
+		}
 	}
 
 	public Connection[] getConnections() {
