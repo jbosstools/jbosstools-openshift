@@ -134,18 +134,18 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel() {
-		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-		if (connectionUrl == null) {
+//		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+//		if (connectionUrl == null) {
 			initModelNewServerWizard();
-			return;
-		}
-
-		this.connectionUrl = connectionUrl;
-		this.connection = ConnectionsModel.getDefault().getConnection(this.connectionUrl);
-		this.app = ExpressServerUtils.getExpressApplicationName(server);
-		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
-		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
-		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+//			return;
+//		}
+//		
+//		this.connectionUrl = connectionUrl;
+//		this.connection = ConnectionsModel.getDefault().getConnection(this.connectionUrl);
+//		this.app = ExpressServerUtils.getExpressApplicationName(server);
+//		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
+//		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
+//		this.remote = ExpressServerUtils.getExpressRemoteName(server);
 	}
 
 	private void initModelNewServerWizard() {
