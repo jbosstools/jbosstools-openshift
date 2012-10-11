@@ -166,6 +166,7 @@ public class ExpressDetailsComposite {
 			// we may or may not have a user, clearly no app
 			this.connection = tmpConnection == null ? ConnectionsModel.getDefault().getRecentConnection()
 					: tmpConnection;
+			updateModel(connection);
 		}
 
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
