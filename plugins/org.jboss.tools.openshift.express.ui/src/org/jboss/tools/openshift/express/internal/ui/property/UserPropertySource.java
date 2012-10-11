@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.explorer.property;
+package org.jboss.tools.openshift.express.internal.ui.property;
 
 import java.lang.reflect.InvocationTargetException;
 
