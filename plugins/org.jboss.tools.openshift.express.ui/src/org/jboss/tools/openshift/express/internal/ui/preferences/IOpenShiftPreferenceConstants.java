@@ -24,6 +24,6 @@ public interface IOpenShiftPreferenceConstants {
 	/** server history */
 	public static final String SERVERS = "org.jboss.tools.openshift.express.SERVERS";
 	/** default server */
-	public static final String DEFAULT_SERVER = "org.jboss.tools.openshift.express.SERVER";
+	public static final String DEFAULT_HOST = "org.jboss.tools.openshift.express.SERVER";
 
 }

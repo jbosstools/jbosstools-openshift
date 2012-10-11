@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +76,7 @@ public class ExpressServerUtils {
 	public static final String SETTING_APPLICATION_ID = "org.jboss.tools.openshift.ApplicationId";
 	public static final String SETTING_DOMAIN = "org.jboss.tools.openshift.Domain";
 	public static final String SETTING_USERNAME = "org.jboss.tools.openshift.Username";
+	public static final String SETTING_CONNECTIONURL = "org.jboss.tools.openshift.Connection";
 	public static final String SETTING_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.DeployFolder";
 
 	// Legacy, not to be used
@@ -117,7 +119,8 @@ public class ExpressServerUtils {
 	 * OpenShift if the user's applications list had not been loaded before.
 	 * Callers should use this methd without blocking the UI.
 	 * 
-	 * @param server the server 
+	 * @param server
+	 *            the server
 	 * @return the openshift application or null if it could not be located.
 	 * @throws OpenShiftException
 	 */
@@ -151,9 +154,27 @@ public class ExpressServerUtils {
 				attributes.getAttribute(ATTRIBUTE_DOMAIN, (String) null));
 	}
 
-	public static String getExpressUsername(IServerAttributes attributes) {
+	private static String getExpressUsername(IServerAttributes attributes) {
 		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_USERNAME,
 				attributes.getAttribute(ATTRIBUTE_USERNAME, (String) null));
+	}
+
+	public static String getExpressConnectionUrl(IServerAttributes attributes) {
+		String connectionValue =
+				getProjectAttribute(
+						getExpressDeployProject2(attributes), SETTING_CONNECTIONURL, null);
+		if (connectionValue == null) {
+			String username = getExpressUsername(attributes);
+//			connectionValue = ConnectionUtils.getUrlForUsername(getExpressUsername(attributes));
+			try {
+				connectionValue = new Connection(username, null).toURLString();
+			} catch (UnsupportedEncodingException e) {
+				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
+				return null;
+			}
+		}
+
+		return connectionValue;
 	}
 
 	/* Settings stored in the project, maybe over-ridden in the server */
@@ -378,7 +399,7 @@ public class ExpressServerUtils {
 	/**
 	 * This method will search for all projects connected to git and having the
 	 * proper settings file containing domain, application id, app name, and
-	 * username
+	 * connection url
 	 * 
 	 * @return
 	 */
@@ -386,17 +407,24 @@ public class ExpressServerUtils {
 		final ArrayList<IProject> results = new ArrayList<IProject>();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
-			if (EGitUtils.getRepository(projects[i]) != null) {
-				String appName = getProjectAttribute(projects[i], SETTING_APPLICATION_NAME, null);
-				String appId = getProjectAttribute(projects[i], SETTING_APPLICATION_ID, null);
-				String domain = getProjectAttribute(projects[i], SETTING_DOMAIN, null);
-				String username = getProjectAttribute(projects[i], SETTING_USERNAME, null);
-				if (appName != null && appId != null && domain != null && username != null) {
-					results.add(projects[i]);
-				}
+			if (EGitUtils.getRepository(projects[i]) != null
+					&& hasOpenShiftSettings(projects[i])) {
+				results.add(projects[i]);
 			}
 		}
 		return results.toArray(new IProject[results.size()]);
+	}
+
+	private static boolean hasOpenShiftSettings(IProject project) {
+		String appName = getProjectAttribute(project, SETTING_APPLICATION_NAME, null);
+		String appId = getProjectAttribute(project, SETTING_APPLICATION_ID, null);
+		String domain = getProjectAttribute(project, SETTING_DOMAIN, null);
+		String connectionUrl = getProjectAttribute(project, SETTING_CONNECTIONURL, null);
+		String username = getProjectAttribute(project, SETTING_USERNAME, null);
+		return appName != null
+				&& appId != null
+				&& domain != null
+				&& (connectionUrl != null || username != null);
 	}
 
 	public static IProject findProjectForApplication(IApplication application) {
@@ -415,9 +443,9 @@ public class ExpressServerUtils {
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
 			String user = ExpressServerUtils.getExpressUsername(server);
-			Connection user2 = ConnectionsModel.getDefault().getConnection(user);
+			Connection connection = ConnectionsModel.getDefault().getConnection(user);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
-			IApplication app = user2 == null ? null : user2.getApplicationByName(appName);
+			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
 			return app;
 		} catch (OpenShiftException ose) {
 			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
@@ -426,13 +454,13 @@ public class ExpressServerUtils {
 	}
 
 	public static void updateOpenshiftProjectSettings(IProject project, IApplication app,
-			Connection user, String remoteName, String deployFolder) {
+			Connection connection, String remoteName, String deployFolder) {
 		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);
 		node.put(ExpressServerUtils.SETTING_APPLICATION_ID, app.getUUID());
 		node.put(ExpressServerUtils.SETTING_APPLICATION_NAME, app.getName());
-		node.put(ExpressServerUtils.SETTING_USERNAME, user.getUsername());
+		setConnectionUrl(connection, node);
 		node.put(ExpressServerUtils.SETTING_DOMAIN, app.getDomain().getId());
 		node.put(ExpressServerUtils.SETTING_REMOTE_NAME, remoteName);
 		node.put(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);
@@ -441,6 +469,22 @@ public class ExpressServerUtils {
 		} catch (BackingStoreException e) {
 			OpenShiftUIActivator.log(e);
 		}
+	}
+
+	private static void setConnectionUrl(Connection connection, IEclipsePreferences node) {
+		try {
+			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, connection.toURLString());
+			if (hasUsername(node)) {
+				node.put(ExpressServerUtils.SETTING_USERNAME, connection.getUsername());
+			}
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for connection {0}/{1}",
+					connection.getUsername(), connection.getHost()), e);
+		}
+	}
+
+	private static boolean hasUsername(IEclipsePreferences node) {
+		return node.get(ExpressServerUtils.SETTING_USERNAME, null) != null;
 	}
 
 	public static IServer setExpressDeployProject(IServer server, String val) throws CoreException {

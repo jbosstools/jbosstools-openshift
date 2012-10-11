@@ -16,6 +16,8 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -164,5 +166,15 @@ public class UIUtils {
 		return shell;
 	}
 
-
+	@SuppressWarnings("unchecked")
+	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
+		if (selection instanceof IStructuredSelection) {
+			Object firstSelectedElement = ((IStructuredSelection) selection).getFirstElement();
+			if (firstSelectedElement != null
+					&& clazz.isAssignableFrom(firstSelectedElement.getClass())) {
+				return (E) firstSelectedElement;
+			}
+		}
+		return null;
+	}
 }

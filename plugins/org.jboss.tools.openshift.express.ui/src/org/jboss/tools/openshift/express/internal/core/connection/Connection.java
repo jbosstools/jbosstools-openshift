@@ -67,8 +67,13 @@ public class Connection {
 		this(null, null, null, false);
 	}
 
-	public Connection(String url, ICredentialsPrompter prompter) throws MalformedURLException, UnsupportedEncodingException {
-		UrlPortions portions = UrlUtils.toPortions(new URL(url));
+	public Connection(String username, ICredentialsPrompter prompter) {
+		this.username = username;
+		this.prompter = prompter;
+	}
+	
+	public Connection(URL url, ICredentialsPrompter prompter) throws MalformedURLException, UnsupportedEncodingException {
+		UrlPortions portions = UrlUtils.toPortions(url);
 		this.username = portions.getUsername();
 		this.password = portions.getPassword();
 		setHost(portions.getHost());
@@ -149,11 +154,8 @@ public class Connection {
 	 * @return
 	 */
 	public String getHost() {
-		if (StringUtils.isEmpty(host)) {
-			return getDefaultHost();
-		}
 		if (isDefaultHost()) {
-			return getDefaultHost() + UrlUtils.cutScheme(host);
+			return UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl());
 		}
 
 		return host;
@@ -183,16 +185,6 @@ public class Connection {
 		}
 	}
 	
-	private String getDefaultHost() {
-		try {
-			// TODO: override by default server set in preferences
-			return getOpenShiftConfiguration().getLibraServer();
-		} catch (Exception e) {
-			Logger.error("Could not load default server from OpenShift configuration.", e);
-		}
-		return null;
-	}
-
 	public boolean isRememberPassword() {
 		return rememberPassword;
 	}

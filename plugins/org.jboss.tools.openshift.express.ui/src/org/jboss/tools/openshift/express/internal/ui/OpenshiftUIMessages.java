@@ -25,7 +25,7 @@ public class OpenshiftUIMessages extends NLS {
 	public static String EditorSectionAppNameLabel;
 	public static String EditorSectionDeployLocLabel;
 	public static String EditorSectionZipDestLabel;
-	public static String EditorSectionUserLabel;
+	public static String EditorSectionConnectionLabel;
 	public static String EditorSectionRemoteLabel;
 	public static String EditorSectionBrowseDestButton;
 	public static String EditorSectionProjectSettingsGroup;

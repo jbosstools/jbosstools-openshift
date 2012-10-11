@@ -301,4 +301,9 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			return Status.OK_STATUS;
 		}
 	}
+
+	public Connection getConnection(){
+		return pageModel.getConnection();
+	}
+
 }

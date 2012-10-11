@@ -47,8 +47,8 @@ public class ServerPreferencePage extends FieldEditorPreferencePage implements I
 
 	public void createFieldEditors() {
 		addField(new StringFieldEditor(
-				OpenShiftPreferences.DEFAULT_SERVER
-				, OpenShiftPreferences.INSTANCE.getDefaultServer()
+				OpenShiftPreferences.DEFAULT_HOST
+				, OpenShiftPreferences.INSTANCE.getDefaultHost()
 				, getFieldEditorParent()));
 	}
 

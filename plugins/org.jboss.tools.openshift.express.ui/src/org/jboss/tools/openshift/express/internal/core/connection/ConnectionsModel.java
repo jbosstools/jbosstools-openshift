@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -78,10 +79,14 @@ public class ConnectionsModel {
 	}
 
 	public void removeConnection(Connection connection) {
-		allConnections.remove(connection.getUsername());
-		if (this.recentConnection == connection)
-			this.recentConnection = null;
-		fireModelChange(connection, REMOVED);
+		try {
+			allConnections.remove(connection.toURLString());
+			if (this.recentConnection == connection)
+				this.recentConnection = null;
+			fireModelChange(connection, REMOVED);
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()), e);
+		}
 	}
 
 	private void fireModelChange(Connection connection, int type) {
@@ -134,7 +139,8 @@ public class ConnectionsModel {
 		for (int i = 0; i < connections.length; i++) {
 			Connection connection = null;
 			try {
-				connection = new Connection(connections[i], new CredentialsPrompter());
+				URL connectionUrl = new URL(connections[i]);
+				connection = new Connection(connectionUrl, new CredentialsPrompter());
 				addConnection(connection);
 			} catch (MalformedURLException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);

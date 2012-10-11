@@ -97,15 +97,14 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	}
 
 	private StyledString createStyledString(Connection connection) {
-//		String name = connection.getName();
 		String name = connection.getUsername();
-		String server = connection.getHost();
+		String host = connection.getHost();
 		String label = new StringBuilder(name)
 				.append(' ')
-				.append(server)
+				.append(host)
 				.toString();
 		StyledString styledString = new StyledString(label);
-		styledString.setStyle(name.length() + 1, server.length(), StyledString.QUALIFIER_STYLER);
+		styledString.setStyle(name.length() + 1, host.length(), StyledString.QUALIFIER_STYLER);
 		return styledString;
 	}
 

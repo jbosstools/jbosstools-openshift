@@ -38,8 +38,12 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 		return OpenShiftUIActivator.getDefault().getPreferenceStore();
 	}
 
-	public String getDefaultServer() {
-		return getPreferencesStore().getString(DEFAULT_SERVER);
+	public String getDefaultHost() {
+		return getPreferencesStore().getString(DEFAULT_HOST);
+	}
+	
+	public void setDefaultHost(String host) {
+		getPreferencesStore().setValue(DEFAULT_HOST, host);
 	}
 
 	public String getLastUsername() {

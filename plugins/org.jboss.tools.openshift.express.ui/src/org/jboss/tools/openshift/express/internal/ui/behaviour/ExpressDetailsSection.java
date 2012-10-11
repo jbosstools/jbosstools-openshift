@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 
 import org.eclipse.core.resources.IFolder;
@@ -18,9 +21,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -54,14 +59,17 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyButtonCommand
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author Rob Stryker
  */
 public class ExpressDetailsSection extends ServerEditorSection {
 	private IEditorInput input;
-	protected Text userText, remoteText;
+	protected Text connectionText, remoteText;
 	protected Text deployFolderText;
 	protected Text appNameText;
 	protected Combo deployProjectCombo;
@@ -76,110 +84,138 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	public void createSection(Composite parent) {
 		super.createSection(parent);
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		
-		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.EXPANDED|ExpandableComposite.TITLE_BAR);
+
+		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED
+				| ExpandableComposite.TITLE_BAR);
 		section.setText("Openshift Server");
-		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL| GridData.GRAB_VERTICAL));
+		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL
+				| GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL));
 		Composite c = toolkit.createComposite(section, SWT.NONE);
-		c.setLayout(new GridLayout(2,true));
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).equalWidth(true).applyTo(c);
 		createWidgets(c, toolkit);
 		toolkit.paintBordersFor(c);
 		toolkit.adapt(c);
 		section.setClient(c);
-		
+
 		initWidgets();
 		addListeners();
 	}
-	
+
 	protected void initWidgets() {
 		// Set the widgets
-		String user = ExpressServerUtils.getExpressUsername(server);
-		String appName = ExpressServerUtils.getExpressApplicationName(server);
 		deployProjectCombo.setEnabled(true);
-		userText.setText(user == null ? "" : user);
+		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		connectionText.setText(getConnectionLabel(connectionUrl));
+		String appName = ExpressServerUtils.getExpressApplicationName(server);
 		appNameText.setText(appName == null ? "" : appName);
-		userText.setEnabled(false);
+		connectionText.setEnabled(false);
 		appNameText.setEnabled(false);
-		
+
 		String outDir = ExpressServerUtils.getExpressDeployFolder(server);
 		String remote = ExpressServerUtils.getExpressRemoteName(server);
 		deployFolderText.setText(outDir == null ? "" : outDir);
 		remoteText.setText(remote == null ? "" : remote);
-		
+
 		deployProjectCombo.setItems(getSuitableProjects());
 		java.util.List<String> l = Arrays.asList(deployProjectCombo.getItems());
 		String depProj = ExpressServerUtils.getExpressDeployProject(server);
-		if( depProj != null ) {
+		if (depProj != null) {
 			int ind = l.indexOf(depProj);
-			if( ind != -1 ) 
+			if (ind != -1)
 				deployProjectCombo.select(ind);
 		}
-		
+
 		boolean overrides = ExpressServerUtils.getOverridesProject(server);
 		overrideProjectSettings.setSelection(overrides);
 		remoteText.setEnabled(overrides);
 		deployFolderText.setEnabled(overrides);
 		browseDestButton.setEnabled(overrides);
 	}
-	
+
+	private String getConnectionLabel(String connectionUrl) {
+		String connectionLabel = "";
+		if (!StringUtils.isEmpty(connectionUrl)) {
+			try {
+				Connection connection = new Connection(new URL(connectionUrl), null);
+				connectionLabel = connection.getUsername() + " - " + connection.getHost();
+			} catch (MalformedURLException e) {
+				OpenShiftUIActivator.log(NLS.bind("Could not get URL for connection {0}", connectionUrl), e);
+			} catch (UnsupportedEncodingException e) {
+				OpenShiftUIActivator.log(NLS.bind("Could not get URL for connection {0}", connectionUrl), e);
+			}
+		}
+		return connectionLabel;
+	}
+
 	private String[] getSuitableProjects() {
 		IProject[] all = ExpressServerUtils.findAllSuitableOpenshiftProjects();
 		String[] s = new String[all.length];
-		for( int i = 0; i < all.length; i++ ) {
+		for (int i = 0; i < all.length; i++) {
 			s[i] = all[i].getName();
 		}
 		return s;
 	}
-	
+
 	protected Composite createComposite(Section section) {
 		createWidgets(section, new FormToolkit(section.getDisplay()));
 		return section;
 	}
-	
-	private void createWidgets(Composite composite, FormToolkit toolkit) {
-		composite.setLayout(new GridLayout(2, false));
 
-		Label deployLocationLabel = toolkit.createLabel(composite, OpenshiftUIMessages.EditorSectionDeployLocLabel, SWT.NONE);
+	private void createWidgets(Composite composite, FormToolkit toolkit) {
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).equalWidth(false).applyTo(composite);
+
+		Label deployLocationLabel = toolkit.createLabel(composite, OpenshiftUIMessages.EditorSectionDeployLocLabel,
+				SWT.NONE);
 		deployProjectCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
-		
 
 		projectSettingGroup = new Group(composite, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(projectSettingGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1)
+				.applyTo(projectSettingGroup);
 		projectSettingGroup.setLayout(new GridLayout(2, false));
 		projectSettingGroup.setText(OpenshiftUIMessages.EditorSectionProjectSettingsGroup);
-		
-		overrideProjectSettings = toolkit.createButton(projectSettingGroup, OpenshiftUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
 
-		Label userLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionUserLabel, SWT.NONE);
+		overrideProjectSettings = toolkit.createButton(projectSettingGroup,
+				OpenshiftUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1)
+				.applyTo(overrideProjectSettings);
+
+		Label userLabel = toolkit
+				.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionConnectionLabel, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(userLabel);
-		userText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(userText);
-		
-		Label appNameLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionAppNameLabel, SWT.NONE);
+		connectionText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionText);
+
+		Label appNameLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionAppNameLabel,
+				SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 		appNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameText);
 
-		Label zipDestLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionZipDestLabel, SWT.NONE);
+		Label zipDestLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionZipDestLabel,
+				SWT.NONE);
 		Composite zipDestComposite = toolkit.createComposite(projectSettingGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
-		browseDestButton = toolkit.createButton(zipDestComposite, OpenshiftUIMessages.EditorSectionBrowseDestButton, SWT.PUSH);
-		browseDestButton.setLayoutData(UIUtil.createFormData2(0,5,100,-5,null,0,100,0));
+		browseDestButton = toolkit.createButton(zipDestComposite, OpenshiftUIMessages.EditorSectionBrowseDestButton,
+				SWT.PUSH);
+		browseDestButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
 		deployFolderText = toolkit.createText(zipDestComposite, "", SWT.SINGLE | SWT.BORDER);
-		deployFolderText.setLayoutData(UIUtil.createFormData2(0,5,100,-5,0,0,browseDestButton,-5));
-		
-		Label remoteLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionRemoteLabel, SWT.NONE);
+		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDestButton, -5));
+
+		Label remoteLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionRemoteLabel,
+				SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
 	}
-	
+
 	ModifyListener remoteModifyListener, deployDestinationModifyListener, deployProjectListener;
 	SelectionListener overrideListener;
+
 	protected void addListeners() {
 		deployProjectListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -187,7 +223,8 @@ public class ExpressDetailsSection extends ServerEditorSection {
 				String newVal = ind == -1 ? null : deployProjectCombo.getItem(ind);
 				((ServerEditorPartInput) input).getServerCommandManager().execute(
 						new SetProjectCommand(server, newVal));
-			}};
+			}
+		};
 		deployProjectCombo.addModifyListener(deployProjectListener);
 		overrideListener = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -196,7 +233,6 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		};
 		overrideProjectSettings.addSelectionListener(overrideListener);
 
-		
 		remoteModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				((ServerEditorPartInput) input).getServerCommandManager().execute(new SetRemoteCommand(server));
@@ -209,7 +245,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 			}
 		};
 		deployFolderText.addModifyListener(deployDestinationModifyListener);
-		
+
 		browseDestButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				browsePressed();
@@ -217,30 +253,31 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		});
 
 	}
-	
+
 	private void browsePressed() {
 		IFolder f = chooseFolder();
-		if( f != null ) {
+		if (f != null) {
 			deployFolderText.setText(f.getFullPath().removeFirstSegments(1).makeRelative().toOSString());
 		}
 	}
-	
+
 	private IFolder chooseFolder() {
 		String depProject = ExpressServerUtils.getExpressDeployProject(server);
 		String depFolder = ExpressServerUtils.getExpressDeployFolder(server);
-		
+
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(depProject);
 
-		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new WorkbenchContentProvider();
+		ILabelProvider lp = new WorkbenchLabelProvider();
+		ITreeContentProvider cp = new WorkbenchContentProvider();
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp, cp);
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp,
+				cp);
 		dialog.setTitle("Deploy Location");
 		dialog.setMessage("Please choose a location to put zipped projects");
 		dialog.setInput(p);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
-		
-		IResource res= p.findMember(new Path(depFolder));
+
+		IResource res = p.findMember(new Path(depFolder));
 		if (res != null)
 			dialog.setInitialSelection(res);
 
@@ -248,19 +285,21 @@ public class ExpressDetailsSection extends ServerEditorSection {
 			return (IFolder) dialog.getFirstResult();
 		return null;
 	}
-	
+
 	public class SetRemoteCommand extends ServerWorkingCopyPropertyCommand {
 		public SetRemoteCommand(IServerWorkingCopy server) {
 			super(server, "Change Remote Name", remoteText, remoteText.getText(),
-					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener, 
+					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener,
 					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		}
 	}
 
 	public class SetProjectCommand extends ServerWorkingCopyPropertyComboCommand {
 		public SetProjectCommand(IServerWorkingCopy wc, String newVal) {
-			super(wc, "Change Openshift Project", deployProjectCombo, newVal, ExpressServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
+			super(wc, "Change Openshift Project", deployProjectCombo, newVal,
+					ExpressServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
 		}
+
 		@Override
 		protected void postOp(int type) {
 			updateWidgetsFromWorkingCopy();
@@ -270,28 +309,30 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	public class SetDeployFolderCommand extends ServerWorkingCopyPropertyCommand {
 		public SetDeployFolderCommand(IServerWorkingCopy server) {
 			super(server, "Change Deployment Folder", deployFolderText, deployFolderText.getText(),
-					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener, 
+					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener,
 					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
 		}
 	}
 
 	public class SetOverrideCommand extends ServerWorkingCopyPropertyButtonCommand {
 		public SetOverrideCommand(IServerWorkingCopy wc) {
-			super(wc, "Override Openshift Project Settings Command", 
-					overrideProjectSettings, overrideProjectSettings.getSelection(), 
+			super(wc, "Override Openshift Project Settings Command",
+					overrideProjectSettings, overrideProjectSettings.getSelection(),
 					ExpressServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
 		}
+
 		@Override
 		protected void postOp(int type) {
 			updateWidgetsFromWorkingCopy();
 		}
 	}
+
 	private void updateWidgetsFromWorkingCopy() {
-		String user = ExpressServerUtils.getExpressUsername(server);
+		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		connectionText.setText(getConnectionLabel(connectionUrl));
 		String appName = ExpressServerUtils.getExpressApplicationName(server);
-		userText.setText(user == null ? "" : user);
 		appNameText.setText(appName == null ? "" : appName);
-		
+
 		browseDestButton.setEnabled(overrideProjectSettings.getSelection());
 		deployFolderText.setEnabled(overrideProjectSettings.getSelection());
 		remoteText.setEnabled(overrideProjectSettings.getSelection());
@@ -299,7 +340,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		String depFolder = ExpressServerUtils.getExpressDeployFolder(server, ExpressServerUtils.SETTING_FROM_PROJECT);
 		remote = remote == null ? "" : remote;
 		depFolder = depFolder == null ? "" : depFolder;
-		
+
 		remoteText.removeModifyListener(remoteModifyListener);
 		deployFolderText.removeModifyListener(deployDestinationModifyListener);
 		remoteText.setText(remote);

@@ -47,4 +47,8 @@ public class ConnectToOpenShiftWizard extends Wizard {
 	public void addPages() {
 		addPage(page);
 	}
+	
+	public Connection getConnection() {
+		return page.getConnection();
+	}
 }
