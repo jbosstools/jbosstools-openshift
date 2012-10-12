@@ -74,6 +74,18 @@ public class ConnectionsModel {
 		}
 	}
 
+	public boolean hasConnection(Connection connection) {
+		try {
+			String url = connection.toURLString();
+			return getConnectionByUrl(url) != null;
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(
+					NLS.bind("Could not get url for connection {0} - {1}", connection.getUsername(),
+							connection.getHost()), e);
+			return false;
+		}
+	}
+
 	public void fireConnectionChanged(Connection connection) {
 		fireModelChange(connection, CHANGED);
 	}

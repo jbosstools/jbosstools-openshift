@@ -97,22 +97,21 @@ public class Connection {
 		if (!StringUtils.isEmpty(username)) {
 			return username;
 		}
-		username = OpenShiftPreferences.INSTANCE.getLastUsername();
-		if (StringUtils.isEmpty(username)) {
-			username = getDefaultUsername();
-		}
-		return username;
+		return getDefaultUsername();
 	}
 
 	private String getDefaultUsername() {
-		try {
-			return getOpenShiftConfiguration().getRhlogin();
-		} catch (Exception e) {
-			Logger.error("Could not load default user name from OpenShift configuration.", e);
+		String username = OpenShiftPreferences.INSTANCE.getLastUsername();
+		if (StringUtils.isEmpty(username)) {
+			try {
+				username = getOpenShiftConfiguration().getRhlogin();
+			} catch (Exception e) {
+				Logger.error("Could not load default user name from OpenShift configuration.", e);
+			}
 		}
-		return null;
+		return username;
 	}
-
+		
 	private void setUser(IUser user) {
 		if (user == null) {
 			return;

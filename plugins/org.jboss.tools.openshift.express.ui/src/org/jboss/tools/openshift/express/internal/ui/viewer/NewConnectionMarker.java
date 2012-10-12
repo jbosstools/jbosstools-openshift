@@ -10,27 +10,18 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
+ * A class that is used to have an entry <New Connection> in a combo view with
+ * connections.
+ * 
  * @author Andre Dietisheim
+ * 
  */
-public class ConnectionColumLabelProvider extends ColumnLabelProvider {
+public class NewConnectionMarker extends Connection {
 
-	private static final String LABEL_NEW_CONNECTION = "<New Connection>";
-
-	@Override
-	public String getText(Object element) {
-		if (element instanceof NewConnectionMarker) {
-			return LABEL_NEW_CONNECTION;
-		}
-		
-		if (!(element instanceof Connection)) {
-			return super.getText(element);
-		}
-		Connection connection = (Connection) element;
-		return connection.getUsername() + " - " + connection.getHost();
+	public NewConnectionMarker() {
+		super();
 	}
-
 }
