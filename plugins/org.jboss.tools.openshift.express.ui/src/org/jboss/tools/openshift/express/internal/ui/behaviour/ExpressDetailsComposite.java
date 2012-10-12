@@ -71,7 +71,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtil
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.explorer.ConnectToOpenShiftWizard;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUpdatingJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
@@ -164,9 +163,9 @@ public class ExpressDetailsComposite {
 			showImportLink = p == null || p.length == 0;
 		} else {
 			// we may or may not have a user, clearly no app
-			this.connection = tmpConnection == null ? ConnectionsModel.getDefault().getRecentConnection()
-					: tmpConnection;
-			updateModel(connection);
+			if( tmpConnection == null )
+				tmpConnection = ConnectionsModel.getDefault().getRecentConnection();
+			updateModel(tmpConnection);
 		}
 
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
@@ -324,22 +323,17 @@ public class ExpressDetailsComposite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Connection connection = UIUtils.getFirstElement(event.getSelection(), Connection.class);
 				if (connection != null) {
-					Job j = new UIUpdatingJob("Verifying connection...") {
+					Job j = new Job("Verifying connection...") {
 						
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							updateModel(connection);
 							return Status.OK_STATUS;
 						}
-
-						@Override
-						protected IStatus updateUI(IProgressMonitor monitor) {
-							updateWidgets();
-							updateErrorMessage();
-							return Status.OK_STATUS;
-						}
 					};
 					callback.executeLongRunning(j);
+					updateWidgets();
+					updateErrorMessage();
 				}
 			}
 		};
@@ -476,6 +470,7 @@ public class ExpressDetailsComposite {
 	}
 
 	private void updateWidgets() {
+		System.out.println(importLink.getClass().getName());
 		importLink.setEnabled(false);
 		if (connection == null
 				|| !connection.isConnected()) {
@@ -535,6 +530,9 @@ public class ExpressDetailsComposite {
 	}
 
 	private void updateModel(Connection connection) {
+		if( connection == null )
+			return;
+		
 		try {
 			// IF we load the applications first, domain gets loaded
 			// automatically
