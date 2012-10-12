@@ -25,7 +25,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 public class CredentialsPrompter implements ICredentialsPrompter {
 
 	@Override
-	public void promptAndAuthenticate(final Connection user) {
+	public void promptAndAuthenticate(final Connection connection) {
 		Display.getDefault().syncExec(
 				new Runnable() {
 					public void run() {
@@ -36,7 +36,7 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 						}
 						
 						final ConnectToOpenShiftWizard connectToOpenShiftWizard =
-								new ConnectToOpenShiftWizard(user);
+								new ConnectToOpenShiftWizard(connection);
 						WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
 					}
 				});
