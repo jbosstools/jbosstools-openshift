@@ -12,12 +12,9 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -41,7 +38,7 @@ public class ConnectionUtils {
 	/**
 	 * Returns the default host from the preferences if present. If it's not it
 	 * will return the host defined in the OpenShift configuration. The host
-	 * that is returned will alwas have the scheme prefix.
+	 * that is returned will always have the scheme prefix.
 	 * 
 	 * @return the default host
 	 */
