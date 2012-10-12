@@ -23,10 +23,6 @@ public class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
 	public ConnectToOpenShiftWizardModel() {
 	}
 
-	/**
-	 * Constructor 
-	 * @param connection the user to use to connect to OpenShift.
-	 */
 	public ConnectToOpenShiftWizardModel(final Connection connection) {
 		this.connection = connection;
 	}
