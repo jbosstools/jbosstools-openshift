@@ -27,14 +27,18 @@ import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 
 /**
  * @author Rob Stryker
  */
 public class ExpressServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
-
+	public static final String DEFAULT_SERVER_NAME_BASE = "ApplicationName at Openshift";
 	public void setDefaults(IProgressMonitor monitor) {
-		getServerWorkingCopy().setName(ServerUtil.getDefaultServerName(getServer().getServerType().getName()));
+		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl()));
+
+		getServerWorkingCopy().setName(ServerUtil.getDefaultServerName(DEFAULT_SERVER_NAME_BASE));
 		setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
 	}
 

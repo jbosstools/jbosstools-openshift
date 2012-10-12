@@ -601,7 +601,7 @@ public class ExpressDetailsComposite {
 		// update the values
 		IServerWorkingCopy wc = callback.getServer();
 		String host = fapplication == null ? null : fapplication.getApplicationUrl();
-		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProject, remote);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProject, remote, app);
 	}
 
 	private void updateProjectSettings() {

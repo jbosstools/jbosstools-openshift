@@ -39,6 +39,7 @@ import org.jboss.ide.eclipse.as.core.util.DeploymentPreferenceLoader;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
+import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
@@ -257,15 +258,15 @@ public class ExpressServerUtils {
 	 * @throws CoreException
 	 */
 	public static IServer fillServerWithOpenShiftDetails(IServer server, String host,
-			String deployProject, String remote) throws CoreException {
+			String deployProject, String remote, String appName) throws CoreException {
 		ServerWorkingCopy wc = (ServerWorkingCopy) server.createWorkingCopy();
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, remote);
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, remote, appName);
 		IServer saved = wc.save(true, new NullProgressMonitor());
 		return saved;
 	}
 
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
-			String deployProject, String remote) {
+			String deployProject, String remote, String appName) {
 
 		if (host != null) {
 			if (host.indexOf("://") != -1)
@@ -289,6 +290,10 @@ public class ExpressServerUtils {
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
 		wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
+		if( appName != null && ( wc.getName() == null || wc.getName().length() == 0 || wc.getName().startsWith(ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
+			String newBase = appName + " at Openshift";
+			wc.setName(ServerUtil.getDefaultServerName(newBase));
+		}
 	}
 
 	public static IServer createServerAndRuntime(String runtimeID, String serverID,
