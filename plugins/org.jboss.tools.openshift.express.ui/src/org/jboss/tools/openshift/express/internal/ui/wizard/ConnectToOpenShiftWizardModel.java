@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsMod
  */
 public class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
 	
-	protected Connection user;
+	protected Connection connection;
 		
 	public ConnectToOpenShiftWizardModel() {
 	}
@@ -28,18 +28,18 @@ public class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
 	 * @param user the user to use to connect to OpenShift.
 	 */
 	public ConnectToOpenShiftWizardModel(final Connection user) {
-		this.user = user;
+		this.connection = user;
 	}
 	
 	@Override
 	public Connection getConnection() {
-		return user == null ? ConnectionsModel.getDefault().getRecentConnection() : user;
+		return connection == null ? ConnectionsModel.getDefault().getRecentConnection() : connection;
 	}
 
 	@Override
-	public Connection setConnection(Connection user) {
-		this.user = user;
-		return user;
+	public Connection setConnection(Connection connection) {
+		this.connection = connection;
+		return connection;
 	}
 
 	@Override
