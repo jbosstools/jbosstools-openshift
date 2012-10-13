@@ -4,7 +4,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.0.0.Beta1-SNAPSHOT</version>
+		<version>4.0.0.Beta2-SNAPSHOT</version>
 		<relativePath>../build/parent/pom.xml</relativePath>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
