@@ -16,19 +16,23 @@ public class DeleteDomain extends SWTTestExt {
 
 		// refresh first
 		explorer.bot().tree()
-				.getTreeItem(TestProperties.get("openshift.user.name"))
+				.getTreeItem(
+						TestProperties.get("openshift.user.name") + " "
+								+ TestProperties.get("openshift.server.prod"))
 				.contextMenu(OpenShiftUI.Labels.REFRESH).click();
 
 		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S * 3, TIME_1S);
 		
 		// delete
 		explorer.bot().tree()
-				.getTreeItem(TestProperties.get("openshift.user.name"))
+				.getTreeItem(
+						TestProperties.get("openshift.user.name") + " "
+								+ TestProperties.get("openshift.server.prod"))
 				.contextMenu(OpenShiftUI.Labels.EXPLORER_DELETE_DOMAIN).click();
 
 		bot.checkBox().select();
 		bot.button("OK").click();
 
-		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S * 3, TIME_1S);		
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S * 4, TIME_1S);		
 	}
 }

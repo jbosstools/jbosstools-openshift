@@ -28,14 +28,14 @@ public class Connection extends SWTTestExt {
 		// set wrong user credentials
 		bot.text(0).setText(TestProperties.get("openshift.user.name"));
 		bot.text(1).setText(TestProperties.get("openshift.user.wrongpwd"));
-		bot.checkBox(0).deselect();
+		bot.checkBox(1).deselect();
 
 		SWTBotButton finishButton = bot.button(IDELabel.Button.FINISH);
 		// try to move forward
 		finishButton.click();
 
 		// wait for credentials validation
-		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_20S);
+		bot.waitWhile(new NonSystemJobRunsCondition(), TIME_60S);
 
 		assertFalse("Finish button shouldn't be enabled.",
 				finishButton.isEnabled());
@@ -43,7 +43,7 @@ public class Connection extends SWTTestExt {
 		// set correct user credentials and save it to secure storage
 		bot.text(0).setText(TestProperties.get("openshift.user.name"));
 		bot.text(1).setText(TestProperties.get("openshift.user.pwd"));
-
+		bot.checkBox(1).deselect();
 		// create connection to OpenShift account
 		finishButton.click();
 
