@@ -22,6 +22,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeWizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -40,8 +41,9 @@ public class EditCartridgesAction extends AbstractAction {
 		if (selection != null && selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
 			try {
 				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				final Connection user = ConnectionsModel.getDefault().getConnectionByUrl(application.getDomain().getUser().getRhlogin());
-				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
+				final IUser user = application.getDomain().getUser();
+				final Connection connection = ConnectionsModel.getDefault().getConnectionByUsernameAndHost(user.getRhlogin(), user.getServer());
+				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, connection);
 				int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
 				if(result == Dialog.OK) {
 					RefreshViewerJob.refresh(viewer);

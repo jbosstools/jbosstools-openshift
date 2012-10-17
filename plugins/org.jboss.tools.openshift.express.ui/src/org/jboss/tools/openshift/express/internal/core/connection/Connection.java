@@ -67,16 +67,21 @@ public class Connection {
 		this(null, null, null, false);
 	}
 
-	public Connection(String username, ICredentialsPrompter prompter) {
+	public Connection(String username) {
 		this.username = username;
-		this.prompter = prompter;
 	}
-	
-	public Connection(URL url, ICredentialsPrompter prompter) throws MalformedURLException, UnsupportedEncodingException {
+
+	public Connection(String username, String host) {
+		this.username = username;
+		setHost(host);
+	}
+
+	public Connection(URL url, ICredentialsPrompter prompter) throws MalformedURLException,
+			UnsupportedEncodingException {
 		UrlPortions portions = UrlUtils.toPortions(url);
 		this.username = portions.getUsername();
 		this.password = portions.getPassword();
-		setHost(portions.getHost());
+		setHost(portions.getProtocol() + UrlUtils.SCHEME_SEPARATOR + portions.getHost());
 		this.prompter = prompter;
 	}
 
@@ -111,7 +116,7 @@ public class Connection {
 		}
 		return username;
 	}
-		
+
 	private void setUser(IUser user) {
 		if (user == null) {
 			return;
@@ -154,36 +159,37 @@ public class Connection {
 	 */
 	public String getHost() {
 		if (isDefaultHost()) {
-			return UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl());
+			return ConnectionUtils.getDefaultHostUrl();
 		}
 
 		return host;
 	}
+
+	/**
+	 * Returns the scheme of this connections. Returns https by default;
+	 * @return
+	 */
+	public String getScheme() {
+		String scheme = UrlUtils.getScheme(getHost());
+		if (StringUtils.isEmpty(scheme)) {
+			scheme = UrlUtils.HTTPS;
+		}
+		return scheme;
+	}
 	
 	public String setHost(String host) {
-		if (isDefaultHost(host)) {
-			this.host = null;
-		} else {
-			this.host = host;
+		if (!UrlUtils.hasScheme(host)) {
+			host = UrlUtils.SCHEME_HTTPS + StringUtils.null2emptyString(host);
 		}
+		this.host = host;
 		clearUser();
 		return host;
 	}
 
-	
-	public boolean isDefaultHost() {
-		return isDefaultHost(host);
+	private boolean isDefaultHost() {
+		return 	ConnectionUtils.isDefaultHost(host);
 	}
 
-	private boolean isDefaultHost(String host) {
-		try {
-			return StringUtils.isEmpty(host)
-					|| new URL(UrlUtils.ensureStartsWithSchemeOrHttps(host)).getHost().isEmpty();
-		} catch (MalformedURLException e) {
-			return true;
-		}
-	}
-	
 	public boolean isRememberPassword() {
 		return rememberPassword;
 	}
@@ -459,14 +465,5 @@ public class Connection {
 		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
 		SecurePasswordStore store = new SecurePasswordStore(key);
 		return store;
-	}
-
-	/**
-	 * @return an url-alike string that always starts with a scheme but
-	 *         eventually has no host where the default host shall be used.
-	 * @throws UnsupportedEncodingException 
-	 */
-	public String toURLString() throws UnsupportedEncodingException {
-		return UrlUtils.toUrlString(username, host);
 	}
 }

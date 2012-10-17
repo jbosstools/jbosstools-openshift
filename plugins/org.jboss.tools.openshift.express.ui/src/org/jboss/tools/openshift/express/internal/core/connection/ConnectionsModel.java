@@ -64,7 +64,7 @@ public class ConnectionsModel {
 
 	public void addConnection(Connection connection) {
 		try {
-			allConnections.put(connection.toURLString(), connection);
+			allConnections.put(ConnectionUtils.getUrlForConnection(connection), connection);
 			this.recentConnection = connection;
 			fireModelChange(connection, ADDED);
 		} catch (UnsupportedEncodingException e) {
@@ -76,7 +76,7 @@ public class ConnectionsModel {
 
 	public boolean hasConnection(Connection connection) {
 		try {
-			String url = connection.toURLString();
+			String url = ConnectionUtils.getUrlForConnection(connection);
 			return getConnectionByUrl(url) != null;
 		} catch (UnsupportedEncodingException e) {
 			OpenShiftUIActivator.log(
@@ -92,7 +92,7 @@ public class ConnectionsModel {
 
 	public void removeConnection(Connection connection) {
 		try {
-			allConnections.remove(connection.toURLString());
+			allConnections.remove(ConnectionUtils.getUrlForConnection(connection));
 			if (this.recentConnection == connection)
 				this.recentConnection = null;
 			fireModelChange(connection, REMOVED);
@@ -139,11 +139,22 @@ public class ConnectionsModel {
 		return allConnections.get(url);
 	}
 
+	public Connection getConnectionByUsernameAndHost(String username, String host) {
+		try {
+			return getConnectionByUrl(ConnectionUtils.getUrlForUsernameAndHost(username, host));
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get url for connection {0} - {1}", username, host), e);
+			return null;
+		}
+	}
+
 	public Connection getConnectionByUsername(String username) {
 		try {
-			String url = new Connection(username, null).toURLString();
-			return getConnectionByUrl(url);
+			return getConnectionByUrl(ConnectionUtils.getUrlForUsername(username));
 		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get url for connection {0}", username), e);
+			return null;
+		} catch (MalformedURLException e) {
 			OpenShiftUIActivator.log(NLS.bind("Could not get url for connection {0}", username), e);
 			return null;
 		}
@@ -158,7 +169,7 @@ public class ConnectionsModel {
 	/**
 	 * Load the user list from preferences and secure storage
 	 */
-	public void load() {
+	private void load() {
 		String[] connections = OpenShiftPreferences.INSTANCE.getConnections();
 		for (int i = 0; i < connections.length; i++) {
 			Connection connection = null;
@@ -183,7 +194,7 @@ public class ConnectionsModel {
 			Connection connection = entry.getValue();
 			connection.save();
 			try {
-				persistedConnections.add(connection.toURLString());
+				persistedConnections.add(ConnectionUtils.getUrlForConnection(connection));
 			} catch (UnsupportedEncodingException e) {
 				OpenShiftUIActivator.log(
 						NLS.bind("Could not store connection {0}/{1}", connection.getUsername(), connection.getHost()),

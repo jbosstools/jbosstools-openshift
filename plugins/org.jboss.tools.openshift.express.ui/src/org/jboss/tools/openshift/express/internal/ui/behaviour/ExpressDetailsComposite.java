@@ -135,7 +135,7 @@ public class ExpressDetailsComposite {
 
 	private void initModel() {
 		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-		if (ConnectionUtils.getDefaultHostUrl().equals(connectionUrl)) {
+		if (ConnectionUtils.isDefaultHost(connectionUrl)) {
 			initModelNewServerWizard();
 			return;
 		}

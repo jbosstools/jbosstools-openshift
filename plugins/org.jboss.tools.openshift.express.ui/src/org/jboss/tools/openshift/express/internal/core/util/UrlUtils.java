@@ -82,9 +82,8 @@ public class UrlUtils {
 
 	}
 
-	public static String toUrlString(String username, String host) throws UnsupportedEncodingException {
-		host = cutScheme(host);
-		StringBuilder builder = new StringBuilder();
+	public static String toUrlString(String username, String host, String scheme) throws UnsupportedEncodingException {
+		StringBuilder builder = new StringBuilder(scheme);
 		if (!isEmpty(username)) {
 			builder.append(URLEncoder.encode(username, "UTF-8"))
 					.append(CREDENTIALS_HOST_SEPARATOR);
@@ -92,7 +91,7 @@ public class UrlUtils {
 		if (!isEmpty(host)) {
 			builder.append(host);
 		}
-		return ensureStartsWithSchemeOrHttps(builder.toString());
+		return (builder.toString());
 	}
 
 	public static String ensureStartsWithSchemeOrHttps(String host) {
@@ -109,20 +108,39 @@ public class UrlUtils {
 		if (isEmpty(host)) {
 			return host;
 		}
-		int schemeDelimiterIndex = getSchemeIndex(host);
-		if (schemeDelimiterIndex > -1) {
-			return host.substring(schemeDelimiterIndex + SCHEME_SEPARATOR.length());
+		int hostIndex = getHostIndex(host);
+		if (hostIndex > -1) {
+			return host.substring(hostIndex);
 		}
 		return host;
 	}
 
-	private static boolean hasScheme(String host) {
+	public static String getScheme(String url) {
+		if (isEmpty(url)) {
+			return null;
+		}
+
+		int hostIndex = getHostIndex(url);
+		if (hostIndex == -1)  {
+			return null;
+		}
+		
+		return url.substring(0, hostIndex); 
+	}
+	
+	public static boolean hasScheme(String host) {
+		if (isEmpty(host)) {
+			return false;
+		}
 		return host.indexOf(SCHEME_SEPARATOR) > -1;
 	}
 
-	private static int getSchemeIndex(String host) {
-		int schemeDelimiterIndex = host.indexOf(SCHEME_SEPARATOR);
-		return schemeDelimiterIndex;
+	private static int getHostIndex(String url) {
+		int schemeSeparatorIndex = url.indexOf(SCHEME_SEPARATOR);
+		if (schemeSeparatorIndex == -1) {
+			return schemeSeparatorIndex;
+		}
+		return schemeSeparatorIndex + SCHEME_SEPARATOR.length();
 	}
 
 	private static boolean isEmpty(String string) {
@@ -141,19 +159,21 @@ public class UrlUtils {
 	 * @param scheme
 	 *            the scheme to prepend
 	 * @return
+	 * @throws UnsupportedEncodingException 
 	 */
-	public static String getUrlFor(String username, String host, String scheme) {
+	public static String getUrlFor(String username, String host, String scheme) throws UnsupportedEncodingException {
 		StringBuilder builder = new StringBuilder();
-		if (StringUtils.isEmpty(host)
-				|| !hasScheme(host)) {
-			builder.append(scheme).append(SCHEME_SEPARATOR);
+		if (!hasScheme(host)) {
+			builder.append(scheme);
 		}
 		if (!StringUtils.isEmpty(username)) {
-			builder.append(username)
+			builder.append(URLEncoder.encode(username, "UTF-8"))
 					.append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
 		}
-		return builder.append(host)
-				.toString();
+		if (!isEmpty(host)) {
+			builder.append(host);
+		}
+		return builder.toString();
 
 	}
 }

@@ -21,11 +21,11 @@ import com.openshift.client.IApplication;
 public class ApplicationWizardModel extends ObservableUIPojo {
 
 	private IApplication application;
-	private Connection user;
+	private Connection connection;
 
-	public ApplicationWizardModel(IApplication application, Connection user) {
+	public ApplicationWizardModel(IApplication application, Connection connection) {
 		this.application = application;
-		this.user = user;
+		this.connection = connection;
 	}
 
 	public IApplication getApplication() {
@@ -33,6 +33,6 @@ public class ApplicationWizardModel extends ObservableUIPojo {
 	}
 
 	public Connection getUser() {
-		return user;
+		return connection;
 	}
 }

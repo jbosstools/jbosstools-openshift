@@ -22,6 +22,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 public class NewConnectionMarker extends Connection {
 
 	public NewConnectionMarker() {
-		super();
+		super("<New Connection>");
 	}
 }

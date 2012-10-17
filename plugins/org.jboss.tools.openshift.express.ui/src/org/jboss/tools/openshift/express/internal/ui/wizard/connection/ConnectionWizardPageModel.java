@@ -103,9 +103,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedConnection(Connection connection) {
-		if ((this.selectedConnection instanceof NewConnectionMarker 
-				&& connection instanceof NewConnectionMarker)
-				|| Diffs.equals(selectedConnection, connection)) {
+		if (Diffs.equals(selectedConnection, connection)) {
 			return;
 		}
 		this.isCreateNewConnection = getIsCreateNewConnection(connection);

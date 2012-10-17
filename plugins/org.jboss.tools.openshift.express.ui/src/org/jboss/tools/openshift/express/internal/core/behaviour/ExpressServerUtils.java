@@ -480,7 +480,7 @@ public class ExpressServerUtils {
 
 	private static void setConnectionUrl(Connection connection, IEclipsePreferences node) {
 		try {
-			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, connection.toURLString());
+			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, ConnectionUtils.getUrlForConnection(connection));
 			if (hasUsername(node)) {
 				node.put(ExpressServerUtils.SETTING_USERNAME, connection.getUsername());
 			}
