@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
@@ -40,18 +44,29 @@ public class EditCartridgesAction extends AbstractAction {
 		if (selection != null && selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
 			try {
 				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				final Connection user = ConnectionsModel.getDefault().getConnectionByUrl(application.getDomain().getUser().getRhlogin());
-				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, user);
+				final Connection connection = getConnection(application);
+				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, connection);
 				int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
 				if(result == Dialog.OK) {
 					RefreshViewerJob.refresh(viewer);
 				}
 			} catch (OpenShiftException e) {
 				Logger.error("Failed to edit cartridges", e);
+			} catch (URISyntaxException e) {
+				Logger.error("Failed to edit cartridges", e);
+			} catch (UnsupportedEncodingException e) {
+				Logger.error("Failed to edit cartridges", e);
 			}
-			
 		}
 	}
 
-	
+	private Connection getConnection(final IApplication application) throws UnsupportedEncodingException, OpenShiftException, URISyntaxException {
+		Connection tmpConnection = new Connection(new URI(application.getDomain().getUser().getRhlogin()), null);
+		final Connection existingConnection = ConnectionsModel.getDefault().getConnectionByUrl(tmpConnection.toURLString());
+		if (existingConnection == null) {
+			return tmpConnection;
+		} else {
+			return existingConnection;
+		}
+	}
 }
