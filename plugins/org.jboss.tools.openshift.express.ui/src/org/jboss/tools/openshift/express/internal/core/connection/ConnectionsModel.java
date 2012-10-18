@@ -11,8 +11,8 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -163,10 +163,10 @@ public class ConnectionsModel {
 		for (int i = 0; i < connections.length; i++) {
 			Connection connection = null;
 			try {
-				URL connectionUrl = new URL(connections[i]);
+				URI connectionUrl = new URI(connections[i]);
 				connection = new Connection(connectionUrl, new CredentialsPrompter());
 				addConnection(connection);
-			} catch (MalformedURLException e) {
+			} catch (URISyntaxException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);
 			} catch (UnsupportedEncodingException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);

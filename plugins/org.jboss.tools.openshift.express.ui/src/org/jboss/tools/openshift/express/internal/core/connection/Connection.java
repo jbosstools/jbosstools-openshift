@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class Connection {
 		this.prompter = prompter;
 	}
 	
-	public Connection(URL url, ICredentialsPrompter prompter) throws MalformedURLException, UnsupportedEncodingException {
+	public Connection(URI url, ICredentialsPrompter prompter) throws UnsupportedEncodingException {
 		UrlPortions portions = UrlUtils.toPortions(url);
 		this.username = portions.getUsername();
 		this.password = portions.getPassword();

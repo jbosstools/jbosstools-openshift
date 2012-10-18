@@ -11,8 +11,8 @@
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.eclipse.core.resources.IFolder;
@@ -137,9 +137,9 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		String connectionLabel = "";
 		if (!StringUtils.isEmpty(connectionUrl)) {
 			try {
-				Connection connection = new Connection(new URL(connectionUrl), null);
+				Connection connection = new Connection(new URI(connectionUrl), null);
 				connectionLabel = connection.getUsername() + " - " + connection.getHost();
-			} catch (MalformedURLException e) {
+			} catch (URISyntaxException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not get URL for connection {0}", connectionUrl), e);
 			} catch (UnsupportedEncodingException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not get URL for connection {0}", connectionUrl), e);

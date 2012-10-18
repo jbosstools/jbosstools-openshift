@@ -11,8 +11,8 @@
 package org.jboss.tools.openshift.express.internal.core.util;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
@@ -34,11 +34,11 @@ public class UrlUtils {
 		// inhibit instantiation
 	}
 
-	public static UrlPortions toPortions(String url) throws UnsupportedEncodingException, MalformedURLException {
-		return new UrlPortions(new URL(url));
+	public static UrlPortions toPortions(String url) throws UnsupportedEncodingException, URISyntaxException {
+		return new UrlPortions(new URI(url));
 	}
 
-	public static UrlPortions toPortions(URL url) throws UnsupportedEncodingException {
+	public static UrlPortions toPortions(URI url) throws UnsupportedEncodingException {
 		return new UrlPortions(url);
 	}
 
@@ -49,7 +49,7 @@ public class UrlUtils {
 		private String password;
 		private String host;
 
-		private UrlPortions(URL url) throws UnsupportedEncodingException {
+		private UrlPortions(URI url) throws UnsupportedEncodingException {
 			String userInfo = url.getUserInfo();
 			if (userInfo != null) {
 				String[] userInfos = url.getUserInfo().split(":");
@@ -61,7 +61,7 @@ public class UrlUtils {
 				}
 			}
 			this.host = url.getHost();
-			this.protocol = url.getProtocol();
+			this.protocol = url.getScheme();
 		}
 
 		public String getUsername() {

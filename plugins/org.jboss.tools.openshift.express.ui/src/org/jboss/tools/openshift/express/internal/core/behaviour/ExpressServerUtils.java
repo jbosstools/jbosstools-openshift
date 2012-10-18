@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.core.behaviour;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -129,14 +130,14 @@ public class ExpressServerUtils {
 	 */
 	public static IApplication getApplication(IServer server) {
 		final String appName = getExpressApplicationName(server);
-		final String userName = getExpressUsername(server);
+		final String connectionUrl = getExpressConnectionUrl(server);
 		try {
-			final Connection ud = ConnectionsModel.getDefault().getConnectionByUrl(userName);
+			final Connection ud = ConnectionsModel.getDefault().getConnectionByUrl(connectionUrl);
 			if (ud != null) {
 				return ud.getApplicationByName(appName); // May be long running
 			}
 		} catch (OpenShiftException e) {
-			Logger.error(NLS.bind("Failed to retrieve application ''{0}'' from user ''{1}}'", appName, userName), e);
+			Logger.error(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
 		}
 		return null;
 	}
@@ -172,7 +173,7 @@ public class ExpressServerUtils {
 				connectionValue = ConnectionUtils.getUrlForUsername(username);
 			} catch (UnsupportedEncodingException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
-			} catch (MalformedURLException e) {
+			} catch (URISyntaxException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
 			}
 		}
@@ -449,8 +450,8 @@ public class ExpressServerUtils {
 
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
-			String user = ExpressServerUtils.getExpressUsername(server);
-			Connection connection = ConnectionsModel.getDefault().getConnectionByUrl(user);
+			String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+			Connection connection = ConnectionsModel.getDefault().getConnectionByUrl(connectionUrl);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
 			return app;

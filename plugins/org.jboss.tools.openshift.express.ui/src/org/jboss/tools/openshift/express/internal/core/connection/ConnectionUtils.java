@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
@@ -30,7 +30,7 @@ public class ConnectionUtils {
 		// inhibit instantiation
 	}
 
-	public static String getUrlForUsername(String username) throws UnsupportedEncodingException, MalformedURLException {
+	public static String getUrlForUsername(String username) throws UnsupportedEncodingException, URISyntaxException {
 		UrlPortions portions = UrlUtils.toPortions(getDefaultHostUrl());
 		return UrlUtils.getUrlFor(username, portions.getHost(), portions.getProtocol());
 	}
