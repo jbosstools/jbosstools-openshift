@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
 import com.openshift.client.IUser;
+import com.openshift.client.InvalidCredentialsOpenShiftException;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftTimeoutException;
@@ -61,7 +62,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		Connection wizardModelConnection = wizardModel.getConnection();
 		this.selectedConnection = getSelectedConnection(wizardModelConnection);
 		this.isCreateNewConnection = getIsCreateNewConnection(selectedConnection);
-		this.editedConnection = createConnection(wizardModelConnection);
+		this.editedConnection = createConnection(selectedConnection);
 		this.servers = getServers(editedConnection);
 	}
 
@@ -71,7 +72,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	private Connection getSelectedConnection(Connection wizardModelConnection) {
 		if (wizardModelConnection == null) {
-			return new NewConnectionMarker();
+			Connection recentConnection = ConnectionsModel.getDefault().getRecentConnection();
+			if (recentConnection != null) {
+				return recentConnection;
+			} else {
+				return new NewConnectionMarker();
+			}
 		} else {
 			return wizardModelConnection;
 		}
@@ -116,6 +122,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private void setEditedConnection(Connection connection) {
 		Connection oldValue = editedConnection;
 		this.editedConnection = connection;
+		resetValid();
 		firePropertyChange(PROPERTY_SERVER, oldValue.getHost(), this.editedConnection.getHost());
 		firePropertyChange(PROPERTY_USERNAME, oldValue.getUsername(), this.editedConnection.getUsername());
 		firePropertyChange(PROPERTY_PASSWORD, oldValue.getPassword(), this.editedConnection.getPassword());
@@ -139,10 +146,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (this.isDefaultServer != isDefaultServer) {
 			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
 					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
-			if (isDefaultServer) {
-				setServer(editedConnection.getHost());
-			}
 			resetValid();
+			if (isDefaultServer) {
+				setServer(new Connection().getHost());
+			}
 		}
 	}
 
@@ -237,9 +244,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 				} catch (OpenShiftTimeoutException e) {
 					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 							"Could not reach server at {0}. Connection timeouted.", editedConnection.getHost()));
-				} catch (OpenShiftException e) {
+				} catch (InvalidCredentialsOpenShiftException e) {
 					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
 							"The credentials for user {0} are not valid", editedConnection.getUsername()));
+				} catch (OpenShiftException e) {
+					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
+							"Could not check user credentials: {0}", e.getMessage()));
 				}
 			}
 		} catch (NotFoundOpenShiftException e) {

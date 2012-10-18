@@ -14,7 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -54,7 +57,6 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.databinding.HostNameValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredStringValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
@@ -243,7 +245,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		Combo serversCombo = new Combo(connectionWidgets, SWT.BORDER);
 		Binding serverBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text().observe(serversCombo))
-				.validatingAfterGet(new HostNameValidator())
+				.validatingAfterGet(new RequiredStringValidator("server"))
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SERVER).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport
@@ -273,14 +275,17 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		rhLoginText = new Text(connectionWidgets, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(rhLoginText);
-		Binding usernameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(rhLoginText))
+		IObservableValue usernameObservable = WidgetProperties.text(SWT.Modify).observe(rhLoginText);
+		ValueBindingBuilder
+				.bind(usernameObservable)
 				.converting(new TrimmingStringConverter())
-				.validatingAfterGet(new RequiredStringValidator("username"))
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USERNAME).observe(pageModel))
 				.in(dbc);
+		ValidationStatusProvider usernameValidation = new RequiredStringValidationProvider(usernameObservable,
+				"username");
+		dbc.addValidationStatusProvider(usernameValidation);
 		ControlDecorationSupport
-				.create(usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+				.create(usernameValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		// password
 		Label passwordLabel = new Label(connectionWidgets, SWT.NONE);
@@ -290,13 +295,16 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		passwordText = new Text(connectionWidgets, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
-		Binding passwordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
-				.validatingAfterGet(new RequiredStringValidator("password"))
+		IObservableValue passwordObservable = WidgetProperties.text(SWT.Modify).observe(passwordText);
+		ValueBindingBuilder
+				.bind(passwordObservable)
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_PASSWORD).observe(pageModel))
 				.in(dbc);
+		ValidationStatusProvider passwordValidation = 
+				new RequiredStringValidationProvider(passwordObservable,"password");
+		dbc.addValidationStatusProvider(passwordValidation);
 		ControlDecorationSupport
-				.create(passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+				.create(passwordValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		Button rememberPasswordCheckBox = new Button(connectionWidgets, SWT.CHECK);
 		rememberPasswordCheckBox.setText(OpenshiftUIMessages.OpenshiftWizardSavePassword);
@@ -312,7 +320,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		final CredentialsValidator credentialsValidator =
 				new CredentialsValidator(credentialsStatusObservable);
 		dbc.addValidationStatusProvider(credentialsValidator);
-		ControlDecorationSupport.create(credentialsValidator, SWT.LEFT | SWT.TOP);
 
 		return connectionWidgets;
 	}
@@ -383,6 +390,37 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			return ValidationStatus.ok();
 		}
+	}
+
+	class RequiredStringValidationProvider extends MultiValidator {
+
+		private IObservableValue observableValue;
+		private String name;
+
+		public RequiredStringValidationProvider(IObservableValue value, String name) {
+			this.observableValue = value;
+			this.name = name;
+		}
+
+		@Override
+		protected IStatus validate() {
+			if (!(observableValue.getValue() instanceof String)) {
+				return ValidationStatus.cancel("You have to provide a " + name);
+			}
+			String string = (String) observableValue.getValue();
+			if (string.isEmpty()) {
+				return ValidationStatus.cancel("You have to provide a " + name);
+			}
+			return ValidationStatus.ok();
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			IObservableList targets = new WritableList();
+			targets.add(observableValue);
+			return targets;
+		}
+
 	}
 
 	public Connection getConnection() {
