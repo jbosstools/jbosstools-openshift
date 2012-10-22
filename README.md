@@ -1,8 +1,8 @@
-# The =OpenShift Tools project
+# The OpenShift Tools project
 
 ## Install
 
-_=OpenShift Tools_ is part of [JBoss Tools](http://jboss.org/tools) from
+_OpenShift Tools_ is part of [JBoss Tools](http://jboss.org/tools) from
 which it can be [downloaded and installed](http://jboss.org/tools/download)
 on its own or together with the full JBoss Tools distribution.
 
@@ -11,9 +11,9 @@ on its own or together with the full JBoss Tools distribution.
 The easiest way to get started with the code is to [create your own fork](http://help.github.com/forking/), 
 and then clone your fork:
 
-    $ git clone git@github.com:<you>/=jbosstools-openshift.git
-    $ cd =jbosstools-openshift
-    $ git remote add upstream git://github.com/jbosstools/=jbosstools-openshift.git
+    $ git clone git@github.com:<you>/jbosstools-openshift.git
+    $ cd jbosstools-openshift
+    $ git remote add upstream git://github.com/jbosstools/jbosstools-openshift.git
 	
 At any time, you can pull changes from the upstream and merge them onto your master:
 
@@ -24,9 +24,9 @@ At any time, you can pull changes from the upstream and merge them onto your mas
 The general idea is to keep your 'master' branch in-sync with the
 'upstream/master'.
 
-## Building =OpenShift Tools
+## Building OpenShift Tools
 
-To build _=OpenShift Tools_ requires specific versions of Java and
+To build _OpenShift Tools_ requires specific versions of Java and
 Maven. Also, there is some Maven setup. The [How to Build JBoss Tools with Maven 3](https://community.jboss.org/wiki/HowToBuildJBossToolsWithMaven3)
 document will guide you through that setup.
 
@@ -42,13 +42,13 @@ But *do not* push changes without having the new and existing unit tests pass!
  
 ## Contribute fixes and features
 
-_=OpenShift Tools_ is open source, and we welcome anybody that wants to
+_OpenShift Tools_ is open source, and we welcome anybody that wants to
 participate and contribute!
 
 If you want to fix a bug or make any changes, please log an issue in
 the [JBoss Tools JIRA](https://issues.jboss.org/browse/JBDE)
 describing the bug or new feature and give it a component type of
-`=openshift`. Then we highly recommend making the changes on a
+`openshift`. Then we highly recommend making the changes on a
 topic branch named with the JIRA issue number. For example, this
 command creates a branch for the JBIDE-1234 issue:
 
@@ -70,7 +70,7 @@ tests enabled to make sure your changes are still good.
 
 You can then push your topic branch and its changes into your public fork repository:
 
-	$ git push origin jbide-1234         # pushes your topic branch into your public fork of =OpenShift Tools
+	$ git push origin jbide-1234         # pushes your topic branch into your public fork of OpenShift Tools
 
 And then [generate a pull-request](http://help.github.com/pull-requests/) where we can
 review the proposed changes, comment on them, discuss them with you,
