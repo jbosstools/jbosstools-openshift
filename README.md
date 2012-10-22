@@ -1,5 +1,9 @@
 # The OpenShift Tools project
 
+## Summary
+
+OpenShift Tools provides wizards and views for creating and maintaining OpenShift applications. 
+
 ## Install
 
 _OpenShift Tools_ is part of [JBoss Tools](http://jboss.org/tools) from
