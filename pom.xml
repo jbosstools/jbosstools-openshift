@@ -1,5 +1,4 @@
-<project
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.jboss.tools</groupId>
@@ -8,8 +7,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<relativePath>../build/parent/pom.xml</relativePath>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
-	<artifactId>openshift</artifactId>
-	<name>openshift.all</name>
+	<artifactId>openshift.all</artifactId>
 	<version>2.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
@@ -19,26 +17,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<module>site</module>
 	</modules>
 	<profiles>
-		<!-- use with github repos -->
 		<profile>
 			<id>bootstrap</id>
 			<modules>
-				<module>../base</module>
 				<module>../server</module>
-			</modules>
-		</profile>
-		<!-- deprecated; use with svn repos -->
-		<profile>
-			<id>bootstrap-svn</id>
-			<modules>
-				<module>../tests</module>
-				<module>../common</module>
-				<module>../runtime</module>
-				<module>../usage</module>
-
-				<module>../jmx</module>
-				<module>../archives</module>
-				<module>../as</module>
+				<module>../base</module>
 			</modules>
 		</profile>
 	</profiles>
