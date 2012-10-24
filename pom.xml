@@ -22,7 +22,6 @@
 			<id>bootstrap</id>
 			<modules>
 				<module>../server</module>
-				<module>../base</module>
 			</modules>
 		</profile>
 	</profiles>
