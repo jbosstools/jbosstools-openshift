@@ -125,6 +125,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_SERVER, oldValue.getHost(), this.editedConnection.getHost());
 		firePropertyChange(PROPERTY_USERNAME, oldValue.getUsername(), this.editedConnection.getUsername());
 		firePropertyChange(PROPERTY_PASSWORD, oldValue.getPassword(), this.editedConnection.getPassword());
+		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, oldValue.isRememberPassword(), this.editedConnection.isRememberPassword());
 	}
 
 	public Connection getSelectedConnection() {
