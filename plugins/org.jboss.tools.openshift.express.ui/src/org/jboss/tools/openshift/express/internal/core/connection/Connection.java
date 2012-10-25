@@ -159,27 +159,16 @@ public class Connection {
 	 */
 	public String getHost() {
 		if (isDefaultHost()) {
-			return ConnectionUtils.getDefaultHostUrl();
+			return UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl());
 		}
 
 		return host;
 	}
-
-	/**
-	 * Returns the scheme of this connections. Returns https by default;
-	 * @return
-	 */
-	public String getScheme() {
-		String scheme = UrlUtils.getScheme(getHost());
-		if (StringUtils.isEmpty(scheme)) {
-			scheme = UrlUtils.HTTPS;
-		}
-		return scheme;
-	}
 	
 	public String setHost(String host) {
-		if (!UrlUtils.hasScheme(host)) {
-			host = UrlUtils.SCHEME_HTTPS + StringUtils.null2emptyString(host);
+		if (!StringUtils.isEmpty(host)
+				&& !UrlUtils.hasScheme(host)) {
+			host = UrlUtils.SCHEME_HTTPS + host;
 		}
 		this.host = host;
 		clearUser();

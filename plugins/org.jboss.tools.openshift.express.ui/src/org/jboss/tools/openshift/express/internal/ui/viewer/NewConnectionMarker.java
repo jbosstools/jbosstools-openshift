@@ -24,4 +24,14 @@ public class NewConnectionMarker extends Connection {
 	public NewConnectionMarker() {
 		super("<New Connection>");
 	}
+
+	@Override
+	public int hashCode() {
+		return getUsername().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		return object instanceof NewConnectionMarker;
+	}
+
 }

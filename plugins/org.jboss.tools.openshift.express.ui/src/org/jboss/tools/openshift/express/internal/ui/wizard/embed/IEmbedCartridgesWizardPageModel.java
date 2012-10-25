@@ -38,5 +38,5 @@ public interface IEmbedCartridgesWizardPageModel {
 
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException;
 
-	public Connection getUser();
+	public Connection getConnection();
 }

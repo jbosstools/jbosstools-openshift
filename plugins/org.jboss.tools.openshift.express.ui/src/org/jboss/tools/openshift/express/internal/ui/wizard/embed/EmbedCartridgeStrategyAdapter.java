@@ -154,7 +154,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		try {
 			CreateApplicationJob createJob =
 					new CreateApplicationJob(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE,
-							IGearProfile.SMALL, pageModel.getUser());
+							IGearProfile.SMALL, pageModel.getConnection());
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 

@@ -688,7 +688,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 */
 	private boolean ensureHasDomain() {
 		try {
-			final Connection user = this.pageModel.getUser();
+			final Connection user = this.pageModel.getConnection();
 			if (user != null && !user.hasDomain()) {
 				IWizard domainDialog = new NewDomainDialog(user);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), domainDialog);

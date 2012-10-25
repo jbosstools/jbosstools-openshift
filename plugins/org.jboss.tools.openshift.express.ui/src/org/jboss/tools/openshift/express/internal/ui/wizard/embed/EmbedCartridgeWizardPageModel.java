@@ -54,7 +54,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	}
 	
 	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
-		List<IEmbeddableCartridge> cartridges = wizardModel.getUser().getEmbeddableCartridges();
+		List<IEmbeddableCartridge> cartridges = wizardModel.getConnection().getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
 	}
@@ -94,7 +94,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	}
 	
 	public boolean hasApplication(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
-		return wizardModel.getUser().hasApplicationOfType(cartridge);
+		return wizardModel.getConnection().hasApplicationOfType(cartridge);
 	}
 
 	public IApplication getApplication() {
@@ -103,7 +103,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 
 	@Override
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
-		return wizardModel.getUser().getDefaultDomain();
+		return wizardModel.getConnection().getDefaultDomain();
 	}
 
 	@Override
@@ -128,8 +128,8 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 	}
 
 	@Override
-	public Connection getUser() {
-		return wizardModel.getUser();
+	public Connection getConnection() {
+		return wizardModel.getConnection();
 	}
 	
 }

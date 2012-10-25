@@ -59,11 +59,31 @@ public class ConnectionUtils {
 	 */
 	public static String getUrlForConnection(Connection connection) throws UnsupportedEncodingException {
 		String username = connection.getUsername();
-		String host = connection.getHost();
-		if (isDefaultHost(host)) {
-			host = null;
+		String host = getHostReplaceDefault(connection);
+		String[] schemeAndHost = splitSchemeAndHostname(host);
+		return UrlUtils.toUrlString(username, schemeAndHost[1], schemeAndHost[0]);
+	}
+
+	private static String getHostReplaceDefault(Connection connection) {
+ 		String host = connection.getHost();
+ 		if (isDefaultHost(host)) {
+ 			host = null;
+ 		}
+		return host;
+	}
+
+	private static String[] splitSchemeAndHostname(String host) {
+		if (StringUtils.isEmpty(host)) {
+			return new String[] { UrlUtils.SCHEME_HTTPS, null };
 		}
-		return UrlUtils.toUrlString(username, host, connection.getScheme());
+
+		String scheme = UrlUtils.getScheme(host);
+		if (StringUtils.isEmpty(scheme)) {
+			scheme = UrlUtils.SCHEME_HTTPS;
+		} else {
+			host = UrlUtils.cutScheme(host);
+		}
+		return new String[] { scheme, host };
 	}
 
 	/**

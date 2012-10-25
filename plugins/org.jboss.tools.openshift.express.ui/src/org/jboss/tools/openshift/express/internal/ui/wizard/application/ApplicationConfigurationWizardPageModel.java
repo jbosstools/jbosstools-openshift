@@ -79,12 +79,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel;
 	}
 
-	public Connection getUser() {
+	public Connection getConnection() {
 		return wizardModel.getConnection();
 	}
 
 	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
-		Connection user = getUser();
+		Connection user = getConnection();
 		if (user == null || !user.isConnected() || !user.hasDomain()) {
 			return Collections.emptyList();
 		}
@@ -158,7 +158,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void loadExistingApplications() throws OpenShiftException, SocketTimeoutException {
-		Connection user = getUser();
+		Connection user = getConnection();
 		if (user != null) {
 			setExistingApplications(user.getApplications());
 			setExistingApplicationsLoaded(true);
@@ -203,7 +203,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void loadStandaloneCartridges() throws OpenShiftException, SocketTimeoutException {
-		setCartridges(getUser().getStandaloneCartridgeNames());
+		setCartridges(getConnection().getStandaloneCartridgeNames());
 		refreshSelectedCartridge();
 	}
 
@@ -224,7 +224,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void loadGearProfiles() throws OpenShiftException, SocketTimeoutException {
-		setGearProfiles(getUser().getDefaultDomain().getAvailableGearProfiles());
+		setGearProfiles(getConnection().getDefaultDomain().getAvailableGearProfiles());
 		// refreshSelectedCartridge();
 	}
 
@@ -304,7 +304,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public List<IEmbeddableCartridge> loadEmbeddedCartridges() throws OpenShiftException, SocketTimeoutException {
-		List<IEmbeddableCartridge> cartridges = getUser().getEmbeddableCartridges();
+		List<IEmbeddableCartridge> cartridges = getConnection().getEmbeddableCartridges();
 		setEmbeddedCartridges(cartridges);
 		return cartridges;
 	}
@@ -419,7 +419,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
-		return getUser().hasApplication(applicationName);
+		return getConnection().hasApplication(applicationName);
 	}
 
 	@Override
