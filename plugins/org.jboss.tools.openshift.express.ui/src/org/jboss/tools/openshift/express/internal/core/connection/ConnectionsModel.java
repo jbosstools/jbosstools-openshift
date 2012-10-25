@@ -181,6 +181,8 @@ public class ConnectionsModel {
 				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);
 			} catch (UnsupportedEncodingException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);
+			} catch (IllegalArgumentException e) {
+				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);
 			}
 		}
 	}

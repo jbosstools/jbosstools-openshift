@@ -18,6 +18,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -80,6 +82,9 @@ public class Connection {
 			UnsupportedEncodingException {
 		UrlPortions portions = UrlUtils.toPortions(url);
 		this.username = portions.getUsername();
+		Assert.isLegal(
+				!StringUtils.isEmpty(username), 
+				NLS.bind("There is no no username for connection to url {0}", url.toString()));
 		this.password = portions.getPassword();
 		setHost(portions.getProtocol() + UrlUtils.SCHEME_SEPARATOR + portions.getHost());
 		this.prompter = prompter;
