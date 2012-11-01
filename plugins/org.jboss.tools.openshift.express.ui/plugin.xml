@@ -299,7 +299,7 @@
       </view-->
       <view
             category="org.jboss.tools.common.model.ui.views"
-            class="org.jboss.tools.openshift.express.internal.ui.console.OpenShiftConsoleView"
+            class="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerView"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
             name="OpenShift Explorer">

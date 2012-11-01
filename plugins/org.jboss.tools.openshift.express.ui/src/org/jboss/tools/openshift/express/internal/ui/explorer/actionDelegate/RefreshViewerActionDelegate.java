@@ -14,14 +14,14 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.jboss.tools.openshift.express.internal.ui.console.OpenShiftConsoleView;
+import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerView;
 
 /**
  * @author Xavier Coulon
  */
 public class RefreshViewerActionDelegate implements IViewActionDelegate {
 
-	private OpenShiftConsoleView view;
+	private OpenShiftExplorerView view;
 
 	protected ISelection selection;
 	
@@ -37,8 +37,8 @@ public class RefreshViewerActionDelegate implements IViewActionDelegate {
 
 	@Override
 	public void init(IViewPart view) {
-		if (view instanceof OpenShiftConsoleView) {
-			this.view = (OpenShiftConsoleView) view;
+		if (view instanceof OpenShiftExplorerView) {
+			this.view = (OpenShiftExplorerView) view;
 		}
 	}
 
