@@ -2,3 +2,4 @@ target
 *.class
 bin
 .metadata
+.settings
