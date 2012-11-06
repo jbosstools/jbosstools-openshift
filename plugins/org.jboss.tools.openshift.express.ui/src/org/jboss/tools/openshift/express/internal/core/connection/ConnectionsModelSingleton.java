@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,21 +8,22 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.test;
+package org.jboss.tools.openshift.express.internal.core.connection;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
-@RunWith(Suite.class)
-@SuiteClasses({
-		OpenShiftMavenProfileTests.class,
-		EmbedCartridgeStrategyTest.class,
-		SSHUserConfigTest.class
-		
-})
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftTestSuite {
+public class ConnectionsModelSingleton {
+
+	private static ConnectionsModel model;
+
+	public static ConnectionsModel getInstance() {
+		if (model == null)
+			model = new ConnectionsModel();
+		return model;
+	}
+
+	private ConnectionsModelSingleton() {
+		// inhibit instantiation
+	}
 }

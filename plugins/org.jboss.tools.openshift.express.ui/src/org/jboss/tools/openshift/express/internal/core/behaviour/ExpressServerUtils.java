@@ -43,7 +43,7 @@ import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.osgi.service.prefs.BackingStoreException;
@@ -131,7 +131,7 @@ public class ExpressServerUtils {
 		final String appName = getExpressApplicationName(server);
 		final String connectionUrl = getExpressConnectionUrl(server);
 		try {
-			final Connection ud = ConnectionsModel.getDefault().getConnectionByUrl(connectionUrl);
+			final Connection ud = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 			if (ud != null) {
 				return ud.getApplicationByName(appName); // May be long running
 			}
@@ -450,7 +450,7 @@ public class ExpressServerUtils {
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
 			String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-			Connection connection = ConnectionsModel.getDefault().getConnectionByUrl(connectionUrl);
+			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
 			return app;
@@ -480,11 +480,14 @@ public class ExpressServerUtils {
 
 	private static void setConnectionUrl(Connection connection, IEclipsePreferences node) {
 		try {
-			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, ConnectionUtils.getUrlForConnection(connection));
+			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, ConnectionUtils.getUrlFor(connection));
 			if (hasUsername(node)) {
 				node.put(ExpressServerUtils.SETTING_USERNAME, connection.getUsername());
 			}
 		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for connection {0}/{1}",
+					connection.getUsername(), connection.getHost()), e);
+		} catch (MalformedURLException e) {
 			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for connection {0}/{1}",
 					connection.getUsername(), connection.getHost()), e);
 		}

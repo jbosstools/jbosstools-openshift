@@ -8,10 +8,11 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard;
+package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
 /**
  * @author Andre Dietisheim
@@ -29,7 +30,7 @@ public class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
 	
 	@Override
 	public Connection getConnection() {
-		return connection == null ? ConnectionsModel.getDefault().getRecentConnection() : connection;
+		return connection == null ? ConnectionsModelSingleton.getInstance().getRecentConnection() : connection;
 	}
 
 	@Override

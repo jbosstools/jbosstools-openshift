@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.connection.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 
@@ -25,17 +25,17 @@ import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsModelListener {
 
 	protected Object getInitialInput() {
-		return ConnectionsModel.getDefault();
+		return ConnectionsModelSingleton.getInstance();
 	}
 
 	protected CommonViewer createCommonViewer(Composite aParent) {
 		CommonViewer v = super.createCommonViewer(aParent);
-		ConnectionsModel.getDefault().addListener(this);
+		ConnectionsModelSingleton.getInstance().addListener(this);
 		return v;
 	}
 
 	public void dispose() {
-		ConnectionsModel.getDefault().removeListener(this);
+		ConnectionsModelSingleton.getInstance().removeListener(this);
 		super.dispose();
 	}
 
