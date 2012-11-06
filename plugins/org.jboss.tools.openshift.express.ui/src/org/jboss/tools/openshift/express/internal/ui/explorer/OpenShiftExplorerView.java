@@ -29,8 +29,9 @@ import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributo
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
 
 /**
  * @author Xavier Coulon
@@ -79,7 +80,7 @@ public class OpenShiftExplorerView extends ViewPart implements ITabbedPropertySh
 				int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, commonViewer.getTree().getShell());
 				if (returnCode == Window.OK) {
 					Logger.debug("OpenShift Auth succeeded.");
-					final Connection user = ConnectionsModel.getDefault().getRecentConnection();
+					final Connection user = ConnectionsModelSingleton.getInstance().getRecentConnection();
 					getCommonViewer().setInput(new OpenShiftExplorerContentCategory(user));
 					switchToCommonViewer();
 				}

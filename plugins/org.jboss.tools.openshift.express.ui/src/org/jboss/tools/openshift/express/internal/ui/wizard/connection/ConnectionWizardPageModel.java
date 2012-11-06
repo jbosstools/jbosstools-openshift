@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,13 +22,15 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.CollectionUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
-import com.openshift.client.IUser;
 import com.openshift.client.InvalidCredentialsOpenShiftException;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
@@ -43,37 +46,70 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
 	public static final String PROPERTY_USERNAME = "username";
 	public static final String PROPERTY_PASSWORD = "password";
-	public static final String PROPERTY_SERVER = "server";
+	public static final String PROPERTY_HOST = "host";
 	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
 	public static final String PROPERTY_USE_DEFAULTSERVER = "useDefaultServer";
 	public static final String PROPERTY_VALID = "valid";
 	public static final String PROPERTY_DUPLICATE_CONNECTION = "duplicateConnection";
 	public static final String PROPERTY_CREATE_CONNECTION = "createConnection";
-	
+
 	final private IConnectionAwareModel wizardModel;
 	private Connection selectedConnection;
 	final private List<String> servers;
 	private boolean isDefaultServer = true;
-	private Connection editedConnection;
 	private IStatus valid;
-	private boolean isCreateNewConnection;
-	
+	private String host;
+	private String username;
+	private String password;
+	private boolean isRememberPassword;
+	private Connection newConnection;
+
 	public ConnectionWizardPageModel(IConnectionAwareModel wizardModel) {
 		this.wizardModel = wizardModel;
 		Connection wizardModelConnection = wizardModel.getConnection();
 		this.selectedConnection = getSelectedConnection(wizardModelConnection);
-		this.isCreateNewConnection = getIsCreateNewConnection(selectedConnection);
-		this.editedConnection = createConnection(selectedConnection);
-		this.servers = getServers(editedConnection);
+		this.servers = getServers(selectedConnection);
+		updateFrom(selectedConnection);
 	}
 
-	private boolean getIsCreateNewConnection(Connection connection) {
+	private void updateFrom(Connection selectedConnection) {
+		if (isCreateNewConnection(selectedConnection)) {
+			initDefaults();
+		} else {
+			setUsername(selectedConnection.getUsername());
+			setPassword(selectedConnection.getPassword());
+			setHost(selectedConnection.getHost());
+			setUseDefaultServer(selectedConnection.isDefaultHost());
+			setRememberPassword(selectedConnection.isRememberPassword());
+		}
+	}
+
+	private boolean isCreateNewConnection(Connection connection) {
 		return connection instanceof NewConnectionMarker;
+	}
+
+	private void initDefaults() {
+		setUsername(getDefaultUsername());
+		setHost(ConnectionUtils.getDefaultHostUrl());
+	}
+
+	protected String getDefaultUsername() {
+		String username = OpenShiftPreferences.INSTANCE.getLastUsername();
+		if (StringUtils.isEmpty(username)) {
+			try {
+				username = new OpenShiftConfiguration().getRhlogin();
+			} catch (IOException e) {
+				Logger.error("Could not load default user name from OpenShift configuration.", e);
+			} catch (OpenShiftException e) {
+				Logger.error("Could not load default user name from OpenShift configuration.", e);
+			}
+		}
+		return username;
 	}
 
 	private Connection getSelectedConnection(Connection wizardModelConnection) {
 		if (wizardModelConnection == null) {
-			Connection recentConnection = ConnectionsModel.getDefault().getRecentConnection();
+			Connection recentConnection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 			if (recentConnection != null) {
 				return recentConnection;
 			} else {
@@ -84,48 +120,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	/**
-	 * Returns a new Connection for a given connection. The new connection gets
-	 * created with the username and password from the preferences (and secure
-	 * storage) if <code>null</code>.
-	 * <p>
-	 * We always have to create a new connection since you can cancel the wizard
-	 * and dont want changes to your existing connection then.
-	 * 
-	 * @param connection
-	 * @return
-	 * 
-	 * @see Connection
-	 * @see IUser
-	 */
-	private Connection createConnection(Connection connection) {
-		Connection newConnection = null;
-		if (connection instanceof NewConnectionMarker
-				|| connection == null) {
-			newConnection = new Connection();
-		} else {
-			newConnection = new Connection(connection);
-		}
-		return newConnection;
-	}
-
 	public void setSelectedConnection(Connection connection) {
 		if (Diffs.equals(selectedConnection, connection)) {
 			return;
 		}
-		this.isCreateNewConnection = getIsCreateNewConnection(connection);
-		setEditedConnection(createConnection(connection));
+		updateFrom(connection);
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = connection);
-	}
-	
-	private void setEditedConnection(Connection connection) {
-		Connection oldValue = editedConnection;
-		this.editedConnection = connection;
-		resetValid();
-		firePropertyChange(PROPERTY_SERVER, oldValue.getHost(), this.editedConnection.getHost());
-		firePropertyChange(PROPERTY_USERNAME, oldValue.getUsername(), this.editedConnection.getUsername());
-		firePropertyChange(PROPERTY_PASSWORD, oldValue.getPassword(), this.editedConnection.getPassword());
-		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, oldValue.isRememberPassword(), this.editedConnection.isRememberPassword());
 	}
 
 	public Connection getSelectedConnection() {
@@ -133,7 +133,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public List<Connection> getConnections() {
-		List<Connection> connections = CollectionUtils.toList(ConnectionsModel.getDefault().getConnections());
+		List<Connection> connections = CollectionUtils.toList(ConnectionsModelSingleton.getInstance().getConnections());
 		connections.add(new NewConnectionMarker());
 		return connections;
 	}
@@ -148,7 +148,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
 			resetValid();
 			if (isDefaultServer) {
-				setServer(ConnectionUtils.getDefaultHostUrl());
+				setHost(ConnectionUtils.getDefaultHostUrl());
 			}
 			resetValid();
 		}
@@ -172,40 +172,38 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public String getUsername() {
-		return editedConnection.getUsername();
+		return username;
 	}
 
 	public void setUsername(String username) {
-		if (!Diffs.equals(editedConnection.getUsername(), username)) {
-			firePropertyChange(PROPERTY_USERNAME, editedConnection.getUsername(),
-					editedConnection.setUsername(username));
+		if (!Diffs.equals(this.username, username)) {
+			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
 			resetValid();
 			fireDuplicateConnectionUpdated();
 		}
 	}
 
 	public String getPassword() {
-		return editedConnection.getPassword();
+		return password;
 	}
 
 	public void setPassword(String password) {
-		if (!Diffs.equals(password, editedConnection.getPassword())) {
-			firePropertyChange(PROPERTY_PASSWORD, editedConnection.getPassword(),
-					editedConnection.setPassword(password));
+		if (!Diffs.equals(password, this.password)) {
+			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
 			resetValid();
 		}
 	}
 
-	public String getServer() {
-		return editedConnection.getHost();
+	public String getHost() {
+		return host;
 	}
 
-	public void setServer(String server) {
-		if (server == null) { // workaround
+	public void setHost(String host) {
+		if (host == null) { // workaround
 			return;
 		}
-		if (!Diffs.equals(editedConnection.getHost(), server)) {
-			firePropertyChange(PROPERTY_SERVER, editedConnection.getHost(), editedConnection.setHost(server));
+		if (!Diffs.equals(this.host, host)) {
+			firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 			resetValid();
 			fireDuplicateConnectionUpdated();
 		}
@@ -216,12 +214,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public boolean isRememberPassword() {
-		return editedConnection.isRememberPassword();
+		return isRememberPassword;
 	}
 
 	public void setRememberPassword(boolean rememberPassword) {
 		firePropertyChange(PROPERTY_REMEMBER_PASSWORD,
-				editedConnection.isRememberPassword(), editedConnection.setRememberPassword(rememberPassword));
+				this.isRememberPassword, this.isRememberPassword = rememberPassword);
 	}
 
 	private void resetValid() {
@@ -239,19 +237,19 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public IStatus connect() {
 		IStatus status = Status.OK_STATUS;
 		try {
-			if (!editedConnection.isConnected()) {
-				try {
-					editedConnection.connect();
-				} catch (OpenShiftTimeoutException e) {
-					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-							"Could not reach server at {0}. Connection timeouted.", editedConnection.getHost()));
-				} catch (InvalidCredentialsOpenShiftException e) {
-					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-							"The credentials for user {0} are not valid", editedConnection.getUsername()));
-				} catch (OpenShiftException e) {
-					status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-							"The credentials for user {0} are not valid", editedConnection.getUsername()));
-				}
+			try {
+				Connection connection = new Connection(username, password, host, isRememberPassword, null);
+				connection.connect();
+				this.newConnection = connection;
+			} catch (OpenShiftTimeoutException e) {
+				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
+						"Could not reach host at {0}. Connection timeouted.", host));
+			} catch (InvalidCredentialsOpenShiftException e) {
+				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
+						"The credentials for user {0} are not valid", username));
+			} catch (OpenShiftException e) {
+				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
+						"The credentials for user {0} are not valid", username));
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
@@ -264,8 +262,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public boolean isDuplicateConnection() {
-		return editedConnection == null
-				|| ConnectionsModel.getDefault().hasConnection(editedConnection);
+		return ConnectionsModelSingleton.getInstance().hasConnection(username, host);
 	}
 
 	private void fireDuplicateConnectionUpdated() {
@@ -273,35 +270,32 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public Connection getConnection() {
-		return editedConnection;
+		return newConnection;
 	}
 
 	public boolean isCreateNewConnection() {
-		return isCreateNewConnection;
+		return isCreateNewConnection(selectedConnection);
 	}
 
 	/**
-	 * Updates the connection that this wizard operates on or creates a new one.
-	 * Will create a new connection if the wizard had no connection to operate
+	 * Updates the newConnection that this wizard operates on or creates a new one.
+	 * Will create a new newConnection if the wizard had no newConnection to operate
 	 * on or if there was one and it was told to create a new one by the given
 	 * flag.
 	 * 
 	 * @param create
-	 *            if true, creates a new connection if the wizard had a
-	 *            connection to edit. Updates the existing one otherwise.
+	 *            if true, creates a new newConnection if the wizard had a
+	 *            newConnection to edit. Updates the existing one otherwise.
 	 */
 	public void createOrUpdateConnection() {
-		Connection wizardModelConnection = wizardModel.getConnection();
-		if (wizardModelConnection == null
-				|| isCreateNewConnection()) {
-			wizardModel.setConnection(editedConnection);
-			ConnectionsModel.getDefault().addConnection(editedConnection);
+		if (isCreateNewConnection()) {
+			wizardModel.setConnection(newConnection);
+			ConnectionsModelSingleton.getInstance().addConnection(newConnection);
 			// editedConnection.save();
 		} else {
-			wizardModelConnection.update(editedConnection);
-			ConnectionsModel.getDefault().fireConnectionChanged(wizardModelConnection);
+			selectedConnection.update(newConnection);
+			ConnectionsModelSingleton.getInstance().fireConnectionChanged(selectedConnection);
 			// wizardModelConnection.save();
 		}
 	}
-
 }

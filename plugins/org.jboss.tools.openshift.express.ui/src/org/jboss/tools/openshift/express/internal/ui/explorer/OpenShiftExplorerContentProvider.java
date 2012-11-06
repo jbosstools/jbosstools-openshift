@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -75,7 +76,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		loadingElements.clear();
 		errors.clear();
 		if (parentElement instanceof IWorkspaceRoot) {
-			return ConnectionsModel.getDefault().getConnections();
+			return ConnectionsModelSingleton.getInstance().getConnections();
 		}
 		if (parentElement instanceof ConnectionsModel) {
 			Connection[] users = ((ConnectionsModel) parentElement).getConnections();

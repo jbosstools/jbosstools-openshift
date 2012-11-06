@@ -15,7 +15,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
@@ -29,6 +31,7 @@ public class UrlUtils {
 	public static final String SCHEME_HTTPS = HTTPS + SCHEME_SEPARATOR;
 	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
 	public static final char CREDENTIALS_HOST_SEPARATOR = '@';
+	public static final char PORT_DELIMITER = ':';
 
 	private UrlUtils() {
 		// inhibit instantiation
@@ -48,6 +51,7 @@ public class UrlUtils {
 		private String username;
 		private String password;
 		private String host;
+		private int port;
 
 		private UrlPortions(URL url) throws UnsupportedEncodingException {
 			String userInfo = url.getUserInfo();
@@ -62,6 +66,7 @@ public class UrlUtils {
 			}
 			this.host = url.getHost();
 			this.protocol = url.getProtocol();
+			this.port = url.getPort();
 		}
 
 		public String getUsername() {
@@ -79,29 +84,33 @@ public class UrlUtils {
 		public String getProtocol() {
 			return protocol;
 		}
-
+		
+		public int getPort() {
+			return port;
+		}
 	}
 
-	public static String toUrlString(String username, String host, String scheme) throws UnsupportedEncodingException {
-		StringBuilder builder = new StringBuilder(scheme);
-		if (!isEmpty(username)) {
-			builder.append(URLEncoder.encode(username, "UTF-8"))
-					.append(CREDENTIALS_HOST_SEPARATOR);
+	/**
+	 * Ensures the given host url starts with a scheme. The given default-scheme
+	 * is appended otherwise.
+	 * 
+	 * @param hostUrl
+	 *            the host url that shall start with a scheme
+	 * @param defaultScheme
+	 *            the default scheme that shall get appended if the host url has
+	 *            no scheme
+	 * @return the host url with a scheme
+	 * @throws IllegalArgumentException
+	 */
+	public static String ensureStartsWithScheme(String hostUrl, String defaultScheme) throws IllegalArgumentException {
+		Assert.isLegal(!isEmpty(defaultScheme), "Default scheme is empty");
+		if (isEmpty(hostUrl)) {
+			return hostUrl;
 		}
-		if (!isEmpty(host)) {
-			builder.append(host);
+		if (hostUrl.indexOf(SCHEME_SEPARATOR) == -1) {
+			return defaultScheme + hostUrl;
 		}
-		return (builder.toString());
-	}
-
-	public static String ensureStartsWithSchemeOrHttps(String host) {
-		if (isEmpty(host)) {
-			return SCHEME_HTTPS;
-		}
-		if (host.indexOf(SCHEME_SEPARATOR) > -1) {
-			return host;
-		}
-		return SCHEME_HTTPS + host;
+		return hostUrl;
 	}
 
 	public static String cutScheme(String host) {
@@ -121,13 +130,13 @@ public class UrlUtils {
 		}
 
 		int hostIndex = getHostIndex(url);
-		if (hostIndex == -1)  {
+		if (hostIndex == -1) {
 			return null;
 		}
-		
-		return url.substring(0, hostIndex); 
+
+		return url.substring(0, hostIndex);
 	}
-	
+
 	public static boolean hasScheme(String host) {
 		if (isEmpty(host)) {
 			return false;
@@ -159,14 +168,14 @@ public class UrlUtils {
 	 * @param scheme
 	 *            the scheme to prepend
 	 * @return
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String getUrlFor(String username, String host, String scheme) throws UnsupportedEncodingException {
 		StringBuilder builder = new StringBuilder();
 		if (!hasScheme(host)) {
 			builder.append(scheme);
 		}
-		if (!StringUtils.isEmpty(username)) {
+		if (!isEmpty(username)) {
 			builder.append(URLEncoder.encode(username, "UTF-8"))
 					.append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
 		}
@@ -174,6 +183,44 @@ public class UrlUtils {
 			builder.append(host);
 		}
 		return builder.toString();
-
 	}
+
+	/**
+	 * Returns an url for the given username and host. The host is required to
+	 * have a scheme. An illegalArgumentException is thrown otherwise.
+	 * 
+	 * @param username
+	 *            the username to use in the url
+	 * @param host
+	 *            the host with a scheme to use in the url
+	 * @return an url for the username and host
+	 * @throws UnsupportedEncodingException
+	 * @throws IllegalArgumentException
+	 *             if the host has no scheme
+	 */
+	public static String getUrlFor(String username, String host) throws UnsupportedEncodingException,
+			IllegalArgumentException {
+		String scheme = getScheme(host);
+		Assert.isLegal(!isEmpty(scheme),
+				MessageFormat.format("Could not extract scheme. Host {0} has no scheme", host));
+		return getUrlFor(username, host, scheme);
+	}
+
+	/**
+	 * Returns <code>true</code> if the given host is an empty string or is an
+	 * url with an empty host portion.
+	 * 
+	 * @param host
+	 *            the host to check whether it is empty
+	 * @return true if empty string or url without a host portion
+	 */
+	public static boolean isEmptyHost(String host) {
+		try {
+			return StringUtils.isEmpty(host)
+					|| new URL(UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS)).getHost().isEmpty();
+		} catch (MalformedURLException e) {
+			return false;
+		}
+	}
+
 }

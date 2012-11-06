@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ICredentialsPrompter;
-import org.jboss.tools.openshift.express.internal.ui.explorer.ConnectToOpenShiftWizard;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 

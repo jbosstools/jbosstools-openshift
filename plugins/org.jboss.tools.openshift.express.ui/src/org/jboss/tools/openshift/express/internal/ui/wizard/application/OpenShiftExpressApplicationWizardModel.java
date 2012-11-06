@@ -21,7 +21,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ConfigureGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ConfigureUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
@@ -483,8 +483,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
 	}			
 
-	public void fireUserChanged() {
-		ConnectionsModel.getDefault().fireConnectionChanged(getConnection());
+	public void fireConnectionChanged() {
+		ConnectionsModelSingleton.getInstance().fireConnectionChanged(getConnection());
 	}
 
 }

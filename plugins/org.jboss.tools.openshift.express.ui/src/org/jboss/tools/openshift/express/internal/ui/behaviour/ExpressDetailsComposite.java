@@ -68,13 +68,13 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.explorer.ConnectToOpenShiftWizard;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -141,7 +141,7 @@ public class ExpressDetailsComposite {
 		}
 		
 		this.connectionUrl = connectionUrl;
-		this.connection = ConnectionsModel.getDefault().getConnectionByUrl(connectionUrl);
+		this.connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 		this.app = ExpressServerUtils.getExpressApplicationName(server);
 		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
@@ -164,7 +164,7 @@ public class ExpressDetailsComposite {
 		} else {
 			// we may or may not have a user, clearly no app
 			if( tmpConnection == null )
-				tmpConnection = ConnectionsModel.getDefault().getRecentConnection();
+				tmpConnection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 			updateModel(tmpConnection);
 		}
 
@@ -177,7 +177,7 @@ public class ExpressDetailsComposite {
 
 	/* Set widgets initial values */
 	private void fillWidgets() {
-		connectionComboViewer.setInput(ConnectionsModel.getDefault().getConnections());
+		connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
 		if (connection != null) {
 			selectComboConnection(connection);
 			connectionComboViewer.getControl().setEnabled(showVerify);
@@ -307,9 +307,9 @@ public class ExpressDetailsComposite {
 				if (WizardUtils.openWizardDialog(
 						wizard, connectionComboViewer.getControl().getShell()) == Window.OK) {
 					connectionComboViewer.getControl().setEnabled(true);
-					connectionComboViewer.setInput(ConnectionsModel.getDefault().getConnections());
+					connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
 					final Connection selectedConnection =
-							ConnectionsModel.getDefault().getRecentConnection();
+							ConnectionsModelSingleton.getInstance().getRecentConnection();
 					selectComboConnection(selectedConnection);
 				}
 			}
@@ -585,7 +585,7 @@ public class ExpressDetailsComposite {
 
 	public void finish(IProgressMonitor monitor) throws CoreException {
 		try {
-			ConnectionsModel.getDefault().addConnection(connection);
+			ConnectionsModelSingleton.getInstance().addConnection(connection);
 			connection.save();
 			fillServerWithDetails();
 			updateProjectSettings();

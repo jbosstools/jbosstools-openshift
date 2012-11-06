@@ -8,13 +8,11 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.explorer;
+package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ConnectToOpenShiftWizardModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 
 /**
  * @author Xavier Coulon
@@ -27,7 +25,7 @@ public class ConnectToOpenShiftWizard extends Wizard {
 	 * Constructor to use when connecting with the default connection.
 	 */
 	public ConnectToOpenShiftWizard() {
-		this(ConnectionsModel.getDefault().getRecentConnection());
+		this(ConnectionsModelSingleton.getInstance().getRecentConnection());
 	}
 	
 	/**

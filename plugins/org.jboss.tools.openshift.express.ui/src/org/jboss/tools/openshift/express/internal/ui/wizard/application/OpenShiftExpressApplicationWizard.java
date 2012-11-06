@@ -154,7 +154,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 		boolean success = importProject();
 
-		wizardModel.fireUserChanged();
+		wizardModel.fireConnectionChanged();
 		
 		return success;
 	}

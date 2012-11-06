@@ -6,7 +6,7 @@ Bundle-Version: 2.4.0.qualifier
 Bundle-Vendor: JBoss by Red Hat
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- openshift-java-client-2.0.0-SNAPSHOT.jar,
+ openshift-java-client-2.0.2-SNAPSHOT.jar,
  jboss-dmr-1.0.0.Final.jar,
  log4j-1.2.16.jar,
  slf4j-api-1.6.1.jar,

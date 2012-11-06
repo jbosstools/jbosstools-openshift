@@ -14,7 +14,7 @@ package org.jboss.tools.openshift.express.internal.core.connection;
  * @author Rob Stryker
  */
 public interface IConnectionsModelListener {
-	public void connectionAdded(Connection user);
-	public void connectionRemoved(Connection user);
-	public void connectionChanged(Connection user);
+	public void connectionAdded(Connection connection);
+	public void connectionRemoved(Connection connection);
+	public void connectionChanged(Connection connection);
 }
