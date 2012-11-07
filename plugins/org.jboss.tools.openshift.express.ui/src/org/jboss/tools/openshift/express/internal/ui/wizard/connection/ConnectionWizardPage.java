@@ -54,6 +54,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
@@ -86,6 +87,11 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server Connection",
 				wizard);
 		this.pageModel = new ConnectionWizardPageModel(wizardModel);
+		/*
+		 * JBIDE-12999: ensure EclipseAuthenticator is installed and overrides
+		 * NetAuthenticator
+		 */
+		EGitUIUtils.ensureEgitUIIsStarted();
 	}
 
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
