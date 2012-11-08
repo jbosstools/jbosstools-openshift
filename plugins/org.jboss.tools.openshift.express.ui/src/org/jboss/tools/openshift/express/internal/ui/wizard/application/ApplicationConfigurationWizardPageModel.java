@@ -203,8 +203,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void loadStandaloneCartridges() throws OpenShiftException, SocketTimeoutException {
-		setCartridges(getConnection().getStandaloneCartridgeNames());
-		refreshSelectedCartridge();
+		Connection connection = getConnection();
+		if (connection != null) {
+			setCartridges(connection.getStandaloneCartridgeNames());
+			refreshSelectedCartridge();
+		}
 	}
 
 	public void setCartridges(List<ICartridge> cartridges) {
