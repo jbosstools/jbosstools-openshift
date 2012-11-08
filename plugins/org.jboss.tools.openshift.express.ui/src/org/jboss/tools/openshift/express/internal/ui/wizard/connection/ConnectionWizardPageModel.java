@@ -294,6 +294,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			// editedConnection.save();
 		} else {
 			selectedConnection.update(newConnection);
+			// we may have get started from new wizard without a connection in wizard model: set it to wizard model
+			wizardModel.setConnection(selectedConnection);
 			ConnectionsModelSingleton.getInstance().fireConnectionChanged(selectedConnection);
 			// wizardModelConnection.save();
 		}
