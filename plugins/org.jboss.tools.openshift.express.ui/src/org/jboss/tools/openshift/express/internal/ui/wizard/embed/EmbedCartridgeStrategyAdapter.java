@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -23,6 +24,7 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
@@ -77,9 +79,12 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 						.openQuestion(getShell(),
 								NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
 								createEmbeddingOperationMessage(event.getChecked(), diff))) {
-					createApplications(diff.getApplicationAdditions());
-					unselectEmbeddableCartridges(diff.getRemovals());
-					selectEmbeddableCartridges(diff.getAdditions());
+					if (createApplications(diff.getApplicationAdditions())) {
+						unselectEmbeddableCartridges(diff.getRemovals());
+						selectEmbeddableCartridges(diff.getAdditions());
+					} else {
+						pageModel.unselectEmbeddedCartridges(cartridge);
+					}
 				} else {
 					if (event.getChecked()) {
 						pageModel.unselectEmbeddedCartridges(cartridge);
@@ -140,17 +145,23 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
-	private void createApplications(List<ICartridge> applicationAdditions) {
+	private boolean createApplications(List<ICartridge> applicationAdditions) {
 		for (ICartridge cartridge : applicationAdditions) {
 			if (!ICartridge.JENKINS_14.equals(cartridge)) {
 				throw new UnsupportedOperationException("only jenkins applications may currently be created.");
 			}
-			createJenkinsApplication(cartridge);
+			if (!createJenkinsApplication(cartridge)) {
+				return false;
+			}
 		}
+		return true;
 	}
 
-	private void createJenkinsApplication(final ICartridge cartridge) {
+	private boolean createJenkinsApplication(final ICartridge cartridge) {
 		final String name = openJenkinsApplicationDialog();
+		if (name == null) {
+			return false;
+		}
 		try {
 			CreateApplicationJob createJob =
 					new CreateApplicationJob(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE,
@@ -158,18 +169,20 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 
-			if (createJob.getResult().isOK()) {
+			if (JobUtils.isOk(createJob.getResult())) {
 				IApplication application = createJob.getApplication();
 				openLogDialog(application);
 
 				AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
-				WizardUtils.runInWizard(
+				IStatus waitStatus = WizardUtils.runInWizard(
 						job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
+				return JobUtils.isOk(waitStatus);
 			}
 
 		} catch (Exception e) {
 			// ignore
 		}
+		return false;
 	}
 
 	private String openJenkinsApplicationDialog() {
