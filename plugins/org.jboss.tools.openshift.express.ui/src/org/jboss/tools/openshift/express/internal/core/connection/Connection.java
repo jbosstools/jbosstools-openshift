@@ -156,19 +156,20 @@ public class Connection {
 	}
 
 	public String setHost(String host) {
-		if (host != null) {
-			this.host = UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS);
-		} else {
-			this.host = null;
-		}
+		this.host = UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS);
 		clearUser();
 		return host;
 	}
 
 	public boolean isDefaultHost() {
-		return ConnectionUtils.isDefaultHost(host);
+		return isDefaultHost(host);
 	}
 
+	private boolean isDefaultHost(String host) {
+		return host == null
+				|| UrlUtils.cutScheme(host).isEmpty();
+	}
+	
 	public boolean isRememberPassword() {
 		return rememberPassword;
 	}

@@ -66,13 +66,7 @@ public class ConnectionsModel {
 	public boolean addConnection(Connection connection) {
 		try {
 			String connectionUrl = ConnectionUtils.getUrlFor(connection);
-			if (connectionsByUrl.containsKey(connectionUrl)) {
-				return false;
-			}
-			connectionsByUrl.put(connectionUrl, connection);
-			this.recentConnection = connection;
-			fireModelChange(connection, ADDED);
-			return true;
+			return addConnection(connectionUrl, connection);
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftUIException(
 					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
@@ -80,6 +74,16 @@ public class ConnectionsModel {
 			throw new OpenShiftUIException(
 					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
 		}
+	}
+
+	protected boolean addConnection(String connectionUrl, Connection connection) {
+		if (connectionsByUrl.containsKey(connectionUrl)) {
+			return false;
+		}
+		connectionsByUrl.put(connectionUrl, connection);
+		this.recentConnection = connection;
+		fireModelChange(connection, ADDED);
+		return true;
 	}
 
 	public boolean hasConnection(String username, String host) {
@@ -209,7 +213,7 @@ public class ConnectionsModel {
 			try {
 				URL connectionUrl = new URL(connections[i]);
 				connection = new Connection(connectionUrl, new CredentialsPrompter());
-				addConnection(connection);
+				addConnection(connectionUrl.toString(), connection);
 			} catch (MalformedURLException e) {
 				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connections[i]), e);
 			} catch (UnsupportedEncodingException e) {
