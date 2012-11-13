@@ -145,8 +145,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.span(2, 1).applyTo(connectionWidgetsContainer);
 		StackLayout stackLayout = new StackLayout();
 		connectionWidgetsContainer.setLayout(stackLayout);
-		Composite connectionWidgets = createConnectionComposite(connectionWidgetsContainer, dbc);
-		Composite passwordWidgets = createPasswordComposite(connectionWidgetsContainer, dbc);
+		Composite connectionWidgets = createNewConnectionComposite(connectionWidgetsContainer, dbc);
+		Composite passwordWidgets = createExistingConnectionComposite(connectionWidgetsContainer, dbc);
 
 		showConnectionWidgets(pageModel.isCreateNewConnection(), passwordWidgets, connectionWidgets, stackLayout,
 				connectionWidgetsContainer);
@@ -185,7 +185,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		container.layout();
 	}
 
-	private Composite createPasswordComposite(Composite container, DataBindingContext dbc) {
+	private Composite createExistingConnectionComposite(Composite container, DataBindingContext dbc) {
 		Composite passwordWidgets = new Composite(container, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).applyTo(passwordWidgets);
@@ -227,7 +227,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		return passwordWidgets;
 	}
 
-	private Composite createConnectionComposite(Composite container, DataBindingContext dbc) {
+	private Composite createNewConnectionComposite(Composite container, DataBindingContext dbc) {
 		Composite connectionWidgets = new Composite(container, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).applyTo(connectionWidgets);

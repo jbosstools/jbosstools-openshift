@@ -65,6 +65,25 @@ public class ConnectionsModelTest {
 	}
 
 	@Test
+	public void shouldAddDefaultAndNonDefaultConnection() {
+		// pre-conditions
+		/* connection explicitly using default host */
+		Connection defaultHostConnection = new ConnectionFake("fakeUser", null);
+		/* connection pointing to default host */
+		Connection connectionToDefaultHost = new ConnectionFake("fakeUser", ConnectionUtils.getDefaultHostUrl());
+		int numberOfConnections = connectionsModel.size();
+
+		// operations
+		boolean added1 = connectionsModel.addConnection(defaultHostConnection);
+		boolean added2 = connectionsModel.addConnection(connectionToDefaultHost);
+		
+		// verifications
+		assertTrue(added1);
+		assertTrue(added2);
+		assertEquals(numberOfConnections + 2, connectionsModel.size());
+	}
+
+	@Test
 	public void shouldNotifyAddition() {
 		// pre-conditions
 
