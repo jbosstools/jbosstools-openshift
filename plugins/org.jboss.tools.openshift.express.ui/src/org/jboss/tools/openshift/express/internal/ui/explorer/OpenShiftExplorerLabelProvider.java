@@ -33,6 +33,8 @@ import com.openshift.client.OpenShiftException;
  */
 public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
+	private static final String DEFAULT_MARKER = "(default)";
+
 	@Override
 	public void addListener(ILabelProviderListener listener) {
 	}
@@ -99,12 +101,13 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	private StyledString createStyledString(Connection connection) {
 		String name = connection.getUsername();
 		String host = connection.getHost();
-		String label = new StringBuilder(name)
-				.append(' ')
-				.append(host)
-				.toString();
+		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
+		if (connection.isDefaultHost()) {
+			builder.append(' ').append(DEFAULT_MARKER);
+		}
+		String label = builder.toString();
 		StyledString styledString = new StyledString(label);
-		styledString.setStyle(name.length() + 1, host.length(), StyledString.QUALIFIER_STYLER);
+		styledString.setStyle(name.length() + 1, builder.length() - name.length() - 1, StyledString.QUALIFIER_STYLER);
 		return styledString;
 	}
 
@@ -123,5 +126,4 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		styledString.setStyle(0, label.length(), StyledString.DECORATIONS_STYLER);
 		return new StyledString(label);
 	}
-
 }

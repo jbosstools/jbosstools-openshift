@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
  */
 public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 
+	private static final String DEFAULT_MARKER = " (default)";
 	private static final String LABEL_NEW_CONNECTION = "<New Connection>";
 
 	@Override
@@ -25,12 +26,20 @@ public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 		if (element instanceof NewConnectionMarker) {
 			return LABEL_NEW_CONNECTION;
 		}
-		
+
 		if (!(element instanceof Connection)) {
 			return super.getText(element);
 		}
-		Connection connection = (Connection) element;
-		return connection.getUsername() + " - " + connection.getHost();
+		return createLabel((Connection) element);
+	}
+
+	private String createLabel(Connection connection) {
+		StringBuilder builder =
+				new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
+		if (connection.isDefaultHost()) {
+			builder.append(DEFAULT_MARKER);
+		}
+		return builder.toString();
 	}
 
 }
