@@ -72,25 +72,21 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		updateFrom(selectedConnection);
 	}
 
-	private void updateFrom(Connection selectedConnection) {
-		if (isCreateNewConnection(selectedConnection)) {
-			initDefaults();
+	private void updateFrom(Connection connection) {
+		if (isCreateNewConnection(connection)) {
+			setUsername(getDefaultUsername());
+			setDefaultHost();
 		} else {
-			setUsername(selectedConnection.getUsername());
-			setPassword(selectedConnection.getPassword());
-			setHost(selectedConnection.getHost());
-			setUseDefaultServer(selectedConnection.isDefaultHost());
-			setRememberPassword(selectedConnection.isRememberPassword());
+			setUsername(connection.getUsername());
+			setPassword(connection.getPassword());
+			setHost(connection.getHost());
+			setUseDefaultServer(connection.isDefaultHost());
+			setRememberPassword(connection.isRememberPassword());
 		}
 	}
 
 	private boolean isCreateNewConnection(Connection connection) {
 		return connection instanceof NewConnectionMarker;
-	}
-
-	private void initDefaults() {
-		setUsername(getDefaultUsername());
-		setHost(ConnectionUtils.getDefaultHostUrl());
 	}
 
 	protected String getDefaultUsername() {
@@ -146,14 +142,13 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (this.isDefaultServer != isDefaultServer) {
 			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
 					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
-			resetValid();
 			if (isDefaultServer) {
-				setHost(ConnectionUtils.getDefaultHostUrl());
+				setDefaultHost();
 			}
 			resetValid();
 		}
 	}
-
+	
 	private List<String> getServers(Connection connection) {
 		List<String> servers = new ArrayList<String>();
 		HashSet<String> uniqueServers = new HashSet<String>();
@@ -199,9 +194,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setHost(String host) {
-		if (host == null) { // workaround
-			return;
-		}
 		if (!Diffs.equals(this.host, host)) {
 			firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 			resetValid();
@@ -209,6 +201,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
+	private void setDefaultHost() {
+		setHost(ConnectionUtils.getDefaultHostUrl());
+	}
+	
 	public List<String> getServers() {
 		return servers;
 	}
@@ -238,7 +234,13 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		try {
 			try {
-				Connection connection = new Connection(username, password, host, isRememberPassword, null);
+				Connection connection = null;
+				if (isCreateNewConnection()
+						|| isSelectedConnectionChanged()) {
+					connection = createConnection();
+				} else {
+					connection = selectedConnection;
+				}
 				connection.connect();
 				this.newConnection = connection;
 			} catch (OpenShiftTimeoutException e) {
@@ -259,6 +261,18 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 		setValid(status);
 		return status;
+	}
+
+	private Connection createConnection() {
+		String host = this.host; 
+		if (isDefaultServer) {
+			host = null;
+		}
+		return new Connection(username, password, host, isRememberPassword);
+	}
+	
+	private boolean isSelectedConnectionChanged() {
+		return !password.equals(selectedConnection.getPassword());
 	}
 
 	public boolean isDuplicateConnection() {

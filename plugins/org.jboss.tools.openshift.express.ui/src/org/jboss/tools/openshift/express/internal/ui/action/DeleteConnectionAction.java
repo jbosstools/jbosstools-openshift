@@ -28,8 +28,7 @@ public class DeleteConnectionAction extends AbstractAction {
 	public void run() {
 		if (selection instanceof ITreeSelection
 				&& ((ITreeSelection) selection).getFirstElement() instanceof Connection) {
-			final ITreeSelection treeSelection = (ITreeSelection) selection;
-			final Connection connection = (Connection) treeSelection.getFirstElement();
+			final Connection connection = (Connection) ((ITreeSelection) selection).getFirstElement();
 			ConnectionsModelSingleton.getInstance().removeConnection(connection);
 		}
 	}

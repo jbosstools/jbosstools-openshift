@@ -91,7 +91,11 @@ public class Connection {
 		return builder.toString();
 	}
 
-	public Connection(String username, String password, String host, boolean rememberPassword, IUser user) {
+	public Connection(String username, String password, String host, boolean rememberPassword) {
+		this(username, password, host, rememberPassword, null);
+	}
+	
+	protected Connection(String username, String password, String host, boolean rememberPassword, IUser user) {
 		this.username = username;
 		this.password = password;
 		setHost(host);
@@ -253,8 +257,6 @@ public class Connection {
 		} else {
 			setHost(connection.getHost());
 		}
-		
-		setHost(connection.getHost());
 		setUser(connection.getUser());
 	}
 

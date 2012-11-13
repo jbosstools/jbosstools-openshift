@@ -124,8 +124,8 @@ public class ConnectionUtils {
 	 * @see getDefaultHost()
 	 */
 	public static boolean isDefaultHost(String host) {
-		return UrlUtils.isEmptyHost(host)
-				|| getDefaultHostUrl().equals(
-						UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
+		return UrlUtils.isEmptyHost(host);
+//				|| getDefaultHostUrl().equals(
+//						UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
 	}
 }

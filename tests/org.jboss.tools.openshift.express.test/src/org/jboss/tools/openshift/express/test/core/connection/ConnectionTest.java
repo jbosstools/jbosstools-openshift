@@ -33,7 +33,7 @@ public class ConnectionTest {
 	@Test
 	public void nullHostShouldBeDefaultHost() {
 		// pre-conditions
-		
+
 		// operations
 		Connection connection = new ConnectionFake("fakeUser", null);
 
@@ -43,13 +43,40 @@ public class ConnectionTest {
 	}
 
 	@Test
+	public void manuallySetDefaultHostShouldNotBeDefaultHost() {
+		// pre-conditions
+		String host = ConnectionUtils.getDefaultHostUrl();
+		assertNotNull(host);
+
+		// operations
+		Connection connection = new ConnectionFake("fakeUser", host);
+
+		// verifications
+		assertFalse(connection.isDefaultHost());
+		assertEquals(ConnectionUtils.getDefaultHostUrl(), connection.getHost());
+	}
+
+	@Test
+	public void setHostShouldResetIsDefaultHost() {
+		// pre-conditions
+		Connection connection = new ConnectionFake("fakeUser", null);
+		assertTrue(connection.isDefaultHost());
+
+		// operations
+		connection.setHost("http://www.redhat.com");
+
+		// verifications
+		assertFalse(connection.isDefaultHost());
+	}
+
+	@Test
 	public void shouldExtractUrlPortions() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
 		String scheme = UrlUtils.SCHEME_HTTP;
 		String username = "adietish@redhat.com";
 		String password = "12345";
 		String server = "openshift.redhat.com";
-		
+
 		// operations
 		Connection connection = new ConnectionFake(
 				new URL(scheme + URLEncoder.encode(username, "UTF-8") + ":" + password + "@" + server));
@@ -59,24 +86,24 @@ public class ConnectionTest {
 		assertEquals(username, connection.getUsername());
 		assertEquals(password, connection.getPassword());
 		assertEquals(scheme + server, connection.getHost());
-	}	
-	
+	}
+
 	@Test
 	public void shouldAllowPortInUrl() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
-		
+
 		// operations
 		Connection connection = new ConnectionFake(
 				new URL("http://adietish%40redhat.com@localhost:8081"));
 
 		// verifications
 		assertEquals("http://localhost:8081", connection.getHost());
-	}	
+	}
 
 	@Test
 	public void shouldHaveHostWithScheme() {
 		// pre-conditions
-		
+
 		// operations
 		Connection connection = new ConnectionFake("fakeUser", "openshift.redhat.com");
 
@@ -86,15 +113,15 @@ public class ConnectionTest {
 		assertNotNull(connection.getScheme());
 		assertTrue(connection.getScheme().startsWith(UrlUtils.HTTP));
 	}
-	
+
 	@Test
 	public void shouldHaveHostWithSchemeAfterSetting() {
 		// pre-conditions
 		Connection connection = new ConnectionFake("fakeUser", "openshift.redhat.com");
-		
+
 		// operations
 		connection.setHost("jboss.com");
-		
+
 		// verifications
 		assertNotNull(connection.getHost());
 		assertTrue(connection.getHost().startsWith(UrlUtils.HTTP));
@@ -105,10 +132,10 @@ public class ConnectionTest {
 	@Test
 	public void shouldNotOverrideGivenScheme() {
 		// pre-conditions
-		
+
 		// operations
 		Connection connection = new ConnectionFake("fakeUser", "scheme://openshift.redhat.com");
-		
+
 		// verifications
 		assertNotNull(connection.getHost());
 		assertTrue(connection.getHost().startsWith("scheme://"));
@@ -125,7 +152,7 @@ public class ConnectionTest {
 
 		// operations
 		connection.setUsername("adietish");
-		
+
 		// verifications
 		assertFalse(connection.isConnected());
 	}
@@ -139,7 +166,7 @@ public class ConnectionTest {
 
 		// operations
 		connection.setPassword("fakePassword");
-		
+
 		// verifications
 		assertFalse(connection.isConnected());
 	}
@@ -153,8 +180,36 @@ public class ConnectionTest {
 
 		// operations
 		connection.setHost("fakeHost");
+
+		// verifications
+		assertFalse(connection.isConnected());
+	}
+
+	@Test
+	public void shouldUpdate() {
+		// pre-conditions
+		ConnectionFake connection = new ConnectionFake("fakeUser", null);
+		connection.setRememberPassword(true);
+		connection.setConnected(true);
+		assertTrue(connection.isConnected());
+		assertTrue(connection.isDefaultHost());
+
+		String newUsername = "anotherUser";
+		String newHost = "http://www.redhat.com";
+		String newPassword = "1q2w3e";
+		Connection updatingConnection = new ConnectionFake(newUsername, newHost);
+		updatingConnection.setPassword(newPassword);
+		updatingConnection.setRememberPassword(false);
+
+		// operations
+		connection.update(updatingConnection);
 		
 		// verifications
+		assertEquals(newUsername, connection.getUsername());
+		assertEquals(newHost, connection.getHost());
+		assertFalse(newUsername, connection.isDefaultHost());
+		assertEquals(newPassword, connection.getPassword());
+		assertFalse(connection.isRememberPassword());
 		assertFalse(connection.isConnected());
 	}
 }
