@@ -64,7 +64,7 @@ public class ConnectionUtils {
 	 * @return an url-alike string that always starts with a scheme but
 	 *         eventually has no host where the default host shall be used.
 	 * @throws UnsupportedEncodingException
-	 * @throws MalformedURLException 
+	 * @throws MalformedURLException
 	 */
 	public static String getUrlFor(Connection connection) throws UnsupportedEncodingException, MalformedURLException {
 		String username = connection.getUsername();
@@ -80,11 +80,11 @@ public class ConnectionUtils {
 	}
 
 	private static String getHostOrDefault(Connection connection) {
-		String host = connection.getHost();
-		if (isDefaultHost(host)) {
-			host = null;
+		if (connection.isDefaultHost()) {
+			return null;
+		} else {
+			return connection.getHost();
 		}
-		return host;
 	}
 
 	/**
@@ -124,8 +124,8 @@ public class ConnectionUtils {
 	 * @see getDefaultHost()
 	 */
 	public static boolean isDefaultHost(String host) {
-		return UrlUtils.isEmptyHost(host);
-//				|| getDefaultHostUrl().equals(
-//						UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
+		return UrlUtils.isEmptyHost(host)
+				|| getDefaultHostUrl().equals(
+						UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
 	}
 }
