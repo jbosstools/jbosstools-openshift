@@ -266,9 +266,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Connection createConnection() {
 		String host = this.host; 
 		if (isDefaultServer) {
-			host = null;
+			return new Connection(username, password, isRememberPassword);
+		} else {
+			return new Connection(username, password, host, isRememberPassword);
 		}
-		return new Connection(username, password, host, isRememberPassword);
 	}
 	
 	private boolean isSelectedConnectionChanged() {

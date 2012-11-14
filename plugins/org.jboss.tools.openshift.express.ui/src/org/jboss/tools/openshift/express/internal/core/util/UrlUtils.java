@@ -81,8 +81,8 @@ public class UrlUtils {
 			return host;
 		}
 
-		public String getProtocol() {
-			return protocol;
+		public String getScheme() {
+			return protocol + SCHEME_SEPARATOR;
 		}
 		
 		public int getPort() {

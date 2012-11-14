@@ -11,11 +11,8 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
 import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
@@ -30,61 +27,6 @@ public class ConnectionUtils {
 
 	private ConnectionUtils() {
 		// inhibit instantiation
-	}
-
-	/**
-	 * Returns an url for the given username. The host used to build this url is
-	 * the default host. Returns <code>null</code> if the given username is
-	 * empty or <code>null</code>.
-	 * 
-	 * @see #getDefaultHostUrl()
-	 * 
-	 */
-	public static String getUrlForUsername(String username) throws UnsupportedEncodingException, MalformedURLException {
-		if (StringUtils.isEmpty(username)) {
-			return null;
-		}
-		UrlPortions portions = UrlUtils.toPortions(getDefaultHostUrl());
-		return UrlUtils.getUrlFor(username, null, portions.getProtocol() + UrlUtils.SCHEME_SEPARATOR);
-	}
-
-	public static String getUrlForUsernameAndHost(String username, String host) throws UnsupportedEncodingException {
-		String scheme = UrlUtils.SCHEME_HTTPS;
-		if (isDefaultHost(host)) {
-			scheme = UrlUtils.ensureStartsWithScheme(UrlUtils.getScheme(host), UrlUtils.SCHEME_HTTPS);
-			host = null;
-		} else if (UrlUtils.hasScheme(host)) {
-			scheme = UrlUtils.getScheme(host);
-			host = UrlUtils.cutScheme(host);
-		}
-		return UrlUtils.getUrlFor(username, host, scheme);
-	}
-
-	/**
-	 * @return an url-alike string that always starts with a scheme but
-	 *         eventually has no host where the default host shall be used.
-	 * @throws UnsupportedEncodingException
-	 * @throws MalformedURLException
-	 */
-	public static String getUrlFor(Connection connection) throws UnsupportedEncodingException, MalformedURLException {
-		String username = connection.getUsername();
-		if (connection.isDefaultHost()) {
-			return getUrlForUsername(username);
-		}
-		String host = UrlUtils.cutScheme(getHostOrDefault(connection));
-		String scheme = connection.getScheme();
-		if (scheme == null) {
-			scheme = UrlUtils.SCHEME_HTTPS;
-		}
-		return UrlUtils.getUrlFor(username, host, scheme);
-	}
-
-	private static String getHostOrDefault(Connection connection) {
-		if (connection.isDefaultHost()) {
-			return null;
-		} else {
-			return connection.getHost();
-		}
 	}
 
 	/**

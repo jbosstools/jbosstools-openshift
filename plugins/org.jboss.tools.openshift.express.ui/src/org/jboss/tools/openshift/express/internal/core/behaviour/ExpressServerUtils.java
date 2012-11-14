@@ -42,10 +42,11 @@ import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
@@ -129,7 +130,7 @@ public class ExpressServerUtils {
 	 */
 	public static IApplication getApplication(IServer server) {
 		final String appName = getExpressApplicationName(server);
-		final String connectionUrl = getExpressConnectionUrl(server);
+		final ConnectionURL connectionUrl = getExpressConnectionUrl(server);
 		try {
 			final Connection ud = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 			if (ud != null) {
@@ -162,22 +163,25 @@ public class ExpressServerUtils {
 				attributes.getAttribute(ATTRIBUTE_USERNAME, (String) null));
 	}
 
-	public static String getExpressConnectionUrl(IServerAttributes attributes) {
-		String connectionValue =
-				getProjectAttribute(
-						getExpressDeployProject2(attributes), SETTING_CONNECTIONURL, null);
-		if (connectionValue == null) {
-			String username = getExpressUsername(attributes);
-			try {
-				connectionValue = ConnectionUtils.getUrlForUsername(username);
-			} catch (UnsupportedEncodingException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
-			} catch (MalformedURLException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", username), e);
+	public static ConnectionURL getExpressConnectionUrl(IServerAttributes attributes) {
+		try {
+			String connectionUrlString = getProjectAttribute(
+					getExpressDeployProject2(attributes), SETTING_CONNECTIONURL, null);
+			if (!StringUtils.isEmpty(connectionUrlString)) {
+				return ConnectionURL.forURL(connectionUrlString);
 			}
+			
+			String username = getExpressUsername(attributes);
+			if (!StringUtils.isEmpty(username)) {
+				return ConnectionURL.forUsername(username);
+			}
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+		} catch (MalformedURLException e) {
+			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		}
 
-		return connectionValue;
+		return null;
 	}
 
 	/* Settings stored in the project, maybe over-ridden in the server */
@@ -290,7 +294,9 @@ public class ExpressServerUtils {
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
 		wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
-		if( appName != null && ( wc.getName() == null || wc.getName().length() == 0 || wc.getName().startsWith(ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
+		if (appName != null
+				&& (wc.getName() == null || wc.getName().length() == 0 || wc.getName().startsWith(
+						ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
 			String newBase = appName + " at Openshift";
 			wc.setName(ServerUtil.getDefaultServerName(newBase));
 		}
@@ -449,7 +455,7 @@ public class ExpressServerUtils {
 
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
-			String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+			ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
 			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 			String appName = ExpressServerUtils.getExpressApplicationName(server);
 			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
@@ -480,7 +486,8 @@ public class ExpressServerUtils {
 
 	private static void setConnectionUrl(Connection connection, IEclipsePreferences node) {
 		try {
-			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, ConnectionUtils.getUrlFor(connection));
+			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, connectionUrl.toString());
 			if (hasUsername(node)) {
 				node.put(ExpressServerUtils.SETTING_USERNAME, connection.getUsername());
 			}
