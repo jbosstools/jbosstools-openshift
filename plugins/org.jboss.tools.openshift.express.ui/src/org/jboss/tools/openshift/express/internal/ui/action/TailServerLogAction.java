@@ -12,12 +12,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteSession;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
@@ -27,10 +29,12 @@ import org.eclipse.ui.views.IViewDescriptor;
 import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
+import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -94,13 +98,12 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 
 	private void run(final IApplication application) throws OpenShiftException, MalformedURLException {
 		final String host = new URL(application.getApplicationUrl()).getHost();
-		final String appId = application.getUUID();
 		final String appName = application.getName();
 		final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(appName, host));
 		ConsoleUtils.displayConsoleView(console);
 		console.newMessageStream().println("Loading....");
 		if (!this.consoleWorkers.containsKey(console.getName())) {
-			launchTailServerJob(host, appId, appName, console);
+			launchTailServerJob(host, application, console);
 		}
 	}
 
@@ -111,33 +114,37 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	private void run(final IServer server) {
 		if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
 			final String host = server.getHost();
-			final String appId = ExpressServerUtils.getExpressApplicationId(server);
-			final String appName = ExpressServerUtils.getExpressApplicationName(server);
-			final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(appName, host));
+			final IApplication app = ExpressServerUtils.getApplication(server);
+			final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(app.getName(), host));
 			ConsoleUtils.displayConsoleView(console);
 			console.newMessageStream().println("Loading....");
 			if (!this.consoleWorkers.containsKey(console.getName())) {
-				launchTailServerJob(host, appId, appName, console);
+				launchTailServerJob(host, app, console);
 			}
 		}
 	}
 
-	private void launchTailServerJob(final String host, final String appId, final String appName,
+	private void launchTailServerJob(final String host, final IApplication app,
 			final MessageConsole console) {
-		new Job("Launching Tail Server Operation") {
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					final TailServerLogWorker tailServerLogWorker = startTailProcess(host, appId, appName, console);
-					consoleWorkers.put(console.getName(), tailServerLogWorker);
-					Thread thread = new Thread(tailServerLogWorker);
-					thread.start();
-				} catch (IOException e) {
-					return OpenShiftUIActivator.createErrorStatus(NLS.bind("Failed to tail files for application ''{0}''", appName), e);
+		final TailFilesWizard wizard = new TailFilesWizard(app);
+		if (WizardUtils.openWizardDialog(
+				wizard, Display.getCurrent().getActiveShell()) == Window.OK) {
+			
+			new Job("Launching Tail Server Operation") {
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						final TailServerLogWorker tailServerLogWorker = startTailProcess(host, app.getUUID(), app.getName(), wizard.getFilePattern(), console);
+						consoleWorkers.put(console.getName(), tailServerLogWorker);
+						Thread thread = new Thread(tailServerLogWorker);
+						thread.start();
+					} catch (IOException e) {
+						return OpenShiftUIActivator.createErrorStatus(NLS.bind("Failed to tail files for application ''{0}''", app.getName()), e);
+					}
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
-
-		}.schedule();
+	
+			}.schedule();
+		}
 	}
 
 	/**
@@ -145,10 +152,10 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	 * JSch) to open a connection AND execute a command in a single invocation. The connection establishement requires
 	 * an SSH key, and the passphrase is prompted to the user if necessary.
 	 * 
-	 * @param server
-	 *            the server adapter on which the action is performed
-	 * @param console
-	 *            the console into which the tail should be writtent
+	 * @param host the remote host to connect to
+	 * @param appId the application id, used as the user to establish the ssh connexion
+	 * @param appName the application name
+	 * @param filePattern the file pattern to use in the tail command
 	 * @return the Worker that encapsulate the established RemoteSession, the tail Process and the output console
 	 * @throws OpenShiftSSHOperationException 
 	 * @throws JSchException
@@ -157,8 +164,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	 *             in case of underlying exception
 	 */
 	private TailServerLogWorker startTailProcess(final String host, final String appId, final String appName,
-			final MessageConsole console) throws IOException {
-		final String logFilePath = appName + "/logs/*.log";
+			final String filePattern, final MessageConsole console) throws IOException {
 		final String options = "-f -n 100";
 
 		JSch.setLogger(new JschToEclipseLogger());
@@ -170,7 +176,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		// the rhc-tail-files command template
 		// ssh_cmd =
 		// "ssh -t #{app_uuid}@#{app}-#{namespace}.#{rhc_domain} 'tail#{opt['opts'] ? ' --opts ' + Base64::encode64(opt['opts']).chomp : ''} #{file_glob}'"
-		final String command = buildCommand(logFilePath, options);
+		final String command = buildCommand(filePattern, options);
 		Process process = remoteSession.exec(command, 0);
 		return new TailServerLogWorker(console, process, remoteSession);
 	}
