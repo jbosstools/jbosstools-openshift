@@ -10,15 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.connection;
 
-import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -68,27 +63,13 @@ public class Connection {
 		this.username = username;
 	}
 
-	public Connection(URL url, ICredentialsPrompter prompter) throws UnsupportedEncodingException {
-		UrlPortions portions = UrlUtils.toPortions(url);
-		Assert.isLegal(
-				!StringUtils.isEmpty(portions.getUsername()),
-				NLS.bind("There is no no username for connection to url {0}", url.toString()));
-		this.username = portions.getUsername();
-		this.password = portions.getPassword();
-		setHost(getHost(portions));
+	public Connection(String username, String host, ICredentialsPrompter prompter) {
+		this(username, null, host, false);
 		this.prompter = prompter;
 	}
 
-	private String getHost(UrlPortions portions) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(portions.getProtocol())
-				.append(UrlUtils.SCHEME_SEPARATOR)
-				.append(portions.getHost());
-		if (portions.getPort() > -1) {
-			builder.append(UrlUtils.PORT_DELIMITER)
-					.append(portions.getPort());
-		}
-		return builder.toString();
+	public Connection(String username, String password, boolean rememberPassword) {
+		this(username, password, null, rememberPassword);
 	}
 
 	public Connection(String username, String password, String host, boolean rememberPassword) {
@@ -98,9 +79,16 @@ public class Connection {
 	protected Connection(String username, String password, String host, boolean rememberPassword, IUser user) {
 		this.username = username;
 		this.password = password;
-		setHost(host);
+		this.host = getHost(host);
 		this.rememberPassword = rememberPassword;
 		setUser(user);
+	}
+
+	private String getHost(String host) {
+		if (StringUtils.isEmpty(host)) {
+			return host;
+		}
+		return UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS);
 	}
 
 	protected void setUser(IUser user) {

@@ -17,10 +17,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.junit.Test;
@@ -78,13 +78,13 @@ public class ConnectionTest {
 		String server = "openshift.redhat.com";
 
 		// operations
-		Connection connection = new ConnectionFake(
-				new URL(scheme + URLEncoder.encode(username, "UTF-8") + ":" + password + "@" + server));
+		ConnectionURL connectionUrl = ConnectionURL.forURL(scheme + URLEncoder.encode(username, "UTF-8") + ":"
+				+ password + "@" + server);
+		Connection connection = new ConnectionFake(connectionUrl.getUsername(), connectionUrl.getHost());
 
 		// verifications
 		assertEquals(scheme, connection.getScheme());
 		assertEquals(username, connection.getUsername());
-		assertEquals(password, connection.getPassword());
 		assertEquals(scheme + server, connection.getHost());
 	}
 
@@ -93,8 +93,8 @@ public class ConnectionTest {
 		// pre-conditions
 
 		// operations
-		Connection connection = new ConnectionFake(
-				new URL("http://adietish%40redhat.com@localhost:8081"));
+		ConnectionURL connectionUrl = ConnectionURL.forURL("http://adietish%40redhat.com@localhost:8081");
+		Connection connection = new ConnectionFake(connectionUrl.getUsername(), connectionUrl.getHost());
 
 		// verifications
 		assertEquals("http://localhost:8081", connection.getHost());
@@ -203,7 +203,7 @@ public class ConnectionTest {
 
 		// operations
 		connection.update(updatingConnection);
-		
+
 		// verifications
 		assertEquals(newUsername, connection.getUsername());
 		assertEquals(newHost, connection.getHost());

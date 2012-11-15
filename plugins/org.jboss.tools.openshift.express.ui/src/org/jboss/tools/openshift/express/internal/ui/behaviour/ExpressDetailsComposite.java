@@ -67,7 +67,7 @@ import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallbac
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -102,7 +102,7 @@ public class ExpressDetailsComposite {
 	protected boolean showVerify, showImportLink;
 
 	// Data / Model
-	private String connectionUrl, app, remote, deployProject, deployFolder;
+	private String app, remote, deployProject, deployFolder;
 	private IApplication fapplication;
 	private Connection connection;
 	private IDomain fdomain;
@@ -134,13 +134,12 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel() {
-		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-		if (ConnectionUtils.isDefaultHost(connectionUrl)) {
+		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		if (connectionUrl == null) {
 			initModelNewServerWizard();
 			return;
 		}
 		
-		this.connectionUrl = connectionUrl;
 		this.connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 		this.app = ExpressServerUtils.getExpressApplicationName(server);
 		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
@@ -550,7 +549,6 @@ public class ExpressDetailsComposite {
 		this.fapplication = application;
 		if (connection.isConnected()) {
 			this.connection = connection;
-			this.connectionUrl = connection.getUsername();
 		} else {
 			connection = null;
 		}

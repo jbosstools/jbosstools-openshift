@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.core.connection;
 
+import java.util.List;
+
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.internal.core.connection.IConnectionsModelListener;
@@ -19,26 +21,46 @@ import org.jboss.tools.openshift.express.internal.core.connection.IConnectionsMo
  */
 public class ConnectionsModelFake extends ConnectionsModel {
 
-	ConnectionsChange change = new ConnectionsChange();
+	private ConnectionsChange change = new ConnectionsChange();
+	private List<String> savedDefaultHosts;
+	private List<String> savedCustomHosts;
 	
 	public ConnectionsModelFake() {
 		change.listenTo(this);
 	}
 
 	@Override
-	protected void load() {
-		// dont load anything
+	protected String[] loadPersistedDefaultHosts() {
+		return new String[]{};
 	}
 
 	@Override
-	public void save() {
-		// dont save anything
+	protected String[] loadPersistedCustomHosts() {
+		return new String[]{};
+	}
+
+	@Override
+	protected void saveDefaultHostConnections(List<String> usernames) {
+		this.savedDefaultHosts = usernames;
+	}
+
+	@Override
+	protected void saveCustomHostConnections(List<String> connectionUrls) {
+		this.savedCustomHosts = connectionUrls;
 	}
 
 	public ConnectionsChange getChange() {
 		return change;
 	}
 	
+	public List<String> getSavedDefaultHosts() {
+		return savedDefaultHosts;
+	}
+
+	public List<String> getSavedCustomHosts() {
+		return savedCustomHosts;
+	}
+
 	public static class ConnectionsChange {
 
 		private Connection notifiedConnection;
