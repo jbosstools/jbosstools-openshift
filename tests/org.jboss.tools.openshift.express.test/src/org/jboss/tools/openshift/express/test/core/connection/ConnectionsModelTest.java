@@ -16,9 +16,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionsModelFake.ConnectionsChange;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +79,7 @@ public class ConnectionsModelTest {
 		// operations
 		boolean added1 = connectionsModel.addConnection(defaultHostConnection);
 		boolean added2 = connectionsModel.addConnection(connectionToDefaultHost);
-		
+
 		// verifications
 		assertTrue(added1);
 		assertTrue(added2);
@@ -169,8 +172,8 @@ public class ConnectionsModelTest {
 		connectionsModel.addConnection(connection);
 
 		// operations
-		String url = ConnectionUtils.getUrlFor(connection);
-		Connection queriedConnection = connectionsModel.getConnectionByUrl(url);
+		ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+		Connection queriedConnection = connectionsModel.getConnectionByUrl(connectionUrl);
 
 		// verifications
 		assertEquals(connection, queriedConnection);
@@ -261,6 +264,94 @@ public class ConnectionsModelTest {
 
 		// verifications
 		assertEquals(numOfConnections + 3, numOfConnectionsAfterAddition);
+	}
+
+	@Test
+	public void shouldLoadDefaultHostConnectionsByUsername() throws UnsupportedEncodingException {
+		// pre-conditions
+		ConnectionsModel connectionsModel = new ConnectionsModelFake() {
+
+			@Override
+			protected String[] loadPersistedDefaultHosts() {
+				return new String[] { "adietish@redhat.com" };
+			}
+
+			@Override
+			protected String[] loadPersistedCustomHosts() {
+				return new String[] {};
+			}
+		};
+
+		// operations
+
+		// verifications
+		assertEquals(1, connectionsModel.getConnections().length);
+		Connection connection = connectionsModel.getConnections()[0];
+		assertTrue(connection.isDefaultHost());
+		assertEquals(ConnectionUtils.getDefaultHostUrl(), connection.getHost());
+		assertEquals("adietish@redhat.com", connection.getUsername());
+	}
+
+	@Test
+	public void shouldSaveDefaultHostConnectionsByUsername() throws UnsupportedEncodingException {
+		// pre-conditions
+		ConnectionsModelFake connectionsModel = new ConnectionsModelFake();
+		
+		// operations
+		/* custom host */
+		connectionsModel.addConnection(new ConnectionFake("toolsjboss@gmail.com", "http://openshift.local"));
+		/* default host */
+		connectionsModel.addConnection(new ConnectionFake("adietish@redhat.com"));
+		
+		// verifications
+		connectionsModel.save();
+		List<String> defaultHosts = connectionsModel.getSavedDefaultHosts();
+		assertEquals(1, defaultHosts.size());
+		assertEquals("adietish@redhat.com", defaultHosts.get(0));
+	}
+
+	@Test
+	public void shouldLoadCustomHostConnectionsByUrl() throws UnsupportedEncodingException {
+		// pre-conditions
+		ConnectionsModel connectionsModel = new ConnectionsModelFake() {
+
+			@Override
+			protected String[] loadPersistedDefaultHosts() {
+				return new String[] {};
+			}
+
+			@Override
+			protected String[] loadPersistedCustomHosts() {
+				return new String[] { "http://adietish%40redhat.com@openshift.local" };
+			}
+		};
+
+		// operations
+
+		// verifications
+		assertEquals(1, connectionsModel.getConnections().length);
+		Connection connection = connectionsModel.getConnections()[0];
+		assertFalse(connection.isDefaultHost());
+		assertEquals("http://openshift.local", connection.getHost());
+		assertEquals("adietish@redhat.com", connection.getUsername());
+	}
+
+	@Test
+	public void shouldSaveCustomHostConnectionsByUrl() throws UnsupportedEncodingException {
+		// pre-conditions
+		ConnectionsModelFake connectionsModel = new ConnectionsModelFake();
+		
+		// operations
+		/* custom host */
+		connectionsModel.addConnection(new ConnectionFake("toolsjboss@gmail.com", "http://openshift.local"));
+		/* default host */
+		connectionsModel.addConnection(new ConnectionFake("adietish@redhat.com"));
+		
+		// verifications
+		connectionsModel.save();
+		List<String> customHosts = connectionsModel.getSavedCustomHosts();
+		assertEquals(1, customHosts.size());
+		assertEquals("http://toolsjboss%40gmail.com@openshift.local", customHosts.get(0));
 	}
 
 }

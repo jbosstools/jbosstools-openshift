@@ -21,7 +21,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -74,7 +74,7 @@ public class UserPropertySource implements IPropertySource {
 			} else if (PROPERTY_DOMAIN.equals(id) && connection.hasDomain()) {
 				return getDomain(connection);
 			} else if (PROPERTY_KEY.equals(id)) {
-				return getURL(connection);
+				return getKey(connection);
 			}
 		} catch (OpenShiftException e) {
 			Logger.error("Could not get selected object's property '" + id + "'.", e);
@@ -91,9 +91,9 @@ public class UserPropertySource implements IPropertySource {
 				+ "." + connection.getDefaultDomain().getSuffix();
 	}
 
-	private String getURL(Connection connection) {
+	private String getKey(Connection connection) {
 		try {
-			return ConnectionUtils.getUrlFor(connection);
+			return ConnectionURL.forConnection(connection).toString();
 		} catch (UnsupportedEncodingException e) {
 			// ignore
 		} catch (MalformedURLException e) {

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 
 import org.eclipse.core.resources.IFolder;
@@ -25,7 +22,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -60,14 +56,15 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author Rob Stryker
  */
 public class ExpressDetailsSection extends ServerEditorSection {
+	private static final String DEFAULT_HOST_MARKER = " (default)";
+
 	private IEditorInput input;
 	protected Text connectionText, remoteText;
 	protected Text deployFolderText;
@@ -105,8 +102,8 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	protected void initWidgets() {
 		// Set the widgets
 		deployProjectCombo.setEnabled(true);
-		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-		connectionText.setText(getConnectionLabel(connectionUrl));
+		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		connectionText.setText(createConnectionLabel(connectionUrl));
 		String appName = ExpressServerUtils.getExpressApplicationName(server);
 		appNameText.setText(appName == null ? "" : appName);
 		connectionText.setEnabled(false);
@@ -133,17 +130,16 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		browseDestButton.setEnabled(overrides);
 	}
 
-	private String getConnectionLabel(String connectionUrl) {
+	private String createConnectionLabel(ConnectionURL connectionUrl) {
 		String connectionLabel = "";
-		if (!StringUtils.isEmpty(connectionUrl)) {
-			try {
-				Connection connection = new Connection(new URL(connectionUrl), null);
-				connectionLabel = connection.getUsername() + " - " + connection.getHost();
-			} catch (MalformedURLException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not get URL for connection {0}", connectionUrl), e);
-			} catch (UnsupportedEncodingException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not get URL for connection {0}", connectionUrl), e);
+		if (connectionUrl != null) {
+			Connection connection = new Connection(connectionUrl.getUsername(), connectionUrl.getHost(), null);
+			StringBuilder builder =
+					new StringBuilder(connection.getUsername()).append(" - ").append(connectionUrl.getHost());
+			if (connectionUrl.isDefaultHost()) {
+				builder.append(DEFAULT_HOST_MARKER);
 			}
+			connectionLabel = builder.toString();
 		}
 		return connectionLabel;
 	}
@@ -328,8 +324,8 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	}
 
 	private void updateWidgetsFromWorkingCopy() {
-		String connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-		connectionText.setText(getConnectionLabel(connectionUrl));
+		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		connectionText.setText(createConnectionLabel(connectionUrl));
 		String appName = ExpressServerUtils.getExpressApplicationName(server);
 		appNameText.setText(appName == null ? "" : appName);
 

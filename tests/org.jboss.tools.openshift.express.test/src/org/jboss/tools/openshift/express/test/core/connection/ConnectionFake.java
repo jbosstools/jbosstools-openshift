@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.core.connection;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
@@ -36,10 +34,6 @@ public class ConnectionFake extends Connection {
 		this(USERNAME);
 	}
 	
-	public ConnectionFake(URL url) throws UnsupportedEncodingException {
-		super(url, null);
-	}
-
 	public ConnectionFake(String username) {
 		this(username, null);
 	}

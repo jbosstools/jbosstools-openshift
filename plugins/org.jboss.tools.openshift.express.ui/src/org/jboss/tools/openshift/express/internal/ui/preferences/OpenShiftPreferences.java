@@ -66,6 +66,10 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 		return legacyConnections.get();
 	}
 
+	public void saveLegacyConnections(String[] connections) {
+		legacyConnections.store(connections);
+	}
+
 	public void flush() {
 		// TODO: implement
 	}
