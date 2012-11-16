@@ -57,9 +57,17 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	public final IApplication getApplication() {
 		return application;
 	}
+	
+	public boolean isPortForwardingStarted() {
+		return application.isPortFowardingStarted();
+	}
 
 	public List<IApplicationPortForwarding> getForwardablePorts() throws OpenShiftSSHOperationException {
 		return application.getForwardablePorts();
+	}
+
+	public boolean hasForwardablePorts() {
+		return application != null && application.getForwardablePorts() != null && !application.getForwardablePorts().isEmpty();
 	}
 
 	public boolean getPortForwarding() throws OpenShiftSSHOperationException {
@@ -152,10 +160,8 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	 * @throws OpenShiftSSHOperationException
 	 */
 	public void setUseFreePorts(Boolean useFreePorts) throws OpenShiftSSHOperationException {
-		if (!application.isPortFowardingStarted()) { // do not change the
-														// current bindings if
-														// port forwarding is
-														// already started.
+		// do not change the current bindings if port forwarding is already started.
+		if (!application.isPortFowardingStarted()) { 
 			updateLocalPortBindings(useFreePorts);
 		}
 		firePropertyChange(PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS, this.useFreePorts, this.useFreePorts = useFreePorts);
@@ -204,16 +210,14 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public void refreshForwardablePorts() throws OpenShiftSSHOperationException {
-		if (!application.isPortFowardingStarted()) { // we don't reload/refresh
-														// the ports if
-														// portforwarding is
-														// already running since
-														// we then loose the
-														// existing local
-														// ip/ports.
+		// we don't reload/refresh the ports if port forwarding is already running since
+		// we then loose the existing local ip/ports.
+		if (!application.isPortFowardingStarted()) { 
 			application.refreshForwardablePorts();
 			updateLocalAddressBindings(this.useDefaultLocalIpAddress);
 			updateLocalPortBindings(this.useFreePorts);
+			// force property change fire to notify wizard that things changed in the list
+			firePropertyChange(PROPERTY_FORWARDABLE_PORTS, null, application.getForwardablePorts());
 		}
 	}
 
@@ -234,5 +238,6 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 		// now, check if the session is valid (ie, not null and still connected)
 		return getApplication().hasSSHSession();
 	}
+
 
 }

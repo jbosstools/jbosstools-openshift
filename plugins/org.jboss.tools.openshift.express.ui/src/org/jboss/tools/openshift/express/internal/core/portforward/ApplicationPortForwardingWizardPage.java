@@ -14,9 +14,12 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
+import org.eclipse.core.databinding.validation.MultiValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -84,30 +87,23 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(container);
 
 		Composite tableContainer = new Composite(container, SWT.NONE);
-		this.viewer = createTable(tableContainer);
+		this.viewer = createTable(tableContainer, dbc);
 		GridDataFactory.fillDefaults().span(1, 3).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		// viewer.addSelectionChangedListener(onTableSelectionChanged());
 
 		refreshButton = new Button(container, SWT.PUSH);
 		refreshButton.setText("Refresh");
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(refreshButton);
 		refreshButton.addSelectionListener(onRefreshPorts());
 
-		/*
-		 * Button editButton = new Button(container, SWT.PUSH); editButton.setText("Edit...");
-		 * GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(editButton); //
-		 * checkAllButton.addSelectionListener(onCheckAll());
-		 */
-
 		startButton = new Button(container, SWT.PUSH);
 		startButton.setText("Start All");
-		startButton.setEnabled(true);
+		startButton.setEnabled(wizardModel.hasForwardablePorts()); 
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(startButton);
 		startButton.addSelectionListener(onStartPortForwarding());
 
 		stopButton = new Button(container, SWT.PUSH);
 		stopButton.setText("Stop All");
-		stopButton.setEnabled(true);
+		stopButton.setEnabled(false);
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(stopButton);
 		stopButton.addSelectionListener(onStopPortForwarding());
 
@@ -147,8 +143,25 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		// enabling/disabling controls
 		IObservableValue portForwardingStartedObservable = BeanProperties.value(
 				ApplicationPortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
+		
+		IObservableValue forwardablePortsExistObservable = BeanProperties.value(
+				ApplicationPortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
+		
+		
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
-				.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+			.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
+				.notUpdating(forwardablePortsExistObservable).converting(new Converter(List.class, Boolean.class) {
+					
+					@Override
+					public Object convert(Object fromObject) {
+						if(fromObject instanceof List<?>) {
+							return !((List<?>)fromObject).isEmpty();
+						}
+						return Boolean.FALSE;
+					}
+				}).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(stopButton))
 				.notUpdating(portForwardingStartedObservable).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(useLocalIpAddressButton))
@@ -266,14 +279,13 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		};
 	}
 
-	protected TableViewer createTable(Composite tableContainer) {
+	protected TableViewer createTable(Composite tableContainer, DataBindingContext dbc) {
 		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
 		TableViewer viewer = new TableViewer(table);
-		// viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
 
 		createTableColumn("Service", 1, new CellLabelProvider() {
@@ -331,6 +343,14 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 			}
 		}, viewer, tableLayout);
 
+		IObservableValue forwardablePortsModelObservable =
+				BeanProperties.value(ApplicationPortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS)
+						.observe(wizardModel);
+		
+		final ForwardablePortListValidator validator =
+				new ForwardablePortListValidator(forwardablePortsModelObservable);
+		dbc.addValidationStatusProvider(validator);
+
 		return viewer;
 	}
 
@@ -372,7 +392,6 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 
 	private void refreshViewerInput() {
 		getShell().getDisplay().syncExec(new Runnable() {
-
 			@Override
 			public void run() {
 				try {
@@ -382,6 +401,26 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 				}
 			}
 		});
+	}
+	
+	class ForwardablePortListValidator extends MultiValidator {
+
+		private final IObservableValue viewerObservable;
+		
+		public ForwardablePortListValidator(IObservableValue viewerObservable) {
+			this.viewerObservable = viewerObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			@SuppressWarnings("unchecked")
+			final List<IApplicationPortForwarding> ports = (List<IApplicationPortForwarding>) viewerObservable.getValue();
+			if(ports == null || ports.isEmpty()) {
+				return ValidationStatus.error("There are no available ports to forward for this application.\nYour application may be stopped.");
+			}
+			return Status.OK_STATUS;
+		}
+		
 	}
 
 }
