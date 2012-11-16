@@ -190,7 +190,7 @@ public class EmbedCartridgeStrategyTest {
 		assertEquals(IEmbeddableCartridge.ROCKMONGO_11, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertTrue(diff.getAdditions().size() == 1);
-		assertEquals(IEmbeddableCartridge.MONGODB_20, diff.getAdditions().get(0));
+		assertEquals(IEmbeddableCartridge.MONGODB_22, diff.getAdditions().get(0));
 		assertNotNull(diff.getRemovals());
 		assertTrue(diff.getRemovals().size() == 0);
 	}
@@ -199,15 +199,15 @@ public class EmbedCartridgeStrategyTest {
 	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.MONGODB_20);
+		currentCartridges.add(IEmbeddableCartridge.MONGODB_22);
 		currentCartridges.add(IEmbeddableCartridge.ROCKMONGO_11);
 		currentCartridges.add(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
 
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(IEmbeddableCartridge.MONGODB_20, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(IEmbeddableCartridge.MONGODB_22, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.MONGODB_20, diff.getCartridge());
+		assertEquals(IEmbeddableCartridge.MONGODB_22, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertTrue(diff.getAdditions().size() == 0);
 		assertNotNull(diff.getRemovals());
