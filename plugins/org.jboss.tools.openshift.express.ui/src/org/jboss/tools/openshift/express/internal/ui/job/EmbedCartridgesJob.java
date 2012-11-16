@@ -137,9 +137,9 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 				return -1;
 			} else if (thatCartridge.equals(IEmbeddableCartridge.POSTGRESQL_84)) {
 				return 1;
-			} else if (thisCartridge.equals(IEmbeddableCartridge.MONGODB_20)) {
+			} else if (thisCartridge.equals(IEmbeddableCartridge.MONGODB_22)) {
 				return -1;
-			} else if (thatCartridge.equals(IEmbeddableCartridge.MONGODB_20)) {
+			} else if (thatCartridge.equals(IEmbeddableCartridge.MONGODB_22)) {
 				return 1;
 			}
 			return 0;
