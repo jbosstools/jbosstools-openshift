@@ -6,7 +6,7 @@
 		<revhistory>
 			<revision>
 				<revnumber>1-0</revnumber>
-				<date>Tue Nov 29 2011</date>
+				<date>Fri Nov 16 2012</date>
 				<author>
 					<firstname>Isaac</firstname>
 					<surname>Rooskov</surname>
@@ -14,7 +14,7 @@
 				</author>
 				<revdescription>
 					<simplelist>
-						<member>Initial creation of book</member>
+						<member>Updated for JBoss Developer Studio 6</member>
 					</simplelist>
 				</revdescription>
 			</revision>
