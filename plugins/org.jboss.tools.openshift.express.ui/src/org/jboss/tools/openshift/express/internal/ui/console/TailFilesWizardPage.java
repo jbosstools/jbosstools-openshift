@@ -37,7 +37,8 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 	private final TailFilesWizardPageModel pageModel;
 
 	public TailFilesWizardPage(final TailFilesWizardPageModel pageModel, final IWizard wizard) {
-		super("Tail Log Files", "Please select the patter for the files you want to tail",
+		super("Tail Log Files", "This will run tail on your OpenShift application '" + pageModel.getApplication().getName() +
+				"'.\nYou can use the defaults or change the tail options.",
 				"TailFilePage", wizard);
 		this.pageModel = pageModel;
 	}
@@ -51,7 +52,7 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 
 		// label
 		final Label filePatternLabel = new Label(container, SWT.NONE);
-		filePatternLabel.setText("File pattern:");
+		filePatternLabel.setText("Tail options:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false)
 				.applyTo(filePatternLabel);
 		// input text field

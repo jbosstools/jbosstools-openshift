@@ -39,8 +39,12 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void resetFilePattern() {
-		setFilePattern(application.getCartridge().getName() + "/logs/*");
+		setFilePattern("-f -n 100 " + getApplication().getCartridge().getName() + "/logs/*");
 		
+	}
+
+	public IApplication getApplication() {
+		return application;
 	}
 	
 }

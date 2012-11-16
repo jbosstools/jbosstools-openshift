@@ -101,7 +101,6 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		final String appName = application.getName();
 		final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(appName, host));
 		ConsoleUtils.displayConsoleView(console);
-		console.newMessageStream().println("Loading....");
 		if (!this.consoleWorkers.containsKey(console.getName())) {
 			launchTailServerJob(host, application, console);
 		}
@@ -129,7 +128,7 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		final TailFilesWizard wizard = new TailFilesWizard(app);
 		if (WizardUtils.openWizardDialog(
 				wizard, Display.getCurrent().getActiveShell()) == Window.OK) {
-			
+			console.newMessageStream().println("Loading....");
 			new Job("Launching Tail Server Operation") {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
@@ -191,10 +190,12 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	 */
 	private String buildCommand(final String filePath, final String options) throws UnsupportedEncodingException {
 		StringBuilder commandBuilder = new StringBuilder("tail ");
+		// ignored for now,the options are now part of the filePath, given by the user in the TailFilesWizard
+		/*  
 		if (options != null && !options.isEmpty()) {
 			final String opts = new String(Base64Coder.encode(options.getBytes()));
 			commandBuilder.append("--opts ").append(opts).append(" ");
-		}
+		}*/
 		commandBuilder.append(filePath);
 		final String command = commandBuilder.toString();
 		Logger.debug("ssh command to execute: " + command);
