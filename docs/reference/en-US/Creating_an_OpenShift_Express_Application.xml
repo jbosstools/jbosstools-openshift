@@ -40,6 +40,11 @@
 	<para>
 		If you do not have an OpenShift account, you can create one through the link at the top of the wizard screen. This will open the OpenShift sign-up page within your workbench. Once you have created an account you will need to relaunch the <guilabel>OpenShift Application</guilabel> wizard and input your new username and password.
 	</para>
+	<note>
+		<para>
+			If you have a local OpenShift Cloud instance you can choose to connect to it instead by either selecting it from the available defined connections in the <guilabel>Connection</guilabel> list, or by deselecting the <guilabel>Use default server</guilabel> option and specifying your own in the <guilabel>Server</guilabel> field. 
+		</para>
+	</note>
 	<figure id="application_creation_03">
 		<title>Creating a domain</title>
 		<mediaobject>
