@@ -10,8 +10,14 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.egit.core.internal;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.egit.core.project.GitProjectData;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -21,6 +27,8 @@ public class EGitCoreActivator implements BundleActivator {
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.egit.core";
 	
 	private static BundleContext context;
+	
+	private IResourceChangeListener egitChangeListener;
 
 	public static BundleContext getContext() {
 		return context;
@@ -28,6 +36,19 @@ public class EGitCoreActivator implements BundleActivator {
 
 	public void start(BundleContext bundleContext) throws Exception {
 		EGitCoreActivator.context = bundleContext;
+		if (egitChangeListener == null) {
+			egitChangeListener = new IResourceChangeListener() {
+				
+				@Override
+				public void resourceChanged(IResourceChangeEvent event) {
+					IResource project = event.getResource();
+					if (project != null && project instanceof IProject) {
+						GitProjectData.reconfigureWindowCache();
+					}
+				}
+			};
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(egitChangeListener, IResourceChangeEvent.PRE_DELETE);
+		}
 		//DelegatingJBoss7ServerBehavior.addDelegateMapping(EgitBehaviourDelegate.ID, EgitBehaviourDelegate.class);
 		// THIS is not relevant at the moment. Egit support will need to be revisited
 	}
@@ -35,6 +56,10 @@ public class EGitCoreActivator implements BundleActivator {
 
 	public void stop(BundleContext bundleContext) throws Exception {
 		EGitCoreActivator.context = null;
+		if (egitChangeListener != null) {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(egitChangeListener);
+			egitChangeListener = null;
+		}
 	}
 	
 	public static IStatus createErrorStatus(String message) {
