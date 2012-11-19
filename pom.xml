@@ -21,7 +21,7 @@
 		<profile>
 			<id>bootstrap</id>
 			<modules>
-				<module>../server</module>
+				<module>../jbosstools-server</module>
 			</modules>
 		</profile>
 	</profiles>
