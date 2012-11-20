@@ -19,7 +19,6 @@ import org.eclipse.jsch.internal.core.IConstants;
 import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 
 /**
  * @author Andre Dietisheim
@@ -61,7 +60,7 @@ public class SSHUtils {
 		}
 		for (String preferencesKey : getPrivateKeysFromPreferences()) {
 			try {
-				File privateKey = SshPrivateKeysPreferences.getKeyFile(preferencesKey);
+				File privateKey = getKeyFile(preferencesKey);
 				if (privateKey == null
 						|| !FileUtils.canRead(privateKey)) {
 					continue;
@@ -121,7 +120,7 @@ public class SSHUtils {
 	public static boolean publicKeyMatchesPrivateKeyInPreferences(File publicKey) {
 		for (String preferencesKey : SSHUtils.getPrivateKeysFromPreferences()) {
 			try {
-				File privateKey = SshPrivateKeysPreferences.getKeyFile(preferencesKey.trim());
+				File privateKey = getKeyFile(preferencesKey.trim());
 				if (privateKey == null) {
 					continue;
 				}
@@ -159,5 +158,25 @@ public class SSHUtils {
 		return string == null
 				|| string.isEmpty();
 	}
+	
+	/**
+	 * Returns the key file for the given (absolute or relative) key path.
+	 * This methods prepends the ssh directory to the path if the given it's a
+	 * relative one. There's no guarantee that the file returned really exists.
+	 * 
+	 * @param keyName
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static File getKeyFile(String keyName) throws FileNotFoundException {
+		if (isEmpty(keyName)) {
+			return null;
+		}
 
+		if (keyName.startsWith(File.separator)) {
+			return new File(keyName);
+		} else {
+			return new File(getSSH2Home(), keyName);
+		}
+	}
 }
