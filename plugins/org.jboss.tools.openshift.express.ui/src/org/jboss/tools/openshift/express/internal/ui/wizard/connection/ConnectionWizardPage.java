@@ -248,23 +248,24 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
 		Combo serversCombo = new Combo(connectionWidgets, SWT.BORDER);
+		ComboViewer serverComboViewer = new ComboViewer(serversCombo);
+		serverComboViewer.setLabelProvider(new ServerLabelProvider());
+		serverComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		serverComboViewer.setInput(pageModel.getServers());
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(serversCombo);
+		IObservableValue serverObservable = WidgetProperties.text().observe(serversCombo);
 		Binding serverBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(serversCombo))
-				.validatingAfterGet(new RequiredStringValidator("server"))
+				.bind(serverObservable)
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport
 				.create(serverBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		ComboViewer serversComboViewer = new ComboViewer(serversCombo);
-		serversComboViewer.setLabelProvider(new ServerLabelProvider());
-		serversComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		serversComboViewer.setInput(pageModel.getServers());
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(serversCombo);
-		ValueBindingBuilder
-				.bind(ViewerProperties.singlePostSelection().observe(serversComboViewer))
-				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel))
-				.in(dbc);
+		ValidationStatusProvider hostValidation = 
+				new RequiredStringValidationProvider(serverObservable, "server");
+		dbc.addValidationStatusProvider(hostValidation);
+		ControlDecorationSupport
+				.create(hostValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(serversCombo))
 				.notUpdatingParticipant()
