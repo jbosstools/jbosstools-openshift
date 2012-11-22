@@ -7,12 +7,13 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.portforward.ApplicationPortForwardingWizard;
-import org.jboss.tools.openshift.express.internal.core.portforward.ApplicationPortForwardingWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.VerifySSHSessionJob;
+import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 
 import com.openshift.client.IApplication;
 
@@ -85,10 +86,8 @@ public class ApplicationPortForwardingAction extends AbstractAction {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				ApplicationPortForwardingWizard wizard = new ApplicationPortForwardingWizard(
-						application);
-				WizardDialog dialog = new ApplicationPortForwardingWizardDialog(PlatformUI.getWorkbench().getModalDialogShellProvider().getShell(),
-						wizard);
+				Shell shell = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
+				WizardDialog dialog = new OkButtonWizardDialog(shell, new ApplicationPortForwardingWizard(application));
 				dialog.setMinimumPageSize(700, 300);
 				dialog.create();
 				dialog.open();
