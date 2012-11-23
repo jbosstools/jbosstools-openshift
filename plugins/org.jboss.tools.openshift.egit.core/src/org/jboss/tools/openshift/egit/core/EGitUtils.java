@@ -368,20 +368,48 @@ public class EGitUtils {
 		return op.getCommit();
 	}
 
-	public static List<URIish> getRemoteURIs(IProject p) throws CoreException {
-		RemoteConfig rc = getRemoteConfig(p);
-		if (rc != null) {
-			return rc.getURIs();
+	/**
+	 * Returns the URIish's for the remote on the given project.
+	 * 
+	 * @param remoteName
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 */
+	public static List<URIish> getRemoteURIs(String remoteName, IProject project) throws CoreException {
+		List<URIish> uris = Collections.emptyList();
+		RemoteConfig remoteConfig = getRemoteByName(remoteName, getRepository(project));
+		if (remoteConfig != null) {
+			uris = remoteConfig.getURIs();
+		}
+		return uris;
+	}
+
+	
+	public static List<URIish> getDefaultRemoteURIs(IProject project) throws CoreException {
+		RemoteConfig remoteConfig = getRemoteConfig(getRepository(project));
+		if (remoteConfig != null) {
+			return remoteConfig.getURIs();
 		}
 		return new ArrayList<URIish>();
 	}
 
-	public static RemoteConfig getRemoteConfig(IProject project) throws CoreException {
-		Repository rep = getRepository(project);
-		if (rep != null) {
-			return getRemoteConfig(rep);
+	/**
+	 * Returns all uris of alls remotes for the given project.
+	 * 
+	 * @param project the project to get all remotes and all uris from
+	 * @return all uris
+	 * @throws CoreException
+	 */
+	public static List<URIish> getAllRemoteURIs(IProject project) throws CoreException {
+		List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(getRepository(project));
+		List<URIish> uris = new ArrayList<URIish>();
+		if (remoteConfigs != null) {
+			for (RemoteConfig remoteConfig : remoteConfigs) {
+				uris.addAll(remoteConfig.getURIs());
+			}
 		}
-		return null;
+		return uris;
 	}
 
 	/**
@@ -706,6 +734,9 @@ public class EGitUtils {
 	 * @throws CoreException
 	 */
 	public static List<RemoteConfig> getAllRemoteConfigs(Repository repository) throws CoreException {
+		if (repository == null) {
+			return Collections.emptyList();
+		}
 		try {
 			return RemoteConfig.getAllRemoteConfigs(repository.getConfig());
 		} catch (URISyntaxException e) {
@@ -723,6 +754,10 @@ public class EGitUtils {
 	 * @throws CoreException
 	 */
 	public static RemoteConfig getRemoteByUrl(Pattern pattern, Repository repository) throws CoreException {
+		if (repository == null) {
+			return null;
+		}
+
 		for (RemoteConfig config : getAllRemoteConfigs(repository)) {
 			if (hasRemoteUrl(pattern, config)) {
 				return config;
@@ -731,7 +766,14 @@ public class EGitUtils {
 		return null;
 	}
 
+	public static boolean hasRemoteUrl(Pattern pattern, Repository repository) throws CoreException {
+		return getRemoteByUrl(pattern, repository) != null;
+	}
+	
 	public static boolean hasRemoteUrl(Pattern pattern, RemoteConfig config) {
+		if (config == null) {
+			return false;
+		}
 		for (URIish uri : config.getURIs()) {
 			Matcher matcher = pattern.matcher(uri.toString());
 			if (matcher.find()) {
