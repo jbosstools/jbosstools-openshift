@@ -87,7 +87,7 @@ public class ConnectionsModel {
 
 	protected boolean addConnection(ConnectionURL connectionUrl) {
 		Connection connection =
-				new Connection(connectionUrl.getUsername(), connectionUrl.getHost(), new CredentialsPrompter());
+				new Connection(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost(), new CredentialsPrompter());
 		return addConnection(connectionUrl, connection);
 	}
 

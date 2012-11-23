@@ -42,7 +42,10 @@ public class ConnectionFake extends Connection {
 		super(username, null, host, false, null);
 	}
 
-
+	public ConnectionFake(String username, String scheme, String host) {
+		super(username, null, scheme, host, false, null);
+	}
+	
 	public void setConnected(boolean connected) {
 		if (connected) {
 			setUser(new UserFake());

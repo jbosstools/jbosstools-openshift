@@ -56,11 +56,16 @@ public class Connection {
 	private ICredentialsPrompter prompter;
 
 	public Connection() {
-		this(null, null, null, false, null);
+		this(null, null, null, null, false, null);
 	}
 
 	protected Connection(String username) {
 		this.username = username;
+	}
+
+	public Connection(String username, String scheme, String host, ICredentialsPrompter prompter) {
+		this(username, null, scheme, host, false, null);
+		this.prompter = prompter;
 	}
 
 	public Connection(String username, String host, ICredentialsPrompter prompter) {
@@ -77,18 +82,26 @@ public class Connection {
 	}
 	
 	protected Connection(String username, String password, String host, boolean rememberPassword, IUser user) {
+		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, user);
+	}
+
+	protected Connection(String username, String password, String scheme, String host, boolean rememberPassword, IUser user) {
 		this.username = username;
 		this.password = password;
-		this.host = getHost(host);
+		this.host = getHost(scheme, host);
 		this.rememberPassword = rememberPassword;
 		setUser(user);
 	}
 
-	private String getHost(String host) {
+	private String getHost(String scheme, String host) {
 		if (StringUtils.isEmpty(host)) {
 			return host;
 		}
-		return UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS);
+		
+		if (StringUtils.isEmpty(scheme)) {
+			scheme = UrlUtils.SCHEME_HTTPS;
+		}
+		return UrlUtils.ensureStartsWithScheme(host, scheme);
 	}
 
 	protected void setUser(IUser user) {
