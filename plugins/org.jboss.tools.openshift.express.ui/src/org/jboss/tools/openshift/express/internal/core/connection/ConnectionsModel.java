@@ -248,7 +248,7 @@ public class ConnectionsModel {
 			}
 		}
 	}
-
+	
 	protected String[] loadPersistedCustomHosts() {
 		return OpenShiftPreferences.INSTANCE.getConnections();
 	}
