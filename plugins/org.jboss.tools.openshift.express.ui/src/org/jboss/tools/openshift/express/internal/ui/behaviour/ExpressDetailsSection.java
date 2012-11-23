@@ -135,7 +135,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		if (connectionUrl != null) {
 			Connection connection = new Connection(connectionUrl.getUsername(), connectionUrl.getHost(), null);
 			StringBuilder builder =
-					new StringBuilder(connection.getUsername()).append(" - ").append(connectionUrl.getHost());
+					new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
 			if (connectionUrl.isDefaultHost()) {
 				builder.append(DEFAULT_HOST_MARKER);
 			}
