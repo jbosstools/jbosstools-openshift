@@ -135,9 +135,11 @@ public class ExpressServerUtils {
 		final String appName = getExpressApplicationName(server);
 		final ConnectionURL connectionUrl = getExpressConnectionUrl(server);
 		try {
-			final Connection ud = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
-			if (ud != null) {
-				return ud.getApplicationByName(appName); // May be long running
+			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
+			if (connection != null) {
+				return connection.getApplicationByName(appName); // May be long running
+			} else {
+				Logger.error(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
 			}
 		} catch (OpenShiftException e) {
 			Logger.error(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
