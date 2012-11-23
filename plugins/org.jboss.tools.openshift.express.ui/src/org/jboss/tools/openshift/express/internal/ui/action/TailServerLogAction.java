@@ -114,6 +114,13 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
 			final String host = server.getHost();
 			final IApplication app = ExpressServerUtils.getApplication(server);
+			if (app == null) {
+				OpenShiftUIActivator.log(
+						OpenShiftUIActivator
+								.createErrorStatus("Failed to retrieve Application from the selected Server.\n" +
+										"Please verify that the associated OpenShift Application still exists."));
+				return;
+			}
 			final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(app.getName(), host));
 			ConsoleUtils.displayConsoleView(console);
 			console.newMessageStream().println("Loading....");

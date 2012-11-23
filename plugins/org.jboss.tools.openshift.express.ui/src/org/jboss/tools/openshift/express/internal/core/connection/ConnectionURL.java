@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
@@ -32,6 +34,8 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
  */
 public class ConnectionURL {
 
+	private static final Pattern MALFORMED_URL_PATTERN = Pattern.compile("(https?://)?([^@]+)@(https://)?(.*)");
+	
 	private String username;
 	private String host;
 	private String scheme;
@@ -109,6 +113,9 @@ public class ConnectionURL {
 		String scheme = UrlUtils.SCHEME_HTTPS;
 		if (ConnectionUtils.isDefaultHost(host)) {
 			scheme = UrlUtils.ensureStartsWithScheme(UrlUtils.getScheme(host), UrlUtils.SCHEME_HTTPS);
+			if (scheme == null) {
+				scheme = UrlUtils.SCHEME_HTTPS;
+			}
 			host = null;
 		} else if (UrlUtils.hasScheme(host)) {
 			scheme = UrlUtils.getScheme(host);
@@ -144,9 +151,37 @@ public class ConnectionURL {
 	}
 
 	public static ConnectionURL forURL(String url) throws UnsupportedEncodingException, MalformedURLException {
-		return forURL(new URL(url));
+		return forURL(new URL(correctMalformedUrl(url)));
 	}
 
+	private static String correctMalformedUrl(String url) {
+		Matcher matcher = MALFORMED_URL_PATTERN.matcher(url);
+		if (!matcher.matches()
+				|| matcher.groupCount() != 4) {
+			return url;
+		}
+
+		if (!StringUtils.isEmpty(matcher.group(1))) {
+			// https://adietish%40redhat.com@openshift.redhat.com
+			return url;
+		}
+
+		if (StringUtils.isEmpty(matcher.group(4))) {
+			// adietish%40redhat.com@http://
+			return new StringBuilder(matcher.group(3))
+					.append(matcher.group(2))
+					.append('@')
+					.toString();
+		} else {
+			// adietish%40redhat.com@https://openshift.redhat.com
+			return new StringBuilder(matcher.group(3))
+					.append(matcher.group(2))
+					.append('@')
+					.append(matcher.group(4))
+					.toString();
+		}
+	}
+	
 	public static ConnectionURL forURL(URL url) throws UnsupportedEncodingException {
 		Assert.isLegal(url != null, "url is null");
 		UrlPortions portions = UrlUtils.toPortions(url);
@@ -155,6 +190,10 @@ public class ConnectionURL {
 	}
 
 	private static String getHost(UrlPortions portions) {
+		String host = portions.getHost();
+		if (StringUtils.isEmpty(host)) {
+			return null;
+		}
 		StringBuilder builder = new StringBuilder();
 		builder.append(portions.getScheme()).append(portions.getHost());
 		if (portions.getPort() > -1) {
