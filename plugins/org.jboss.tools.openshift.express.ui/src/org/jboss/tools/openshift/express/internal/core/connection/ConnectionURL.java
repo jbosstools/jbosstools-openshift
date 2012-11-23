@@ -167,7 +167,7 @@ public class ConnectionURL {
 			return null;
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append(portions.getScheme()).append(portions.getHost());
+		builder.append(portions.getHost());
 		if (portions.getPort() > -1) {
 			builder.append(UrlUtils.PORT_DELIMITER).append(portions.getPort());
 		}
