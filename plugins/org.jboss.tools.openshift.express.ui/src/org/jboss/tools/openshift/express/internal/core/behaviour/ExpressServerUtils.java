@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IRuntime;
@@ -37,6 +39,7 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethodType;
 import org.jboss.ide.eclipse.as.core.util.DeploymentPreferenceLoader;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
+import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
@@ -363,7 +366,7 @@ public class ExpressServerUtils {
 
 	public static IApplication findApplicationForProject(IProject p, List<IApplication> applications)
 			throws OpenShiftException, CoreException {
-		List<URIish> uris = EGitUtils.getRemoteURIs(p);
+		List<URIish> uris = EGitUtils.getDefaultRemoteURIs(p);
 		Iterator<IApplication> i = applications.iterator();
 		while (i.hasNext()) {
 			IApplication a = i.next();
@@ -393,20 +396,27 @@ public class ExpressServerUtils {
 		final String gitUri = application.getGitUrl();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
-			List<URIish> uris = null;
-			try {
-				uris = EGitUtils.getRemoteURIs(projects[i]);
-				Iterator<URIish> it = uris.iterator();
-				while (it.hasNext()) {
-					String projURI = it.next().toPrivateString();
-					if (projURI.equals(gitUri))
-						results.add(projects[i]);
-				}
-			} catch (CoreException ce) {
-				// Log? Not 100 required, just skip this project?
+			if (hasGitUri(gitUri, projects[i])) {
+				results.add(projects[i]);
 			}
 		}
 		return results.toArray(new IProject[results.size()]);
+	}
+
+	private static boolean hasGitUri(String gitURI, IProject project) {
+		try {
+			Pattern gitURIPattern = Pattern.compile(RegExUtils.escapeRegex(gitURI));
+			Repository repository = EGitUtils.getRepository(project);
+			String remoteName = getProjectAttribute(project, SETTING_REMOTE_NAME, null);
+			if (!StringUtils.isEmptyOrNull(remoteName)) {
+				return EGitUtils.hasRemoteUrl(gitURIPattern, EGitUtils.getRemoteByName(remoteName, repository));
+			} else {
+				return EGitUtils.hasRemoteUrl(gitURIPattern, repository);
+			}
+		} catch (CoreException ce) {
+			OpenShiftUIActivator.log(NLS.bind("Could not look up remotes for project {0}", project), ce);
+		}
+		return false;
 	}
 
 	/**
