@@ -44,7 +44,6 @@ import com.jcraft.jsch.JSchException;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
-import com.openshift.client.utils.Base64Coder;
 
 /**
  * The action associated with the "Show In>Remote Console" menu item.
@@ -114,6 +113,13 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
 			final String host = server.getHost();
 			final IApplication app = ExpressServerUtils.getApplication(server);
+			if (app == null) {
+				OpenShiftUIActivator.log(
+						OpenShiftUIActivator.createErrorStatus("Failed to retrieve Application from the selected Server.\n" +
+						"Please verify that the associated OpenShift Application still exists."));
+
+				return;
+			}
 			final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(app.getName(), host));
 			ConsoleUtils.displayConsoleView(console);
 			console.newMessageStream().println("Loading....");
