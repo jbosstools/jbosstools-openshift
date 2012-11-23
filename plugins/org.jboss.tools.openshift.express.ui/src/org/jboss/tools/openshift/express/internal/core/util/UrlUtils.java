@@ -172,13 +172,12 @@ public class UrlUtils {
 	 */
 	public static String getUrlFor(String username, String host, String scheme) throws UnsupportedEncodingException {
 		StringBuilder builder = new StringBuilder();
-		if (!hasScheme(host)) {
-			builder.append(scheme);
-		}
+		builder.append(scheme);
 		if (!isEmpty(username)) {
 			builder.append(URLEncoder.encode(username, "UTF-8"))
 					.append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
 		}
+		host = cutScheme(host);
 		if (!isEmpty(host)) {
 			builder.append(host);
 		}

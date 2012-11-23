@@ -154,6 +154,26 @@ public class ConnectionURL {
 		return forURL(new URL(correctMalformedUrl(url)));
 	}
 
+	public static ConnectionURL forURL(URL url) throws UnsupportedEncodingException {
+		Assert.isLegal(url != null, "url is null");
+		UrlPortions portions = UrlUtils.toPortions(url);
+		String host = getHost(portions);
+		return new ConnectionURL(portions.getUsername(), host, portions.getScheme());
+	}
+
+	private static String getHost(UrlPortions portions) {
+		String host = portions.getHost();
+		if (StringUtils.isEmpty(host)) {
+			return null;
+		}
+		StringBuilder builder = new StringBuilder();
+		builder.append(portions.getHost());
+		if (portions.getPort() > -1) {
+			builder.append(UrlUtils.PORT_DELIMITER).append(portions.getPort());
+		}
+		return builder.toString();
+	}
+
 	private static String correctMalformedUrl(String url) {
 		Matcher matcher = MALFORMED_URL_PATTERN.matcher(url);
 		if (!matcher.matches()
@@ -180,25 +200,5 @@ public class ConnectionURL {
 					.append(matcher.group(4))
 					.toString();
 		}
-	}
-	
-	public static ConnectionURL forURL(URL url) throws UnsupportedEncodingException {
-		Assert.isLegal(url != null, "url is null");
-		UrlPortions portions = UrlUtils.toPortions(url);
-		String host = getHost(portions);
-		return new ConnectionURL(portions.getUsername(), host, portions.getScheme());
-	}
-
-	private static String getHost(UrlPortions portions) {
-		String host = portions.getHost();
-		if (StringUtils.isEmpty(host)) {
-			return null;
-		}
-		StringBuilder builder = new StringBuilder();
-		builder.append(portions.getScheme()).append(portions.getHost());
-		if (portions.getPort() > -1) {
-			builder.append(UrlUtils.PORT_DELIMITER).append(portions.getPort());
-		}
-		return builder.toString();
 	}
 }

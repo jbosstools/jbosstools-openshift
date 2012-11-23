@@ -80,7 +80,7 @@ public class ConnectionTest {
 		// operations
 		ConnectionURL connectionUrl = ConnectionURL.forURL(scheme + URLEncoder.encode(username, "UTF-8") + ":"
 				+ password + "@" + server);
-		Connection connection = new ConnectionFake(connectionUrl.getUsername(), connectionUrl.getHost());
+		Connection connection = new ConnectionFake(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost());
 
 		// verifications
 		assertEquals(scheme, connection.getScheme());
@@ -94,7 +94,7 @@ public class ConnectionTest {
 
 		// operations
 		ConnectionURL connectionUrl = ConnectionURL.forURL("http://adietish%40redhat.com@localhost:8081");
-		Connection connection = new ConnectionFake(connectionUrl.getUsername(), connectionUrl.getHost());
+		Connection connection = new ConnectionFake(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost());
 
 		// verifications
 		assertEquals("http://localhost:8081", connection.getHost());
