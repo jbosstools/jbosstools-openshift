@@ -59,7 +59,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		If you need to create a domain, type the name you wish to have into the <guilabel>Domain name</guilabel> field. You will also need to provide your public SSH key. Ensure that the paired private key is listed within the SSH2 Preferences. If you are unsure, click the <guilabel>SSH2 Preferences</guilabel> link. Click <guibutton>Finish</guibutton> to complete domain creation.
+		If you need to create a domain, type the name you wish to have into the <guilabel>Domain name</guilabel> field. You will also need to ensure your public SSH key is provided and listed within the SSH2 Preferences. If you are unsure, click the <guilabel>SSH2 keys wizard</guilabel> link. Click <guibutton>Finish</guibutton> to complete domain creation.
 	</para>
 	<para>
 		If you already have a domain name then you will not see the <guilabel>Domain Creation</guilabel> screen.
