@@ -14,19 +14,17 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeWizard;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
 
 /**
  * @author Xavier Coulon
+ * @author Andre Dietisheim
  */
 public class EditCartridgesAction extends AbstractAction {
 
@@ -41,10 +39,8 @@ public class EditCartridgesAction extends AbstractAction {
 		if (selection != null && selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
 			try {
 				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				final IUser user = application.getDomain().getUser();
-				final Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUsernameAndHost(user.getRhlogin(), user.getServer());
-				EmbedCartridgeWizard wizard = new EmbedCartridgeWizard(application, connection);
-				int result = WizardUtils.openWizardDialog(wizard, Display.getCurrent().getActiveShell());
+				int result = WizardUtils.openWizardDialog(
+						new EmbedCartridgeWizard(application), Display.getCurrent().getActiveShell());
 				if(result == Dialog.OK) {
 					RefreshViewerJob.refresh(viewer);
 				}

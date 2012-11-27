@@ -50,7 +50,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
 	public static final String PROPERTY_USE_DEFAULTSERVER = "useDefaultServer";
 	public static final String PROPERTY_VALID = "valid";
-	public static final String PROPERTY_DUPLICATE_CONNECTION = "duplicateConnection";
 	public static final String PROPERTY_CREATE_CONNECTION = "createConnection";
 
 	final private IConnectionAwareModel wizardModel;
@@ -174,7 +173,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (!Diffs.equals(this.username, username)) {
 			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
 			resetValid();
-			fireDuplicateConnectionUpdated();
 		}
 	}
 
@@ -197,7 +195,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (!Diffs.equals(this.host, host)) {
 			firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 			resetValid();
-			fireDuplicateConnectionUpdated();
 		}
 	}
 
@@ -274,14 +271,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	private boolean isSelectedConnectionChanged() {
 		return !password.equals(selectedConnection.getPassword());
-	}
-
-	public boolean isDuplicateConnection() {
-		return ConnectionsModelSingleton.getInstance().hasConnection(username, host);
-	}
-
-	private void fireDuplicateConnectionUpdated() {
-		firePropertyChange(PROPERTY_DUPLICATE_CONNECTION, null, isDuplicateConnection());
 	}
 
 	public Connection getConnection() {
