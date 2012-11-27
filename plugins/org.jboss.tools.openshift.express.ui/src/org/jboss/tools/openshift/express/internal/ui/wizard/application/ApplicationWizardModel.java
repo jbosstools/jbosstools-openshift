@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IOpenShiftConnection;
 
 /**
  * @author André Dietisheim
@@ -22,20 +22,18 @@ import com.openshift.client.IApplication;
 public class ApplicationWizardModel extends ObservableUIPojo {
 
 	private IApplication application;
-	private Connection connection;
 
-	public ApplicationWizardModel(IApplication application, Connection connection) {
+	public ApplicationWizardModel(IApplication application) {
 		Assert.isLegal(application != null, "No application provided");
 		this.application = application;
-		Assert.isLegal(connection != null, "No connection provided");
-		this.connection = connection;
 	}
 
 	public IApplication getApplication() {
 		return application;
 	}
 
-	public Connection getConnection() {
-		return connection;
+	public IOpenShiftConnection getConnection() {
+		return application.getDomain().getUser().getConnection();
 	}
+
 }

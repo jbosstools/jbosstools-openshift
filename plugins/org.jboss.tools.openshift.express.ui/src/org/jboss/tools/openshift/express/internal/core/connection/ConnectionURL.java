@@ -109,21 +109,6 @@ public class ConnectionURL {
 		return new ConnectionURL(username, null, portions.getScheme());
 	}
 
-	public static ConnectionURL forUsernameAndHost(String username, String host) throws UnsupportedEncodingException {
-		String scheme = UrlUtils.SCHEME_HTTPS;
-		if (ConnectionUtils.isDefaultHost(host)) {
-			scheme = UrlUtils.ensureStartsWithScheme(UrlUtils.getScheme(host), UrlUtils.SCHEME_HTTPS);
-			if (scheme == null) {
-				scheme = UrlUtils.SCHEME_HTTPS;
-			}
-			host = null;
-		} else if (UrlUtils.hasScheme(host)) {
-			scheme = UrlUtils.getScheme(host);
-			host = UrlUtils.cutScheme(host);
-		}
-		return new ConnectionURL(username, host, scheme);
-	}
-
 	public static ConnectionURL forConnection(Connection connection) throws UnsupportedEncodingException,
 			MalformedURLException {
 		if (connection.isDefaultHost()) {

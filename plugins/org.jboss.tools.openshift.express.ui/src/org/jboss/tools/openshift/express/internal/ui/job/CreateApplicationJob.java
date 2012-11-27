@@ -20,7 +20,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
@@ -37,28 +36,28 @@ import com.openshift.client.OpenShiftTimeoutException;
  */
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
-	private Connection user;
 	private String name;
 	private ICartridge cartridge;
 	private ApplicationScale scale;
 	private IGearProfile gear;
 	private IApplication application;
-
+	private IDomain domain;
+	
 	public CreateApplicationJob(final String name, final ICartridge cartridge, final ApplicationScale scale,
-			final IGearProfile gear, Connection user) {
+			final IGearProfile gear, IDomain domain) {
 		super(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
 		this.name = name;
 		this.cartridge = cartridge;
 		this.scale = scale;
 		this.gear = gear;
-		this.user = user;
+		this.domain = domain;
 	}
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			try {
-				this.application = user.createApplication(name, cartridge, scale, gear);
+				this.application = domain.createApplication(name, cartridge, scale, gear);
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
 			}
@@ -84,12 +83,11 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		IApplication application = null;
 		do {
 			try {
-				IDomain domain = user.getDefaultDomain();
 				domain.refresh();
 				application = domain.getApplicationByName(name);
 				if (application == null) {
 					// app is not created yet, try again
-					application = user.createApplication(name, cartridge, scale, gear);
+					application = domain.createApplication(name, cartridge, scale, gear);
 				}
 			} catch (OpenShiftTimeoutException ex) {
 				// ignore
@@ -102,7 +100,6 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
 	private void safeRefreshDomain() {
 		try {
-			IDomain domain = user.getDefaultDomain();
 			domain.refresh();
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log(e);

@@ -91,16 +91,6 @@ public class ConnectionsModel {
 		return addConnection(connectionUrl, connection);
 	}
 
-	public boolean hasConnection(String username, String host) {
-		try {
-			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndHost(username, host);
-			return getConnectionByUrl(connectionUrl) != null;
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftUIException(e,
-					NLS.bind("Could not get url for connection {0} - {1}", username, host));
-		}
-	}
-
 	public boolean hasConnection(Connection connection) {
 		try {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
@@ -172,14 +162,6 @@ public class ConnectionsModel {
 			return null;
 		}
 		return connectionsByUrl.get(connectionUrl);
-	}
-
-	public Connection getConnectionByUsernameAndHost(String username, String host) {
-		try {
-			return getConnectionByUrl(ConnectionURL.forUsernameAndHost(username, host));
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftUIException(NLS.bind("Could not get url for connection {0} - {1}", username, host), e);
-		}
 	}
 
 	/**

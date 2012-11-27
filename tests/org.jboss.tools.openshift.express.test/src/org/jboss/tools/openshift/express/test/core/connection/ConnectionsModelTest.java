@@ -209,36 +209,6 @@ public class ConnectionsModelTest {
 	}
 
 	@Test
-	public void shouldGetConnectionByUsernameAndHost() throws UnsupportedEncodingException {
-		// pre-conditions
-		String username = "adietisheim";
-		String host = "http://redhat.com";
-		Connection connection = new ConnectionFake(username, host);
-		connectionsModel.addConnection(connection);
-
-		// operations
-		Connection queriedConnection = connectionsModel.getConnectionByUsernameAndHost(username, host);
-
-		// verifications
-		assertEquals(connection, queriedConnection);
-	}
-
-	@Test
-	public void shouldGetConnectionByUsernameAndHostWithoutScheme() throws UnsupportedEncodingException {
-		// pre-conditions
-		String username = "adietisheim";
-		String host = "redhat.com";
-		Connection connection = new ConnectionFake(username, host);
-		connectionsModel.addConnection(connection);
-
-		// operations
-		Connection queriedConnection = connectionsModel.getConnectionByUsernameAndHost(username, host);
-
-		// verifications
-		assertEquals(connection, queriedConnection);
-	}
-
-	@Test
 	public void shouldHaveConnection() throws UnsupportedEncodingException {
 		// pre-conditions
 		connectionsModel.addConnection(connection);
