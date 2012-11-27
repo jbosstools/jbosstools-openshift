@@ -219,7 +219,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 					, wizardModel.getApplicationCartridge()
 					, wizardModel.getApplicationScale()
 					, wizardModel.getApplicationGearProfile()
-					, wizardModel.getConnection());
+					, wizardModel.getConnection().getDefaultDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			wizardModel.setApplication(job.getApplication());
