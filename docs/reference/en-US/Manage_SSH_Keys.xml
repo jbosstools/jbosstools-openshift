@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<chapter id="chap-OpenSift_Tools_Reference_Guide-Managing_your_ssh_keys">
+	<title>Managing your SSH keys</title>
+	<figure id="managing_your_ssh_keys-ssh_keys_01">
+		<title>Selecting the OpenShift Application wizard</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Managing_your_SSH_keys/ssh_keys_01.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Selecting the wizard from the context menu of a server.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		The <guimenuitem>Manage SSH Keys</guimenuitem> wizard is available at the domain creation step when creating a new OpenShift application or through the context menu of a server in the <guilabel>OpenShift Explorer</guilabel>.
+	</para>
+	<figure id="managing_your_ssh_keys-ssh_keys_02">
+		<title>Managing SSH keys view</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Managing_your_SSH_keys/ssh_keys_02.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The main view for managing your SSH keys.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		From the <guilabel>Manage SSH Keys</guilabel> view you can add an existing key with the <guibutton>Add Existing</guibutton> button, create a completely new key through the <guibutton>New</guibutton> button or remove a key association with your OpenShift account by selecting the key from the list and clicking the <guibutton>Remove</guibutton> button.
+	</para>
+	<para>
+		Selecting to create a new set of SSH keys through the <guibutton>New</guibutton> button will open the <guilabel>Add new SSH key</guilabel> screen.
+	</para>
+	<figure id="managing_your_ssh_keys-ssh_keys_03">
+		<title>Add new SSH key screen</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Managing_your_SSH_keys/ssh_keys_03.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The screen where you can create a new public and private SSH key pair for your OpenShift account.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		You will need to name the new SSH key pair, as well as each key individually and provide a password for your private key (for security purposes). It is also possible to select where you would like to have the key saved on your system (the <guilabel>SSH2 Home</guilabel> field), however the default location is recommended.
+	</para>
+	<para>
+		After you have filled the fields click the <guibutton>Finish</guibutton> button to create the keys and have your private key added automatically to the SSH2 Preferences list.
+	</para>
+	<para>
+		If instead you wish to associate an existing SSH key with your OpenShift account, you can do this by selecting the <guibutton>Add Existing</guibutton> button. This will open the <guilabel>Add existing SSH key</guilabel> screen.
+	</para>
+	<figure id="managing_your_ssh_keys-ssh_keys_04">
+		<title>Add existing SSH key screen</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/Managing_your_SSH_keys/ssh_keys_04.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					The screen where you can associate an existing public SSH key with your OpenShift account.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
+		You will need to name your existing SSH key and specify its location on your system. After you have filled in the fields click the <guibutton>Finish</guibutton> button to add the public key to your OpenShift account.
+	</para>
+	<para>
+		You will have to add the private key manually and you can do this after having clicked the <guibutton>Finish</guibutton> button by clicking the <guilabel>SSH2 Preferences</guilabel> link in the <guilabel>Manage SSH Keys</guilabel> view.
+	</para>
+</chapter>
+
