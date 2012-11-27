@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.test;
 
 import org.jboss.tools.openshift.express.test.core.EmbedCartridgeStrategyTest;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionTest;
+import org.jboss.tools.openshift.express.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionsModelTest;
 import org.jboss.tools.openshift.express.test.ui.utils.SSHUserConfigTest;
 import org.jboss.tools.openshift.express.test.ui.wizard.application.importoperation.OpenShiftMavenProfileTests;
@@ -25,7 +26,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		EmbedCartridgeStrategyTest.class,
 		SSHUserConfigTest.class,
 		ConnectionsModelTest.class,
-		ConnectionTest.class
+		ConnectionTest.class,
+		ConnectionURLTest.class
 })
 /**
  * @author Andre Dietisheim
