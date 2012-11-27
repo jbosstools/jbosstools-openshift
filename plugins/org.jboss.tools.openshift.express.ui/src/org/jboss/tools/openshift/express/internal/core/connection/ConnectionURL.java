@@ -92,6 +92,10 @@ public class ConnectionURL {
 	public String toString() {
 		return url;
 	}
+	
+	public String getUrl() {
+		return url;
+	}
 
 	/**
 	 * Returns an url for the given username. The host used to build this url is
