@@ -237,6 +237,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 					connection = createConnection();
 				} else {
 					connection = selectedConnection;
+					connection.setRememberPassword(isRememberPassword());
 				}
 				connection.connect();
 				this.newConnection = connection;
