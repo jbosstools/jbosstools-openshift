@@ -1,6 +1,4 @@
-target
-bin
-*.class
-bin
+target/
+bin/
 .metadata
 .settings
