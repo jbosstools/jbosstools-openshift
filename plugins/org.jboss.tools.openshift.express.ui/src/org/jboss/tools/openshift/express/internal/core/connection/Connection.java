@@ -193,6 +193,7 @@ public class Connection {
 	 */
 	public boolean connect() throws OpenShiftException {
 		if (isConnected()) {
+			save();
 			return true;
 		}
 		if (createUser()) {
