@@ -75,12 +75,17 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (isCreateNewConnection(connection)) {
 			setUsername(getDefaultUsername());
 			setDefaultHost();
+			setPassword(null);
 		} else {
 			setUsername(connection.getUsername());
-			setPassword(connection.getPassword());
 			setHost(connection.getHost());
 			setUseDefaultServer(connection.isDefaultHost());
 			setRememberPassword(connection.isRememberPassword());
+			if (connection.isRememberPassword()) {
+				setPassword(connection.getPassword());
+			} else {
+				setPassword(null);
+			}
 		}
 	}
 
