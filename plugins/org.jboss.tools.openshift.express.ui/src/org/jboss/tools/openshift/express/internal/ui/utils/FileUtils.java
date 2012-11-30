@@ -99,6 +99,7 @@ public class FileUtils {
 		
 		if (!destination.exists()) {
 			destination.mkdir();
+			copyPermissions(source, destination);
 		}
 
 		for (File content : source.listFiles()) {
@@ -151,6 +152,7 @@ public class FileUtils {
 		Assert.isLegal(destination != null);
 
 		writeTo(new BufferedInputStream(new FileInputStream(source)), destination);
+		copyPermissions(source, destination);
 	}
 
 	public static final void writeTo(String content, File destination) throws FileNotFoundException {
@@ -175,6 +177,30 @@ public class FileUtils {
 			silentlyClose(in);
 			silentlyClose(out);
 		}
+	}
+	
+	/**
+	 * Replicates the owner permissions from the source to the destination. Due
+	 * to limitation in java6 this is the best we can do (there's no way in
+	 * java6 to know if rights are due to owner or group)
+	 * 
+	 * @param source
+	 * @param destination
+	 * 
+	 * @see File#canRead()
+	 * @see File#setReadable(boolean)
+	 * @see File#canWrite()
+	 * @see File#setWritable(boolean)
+	 * @see File#canExecute()
+	 * @see File#setExecutable(boolean)
+	 */
+	private static void copyPermissions(File source, File destination) {
+		Assert.isLegal(source != null);
+		Assert.isLegal(destination != null);
+
+		destination.setReadable(source.canRead());
+		destination.setWritable(source.canWrite());
+		destination.setExecutable(source.canExecute());
 	}
 
 	private static void silentlyClose(InputStream in) {
