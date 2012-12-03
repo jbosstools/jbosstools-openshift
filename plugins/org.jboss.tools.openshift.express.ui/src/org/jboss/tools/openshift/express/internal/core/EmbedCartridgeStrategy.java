@@ -11,14 +11,15 @@
 package org.jboss.tools.openshift.express.internal.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
-import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.OpenShiftException;
 
@@ -34,93 +35,121 @@ import com.openshift.client.OpenShiftException;
  */
 public class EmbedCartridgeStrategy {
 
-	private static final EmbeddableCartridgeRelations[] dependencies =
+	private final EmbeddableCartridgeRelations[] dependencies =
 			new EmbeddableCartridgeRelations[] {
-					new EmbeddableCartridgeRelations(IEmbeddableCartridge.JENKINS_14,
-							null, null, ICartridge.JENKINS_14),
-					new EmbeddableCartridgeRelations(IEmbeddableCartridge.PHPMYADMIN_34,
-							null, IEmbeddableCartridge.MYSQL_51, null),
-					new EmbeddableCartridgeRelations(IEmbeddableCartridge.ROCKMONGO_11,
-							null, IEmbeddableCartridge.MONGODB_22, null),
-					new EmbeddableCartridgeRelations(IEmbeddableCartridge._10GEN_MMS_AGENT_01,
-							null, IEmbeddableCartridge.MONGODB_22, null),
-					new EmbeddableCartridgeRelations(IEmbeddableCartridge.POSTGRESQL_84,
-							IEmbeddableCartridge.MYSQL_51, null, null),
-					new EmbeddableCartridgeRelations(IEmbeddableCartridge.MYSQL_51,
-							IEmbeddableCartridge.POSTGRESQL_84, null, null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("jenkins-client-"),
+							null, null, new CartridgeSelector("jenkins-")),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("phpmyadmin-"),
+							null, new EmbeddableCartridgeSelector("mysql-"), null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("rockmongo-"),
+							null, new EmbeddableCartridgeSelector("mongodb-"), null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("10gen-mms-agent-"),
+							null, new EmbeddableCartridgeSelector("mongodb-"), null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("postgresql-"),
+							new EmbeddableCartridgeSelector("mysql-"), null, null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("mysql-"),
+							new EmbeddableCartridgeSelector("postgresql-"), null, null)
 			};
 
 	private Map<IEmbeddableCartridge, EmbeddableCartridgeRelations> dependenciesByCartridge;
 	private HashMap<IEmbeddableCartridge, Set<IEmbeddableCartridge>> dependantsByCartridge;
 
-	private IDomain domain;
+	private Collection<IEmbeddableCartridge> allEmbeddableCartridges;
+	private Collection<ICartridge> allStandaloneCartridges;
+	private Collection<IApplication> allApplications;
 
-	public EmbedCartridgeStrategy(IDomain domain) {
-		this.domain = domain;
-		initDependencyMaps(dependencies);
+	public EmbedCartridgeStrategy(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
+			Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications) {
+		this.allEmbeddableCartridges = allEmbeddableCartridges;
+		this.allStandaloneCartridges = allStandaloneCartridges;
+		this.allApplications = allApplications;
+		initDependencyMaps(allEmbeddableCartridges, allStandaloneCartridges, dependencies);
 	}
 
-	private void initDependencyMaps(EmbeddableCartridgeRelations... dependencies) {
+	private void initDependencyMaps(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
+			Collection<ICartridge> allCartridges, EmbeddableCartridgeRelations... dependencies) {
 		this.dependenciesByCartridge = new HashMap<IEmbeddableCartridge, EmbeddableCartridgeRelations>();
 
 		this.dependantsByCartridge = new HashMap<IEmbeddableCartridge, Set<IEmbeddableCartridge>>();
 		for (EmbeddableCartridgeRelations dependency : dependencies) {
-			dependenciesByCartridge.put(dependency.getSubject(), dependency);
-			Set<IEmbeddableCartridge> dependants = getDependants(dependency);
-			dependants.add(dependency.getSubject());
+			createDependency(allEmbeddableCartridges, dependency);
+			createDependants(allEmbeddableCartridges, dependency);
 		}
 	}
 
-	private Set<IEmbeddableCartridge> getDependants(EmbeddableCartridgeRelations relation) {
-		Set<IEmbeddableCartridge> dependants = dependantsByCartridge.get(relation.getRequired());
+	protected void createDependants(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
+			EmbeddableCartridgeRelations dependency) {
+		Set<IEmbeddableCartridge> dependants = dependantsByCartridge.get(dependency.getRequired(allEmbeddableCartridges));
 		if (dependants == null) {
-			dependantsByCartridge.put(
-					relation.getRequired(),
-					dependants = new HashSet<IEmbeddableCartridge>());
+			IEmbeddableCartridge dependantCartridge = dependency.getRequired(allEmbeddableCartridges); 
+			if (dependantCartridge != null) {
+				dependantsByCartridge.put(
+						dependantCartridge,
+						dependants = new HashSet<IEmbeddableCartridge>());
+			}
 		}
-		return dependants;
+		if (dependants != null) {
+			dependants.add(dependency.getSubject(allEmbeddableCartridges));
+		}
+	}
+
+	protected void createDependency(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
+			EmbeddableCartridgeRelations dependency) {
+		IEmbeddableCartridge requiringCartridge = dependency.getSubject(allEmbeddableCartridges);
+		dependenciesByCartridge.put(requiringCartridge, dependency);
 	}
 
 	public EmbeddableCartridgeDiff add(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges)
 			throws OpenShiftException {
 		EmbeddableCartridgeDiff cartridgeDiff = new EmbeddableCartridgeDiff(cartridge);
-		add(cartridge, currentCartridges, cartridgeDiff);
+		add(cartridge, currentCartridges, cartridgeDiff, allEmbeddableCartridges, allStandaloneCartridges, allApplications);
 		return cartridgeDiff;
 	}
 
 	private void add(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges,
-			EmbeddableCartridgeDiff diff)
+			EmbeddableCartridgeDiff diff, Collection<IEmbeddableCartridge> allEmbeddableCartridges,
+			Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications)
 			throws OpenShiftException {
 		EmbeddableCartridgeRelations relation = dependenciesByCartridge.get(cartridge);
 		if (relation == null) {
 			return;
 		}
-		removeConflicting(currentCartridges, diff, relation);
-		addRequired(currentCartridges, diff, relation.getRequired());
-		addRequiredApplication(diff, relation);
+		removeConflicting(currentCartridges, diff, relation, allEmbeddableCartridges);
+		addRequired(currentCartridges, diff, relation.getRequired(allEmbeddableCartridges), allEmbeddableCartridges);
+		addRequiredApplication(diff, relation, allStandaloneCartridges, allApplications);
 	}
 
 	private void addRequired(Set<IEmbeddableCartridge> currentCartridges, EmbeddableCartridgeDiff diff,
-			IEmbeddableCartridge requiredCartridge) throws OpenShiftException {
+			IEmbeddableCartridge requiredCartridge, Collection<IEmbeddableCartridge> allEmbeddableCartridges) throws OpenShiftException {
 		if (requiredCartridge != null
 				&& !currentCartridges.contains(requiredCartridge)) {
 			// recurse
-			add(requiredCartridge, currentCartridges, diff);
+			add(requiredCartridge, currentCartridges, diff, allEmbeddableCartridges, allStandaloneCartridges, allApplications);
 			diff.addAddition(requiredCartridge);
 		}
 	}
 
 	private void addRequiredApplication(EmbeddableCartridgeDiff diff,
-			EmbeddableCartridgeRelations relation) throws OpenShiftException {
-		if (relation.getRequiredApplication() != null
-				&& !domain.hasApplicationByCartridge(relation.getRequiredApplication())) {
-			diff.addApplicationAddition(relation.getRequiredApplication());
+			EmbeddableCartridgeRelations relation, Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications) throws OpenShiftException {
+		ICartridge requiredCartridge = relation.getRequiredApplication(allStandaloneCartridges);
+		if (requiredCartridge != null
+				&& !containsApplicationByCartridge(requiredCartridge, allApplications)) {
+			diff.addApplicationAddition(requiredCartridge);
 		}
 	}
 
+	private boolean containsApplicationByCartridge(ICartridge cartridge, Collection<IApplication> applications) {
+		for(IApplication application : applications) {
+			if (cartridge.equals(application.getCartridge())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void removeConflicting(Set<IEmbeddableCartridge> currentCartridges, EmbeddableCartridgeDiff cartridgeDiff,
-			EmbeddableCartridgeRelations relation) throws OpenShiftException {
-		IEmbeddableCartridge conflictingCartridge = relation.getConflicting();
+			EmbeddableCartridgeRelations relation, Collection<IEmbeddableCartridge> allEmbeddableCartridges) throws OpenShiftException {
+		IEmbeddableCartridge conflictingCartridge = relation.getConflicting(allEmbeddableCartridges);
 		if (conflictingCartridge != null) {
 			remove(conflictingCartridge, currentCartridges, cartridgeDiff);
 			if (currentCartridges.contains(conflictingCartridge)) {
@@ -153,35 +182,43 @@ public class EmbedCartridgeStrategy {
 
 	private static class EmbeddableCartridgeRelations {
 
-		private IEmbeddableCartridge subject;
-		private IEmbeddableCartridge conflicting;
-		private IEmbeddableCartridge required;
-		private ICartridge requiredApplication;
+		private EmbeddableCartridgeSelector subject;
+		private EmbeddableCartridgeSelector conflicting;
+		private EmbeddableCartridgeSelector required;
+		private CartridgeSelector requiredApplication;
 
-		protected EmbeddableCartridgeRelations(IEmbeddableCartridge cartridge,
-				IEmbeddableCartridge conflicting, IEmbeddableCartridge required, ICartridge requiredApplication) {
-			this.subject = cartridge;
+		protected EmbeddableCartridgeRelations(EmbeddableCartridgeSelector cartridgeSelector,
+				EmbeddableCartridgeSelector conflicting, EmbeddableCartridgeSelector required, CartridgeSelector requiredApplication) {
+			this.subject = cartridgeSelector;
 			this.conflicting = conflicting;
 			this.required = required;
 			this.requiredApplication = requiredApplication;
 		}
 
-		protected IEmbeddableCartridge getSubject() {
-			return subject;
+		protected IEmbeddableCartridge getSubject(Collection<IEmbeddableCartridge> allEmbeddableCartridges) {
+			return subject.getCartridge(allEmbeddableCartridges);
 		}
 
-		protected IEmbeddableCartridge getConflicting() {
-			return conflicting;
+		protected IEmbeddableCartridge getConflicting(Collection<IEmbeddableCartridge> allEmbeddableCartridges) {
+			if (conflicting == null) {
+				return null;
+			}
+			return conflicting.getCartridge(allEmbeddableCartridges);
 		}
 
-		protected IEmbeddableCartridge getRequired() {
-			return required;
+		protected IEmbeddableCartridge getRequired(Collection<IEmbeddableCartridge> allEmbeddableCartridges) {
+			if (required == null) {
+				return null;
+			}
+			return required.getCartridge(allEmbeddableCartridges);
 		}
 
-		protected ICartridge getRequiredApplication() {
-			return requiredApplication;
+		protected ICartridge getRequiredApplication(Collection<ICartridge> allCartridges) {
+			if (requiredApplication == null) {
+				return null;
+			}
+			return requiredApplication.getCartridge(allCartridges);
 		}
-
 	}
 
 	public static class EmbeddableCartridgeDiff {
@@ -245,4 +282,53 @@ public class EmbedCartridgeStrategy {
 		}
 	}
 
+	private static class EmbeddableCartridgeSelector {
+
+		private String nameStartsWith;
+
+		private EmbeddableCartridgeSelector(String nameStartsWith) {
+			this.nameStartsWith = nameStartsWith;
+		}
+
+		private IEmbeddableCartridge getCartridge(Collection<IEmbeddableCartridge> embeddableCartridges) {
+			if (embeddableCartridges == null
+					|| embeddableCartridges.isEmpty()) {
+				return null;
+			}
+			
+			for(IEmbeddableCartridge cartridge : embeddableCartridges) {
+				if (cartridge.getName() != null
+						&& cartridge.getName().startsWith(nameStartsWith)) {
+					return cartridge;
+				}
+			}
+			return null;
+		}
+		
+	}
+	
+	private static class CartridgeSelector {
+
+		private String nameStartsWith;
+
+		private CartridgeSelector(String nameStartsWith) {
+			this.nameStartsWith = nameStartsWith;
+		}
+
+		private ICartridge getCartridge(Collection<ICartridge> cartridges) {
+			if (cartridges == null
+					|| cartridges.isEmpty()) {
+				return null;
+			}
+			
+			for(ICartridge cartridge : cartridges) {
+				if (cartridge.getName() != null
+						&& cartridge.getName().startsWith(nameStartsWith)) {
+					return cartridge;
+				}
+			}
+			return null;
+		}
+		
+	}
 }

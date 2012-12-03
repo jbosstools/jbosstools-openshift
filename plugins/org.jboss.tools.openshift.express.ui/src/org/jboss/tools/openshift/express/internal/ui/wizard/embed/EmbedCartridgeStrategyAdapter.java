@@ -39,8 +39,10 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -70,30 +72,30 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		try {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-			EmbeddableCartridgeDiff diff = null;
-			EmbedCartridgeStrategy embedCartridgeStrategy = new EmbedCartridgeStrategy(pageModel.getDomain());
-			diff = createEmbeddableCartridgeDiff(event.getChecked(), cartridge, embedCartridgeStrategy);
+			IDomain domain = pageModel.getDomain();
+			IOpenShiftConnection connection = domain.getUser().getConnection();
+			EmbedCartridgeStrategy embedCartridgeStrategy =
+					new EmbedCartridgeStrategy(
+							connection.getEmbeddableCartridges(),
+							connection.getStandaloneCartridges(), 
+							domain.getApplications());
+			EmbeddableCartridgeDiff diff = createEmbeddableCartridgeDiff(event.getChecked(), cartridge, embedCartridgeStrategy);
 
 			if (diff.hasChanges()) {
-				if (MessageDialog
-						.openQuestion(getShell(),
-								NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
-								createEmbeddingOperationMessage(event.getChecked(), diff))) {
-					if (createApplications(diff.getApplicationAdditions())) {
-						unselectEmbeddableCartridges(diff.getRemovals());
-						selectEmbeddableCartridges(diff.getAdditions());
-					} else {
-						pageModel.unselectEmbeddedCartridges(cartridge);
-					}
-				} else {
-					if (event.getChecked()) {
-						pageModel.unselectEmbeddedCartridges(cartridge);
-					} else {
-						pageModel.selectEmbeddedCartridges(cartridge);
-					}
+				int result = openAdditionalOperationsDialog(
+						NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
+						createEmbeddingOperationMessage(event.getChecked(), diff));
+				switch (result) {
+				case 1:
+					executeAdditionOperations(cartridge, diff);
+					break;
+				case 0:
+					dontExecuteAnyOperation(event, cartridge);
+					break;
+				case 2:
+					// user has chosen to ignore additional requirements
 				}
 			}
-
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		} catch (SocketTimeoutException e) {
@@ -111,9 +113,16 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
+	public int openAdditionalOperationsDialog(String title, String message) {
+		MessageDialog dialog = new MessageDialog(getShell(),
+				title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, 0);
+		return dialog.open();
+	}
+	
 	private String createEmbeddingOperationMessage(boolean adding, EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(NLS.bind("If you want {0} {1}, you also have to:", adding ? "add" : "remove",
+		builder.append(NLS.bind("If you want to {0} {1}, it is suggested you:", 
+				adding ? "add" : "remove",
 				new EmbeddableCartridgeToStringConverter().toString(diff.getCartridge())));
 		if (diff.hasApplicationAdditions()) {
 			builder.append(NLS.bind("\n- Create {0}",
@@ -127,8 +136,26 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			builder.append(NLS.bind("\n- Add {0}",
 					StringUtils.toString(diff.getAdditions(), new EmbeddableCartridgeToStringConverter())));
 		}
-		builder.append("\n\nShall we proceed with these modifications?");
+		builder.append("\n\nDo you want to Apply or Ignore these suggestions??");
 		return builder.toString();
+	}
+
+	protected void executeAdditionOperations(IEmbeddableCartridge cartridge, EmbeddableCartridgeDiff diff)
+			throws SocketTimeoutException {
+		if (createApplications(diff.getApplicationAdditions())) {
+			unselectEmbeddableCartridges(diff.getRemovals());
+			selectEmbeddableCartridges(diff.getAdditions());
+		} else {
+			pageModel.unselectEmbeddedCartridges(cartridge);
+		}
+	}
+
+	private void dontExecuteAnyOperation(CheckStateChangedEvent event, IEmbeddableCartridge cartridge) throws SocketTimeoutException, OpenShiftException {
+		if (event.getChecked()) {
+			pageModel.unselectEmbeddedCartridges(cartridge);
+		} else {
+			pageModel.selectEmbeddedCartridges(cartridge);
+		}
 	}
 
 	private void unselectEmbeddableCartridges(List<IEmbeddableCartridge> removals) throws SocketTimeoutException,
