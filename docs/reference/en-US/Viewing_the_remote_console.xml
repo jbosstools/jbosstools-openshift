@@ -19,6 +19,22 @@
 		</mediaobject>
 	</figure>
 	<para>
+		The dialog that opens allows you to modify the tail options. A default tail command will be present and you can always revert back to it by pressing the <guibutton>Reset</guibutton> button. Once you have completed setting the tail options you wish, click the <guibutton>Finish</guibutton> button.
+	</para>
+	<figure id="openshift_remote_console_01b">
+		<title>Tailing OpenShift server files option</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/OpenShift_Remote_Console/openshift_remote_console_01b.png" format="PNG" />
+			</imageobject>
+			<textobject>
+				<phrase>
+					Selecting OpenShift server console viewing.
+				</phrase>
+			</textobject>
+		</mediaobject>
+	</figure>
+	<para>
 		A new tab will open called <guilabel>Console</guilabel> and display the last 100 lines of the servers <filename>boot.log</filename> and <filename>server.log</filename> files. This <guilabel>Console</guilabel> tab will now tail the content of these files on the server, outputing any updates to you, as they occur.
 	</para>
 	<figure id="openshift_remote_console_02">
