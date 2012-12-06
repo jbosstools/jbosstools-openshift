@@ -40,6 +40,11 @@
 	<para>
 		If you do not have an OpenShift account, you can create one through the link at the top of the wizard screen. This will open the OpenShift sign-up page within your workbench. Once you have created an account you will need to relaunch the <guilabel>OpenShift Application</guilabel> wizard and input your new username and password.
 	</para>
+	<note>
+		<para>
+			If you have a local OpenShift Cloud instance you can choose to connect to it instead by either selecting it from the available defined connections in the <guilabel>Connection</guilabel> list, or by deselecting the <guilabel>Use default server</guilabel> option and specifying your own in the <guilabel>Server</guilabel> field. 
+		</para>
+	</note>
 	<figure id="application_creation_03">
 		<title>Creating a domain</title>
 		<mediaobject>
@@ -54,7 +59,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		If you need to create a domain, type the name you wish to have into the <guilabel>Domain name</guilabel> field. You will also need to provide your public SSH key. Ensure that the paired private key is listed within the SSH2 Preferences. If you are unsure, click the <guilabel>SSH2 Preferences</guilabel> link. Click <guibutton>Finish</guibutton> to complete domain creation.
+		If you need to create a domain, type the name you wish to have into the <guilabel>Domain name</guilabel> field. You will also need to ensure your public SSH key is provided and listed within the SSH2 Preferences. If you are unsure, click the <guilabel>SSH2 keys wizard</guilabel> link. Click <guibutton>Finish</guibutton> to complete domain creation.
 	</para>
 	<para>
 		If you already have a domain name then you will not see the <guilabel>Domain Creation</guilabel> screen.

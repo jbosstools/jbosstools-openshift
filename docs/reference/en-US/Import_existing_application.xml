@@ -19,7 +19,7 @@
 		</mediaobject>
 	</figure>
 	<para>
-		Enter your OpenShift credentials and click the <guibutton>Next</guibutton> button.
+		Select your OpenShift server, enter your OpenShift credentials and click the <guibutton>Next</guibutton> button.
 	</para>
 	<figure id="application_creation_02-import_existing_application">
 		<title>Input OpenShift credentials</title>
