@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2013 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -23,6 +24,7 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
@@ -32,12 +34,15 @@ import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.ToStringConverter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -67,27 +72,30 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		try {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-			EmbeddableCartridgeDiff diff = null;
-			EmbedCartridgeStrategy embedCartridgeStrategy = new EmbedCartridgeStrategy(pageModel.getDomain());
-			diff = createEmbeddableCartridgeDiff(event.getChecked(), cartridge, embedCartridgeStrategy);
+			IDomain domain = pageModel.getDomain();
+			IOpenShiftConnection connection = domain.getUser().getConnection();
+			EmbedCartridgeStrategy embedCartridgeStrategy =
+					new EmbedCartridgeStrategy(
+							connection.getEmbeddableCartridges(),
+							connection.getStandaloneCartridges(), 
+							domain.getApplications());
+			EmbeddableCartridgeDiff diff = createEmbeddableCartridgeDiff(event.getChecked(), cartridge, embedCartridgeStrategy);
 
 			if (diff.hasChanges()) {
-				if (MessageDialog
-						.openQuestion(getShell(),
-								NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
-								createEmbeddingOperationMessage(event.getChecked(), diff))) {
-					createApplications(diff.getApplicationAdditions());
-					unselectEmbeddableCartridges(diff.getRemovals());
-					selectEmbeddableCartridges(diff.getAdditions());
-				} else {
-					if (event.getChecked()) {
-						pageModel.unselectEmbeddedCartridges(cartridge);
-					} else {
-						pageModel.selectEmbeddedCartridges(cartridge);
-					}
+				int result = openAdditionalOperationsDialog(
+						NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
+						createEmbeddingOperationMessage(event.getChecked(), diff));
+				switch (result) {
+				case 1:
+					executeAdditionOperations(cartridge, diff);
+					break;
+				case 0:
+					dontExecuteAnyOperation(event, cartridge);
+					break;
+				case 2:
+					// user has chosen to ignore additional requirements
 				}
 			}
-
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		} catch (SocketTimeoutException e) {
@@ -105,9 +113,16 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
+	public int openAdditionalOperationsDialog(String title, String message) {
+		MessageDialog dialog = new MessageDialog(getShell(),
+				title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, 0);
+		return dialog.open();
+	}
+	
 	private String createEmbeddingOperationMessage(boolean adding, EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(NLS.bind("If you want {0} {1}, you also have to:", adding ? "add" : "remove",
+		builder.append(NLS.bind("If you want to {0} {1}, it is suggested you:", 
+				adding ? "add" : "remove",
 				new EmbeddableCartridgeToStringConverter().toString(diff.getCartridge())));
 		if (diff.hasApplicationAdditions()) {
 			builder.append(NLS.bind("\n- Create {0}",
@@ -121,8 +136,26 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			builder.append(NLS.bind("\n- Add {0}",
 					StringUtils.toString(diff.getAdditions(), new EmbeddableCartridgeToStringConverter())));
 		}
-		builder.append("\n\nShall we proceed with these modifications?");
+		builder.append("\n\nDo you want to Apply or Ignore these suggestions??");
 		return builder.toString();
+	}
+
+	protected void executeAdditionOperations(IEmbeddableCartridge cartridge, EmbeddableCartridgeDiff diff)
+			throws SocketTimeoutException {
+		if (createApplications(diff.getApplicationAdditions())) {
+			unselectEmbeddableCartridges(diff.getRemovals());
+			selectEmbeddableCartridges(diff.getAdditions());
+		} else {
+			pageModel.unselectEmbeddedCartridges(cartridge);
+		}
+	}
+
+	private void dontExecuteAnyOperation(CheckStateChangedEvent event, IEmbeddableCartridge cartridge) throws SocketTimeoutException, OpenShiftException {
+		if (event.getChecked()) {
+			pageModel.unselectEmbeddedCartridges(cartridge);
+		} else {
+			pageModel.selectEmbeddedCartridges(cartridge);
+		}
 	}
 
 	private void unselectEmbeddableCartridges(List<IEmbeddableCartridge> removals) throws SocketTimeoutException,
@@ -139,17 +172,23 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
-	private void createApplications(List<ICartridge> applicationAdditions) {
+	private boolean createApplications(List<ICartridge> applicationAdditions) {
 		for (ICartridge cartridge : applicationAdditions) {
 			if (!ICartridge.JENKINS_14.equals(cartridge)) {
 				throw new UnsupportedOperationException("only jenkins applications may currently be created.");
 			}
-			createJenkinsApplication(cartridge);
+			if (!createJenkinsApplication(cartridge)) {
+				return false;
+			}
 		}
+		return true;
 	}
 
-	private void createJenkinsApplication(final ICartridge cartridge) {
+	private boolean createJenkinsApplication(final ICartridge cartridge) {
 		final String name = openJenkinsApplicationDialog();
+		if (name == null) {
+			return false;
+		}
 		try {
 			CreateApplicationJob createJob =
 					new CreateApplicationJob(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE,
@@ -157,18 +196,20 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 
-			if (createJob.getResult().isOK()) {
+			if (JobUtils.isOk(createJob.getResult())) {
 				IApplication application = createJob.getApplication();
 				openLogDialog(application);
 
 				AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
-				WizardUtils.runInWizard(
+				IStatus waitStatus = WizardUtils.runInWizard(
 						job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
+				return JobUtils.isOk(waitStatus);
 			}
 
 		} catch (Exception e) {
 			// ignore
 		}
+		return false;
 	}
 
 	private String openJenkinsApplicationDialog() {
