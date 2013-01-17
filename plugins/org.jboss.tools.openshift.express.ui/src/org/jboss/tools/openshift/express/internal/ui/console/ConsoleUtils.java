@@ -11,13 +11,13 @@
 package org.jboss.tools.openshift.express.internal.ui.console;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
@@ -92,6 +92,15 @@ public class ConsoleUtils {
 		return console;
 	}
 
+	public static void displayConsoleView(IServer server) {
+		MessageConsole console = findMessageConsole(server.getId());
+		if (console == null) {
+			return;
+		}
+		displayConsoleView(console);
+	}
+
+	
 	/**
 	 * Displays the given console in the consoles view which becomes visible if
 	 * it was not the case before.
@@ -114,6 +123,14 @@ public class ConsoleUtils {
 		}
 	}
 	
+	public static OutputStream getConsoleOutputStream(IServer server) {
+		MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
+		if (console == null) {
+			return null;
+		}
+		return console.newMessageStream();
+	}
+
 	public static void appendGitPushToConsole(IServer server, PushOperationResult result) {
 		appendToConsole(server, getPushResultAsString(result));
 	}
@@ -195,11 +212,8 @@ public class ConsoleUtils {
 			} catch (IOException e) {
 				// ignore 
 			}
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					ConsoleUtils.displayConsoleView(console);
-				}
-			});
+
+			ConsoleUtils.displayConsoleView(console);
 		}
 	}
 }
