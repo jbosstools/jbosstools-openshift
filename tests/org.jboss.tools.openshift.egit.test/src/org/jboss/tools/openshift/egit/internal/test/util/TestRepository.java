@@ -34,10 +34,14 @@ import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.op.DisconnectProviderOperation;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.errors.UnmergedPathException;
@@ -55,6 +59,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 
 /**
@@ -62,6 +67,8 @@ import org.eclipse.jgit.util.SystemReader;
  * 
  */
 public class TestRepository {
+
+	private static final String DEFAULT_USER = "<adietish@jbosstools>";
 
 	Repository repository;
 
@@ -86,6 +93,26 @@ public class TestRepository {
 		workdirPrefix = workdirPrefix.replace('\\', '/');
 		if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
 			workdirPrefix += "/"; //$NON-NLS-1$
+	}
+	
+	/**
+	 * Creates the initial branches etc.
+	 * 
+	 * @throws NoHeadException
+	 * @throws NoMessageException
+	 * @throws UnmergedPathsException
+	 * @throws ConcurrentRefUpdateException
+	 * @throws WrongRepositoryStateException
+	 * @throws GitAPIException
+	 */
+	public void initialCommit() throws NoHeadException, NoMessageException,
+			UnmergedPathsException, ConcurrentRefUpdateException,
+			WrongRepositoryStateException, GitAPIException {
+		new Git(repository).commit()
+				.setAll(true)
+				.setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
+				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER))
+				.setMessage("initial commit").call();
 	}
 
 	private String getWorkdirPrefix(Repository repository) {

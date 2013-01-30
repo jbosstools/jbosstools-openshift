@@ -10,20 +10,27 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
@@ -44,6 +51,7 @@ import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
@@ -552,4 +560,74 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_USERNAME, val);
 		return wc.save(false, new NullProgressMonitor());
 	}
+
+	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
+		try {
+			Repository repo = EGitUtils.checkedGetRepository(project);
+			Set<String> commitable = getCommitableChanges(repo, server, monitor);
+			return commitable.size();
+		} catch (IOException ioe) {
+			throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, "Unable to count commitable resources", ioe));
+		}
+	}
+
+	private static Set<String> getCommitableChanges(Repository repo, IServer server, IProgressMonitor monitor)
+			throws IOException {
+
+		IndexDiff diff = EGitUtils.getIndexChanges(repo, monitor);
+		Set<String> set = new HashSet<String>();
+		if (diff != null) {
+			if (isCommitAddedResources(server))
+				set.addAll(diff.getAdded());
+			if (isCommitChangedResources(server))
+				set.addAll(diff.getChanged());
+			if (isCommitConflictingResources(server))
+				set.addAll(diff.getConflicting());
+			if (isCommitMissingResources(server))
+				set.addAll(diff.getMissing());
+			if (isCommitModifiedResources(server))
+				set.addAll(diff.getModified());
+			if (isCommitRemovedResources(server))
+				set.addAll(diff.getRemoved());
+			if (isCommitUntrackedResources(server))
+				set.addAll(diff.getUntracked());
+		}
+		return set;
+	}
+
+	/*
+	 * Current behaviour is to commit only: added, changed, modified, removed
+	 * 
+	 * These can be customized as properties on the server one day, if we wish,
+	 * such that each server can have custom settings, or, they can be global
+	 * settings
+	 */
+	public static boolean isCommitAddedResources(IServer server) {
+		return true;
+	}
+
+	public static boolean isCommitChangedResources(IServer server) {
+		return true;
+	}
+
+	public static boolean isCommitConflictingResources(IServer server) {
+		return false;
+	}
+
+	public static boolean isCommitMissingResources(IServer server) {
+		return false;
+	}
+
+	public static boolean isCommitModifiedResources(IServer server) {
+		return true;
+	}
+
+	public static boolean isCommitRemovedResources(IServer server) {
+		return true;
+	}
+
+	public static boolean isCommitUntrackedResources(IServer server) {
+		return false;
+	}
+	
 }

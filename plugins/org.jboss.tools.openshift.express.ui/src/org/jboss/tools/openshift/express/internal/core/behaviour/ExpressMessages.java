@@ -9,10 +9,10 @@ public class ExpressMessages extends NLS {
 		// load message values from bundle file
 		NLS.initializeMessages(BUNDLE_NAME, ExpressMessages.class);		
 	}
-	public static String requestCommitAndPushTitle;
-	public static String requestCommitAndPushMsg;
-	public static String requestPushTitle;
-	public static String requestPushMsg;
+	public static String publishTitle;
+	public static String commitAndPushMsg;
+	public static String noChangesPushAnywayMsg;
+	public static String pushCommitsMsg;
 	public static String cannotModifyModules;
 	public static String shareProjectTitle;
 	public static String shareProjectMessage;	

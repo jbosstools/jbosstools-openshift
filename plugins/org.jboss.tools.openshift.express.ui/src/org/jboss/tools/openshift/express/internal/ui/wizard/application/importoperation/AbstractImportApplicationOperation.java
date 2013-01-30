@@ -205,10 +205,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 */
 	protected void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException,
 			OpenShiftException {
-		Repository repository = EGitUtils.getRepository(project);
-		if (repository == null) {
-			throw new OpenShiftException("project {0} is not connected to a git repository.", project.getName());
-		}
+		EGitUtils.checkedGetRepository(project);
 		new AddToIndexOperation(modifiedResources).execute(monitor);
 		EGitUtils.commit(project, monitor);
 	}
