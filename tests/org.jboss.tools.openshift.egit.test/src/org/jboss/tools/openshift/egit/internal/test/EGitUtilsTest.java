@@ -1,9 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.egit.internal.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +27,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.RemoteConfig;
@@ -55,13 +67,15 @@ public class EGitUtilsTest {
 		this.testRepository = new TestRepository(TestUtils.createGitDir(testProject));
 		testRepository.createMockSystemReader(ResourcesPlugin.getWorkspace().getRoot().getLocation());
 		testRepository.setUserAndEmail(GIT_USER, GIT_EMAIL);
-		testRepository.connect(testProject.getProject());
-
+		testRepository.connect(testProject.getProject());	
+		testRepository.initialCommit();
+		
 		this.testProject2 = new TestProject(true);
 
 		this.testRepository2 = new TestRepository(TestUtils.createGitDir(testProject2));
 		testRepository2.setUserAndEmail(GIT_USER, GIT_EMAIL);
 		testRepository2.connect(testProject2.getProject());
+		testRepository2.initialCommit();
 		
 		this.testRepositoryClone = cloneRepository(testRepository);
 	}
@@ -161,7 +175,6 @@ public class EGitUtilsTest {
 				fileContent);
 	}
 	
-
 	@Test(expected=CoreException.class)
 	public void pushFailsOnNonFastForward() throws Exception {
 		String fileName = "a.txt";
@@ -174,6 +187,78 @@ public class EGitUtilsTest {
 		
 		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 		EGitUtils.push(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
+	}
+
+	@Test
+	public void shouldReturnThatCloneIsAhead() throws Exception {
+		assertFalse(EGitUtils.isAhead(testRepositoryClone.getRepository(), Constants.DEFAULT_REMOTE_NAME, null));
+
+		String fileName = "c.txt";
+		String fileContent = "adietish@redhat.com";
+		File file = testRepositoryClone.createFile(fileName, fileContent);
+		testRepositoryClone.addAndCommit(file, "adding a file");
+		
+		assertTrue(EGitUtils.isAhead(testRepositoryClone.getRepository(), Constants.DEFAULT_REMOTE_NAME, null));
+	}
+	
+	@Test
+	public void shouldReturnThatRemoteIsAhead() throws Exception {
+		String fileName = "a.txt";
+		String fileContent = "adietish@redhat.com";
+		File file = testRepository.createFile(fileName, fileContent);
+		testRepository.addAndCommit(file, "adding a file");
+		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+
+		assertTrue(EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null));
+	}
+
+	@Test
+	public void shouldNotBeAheadAfterPush() throws Exception {
+		String fileName = "a.txt";
+		String fileContent = "adietish@redhat.com";
+		File file = testRepository.createFile(fileName, fileContent);
+		testRepository.addAndCommit(file, "adding a file");
+		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+
+		assertTrue(EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null));
+
+		EGitUtils.pushForce(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
+		
+		assertFalse(EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null));	
+	}
+
+	@Test
+	public void shouldReturnThatCloneIsAheadOfRemote() throws Exception {
+		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+		new Git(testRepositoryClone.getRepository()).push().setRemote(REPO2_REMOTE_NAME).setForce(true).call();
+		assertFalse(EGitUtils.isAhead(testRepositoryClone.getRepository(), REPO2_REMOTE_NAME, null));
+
+		String fileName = "c.txt";
+		String fileContent = "adietish@redhat.com";
+		File file = testRepositoryClone.createFile(fileName, fileContent);
+		testRepositoryClone.addAndCommit(file, "adding a file");
+		assertTrue(EGitUtils.isAhead(testRepositoryClone.getRepository(), REPO2_REMOTE_NAME, null));
+		
+		new Git(testRepositoryClone.getRepository()).push().setForce(true).call();
+		assertTrue(EGitUtils.isAhead(testRepositoryClone.getRepository(), REPO2_REMOTE_NAME, null));
+	}
+
+	@Test
+	public void shouldUserFetchSpecInConfig() throws Exception {
+		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
+
+		// add custom fetch-spec in config (fetch = refs/heads/master:refs/remotes/bingo/master)
+		StoredConfig config = testRepository.getRepository().getConfig();
+		config.getString(ConfigConstants.CONFIG_KEY_REMOTE, REPO2_REMOTE_NAME, "fetch");
+		String remoteTrackingBranchRef = "refs/remotes/bingo/master"; 
+		String fetchSpec = "refs/heads/master:" + remoteTrackingBranchRef;
+		config.setString(ConfigConstants.CONFIG_KEY_REMOTE, REPO2_REMOTE_NAME, "fetch", fetchSpec);
+		config.save();
+
+		EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null);
+
+		// was remote tracking branch created?
+		assertTrue(testRepository.getRepository().getAllRefs().containsKey(remoteTrackingBranchRef));
 	}
 
 	@Test

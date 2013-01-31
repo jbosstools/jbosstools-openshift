@@ -116,9 +116,7 @@ public class ConfigureGitSharedProject extends AbstractImportApplicationOperatio
 
 	private void addRemote(String remoteName, String uuid, IProject project)
 			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException {
-		Repository repository = EGitUtils.getRepository(project);
-		Assert.isTrue(repository != null);
-
+		Repository repository = EGitUtils.checkedGetRepository(project);
 		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
 		if (config != null) {
 			if (EGitUtils.hasRemoteUrl(
