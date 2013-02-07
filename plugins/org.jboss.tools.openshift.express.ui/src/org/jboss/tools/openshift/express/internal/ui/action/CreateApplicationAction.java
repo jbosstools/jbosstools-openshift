@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
@@ -34,15 +34,12 @@ public class CreateApplicationAction extends AbstractAction {
 
 	@Override
 	public void run() {
-		if (selection != null && selection instanceof ITreeSelection) {
-			Object sel = ((ITreeSelection) selection).getFirstElement();
-			if (sel instanceof Connection) {
-				final Connection user = (Connection) sel;
-				if(user.connect()) {
-					final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(user);
-					final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
-					wizardDialog.open();
-				}
+		Connection connection = OpenShiftExplorerUtils.getConnectionFor(selection);
+		if (connection != null) {
+			if (connection.connect()) {
+				final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(connection);
+				final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
+				wizardDialog.open();
 			}
 		}
 	}

@@ -12,14 +12,15 @@ package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -29,9 +30,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -73,18 +76,17 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 
@@ -97,41 +99,35 @@ public class ExpressDetailsComposite {
 	protected IServerModeUICallback callback;
 
 	// Widgets
-	private ModifyListener remoteModifyListener,
-			appModifyListener, deployProjectModifyListener, deployDestinationModifyListener;
 	private Composite composite;
 	private Link importLink;
 	private ComboViewer connectionComboViewer;
+	private ComboViewer applicationComboViewer;
+	private ComboViewer deployProjectComboViewer;
 	protected Text remoteText;
 	protected Text deployFolderText;
-	protected Combo appNameCombo, deployProjectCombo;
 	protected Button browseDestButton;
-	protected boolean showVerify, showImportLink;
 
 	// Data / Model
-	private String app, remote, deployProject, deployFolder;
-	private IApplication fapplication;
+	private String remote, deployFolder;
+	private IProject deployProject;
+	private IApplication application;
 	private Connection connection;
-	private IDomain fdomain;
-	private List<IApplication> appList;
-	private String[] appListNames = new String[0];
+	private List<IApplication> applications;
 	private IServerWorkingCopy server;
-	private HashMap<IApplication, IProject[]> projectsPerApp = new HashMap<IApplication, IProject[]>();
+	private Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
 
-	public ExpressDetailsComposite(Composite fill, IServerModeUICallback callback, boolean showVerify) {
+	public ExpressDetailsComposite(Composite container, IServerModeUICallback callback) {
 		this.callback = callback;
 		this.server = callback.getServer();
-		this.composite = fill;
-		this.showVerify = showVerify;
-		this.showImportLink = showVerify;
+		this.composite = container;
 		try {
 			initModel();
-			createWidgets(fill);
+			createWidgets(container);
 			fillWidgets();
-			addListeners();
-			updateErrorMessage();
+			updateWidgets();
 		} catch (RuntimeException e) {
-			e.printStackTrace();
+			OpenShiftUIActivator.log(e);
 			throw e;
 		}
 	}
@@ -141,108 +137,55 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel() {
-		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
-		if (connectionUrl == null) {
-			initModelNewServerWizard();
-			return;
+		this.connection = ExpressServerUtils.getConnection(callback);
+		if (connection == null) {
+			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 		}
-		
-		this.connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
-		this.app = ExpressServerUtils.getExpressApplicationName(server);
-		this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
+		updateModel(connection);
+
+		this.application = ExpressServerUtils.getApplication(callback);
+
 		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
+		if (deployFolder == null) {
+			this.deployFolder = ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT;
+		}
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
 	}
 
-	private void initModelNewServerWizard() {
-		// We're in a new server wizard.
-		Connection tmpConnection = (Connection) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_CONNECTION);
-		IApplication app = (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
-
-		if (tmpConnection != null && app != null) {
-			// started from express console with a user and an app
-			this.app = app.getName();
-			updateModel(tmpConnection);
-			updateErrorMessage();
-			showVerify = false;
-			IProject[] p = projectsPerApp.get(app);
-			showImportLink = p == null || p.length == 0;
-		} else {
-			// we may or may not have a user, clearly no app
-			if( tmpConnection == null )
-				tmpConnection = ConnectionsModelSingleton.getInstance().getRecentConnection();
-			updateModel(tmpConnection);
-		}
-
-		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
-		this.deployFolder = this.deployFolder == null ? ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT
-				: this.deployFolder;
-		this.remote = ExpressServerUtils.getExpressRemoteName(server);
-		this.remote = this.remote == null ? ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT : this.remote;
-	}
-
-	/* Set widgets initial values */
 	private void fillWidgets() {
 		connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
-		if (connection != null) {
-			selectComboConnection(connection);
-			connectionComboViewer.getControl().setEnabled(showVerify);
-		}
+		selectConnectionCombo(connection);
+		applicationComboViewer.setInput(applications);
+		selectApplicationCombo(application);
+		setDeployProjectComboInput(application);
+		selectDeployProjectCombo(application);
+
 		if (remote != null) {
 			remoteText.setText(remote);
 		}
-		appNameCombo.setItems(appListNames);
-		if (app != null) {
-			appNameCombo.setEnabled(false);
-			appNameCombo.setItems(new String[] { app });
-			appNameCombo.select(0);
-			if (fapplication != null) {
-				resetDeployProjectCombo();
-			} else {
-				this.deployProject = ExpressServerUtils.getExpressDeployProject(server);
-				if (deployProject != null) {
-					this.deployProjectCombo.setItems(new String[] { deployProject });
-					this.deployProjectCombo.select(0);
-					this.deployProjectCombo.setEnabled(false);
-				} else {
-					this.browseDestButton.setEnabled(false);
-				}
-			}
+
+		if (deployFolder != null) {
+			deployFolderText.setText(deployFolder);
 		}
 
-		deployFolderText.setText(deployFolder);
-		remoteText.setText(remote);
-	}
-
-	private void resetDeployProjectCombo() {
-		IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
-		String[] names = p == null ? new String[0] : new String[p.length];
-		for (int i = 0; i < names.length; i++) {
-			names[i] = p[i].getName();
-		}
-		this.deployProjectCombo.setItems(names);
-		if (names.length > 0) {
-			deployProjectCombo.select(0);
-			deployProjectChanged(names[0]);
-//			this.deployProject = names[0];
-//			browseDestButton.setEnabled(true);
-//		} else {
-//			browseDestButton.setEnabled(false);
-		}
 	}
 
 	private void createWidgets(Composite composite) {
 		GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(false).applyTo(composite);
+
+		// connection
 		Label connectionLabel = new Label(composite, SWT.NONE);
 		connectionLabel.setText("Connection:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
+
 		Combo connectionCombo = new Combo(composite, SWT.DEFAULT);
 		this.connectionComboViewer = new ComboViewer(connectionCombo);
 		connectionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		connectionComboViewer.setLabelProvider(new ConnectionColumLabelProvider());
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionCombo);
+		connectionComboViewer.addSelectionChangedListener(onConnectionSelected());
 
 		Button newConnectionButton = new Button(composite, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -250,40 +193,57 @@ public class ExpressDetailsComposite {
 		newConnectionButton.setText("New...");
 		newConnectionButton.addSelectionListener(onNewConnection());
 
+		// application
 		Label appNameLabel = new Label(composite, SWT.NONE);
+		appNameLabel.setText("Application Name: ");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
-		appNameCombo = new Combo(composite, SWT.READ_ONLY);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameCombo);
-		appNameLabel.setText("Application Name: ");
 
+		this.applicationComboViewer = new ComboViewer(new Combo(composite, SWT.DEFAULT));
+		applicationComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		applicationComboViewer.setLabelProvider(new ApplicationColumnLabelProvider());
+		GridDataFactory.fillDefaults()
+				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(applicationComboViewer.getControl());
+		applicationComboViewer.addSelectionChangedListener(onApplicationChanged());
+
+		// deploy project
 		Label deployLocationLabel = new Label(composite, SWT.NONE);
-		deployProjectCombo = new Combo(composite, SWT.READ_ONLY);
+		this.deployProjectComboViewer = new ComboViewer(new Combo(composite, SWT.DEFAULT));
+		deployProjectComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		deployProjectComboViewer.setLabelProvider(new ColumnLabelProvider() {
+
+			@Override
+			public String getText(Object element) {
+				if (!(element instanceof IProject)) {
+					return super.getText(element);
+				}
+				return ((IProject) element).getName();
+			}
+		});
 		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
+				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectComboViewer.getControl());
 		deployLocationLabel.setText("Deploy Project: ");
+		deployProjectComboViewer.addSelectionChangedListener(onDeployProjectSelected());
 
-		if (showImportLink) {
-			importLink = new Link(composite, SWT.None);
-			importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
-			// if we show verify, start import link disabled (wait for verify
-			// pressed to enable)
-			// Otherwise, not showing verify means we're inside new wizard
-			// fragment with no suitable projects
-			importLink.setEnabled(!showVerify);
-			GridDataFactory.fillDefaults()
-					.span(3, 1).applyTo(importLink);
-		}
+		// import
+		importLink = new Link(composite, SWT.None);
+		importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
+		GridDataFactory.fillDefaults()
+				.span(3, 1).applyTo(importLink);
+		importLink.addSelectionListener(onImportClicked());
 
+		// remote
 		Label remoteLabel = new Label(composite, SWT.NONE);
+		remoteLabel.setText("Remote: ");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		remoteText.setEditable(false);
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
+		remoteText.addModifyListener(onRemoteModified());
 
 		Group projectSettings = new Group(composite, SWT.NONE);
+		projectSettings.setText("Project Settings");
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectSettings);
 		projectSettings.setLayout(new GridLayout(2, false));
@@ -297,12 +257,11 @@ public class ExpressDetailsComposite {
 		browseDestButton = new Button(zipDestComposite, SWT.PUSH);
 		browseDestButton.setText("Browse...");
 		browseDestButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
+		browseDestButton.addSelectionListener(onBrowseDeployFolder(deployFolderText));
+
 		deployFolderText = new Text(zipDestComposite, SWT.SINGLE | SWT.BORDER);
 		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDestButton, -5));
-
-		// Text
-		projectSettings.setText("Project Settings");
-		remoteLabel.setText("Remote: ");
+		deployFolderText.addModifyListener(onDeployFolderModified());
 	}
 
 	private SelectionListener onNewConnection() {
@@ -318,7 +277,7 @@ public class ExpressDetailsComposite {
 					connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
 					final Connection selectedConnection =
 							ConnectionsModelSingleton.getInstance().getRecentConnection();
-					selectComboConnection(selectedConnection);
+					selectConnectionCombo(selectedConnection);
 				}
 			}
 		};
@@ -330,128 +289,111 @@ public class ExpressDetailsComposite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Connection connection = UIUtils.getFirstElement(event.getSelection(), Connection.class);
-				if (connection != null) {
-					Job j = new Job("Verifying connection...") {
-						
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							updateModel(connection);
-							return Status.OK_STATUS;
-						}
-					};
-					callback.executeLongRunning(j);
-					updateWidgets();
-					updateErrorMessage();
+				if (connection == null ||
+						(ExpressDetailsComposite.this.connection != null
+						&& ExpressDetailsComposite.this.connection.equals(connection))) {
+					return;
 				}
+
+				Job j = new Job("Verifying connection...") {
+
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						updateModel(connection);
+						return Status.OK_STATUS;
+					}
+				};
+				callback.executeLongRunning(j);
+				updateWidgets();
+				updateErrorMessage();
 			}
 		};
 	}
 
-	private void addListeners() {
-		connectionComboViewer.addSelectionChangedListener(onConnectionSelected());
-
-		remoteModifyListener = new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				remote = remoteText.getText();
-			}
-		};
-		remoteText.addModifyListener(remoteModifyListener);
-
-		if (appNameCombo != null) {
-			appModifyListener = new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					app = appNameCombo.getText();
-					int ind = appNameCombo.indexOf(app);
-					if (ind != -1) {
-						fapplication = appList.get(ind);
-					}
-					resetDeployProjectCombo();
-					enableImportLink();
-					updateErrorMessage();
-				}
-			};
-			appNameCombo.addModifyListener(appModifyListener);
-		}
-
-		if (deployProjectCombo != null) {
-			deployProjectModifyListener = new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-//					deployProject = deployProjectCombo.getText();
-					deployProjectChanged(deployProjectCombo.getText());
-				}
-			};
-			deployProjectCombo.addModifyListener(deployProjectModifyListener);
-		}
-		deployDestinationModifyListener = new ModifyListener() {
+	protected ModifyListener onDeployFolderModified() {
+		return new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				deployFolder = deployFolderText.getText();
 			}
 		};
-		deployFolderText.addModifyListener(deployDestinationModifyListener);
+	}
 
-		browseDestButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				browsePressed();
+	protected ModifyListener onRemoteModified() {
+		return new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				remote = remoteText.getText();
 			}
-		});
+		};
+	}
 
-		if (showImportLink) {
-			importLink.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					OpenShiftExpressApplicationWizard wizard =
-							new ImportOpenShiftExpressApplicationWizard(connection, null, fapplication);
-					WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
-					int oldServerCount = ServerCore.getServers().length;
-					dialog.create();
-					dialog.open();
-					if (ServerCore.getServers().length > oldServerCount) {
-						// Cancel this wizard, a server has already been created
-						// This is reeeaally ugly
-						IWizardHandle handle = ((DeploymentTypeUIUtil.NewServerWizardBehaviourCallback) callback)
-								.getHandle();
-						IWizardContainer container = ((WizardPage) handle).getWizard().getContainer();
-						((WizardDialog) container).close();
-					}
+	protected SelectionAdapter onImportClicked() {
+		return new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				OpenShiftExpressApplicationWizard wizard =
+						new ImportOpenShiftExpressApplicationWizard(connection, null, application);
+				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+				int oldServerCount = ServerCore.getServers().length;
+				dialog.create();
+				dialog.open();
+				if (ServerCore.getServers().length > oldServerCount) {
+					// Cancel this wizard, a server has already been created
+					// This is really ugly
+					IWizardHandle handle =
+							((DeploymentTypeUIUtil.NewServerWizardBehaviourCallback) callback).getHandle();
+					IWizardContainer container = ((WizardPage) handle).getWizard().getContainer();
+					((WizardDialog) container).close();
 				}
-			});
-		}
+			}
+		};
+	}
 
-		deployProjectCombo.addSelectionListener(new SelectionAdapter() {
+	private ISelectionChangedListener onDeployProjectSelected() {
+		return new ISelectionChangedListener() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				int index = deployProjectCombo.getSelectionIndex();
-				if (index > -1) {
-					deployProject = deployProjectCombo.getText();
-					deployProjectChanged(deployProject);
-				}
-			}
-		});
-	}
+			public void selectionChanged(SelectionChangedEvent event) {
+				deployProject = UIUtils.getFirstElement(event.getSelection(), IProject.class);
 
-	private void deployProjectChanged(String deployProject) {
-		if (!StringUtils.isEmpty(deployProject)) {
-			IProject depProj = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
-			if (depProj != null && depProj.isAccessible()) {
-				this.deployProject = deployProject;
-				remoteText.setText(getRemote(remote, fapplication, depProj));
-				String depFolder = ExpressServerUtils.getProjectAttribute(depProj,
-						ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
-				if (depFolder != null) {
-					deployFolderText.setText(depFolder.toString());
+				if (deployProject != null
+						&& deployProject.isAccessible()) {
+
+					remoteText.setText(getRemoteConfig(remote, application, deployProject));
+					remoteText.setEnabled(true);
+
+					String deployFolder = ExpressServerUtils.getProjectAttribute(deployProject,
+							ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
+					if (!StringUtils.isEmpty(deployFolder)) {
+						deployFolderText.setText(deployFolder);
+					} else {
+						deployFolderText.setText(ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+					}
+					deployFolderText.setEnabled(!StringUtils.isEmpty(deployFolder));
+
+					browseDestButton.setEnabled(!StringUtils.isEmpty(deployFolder));
 				} else {
-					deployFolderText.setText(ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);	
+					deployFolderText.setEnabled(false);
+					browseDestButton.setEnabled(false);
+					remoteText.setEnabled(false);
 				}
-				deployFolderText.setEnabled(depFolder == null);
-				browseDestButton.setEnabled(depFolder == null);
 			}
-		} else {
-			deployFolderText.setEnabled(false);
-			browseDestButton.setEnabled(false);
-		}
+		};
 	}
 
-	private String getRemote(String remote, IApplication application, IProject project) {
+	private ISelectionChangedListener onApplicationChanged() {
+		return new ISelectionChangedListener() {
+
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				application = UIUtils.getFirstElement(event.getSelection(), IApplication.class);
+				setDeployProjectComboInput(application);
+				selectDeployProjectCombo(application);
+				enableImportLink(application);
+				updateErrorMessage();
+			}
+		};
+	}
+
+	private String getRemoteConfig(String remote, IApplication application, IProject project) {
 		try {
 			Repository repository = EGitUtils.getRepository(project);
 			if (repository == null) {
@@ -465,36 +407,41 @@ public class ExpressDetailsComposite {
 			return remoteConfig.getName();
 		} catch (CoreException e) {
 			OpenShiftUIActivator.log(
-					NLS.bind("Could not get remote pointing to {0} for project {1}", 
-							application.getGitUrl(),project.getName()), e);
+					NLS.bind("Could not get remote pointing to {0} for project {1}",
+							application.getGitUrl(), project.getName()), e);
 			return null;
 		}
 	}
 
-	private void browsePressed() {
-		IFolder f = chooseFolder();
-		if (f != null) {
-			deployFolderText.setText(f.getFullPath().removeFirstSegments(1).makeRelative().toOSString());
-		}
+	private SelectionAdapter onBrowseDeployFolder(final Text deployFolderText) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IFolder f = chooseFolder();
+				if (f != null) {
+					deployFolderText.setText(f.getFullPath().removeFirstSegments(1).makeRelative().toOSString());
+				}
+			}
+		};
 	}
 
 	private IFolder chooseFolder() {
-		if (this.deployProject == null)
+		if (this.deployProject == null) {
 			return null;
-
-		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(this.deployProject);
+		}
 
 		ILabelProvider lp = new WorkbenchLabelProvider();
 		ITreeContentProvider cp = new WorkbenchContentProvider();
 
-		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp,
-				cp);
+		ElementTreeSelectionDialog dialog =
+				new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp, cp);
 		dialog.setTitle("Deploy Location");
 		dialog.setMessage("Please choose a location to put zipped projects");
-		dialog.setInput(p);
+		dialog.setInput(deployProject);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
-		IResource res = p.findMember(new Path(this.deployFolder));
+		IResource res = deployProject.findMember(new Path(this.deployFolder));
 		if (res != null) {
 			dialog.setInitialSelection(res);
 		}
@@ -506,156 +453,156 @@ public class ExpressDetailsComposite {
 	}
 
 	private void updateWidgets() {
-		System.out.println(importLink.getClass().getName());
-		importLink.setEnabled(false);
-		if (connection == null
-				|| !connection.isConnected()) {
-			selectComboConnection(null);
+		if (connection == null) {
+			selectConnectionCombo(null);
 		}
-		populateAppNamesCombo();
-		enableImportLink();
-		resetDeployProjectCombo();
+		setApplicationComboInput(connection);
+		selectApplicationCombo(application);
+		selectDeployProjectCombo(application);
+		enableImportLink(application);
+		updateErrorMessage();
 	}
 
-	private void populateAppNamesCombo() {
-		if (appNameCombo != null && connection != null) {
-			appNameCombo.setItems(appListNames);
-			int index = Arrays.asList(appListNames).indexOf(app);
-			if (index != -1)
-				appNameCombo.select(index);
-			else if ((app == null || "".equals(app)) && appListNames.length > 0) {
-				int select = 0;
-				for (int i = 0; i < appList.size(); i++) {
-					IProject[] p = projectsPerApp.get(appList.get(i));
-					if (p != null && p.length > 0) {
-						select = i;
-						break;
-					}
-				}
-				appNameCombo.select(select);
-			}
+	private void setApplicationComboInput(Connection connection) {
+		if (connection == null) {
+			applicationComboViewer.setInput(Collections.emptyList());
+		} else {
+			applicationComboViewer.setInput(connection.getApplications());
 		}
 	}
 
-	private void enableImportLink() {
-		IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
+	private void enableImportLink(IApplication application) {
+		IProject[] p = ExpressServerUtils.findProjectsForApplication(application);
 		importLink.setEnabled(p == null || p.length == 0);
 	}
 
 	private void updateErrorMessage() {
-		if (!showVerify)
-			return;
 		callback.setErrorMessage(getErrorString());
 	}
 
 	public String getErrorString() {
 		String error = null;
-		if (appList == null) {
+		if (applications == null) {
 			error = "Please select an existing connection or create a new one.";
-		} else if (fdomain == null) {
-			error = "Your OpenShift account has not been configured with a domain.";
-		} else if (app == null || app.equals("")) {
+		} else if (application == null) {
 			error = "Please select an application from the combo below.";
 		} else {
-			IProject[] p = ExpressServerUtils.findProjectsForApplication(fapplication);
+			IProject[] p = ExpressServerUtils.findProjectsForApplication(application);
 			if (p == null || p.length == 0) {
-				error = "Your workspace does not have a project corresponding to " + app + ". Please import one.";
+				error = "Your workspace does not have a project corresponding to " + application.getName()
+						+ ". Please import one.";
 			}
 		}
 		return error;
 	}
 
 	private void updateModel(Connection connection) {
-		if( connection == null )
+		if (connection == null)
 			return;
-		
+
+		this.connection = connection;
+
 		try {
-			// IF we load the applications first, domain gets loaded
-			// automatically
-			this.appList = connection.getApplications();
-			fdomain = connection.getDefaultDomain();
+			this.applications = connection.getApplications();
+			if (applications != null
+					&& applications.size() > 0) {
+				this.application = applications.get(0);
+			}
 		} catch (NotFoundOpenShiftException nfose) {
 			// Credentials work, but no domain, so no applications either
-			this.appList = new ArrayList<IApplication>();
-			fdomain = null;
+			this.applications = new ArrayList<IApplication>();
 		}
-		String[] appNames = getAppNamesAsStrings(appList);
-		int index = Arrays.asList(appNames).indexOf(app);
-		IApplication application = index == -1 ? null : appList.get(index);
-		this.appListNames = appNames == null ? new String[0] : appNames;
-		this.fapplication = application;
-		if (connection.isConnected()) {
-			this.connection = connection;
-		} else {
-			connection = null;
-		}
-		updateProjectsPerApp(appList);
-		IProject[] possibleProjects = projectsPerApp.get(fapplication);
-		this.deployProject =
-				possibleProjects == null || possibleProjects.length == 0 ?
-						null : possibleProjects[0].getName();
 
-		fillServerWithDetails();
+		this.projectsByApplication = createProjectsByApplication(applications);
+
+		fillServerWithDetails(application, remote);
 	}
 
-	private void updateProjectsPerApp(List<IApplication> appList) {
-		projectsPerApp.clear();
-		if (appList != null) {
-			for (int i = 0; i < appList.size(); i++) {
-				projectsPerApp.put(appList.get(i), ExpressServerUtils.findProjectsForApplication(appList.get(i)));
+	private Map<IApplication, IProject[]> createProjectsByApplication(List<IApplication> applications) {
+		Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
+		if (applications != null) {
+			for (int i = 0; i < applications.size(); i++) {
+				projectsByApplication.put(applications.get(i),
+						ExpressServerUtils.findProjectsForApplication(applications.get(i)));
 			}
 		}
-	}
-
-	private String[] getAppNamesAsStrings(List<IApplication> allApps) {
-		if (allApps == null) {
-			return new String[] {};
-		}
-		String[] appNames = new String[allApps.size()];
-		for (int i = 0; i < allApps.size(); i++) {
-			appNames[i] = allApps.get(i).getName();
-		}
-		return appNames;
+		return projectsByApplication;
 	}
 
 	public void finish(IProgressMonitor monitor) throws CoreException {
 		try {
 			ConnectionsModelSingleton.getInstance().addConnection(connection);
 			connection.save();
-			fillServerWithDetails();
+			fillServerWithDetails(application, remote);
 			updateProjectSettings();
 		} catch (OpenShiftException ose) {
 			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, ose.getMessage(), ose));
 		}
 	}
 
-	private void fillServerWithDetails() throws OpenShiftException {
-		// Fill the server working copy
-		// update the values
+	private void fillServerWithDetails(IApplication application, String remote) throws OpenShiftException {
 		IServerWorkingCopy wc = callback.getServer();
-		String host = fapplication == null ? null : fapplication.getApplicationUrl();
-		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProject, remote, app);
+		String host = null;
+		String applicationName = null;
+		if (application != null) {
+			host = application.getApplicationUrl();
+			applicationName = application.getName();
+		}
+
+		String deployProjectName = null;
+		if (deployProject != null) {
+			deployProjectName = deployProject.getName();
+		}
+
+		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProjectName, remote, applicationName);
 	}
 
 	private void updateProjectSettings() {
-		IProject depProj = ResourcesPlugin.getWorkspace().getRoot().getProject(deployProject);
-
-		String projRemote = ExpressServerUtils.getProjectAttribute(depProj,
-				ExpressServerUtils.SETTING_REMOTE_NAME, null);
-		String projDepFolder = ExpressServerUtils.getProjectAttribute(depProj,
-				ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
+		String projRemote = ExpressServerUtils.getProjectAttribute(
+				deployProject, ExpressServerUtils.SETTING_REMOTE_NAME, null);
+		String projDepFolder = ExpressServerUtils.getProjectAttribute(
+				deployProject, ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
 		if (projRemote == null && projDepFolder == null) {
 			ExpressServerUtils.updateOpenshiftProjectSettings(
-					depProj, fapplication, connection, remote, deployFolder);
+					deployProject, application, connection, remote, deployFolder);
 		}
 	}
-	
-	private void selectComboConnection(final Connection connection) {
+
+	private void selectConnectionCombo(final Connection connection) {
+		IStructuredSelection selection = new StructuredSelection();
 		if (connection != null
 				&& connection.isConnected()) {
-			connectionComboViewer.setSelection(new StructuredSelection(connection));
-		} else {
-			connectionComboViewer.setSelection(new StructuredSelection());
+			selection = new StructuredSelection(connection);
 		}
+		connectionComboViewer.setSelection(selection);
 	}
+
+	protected void selectApplicationCombo(IApplication application) {
+		IStructuredSelection selection = new StructuredSelection();
+		if (application != null) {
+			selection = new StructuredSelection(application);
+		}
+		applicationComboViewer.setSelection(selection);
+	}
+
+	private void setDeployProjectComboInput(IApplication application) {
+		List<IProject> deployProjects = new ArrayList<IProject>();
+		if (application != null) {
+			IProject[] projects = projectsByApplication.get(application);
+			deployProjects.addAll(Arrays.asList(projects));
+		}
+		deployProjectComboViewer.setInput(deployProjects);
+	}
+
+	private void selectDeployProjectCombo(final IApplication application) {
+		IStructuredSelection selection = new StructuredSelection();
+		if (application != null) {
+			IProject[] projects = projectsByApplication.get(application);
+			if (projects != null
+					&& projects.length > 0)
+				selection = new StructuredSelection(projects[0]);
+		}
+		deployProjectComboViewer.setSelection(selection);
+	}
+
 }
