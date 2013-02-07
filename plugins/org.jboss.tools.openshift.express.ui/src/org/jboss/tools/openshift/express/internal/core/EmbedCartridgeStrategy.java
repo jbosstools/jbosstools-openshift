@@ -44,11 +44,7 @@ public class EmbedCartridgeStrategy {
 					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("rockmongo-"),
 							null, new EmbeddableCartridgeSelector("mongodb-"), null),
 					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("10gen-mms-agent-"),
-							null, new EmbeddableCartridgeSelector("mongodb-"), null),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("postgresql-"),
-							new EmbeddableCartridgeSelector("mysql-"), null, null),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("mysql-"),
-							new EmbeddableCartridgeSelector("postgresql-"), null, null)
+							null, new EmbeddableCartridgeSelector("mongodb-"), null)
 			};
 
 	private Map<IEmbeddableCartridge, EmbeddableCartridgeRelations> dependenciesByCartridge;
