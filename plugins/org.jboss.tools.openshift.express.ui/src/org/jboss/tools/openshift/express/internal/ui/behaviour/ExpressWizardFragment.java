@@ -45,7 +45,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		handle.setTitle("Create an Openshift Server");
-		handle.setDescription("Create an Openshift Server adapter by typing in your credentials and choosing an application.");
+		handle.setDescription("Create an Openshift Server by choosing your connection, application and deploy project.");
 		callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
 			public void executeLongRunning(Job j) {
 				// depends on COMMON, DAMN
@@ -59,8 +59,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 		};
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
-		this.composite = new ExpressDetailsComposite(
-				composite, callback, true);
+		this.composite = new ExpressDetailsComposite(composite, callback);
 		return this.composite.getComposite();
 	}
 		

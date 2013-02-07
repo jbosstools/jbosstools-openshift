@@ -40,6 +40,7 @@ import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
+import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
@@ -50,6 +51,7 @@ import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
+import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
@@ -61,6 +63,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -400,9 +403,9 @@ public class ExpressServerUtils {
 	 * @return
 	 */
 	public static IProject[] findProjectsForApplication(final IApplication application) {
-		final ArrayList<IProject> results = new ArrayList<IProject>();
 		if (application == null)
 			return null;
+		final ArrayList<IProject> results = new ArrayList<IProject>();
 		final String gitUri = application.getGitUrl();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
@@ -412,7 +415,7 @@ public class ExpressServerUtils {
 		}
 		return results.toArray(new IProject[results.size()]);
 	}
-
+	
 	private static boolean hasGitUri(String gitURI, IProject project) {
 		try {
 			Pattern gitURIPattern = Pattern.compile(RegExUtils.escapeRegex(gitURI));
@@ -428,6 +431,7 @@ public class ExpressServerUtils {
 		}
 		return false;
 	}
+
 
 	/**
 	 * This method will search for all projects connected to git and having the
@@ -630,4 +634,49 @@ public class ExpressServerUtils {
 		return false;
 	}
 	
+	public static String[] toNames(final IProject[] projects) {
+		if (projects == null) {
+			return new String[]{};
+		}
+		String[] names = new String[projects.length];
+		for(int i = 0; i < projects.length; i++) {
+			names[i] = projects[i].getName();
+		}
+		return names;
+	}
+
+	public static String[] toNames(List<IApplication> apps) {
+		if (apps == null) {
+			return new String[] {};
+		}
+		String[] appNames = new String[apps.size()];
+		for (int i = 0; i < apps.size(); i++) {
+			appNames[i] = apps.get(i).getName();
+		}
+		return appNames;
+	}
+
+	public static void put(Connection connection, TaskModel taskModel) {
+		taskModel.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
+	}
+
+	public static Connection getConnection(IServerModeUICallback callback) {
+		return (Connection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
+	}
+
+	public static void put(IDomain domain, TaskModel taskModel) {
+		taskModel.putObject(TASK_WIZARD_ATTR_DOMAIN, domain);
+	}
+
+	public static IDomain getDomain(IServerModeUICallback callback) {
+		return (IDomain) callback.getAttribute(TASK_WIZARD_ATTR_DOMAIN);
+	}
+
+	public static void put(IApplication application, TaskModel taskModel) {
+		taskModel.putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
+	}
+	
+	public static IApplication getApplication(IServerModeUICallback callback) {
+		return (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
+	}
 }
