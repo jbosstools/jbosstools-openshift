@@ -1,18 +1,20 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Client
-Bundle-SymbolicName: org.jboss.tools.openshift.express.client
+Bundle-SymbolicName: org.jboss.tools.openshift.express.client;singleton:=true
 Bundle-Version: 2.4.0.qualifier
 Bundle-Vendor: JBoss by Red Hat
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  openshift-java-client-2.0.2-SNAPSHOT.jar,
  jboss-dmr-1.0.0.Final.jar,
- log4j-1.2.16.jar,
+ log4j-1.2.17.jar,
  slf4j-api-1.6.1.jar,
  slf4j-log4j12-1.6.1.jar
 Export-Package: com.openshift.client,
  com.openshift.client.configuration,
  com.openshift.client.utils
-Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44"
+Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44",
+ org.eclipse.core.runtime;bundle-version="3.8.0"
 Import-Package: org.jboss.dmr
+Bundle-ActivationPolicy: lazy
