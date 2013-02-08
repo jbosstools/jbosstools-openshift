@@ -168,43 +168,6 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePostgresAndAddMySql() throws OpenShiftException{
-		// given
-		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.POSTGRESQL_84);
-
-		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.MYSQL_51, currentCartridges);
-
-		// then
-		assertEquals(IEmbeddableCartridge.MYSQL_51, diff.getCartridge());
-		assertNotNull(diff.getAdditions());
-		assertEquals(0, diff.getAdditions().size());
-		assertNotNull(diff.getRemovals());
-		assertEquals(1, diff.getRemovals().size());
-		assertEquals(IEmbeddableCartridge.POSTGRESQL_84, diff.getRemovals().get(0));
-	}
-
-	@Test
-	public void shouldRemovePostgresAndAddPhpMyAdminAndMySql() throws OpenShiftException{
-		// given
-		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.POSTGRESQL_84);
-
-		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.PHPMYADMIN_34, currentCartridges);
-
-		// then
-		assertEquals(IEmbeddableCartridge.PHPMYADMIN_34, diff.getCartridge());
-		assertNotNull(diff.getAdditions());
-		assertEquals(1, diff.getAdditions().size());
-		assertEquals(IEmbeddableCartridge.MYSQL_51, diff.getAdditions().get(0));
-		assertNotNull(diff.getRemovals());
-		assertEquals(1, diff.getRemovals().size());
-		assertEquals(IEmbeddableCartridge.POSTGRESQL_84, diff.getRemovals().get(0));
-	}
-
-	@Test
 	public void shouldAddRockmongoAndMongoDb() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
