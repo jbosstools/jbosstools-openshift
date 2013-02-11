@@ -69,4 +69,9 @@ public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 	public List<IDomain> getDomains() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String getServer() {
+		throw new UnsupportedOperationException();
+	}
 }
