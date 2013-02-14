@@ -268,11 +268,6 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public String getLogDirEnvName(String arg0) throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void removeEmbeddedCartridges(IEmbeddableCartridgeConstraint arg0) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
