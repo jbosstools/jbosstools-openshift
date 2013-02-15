@@ -22,6 +22,7 @@ import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IEmbeddableCartridgeConstraint;
 import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
@@ -173,21 +174,6 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public void exposePort() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void concealPort() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void showPort() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void scaleDown() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
@@ -267,6 +253,27 @@ public class NoopApplicationFake implements IApplication {
 
 	@Override
 	public Future<Boolean> waitForAccessibleAsync(long timeout) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IEmbeddedCartridge> addEmbeddableCartridge(IEmbeddableCartridgeConstraint arg0)
+			throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getCartridge(String arg0) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEmbeddedCartridges(IEmbeddableCartridgeConstraint arg0) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEmbeddedCartridges(List<IEmbeddableCartridge> arg0) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 }
