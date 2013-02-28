@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 import com.openshift.client.IApplication;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.LatestVersionOf;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -129,20 +130,23 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		@Override
 		public int compare(IEmbeddableCartridge thisCartridge, IEmbeddableCartridge thatCartridge) {
 			// mysql has to be added/removed before phpmyadmin
-			if (thisCartridge.equals(IEmbeddableCartridge.MYSQL_51)) {
+			if (thisCartridge.equals(LatestVersionOf.mySQL().matches(thisCartridge))) {
 				return -1;
-			} else if (thatCartridge.equals(IEmbeddableCartridge.MYSQL_51)) {
+			} else if (LatestVersionOf.mySQL().matches(thatCartridge)) {
 				return 1;
-			} else if (thisCartridge.equals(IEmbeddableCartridge.POSTGRESQL_84)) {
+			} else if (LatestVersionOf.postgreSQL().matches(thisCartridge)) {
 				return -1;
-			} else if (thatCartridge.equals(IEmbeddableCartridge.POSTGRESQL_84)) {
+			} else if (LatestVersionOf.postgreSQL().matches(thatCartridge)) {
 				return 1;
-			} else if (thisCartridge.equals(IEmbeddableCartridge.MONGODB_22)) {
+			} else if (LatestVersionOf.mongoDB().matches(thisCartridge)) {
 				return -1;
-			} else if (thatCartridge.equals(IEmbeddableCartridge.MONGODB_22)) {
+			} else if (LatestVersionOf.mongoDB().matches(thatCartridge)) {
 				return 1;
 			}
 			return 0;
 		}
+
+		
+	
 	}
 }

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.core;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -20,9 +21,9 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IApplicationGear;
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.ICartridge;
+import com.openshift.client.ICartridgeConstraint;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
-import com.openshift.client.IEmbeddableCartridgeConstraint;
 import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
@@ -74,23 +75,12 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public String getHealthCheckUrl() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public ICartridge getCartridge() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge) 
-			throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<IEmbeddedCartridge> addEmbeddableCartridges(List<IEmbeddableCartridge> cartridge)
 			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
@@ -257,23 +247,35 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public List<IEmbeddedCartridge> addEmbeddableCartridge(IEmbeddableCartridgeConstraint arg0)
-			throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public String getCartridge(String arg0) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removeEmbeddedCartridges(IEmbeddableCartridgeConstraint arg0) throws OpenShiftException {
+	public List<IEmbeddedCartridge> addEmbeddableCartridge(ICartridgeConstraint cartridgeConstraint)
+			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removeEmbeddedCartridges(List<IEmbeddableCartridge> arg0) throws OpenShiftException {
+	public List<IEmbeddedCartridge> addEmbeddableCartridges(Collection<IEmbeddableCartridge> cartridge)
+			throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Collection<IEmbeddedCartridge> getEmbeddedCartridges(ICartridgeConstraint constraint)
+			throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEmbeddedCartridges(ICartridgeConstraint cartridgeConstraint) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEmbeddedCartridges(Collection<IEmbeddableCartridge> cartridges) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 }
