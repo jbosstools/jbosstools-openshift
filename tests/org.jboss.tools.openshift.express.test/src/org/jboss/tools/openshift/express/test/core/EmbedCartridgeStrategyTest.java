@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.openshift.client.EmbeddableCartridge;
 import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
@@ -36,7 +37,20 @@ import com.openshift.client.OpenShiftException;
  */
 public class EmbedCartridgeStrategyTest {
 
-	
+	private static final IEmbeddableCartridge CARTRIDGE_MYSQL = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MYSQL, "51");
+	private static final IEmbeddableCartridge CARTRIDGE_PHPMYADMIN = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_PHPMYADMIN, "34");
+	private static final IEmbeddableCartridge CARTRIDGE_POSTGRESQL = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_POSTGRESQL, "84");
+	private static final IEmbeddableCartridge CARTRIDGE_ROCKMONGO = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_ROCKMONGO, "11");
+	private static final IEmbeddableCartridge CARTRIDGE_MONGODB = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MONGODB, "22");
+	private static final IEmbeddableCartridge CARTRIDGE_JENKINS_CLIENT = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_JENKINS_CLIENT, "14");
+	private static final IEmbeddableCartridge CARTRIDGE_10GEN_MMS_AGENT = 
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT, "01");
 	
 	private EmbedCartridgeStrategy embedStrategy;
 
@@ -47,13 +61,13 @@ public class EmbedCartridgeStrategyTest {
 
 	protected void createEmbeddableCartridgeStrategy(ICartridge... cartridges) {
 		List<IEmbeddableCartridge> allEmbeddableCartridgeList = createCartridgesList(
-				IEmbeddableCartridge.MYSQL_51, 
-				IEmbeddableCartridge.PHPMYADMIN_34,
-				IEmbeddableCartridge.POSTGRESQL_84, 
-				IEmbeddableCartridge.ROCKMONGO_11, 
-				IEmbeddableCartridge.MONGODB_22, 
-				IEmbeddableCartridge.JENKINS_14,
-				IEmbeddableCartridge._10GEN_MMS_AGENT_01);
+				CARTRIDGE_MYSQL,
+				CARTRIDGE_PHPMYADMIN,
+				CARTRIDGE_POSTGRESQL,
+				CARTRIDGE_ROCKMONGO,
+				CARTRIDGE_MONGODB,
+				CARTRIDGE_JENKINS_CLIENT,
+				CARTRIDGE_10GEN_MMS_AGENT);
 		List<ICartridge> allCartridgeList = createCartridgesList(
 				ICartridge.JBOSSAS_7, 
 				ICartridge.JENKINS_14);
@@ -85,13 +99,13 @@ public class EmbedCartridgeStrategyTest {
 	public void shouldNotAddMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.MYSQL_51);
+		currentCartridges.add(CARTRIDGE_MYSQL);
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.MYSQL_51, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_MYSQL, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.MYSQL_51, diff.getCartridge());
+		assertEquals(CARTRIDGE_MYSQL, diff.getCartridge());
 		assertFalse(diff.hasAdditions());
 		assertFalse(diff.hasRemovals());
 		assertFalse(diff.hasApplicationAdditions());
@@ -103,10 +117,10 @@ public class EmbedCartridgeStrategyTest {
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.MYSQL_51, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_MYSQL, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.MYSQL_51, diff.getCartridge());
+		assertEquals(CARTRIDGE_MYSQL, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertTrue(diff.getAdditions().size() == 0);
 		assertNotNull(diff.getRemovals());
@@ -119,13 +133,13 @@ public class EmbedCartridgeStrategyTest {
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.PHPMYADMIN_34, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_PHPMYADMIN, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.PHPMYADMIN_34, diff.getCartridge());
+		assertEquals(CARTRIDGE_PHPMYADMIN, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(1, diff.getAdditions().size());
-		assertEquals(IEmbeddableCartridge.MYSQL_51, diff.getAdditions().get(0));
+		assertEquals(CARTRIDGE_MYSQL, diff.getAdditions().get(0));
 		assertNotNull(diff.getRemovals());
 		assertEquals(0, diff.getRemovals().size());
 	}
@@ -134,14 +148,14 @@ public class EmbedCartridgeStrategyTest {
 	public void shouldRemovePhpMyAdmin() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.MYSQL_51);
-		currentCartridges.add(IEmbeddableCartridge.PHPMYADMIN_34);
+		currentCartridges.add(CARTRIDGE_MYSQL);
+		currentCartridges.add(CARTRIDGE_PHPMYADMIN);
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(IEmbeddableCartridge.PHPMYADMIN_34, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_PHPMYADMIN, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.PHPMYADMIN_34, diff.getCartridge());
+		assertEquals(CARTRIDGE_PHPMYADMIN, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(0, diff.getAdditions().size());
 		assertNotNull(diff.getRemovals());
@@ -152,19 +166,19 @@ public class EmbedCartridgeStrategyTest {
 	public void shouldRemovePhpMyAdminAndMySql() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.MYSQL_51);
-		currentCartridges.add(IEmbeddableCartridge.PHPMYADMIN_34);
+		currentCartridges.add(CARTRIDGE_MYSQL);
+		currentCartridges.add(CARTRIDGE_PHPMYADMIN);
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(IEmbeddableCartridge.MYSQL_51, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_MYSQL, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.MYSQL_51, diff.getCartridge());
+		assertEquals(CARTRIDGE_MYSQL, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(0, diff.getAdditions().size());
 		assertNotNull(diff.getRemovals());
 		assertEquals(1, diff.getRemovals().size());
-		assertTrue(diff.getRemovals().contains(IEmbeddableCartridge.PHPMYADMIN_34));
+		assertTrue(diff.getRemovals().contains(CARTRIDGE_PHPMYADMIN));
 	}
 
 	@Test
@@ -173,13 +187,13 @@ public class EmbedCartridgeStrategyTest {
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.ROCKMONGO_11, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_ROCKMONGO, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.ROCKMONGO_11, diff.getCartridge());
+		assertEquals(CARTRIDGE_ROCKMONGO, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(1, diff.getAdditions().size());
-		assertEquals(IEmbeddableCartridge.MONGODB_22, diff.getAdditions().get(0));
+		assertEquals(CARTRIDGE_MONGODB, diff.getAdditions().get(0));
 		assertNotNull(diff.getRemovals());
 		assertEquals(0, diff.getRemovals().size());
 	}
@@ -188,21 +202,21 @@ public class EmbedCartridgeStrategyTest {
 	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws OpenShiftException{
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
-		currentCartridges.add(IEmbeddableCartridge.MONGODB_22);
-		currentCartridges.add(IEmbeddableCartridge.ROCKMONGO_11);
-		currentCartridges.add(IEmbeddableCartridge._10GEN_MMS_AGENT_01);
+		currentCartridges.add(CARTRIDGE_MONGODB);
+		currentCartridges.add(CARTRIDGE_ROCKMONGO);
+		currentCartridges.add(CARTRIDGE_10GEN_MMS_AGENT);
 
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(IEmbeddableCartridge.MONGODB_22, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_MONGODB, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.MONGODB_22, diff.getCartridge());
+		assertEquals(CARTRIDGE_MONGODB, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(0, diff.getAdditions().size());
 		assertNotNull(diff.getRemovals());
 		assertEquals(2, diff.getRemovals().size());
-		assertTrue(diff.getRemovals().contains(IEmbeddableCartridge.ROCKMONGO_11));
-		assertTrue(diff.getRemovals().contains(IEmbeddableCartridge._10GEN_MMS_AGENT_01));
+		assertTrue(diff.getRemovals().contains(CARTRIDGE_ROCKMONGO));
+		assertTrue(diff.getRemovals().contains(CARTRIDGE_10GEN_MMS_AGENT));
 	}
 
 	@Test
@@ -212,10 +226,10 @@ public class EmbedCartridgeStrategyTest {
 		createEmbeddableCartridgeStrategy(ICartridge.JENKINS_14);
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.JENKINS_14, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_JENKINS_CLIENT, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.JENKINS_14, diff.getCartridge());
+		assertEquals(CARTRIDGE_JENKINS_CLIENT, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(0, diff.getAdditions().size());
 		assertNotNull(diff.getRemovals());
@@ -230,10 +244,10 @@ public class EmbedCartridgeStrategyTest {
 		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
 		
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(IEmbeddableCartridge.JENKINS_14, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_JENKINS_CLIENT, currentCartridges);
 
 		// then
-		assertEquals(IEmbeddableCartridge.JENKINS_14, diff.getCartridge());
+		assertEquals(CARTRIDGE_JENKINS_CLIENT, diff.getCartridge());
 		assertNotNull(diff.getAdditions());
 		assertEquals(0, diff.getAdditions().size());
 		assertNotNull(diff.getRemovals());
