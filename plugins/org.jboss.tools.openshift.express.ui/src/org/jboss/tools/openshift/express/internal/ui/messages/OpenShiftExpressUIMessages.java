@@ -23,6 +23,7 @@ public class OpenShiftExpressUIMessages extends NLS {
 	public static String APPLICATION_NOT_ANSWERING_CONTINUE_WAITING;
 	public static String BTN_KEEP_WAITING;
 	public static String BTN_CLOSE_WIZARD;
+	public static String RESTARTING_APPLICATION;
 	
 	public static String ADDING_REMOVING_CARTRIDGES;
 	
