@@ -44,8 +44,8 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		handle.setTitle("Create an Openshift Server");
-		handle.setDescription("Create an Openshift Server by choosing your connection, application and deploy project.");
+		handle.setTitle("Create an OpenShift Server");
+		handle.setDescription("Create an OpenShift Server by choosing your connection, application and deploy project.");
 		callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
 			public void executeLongRunning(Job j) {
 				// depends on COMMON, DAMN
