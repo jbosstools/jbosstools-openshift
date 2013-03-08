@@ -100,7 +100,7 @@ public class ServerAdapterFactory {
 		Assert.isLegal(application != null);
 		Assert.isLegal(user != null);
 
-		String serverNameBase = application.getName() + " at Openshift";
+		String serverNameBase = application.getName() + " at OpenShift";
 		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);
 
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);

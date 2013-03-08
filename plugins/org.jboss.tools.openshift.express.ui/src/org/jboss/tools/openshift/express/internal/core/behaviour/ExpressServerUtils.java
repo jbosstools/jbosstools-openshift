@@ -313,7 +313,7 @@ public class ExpressServerUtils {
 		if (appName != null
 				&& (wc.getName() == null || wc.getName().length() == 0 || wc.getName().startsWith(
 						ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
-			String newBase = appName + " at Openshift";
+			String newBase = appName + " at OpenShift";
 			wc.setName(ServerUtil.getDefaultServerName(newBase));
 		}
 	}

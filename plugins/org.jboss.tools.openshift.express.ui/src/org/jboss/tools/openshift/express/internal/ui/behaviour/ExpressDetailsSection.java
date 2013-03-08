@@ -84,7 +84,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 
 		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED
 				| ExpandableComposite.TITLE_BAR);
-		section.setText("Openshift Server");
+		section.setText("OpenShift Server");
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL
 				| GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL));
 		Composite c = toolkit.createComposite(section, SWT.NONE);
@@ -292,7 +292,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 
 	public class SetProjectCommand extends ServerWorkingCopyPropertyComboCommand {
 		public SetProjectCommand(IServerWorkingCopy wc, String newVal) {
-			super(wc, "Change Openshift Project", deployProjectCombo, newVal,
+			super(wc, "Change OpenShift Project", deployProjectCombo, newVal,
 					ExpressServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
 		}
 
@@ -312,7 +312,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 
 	public class SetOverrideCommand extends ServerWorkingCopyPropertyButtonCommand {
 		public SetOverrideCommand(IServerWorkingCopy wc) {
-			super(wc, "Override Openshift Project Settings Command",
+			super(wc, "Override OpenShift Project Settings Command",
 					overrideProjectSettings, overrideProjectSettings.getSelection(),
 					ExpressServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
 		}
