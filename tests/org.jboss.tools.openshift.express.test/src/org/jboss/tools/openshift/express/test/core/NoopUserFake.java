@@ -125,17 +125,7 @@ public class NoopUserFake implements IUser {
 	public IOpenShiftConnection getConnection() {
 		throw new UnsupportedOperationException();
 	}
-	
-	@Override
-	public String getAuthKey() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public String getAuthIV() {
-		throw new UnsupportedOperationException();
-	}
-	
+		
 	@Override
 	public void deleteKey(String name) {
 		throw new UnsupportedOperationException();
