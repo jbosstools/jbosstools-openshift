@@ -18,7 +18,6 @@ import java.util.concurrent.Future;
 import com.jcraft.jsch.Session;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.IApplicationGear;
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.ICartridge;
 import com.openshift.client.ICartridgeConstraint;
@@ -115,11 +114,6 @@ public class NoopApplicationFake implements IApplication {
 
 	@Override
 	public void removeEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<IApplicationGear> getGears() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
