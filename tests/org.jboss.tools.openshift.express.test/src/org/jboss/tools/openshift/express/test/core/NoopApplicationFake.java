@@ -24,6 +24,7 @@ import com.openshift.client.ICartridgeConstraint;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.IGearGroup;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
@@ -270,6 +271,11 @@ public class NoopApplicationFake implements IApplication {
 
 	@Override
 	public void removeEmbeddedCartridges(Collection<IEmbeddableCartridge> cartridges) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Collection<IGearGroup> getGearGroups() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 }
