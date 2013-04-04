@@ -87,11 +87,11 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridge
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -523,17 +523,17 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		@Override
 		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof ICartridge)) {
+			if (!(fromObject instanceof IStandaloneCartridge)) {
 				return null;
 			}
-			return ((ICartridge) fromObject).getName();
+			return ((IStandaloneCartridge) fromObject).getName();
 		}
 	}
 
 	private final class CartridgesIndexToCartridge extends Converter {
 
 		public CartridgesIndexToCartridge() {
-			super(Integer.class, ICartridge.class);
+			super(Integer.class, IStandaloneCartridge.class);
 		}
 
 		@Override
@@ -543,7 +543,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 
 			int index = ((Integer) fromObject).intValue();
-			List<ICartridge> cartridges = pageModel.getCartridges();
+			List<IStandaloneCartridge> cartridges = pageModel.getCartridges();
 			if (index >= cartridges.size()
 					|| index == -1) {
 				return null;
@@ -555,17 +555,17 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private final class CartridgeToCartridgesIndex extends Converter {
 
 		public CartridgeToCartridgesIndex() {
-			super(ICartridge.class, Integer.class);
+			super(IStandaloneCartridge.class, Integer.class);
 		}
 
 		@Override
 		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof ICartridge)) {
+			if (!(fromObject instanceof IStandaloneCartridge)) {
 				return null;
 			}
 
-			ICartridge cartridge = ((ICartridge) fromObject);
-			List<ICartridge> cartridges = pageModel.getCartridges();
+			IStandaloneCartridge cartridge = ((IStandaloneCartridge) fromObject);
+			List<IStandaloneCartridge> cartridges = pageModel.getCartridges();
 			return cartridges.indexOf(cartridge);
 		}
 	}

@@ -24,9 +24,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.ISSHPublicKey;
@@ -34,6 +32,8 @@ import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftConnectionFactory;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Rob Stryker
@@ -276,7 +276,7 @@ public class Connection {
 		return hasUser();
 	}
 
-	public IApplication createApplication(final String applicationName, final ICartridge applicationType,
+	public IApplication createApplication(final String applicationName, final IStandaloneCartridge applicationType,
 			final ApplicationScale scale, final IGearProfile gearProfile)
 			throws OpenShiftException {
 		if (connect()) {
@@ -317,7 +317,7 @@ public class Connection {
 		return null;
 	}
 
-	public List<ICartridge> getStandaloneCartridgeNames() throws OpenShiftException {
+	public List<IStandaloneCartridge> getStandaloneCartridgeNames() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getStandaloneCartridges();
 		}
@@ -355,7 +355,7 @@ public class Connection {
 		return false;
 	}
 
-	public boolean hasApplicationOfType(ICartridge type) throws OpenShiftException {
+	public boolean hasApplicationOfType(IStandaloneCartridge type) throws OpenShiftException {
 		if (hasDomain()) {
 			return user.getDefaultDomain().hasApplicationByCartridge(type);
 		}

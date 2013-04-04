@@ -19,15 +19,14 @@ import com.jcraft.jsch.Session;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IApplicationPortForwarding;
-import com.openshift.client.ICartridge;
-import com.openshift.client.ICartridgeConstraint;
 import com.openshift.client.IDomain;
-import com.openshift.client.IEmbeddableCartridge;
-import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.IGearGroup;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -75,7 +74,7 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public ICartridge getCartridge() {
+	public IStandaloneCartridge getCartridge() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -247,25 +246,8 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public List<IEmbeddedCartridge> addEmbeddableCartridge(ICartridgeConstraint cartridgeConstraint)
-			throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public List<IEmbeddedCartridge> addEmbeddableCartridges(Collection<IEmbeddableCartridge> cartridge)
 			throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Collection<IEmbeddedCartridge> getEmbeddedCartridges(ICartridgeConstraint constraint)
-			throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void removeEmbeddedCartridges(ICartridgeConstraint cartridgeConstraint) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 

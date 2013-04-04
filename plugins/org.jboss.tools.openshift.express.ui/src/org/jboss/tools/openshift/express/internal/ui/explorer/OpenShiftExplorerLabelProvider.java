@@ -24,8 +24,8 @@ import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerC
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
  * @author Xavier Coulon

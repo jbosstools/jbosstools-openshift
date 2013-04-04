@@ -36,7 +36,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
  * @author André Dietisheim

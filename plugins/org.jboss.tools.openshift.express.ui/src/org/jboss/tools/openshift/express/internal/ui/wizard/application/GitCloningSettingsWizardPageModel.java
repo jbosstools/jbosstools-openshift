@@ -21,7 +21,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
@@ -108,14 +108,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getApplicationName();
 	}
 	
-	public boolean isJBossAS7Application() {
-		IApplication application = wizardModel.getApplication();
-		if (application == null) {
-			return false;
-		}
-		return ICartridge.JBOSSAS_7.equals(application.getCartridge());
-	}
-
 	public String getRepositoryPath() {
 		return wizardModel.getRepositoryPath();
 	}

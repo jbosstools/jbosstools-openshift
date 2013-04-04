@@ -13,12 +13,12 @@ package org.jboss.tools.openshift.express.test.core;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -51,7 +51,7 @@ public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 	}
 
 	@Override
-	public List<ICartridge> getStandaloneCartridges() throws OpenShiftException {
+	public List<IStandaloneCartridge> getStandaloneCartridges() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 

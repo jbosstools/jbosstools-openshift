@@ -29,10 +29,11 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareMode
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.ICartridge;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author André Dietisheim
@@ -146,9 +147,9 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 
 	public String getApplicationName();
 
-	public ICartridge setApplicationCartridge(ICartridge cartridge);
+	public ICartridge setApplicationCartridge(IStandaloneCartridge cartridge);
 
-	public ICartridge getApplicationCartridge();
+	public IStandaloneCartridge getApplicationCartridge();
 
 	public void setApplication(IApplication application);
 

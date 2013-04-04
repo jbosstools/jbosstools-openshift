@@ -14,8 +14,8 @@ import java.net.SocketTimeoutException;
 import java.util.Set;
 
 import com.openshift.client.IDomain;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
 
 /**
  * @author Andre Dietisheim

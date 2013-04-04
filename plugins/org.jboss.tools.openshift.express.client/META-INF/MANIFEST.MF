@@ -12,8 +12,15 @@ Bundle-ClassPath: .,
  slf4j-log4j12-1.6.1.jar,
  openshift-java-client-2.1.0-SNAPSHOT.jar
 Export-Package: com.openshift.client,
+ com.openshift.client.cartridge,
+ com.openshift.client.cartridge.selector,
  com.openshift.client.configuration,
- com.openshift.client.utils
+ com.openshift.client.utils,
+ com.openshift.internal.client;x-friends:="org.jboss.tools.openshift.express.test",
+ com.openshift.internal.client.httpclient;x-friends:="org.jboss.tools.openshift.express.test",
+ com.openshift.internal.client.response;x-friends:="org.jboss.tools.openshift.express.test",
+ com.openshift.internal.client.ssh;x-friends:="org.jboss.tools.openshift.express.test",
+ com.openshift.internal.client.utils;x-friends:="org.jboss.tools.openshift.express.test"
 Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44",
  org.eclipse.core.runtime;bundle-version="3.8.0"
 Import-Package: org.jboss.dmr

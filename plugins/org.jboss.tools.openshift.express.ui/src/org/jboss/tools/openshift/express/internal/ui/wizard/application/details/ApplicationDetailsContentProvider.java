@@ -18,8 +18,8 @@ import org.jboss.tools.openshift.express.internal.ui.propertytable.StringElement
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IEmbeddedCartridge;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
  * @author Xavier Coulon

@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.core;
 import java.text.Collator;
 import java.util.Comparator;
 
-import com.openshift.client.ICartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim

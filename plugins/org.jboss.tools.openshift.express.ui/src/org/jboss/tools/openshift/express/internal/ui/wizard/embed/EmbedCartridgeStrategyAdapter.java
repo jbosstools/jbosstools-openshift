@@ -38,12 +38,13 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.client.cartridge.selector.LatestVersionOf;
 
 /**
  * A UI strategy that is able to add and remove embedded cartridges while
@@ -172,9 +173,9 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
-	private boolean createApplications(List<ICartridge> applicationAdditions) {
-		for (ICartridge cartridge : applicationAdditions) {
-			if (!ICartridge.JENKINS_14.equals(cartridge)) {
+	private boolean createApplications(List<IStandaloneCartridge> applicationAdditions) {
+		for (IStandaloneCartridge cartridge : applicationAdditions) {
+			if (!LatestVersionOf.jenkins().matches(cartridge)) {
 				throw new UnsupportedOperationException("only jenkins applications may currently be created.");
 			}
 			if (!createJenkinsApplication(cartridge)) {
@@ -184,15 +185,17 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		return true;
 	}
 
-	private boolean createJenkinsApplication(final ICartridge cartridge) {
+	private boolean createJenkinsApplication(final IStandaloneCartridge cartridge) {
 		final String name = openJenkinsApplicationDialog();
 		if (name == null) {
 			return false;
 		}
 		try {
+			IDomain domain = pageModel.getDomain();
+			IStandaloneCartridge jenkinsCartridge = LatestVersionOf.jenkins().get(domain.getUser());
 			CreateApplicationJob createJob =
-					new CreateApplicationJob(name, ICartridge.JENKINS_14, ApplicationScale.NO_SCALE,
-							IGearProfile.SMALL, pageModel.getDomain());
+					new CreateApplicationJob(name, jenkinsCartridge , ApplicationScale.NO_SCALE,
+							IGearProfile.SMALL, domain);
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 
@@ -276,10 +279,10 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
-	private static class CartridgeToStringConverter implements ToStringConverter<ICartridge> {
+	private static class CartridgeToStringConverter implements ToStringConverter<IStandaloneCartridge> {
 
 		@Override
-		public String toString(ICartridge cartridge) {
+		public String toString(IStandaloneCartridge cartridge) {
 			if (cartridge == null) {
 				return null;
 			}

@@ -23,10 +23,10 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IEmbeddableCartridge;
-import com.openshift.client.IEmbeddedCartridge;
-import com.openshift.client.LatestVersionOf;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.client.cartridge.selector.LatestVersionOf;
 
 /**
  * @author Andre Dietisheim
@@ -125,7 +125,7 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		return cartridgesToRemove;
 	}
 
-	private static class CartridgeAddRemovePriorityComparator implements Comparator<IEmbeddableCartridge> {
+	private class CartridgeAddRemovePriorityComparator implements Comparator<IEmbeddableCartridge> {
 
 		@Override
 		public int compare(IEmbeddableCartridge thisCartridge, IEmbeddableCartridge thatCartridge) {

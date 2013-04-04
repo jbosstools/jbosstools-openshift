@@ -14,11 +14,11 @@ import java.util.List;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -77,25 +77,25 @@ public class NoopDomainFake implements IDomain {
 	}
 
 	@Override
-	public IApplication createApplication(String name, ICartridge cartridge, ApplicationScale scale,
+	public IApplication createApplication(String name, IStandaloneCartridge cartridge, ApplicationScale scale,
 			IGearProfile gearProfile) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IApplication createApplication(String name, ICartridge cartridge, ApplicationScale scale)
+	public IApplication createApplication(String name, IStandaloneCartridge cartridge, ApplicationScale scale)
 			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IApplication createApplication(String name, ICartridge cartridge, IGearProfile gearProfile)
+	public IApplication createApplication(String name, IStandaloneCartridge cartridge, IGearProfile gearProfile)
 			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IApplication createApplication(String name, ICartridge cartridge) {
+	public IApplication createApplication(String name, IStandaloneCartridge cartridge) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -120,12 +120,12 @@ public class NoopDomainFake implements IDomain {
 	}
 
 	@Override
-	public List<IApplication> getApplicationsByCartridge(ICartridge cartridge) throws OpenShiftException {
+	public List<IApplication> getApplicationsByCartridge(IStandaloneCartridge cartridge) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean hasApplicationByCartridge(ICartridge cartridge) throws OpenShiftException {
+	public boolean hasApplicationByCartridge(IStandaloneCartridge cartridge) throws OpenShiftException {
 		return getApplicationsByCartridge(cartridge).size() > 0;
 	}
 

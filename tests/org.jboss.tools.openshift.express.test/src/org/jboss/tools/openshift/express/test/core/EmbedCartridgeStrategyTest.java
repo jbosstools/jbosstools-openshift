@@ -27,31 +27,37 @@ import org.junit.Test;
 
 import com.openshift.client.EmbeddableCartridge;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
-import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.internal.client.StandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
  */
 public class EmbedCartridgeStrategyTest {
 
-	private static final IEmbeddableCartridge CARTRIDGE_MYSQL = 
+	private static final IStandaloneCartridge JENKINS_14 =
+			new StandaloneCartridge(IStandaloneCartridge.NAME_JENKINS, "14");
+	private static final IStandaloneCartridge JBOSSAS_7 =
+			new StandaloneCartridge(IStandaloneCartridge.NAME_JBOSSAS, "7");
+
+	private static final IEmbeddableCartridge CARTRIDGE_MYSQL =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MYSQL, "51");
-	private static final IEmbeddableCartridge CARTRIDGE_PHPMYADMIN = 
+	private static final IEmbeddableCartridge CARTRIDGE_PHPMYADMIN =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_PHPMYADMIN, "34");
-	private static final IEmbeddableCartridge CARTRIDGE_POSTGRESQL = 
+	private static final IEmbeddableCartridge CARTRIDGE_POSTGRESQL =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_POSTGRESQL, "84");
-	private static final IEmbeddableCartridge CARTRIDGE_ROCKMONGO = 
+	private static final IEmbeddableCartridge CARTRIDGE_ROCKMONGO =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_ROCKMONGO, "11");
-	private static final IEmbeddableCartridge CARTRIDGE_MONGODB = 
+	private static final IEmbeddableCartridge CARTRIDGE_MONGODB =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MONGODB, "22");
-	private static final IEmbeddableCartridge CARTRIDGE_JENKINS_CLIENT = 
+	private static final IEmbeddableCartridge CARTRIDGE_JENKINS_CLIENT =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_JENKINS_CLIENT, "14");
-	private static final IEmbeddableCartridge CARTRIDGE_10GEN_MMS_AGENT = 
+	private static final IEmbeddableCartridge CARTRIDGE_10GEN_MMS_AGENT =
 			new EmbeddableCartridge(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT, "01");
-	
+
 	private EmbedCartridgeStrategy embedStrategy;
 
 	@Before
@@ -59,7 +65,7 @@ public class EmbedCartridgeStrategyTest {
 		createEmbeddableCartridgeStrategy();
 	}
 
-	protected void createEmbeddableCartridgeStrategy(ICartridge... cartridges) {
+	protected void createEmbeddableCartridgeStrategy(IStandaloneCartridge... cartridges) {
 		List<IEmbeddableCartridge> allEmbeddableCartridgeList = createCartridgesList(
 				CARTRIDGE_MYSQL,
 				CARTRIDGE_PHPMYADMIN,
@@ -68,17 +74,17 @@ public class EmbedCartridgeStrategyTest {
 				CARTRIDGE_MONGODB,
 				CARTRIDGE_JENKINS_CLIENT,
 				CARTRIDGE_10GEN_MMS_AGENT);
-		List<ICartridge> allCartridgeList = createCartridgesList(
-				ICartridge.JBOSSAS_7, 
-				ICartridge.JENKINS_14);
+		List<IStandaloneCartridge> allCartridgeList = createCartridgesList(
+				JBOSSAS_7,
+				JENKINS_14);
 		List<IApplication> allApplications = createAllApplicationsList(new NoopDomainFake(), cartridges);
 		this.embedStrategy = new EmbedCartridgeStrategy(allEmbeddableCartridgeList, allCartridgeList, allApplications);
 	}
 
-	private List<IApplication> createAllApplicationsList(IDomain domain, ICartridge... cartridges) {
+	private List<IApplication> createAllApplicationsList(IDomain domain, IStandaloneCartridge... cartridges) {
 		List<IApplication> applications = new ArrayList<IApplication>();
 		if (cartridges != null) {
-			for(ICartridge cartridge : cartridges) {
+			for (IStandaloneCartridge cartridge : cartridges) {
 				applications.add(new ApplicationFake(cartridge));
 			}
 		}
@@ -88,7 +94,7 @@ public class EmbedCartridgeStrategyTest {
 	private <C> List<C> createCartridgesList(C... cartridges) {
 		List<C> embeddableCartridges = new ArrayList<C>();
 		if (cartridges != null) {
-			for(C cartridge : cartridges) {
+			for (C cartridge : cartridges) {
 				embeddableCartridges.add(cartridge);
 			}
 		}
@@ -96,11 +102,11 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldNotAddMySql() throws OpenShiftException{
+	public void shouldNotAddMySql() throws OpenShiftException {
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(CARTRIDGE_MYSQL);
-		
+
 		// when
 		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_MYSQL, currentCartridges);
 
@@ -112,10 +118,10 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldAddMySql() throws OpenShiftException{
+	public void shouldAddMySql() throws OpenShiftException {
 		// given
-		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
-		
+		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge> emptySet();
+
 		// when
 		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_MYSQL, currentCartridges);
 
@@ -128,12 +134,13 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldAddPhpMyAdminAndMySql() throws OpenShiftException{
+	public void shouldAddPhpMyAdminAndMySql() throws OpenShiftException {
 		// given
-		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
-		
+		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge> emptySet();
+
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_PHPMYADMIN, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy
+				.add(CARTRIDGE_PHPMYADMIN, currentCartridges);
 
 		// then
 		assertEquals(CARTRIDGE_PHPMYADMIN, diff.getCartridge());
@@ -145,14 +152,15 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePhpMyAdmin() throws OpenShiftException{
+	public void shouldRemovePhpMyAdmin() throws OpenShiftException {
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(CARTRIDGE_MYSQL);
 		currentCartridges.add(CARTRIDGE_PHPMYADMIN);
-		
+
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_PHPMYADMIN, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_PHPMYADMIN,
+				currentCartridges);
 
 		// then
 		assertEquals(CARTRIDGE_PHPMYADMIN, diff.getCartridge());
@@ -163,12 +171,12 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemovePhpMyAdminAndMySql() throws OpenShiftException{
+	public void shouldRemovePhpMyAdminAndMySql() throws OpenShiftException {
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(CARTRIDGE_MYSQL);
 		currentCartridges.add(CARTRIDGE_PHPMYADMIN);
-		
+
 		// when
 		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_MYSQL, currentCartridges);
 
@@ -182,9 +190,9 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldAddRockmongoAndMongoDb() throws OpenShiftException{
+	public void shouldAddRockmongoAndMongoDb() throws OpenShiftException {
 		// given
-		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
+		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge> emptySet();
 
 		// when
 		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_ROCKMONGO, currentCartridges);
@@ -199,7 +207,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws OpenShiftException{
+	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws OpenShiftException {
 		// given
 		Set<IEmbeddableCartridge> currentCartridges = new HashSet<IEmbeddableCartridge>();
 		currentCartridges.add(CARTRIDGE_MONGODB);
@@ -207,7 +215,8 @@ public class EmbedCartridgeStrategyTest {
 		currentCartridges.add(CARTRIDGE_10GEN_MMS_AGENT);
 
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.remove(CARTRIDGE_MONGODB, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy
+				.remove(CARTRIDGE_MONGODB, currentCartridges);
 
 		// then
 		assertEquals(CARTRIDGE_MONGODB, diff.getCartridge());
@@ -220,13 +229,14 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	@Test
-	public void shouldNotAddJenkinsApplication() throws OpenShiftException{
+	public void shouldNotAddJenkinsApplication() throws OpenShiftException {
 		// given
-		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
-		createEmbeddableCartridgeStrategy(ICartridge.JENKINS_14);
-		
+		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge> emptySet();
+		createEmbeddableCartridgeStrategy(JENKINS_14);
+
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_JENKINS_CLIENT, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_JENKINS_CLIENT,
+				currentCartridges);
 
 		// then
 		assertEquals(CARTRIDGE_JENKINS_CLIENT, diff.getCartridge());
@@ -237,14 +247,15 @@ public class EmbedCartridgeStrategyTest {
 		assertNotNull(diff.getApplicationAdditions());
 		assertEquals(0, diff.getApplicationAdditions().size());
 	}
-	
+
 	@Test
-	public void shouldAddJenkinsApplication() throws OpenShiftException{
+	public void shouldAddJenkinsApplication() throws OpenShiftException {
 		// given
-		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge>emptySet();
-		
+		Set<IEmbeddableCartridge> currentCartridges = Collections.<IEmbeddableCartridge> emptySet();
+
 		// when
-		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_JENKINS_CLIENT, currentCartridges);
+		EmbedCartridgeStrategy.EmbeddableCartridgeDiff diff = embedStrategy.add(CARTRIDGE_JENKINS_CLIENT,
+				currentCartridges);
 
 		// then
 		assertEquals(CARTRIDGE_JENKINS_CLIENT, diff.getCartridge());
@@ -254,19 +265,19 @@ public class EmbedCartridgeStrategyTest {
 		assertEquals(0, diff.getRemovals().size());
 		assertNotNull(diff.getApplicationAdditions());
 		assertEquals(1, diff.getApplicationAdditions().size());
-		assertTrue(diff.getApplicationAdditions().contains(ICartridge.JENKINS_14));
+		assertTrue(diff.getApplicationAdditions().contains(JENKINS_14));
 	}
 
 	private static final class ApplicationFake extends NoopApplicationFake {
 
-		private ICartridge cartridge;
+		private IStandaloneCartridge cartridge;
 
-		public ApplicationFake(ICartridge cartridge) {
+		private ApplicationFake(IStandaloneCartridge cartridge) {
 			this.cartridge = cartridge;
 		}
 
 		@Override
-		public ICartridge getCartridge() {
+		public IStandaloneCartridge getCartridge() {
 			return cartridge;
 		}
 	}

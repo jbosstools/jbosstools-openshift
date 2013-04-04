@@ -15,7 +15,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IEmbeddedCartridge;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
  * @author Xavier Coulon
