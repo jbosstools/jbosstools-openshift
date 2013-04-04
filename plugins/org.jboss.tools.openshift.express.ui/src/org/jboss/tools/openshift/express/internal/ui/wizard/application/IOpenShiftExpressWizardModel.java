@@ -32,6 +32,7 @@ import com.openshift.client.IApplication;
 import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IStandaloneCartridge;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -146,9 +147,9 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 
 	public String getApplicationName();
 
-	public ICartridge setApplicationCartridge(ICartridge cartridge);
+	public ICartridge setApplicationCartridge(IStandaloneCartridge cartridge);
 
-	public ICartridge getApplicationCartridge();
+	public IStandaloneCartridge getApplicationCartridge();
 
 	public void setApplication(IApplication application);
 

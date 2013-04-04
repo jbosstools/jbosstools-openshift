@@ -25,9 +25,9 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IStandaloneCartridge;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftTimeoutException;
 
@@ -37,13 +37,13 @@ import com.openshift.client.OpenShiftTimeoutException;
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
 	private String name;
-	private ICartridge cartridge;
+	private IStandaloneCartridge cartridge;
 	private ApplicationScale scale;
 	private IGearProfile gear;
 	private IApplication application;
 	private IDomain domain;
 	
-	public CreateApplicationJob(final String name, final ICartridge cartridge, final ApplicationScale scale,
+	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
 			final IGearProfile gear, IDomain domain) {
 		super(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
 		this.name = name;

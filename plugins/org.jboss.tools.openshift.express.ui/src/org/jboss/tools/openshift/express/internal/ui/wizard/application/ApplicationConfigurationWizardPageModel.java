@@ -27,10 +27,10 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.embed.IEmbedCartridg
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IStandaloneCartridge;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -59,7 +59,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	// start with a null value as a marker of non-initialized state (used during
 	// first pass validation)
 	private List<IApplication> existingApplications = new ArrayList<IApplication>();
-	private List<ICartridge> cartridges = new ArrayList<ICartridge>();
+	private List<IStandaloneCartridge> cartridges = new ArrayList<IStandaloneCartridge>();
 	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private String existingApplicationName;
@@ -210,19 +210,19 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		}
 	}
 
-	public void setCartridges(List<ICartridge> cartridges) {
+	public void setCartridges(List<IStandaloneCartridge> cartridges) {
 		Collections.sort(cartridges, new CartridgeNameComparator());
 		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
 		final String lastSelectedCartridgeName = openShiftUserPreferencesProvider.getLastSelectedCartridgeName();
-		final ICartridge selectedCartridge = getCartridgeByName(lastSelectedCartridgeName);
+		final IStandaloneCartridge selectedCartridge = getCartridgeByName(lastSelectedCartridgeName);
 		setSelectedCartridge(selectedCartridge);
 	}
 
-	public List<ICartridge> getCartridges() {
+	public List<IStandaloneCartridge> getCartridges() {
 		return cartridges;
 	}
 
-	public ICartridge getSelectedCartridge() {
+	public IStandaloneCartridge getSelectedCartridge() {
 		return wizardModel.getApplicationCartridge();
 	}
 
@@ -266,14 +266,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return matchingGearProfile;
 	}
 
-	public ICartridge getCartridgeByName(String name) {
-		List<ICartridge> cartridges = getCartridges();
+	public IStandaloneCartridge getCartridgeByName(String name) {
+		List<IStandaloneCartridge> cartridges = getCartridges();
 		if (cartridges == null || name == null) {
 			return null;
 		}
 
-		ICartridge matchingCartridge = null;
-		for (ICartridge cartridge : cartridges) {
+		IStandaloneCartridge matchingCartridge = null;
+		for (IStandaloneCartridge cartridge : cartridges) {
 			if (name.equals(cartridge.getName())) {
 				matchingCartridge = cartridge;
 				break;
@@ -287,12 +287,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	 * forces property change listeners to update their value
 	 */
 	protected void refreshSelectedCartridge() {
-		ICartridge selectedCartridge = getSelectedCartridge();
-		setSelectedCartridge((ICartridge) null);
+		IStandaloneCartridge selectedCartridge = getSelectedCartridge();
+		setSelectedCartridge((IStandaloneCartridge) null);
 		setSelectedCartridge(selectedCartridge);
 	}
 
-	public void setSelectedCartridge(ICartridge cartridge) {
+	public void setSelectedCartridge(IStandaloneCartridge cartridge) {
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE
 				, wizardModel.getApplicationCartridge()
 				, wizardModel.setApplicationCartridge(cartridge));
@@ -302,7 +302,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	protected void setSelectedCartridge(IApplication application) {
-		final ICartridge applicationCartridge = (application != null) ? application.getCartridge() : null;
+		final IStandaloneCartridge applicationCartridge = (application != null) ? application.getCartridge() : null;
 		setSelectedCartridge(applicationCartridge);
 	}
 

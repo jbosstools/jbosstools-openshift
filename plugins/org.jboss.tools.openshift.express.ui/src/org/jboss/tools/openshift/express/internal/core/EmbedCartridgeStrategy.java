@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IStandaloneCartridge;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -51,11 +51,11 @@ public class EmbedCartridgeStrategy {
 	private HashMap<IEmbeddableCartridge, Set<IEmbeddableCartridge>> dependantsByCartridge;
 
 	private Collection<IEmbeddableCartridge> allEmbeddableCartridges;
-	private Collection<ICartridge> allStandaloneCartridges;
+	private Collection<IStandaloneCartridge> allStandaloneCartridges;
 	private Collection<IApplication> allApplications;
 
 	public EmbedCartridgeStrategy(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
-			Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications) {
+			Collection<IStandaloneCartridge> allStandaloneCartridges, Collection<IApplication> allApplications) {
 		this.allEmbeddableCartridges = allEmbeddableCartridges;
 		this.allStandaloneCartridges = allStandaloneCartridges;
 		this.allApplications = allApplications;
@@ -63,7 +63,7 @@ public class EmbedCartridgeStrategy {
 	}
 
 	private void initDependencyMaps(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
-			Collection<ICartridge> allCartridges, EmbeddableCartridgeRelations... dependencies) {
+			Collection<IStandaloneCartridge> allCartridges, EmbeddableCartridgeRelations... dependencies) {
 		this.dependenciesByCartridge = new HashMap<IEmbeddableCartridge, EmbeddableCartridgeRelations>();
 
 		this.dependantsByCartridge = new HashMap<IEmbeddableCartridge, Set<IEmbeddableCartridge>>();
@@ -104,7 +104,7 @@ public class EmbedCartridgeStrategy {
 
 	private void add(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges,
 			EmbeddableCartridgeDiff diff, Collection<IEmbeddableCartridge> allEmbeddableCartridges,
-			Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications)
+			Collection<IStandaloneCartridge> allStandaloneCartridges, Collection<IApplication> allApplications)
 			throws OpenShiftException {
 		EmbeddableCartridgeRelations relation = dependenciesByCartridge.get(cartridge);
 		if (relation == null) {
@@ -126,15 +126,15 @@ public class EmbedCartridgeStrategy {
 	}
 
 	private void addRequiredApplication(EmbeddableCartridgeDiff diff,
-			EmbeddableCartridgeRelations relation, Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications) throws OpenShiftException {
-		ICartridge requiredCartridge = relation.getRequiredApplication(allStandaloneCartridges);
+			EmbeddableCartridgeRelations relation, Collection<IStandaloneCartridge> allStandaloneCartridges, Collection<IApplication> allApplications) throws OpenShiftException {
+		IStandaloneCartridge requiredCartridge = relation.getRequiredApplication(allStandaloneCartridges);
 		if (requiredCartridge != null
 				&& !containsApplicationByCartridge(requiredCartridge, allApplications)) {
 			diff.addApplicationAddition(requiredCartridge);
 		}
 	}
 
-	private boolean containsApplicationByCartridge(ICartridge cartridge, Collection<IApplication> applications) {
+	private boolean containsApplicationByCartridge(IStandaloneCartridge cartridge, Collection<IApplication> applications) {
 		for(IApplication application : applications) {
 			if (cartridge.equals(application.getCartridge())) {
 				return true;
@@ -209,7 +209,7 @@ public class EmbedCartridgeStrategy {
 			return required.getCartridge(allEmbeddableCartridges);
 		}
 
-		protected ICartridge getRequiredApplication(Collection<ICartridge> allCartridges) {
+		protected IStandaloneCartridge getRequiredApplication(Collection<IStandaloneCartridge> allCartridges) {
 			if (requiredApplication == null) {
 				return null;
 			}
@@ -221,14 +221,14 @@ public class EmbedCartridgeStrategy {
 
 		private List<IEmbeddableCartridge> removals;
 		private List<IEmbeddableCartridge> additions;
-		private List<ICartridge> applicationAdditions;
+		private List<IStandaloneCartridge> applicationAdditions;
 		private IEmbeddableCartridge cartridge;
 
 		protected EmbeddableCartridgeDiff(IEmbeddableCartridge cartridge) {
 			this.cartridge = cartridge;
 			this.removals = new ArrayList<IEmbeddableCartridge>();
 			this.additions = new ArrayList<IEmbeddableCartridge>();
-			this.applicationAdditions = new ArrayList<ICartridge>();
+			this.applicationAdditions = new ArrayList<IStandaloneCartridge>();
 		}
 
 		public IEmbeddableCartridge getCartridge() {
@@ -259,11 +259,11 @@ public class EmbedCartridgeStrategy {
 			removals.add(cartridge);
 		}
 
-		protected void addApplicationAddition(ICartridge applicationType) {
+		protected void addApplicationAddition(IStandaloneCartridge applicationType) {
 			applicationAdditions.add(applicationType);
 		}
 
-		public List<ICartridge> getApplicationAdditions() {
+		public List<IStandaloneCartridge> getApplicationAdditions() {
 			return applicationAdditions;
 		}
 
@@ -311,13 +311,13 @@ public class EmbedCartridgeStrategy {
 			this.nameStartsWith = nameStartsWith;
 		}
 
-		private ICartridge getCartridge(Collection<ICartridge> cartridges) {
+		private IStandaloneCartridge getCartridge(Collection<IStandaloneCartridge> cartridges) {
 			if (cartridges == null
 					|| cartridges.isEmpty()) {
 				return null;
 			}
 			
-			for(ICartridge cartridge : cartridges) {
+			for(IStandaloneCartridge cartridge : cartridges) {
 				if (cartridge.getName() != null
 						&& cartridge.getName().startsWith(nameStartsWith)) {
 					return cartridge;
