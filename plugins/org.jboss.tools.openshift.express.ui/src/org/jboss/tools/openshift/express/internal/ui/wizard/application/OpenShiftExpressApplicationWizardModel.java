@@ -28,9 +28,9 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.importop
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IEmbeddableCartridge;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IStandaloneCartridge;
 import com.openshift.client.OpenShiftException;
 
 public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
@@ -406,8 +406,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public ICartridge setApplicationCartridge(ICartridge cartridge) {
-		return (ICartridge) setProperty(APPLICATION_CARTRIDGE, cartridge);
+	public IStandaloneCartridge setApplicationCartridge(IStandaloneCartridge cartridge) {
+		return (IStandaloneCartridge) setProperty(APPLICATION_CARTRIDGE, cartridge);
 	}
 
 	protected void setApplicationCartridge(IApplication application) {
@@ -434,8 +434,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	}
 
 	@Override
-	public ICartridge getApplicationCartridge() {
-		return (ICartridge) getProperty(APPLICATION_CARTRIDGE);
+	public IStandaloneCartridge getApplicationCartridge() {
+		return (IStandaloneCartridge) getProperty(APPLICATION_CARTRIDGE);
 	}
 
 	@Override

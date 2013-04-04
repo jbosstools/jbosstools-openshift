@@ -20,9 +20,9 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationWizardModel;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.ICartridge;
 import com.openshift.client.IDomain;
 import com.openshift.client.IEmbeddableCartridge;
+import com.openshift.client.IStandaloneCartridge;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -92,7 +92,7 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 	
-	public boolean hasApplication(ICartridge cartridge) throws SocketTimeoutException, OpenShiftException {
+	public boolean hasApplication(IStandaloneCartridge cartridge) throws SocketTimeoutException, OpenShiftException {
 		IDomain domain = wizardModel.getApplication().getDomain();
 		return domain.hasApplicationByCartridge(cartridge);
 	}

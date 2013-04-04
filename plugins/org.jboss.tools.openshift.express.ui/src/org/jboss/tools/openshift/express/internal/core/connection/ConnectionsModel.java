@@ -20,13 +20,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
-
-import com.openshift.client.IUser;
 
 /**
  * @author Rob Stryker

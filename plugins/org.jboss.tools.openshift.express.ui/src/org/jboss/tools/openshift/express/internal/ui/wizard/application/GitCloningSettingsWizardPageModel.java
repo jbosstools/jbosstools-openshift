@@ -108,14 +108,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getApplicationName();
 	}
 	
-	public boolean isJBossAS7Application() {
-		IApplication application = wizardModel.getApplication();
-		if (application == null) {
-			return false;
-		}
-		return ICartridge.JBOSSAS_7.equals(application.getCartridge());
-	}
-
 	public String getRepositoryPath() {
 		return wizardModel.getRepositoryPath();
 	}
