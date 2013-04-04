@@ -219,9 +219,12 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 					}
 				}
 			} catch (Exception e) {
-				// TODO: handle properly
-				e.printStackTrace();
+				OpenShiftUIActivator.log(e);
 			}
+		}
+
+		if (result != null) {
+			ConsoleUtils.appendGitPushToConsole(behaviour.getServer(), result);
 		}
 
 		return result;
@@ -277,7 +280,6 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 				}
 			}
 		}
-
 	}
 
 	protected String getModuleProjectName(IModule[] module) {
