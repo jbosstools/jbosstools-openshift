@@ -200,7 +200,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		GridLayoutFactory.fillDefaults().numColumns(3).spacing(12, 8).applyTo(c);
 
 		final Button serverAdapterCheckbox = new Button(c, SWT.CHECK);
-		serverAdapterCheckbox.setText("Create and setup a server for easy publishing");
+		serverAdapterCheckbox.setText("Create and set up a server for easy publishing");
 		serverAdapterCheckbox
 				.setToolTipText("This Server Adapter will let you publish your local changes onto OpenShift, right from your Eclipse workbench.");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
