@@ -162,19 +162,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		IObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingAppNameText);
 		IObservableValue existingAppNameModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
-		ValueBindingBuilder.bind(existingAppNameTextObservable).to(existingAppNameModelObservable).in(dbc);
+		ValueBindingBuilder
+				.bind(existingAppNameTextObservable)
+				.to(existingAppNameModelObservable)
+				.in(dbc);
 		UIUtils.focusOnSelection(useExistingAppBtn, existingAppNameText);
-		createExistingAppNameContentAssist();
-		useExistingAppBtnSelection.addValueChangeListener(
-				onUseExistingApplication(
-						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
+		createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
 
-		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
-		browseAppsButton.setText("Browse...");
-		browseAppsButton.addSelectionListener(onBrowseApps(dbc));
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
-				.applyTo(browseAppsButton);
 		// observe the list of application, get notified once they have been
+		// loaded
 		IObservableValue existingApplicationsLoaded =
 				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
 						.observe(pageModel);
@@ -183,11 +179,23 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						useExistingAppBtnSelection, existingAppNameTextObservable, existingApplicationsLoaded);
 		dbc.addValidationStatusProvider(existingAppValidator);
 		ControlDecorationSupport.create(
-				existingAppValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(false));
+				existingAppValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+		useExistingAppBtnSelection.addValueChangeListener(
+				onUseExistingApplication(
+						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
+
+		// browse button
+		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
+		browseAppsButton.setText("Browse...");
+		browseAppsButton.addSelectionListener(onBrowseApps(dbc));
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
+				.applyTo(browseAppsButton);
 		return existingAppSelectionGroup;
 	}
 
-	private void createExistingAppNameContentAssist() {
+	private void createExistingAppNameContentAssist(Text existingAppNameText, String[] applicationNames) {
 		ControlDecoration dec = new ControlDecoration(existingAppNameText, SWT.TOP | SWT.LEFT);
 		FieldDecoration contentProposalFieldIndicator =
 				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
@@ -197,7 +205,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		AutoCompleteField adapter =
 				new AutoCompleteField(existingAppNameText, new TextContentAdapter(), new String[] {});
-		adapter.setProposals(pageModel.getApplicationNames());
+		adapter.setProposals(applicationNames);
 	}
 
 	private SelectionListener onBrowseApps(final DataBindingContext dbc) {
@@ -672,7 +680,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				loadOpenshiftResources(dbc);
 				dbc.updateTargets();
 				enableApplicationWidgets(pageModel.isUseExistingApplication());
-				createExistingAppNameContentAssist();
+				createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
 				this.newAppNameText.setFocus();
 			} catch (OpenShiftException e) {
 				Logger.error("Failed to reset page fields", e);
@@ -780,6 +788,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return ValidationStatus.ok();
 
 		}
+
+		@Override
+		public IObservableList getTargets() {
+			IObservableList targets = new WritableList();
+			targets.add(existingAppNameTextObservable);
+			return targets;
+		}
 	}
 
 	class NewApplicationNameValidator extends MultiValidator {
@@ -801,7 +816,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.ok();
 			}
 			if (applicationName.isEmpty()) {
-				return ValidationStatus.cancel(getDescription());
+				return ValidationStatus.cancel(
+						"Please choose the application that you want to import");
 			}
 			if (!StringUtils.isAlphaNumeric(applicationName)) {
 				return ValidationStatus.error(
