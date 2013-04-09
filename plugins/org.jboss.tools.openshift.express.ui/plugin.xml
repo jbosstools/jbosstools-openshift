@@ -202,6 +202,17 @@
 		        </and>
 			</enablement>
 		</actionProvider>
+		<actionProvider
+				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.RestartApplicationActionProvider"
+				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.restartApplicationActionProvider">
+			<enablement>
+              <and>
+		           <instanceof
+		                 value="org.eclipse.wst.server.core.IServer">
+		           </instanceof>
+		        </and>
+			</enablement>
+		</actionProvider>
     </extension>
 	
     <extension

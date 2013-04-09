@@ -14,11 +14,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IOpenShiftResource;
 import com.openshift.client.OpenShiftException;
@@ -26,7 +26,7 @@ import com.openshift.client.OpenShiftException;
 /**
  * @author Xavier Coulon
  */
-public class RefreshElementAction extends AbstractAction {
+public class RefreshElementAction extends AbstractOpenShiftAction {
 
 	public RefreshElementAction() {
 		super(OpenShiftExpressUIMessages.REFRESH_USER_ACTION, true);
@@ -39,11 +39,12 @@ public class RefreshElementAction extends AbstractAction {
 	 */
 	@Override
 	public void run() {
-		if (selection != null && selection instanceof ITreeSelection
-				&& (((ITreeSelection) selection).getFirstElement() instanceof Connection)
-				|| (((ITreeSelection) selection).getFirstElement() instanceof IOpenShiftResource)){
-			refresh( ((ITreeSelection) selection).getFirstElement());
+		final IOpenShiftResource resource = UIUtils.getFirstElement(getSelection(), IOpenShiftResource.class);
+		if (resource == null) {
+			return;
 		}
+
+		refresh(resource);
 	}
 
 	private void refresh(final Object element) {

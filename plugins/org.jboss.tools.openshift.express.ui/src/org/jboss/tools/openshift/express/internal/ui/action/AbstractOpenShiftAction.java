@@ -22,25 +22,25 @@ import org.eclipse.ui.navigator.CommonViewer;
 /**
  * @author Xavier Coulon
  */
-public abstract class AbstractAction extends Action implements ISelectionChangedListener {
+public abstract class AbstractOpenShiftAction extends Action implements ISelectionChangedListener {
 
 	/** The current selection in the view. */
-	protected ISelection selection = null;
+	private ISelection selection;
 	
 	protected StructuredViewer viewer;
 	
 	private boolean enableForSingleElement = false;
 
-	public AbstractAction(String text) {
+	public AbstractOpenShiftAction(String text) {
 		super(text);
 	}
 	
-	public AbstractAction(String text, boolean enableForSingleElement) {
+	public AbstractOpenShiftAction(String text, boolean enableForSingleElement) {
 		super(text);
 		this.enableForSingleElement = enableForSingleElement;
 	}
 
-	public AbstractAction(String text, ImageDescriptor image) {
+	public AbstractOpenShiftAction(String text, ImageDescriptor image) {
 		super(text, image);
 	}
 
@@ -50,27 +50,33 @@ public abstract class AbstractAction extends Action implements ISelectionChanged
 		if (source instanceof CommonViewer) {
 			this.viewer = (CommonViewer) source;
 			this.selection = ((CommonViewer) source).getSelection();
-			if(enableForSingleElement){
-				if(selection instanceof ITreeSelection && ((ITreeSelection) selection).size() == 1){
-					setEnabled(true);
-				}else{
-					setEnabled(false);
-				}
+			setEnablement(selection);
+		}
+	}
+
+	protected void setEnablement(ISelection selection) {
+		if (enableForSingleElement) {
+			if (selection instanceof ITreeSelection
+					&& ((ITreeSelection) selection).size() == 1) {
+				setEnabled(true);
+			} else {
+				setEnabled(false);
 			}
 		}
 	}
 
 	public void setSelection(ISelection selection) {
 		this.selection = selection;
-	
 	}
-
+	
+	protected ISelection getSelection() {
+		return selection;
+	}
+		
 	public void setViewer(StructuredViewer viewer) {
 		this.viewer = viewer;
 	}
 	
-	public void validate(){
-		
+	public void validate() {
 	}
-
 }

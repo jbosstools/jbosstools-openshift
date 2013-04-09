@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -44,7 +45,7 @@ import com.openshift.client.OpenShiftException;
  * @author Rob Stryker
  * 
  */
-public class CreateServerAdapterAction extends AbstractAction {
+public class CreateServerAdapterAction extends AbstractOpenShiftAction {
 
 	public CreateServerAdapterAction() {
 		super(OpenShiftExpressUIMessages.CREATE_SERVER_ADAPTER_ACTION, true);
@@ -54,21 +55,24 @@ public class CreateServerAdapterAction extends AbstractAction {
 	@Override
 	public void run() {
 		try {
-			final ITreeSelection treeSelection = (ITreeSelection) selection;
-			if (selection instanceof ITreeSelection
-					&& treeSelection.getFirstElement() instanceof IApplication) {
-				NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				ExpressServerUtils.put(application, w.getTaskModel());
-				final IDomain domain = application.getDomain();
-				ExpressServerUtils.put(domain, w.getTaskModel());
-				final IUser user = domain.getUser();
-				Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
-				Connection connection = OpenShiftExplorerUtils.getConnectionFor(treeSelection);
-				ExpressServerUtils.put(connection, w.getTaskModel());
-				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
-				dialog.open();
+			if (!(getSelection() instanceof ITreeSelection)) {
+				return;
 			}
+			ITreeSelection treeSelection = (ITreeSelection) getSelection();
+			IApplication application = UIUtils.getFirstElement(treeSelection, IApplication.class);
+			if (application == null) {
+				return;
+			}
+			NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
+			ExpressServerUtils.put(application, w.getTaskModel());
+			final IDomain domain = application.getDomain();
+			ExpressServerUtils.put(domain, w.getTaskModel());
+			final IUser user = domain.getUser();
+			Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
+			Connection connection = OpenShiftExplorerUtils.getConnectionFor(treeSelection);
+			ExpressServerUtils.put(connection, w.getTaskModel());
+			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
+			dialog.open();
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not create OpenShift server", e);
 		}

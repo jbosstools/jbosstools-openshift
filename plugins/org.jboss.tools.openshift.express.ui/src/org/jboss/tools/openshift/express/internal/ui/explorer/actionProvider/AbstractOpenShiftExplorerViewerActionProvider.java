@@ -15,20 +15,20 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
-import org.jboss.tools.openshift.express.internal.ui.action.AbstractAction;
+import org.jboss.tools.openshift.express.internal.ui.action.AbstractOpenShiftAction;
 
 /**
  * @author Xavier Coulon
  */
 public abstract class AbstractOpenShiftExplorerViewerActionProvider extends CommonActionProvider {
 
-	protected final AbstractAction action;
+	protected final AbstractOpenShiftAction action;
 	
 	protected ICommonActionExtensionSite actionExtensionSite;
 
 	private final String group;
 	
-	public AbstractOpenShiftExplorerViewerActionProvider(AbstractAction action, String group) {
+	public AbstractOpenShiftExplorerViewerActionProvider(AbstractOpenShiftAction action, String group) {
 		this.action = action;
 		this.group = group;
 	}
@@ -46,8 +46,8 @@ public abstract class AbstractOpenShiftExplorerViewerActionProvider extends Comm
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
-		action.validate();
 		if (action != null/* && action.isEnabled()*/) {
+			action.validate();
 			menu.appendToGroup(group, action);
 		}
 	}

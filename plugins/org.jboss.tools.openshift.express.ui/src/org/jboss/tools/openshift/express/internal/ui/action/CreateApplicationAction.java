@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShif
 /**
  * @author Xavier Coulon
  */
-public class CreateApplicationAction extends AbstractAction {
+public class CreateApplicationAction extends AbstractOpenShiftAction {
 
 	/**
 	 * Constructor
@@ -34,13 +34,15 @@ public class CreateApplicationAction extends AbstractAction {
 
 	@Override
 	public void run() {
-		Connection connection = OpenShiftExplorerUtils.getConnectionFor(selection);
-		if (connection != null) {
-			if (connection.connect()) {
-				final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(connection);
-				final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
-				wizardDialog.open();
-			}
+		Connection connection = OpenShiftExplorerUtils.getConnectionFor(getSelection());
+		if (connection == null) {
+			return;
+		}
+
+		if (connection.connect()) {
+			final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(connection);
+			final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
+			wizardDialog.open();
 		}
 	}
 

@@ -34,7 +34,7 @@ import com.openshift.client.OpenShiftException;
 /**
  * @author Xavier Coulon
  */
-public class DeleteApplicationAction extends AbstractAction {
+public class DeleteApplicationAction extends AbstractOpenShiftAction {
 
 	public DeleteApplicationAction() {
 		super(OpenShiftExpressUIMessages.DELETE_APPLICATION_ACTION);
@@ -49,9 +49,13 @@ public class DeleteApplicationAction extends AbstractAction {
 	 */
 	@Override
 	public void run() {
+		if (!(getSelection() instanceof ITreeSelection)) {
+			return;
+		}
+		ITreeSelection treeSelection = (ITreeSelection) getSelection();
 		final List<IApplication> appsToDelete = new ArrayList<IApplication>();
 		for (@SuppressWarnings("unchecked")
-		Iterator<Object> iterator = ((ITreeSelection) selection).iterator(); iterator.hasNext();) {
+		Iterator<Object> iterator = treeSelection.iterator(); iterator.hasNext();) {
 			final Object element = iterator.next();
 			if (isApplication(element)) {
 				appsToDelete.add((IApplication) element);
