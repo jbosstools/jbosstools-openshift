@@ -40,8 +40,10 @@ public class OpenShiftExplorerUtils {
 	 * @return
 	 */
 	public static Connection getConnectionFor(ITreeSelection selection) {
-		Assert.isLegal(selection != null);
-		Assert.isLegal(selection.size() <= 1);
+		if (selection == null
+				|| selection.size() <= 1) {
+			return null;
+		}
 
 		Object selectedElement = selection.getFirstElement();
 		TreePath[] paths = selection.getPathsFor(selectedElement);

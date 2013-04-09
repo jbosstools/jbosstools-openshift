@@ -19,7 +19,10 @@ import com.jcraft.jsch.Session;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftSSHOperationException;
 
-public abstract class AbstractSSHAction extends AbstractAction {
+/**
+ * @author Xavier Coulon
+ */
+public abstract class AbstractSSHAction extends AbstractOpenShiftAction {
 
 	public AbstractSSHAction(String text) {
 		super(text);

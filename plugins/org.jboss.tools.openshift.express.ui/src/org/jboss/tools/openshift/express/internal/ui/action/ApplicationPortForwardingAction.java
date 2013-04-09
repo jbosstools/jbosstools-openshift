@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -23,11 +22,12 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.portforward.ApplicationPortForwardingWizard;
 import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.VerifySSHSessionJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 
 import com.openshift.client.IApplication;
 
-public class ApplicationPortForwardingAction extends AbstractAction {
+public class ApplicationPortForwardingAction extends AbstractOpenShiftAction {
 
 	public ApplicationPortForwardingAction() {
 		super("Port forwarding...", DebugUITools.getImageDescriptor(IDebugUIConstants.IMG_LCL_DISCONNECT));
@@ -40,12 +40,13 @@ public class ApplicationPortForwardingAction extends AbstractAction {
 	 */
 	@Override
 	public void run() {
-		if (selection != null && selection instanceof ITreeSelection) {
-			Object sel = ((ITreeSelection) selection).getFirstElement();
-			if (sel instanceof IApplication) {
-				openPortForwardingDialogFor((IApplication) sel);
-			} else if (sel instanceof IServer) {
-				openPortForwardingDialogFor((IServer) sel);
+		IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+		if (application != null) {
+			openPortForwardingDialogFor(application);
+		} else {
+			IServer server = UIUtils.getFirstElement(getSelection(), IServer.class);
+			if (server != null) {
+				openPortForwardingDialogFor(server);
 			}
 		}
 	}

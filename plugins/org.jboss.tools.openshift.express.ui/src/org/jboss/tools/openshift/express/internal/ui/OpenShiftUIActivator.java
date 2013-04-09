@@ -65,6 +65,10 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 		plugin.getLog().log(status);
 	}
 
+	public static void log(String message) {
+		log(message, null);
+	}
+
 	public static void log(Throwable e) {
 		log(e.getMessage(), e);
 	}

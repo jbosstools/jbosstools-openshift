@@ -21,7 +21,7 @@ import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.internal.cnf.ServerActionProvider;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.action.AbstractAction;
+import org.jboss.tools.openshift.express.internal.ui.action.AbstractOpenShiftAction;
 
 /**
  * @author Xavier Coulon
@@ -31,11 +31,11 @@ public abstract class AbstractServerViewerActionProvider extends CommonActionPro
 
 	private static final String OPENSHIFT_SERVER_ADAPTER_MENU = "org.jboss.tools.openshift.express.serverviewer.menu";
 
-	protected final AbstractAction action;
+	protected final AbstractOpenShiftAction action;
 
 	protected ICommonActionExtensionSite actionExtensionSite;
 
-	public AbstractServerViewerActionProvider(AbstractAction action) {
+	public AbstractServerViewerActionProvider(AbstractOpenShiftAction action) {
 		this.action = action;
 	}
 

@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -25,34 +24,31 @@ import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.VerifySSHSessionJob;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon
  */
-public class ShowEnvironmentAction extends AbstractAction {
+public class ShowEnvironmentAction extends AbstractOpenShiftAction {
 
 	public ShowEnvironmentAction() {
 		super(OpenShiftExpressUIMessages.SHOW_ENVIRONMENT_ACTION, true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
-		final ITreeSelection treeSelection = (ITreeSelection) selection;
-		if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
-			final IApplication application = (IApplication) treeSelection.getFirstElement();
+		final IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+		if (application != null) {
 			showEnvironmentPropertiesFor(application);
-		} else if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IServer) {
-			final IServer server = (IServer) treeSelection.getFirstElement();
+		} else {
+			IServer server = UIUtils.getFirstElement(getSelection(), IServer.class);
+			if (server == null) {
+				return;
+			}
 			showEnvironmentPropertiesFor(server);
 		}
-
 	}
 
 	/**

@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteSession;
@@ -48,6 +47,7 @@ import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -61,7 +61,7 @@ import com.openshift.client.OpenShiftSSHOperationException;
  * @author Xavier Coulon
  * 
  */
-public class TailServerLogAction extends AbstractAction implements IConsoleListener {
+public class TailServerLogAction extends AbstractOpenShiftAction implements IConsoleListener {
 
 	/**
 	 * The message consoles associated with the 'tail' workers that write the output.
@@ -86,19 +86,17 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 	@Override
 	public void run() {
 		try {
-			
-			if (selection instanceof IStructuredSelection) {
-				final Object selectedItem = ((IStructuredSelection) selection).getFirstElement();
+			try {
+				final Object selectedItem = UIUtils.getFirstElement(getSelection(), Object.class);
 				if (selectedItem instanceof IServer) {
-					final IServer server = ((IServer) selectedItem);
-					run(server);
+					run((IServer) selectedItem);
 				} else if (selectedItem instanceof IServerModule) {
-					final IServer server = ((IServerModule) selectedItem).getServer();
-					run(server);
+					run(((IServerModule) selectedItem).getServer());
 				} else if (selectedItem instanceof IApplication) {
-					final IApplication application = (IApplication) selectedItem;
-					run(application);
+					run((IApplication) selectedItem);
 				}
+			} catch (Exception e) {
+				Logger.error("Failed to open Remote Console", e);
 			}
 		} catch (Exception e) {
 			Logger.error("Failed to open Remote Console", e);
@@ -216,22 +214,6 @@ public class TailServerLogAction extends AbstractAction implements IConsoleListe
 		final String command = commandBuilder.toString();
 		Logger.debug("ssh command to execute: " + command);
 		return command;
-	}
-
-	public Object getSelection() {
-		if (selection instanceof IStructuredSelection) {
-			final Object selectedItem = ((IStructuredSelection) selection).getFirstElement();
-			if (selectedItem instanceof IServer) {
-				return ((IServer) selectedItem);
-			}
-			if (selectedItem instanceof IServerModule) {
-				return ((IServerModule) selectedItem).getServer();
-			}
-			if (selectedItem instanceof IApplication) {
-
-			}
-		}
-		return null;
 	}
 
 	@Override

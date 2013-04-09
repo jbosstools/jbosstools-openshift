@@ -18,16 +18,12 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 /**
  * @author Xavier Coulon
  */
-public class ShowPropertiesAction extends AbstractAction {
+public class ShowPropertiesAction extends AbstractOpenShiftAction {
 
 	public ShowPropertiesAction() {
 		super(OpenShiftExpressUIMessages.SHOW_PROPERTIES_VIEW_ACTION, true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		try {

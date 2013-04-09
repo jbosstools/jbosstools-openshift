@@ -10,18 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon
  */
-public class OpenInWebBrowserAction extends AbstractAction {
+public class OpenInWebBrowserAction extends AbstractOpenShiftAction {
 
 	public OpenInWebBrowserAction() {
 		super(OpenShiftExpressUIMessages.SHOW_IN_BROWSER_ACTION, true);
@@ -34,14 +34,14 @@ public class OpenInWebBrowserAction extends AbstractAction {
 	 */
 	@Override
 	public void run() {
-		if (selection != null && selection instanceof ITreeSelection
-				&& ((ITreeSelection) selection).getFirstElement() instanceof IApplication) {
-			final IApplication application = (IApplication) ((ITreeSelection) selection).getFirstElement();
-			final String appName = application.getName();
-			final String appUrl = application.getApplicationUrl();
-			BrowserUtil.checkedCreateInternalBrowser(appUrl, appName,
-					OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+		final IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+		if (application == null) {
+			return;
 		}
+		final String appName = application.getName();
+		final String appUrl = application.getApplicationUrl();
+		BrowserUtil.checkedCreateInternalBrowser(appUrl, appName,
+				OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 	}
 
 }

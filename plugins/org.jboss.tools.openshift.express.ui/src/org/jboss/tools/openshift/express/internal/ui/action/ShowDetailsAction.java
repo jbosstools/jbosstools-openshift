@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.details.ApplicationDetailsDialog;
 
 import com.openshift.client.IApplication;
@@ -21,24 +21,20 @@ import com.openshift.client.IApplication;
 /**
  * @author Xavier Coulon
  */
-public class ShowDetailsAction extends AbstractAction {
+public class ShowDetailsAction extends AbstractOpenShiftAction {
 
 	public ShowDetailsAction() {
 		super(OpenShiftExpressUIMessages.SHOW_DETAILS_ACTION, true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		try {
-			final ITreeSelection treeSelection = (ITreeSelection) selection;
-			if (selection instanceof ITreeSelection && treeSelection.getFirstElement() instanceof IApplication) {
-				final IApplication application = (IApplication) treeSelection.getFirstElement();
-				new ApplicationDetailsDialog(application, Display.getDefault().getActiveShell()).open();
+			final IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+			if (application == null) {
+				return;
 			}
+			new ApplicationDetailsDialog(application, Display.getDefault().getActiveShell()).open();
 		} catch (Exception e) {
 			OpenShiftUIActivator.createErrorStatus("Failed to display application details", e);
 		}
