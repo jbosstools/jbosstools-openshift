@@ -771,6 +771,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.cancel("Please select an existing OpenShift application");
 			}
 
+			if (!StringUtils.isAlphaNumeric(appName)) {
+				return ValidationStatus.error(
+						"The name may only contain lower-case letters and digits.");
+			}
+
 			if (existingApplicationsLoaded != null
 					&& !existingApplicationsLoaded) {
 				return ValidationStatus.cancel("Existing applications are not loaded yet.");
