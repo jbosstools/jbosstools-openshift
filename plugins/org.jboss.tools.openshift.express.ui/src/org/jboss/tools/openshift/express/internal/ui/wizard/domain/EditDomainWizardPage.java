@@ -92,11 +92,11 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Enter a domain name with lower-case letters and digits only. Max length is 16 characters.");
+						"Enter a domain name with letters and digits only. Max length is 16 characters.");
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
-						"The domain name may only contain lower-case letters and digits.");
+						"The domain name may only contain letters and digits.");
 			}
 			if (domainName.length() > 16) {
 				return ValidationStatus.error(

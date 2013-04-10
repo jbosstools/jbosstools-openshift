@@ -276,7 +276,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 					status = OpenShiftUIActivator.createErrorStatus("You have to choose an application name");
 				} else if (!StringUtils.isAlphaNumeric(applicationName)) {
 					status = OpenShiftUIActivator.createErrorStatus(
-							"The name may only contain lower-case letters and digits.");
+							"The name may only contain letters and digits.");
 				} else {
 					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
 					if (project.exists()) {

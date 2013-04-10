@@ -248,7 +248,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 					shell,
 					"New Jenkins application",
 					"To embed Jenkins into your application, you first have to create a separate Jenkins application. "
-							+ "Please provide a name for this new Jenkins application (lower-case letters and digits only):"
+							+ "Please provide a name for this new Jenkins application (letters and digits only):"
 					, null, new JenkinsNameValidator());
 		}
 
@@ -261,7 +261,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 				}
 
 				if (!StringUtils.isAlphaNumeric(input)) {
-					return "The name may only contain lower-case letters and digits.";
+					return "The name may only contain letters and digits.";
 				}
 				return null;
 			}

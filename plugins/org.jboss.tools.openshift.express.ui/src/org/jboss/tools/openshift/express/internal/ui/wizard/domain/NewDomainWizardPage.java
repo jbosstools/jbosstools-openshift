@@ -113,7 +113,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
-						"The domain name may only contain lower-case letters and digits.");
+						"The domain name may only contain letters and digits.");
 			}
 			return ValidationStatus.ok();
 		}

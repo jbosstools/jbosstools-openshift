@@ -773,7 +773,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			if (!StringUtils.isAlphaNumeric(appName)) {
 				return ValidationStatus.error(
-						"The name may only contain lower-case letters and digits.");
+						"The name may only contain letters and digits.");
 			}
 
 			if (existingApplicationsLoaded != null
@@ -826,7 +826,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			if (!StringUtils.isAlphaNumeric(applicationName)) {
 				return ValidationStatus.error(
-						"The name may only contain lower-case letters and digits.");
+						"The name may only contain letters and digits.");
 			}
 			if (pageModel.isExistingApplication(applicationName)) {
 				return ValidationStatus.error(
