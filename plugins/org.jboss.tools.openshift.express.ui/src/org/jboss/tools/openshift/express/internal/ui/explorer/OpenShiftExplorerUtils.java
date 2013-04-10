@@ -41,7 +41,7 @@ public class OpenShiftExplorerUtils {
 	 */
 	public static Connection getConnectionFor(ITreeSelection selection) {
 		if (selection == null
-				|| selection.size() <= 1) {
+				|| selection.size() < 1) {
 			return null;
 		}
 
