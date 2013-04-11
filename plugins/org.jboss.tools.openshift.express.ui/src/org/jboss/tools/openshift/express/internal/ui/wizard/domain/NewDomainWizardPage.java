@@ -109,7 +109,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			final String domainName = (String) domainNameObservable.getValue();
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Select an alphanumerical name for the domain to edit.");
+						"Provide an alphanumeric name for the domain.");
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
