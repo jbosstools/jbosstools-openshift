@@ -25,10 +25,10 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.openshift.client.EmbeddableCartridge;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.EmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 import com.openshift.internal.client.StandaloneCartridge;
