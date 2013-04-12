@@ -594,7 +594,7 @@
            </adapter>
         </factory>
         <factory
-              adaptableType="com.openshift.client.IEmbeddableCartridge"
+              adaptableType="com.openshift.client.cartridge.IEmbeddedCartridge"
               class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
