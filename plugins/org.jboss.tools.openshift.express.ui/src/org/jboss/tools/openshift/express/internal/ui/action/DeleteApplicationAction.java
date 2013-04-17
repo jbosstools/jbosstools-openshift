@@ -87,11 +87,18 @@ public class DeleteApplicationAction extends AbstractOpenShiftAction {
 			// Equals() and hashcode() in IUser ?
 			Job job = new Job("Deleting OpenShift Application(s)...") {
 				protected IStatus run(IProgressMonitor monitor) {
+					int totalWork = appsToDelete.size();
+					monitor.beginTask("Deleting OpenShift Application(s)...", totalWork);
 					try {
 						for (final IApplication application : appsToDelete) {
 							final String appName = application.getName();
 							try {
+								if (monitor.isCanceled()) {
+									return Status.CANCEL_STATUS;
+								}
+								monitor.subTask("Deleting Application " + application.getName());
 								application.destroy();
+								monitor.worked(1);
 							} catch (OpenShiftException e) {
 								safeRefresh(application);
 								Logger.error(NLS.bind("Failed to delete application \"{0}\"", appName), e);
