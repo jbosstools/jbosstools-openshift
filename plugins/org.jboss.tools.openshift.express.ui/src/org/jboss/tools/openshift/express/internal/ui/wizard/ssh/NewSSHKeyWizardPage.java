@@ -142,7 +142,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		Label privateKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(privateKeyLabel);
-		privateKeyLabel.setText("Private Key:");
+		privateKeyLabel.setText("Private Key Filename:");
 
 		Text privateKeyText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
@@ -171,7 +171,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		Label publicKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
-		publicKeyLabel.setText("Public Key:");
+		publicKeyLabel.setText("Public Key Filename:");
 
 		Text publicKeyText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
