@@ -19,8 +19,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
  */
 public class AlphanumericStringValidator extends RequiredStringValidator {
 
-	private String fieldName;
-
 	public AlphanumericStringValidator(String fieldName) {
 		super(fieldName);
 	}
@@ -28,7 +26,7 @@ public class AlphanumericStringValidator extends RequiredStringValidator {
 	@Override
 	public IStatus validateString(String value) {
 		if (!StringUtils.isAlphaNumeric(value)) {
-			return ValidationStatus.error("You have to provide an alphanumeric " + fieldName);
+			return ValidationStatus.error("You have to provide an alphanumeric " + getFieldName());
 		}
 		return ValidationStatus.ok();
 	}

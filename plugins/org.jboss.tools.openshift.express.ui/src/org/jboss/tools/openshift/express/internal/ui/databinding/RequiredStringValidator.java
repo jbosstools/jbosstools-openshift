@@ -46,5 +46,9 @@ public class RequiredStringValidator implements IValidator {
 	public IStatus validateString(String value) {
 		return ValidationStatus.ok();
 	}
+	
+	protected String getFieldName() {
+		return fieldName;
+	}
 
 }
