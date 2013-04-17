@@ -235,7 +235,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 						return StringUtils.shorten(key.getPublicKey(), 24);
 					}
 				})
-				.name("Type").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
+				.name("Content").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
 				.buildViewer();
 
 		return viewer;
