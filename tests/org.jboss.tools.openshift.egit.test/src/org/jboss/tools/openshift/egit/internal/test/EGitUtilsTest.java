@@ -362,7 +362,7 @@ public class EGitUtilsTest {
 		String host = EGitUtils.getGitHost("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
 		// verification
 		assertNotNull(host);
-		assertEquals("ssh://eap2-honkabonka2.rhcloud.com/~/git/eap2.git/", host);
+		assertEquals("eap2-honkabonka2.rhcloud.com", host);
 	}
 	
 	public void shouldReturnHostFromHostOnlyGitUrl() {
@@ -371,13 +371,22 @@ public class EGitUtilsTest {
 		String host = EGitUtils.getGitHost("ssh://eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
 		// verification
 		assertNotNull(host);
-		assertEquals("ssh://eap2-honkabonka2.rhcloud.com/~/git/eap2.git/", host);
+		assertEquals("eap2-honkabonka2.rhcloud.com", host);
+	}
+
+	public void shouldReturnHostFromHostWithoutPathGitUrl() {
+		//pre-conditions
+		//operation
+		String host = EGitUtils.getGitHost("ssh://adietish@eap2-honkabonka2.rhcloud.com");
+		// verification
+		assertNotNull(host);
+		assertEquals("eap2-honkabonka2.rhcloud.com", host);
 	}
 
 	public void shouldReturnNullFromInvalidGitUrl() {
 		//pre-conditions
 		//operation
-		String host = EGitUtils.getGitHost("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		String host = EGitUtils.getGitHost("://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
 		// verification
 		assertNull(host);
 	}

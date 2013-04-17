@@ -91,7 +91,7 @@ public class EGitUtils {
 			+ Constants.MASTER; // refs/heads/master
 	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
 
-	private static final Pattern GIT_URL_PATTERN = Pattern.compile("(.+://)([^@]+)@(.*)");
+	private static final Pattern GIT_URL_PATTERN = Pattern.compile(".+://([^@]+)@*([^/]*)");
 	
 	private EGitUtils() {
 		// inhibit instantiation
@@ -1224,14 +1224,11 @@ public class EGitUtils {
 	}	
 
 	public static String getGitHost(String gitUrl) {
-		return new StringBuilder(getGitUrlGroup(1, gitUrl))
-		.append(getGitUrlGroup(3, gitUrl))
-		.toString();
-		
+		return getGitUrlGroup(2, gitUrl);		
 	}
 
 	public static String getGitUsername(String gitUrl) {
-		return getGitUrlGroup(2, gitUrl);
+		return getGitUrlGroup(1, gitUrl);
 	}
 
 	private static String getGitUrlGroup(int group, String gitUrl) {
@@ -1241,7 +1238,7 @@ public class EGitUtils {
 		}
 		Matcher matcher = GIT_URL_PATTERN.matcher(gitUrl);
 		if (!matcher.find()
-				|| matcher.groupCount() < 3) {
+				|| matcher.groupCount() < 2) {
 			return null;
 		}
 		return matcher.group(group);
