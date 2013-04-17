@@ -39,9 +39,12 @@ public class RefreshElementAction extends AbstractOpenShiftAction {
 	 */
 	@Override
 	public void run() {
-		final IOpenShiftResource resource = UIUtils.getFirstElement(getSelection(), IOpenShiftResource.class);
+		Object resource = UIUtils.getFirstElement(getSelection(), IOpenShiftResource.class);
 		if (resource == null) {
-			return;
+			resource = UIUtils.getFirstElement(getSelection(), Connection.class);
+			if (resource == null) {
+				return;
+			}
 		}
 
 		refresh(resource);
