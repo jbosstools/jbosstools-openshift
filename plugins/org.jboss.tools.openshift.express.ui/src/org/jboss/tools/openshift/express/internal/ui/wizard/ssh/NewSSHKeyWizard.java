@@ -24,6 +24,7 @@ public class NewSSHKeyWizard extends Wizard {
 	
 	public NewSSHKeyWizard(Connection user) {
 		this.user = user;
+		setWindowTitle("New SSH Key");
 		setNeedsProgressMonitor(true);
 	}
 

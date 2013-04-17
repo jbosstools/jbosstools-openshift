@@ -22,6 +22,7 @@ public class ManageSSHKeysWizard extends Wizard {
 
 	public ManageSSHKeysWizard(Connection user) {
 		this.user = user;
+		setWindowTitle("Manage SSH Keys");
 		setNeedsProgressMonitor(true);
 	}
 
