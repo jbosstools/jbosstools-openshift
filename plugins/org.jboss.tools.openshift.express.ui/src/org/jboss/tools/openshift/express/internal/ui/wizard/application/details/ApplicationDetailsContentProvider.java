@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.AbstractPropertyTableContentProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.ContainerElement;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.IProperty;
@@ -43,6 +44,8 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 						new StringElement("Created on", format.format(application.getCreationTime())));
 				elements.add(new StringElement("UUID", application.getUUID()));
 				elements.add(new StringElement("Git URL", application.getGitUrl()));
+				elements.add(new StringElement("Git Username", EGitUtils.getGitUsername(application.getGitUrl())));
+				elements.add(new StringElement("Git Host", EGitUtils.getGitHost(application.getGitUrl())));
 				elements.add(createCartridges(application));
 
 			} catch (Exception e) {
