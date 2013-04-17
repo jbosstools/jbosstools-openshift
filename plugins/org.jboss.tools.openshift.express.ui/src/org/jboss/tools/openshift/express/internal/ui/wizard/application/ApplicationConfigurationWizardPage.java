@@ -116,9 +116,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	// private ModifyListener modifyListener;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
-		super("Setup OpenShift Application",
+		super("Set up OpenShift Application",
 				"Select an existing or create a new OpenShift Application.",
-				"Setup OpenShift Application", wizard);
+				"Set up OpenShift Application", wizard);
 		try {
 			this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
 		} catch (OpenShiftException e) {
