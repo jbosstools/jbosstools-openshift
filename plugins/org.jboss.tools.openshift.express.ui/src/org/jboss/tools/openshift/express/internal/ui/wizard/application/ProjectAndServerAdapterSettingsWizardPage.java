@@ -59,7 +59,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
 	
-	private static final String PAGE_TITLE_FORMAT = "Setup Project for OpenShift Application \"{0}\""; 
+	private static final String PAGE_TITLE_FORMAT = "Set up Project for OpenShift Application \"{0}\""; 
 	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 	private Text existingProjectNameText = null;
