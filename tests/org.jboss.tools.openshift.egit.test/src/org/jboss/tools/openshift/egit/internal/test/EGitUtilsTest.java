@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.egit.internal.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -353,4 +354,42 @@ public class EGitUtilsTest {
 		assertTrue(
 				EGitUtils.hasRemote(repo2RemoteName, testRepository2.getUri().toString(), testRepositoryClone.getRepository()));
 	}
+	
+	@Test
+	public void shouldReturnHostFromFullGitUrl() {
+		//pre-conditions
+		//operation
+		String host = EGitUtils.getGitHost("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		// verification
+		assertNotNull(host);
+		assertEquals("ssh://eap2-honkabonka2.rhcloud.com/~/git/eap2.git/", host);
+	}
+	
+	public void shouldReturnHostFromHostOnlyGitUrl() {
+		//pre-conditions
+		//operation
+		String host = EGitUtils.getGitHost("ssh://eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		// verification
+		assertNotNull(host);
+		assertEquals("ssh://eap2-honkabonka2.rhcloud.com/~/git/eap2.git/", host);
+	}
+
+	public void shouldReturnNullFromInvalidGitUrl() {
+		//pre-conditions
+		//operation
+		String host = EGitUtils.getGitHost("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		// verification
+		assertNull(host);
+	}
+
+	@Test
+	public void shouldReturnUserFromFullGitUrl() {
+		//pre-conditions
+		//operation
+		String user = EGitUtils.getGitUsername("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		// verification
+		assertNotNull(user);
+		assertEquals("516e82ca4382ec2174000098", user);
+	}
+
 }
