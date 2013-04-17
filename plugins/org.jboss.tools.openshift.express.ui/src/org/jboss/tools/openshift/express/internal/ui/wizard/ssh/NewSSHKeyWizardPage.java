@@ -149,7 +149,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(privateKeyText);
 		Binding privateKeyBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(privateKeyText))
-				.validatingAfterConvert(new FileNameValidator())
+				.validatingAfterConvert(new FileNameValidator("Private Key Filename"))
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_FILENAME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
@@ -178,7 +178,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(publicKeyText);
 		Binding publicKeyBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(publicKeyText))
-				.validatingAfterConvert(new FileNameValidator())
+				.validatingAfterConvert(new FileNameValidator("Public Key Filename"))
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_FILENAME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(

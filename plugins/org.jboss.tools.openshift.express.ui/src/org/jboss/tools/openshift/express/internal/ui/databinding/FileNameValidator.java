@@ -24,14 +24,14 @@ import org.eclipse.core.runtime.IStatus;
  */
 public class FileNameValidator extends RequiredStringValidator implements IValidator {
 
-	public FileNameValidator() {
-		super("private key file name");
+	public FileNameValidator(String fieldName) {
+		super(fieldName);
 	}
 
 	@Override
 	public IStatus validateString(String value) {
 		if (value.indexOf(File.separator) >= 0) {
-			ValidationStatus.error("You may only provide a file name, not a path.");
+			return ValidationStatus.error("You may only provide a file name, not a path.");
 		}
 		return ValidationStatus.ok();
 	}
