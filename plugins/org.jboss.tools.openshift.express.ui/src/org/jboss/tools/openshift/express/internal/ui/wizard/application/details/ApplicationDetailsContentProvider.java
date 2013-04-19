@@ -44,8 +44,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 						new StringElement("Created on", format.format(application.getCreationTime())));
 				elements.add(new StringElement("UUID", application.getUUID()));
 				elements.add(new StringElement("Git URL", application.getGitUrl()));
-				elements.add(new StringElement("Git Username", EGitUtils.getGitUsername(application.getGitUrl())));
-				elements.add(new StringElement("Git Host", EGitUtils.getGitHost(application.getGitUrl())));
+				elements.add(new StringElement("SSH Connection", getSSHConnectionString(application.getGitUrl())));
 				elements.add(createCartridges(application));
 
 			} catch (Exception e) {
@@ -54,6 +53,13 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 			}
 		}
 		return elements.toArray();
+	}
+
+	protected String getSSHConnectionString(String gitUrl) {
+		return new StringBuilder(EGitUtils.getGitUsername(gitUrl))
+				.append('@')
+				.append(EGitUtils.getGitHost(gitUrl))
+				.toString();
 	}
 
 	private ContainerElement createCartridges(IApplication application)
