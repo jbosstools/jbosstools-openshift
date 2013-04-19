@@ -71,9 +71,11 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
 	 * @throws IOException
+	 * @throws GitAPIException 
+	 * @throws NoWorkTreeException 
 	 */
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException, IOException;
+			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException;
 
 	/**
 	 * Enables the user chosen, unshared project to be used on the chosen
