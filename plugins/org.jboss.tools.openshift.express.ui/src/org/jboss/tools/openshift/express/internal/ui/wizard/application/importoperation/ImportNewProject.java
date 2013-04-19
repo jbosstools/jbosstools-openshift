@@ -21,6 +21,8 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
@@ -58,10 +60,12 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
 	 * @throws IOException 
+	 * @throws GitAPIException 
+	 * @throws NoWorkTreeException 
 	 */
 	public IProject execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
-			InvocationTargetException, IOException {
+			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
 		if (cloneDestinationExists()) {
 			throw new WontOverwriteException(
 					NLS.bind("There's already a folder at {0}. The new OpenShift project would overwrite it. " +

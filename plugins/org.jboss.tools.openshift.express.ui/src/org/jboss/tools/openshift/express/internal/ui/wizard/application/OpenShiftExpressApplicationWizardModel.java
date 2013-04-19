@@ -66,10 +66,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * @throws URISyntaxException
 	 * @throws InvocationTargetException
 	 * @throws IOException
+	 * @throws GitAPIException 
+	 * @throws NoWorkTreeException 
 	 */
 	@Override
 	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException, IOException {
+			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
 		IProject importedProject =
 				new ImportNewProject(
 						getProjectName()

@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -198,16 +200,21 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 *            the monitor to report progress to
 	 * @throws CoreException
 	 * @throws OpenShiftException
+	 * @throws GitAPIException 
+	 * @throws IOException 
+	 * @throws NoWorkTreeException 
 	 * 
 	 * @see #addToModified(Collection<IResource>)
  	 * @see #addToModified(IResource)
  	 * 
 	 */
 	protected void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException,
-			OpenShiftException {
+			OpenShiftException, NoWorkTreeException, IOException, GitAPIException {
 		EGitUtils.checkedGetRepository(project);
 		new AddToIndexOperation(modifiedResources).execute(monitor);
-		EGitUtils.commit(project, monitor);
+		if (EGitUtils.isDirty(project)) {
+			EGitUtils.commit(project, monitor);
+		}
 	}
 
 	/**

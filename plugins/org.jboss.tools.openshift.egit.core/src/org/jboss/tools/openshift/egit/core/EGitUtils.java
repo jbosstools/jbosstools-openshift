@@ -990,6 +990,12 @@ public class EGitUtils {
 		return status;
 	}
 
+
+	public static boolean isDirty(IProject project)
+			throws NoWorkTreeException, IOException, GitAPIException {
+		return isDirty(getRepository(project));
+	}
+	
 	/**
 	 * Returns <code>true</code> if the given repository has uncommitted
 	 * changes. Uncommitted changes taken into account are
@@ -1009,6 +1015,7 @@ public class EGitUtils {
 	 */
 	public static boolean isDirty(Repository repository)
 			throws NoWorkTreeException, IOException, GitAPIException {
+		Assert.isLegal(repository != null);
 		boolean hasChanges = false;
 		org.eclipse.jgit.api.Status repoStatus = new Git(repository).status()
 				.call();
