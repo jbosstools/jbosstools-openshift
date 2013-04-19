@@ -142,14 +142,14 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		Label privateKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(privateKeyLabel);
-		privateKeyLabel.setText("Private Key Filename:");
+		privateKeyLabel.setText("Private Key File Name:");
 
 		Text privateKeyText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(privateKeyText);
 		Binding privateKeyBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(privateKeyText))
-				.validatingAfterConvert(new FileNameValidator("Private Key Filename"))
+				.validatingAfterConvert(new FileNameValidator("Private Key File Name"))
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_FILENAME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
@@ -171,14 +171,14 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		Label publicKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
-		publicKeyLabel.setText("Public Key Filename:");
+		publicKeyLabel.setText("Public Key File Name:");
 
 		Text publicKeyText = new Text(newSSHKeyGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(publicKeyText);
 		Binding publicKeyBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(publicKeyText))
-				.validatingAfterConvert(new FileNameValidator("Public Key Filename"))
+				.validatingAfterConvert(new FileNameValidator("Public Key File Name"))
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_FILENAME).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
