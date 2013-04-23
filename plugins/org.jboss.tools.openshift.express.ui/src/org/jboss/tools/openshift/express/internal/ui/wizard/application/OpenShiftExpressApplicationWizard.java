@@ -163,13 +163,13 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		if (JobUtils.isCancel(status)) {
 			if (AbstractDelegatingMonitorJob.TIMEOUTED_CANCELLED == status.getCode()) {
 				closeWizard();
-			} else {
-				new ErrorDialog(getShell(),
-						NLS.bind("Operation was cancelled", operation),
-						NLS.bind("we timeouted while {0}. We therefore cancelled the operation", operation),
-						status,
-						IStatus.ERROR | IStatus.WARNING | IStatus.CANCEL | IStatus.INFO)
-						.open();
+//			} else {
+//				new ErrorDialog(getShell(),
+//						NLS.bind("Operation was cancelled", operation),
+//						NLS.bind("we timeouted while {0}. We therefore cancelled the operation", operation),
+//						status,
+//						IStatus.ERROR | IStatus.WARNING | IStatus.CANCEL | IStatus.INFO)
+//						.open();
 			}
 		}
 
