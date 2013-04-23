@@ -30,6 +30,7 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project.MavenProjectImportOperation;
 
@@ -77,12 +78,16 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 				cloneRepository(getApplication(), getRemoteName(), cloneDestination, true, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, monitor);
 		if (importedProjects.size() == 0) {
+			String projectName = getProjectName();
+			if (StringUtils.isEmpty(projectName)) {
+				projectName = getApplication().getName();
+			}
 			throw new ImportFailedException(
 					NLS.bind("Could not import project {0}. One of the possible reasons is that there's already a " +
 							"project in your workspace that matches the openshift application/maven name of the " +
 							"OpenShift application. " +
 							"Please rename your workspace project in that case and start over again."
-							, getProjectName()));
+							, projectName));
 		}
 
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
@@ -146,5 +151,4 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		return cloneDestination != null
 				&& cloneDestination.exists();
 	}
-
 }
