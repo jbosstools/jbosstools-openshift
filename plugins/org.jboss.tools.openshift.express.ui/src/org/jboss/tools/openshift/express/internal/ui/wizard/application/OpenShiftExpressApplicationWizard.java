@@ -323,8 +323,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 				openError("Project already present", e.getMessage());
 				return Status.CANCEL_STATUS;
 			} catch (final ImportFailedException e) {
-				return OpenShiftUIActivator.createErrorStatus("Could not import maven project {0}.", e,
-						getWizardModel().getProjectName());
+				return OpenShiftUIActivator.createErrorStatus(
+						"Could not import maven project from application {0}.", e, wizardModel.getApplicationName());
 			} catch (IOException e) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"Could not copy openshift configuration files to project {0}", e, getWizardModel()
