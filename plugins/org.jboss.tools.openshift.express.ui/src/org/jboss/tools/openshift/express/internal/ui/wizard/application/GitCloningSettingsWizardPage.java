@@ -188,7 +188,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
 		final IObservableValue projectNameModelObservable =
-				BeanProperties.value(IOpenShiftExpressWizardModel.PROJECT_NAME).observe(wizardModel);
+				BeanProperties.value(IOpenShiftExpressWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
 
 		dbc.addValidationStatusProvider(
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));

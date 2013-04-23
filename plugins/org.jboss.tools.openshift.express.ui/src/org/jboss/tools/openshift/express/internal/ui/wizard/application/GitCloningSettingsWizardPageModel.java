@@ -45,9 +45,9 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public GitCloningSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.APPLICATION_NAME, onWizardApplicationNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROJECT_NAME, onWizardProjectNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.NEW_PROJECT, onWizardProjectNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
 		setRepositoryPath(getDefaultRepositoryPath());
 	}
 
@@ -84,10 +84,10 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 						setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
 					}
 				}
-				if(wizardModel.isExistingProject()) {
-					setRemoteName(IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
-				} else {
+				if(wizardModel.isNewProject()) {
 					setRemoteName(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+				} else {
+					setRemoteName(IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
 				}
 			}
 		};

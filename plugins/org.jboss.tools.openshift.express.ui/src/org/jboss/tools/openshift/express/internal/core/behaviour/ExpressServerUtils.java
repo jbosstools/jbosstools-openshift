@@ -577,7 +577,7 @@ public class ExpressServerUtils {
 
 	private static Set<String> getCommitableChanges(Repository repo, IServer server, IProgressMonitor monitor)
 			throws IOException {
-
+		
 		IndexDiff diff = EGitUtils.getIndexChanges(repo, monitor);
 		Set<String> set = new HashSet<String>();
 		if (diff != null) {

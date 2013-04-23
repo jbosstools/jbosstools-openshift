@@ -12,19 +12,24 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IRuntime;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ConfigureGitSharedProject;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ConfigureUnsharedProject;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoUnsharedProject;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -33,26 +38,29 @@ import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
+/**
+ * @author Andre Dietisheim
+ * @author Xavier Coulon
+ */
 public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
-
-	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	private static final String DEFAULT_APPLICATION = "default_application";
-	private static final String DEFAULT_PROJECT = "default_project";
 	private static final String DEFAULT_USE_EXISTING_APPLICATION = "default_useExistingApplication";
 	
-	public OpenShiftExpressApplicationWizardModel(Connection user) {
-		this(user, null, null, false);
+	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
+
+	public OpenShiftExpressApplicationWizardModel(Connection connection) {
+		this(connection, null, null, false);
 	}
 
-	public OpenShiftExpressApplicationWizardModel(Connection user, IProject project, IApplication application,
+	public OpenShiftExpressApplicationWizardModel(Connection connection, IProject project, IApplication application,
 			boolean useExistingApplication) {
 		// default value(s)
-		setDefaultProject(project);
+		setProject(project);
 		setDefaultApplication(application);
 		setDefaultUseExistingApplication(useExistingApplication);
-		setConnection(user);
+		setConnection(connection);
 	}
 
 	/**
@@ -60,6 +68,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return 
 	 * @throws OpenShiftException
 	 * @throws CoreException
 	 * @throws InterruptedException
@@ -70,9 +79,9 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * @throws NoWorkTreeException 
 	 */
 	@Override
-	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
+	public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
-		IProject importedProject =
+		IProject project =
 				new ImportNewProject(
 						getProjectName()
 						, getApplication()
@@ -80,7 +89,8 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 						, getRepositoryFile()
 						, getConnection())
 						.execute(monitor);
-		createServerAdapter(monitor, importedProject);
+		setProject(project);
+		return project;
 	}
 
 	/**
@@ -91,6 +101,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return 
 	 * @throws URISyntaxException
 	 *             The OpenShift application repository could not be cloned,
 	 *             because the uri it is located at is not a valid git uri
@@ -109,16 +120,17 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 *             The user project could not be shared with the git
 	 */
 	@Override
-	public void configureUnsharedProject(IProgressMonitor monitor)
+	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException {
-		IProject importedProject = new ConfigureUnsharedProject(
+		IProject project = new MergeIntoUnsharedProject(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
 				, getConnection())
 				.execute(monitor);
-		createServerAdapter(monitor, importedProject);
+		setProject(project);
+		return project;
 	}
 
 	/**
@@ -149,28 +161,33 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	 * @throws NoWorkTreeException 
 	 */
 	@Override
-	public void configureGitSharedProject(IProgressMonitor monitor)
+	public IProject mergeIntoGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException, NoWorkTreeException, GitAPIException {
-		IProject project = new ConfigureGitSharedProject(
+		IProject project = new MergeIntoGitSharedProject(
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
 				, getConnection())
 				.execute(monitor);
-		createServerAdapter(monitor, project);
+		setProject(project);
+		return project;
 	}
 
-	private void createServerAdapter(IProgressMonitor monitor, IProject project)
-			throws OpenShiftException {
+	@Override
+	public IServer createServerAdapter(IProgressMonitor monitor) throws OpenShiftException {
+		IServer server = null;
 		if (isCreateServerAdapter()) {
+			IProject project = getProject();
 			if (project == null) {
 				throw new OpenShiftException(
 						"Could not create a server adapter for your application {0}. No project was found when importing",
 						getApplication().getName());
 			}
-			new ServerAdapterFactory().create(project, this, monitor);
+			server = new ServerAdapterFactory().create(project, this, monitor);
+			setServerAdapter(server);
 		}
+		return server;
 	}
 
 	@Override
@@ -197,7 +214,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public IApplication getApplication() {
-		return (IApplication) getProperty(APPLICATION);
+		return (IApplication) getProperty(PROP_APPLICATION);
 	}
 
 	public void setDefaultApplication(IApplication application) {
@@ -211,7 +228,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public void setApplication(IApplication application) {
-		setProperty(APPLICATION, application);
+		setProperty(PROP_APPLICATION, application);
 		setUseExistingApplication(application);
 		setApplicationCartridge(application);
 		setApplicationName(application);
@@ -222,67 +239,45 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public String setRemoteName(String remoteName) {
-		setProperty(REMOTE_NAME, remoteName);
+		setProperty(PROP_REMOTE_NAME, remoteName);
 		return remoteName;
 	}
 
 	@Override
 	public String getRemoteName() {
-		return (String) getProperty(REMOTE_NAME);
+		return (String) getProperty(PROP_REMOTE_NAME);
 	}
 
 	@Override
 	public String setRepositoryPath(String repositoryPath) {
-		return (String) setProperty(REPOSITORY_PATH, repositoryPath);
+		return (String) setProperty(PROP_REPOSITORY_PATH, repositoryPath);
 	}
 
 	@Override
 	public String getRepositoryPath() {
-		return (String) getProperty(REPOSITORY_PATH);
+		return (String) getProperty(PROP_REPOSITORY_PATH);
 	}
 
 	@Override
 	public boolean isNewProject() {
-		return (Boolean) getProperty(NEW_PROJECT);
-	}
-
-	@Override
-	public boolean isExistingProject() {
-		return !((Boolean) getProperty(NEW_PROJECT));
+		return (Boolean) getProperty(PROP_NEW_PROJECT);
 	}
 
 	@Override
 	public Boolean setNewProject(boolean newProject) {
-		return (Boolean) setProperty(NEW_PROJECT, newProject);
-	}
-
-	@Override
-	public Boolean setExistingProject(boolean existingProject) {
-		return (Boolean) setProperty(NEW_PROJECT, !existingProject);
+		return (Boolean) setProperty(PROP_NEW_PROJECT, newProject);
 	}
 
 	@Override
 	public String setProjectName(String projectName) {
-		return (String) setProperty(PROJECT_NAME, projectName);
+		return (String) setProperty(PROP_PROJECT_NAME, projectName);
 	}
 
-	public IProject setDefaultProject(IProject project) {
-		setProperty(DEFAULT_PROJECT, project);
-		setProject(project);
-		return project;
-	}
-
-	public IProject getDefaultProject() {
-		return (IProject) getProperty(DEFAULT_PROJECT);
-	}		
-		
 	@Override
 	public IProject setProject(IProject project) {
-		if (project != null && project.exists()) {
-			setExistingProject(false);
+		if (project != null) { 
 			setProjectName(project.getName());
 		} else {
-			setExistingProject(true);
 			setProjectName(null);
 		}
 		return project;
@@ -296,56 +291,56 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 	@Override
 	public IProject getProject() {
 		String projectName = getProjectName();
-		if (projectName == null || projectName.isEmpty()) {
+		if (StringUtils.isEmpty(projectName)) {
 			return null;
 		}
-		return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 
 	@Override
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter) {
-		return (Boolean) setProperty(CREATE_SERVER_ADAPTER, createServerAdapter);
+		return (Boolean) setProperty(PROP_CREATE_SERVER_ADAPTER, createServerAdapter);
 	}
 
 	@Override
 	public String getProjectName() {
-		return (String) getProperty(PROJECT_NAME);
+		return (String) getProperty(PROP_PROJECT_NAME);
 	}
 
 	@Override
 	public String setMergeUri(String mergeUri) {
-		return (String) setProperty(MERGE_URI, mergeUri);
+		return (String) setProperty(PROP_MERGE_URI, mergeUri);
 	}
 
 	@Override
 	public String getMergeUri() {
-		return (String) getProperty(MERGE_URI);
+		return (String) getProperty(PROP_MERGE_URI);
 	}
 
 	@Override
 	public IRuntime getRuntime() {
-		return (IRuntime) getProperty(RUNTIME_DELEGATE);
+		return (IRuntime) getProperty(PROP_RUNTIME_DELEGATE);
 	}
 
 	@Override
 	public boolean isCreateServerAdapter() {
-		Boolean isCreateServer = (Boolean) getProperty(CREATE_SERVER_ADAPTER);
+		Boolean isCreateServer = (Boolean) getProperty(PROP_CREATE_SERVER_ADAPTER);
 		return isCreateServer != null && isCreateServer.booleanValue();
 	}
 
 	@Override
 	public IServerType getServerType() {
-		return (IServerType) getProperty(SERVER_TYPE);
+		return (IServerType) getProperty(PROP_SERVER_TYPE);
 	}
 
 	@Override
 	public IServerType setServerType(IServerType serverType) {
-		return (IServerType) setProperty(SERVER_TYPE, serverType);
+		return (IServerType) setProperty(PROP_SERVER_TYPE, serverType);
 	}
 
 	@Override
 	public boolean isUseExistingApplication() {
-		return (Boolean) getProperty(USE_EXISTING_APPLICATION);
+		return (Boolean) getProperty(PROP_USE_EXISTING_APPLICATION);
 	}
 
 	public boolean setDefaultUseExistingApplication(boolean useExistingApplication) {
@@ -364,7 +359,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public boolean setUseExistingApplication(boolean useExistingApplication) {
-		Boolean isUseExistingApplication = (Boolean) setProperty(USE_EXISTING_APPLICATION, useExistingApplication);
+		Boolean isUseExistingApplication = (Boolean) setProperty(PROP_USE_EXISTING_APPLICATION, useExistingApplication);
 		return isUseExistingApplication != null && isUseExistingApplication;
 	}
 
@@ -374,12 +369,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public ApplicationScale getApplicationScale() {
-		return (ApplicationScale) getProperty(APPLICATION_SCALE);
+		return (ApplicationScale) getProperty(PROP_APPLICATION_SCALE);
 	}
 
 	@Override
 	public ApplicationScale setApplicationScale(final ApplicationScale scale) {
-		return (ApplicationScale) setProperty(APPLICATION_SCALE, scale);
+		return (ApplicationScale) setProperty(PROP_APPLICATION_SCALE, scale);
 	}
 
 	protected void setApplicationScaling(IApplication application) {
@@ -409,7 +404,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public IStandaloneCartridge setApplicationCartridge(IStandaloneCartridge cartridge) {
-		return (IStandaloneCartridge) setProperty(APPLICATION_CARTRIDGE, cartridge);
+		return (IStandaloneCartridge) setProperty(PROP_APPLICATION_CARTRIDGE, cartridge);
 	}
 
 	protected void setApplicationCartridge(IApplication application) {
@@ -421,12 +416,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public IGearProfile getApplicationGearProfile() {
-		return (IGearProfile) getProperty(APPLICATION_GEAR_PROFILE);
+		return (IGearProfile) getProperty(PROP_APPLICATION_GEAR_PROFILE);
 	}
 
 	@Override
 	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile) {
-		return (IGearProfile) setProperty(APPLICATION_GEAR_PROFILE, gearProfile);
+		return (IGearProfile) setProperty(PROP_APPLICATION_GEAR_PROFILE, gearProfile);
 	}
 
 	protected void setApplicationGearProfile(IApplication application) {
@@ -437,12 +432,12 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public IStandaloneCartridge getApplicationCartridge() {
-		return (IStandaloneCartridge) getProperty(APPLICATION_CARTRIDGE);
+		return (IStandaloneCartridge) getProperty(PROP_APPLICATION_CARTRIDGE);
 	}
 
 	@Override
 	public String setApplicationName(String applicationName) {
-		return (String) setProperty(APPLICATION_NAME, applicationName);
+		return (String) setProperty(PROP_APPLICATION_NAME, applicationName);
 	}
 
 	protected void setApplicationName(IApplication application) {
@@ -454,7 +449,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public String getApplicationName() {
-		return (String) getProperty(APPLICATION_NAME);
+		return (String) getProperty(PROP_APPLICATION_NAME);
 	}
 
 	@Override
@@ -464,16 +459,39 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	@Override
 	public Connection setConnection(Connection connection) {
-		setProperty(CONNECTION, connection);
+		setProperty(PROP_CONNECTION, connection);
 		resetWizardModel();
 		return connection;
 	}
 	
 	@Override
 	public Connection getConnection() {
-		return (Connection) getProperty(CONNECTION);
+		return (Connection) getProperty(PROP_CONNECTION);
 	}
 
+	protected IServer setServerAdapter(IServer server) {
+		return (IServer) setProperty(PROP_SERVER_ADAPTER, server);
+	}
+
+	protected IServer getServerAdapter() {
+		return (IServer) getProperty(PROP_SERVER_ADAPTER);
+	}
+	
+	protected boolean hasServerAdapter() {
+		return getServerAdapter() != null;
+	}
+
+	@Override
+	public IStatus publishServerAdapter(IProgressMonitor monitor) {
+		if (!hasServerAdapter()) {
+			return Status.OK_STATUS;
+		}
+				
+		IServer server = getServerAdapter();
+		server.publish(IServer.PUBLISH_FULL, null, new ServerUserAdaptable(), null);
+		return Status.OK_STATUS;
+	}
+	
 	public void resetWizardModel() {
 		setApplication(getDefaultApplication());
 		setUseExistingApplication(getDefaultUseExistingApplication());
@@ -483,6 +501,7 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 		setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
 		setRemoteName(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
+		setServerAdapter(null);
 	}			
 
 	public void fireConnectionChanged() {

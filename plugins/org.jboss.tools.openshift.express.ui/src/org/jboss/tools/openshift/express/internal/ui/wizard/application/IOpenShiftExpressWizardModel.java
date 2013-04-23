@@ -19,9 +19,11 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IRuntime;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
@@ -40,22 +42,23 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IObservablePojo {
 
-	public static final String NEW_PROJECT = "enableProject";
-	public static final String CONNECTION = "user";
-	public static final String APPLICATION = "application";
-	public static final String APPLICATION_NAME = "applicationName";
-	public static final String APPLICATION_CARTRIDGE = "applicationCartridge";
-	public static final String APPLICATION_GEAR_PROFILE = "applicationGearProfile";
-	public static final String APPLICATION_SCALE = "applicationScale";
-	//public static final String USE_EXISTING_APPLICATION = "uswizardModel.getApplicationName()eExistingApplication";
-	public static final String USE_EXISTING_APPLICATION = "useExistingApplication";
-	public static final String REMOTE_NAME = "remoteName";
-	public static final String REPOSITORY_PATH = "repositoryPath";
-	public static final String PROJECT_NAME = "projectName";
-	public static final String MERGE_URI = "mergeUri";
-	public static final String RUNTIME_DELEGATE = "runtimeDelegate";
-	public static final String CREATE_SERVER_ADAPTER = "createServerAdapter";
-	public static final String SERVER_TYPE = "serverType";
+	public static final String PROP_NEW_PROJECT = "newProject";
+	public static final String PROP_CONNECTION = "connection";
+	public static final String PROP_APPLICATION = "application";
+	public static final String PROP_APPLICATION_NAME = "applicationName";
+	public static final String PROP_APPLICATION_CARTRIDGE = "applicationCartridge";
+	public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
+	public static final String PROP_APPLICATION_SCALE = "applicationScale";
+	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
+	public static final String PROP_REMOTE_NAME = "remoteName";
+	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
+	public static final String PROP_PROJECT_NAME = "projectName";
+	public static final String PROP_MERGE_URI = "mergeUri";
+	public static final String PROP_RUNTIME_DELEGATE = "runtimeDelegate";
+	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
+	public static final String PROP_SERVER_TYPE = "serverType";
+	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
+	
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
 	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
@@ -65,6 +68,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return 
 	 * @throws OpenShiftException
 	 * @throws CoreException
 	 * @throws InterruptedException
@@ -74,7 +78,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
-	public void importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
+	public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException;
 
 	/**
@@ -85,6 +89,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return 
 	 * @throws URISyntaxException
 	 *             The OpenShift application repository could not be cloned,
 	 *             because the uri it is located at is not a valid git uri
@@ -102,7 +107,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
 	 */
-	public void configureUnsharedProject(IProgressMonitor monitor)
+	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException;
 
@@ -114,6 +119,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to
+	 * @return 
 	 * @throws URISyntaxException
 	 *             The OpenShift application repository could not be cloned,
 	 *             because the uri it is located at is not a valid git uri
@@ -133,7 +139,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
-	public void configureGitSharedProject(IProgressMonitor monitor)
+	public IProject mergeIntoGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException, NoWorkTreeException, GitAPIException;
 
@@ -165,11 +171,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 
 	public boolean isNewProject();
 
-	public boolean isExistingProject();
-
 	public Boolean setNewProject(boolean newProject);
-
-	public Boolean setExistingProject(boolean existingProject);
 
 	public String setProjectName(String projectName);
 
@@ -212,4 +214,7 @@ public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IOb
 
 	public IProject getProject();
 
+	public IServer createServerAdapter(IProgressMonitor monitor) throws OpenShiftException;
+
+	public IStatus publishServerAdapter(IProgressMonitor monitor);
 }

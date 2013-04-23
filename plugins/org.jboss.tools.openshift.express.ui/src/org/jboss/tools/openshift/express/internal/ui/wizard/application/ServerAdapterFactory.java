@@ -40,22 +40,22 @@ import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
 
 /**
- * @author André Dietisheim <adietish@redhat.com>
  * @author Rob Stryker
+ * @author André Dietisheim
  */
 public class ServerAdapterFactory {
 
-	public ServerAdapterFactory() {
+	ServerAdapterFactory() {
 	}
 
-	public void create(IProject project, IOpenShiftExpressWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
-		createServerAdapter(project, wizardModel.getServerType(), wizardModel.getRuntime(),  
+	public IServer create(IProject project, IOpenShiftExpressWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
+		return createAdapterAndModules(project, wizardModel.getServerType(), wizardModel.getRuntime(),  
 				wizardModel.getApplication(), wizardModel.getConnection(), wizardModel.getRemoteName(), monitor);
 	}
 
-	public void create(IProject project, IServerType serverType, IRuntime runtime,
+	public IServer create(IProject project, IServerType serverType, IRuntime runtime,
 			IApplication application, Connection user, IProgressMonitor monitor) throws OpenShiftException {
-		createServerAdapter(project, serverType, runtime, application, user, null, monitor);
+		return createAdapterAndModules(project, serverType, runtime, application, user, null, monitor);
 	}
 
 	/**
@@ -63,23 +63,18 @@ public class ServerAdapterFactory {
 	 * 
 	 * @param monitor
 	 *            the monitor to report progress to.
+	 * @return 
 	 * @throws OpenShiftException
 	 */
-	protected void createServerAdapter(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, Connection user,
-			String remoteName, IProgressMonitor monitor) throws OpenShiftException {
-		String name = project.getName();
-		monitor.subTask(NLS.bind("Creating server adapter for project {0}", name));
-		createServerAdapter(Collections.singletonList(project), serverType, runtime, 
-				application, user, project.getName(), remoteName, monitor);
-	}
-	
-	protected void createServerAdapter(List<IProject> importedProjects, IServerType serverType,
-			IRuntime runtime, IApplication application, Connection user, 
-			String deployProject, String remoteName, IProgressMonitor monitor) {
+	protected IServer createAdapterAndModules(IProject project, IServerType serverType, IRuntime runtime,
+			IApplication application, Connection connection, String remoteName, IProgressMonitor monitor)
+			throws OpenShiftException {
+		monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
+		
+		IServer server = null;
 		try {
-			IServer server = doCreateServerAdapter(serverType, runtime, application, user, deployProject, remoteName);
-			addModules(getModules(importedProjects), server, monitor);
+			server = createAdapter(serverType, runtime, application, connection, project.getName(), remoteName);
+			addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
 		} catch (OpenShiftException ose) {
@@ -91,9 +86,10 @@ public class ServerAdapterFactory {
 					"Cannot create openshift server adapter", ste);
 			OpenShiftUIActivator.getDefault().getLog().log(s);
 		}
+		return server;
 	}
-
-	private IServer doCreateServerAdapter(IServerType serverType, IRuntime rt, 
+	
+	private IServer createAdapter(IServerType serverType, IRuntime rt, 
 			IApplication application, Connection user, String deployProject, String remoteName) throws CoreException,
 			OpenShiftException, SocketTimeoutException {
 		Assert.isLegal(serverType != null);
@@ -104,8 +100,8 @@ public class ServerAdapterFactory {
 		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);
 
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(server, 
-				application.getApplicationUrl(), deployProject, remoteName, serverName);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(
+				server, application.getApplicationUrl(), deployProject, remoteName, serverName);
 		return server;
 	}
 	

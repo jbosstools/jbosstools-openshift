@@ -26,7 +26,6 @@ import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -71,8 +70,8 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		boolean allSubModulesPublished = areAllPublished(behaviour);
 		if (destProj != null && destProj.exists()) {
 			String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-			IContainer destFolder = "".equals(destinationFolder) ? destProj : (IContainer) destProj
-					.findMember(new Path(destinationFolder));
+			IContainer destFolder = "".equals(destinationFolder) ? 
+					destProj : (IContainer) destProj.findMember(new Path(destinationFolder));
 			if (allSubModulesPublished || (destFolder != null && destFolder.isAccessible())) {
 				refreshProject(destProj, submon(monitor, 100));
 				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
@@ -190,7 +189,6 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	protected PushOperationResult commitAndPushProject(IProject p, IDeployableServerBehaviour behaviour,
 			IProgressMonitor monitor) throws CoreException {
 
-		Repository repo = EGitUtils.checkedGetRepository(p);
 		PushOperationResult result = null;
 		int changes = ExpressServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
 		if (changes > 0) {
@@ -199,23 +197,23 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 					NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
-				result = push(p, repo, behaviour.getServer(), monitor);
+				result = push(p, behaviour.getServer(), monitor);
 			}
 		} else {
 			try {
 				String openShiftRemoteName =
 						ExpressServerUtils.getExpressRemoteName(behaviour.getServer());
-				if (!EGitUtils.isAhead(repo, openShiftRemoteName, monitor)) {
+				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
 					if (requestApproval(
 							NLS.bind(ExpressMessages.noChangesPushAnywayMsg, p.getName()),
 							NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
-						result = push(p, repo, behaviour.getServer(), monitor);
+						result = push(p, behaviour.getServer(), monitor);
 					}
 				} else {
 					if (requestApproval(
 							NLS.bind(ExpressMessages.pushCommitsMsg, p.getName()),
 							NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
-						result = push(p, repo, behaviour.getServer(), monitor);
+						result = push(p, behaviour.getServer(), monitor);
 					}
 				}
 			} catch (Exception e) {
@@ -230,11 +228,11 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		return result;
 	}
 
-	protected PushOperationResult push(IProject project, Repository repo, IServer server, IProgressMonitor monitor) throws CoreException {
+	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		String remoteName = ExpressServerUtils.getExpressRemoteName(server.createWorkingCopy());
 		try {
 			monitor.beginTask("Publishing " + project.getName(), 200);
-			PushOperationResult result = EGitUtils.push(remoteName, repo, new SubProgressMonitor(monitor, 100));
+			PushOperationResult result = EGitUtils.push(remoteName, project, new SubProgressMonitor(monitor, 100));
 			monitor.done();
 			return result;
 		} catch (CoreException ce) {
@@ -252,7 +250,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 								+ "a forced push (git push -f) might be the right thing to do. This will though overwrite the remote repository!"
 								+ "\n\n Do you want to do a forced push and overwrite any remote changes ? ",
 						"Attempt push force ?", false)) {
-					return EGitUtils.pushForce(remoteName, repo, new SubProgressMonitor(monitor, 100));
+					return EGitUtils.pushForce(remoteName, project, new SubProgressMonitor(monitor, 100));
 				} else {
 					// printing out variation of the standard git output
 					// meesage.

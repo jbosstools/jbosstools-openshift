@@ -35,9 +35,9 @@ import com.openshift.client.OpenShiftException;
  * 
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class ConfigureUnsharedProject extends AbstractImportApplicationOperation {
+public class MergeIntoUnsharedProject extends AbstractImportApplicationOperation {
 
-	public ConfigureUnsharedProject(String projectName, IApplication application, String remoteName,
+	public MergeIntoUnsharedProject(String projectName, IApplication application, String remoteName,
 			Connection user) {
 		super(projectName, application, remoteName, user);
 	}
