@@ -463,15 +463,25 @@ public class EGitUtils {
 	 * @see #getAllRemoteConfigs(Repository)
 	 * @see RemoteConfig#getName()
 	 */
-	public static PushOperationResult push(String remote,
-			Repository repository, IProgressMonitor monitor)
+	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
 		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
 		return push(repository, remoteConfig, false, monitor);
 	}
 
-	public static PushOperationResult pushForce(String remote,
-			Repository repository, IProgressMonitor monitor)
+	public static PushOperationResult push(String remote, IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		Repository repository = getRepository(project);
+		return push(remote, repository, monitor);
+	}
+
+	public static PushOperationResult pushForce(String remote, IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		Repository repository = getRepository(project);
+		return pushForce(remote, repository, monitor);
+	}
+
+	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException {
 		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
 		return push(repository, remoteConfig, true, monitor);
@@ -1151,6 +1161,11 @@ public class EGitUtils {
 	}
 
 
+	public static boolean isAhead(IProject project, String remote, IProgressMonitor monitor) throws IOException,
+			InvocationTargetException, URISyntaxException {
+		return isAhead(getRepository(project), remote, monitor);
+	}
+	
 	/**
 	 * Returns <code>true</code> if the given repo has commits that are not
 	 * contained withing the repo attached to it via the given remote. It is

@@ -213,8 +213,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final ApplicationSelectionDialog appSelectionDialog = new ApplicationSelectionDialog(
-						(OpenShiftExpressApplicationWizard) getWizard(), null, getShell());
+				OpenShiftExpressApplicationWizard wizard = (OpenShiftExpressApplicationWizard) getWizard();
+				OpenShiftExpressApplicationWizardModel wizardModel = wizard.getModel();
+				final ApplicationSelectionDialog appSelectionDialog =
+						new ApplicationSelectionDialog(wizard, wizardModel, null, getShell());
 				final int result = appSelectionDialog.open();
 				if (result == IDialogConstants.OK_ID) {
 					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();

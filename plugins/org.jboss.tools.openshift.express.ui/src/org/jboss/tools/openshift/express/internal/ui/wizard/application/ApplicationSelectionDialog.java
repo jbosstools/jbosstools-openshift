@@ -69,10 +69,10 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 	private final IWizard wizard;
 	private TableViewer tableViewer;
 
-	public ApplicationSelectionDialog(OpenShiftExpressApplicationWizard wizard, IApplication selectedApplication,
+	public ApplicationSelectionDialog(OpenShiftExpressApplicationWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel, IApplication selectedApplication,
 			Shell parentShell) {
 		super(parentShell);
-		this.dialogModel = new ApplicationSelectionDialogModel(wizard.getWizardModel());
+		this.dialogModel = new ApplicationSelectionDialogModel(wizardModel);
 		this.dialogModel.setSelectedApplication(selectedApplication);
 		this.wizard = wizard;
 		this.dbc = new DataBindingContext();
@@ -240,7 +240,6 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-	@SuppressWarnings("unused")
 	private SelectionAdapter onRefresh(final DataBindingContext dbc) {
 		return new SelectionAdapter() {
 

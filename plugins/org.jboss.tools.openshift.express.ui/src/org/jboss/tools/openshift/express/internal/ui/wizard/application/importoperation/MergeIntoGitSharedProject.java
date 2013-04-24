@@ -46,9 +46,9 @@ import com.openshift.client.OpenShiftException;
  * 
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class ConfigureGitSharedProject extends AbstractImportApplicationOperation {
+public class MergeIntoGitSharedProject extends AbstractImportApplicationOperation {
 
-	public ConfigureGitSharedProject(String projectName, IApplication application, String remoteName,
+	public MergeIntoGitSharedProject(String projectName, IApplication application, String remoteName,
 			Connection user) {
 		super(projectName, application, remoteName, user);
 	}

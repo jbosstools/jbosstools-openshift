@@ -38,7 +38,7 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setNewProject(true);
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.APPLICATION_NAME, onWizardApplicationNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	}
 
 	public void reset() {
-		setNewProject(!wizardModel.isExistingProject());
+		setNewProject(wizardModel.isNewProject());
 		setProjectName(wizardModel.getProjectName());
 		setCreateServerAdapter(wizardModel.isCreateServerAdapter());
 	}
