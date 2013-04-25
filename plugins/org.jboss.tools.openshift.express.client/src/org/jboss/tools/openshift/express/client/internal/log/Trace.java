@@ -10,6 +10,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class Trace {
 
 	public static final String GLOBAL_DEBUG_KEY = "/debug";
+	public static final String CLIENT_DEBUG_KEY = "/debug/client";
 
 	private static final boolean DEFAULT_DEBUG = false;
 
@@ -48,11 +49,20 @@ public class Trace {
 			return DEFAULT_DEBUG;
 		}
 		
-		if (getDebugOptions() == null) {
+		DebugOptions debugOptions = getDebugOptions();
+		if (debugOptions == null) {
 			return DEFAULT_DEBUG;
 		}
 		
-		return getDebugOptions().isDebugEnabled();
+		if(!debugOptions.isDebugEnabled()) {
+			return false;
+		}
+		
+		if (!debugOptions.getBooleanOption(pluginId + GLOBAL_DEBUG_KEY, DEFAULT_DEBUG)) {
+			return false;
+		}
+
+		return debugOptions.getBooleanOption(pluginId + CLIENT_DEBUG_KEY, DEFAULT_DEBUG);
 	}
 	
 	private DebugTrace getDebugTrace() {
