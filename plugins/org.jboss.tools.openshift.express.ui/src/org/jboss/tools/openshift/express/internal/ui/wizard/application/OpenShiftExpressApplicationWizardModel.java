@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import java.io.File;
@@ -42,7 +52,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
+class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
 
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	private static final String DEFAULT_APPLICATION = "default_application";
@@ -506,6 +516,15 @@ public class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo imp
 
 	public void fireConnectionChanged() {
 		ConnectionsModelSingleton.getInstance().fireConnectionChanged(getConnection());
+	}
+
+	public void updateRecentConnection() {
+		if (getConnection() == null) {
+			return;
+		}
+		
+		ConnectionsModelSingleton.getInstance().setRecent(getConnection());
+		
 	}
 
 }
