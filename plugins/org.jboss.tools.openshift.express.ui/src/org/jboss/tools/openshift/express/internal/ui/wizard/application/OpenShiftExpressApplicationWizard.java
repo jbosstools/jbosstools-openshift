@@ -157,6 +157,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			return false;
 		}
 
+		model.updateRecentConnection();
+
 		if (!createServerAdapter()) {
 			return false;
 		}
