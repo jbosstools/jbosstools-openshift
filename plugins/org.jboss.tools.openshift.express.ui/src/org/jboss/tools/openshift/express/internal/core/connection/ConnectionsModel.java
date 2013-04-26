@@ -239,6 +239,10 @@ public class ConnectionsModel {
 		return connectionsByUrl.size();
 	}
 
+	public Connection setRecent(Connection connection) {
+		return this.recentConnection = connection;
+	}
+	
 	/**
 	 * Save the user list to preferences and secure storage
 	 */

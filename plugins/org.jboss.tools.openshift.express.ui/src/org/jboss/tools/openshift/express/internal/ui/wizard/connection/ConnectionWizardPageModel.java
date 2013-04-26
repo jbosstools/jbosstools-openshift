@@ -41,7 +41,7 @@ import com.openshift.client.configuration.OpenShiftConfiguration;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-public class ConnectionWizardPageModel extends ObservableUIPojo {
+class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
 	public static final String PROPERTY_USERNAME = "username";
@@ -63,10 +63,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private boolean isRememberPassword;
 	private Connection newConnection;
 
-	public ConnectionWizardPageModel(IConnectionAwareModel wizardModel) {
+	ConnectionWizardPageModel(IConnectionAwareModel wizardModel) {
 		this.wizardModel = wizardModel;
 		Connection wizardModelConnection = wizardModel.getConnection();
-		this.selectedConnection = getSelectedConnection(wizardModelConnection);
+		this.selectedConnection = getWizardModelOrRecentConnection(wizardModelConnection);
 		this.servers = getServers(selectedConnection);
 		updateFrom(selectedConnection);
 	}
@@ -81,11 +81,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			setHost(connection.getHost());
 			setUseDefaultServer(connection.isDefaultHost());
 			setRememberPassword(connection.isRememberPassword());
-			if (connection.isRememberPassword()) {
-				setPassword(connection.getPassword());
-			} else {
-				setPassword(null);
-			}
+			setPassword(connection.getPassword());
 		}
 	}
 
@@ -107,7 +103,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return username;
 	}
 
-	private Connection getSelectedConnection(Connection wizardModelConnection) {
+	private Connection getWizardModelOrRecentConnection(Connection wizardModelConnection) {
 		if (wizardModelConnection == null) {
 			Connection recentConnection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 			if (recentConnection != null) {
