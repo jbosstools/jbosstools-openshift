@@ -17,14 +17,14 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareMode
 /**
  * @author Andre Dietisheim
  */
-public class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
+class ConnectToOpenShiftWizardModel implements IConnectionAwareModel {
 	
 	protected Connection connection;
 		
-	public ConnectToOpenShiftWizardModel() {
+	ConnectToOpenShiftWizardModel() {
 	}
 
-	public ConnectToOpenShiftWizardModel(final Connection connection) {
+	ConnectToOpenShiftWizardModel(final Connection connection) {
 		this.connection = connection;
 	}
 	
