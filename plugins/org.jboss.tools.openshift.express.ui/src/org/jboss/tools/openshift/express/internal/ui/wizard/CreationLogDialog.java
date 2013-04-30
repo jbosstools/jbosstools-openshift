@@ -174,6 +174,9 @@ public class CreationLogDialog extends TitleAreaDialog {
 	private void appendLog(LogEntry logEntry, StringBuilder builder,
 			List<StyleRange> styles) {
 		String log = logEntry.getLog();
+		if (StringUtils.isEmpty(log)) {
+			log = "<no information reported by OpenShift>";
+		}
 		createLinks(log, builder.length(), styles);
 		builder.append(log);
 		builder.append(StringUtils.getLineSeparator());
