@@ -74,6 +74,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	private void updateFrom(Connection connection) {
 		if (isCreateNewConnection(connection)) {
 			setUsername(getDefaultUsername());
+			setUseDefaultServer(true);
 			setDefaultHost();
 			setPassword(null);
 		} else {
