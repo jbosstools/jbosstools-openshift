@@ -523,7 +523,7 @@
                        value="com.openshift.client.IApplication">
                  </instanceof> -->
                  <instanceof
-                       value="com.openshift.client.IEmbeddableCartridge">
+                       value="com.openshift.client.cartridge.IEmbeddedCartridge">
                  </instanceof>
               </or>
            </enablement>

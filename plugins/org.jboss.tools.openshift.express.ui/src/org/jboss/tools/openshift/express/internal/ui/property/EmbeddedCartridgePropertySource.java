@@ -21,11 +21,11 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
 /**
  * @author Xavier Coulon
  */
-public class EmbeddableCartridgePropertySource implements IPropertySource {
+public class EmbeddedCartridgePropertySource implements IPropertySource {
 
 	private final IEmbeddedCartridge cartridge;
 
-	public EmbeddableCartridgePropertySource(IEmbeddedCartridge cartridge) {
+	public EmbeddedCartridgePropertySource(IEmbeddedCartridge cartridge) {
 		this.cartridge = cartridge;
 	}
 
