@@ -32,7 +32,7 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 			if(adaptableObject instanceof IApplication) {
 				return new ApplicationPropertySource((IApplication)adaptableObject);
 			}if(adaptableObject instanceof IEmbeddedCartridge) {
-				return new EmbeddableCartridgePropertySource((IEmbeddedCartridge)adaptableObject);
+				return new EmbeddedCartridgePropertySource((IEmbeddedCartridge)adaptableObject);
 			}
 		}
 		return null;
