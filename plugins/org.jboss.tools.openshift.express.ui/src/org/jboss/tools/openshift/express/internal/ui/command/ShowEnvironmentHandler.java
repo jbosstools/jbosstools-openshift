@@ -8,21 +8,27 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.action;
+package org.jboss.tools.openshift.express.internal.ui.command;
 
+import java.text.MessageFormat;
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.VerifySSHSessionJob;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
@@ -31,24 +37,22 @@ import com.openshift.client.IApplication;
 /**
  * @author Xavier Coulon
  */
-public class ShowEnvironmentAction extends AbstractOpenShiftAction {
-
-	public ShowEnvironmentAction() {
-		super(OpenShiftExpressUIMessages.SHOW_ENVIRONMENT_ACTION, true);
-	}
+public class ShowEnvironmentHandler extends AbstractHandler {
 
 	@Override
-	public void run() {
-		final IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
 		if (application != null) {
 			showEnvironmentPropertiesFor(application);
 		} else {
-			IServer server = UIUtils.getFirstElement(getSelection(), IServer.class);
+			IServer server = UIUtils.getFirstElement(selection, IServer.class);
 			if (server == null) {
-				return;
+				return Status.CANCEL_STATUS;
 			}
 			showEnvironmentPropertiesFor(server);
 		}
+		return Status.OK_STATUS;
 	}
 
 	/**
@@ -65,12 +69,7 @@ public class ShowEnvironmentAction extends AbstractOpenShiftAction {
 			public void done(IJobChangeEvent event) {
 				if (event.getResult().isOK()) {
 					final IApplication application = job.getApplication();
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							showEnvironmentPropertiesFor(application);
-						}
-					});
+					showEnvironmentPropertiesFor(application);
 				}
 			}
 		});
@@ -83,16 +82,16 @@ public class ShowEnvironmentAction extends AbstractOpenShiftAction {
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				if(event.getResult().isOK() && job.isValidSession()) {
+				if (event.getResult().isOK() && job.isValidSession()) {
 					showEnvironmentProperties(application);
 				}
 			}
 		});
-		
+
 		job.setUser(true);
 		job.schedule();
 	}
-	
+
 	/**
 	 * @param application
 	 */
@@ -123,8 +122,9 @@ public class ShowEnvironmentAction extends AbstractOpenShiftAction {
 	 * @return
 	 */
 	private String getMessageConsoleName(final IApplication application) {
-		return "Environment Variables for application '" + application.getName() + "' ("
-				+ application.getDomain().getId() + ")";
+		return MessageFormat.format(
+				"Environment Variables for application {0} ({1})",
+				application.getName(), application.getDomain().getId());
 	}
 
 }

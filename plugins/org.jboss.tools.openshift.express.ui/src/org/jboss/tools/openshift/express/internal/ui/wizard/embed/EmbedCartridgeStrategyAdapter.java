@@ -35,6 +35,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.ToStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -198,10 +199,10 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 							IGearProfile.SMALL, domain);
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
-
-			if (JobUtils.isOk(createJob.getResult())) {
+			IStatus result = createJob.getResult();
+			if (JobUtils.isOk(result)) {
 				IApplication application = createJob.getApplication();
-				openLogDialog(application);
+				openLogDialog(application, createJob.isTimeouted(result));
 
 				AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
 				IStatus waitStatus = WizardUtils.runInWizard(
@@ -211,6 +212,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 
 		} catch (Exception e) {
 			// ignore
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -231,12 +233,13 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		return wizardPage.getWizard().getContainer();
 	}
 
-	private void openLogDialog(final IApplication application) {
+	private void openLogDialog(final IApplication application, final boolean isTimeouted) {
 		wizardPage.getControl().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(), application).open();
+				new CreationLogDialog(getShell(), 
+						LogEntryFactory.create(application, isTimeouted)).open();
 			}
 		});
 	}

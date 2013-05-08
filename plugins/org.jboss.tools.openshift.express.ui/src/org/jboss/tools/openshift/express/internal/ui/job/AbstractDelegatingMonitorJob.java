@@ -20,7 +20,8 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
  */
 public abstract class AbstractDelegatingMonitorJob extends Job {
 
-	public static final int TIMEOUTED_CANCELLED = 1;
+	public static final int OK = 0;
+	public static final int TIMEOUTED = 1;
 
 	protected DelegatingProgressMonitor delegatingMonitor;
 
@@ -40,4 +41,8 @@ public abstract class AbstractDelegatingMonitorJob extends Job {
 	}
 
 	protected abstract IStatus doRun(IProgressMonitor monitor);
+		
+	public boolean isTimeouted(IStatus status){
+		return status.getCode() == TIMEOUTED;
+	}
 }
