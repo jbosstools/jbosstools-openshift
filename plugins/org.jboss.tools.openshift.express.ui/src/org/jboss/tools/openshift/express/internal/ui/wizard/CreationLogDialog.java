@@ -11,15 +11,21 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -31,12 +37,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.BrowserUtil;
+import org.jboss.tools.openshift.egit.ui.util.CommandUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.command.ICommandIds;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
-
-import com.openshift.client.IApplication;
-import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
  * @author André Dietisheim
@@ -44,24 +49,15 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
 public class CreationLogDialog extends TitleAreaDialog {
 
 	private static final Pattern HTTP_LINK_REGEX = Pattern.compile("(http[^ |\n]+)");
-
-	private Collection<IEmbeddedCartridge> cartridges;
-	private IApplication application;
-	private List<LinkSubstring> linkSubstrings;
+	private static final Pattern ECLIPSE_LINK_REGEX = Pattern.compile("(<a>)(.+)(</a>)");
 	
-	public CreationLogDialog(Shell parentShell, Collection<IEmbeddedCartridge> cartridges) {
-		this(parentShell);
-		this.cartridges = cartridges;
-	}
-
-	public CreationLogDialog(Shell parentShell, IApplication application) {
-		this(parentShell);
-		this.application = application;
-	}
-
-	protected CreationLogDialog(Shell parentShell) {
+	private List<Link> links;
+	private LogEntry[] logEntries;
+	
+	public CreationLogDialog(Shell parentShell, LogEntry[] logEntries) {
 		super(parentShell);
-		this.linkSubstrings = new ArrayList<LinkSubstring>();
+		this.logEntries = logEntries;
+		this.links = new ArrayList<Link>();
 	}
 	
 	@Override
@@ -89,61 +85,34 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 		StyledText logText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(logText);
-		writeLogEntries(createLogEntries(), logText);
+		writeLogEntries(logEntries, logText);
 		logText.addListener(SWT.MouseDown, onLinkClicked(logText));
 		return container;
-	}
-
-	private LogEntry[] createLogEntries() {
-		if (cartridges != null) {
-			return createLogEntries(cartridges);
-		} else {
-			return createLogEntries(application);
-		}
-	}
-
-	private LogEntry[] createLogEntries(Collection<IEmbeddedCartridge> cartridges) {
-		if (cartridges == null
-				|| cartridges.isEmpty()) {
-			return new LogEntry[] {};
-		}
-		ArrayList<LogEntry> logEntries = new ArrayList<LogEntry>();
-		for (IEmbeddedCartridge cartridge : cartridges) {
-			logEntries.add(new LogEntry(cartridge.getName(), cartridge.getCreationLog()));
-		}
-		return logEntries.toArray(new LogEntry[cartridges.size()]);
-	}
-	
-	private LogEntry[] createLogEntries(IApplication application) {
-		if (application == null) {
-			return new LogEntry[] {};
-		}
-		return new LogEntry[] { new LogEntry(application.getName(), application.getCreationLog()) };
 	}
 
 	private Listener onLinkClicked(final StyledText logText) {
 		return new Listener() {
 			public void handleEvent(Event event) {
+				int offset = logText.getOffsetAtLocation(new Point(event.x, event.y));
+				Link link = getLink(offset);
+				if (link == null
+						|| !isLinkStyle(offset)) {
+					return;
+				}
 				try {
-					String url = getUrl(logText, event);
-					if (url != null && url.length() > 0) {
-						BrowserUtil.checkedCreateExternalBrowser(
-								url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-					}
-				} catch (IllegalArgumentException e) {
-					// no character under event.x, event.y
+					link.execute();
+				} catch (Exception e) {
+					OpenShiftUIActivator.log(e);
+					MessageDialog.openError(getShell(), "Could not execute link", e.getMessage());
 				}
 			}
 
-			private String getUrl(StyledText logText, Event event) {
-				int offset = logText.getOffsetAtLocation(new Point(event.x, event.y));
+			private boolean isLinkStyle(int offset) {
 				StyleRange style = logText.getStyleRangeAtOffset(offset);
-				if (style == null 
-						|| !style.underline) {
-					return null;
-				}
-				return CreationLogDialog.this.getUrl(offset);
+				return style != null 
+						&& style.underline;
 			}
+		
 		};
 	}
 
@@ -157,46 +126,77 @@ public class CreationLogDialog extends TitleAreaDialog {
 		StringBuilder builder = new StringBuilder();
 
 		for (LogEntry logEntry : logEntries) {
-			writeLogEntry(logEntry, builder, styles);
+			createTextAndStyle(logEntry, builder, styles);
 		}
 
 		logText.setText(builder.toString());
-
+		
 		setStyleRanges(logText, styles);
 
 	}
 
-	private void writeLogEntry(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
+	private void createTextAndStyle(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
 		appendTitle(logEntry.getName(), builder, styles);
 		appendLog(logEntry, builder, styles);
 	}
 
-	private void appendLog(LogEntry logEntry, StringBuilder builder,
-			List<StyleRange> styles) {
+	private void appendLog(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
 		String log = logEntry.getLog();
-		if (StringUtils.isEmpty(log)) {
-			log = "<no information reported by OpenShift>";
+		if (logEntry.isTimeouted) {
+			log = createEnvironmentVariablesLink(
+					"<request timeouted, you can look up the credentials in the <a>environment variables</a>>",
+					builder.length(), 
+					styles,
+					logEntry.getElement());
+			builder.append(log);
+		} else if (StringUtils.isEmpty(log)) {
+			builder.append("<no information reported by OpenShift>");
+		} else {
+			createUrlLinks(log, builder.length(), styles);
+			builder.append(log);
 		}
-		createLinks(log, builder.length(), styles);
-		builder.append(log);
 		builder.append(StringUtils.getLineSeparator());
 	}
 
-	private void createLinks(String log, int baseIndex, List<StyleRange> styles) {
-		if(log != null) {
+	private String createEnvironmentVariablesLink(String log, int baseIndex, List<StyleRange> styles, Object element) {
+		String newLog = log;
+		Matcher matcher = ECLIPSE_LINK_REGEX.matcher(log);
+		while (matcher.find()
+				&& matcher.groupCount() == 3) {
+			newLog = new StringBuilder()
+				.append(log.substring(0, matcher.start(1)))
+				.append(matcher.group(2))
+				.append(log.substring(matcher.end(3), log.length()))
+				.toString();
+			int startOffset = matcher.start(1) + baseIndex;
+			int stopOffset = matcher.start(1) + matcher.group(2).length() + baseIndex;
+			StyleRange linkStyle = createLinkStyleRange(startOffset, stopOffset);
+			styles.add(linkStyle);
+
+			links.add(new EnvironmentVariablesLink(startOffset, stopOffset, element));
+		}
+
+		return newLog;
+	}
+
+	private void createUrlLinks(String log, int baseIndex, List<StyleRange> styles) {
+		if(log == null) {
+			return;
+		}
 			Matcher matcher = HTTP_LINK_REGEX.matcher(log);
 			while (matcher.find() 
 					&& matcher.groupCount() == 1) {
 				int linkStart = matcher.start() + baseIndex;
 				int linkStop = matcher.end() + baseIndex;
+
+				String url = matcher.group(1);
+				Link linkEntry = 
+						new UrlLink(linkStart, linkStop, url);
+				links.add(linkEntry);
+
 				StyleRange linkStyle = createLinkStyleRange(linkStart, linkStop);
 				styles.add(linkStyle);
-				String url = matcher.group(1);
-				LinkSubstring linkEntry = 
-						new LinkSubstring(linkStart, linkStop, url);
-				linkSubstrings.add(linkEntry);
 			}
-		}
 	}
 
 	private StyleRange createLinkStyleRange(int start, int stop) {
@@ -241,10 +241,14 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 		private String name;
 		private String log;
-
-		public LogEntry(String name, String log) {
+		private boolean isTimeouted;
+		private Object element;
+		
+		public LogEntry(String name, String log, boolean isTimeouted, Object element) {
 			this.name = name;
 			this.log = log;
+			this.isTimeouted = isTimeouted;
+			this.element = element;
 		}
 
 		public String getName() {
@@ -254,56 +258,91 @@ public class CreationLogDialog extends TitleAreaDialog {
 		public String getLog() {
 			return log;
 		}
+		
+		public boolean isTimeouted() {
+			return isTimeouted;
+		}
+		
+		public Object getElement() {
+			return element;
+		}
 	}
 
 	/**
-	 * Gets the url at the given index within the log. Returns <code>null</code>
+	 * Gets the link at the given index within the log. Returns <code>null</code>
 	 * if none was found. Looks through the links that were found when parsing
 	 * the log.
 	 * 
 	 * @param offset
-	 * @return the link
+	 * @return the links
 	 * 
 	 * @see #createLinks
 	 */
-	private String getUrl(int offset) {
-		String url = null;
-		for (LinkSubstring linkSubstring : linkSubstrings) {
-			if (offset < linkSubstring.getStopOffset()
-					&& offset > linkSubstring.getStartOffset()) {
-				url = linkSubstring.getUrl();
-				break;
+	private Link getLink(int offset) {
+		for (Link link : links) {
+			if (offset < link.getStopOffset()
+					&& offset > link.getStartOffset()) {
+				return link;
 			}
 		}
-		return url;
+		return null;
 	}
 
 	/**
-	 * A link within the log text.
+	 * A links within the log text.
 	 */
-	private static class LinkSubstring {
+	private abstract static class Link {
 
 		private int startOffset;
 		private int stopOffset;
-		private String url;
 
-		public LinkSubstring(int startOffset, int stopOffset, String url) {
+		public Link(int startOffset, int stopOffset) {
 			this.startOffset = startOffset;
 			this.stopOffset = stopOffset;
-			this.url = url;
 		}
 
-		private int getStartOffset() {
+		public int getStartOffset() {
 			return startOffset;
 		}
 
-		private int getStopOffset() {
+		public int getStopOffset() {
 			return stopOffset;
 		}
 
-		private String getUrl() {
-			return url;
-		}
+		public abstract void execute() throws Exception;
 	}
 
+	private static class UrlLink extends Link {
+
+		private String url;
+
+		public UrlLink(int startOffset, int stopOffset, String url) {
+			super(startOffset, stopOffset);
+			this.url = url;
+		}
+
+		public void execute() {
+			if (url == null 
+					|| url.length() == 0) {
+				return;
+			}
+			BrowserUtil.checkedCreateExternalBrowser(
+					url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+		}
+	}
+	
+	private static class EnvironmentVariablesLink extends Link {
+
+		private Object element;
+		
+		public EnvironmentVariablesLink(int startOffset, int stopOffset, Object element) {
+			super(startOffset, stopOffset);
+			this.element = element;
+		}
+
+		public void execute() throws ExecutionException, NotDefinedException, NotEnabledException, NotHandledException {
+			IStructuredSelection selection = new StructuredSelection(element);
+			CommandUtils.executeCommand(ICommandIds.SHOW_ENVIRONMENT, selection);
+		}
+	}
 }

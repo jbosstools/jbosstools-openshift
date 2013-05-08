@@ -181,17 +181,6 @@
 			</enablement>
 		</actionProvider>
 		<actionProvider
-				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.ShowEnvironmentActionProvider"
-				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.showEnvironmentActionProvider">
-			<enablement>
-              <and>
-		           <instanceof
-		                 value="org.eclipse.wst.server.core.IServer">
-		           </instanceof>
-		        </and>
-			</enablement>
-		</actionProvider>
-		<actionProvider
 				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.ApplicationPortForwardingActionProvider"
 				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.applicationPortForwardingActionProvider">
 			<enablement>
@@ -539,17 +528,6 @@
               </or> 
            </enablement>
         </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ShowEnvironmentActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.showEnvironmentActionProvider">
-           <enablement>
-              <or>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </or> 
-           </enablement>
-        </actionProvider>
      </extension>
      
      <extension
@@ -698,6 +676,10 @@
               id="org.jboss.tools.openshift.express.ui.command.manageKeys"
               name="%openshift.command.managekeys">
         </command>
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+              name="%openshift.command.showenvironment">
+        </command>
      </extension>
      <extension
            point="org.eclipse.ui.handlers">
@@ -705,11 +687,15 @@
               class="org.jboss.tools.openshift.express.internal.ui.command.ManageSSHKeysHandler"
               commandId="org.jboss.tools.openshift.express.ui.command.manageKeys">
         </handler>
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.ShowEnvironmentHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment">
+        </handler>
      </extension>
      <extension
            point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.server">
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.server">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.manageKeys"
                 icon="icons/key-icon.png"
@@ -722,6 +708,48 @@
 	         			<iterate ifEmpty="false" operator="or">
 	            			<instanceof
 	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+		<!-- show environment OpenShift Explorer -->
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+                icon="icons/key-icon.png"
+                id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+                mnemonic="E">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="com.openshift.client.IApplication" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+		<!-- show environment Servers View -->
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.serverviewer.menu">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+                icon="icons/key-icon.png"
+                id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+                mnemonic="E">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.eclipse.wst.server.core.IServer" />
 	                    </iterate>
 					</and>
                 </with>

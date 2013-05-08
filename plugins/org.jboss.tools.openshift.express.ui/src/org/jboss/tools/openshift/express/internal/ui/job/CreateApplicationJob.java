@@ -58,16 +58,14 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		try {
 			try {
 				this.application = domain.createApplication(name, cartridge, scale, gear);
+				return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
-			}
-
-			if (application == null) {
-				int errorCode = monitor.isCanceled() ? TIMEOUTED_CANCELLED : 0;
-				return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, errorCode,
-						NLS.bind("User cancelled creation of application {0}", name), null);
-			} else {
-				return Status.OK_STATUS;
+				if (application != null) {
+					return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
+				} else {
+					return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
+				}
 			}
 		} catch (Exception e) {
 			safeRefreshDomain();
@@ -75,6 +73,8 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 					OpenShiftExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, name);
 		}
 	}
+
+
 
 	private IApplication refreshAndCreateApplication(IProgressMonitor monitor) throws OpenShiftException {
 		if (monitor.isCanceled()) {

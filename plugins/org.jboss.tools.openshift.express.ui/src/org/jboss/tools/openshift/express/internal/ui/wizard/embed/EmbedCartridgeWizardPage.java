@@ -45,6 +45,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationWizardModel;
 
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -85,7 +86,6 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 				BeanProperties.set(
 						EmbedCartridgeWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
 						.observe(pageModel));
-		;
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
 		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
@@ -249,7 +249,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			if (!result.isOK()) {
 				safeRefreshSelectedEmbeddedCartridges();
 			} else {
-				openLogDialog(job.getAddedCartridges());
+				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
 			}
 			return result.isOK();
 		} catch (Exception e) {
@@ -257,7 +257,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private void openLogDialog(final List<IEmbeddedCartridge> cartridges) {
+	private void openLogDialog(final List<IEmbeddedCartridge> cartridges, final boolean isTimeouted) {
 		if (cartridges.size() == 0) {
 			return;
 		}
@@ -266,8 +266,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(), cartridges).open();
-
+				new CreationLogDialog(getShell(), LogEntryFactory.create(cartridges, isTimeouted)).open();
 			}
 		});
 	}

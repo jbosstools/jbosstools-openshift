@@ -56,7 +56,7 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 					return new Status(
 							IStatus.CANCEL,
 							OpenShiftUIActivator.PLUGIN_ID,
-							TIMEOUTED_CANCELLED,
+							TIMEOUTED,
 							NLS.bind(OpenShiftExpressUIMessages.APPLICATION_NOT_ANSWERING, application.getName()),
 							null);
 				}

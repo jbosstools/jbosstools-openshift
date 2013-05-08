@@ -50,6 +50,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
 
 import com.openshift.client.IApplication;
@@ -168,7 +169,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 	private boolean handleOpenShiftError(String operation, IStatus status) {
 		if (JobUtils.isCancel(status)) {
-			if (AbstractDelegatingMonitorJob.TIMEOUTED_CANCELLED == status.getCode()) {
+			if (AbstractDelegatingMonitorJob.TIMEOUTED == status.getCode()) {
 				closeWizard();
 //			} else {
 //				new ErrorDialog(getShell(),
@@ -286,7 +287,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 			IStatus result = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
 			if (result.isOK()) {
-				openLogDialog(job.getAddedCartridges());
+				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
 			}
 			return result;
 		} catch (Exception e) {
@@ -295,7 +296,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
-	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges) {
+	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges, final boolean isTimeouted) {
 		if (embeddableCartridges == null
 				|| embeddableCartridges.isEmpty()) {
 			return;
@@ -304,7 +305,8 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(), embeddableCartridges).open();
+				new CreationLogDialog(getShell(), 
+						LogEntryFactory.create(embeddableCartridges, isTimeouted)).open();
 			}
 		});
 	}
