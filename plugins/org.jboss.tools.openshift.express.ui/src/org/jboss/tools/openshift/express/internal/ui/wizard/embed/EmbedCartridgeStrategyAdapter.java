@@ -74,22 +74,17 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		try {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-			IDomain domain = pageModel.getDomain();
-			IOpenShiftConnection connection = domain.getUser().getConnection();
-			EmbedCartridgeStrategy embedCartridgeStrategy =
-					new EmbedCartridgeStrategy(
-							connection.getEmbeddableCartridges(),
-							connection.getStandaloneCartridges(), 
-							domain.getApplications());
-			EmbeddableCartridgeDiff diff = createEmbeddableCartridgeDiff(event.getChecked(), cartridge, embedCartridgeStrategy);
+			EmbedCartridgeStrategy embedCartridgeStrategy = getEmbedCartridgeStrategy(pageModel.getDomain());
+			boolean adding = event.getChecked();
+			EmbeddableCartridgeDiff diff = createEmbeddableCartridgeDiff(adding, cartridge, embedCartridgeStrategy);
 
 			if (diff.hasChanges()) {
 				int result = openAdditionalOperationsDialog(
 						NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
-						createEmbeddingOperationMessage(event.getChecked(), diff));
+						createEmbeddingOperationMessage(adding, diff));
 				switch (result) {
 				case 1:
-					executeAdditionOperations(cartridge, diff);
+					executeAdditionalOperations(cartridge, diff);
 					break;
 				case 0:
 					dontExecuteAnyOperation(event, cartridge);
@@ -97,12 +92,32 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 				case 2:
 					// user has chosen to ignore additional requirements
 				}
+			} else if (!adding) {
+				if(!MessageDialog.openQuestion(getShell(), 
+						NLS.bind("Remove cartridge {0}", cartridge.getName()), 
+								NLS.bind(
+										"You are about to remove cartridge {0}.\n"
+												+ "Removing a cartridge is not reversible and can cause you to loose the data you have stored in it."
+												+ "\nAre you sure?", cartridge.getName()))) {
+					// revert removal
+					pageModel.selectEmbeddedCartridges(cartridge);
+				}
 			}
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		} catch (SocketTimeoutException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		}
+	}
+
+	private EmbedCartridgeStrategy getEmbedCartridgeStrategy(IDomain domain) throws SocketTimeoutException {
+		IOpenShiftConnection connection = domain.getUser().getConnection();
+		EmbedCartridgeStrategy embedCartridgeStrategy =
+				new EmbedCartridgeStrategy(
+						connection.getEmbeddableCartridges(),
+						connection.getStandaloneCartridges(), 
+						domain.getApplications());
+		return embedCartridgeStrategy;
 	}
 
 	private EmbeddableCartridgeDiff createEmbeddableCartridgeDiff(
@@ -132,7 +147,9 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 		if (diff.hasRemovals()) {
 			builder.append(NLS.bind("\n- Remove {0}",
-					StringUtils.toString(diff.getRemovals(), new EmbeddableCartridgeToStringConverter())));
+					StringUtils.toString(diff.getRemovals(), new EmbeddableCartridgeToStringConverter())))
+					.append("\n\nRemoving cartridges is not reversible and may cause you to loose the data you have stored in it.");
+		
 		}
 		if (diff.hasAdditions()) {
 			builder.append(NLS.bind("\n- Add {0}",
@@ -142,7 +159,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		return builder.toString();
 	}
 
-	protected void executeAdditionOperations(IEmbeddableCartridge cartridge, EmbeddableCartridgeDiff diff)
+	protected void executeAdditionalOperations(IEmbeddableCartridge cartridge, EmbeddableCartridgeDiff diff)
 			throws SocketTimeoutException {
 		if (createApplications(diff.getApplicationAdditions())) {
 			unselectEmbeddableCartridges(diff.getRemovals());
