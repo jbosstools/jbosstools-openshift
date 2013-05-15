@@ -457,7 +457,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
-					return ((IEmbeddableCartridge) e1).getName().compareTo(((IEmbeddableCartridge) e2).getName());
+					return ((IEmbeddableCartridge) e1).getDisplayName().compareTo(((IEmbeddableCartridge) e2).getDisplayName());
 				}
 				return super.compare(viewer, e1, e2);
 			}
