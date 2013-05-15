@@ -470,7 +470,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			@Override
 			public void update(ViewerCell cell) {
 				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) cell.getElement();
-				cell.setText(cartridge.getName());
+				cell.setText(cartridge.getDisplayName());
 			}
 		}, viewer, tableLayout);
 		return viewer;
@@ -536,7 +536,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			if (!(fromObject instanceof IStandaloneCartridge)) {
 				return null;
 			}
-			return ((IStandaloneCartridge) fromObject).getName();
+			return ((IStandaloneCartridge) fromObject).getDisplayName();
 		}
 	}
 
