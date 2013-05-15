@@ -33,7 +33,6 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.client.IApplication;
@@ -50,12 +49,12 @@ public class ServerAdapterFactory {
 
 	public IServer create(IProject project, IOpenShiftExpressWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
 		return createAdapterAndModules(project, wizardModel.getServerType(), wizardModel.getRuntime(),  
-				wizardModel.getApplication(), wizardModel.getConnection(), wizardModel.getRemoteName(), monitor);
+				wizardModel.getApplication(), wizardModel.getRemoteName(), monitor);
 	}
 
 	public IServer create(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, Connection user, IProgressMonitor monitor) throws OpenShiftException {
-		return createAdapterAndModules(project, serverType, runtime, application, user, null, monitor);
+			IApplication application, IProgressMonitor monitor) throws OpenShiftException {
+		return createAdapterAndModules(project, serverType, runtime, application, null, monitor);
 	}
 
 	/**
@@ -67,13 +66,13 @@ public class ServerAdapterFactory {
 	 * @throws OpenShiftException
 	 */
 	protected IServer createAdapterAndModules(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, Connection connection, String remoteName, IProgressMonitor monitor)
+			IApplication application, String remoteName, IProgressMonitor monitor)
 			throws OpenShiftException {
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
 		
 		IServer server = null;
 		try {
-			server = createAdapter(serverType, runtime, application, connection, project.getName(), remoteName);
+			server = createAdapter(serverType, runtime, application, project.getName(), remoteName);
 			addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
@@ -90,11 +89,10 @@ public class ServerAdapterFactory {
 	}
 	
 	private IServer createAdapter(IServerType serverType, IRuntime rt, 
-			IApplication application, Connection user, String deployProject, String remoteName) throws CoreException,
+			IApplication application, String deployProject, String remoteName) throws CoreException,
 			OpenShiftException, SocketTimeoutException {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(application != null);
-		Assert.isLegal(user != null);
 
 		String serverNameBase = application.getName() + " at OpenShift";
 		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);

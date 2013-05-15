@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -62,17 +64,20 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 
 	@Override
-	public int publishFinish(IDeployableServerBehaviour behaviour,
-			IProgressMonitor monitor) throws CoreException {
+	public int publishFinish(IDeployableServerBehaviour behaviour, IProgressMonitor monitor) throws CoreException {
 
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		boolean allSubModulesPublished = areAllPublished(behaviour);
-		if (destProj != null && destProj.exists()) {
+
+		if (destProj != null 
+				&& destProj.exists()) {
+		
 			String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-			IContainer destFolder = "".equals(destinationFolder) ? 
-					destProj : (IContainer) destProj.findMember(new Path(destinationFolder));
-			if (allSubModulesPublished || (destFolder != null && destFolder.isAccessible())) {
+			IContainer destFolder = ExpressServerUtils.getDeployFolderResource(destinationFolder, destProj);
+			
+			if (allSubModulesPublished 
+					|| (destFolder != null && destFolder.isAccessible())) {
 				refreshProject(destProj, submon(monitor, 100));
 				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
 			} // else ignore. (one or more modules not published AND magic
@@ -154,22 +159,28 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 	protected IContainer getDestination(IDeployableServerBehaviour behaviour, IProject destProj) throws CoreException {
 		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-		IContainer destFolder = "".equals(destinationFolder) ? destProj : (IContainer) destProj.findMember(new Path(
-				destinationFolder));
-		if (destFolder == null || !destFolder.isAccessible()) {
-			StringBuffer missingPath = new StringBuffer("");
-			if (destFolder == null) {
-				missingPath.append(destProj.getName());
-				missingPath.append("/");
-				missingPath.append(destinationFolder);
-			} else {
-				missingPath.append(destFolder.getName());
-			}
-			throw new CoreException(new Status(IStatus.ERROR,
-					OpenShiftUIActivator.PLUGIN_ID,
-					NLS.bind(ExpressMessages.publishFailMissingFolder, behaviour.getServer().getName(), missingPath)));
+		IContainer destFolder = ExpressServerUtils.getDeployFolderResource(destinationFolder, destProj);
+;
+		if (destFolder == null 
+				|| !destFolder.isAccessible()) {
+			throw new CoreException(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					ExpressMessages.publishFailMissingFolder,
+					behaviour.getServer().getName(),
+					createMissingPath(destProj, destinationFolder, destFolder))));
 		}
 		return destFolder;
+	}
+
+	protected StringBuilder createMissingPath(IProject destProj, String destinationFolder, IContainer destFolder) {
+		StringBuilder missingPath = new StringBuilder();
+		if (destFolder != null) {
+			missingPath.append(destFolder.getName());
+		} else {
+			missingPath.append(destProj.getName());
+			missingPath.append(File.separatorChar);
+			missingPath.append(destinationFolder);
+		}
+		return missingPath;
 	}
 
 	protected boolean isInDestProjectTree(String magicProject, IModule[] module) {

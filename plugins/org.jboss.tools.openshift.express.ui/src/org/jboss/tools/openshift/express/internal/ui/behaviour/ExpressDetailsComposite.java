@@ -144,11 +144,7 @@ public class ExpressDetailsComposite {
 		updateModel(connection);
 
 		this.application = ExpressServerUtils.getApplication(callback);
-
-		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server);
-		if (deployFolder == null) {
-			this.deployFolder = ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT;
-		}
+		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server, application);
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
 	}
 
@@ -360,15 +356,9 @@ public class ExpressDetailsComposite {
 					remoteText.setText(getRemoteConfig(remote, application, deployProject));
 					remoteText.setEnabled(true);
 
-					String deployFolder = ExpressServerUtils.getProjectAttribute(deployProject,
-							ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
-					if (!StringUtils.isEmpty(deployFolder)) {
-						deployFolderText.setText(deployFolder);
-					} else {
-						deployFolderText.setText(ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
-					}
+					String deployFolder = ExpressServerUtils.getExpressDeployFolder(server, application);
+					deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
 					deployFolderText.setEnabled(!StringUtils.isEmpty(deployFolder));
-
 					browseDestButton.setEnabled(!StringUtils.isEmpty(deployFolder));
 				} else {
 					deployFolderText.setEnabled(false);

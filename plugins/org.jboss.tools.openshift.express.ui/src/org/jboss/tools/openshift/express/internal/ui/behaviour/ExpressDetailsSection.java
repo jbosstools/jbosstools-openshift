@@ -19,8 +19,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -58,6 +56,8 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+
+import com.openshift.client.IApplication;
 
 /**
  * @author Rob Stryker
@@ -109,9 +109,10 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		connectionText.setEnabled(false);
 		appNameText.setEnabled(false);
 
+		IApplication application = ExpressServerUtils.getApplication(server);
 		String outDir = ExpressServerUtils.getExpressDeployFolder(server);
+		deployFolderText.setText(outDir);
 		String remote = ExpressServerUtils.getExpressRemoteName(server);
-		deployFolderText.setText(outDir == null ? "" : outDir);
 		remoteText.setText(remote == null ? "" : remote);
 
 		deployProjectCombo.setItems(getSuitableProjects());
@@ -259,20 +260,18 @@ public class ExpressDetailsSection extends ServerEditorSection {
 
 	private IFolder chooseFolder() {
 		String depProject = ExpressServerUtils.getExpressDeployProject(server);
-		String depFolder = ExpressServerUtils.getExpressDeployFolder(server);
 
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(depProject);
 
-		ILabelProvider lp = new WorkbenchLabelProvider();
-		ITreeContentProvider cp = new WorkbenchContentProvider();
-
-		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp,
-				cp);
+		ElementTreeSelectionDialog dialog = 
+				new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), 
+						new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setTitle("Deploy Location");
 		dialog.setMessage("Please choose a location to put zipped projects");
 		dialog.setInput(p);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
+		String depFolder = ExpressServerUtils.getExpressDeployFolder(server);
 		IResource res = p.findMember(new Path(depFolder));
 		if (res != null)
 			dialog.setInitialSelection(res);
@@ -306,7 +305,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		public SetDeployFolderCommand(IServerWorkingCopy server) {
 			super(server, "Change Deployment Folder", deployFolderText, deployFolderText.getText(),
 					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener,
-					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+					ExpressServerUtils.getDefaultDeployFolder(server));
 		}
 	}
 
