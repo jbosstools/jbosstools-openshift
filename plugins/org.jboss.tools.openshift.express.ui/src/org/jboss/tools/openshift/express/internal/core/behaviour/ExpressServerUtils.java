@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -65,6 +67,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * This class holds the attribute names whose values will be stored inside a
@@ -101,7 +104,8 @@ public class ExpressServerUtils {
 	// public static final String ATTRIBUTE_PASSWORD =
 	// "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT = "origin";
-	public static final String ATTRIBUTE_DEPLOY_FOLDER_DEFAULT = "deployments";
+	private static final String ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT = "deployments";
+	private static final String ATTRIBUTE_DEPLOY_FOLDER_TOMCAT_DEFAULT = "webapps";
 
 	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";
 
@@ -142,9 +146,15 @@ public class ExpressServerUtils {
 	 * @return the openshift application or null if it could not be located.
 	 * @throws OpenShiftException
 	 */
-	public static IApplication getApplication(IServer server) {
+	public static IApplication getApplication(IServerAttributes server) {
 		final String appName = getExpressApplicationName(server);
+		if (StringUtils.isEmpty(appName)) {
+			return null;
+		}
 		final ConnectionURL connectionUrl = getExpressConnectionUrl(server);
+		if (connectionUrl == null) {
+			return null;
+		}
 		try {
 			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
 			if (connection != null) {
@@ -160,7 +170,9 @@ public class ExpressServerUtils {
 
 	/* Settings stored only in the project */
 	public static String getExpressApplicationName(IServerAttributes attributes) {
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_APPLICATION_NAME,
+		return getProjectAttribute(
+				getExpressDeployProject2(attributes), 
+				SETTING_APPLICATION_NAME,	
 				attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String) null));
 	}
 
@@ -199,20 +211,83 @@ public class ExpressServerUtils {
 
 		return null;
 	}
-
-	/* Settings stored in the project, maybe over-ridden in the server */
+		
 	public static String getExpressDeployFolder(IServerAttributes attributes) {
-		if (getOverridesProject(attributes))
-			return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DEPLOY_FOLDER_NAME,
-				ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+		return getExpressDeployFolder(attributes, getApplication(attributes));
 	}
 
+	public static String getExpressDeployFolder(IServerAttributes attributes, IApplication application) {
+		return getExpressDeployFolder(attributes, getDefaultDeployFolder(application));
+	}
+		
+	/* Settings stored in the project, maybe over-ridden in the server */
+	private static String getExpressDeployFolder(IServerAttributes attributes, String defaultDeployFolder) {
+		if (getOverridesProject(attributes)) {
+			return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, defaultDeployFolder);
+		}
+		
+		return getProjectAttribute(
+				getExpressDeployProject2(attributes), SETTING_DEPLOY_FOLDER_NAME, defaultDeployFolder);
+	}
+
+	public static String getDefaultDeployFolder(IServerAttributes server) {
+		return getDefaultDeployFolder(getApplication(server));
+	}
+	
+	private enum DeployFolder {
+		JBOSSAS(IStandaloneCartridge.NAME_JBOSSAS, "deployments"), 
+		JBOSSEAP(IStandaloneCartridge.NAME_JBOSSEAP, "deployments"), 
+		JBOSSEWS(IStandaloneCartridge.NAME_JBOSSEWS, "webapps");
+
+		private String cartridgeName;
+		private String deployFolder;
+
+		DeployFolder(String cartridgeName, String deployFolder) {
+			this.cartridgeName = cartridgeName;
+			this.deployFolder = deployFolder;
+		}
+		
+		public String getDeployFolder() {
+			return deployFolder;
+		}
+		
+		public static DeployFolder getByCartridgeName(String cartridgeName) {
+			if (cartridgeName == null) {
+				return null;
+			}
+			
+			for (DeployFolder deployFolder : values()) {
+				if (cartridgeName.startsWith(deployFolder.cartridgeName)) {
+					return deployFolder;
+				}
+			}
+			return null;
+		}
+		
+	}
+	
+	public static String getDefaultDeployFolder(IApplication application) {
+		DeployFolder deployFolder = DeployFolder.getByCartridgeName(application.getCartridge().getName());
+		if (deployFolder == null) {
+			return null;
+		}
+		return deployFolder.getDeployFolder();
+	}
+		
+	public static IContainer getDeployFolderResource(String deployFolder, IProject project) {
+		if (!StringUtils.isEmpty(deployFolder)) {
+			return (IContainer) project.findMember(new Path(deployFolder));
+		} else {
+			return project;
+		}
+
+	}
+	
 	public static String getExpressRemoteName(IServerAttributes attributes) {
 		if (getOverridesProject(attributes))
 			return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, ATTRIBUTE_REMOTE_NAME_DEFAULT);
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_REMOTE_NAME,
-				ATTRIBUTE_REMOTE_NAME_DEFAULT);
+		return getProjectAttribute(getExpressDeployProject2(attributes), 
+				SETTING_REMOTE_NAME, ATTRIBUTE_REMOTE_NAME_DEFAULT);
 	}
 
 	public static String getExpressDeployFolder(IServerAttributes attributes, int fromWhere) {
@@ -223,8 +298,8 @@ public class ExpressServerUtils {
 		if (fromWhere == SETTING_FROM_PROJECT)
 			return fromProject;
 		if (getOverridesProject(attributes))
-			return fromServer == null ? ATTRIBUTE_DEPLOY_FOLDER_DEFAULT : fromServer;
-		return fromProject == null ? ATTRIBUTE_DEPLOY_FOLDER_DEFAULT : fromProject;
+			return fromServer == null ? ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT : fromServer;
+		return fromProject == null ? ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT : fromProject;
 	}
 
 	public static String getExpressRemoteName(IServerAttributes attributes, int fromWhere) {
@@ -287,13 +362,7 @@ public class ExpressServerUtils {
 
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
 			String deployProject, String remote, String appName) {
-
-		if (host != null) {
-			if (host.indexOf("://") != -1)
-				host = host.substring(host.indexOf("://") + 3);
-			if (host.endsWith("/"))
-				host = host.substring(0, host.length() - 1);
-		}
+		host = removeProtocol(host);
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
@@ -305,17 +374,31 @@ public class ExpressServerUtils {
 		// wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remote);
 		((ServerWorkingCopy) wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
-		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, "true");
+		wc.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, String.valueOf(Boolean.TRUE));
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
 		wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
+		setName(wc, appName);
+	}
+
+	protected static void setName(IServerWorkingCopy wc, String appName) {
 		if (appName != null
-				&& (wc.getName() == null || wc.getName().length() == 0 || wc.getName().startsWith(
-						ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
+				&& (StringUtils.isEmpty(wc.getName()) 
+						|| wc.getName().startsWith(ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
 			String newBase = appName + " at OpenShift";
 			wc.setName(ServerUtil.getDefaultServerName(newBase));
 		}
+	}
+
+	protected static String removeProtocol(String host) {
+		if (host != null) {
+			if (host.indexOf("://") != -1)
+				host = host.substring(host.indexOf("://") + 3);
+			if (host.endsWith("/"))
+				host = host.substring(0, host.length() - 1);
+		}
+		return host;
 	}
 
 	public static IServer createServerAndRuntime(String runtimeID, String serverID,
@@ -500,7 +583,9 @@ public class ExpressServerUtils {
 		setConnectionUrl(connection, node);
 		node.put(ExpressServerUtils.SETTING_DOMAIN, app.getDomain().getId());
 		node.put(ExpressServerUtils.SETTING_REMOTE_NAME, remoteName);
-		node.put(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);
+		if (!StringUtils.isEmpty(deployFolder)) {
+			node.put(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);
+		}
 		try {
 			node.flush();
 		} catch (BackingStoreException e) {

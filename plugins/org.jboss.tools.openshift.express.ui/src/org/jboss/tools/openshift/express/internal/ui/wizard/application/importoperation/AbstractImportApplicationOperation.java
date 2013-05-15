@@ -256,7 +256,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		IApplication app = getApplication();
 		// Add the settings here!
 		ExpressServerUtils.updateOpenshiftProjectSettings(
-				project, app, getUser(), getRemoteName(), ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_DEFAULT);
+				project, app, getUser(), getRemoteName(), ExpressServerUtils.getDefaultDeployFolder(app));
 		return (IResource) project.getFolder(".settings");
 	}
 
