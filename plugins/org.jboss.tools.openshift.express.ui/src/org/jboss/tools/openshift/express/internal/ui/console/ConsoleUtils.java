@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.egit.core.op.PushOperationResult;
-import org.eclipse.egit.ui.UIText;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.widgets.Display;
@@ -144,7 +143,7 @@ public class ConsoleUtils {
 	private static String getOneResultAsString(PushOperationResult pushOperationResult, 
 			URIish uri, RemoteRefUpdate update) {
 		StringBuilder result = new StringBuilder(EMPTY_STRING);
-		result.append(UIText.PushResultTable_repository);
+		result.append("Repository");
 		result.append(SPACE);
 		result.append(uri.toString());
 		result.append(Text.DELIMITER);
