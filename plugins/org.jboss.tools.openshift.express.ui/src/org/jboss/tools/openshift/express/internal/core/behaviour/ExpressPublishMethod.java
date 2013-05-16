@@ -28,6 +28,7 @@ import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -51,16 +52,22 @@ import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 	@Override
-	public void publishStart(IDeployableServerBehaviour behaviour,
-			IProgressMonitor monitor) throws CoreException {
+	public void publishStart(final IDeployableServerBehaviour behaviour, final IProgressMonitor monitor) throws CoreException {
 		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
-		IProject magicProject = destProjName == null ? null : ResourcesPlugin.getWorkspace().getRoot()
-				.getProject(destProjName);
+		IProject magicProject = destProjName == null ? 
+				null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if (magicProject == null || !magicProject.isAccessible()) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					OpenShiftUIActivator.PLUGIN_ID,
 					NLS.bind(ExpressMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
 		}
+		Display.getDefault().asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				ConsoleUtils.displayConsoleView(behaviour.getServer());
+			}
+		});
 	}
 
 	@Override
@@ -241,9 +248,12 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 
 	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		String remoteName = ExpressServerUtils.getExpressRemoteName(server.createWorkingCopy());
+		Repository repository = EGitUtils.getRepository(project);
 		try {
 			monitor.beginTask("Publishing " + project.getName(), 200);
-			PushOperationResult result = EGitUtils.push(remoteName, project, new SubProgressMonitor(monitor, 100));
+			PushOperationResult result = EGitUtils.push(
+					remoteName, repository, new SubProgressMonitor(monitor, 100),
+					ConsoleUtils.getConsoleOutputStream(server));
 			monitor.done();
 			return result;
 		} catch (CoreException ce) {
@@ -261,7 +271,9 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 								+ "a forced push (git push -f) might be the right thing to do. This will though overwrite the remote repository!"
 								+ "\n\n Do you want to do a forced push and overwrite any remote changes ? ",
 						"Attempt push force ?", false)) {
-					return EGitUtils.pushForce(remoteName, project, new SubProgressMonitor(monitor, 100));
+					return EGitUtils.pushForce(
+							remoteName, repository, new SubProgressMonitor(monitor, 100),
+							ConsoleUtils.getConsoleOutputStream(server));
 				} else {
 					// printing out variation of the standard git output
 					// meesage.

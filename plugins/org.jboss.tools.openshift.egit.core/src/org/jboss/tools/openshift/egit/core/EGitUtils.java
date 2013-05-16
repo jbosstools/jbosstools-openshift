@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.egit.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -446,11 +447,20 @@ public class EGitUtils {
 	 * @throws CoreException
 	 *             core exception is thrown if the push could not be executed
 	 */
-	public static PushOperationResult push(Repository repository,
-			IProgressMonitor monitor) throws CoreException {
-		return push(repository, getRemoteConfig(repository), false, monitor);
+	public static PushOperationResult push(Repository repository, IProgressMonitor monitor, OutputStream out)
+			throws CoreException {
+		return push(repository, getRemoteConfig(repository), false, monitor, out);
 	}
 
+	public static PushOperationResult push(Repository repository, IProgressMonitor monitor)
+			throws CoreException {
+		return push(repository, monitor, null);
+	}
+
+	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor) throws CoreException {
+		return push(remote, repository, monitor, null);
+	}
+	
 	/**
 	 * Pushes the given repository to the remote repo with the given name.
 	 * 
@@ -463,33 +473,24 @@ public class EGitUtils {
 	 * @see #getAllRemoteConfigs(Repository)
 	 * @see RemoteConfig#getName()
 	 */
-	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor)
+	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor, OutputStream out)
 			throws CoreException {
 		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
-		return push(repository, remoteConfig, false, monitor);
+		return push(repository, remoteConfig, false, monitor, out);
 	}
 
-	public static PushOperationResult push(String remote, IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		Repository repository = getRepository(project);
-		return push(remote, repository, monitor);
+	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor) throws CoreException {
+		return pushForce(remote, repository, monitor, null);
 	}
-
-	public static PushOperationResult pushForce(String remote, IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		Repository repository = getRepository(project);
-		return pushForce(remote, repository, monitor);
-	}
-
-	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor)
+	
+	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor, OutputStream out)
 			throws CoreException {
 		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
-		return push(repository, remoteConfig, true, monitor);
+		return push(repository, remoteConfig, true, monitor, out);
 	}
 
-	private static PushOperationResult push(Repository repository,
-			RemoteConfig remoteConfig, boolean force, IProgressMonitor monitor)
-			throws CoreException {
+	private static PushOperationResult push(Repository repository, RemoteConfig remoteConfig,
+			boolean force, IProgressMonitor monitor, OutputStream out) throws CoreException {
 		try {
 			if (remoteConfig == null) {
 				throw new CoreException(
@@ -498,8 +499,7 @@ public class EGitUtils {
 								"Repository \"{0}\" has no remote repository configured",
 								repository.toString()));
 			}
-			PushOperation op = createPushOperation(remoteConfig, repository,
-					force);
+			PushOperation op = createPushOperation(remoteConfig, repository, force, out);
 			op.run(monitor);
 			PushOperationResult pushResult = op.getOperationResult();
 			if (hasFailedEntries(pushResult)) {
@@ -525,18 +525,17 @@ public class EGitUtils {
 					failedUpdate.getStatus()));
 		}
 		return builder.toString();
-
 	}
 
-	private static PushOperation createPushOperation(RemoteConfig remoteConfig,
-			Repository repository, boolean force) throws CoreException {
+	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force, OutputStream out)
+			throws CoreException {
 
 		Collection<URIish> pushURIs = getPushURIs(remoteConfig);
-		Collection<RefSpec> pushRefSpecs = createForceRefSpecs(force,
-				getPushRefSpecs(remoteConfig));
-		PushOperationSpecification pushSpec = createPushSpec(pushURIs,
-				pushRefSpecs, repository);
-		return new PushOperation(repository, pushSpec, false, DEFAULT_TIMEOUT);
+		Collection<RefSpec> pushRefSpecs = createForceRefSpecs(force, getPushRefSpecs(remoteConfig));
+		PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, repository);
+		PushOperation pushOperation = new PushOperation(repository, pushSpec, false, DEFAULT_TIMEOUT);
+		pushOperation.setOutputStream(out);
+		return pushOperation;
 	}
 
 	/**
