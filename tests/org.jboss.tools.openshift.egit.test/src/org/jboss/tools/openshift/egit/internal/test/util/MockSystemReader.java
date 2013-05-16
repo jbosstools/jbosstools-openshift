@@ -89,12 +89,23 @@ public class MockSystemReader extends SystemReader {
 		init(Constants.GIT_COMMITTER_EMAIL_KEY);
 		userGitConfig = new MockConfig(null, null);
 		systemGitConfig = new MockConfig(null, null);
+		setCurrentPlatform();
 	}
 
 	private void init(final String n) {
 		setProperty(n, n);
 	}
 
+	/**
+	 * Assign some properties for the currently executing platform
+	 */
+	public void setCurrentPlatform() {
+		setProperty("os.name", System.getProperty("os.name"));
+		setProperty("file.separator", System.getProperty("file.separator"));
+		setProperty("path.separator", System.getProperty("path.separator"));
+		setProperty("line.separator", System.getProperty("line.separator"));
+	}
+	
 	public void clearProperties() {
 		values.clear();
 	}
