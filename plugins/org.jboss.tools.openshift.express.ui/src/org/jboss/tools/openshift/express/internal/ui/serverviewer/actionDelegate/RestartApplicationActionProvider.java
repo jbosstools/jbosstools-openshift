@@ -10,11 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate;
 
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.action.AbstractOpenShiftAction;
 import org.jboss.tools.openshift.express.internal.ui.job.RestartApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
@@ -36,13 +42,21 @@ public class RestartApplicationActionProvider extends AbstractServerViewerAction
 
 		@Override
 		public void validate() {
-			IServer server = UIUtils.getFirstElement(getSelection(), IServer.class);
-			if (server == null) {
-				return;
-			} 
-			
-			IApplication application = ExpressServerUtils.getApplication(server);
-			setEnabled(application != null);
+			boolean enabled = false;
+			ISelection selection = getSelection();
+			if (selection instanceof IStructuredSelection) {
+				if (((IStructuredSelection) selection).size() == 1) {
+					IServer server = UIUtils.getFirstElement(getSelection(), IServer.class);
+					if (server != null) {
+						String applicationName = ExpressServerUtils.getExpressApplicationId(server);
+						if (!StringUtils.isEmpty(applicationName)) {
+							enabled = true;
+						}
+					}
+				}
+			}
+				
+			setEnabled(enabled);
 		}
 
 		@Override
@@ -55,8 +69,18 @@ public class RestartApplicationActionProvider extends AbstractServerViewerAction
 		}
 
 		protected void restartApplication(IServer server) {
-			IApplication application = ExpressServerUtils.getApplication(server);
-			new RestartApplicationJob(application).schedule();
+			final RetrieveApplicationJob job = new RetrieveApplicationJob(server);
+			job.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(IJobChangeEvent event) {
+					if (!event.getResult().isOK()) {
+						return;
+					}
+					final IApplication application = job.getApplication();
+					new RestartApplicationJob(application).schedule();
+				}
+			});
+			job.schedule();
 		}
 	}
 	
