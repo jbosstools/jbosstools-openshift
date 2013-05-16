@@ -96,7 +96,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
 	}
 
-	private class NamespaceValidator extends MultiValidator {
+	class NamespaceValidator extends MultiValidator {
 
 		private final ISWTObservableValue domainNameObservable;
 
@@ -109,11 +109,15 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			final String domainName = (String) domainNameObservable.getValue();
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Provide an alphanumeric name for the domain.");
+						"Enter a domain name with letters and digits only. Max length is 16 characters.");
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
 						"The domain name may only contain letters and digits.");
+			}
+			if (domainName.length() > 16) {
+				return ValidationStatus.error(
+						"The domain name max length is 16 characters.");
 			}
 			return ValidationStatus.ok();
 		}
