@@ -107,11 +107,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 		// Repo Path Management
 		useDefaultRepoPathButton = new Button(cloneGroup, SWT.CHECK);
-		useDefaultRepoPathButton.setText("Use default location");
-		useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location for your project");
+		useDefaultRepoPathButton.setText("Use default clone destination");
+		useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRepoPathButton);
 		Label labelForRepoPath = new Label(cloneGroup, SWT.NONE);
-		labelForRepoPath.setText("Location:");
+		labelForRepoPath.setText("Git Clone Destination:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
 				.applyTo(labelForRepoPath);
 		final Text repoPathText = new Text(cloneGroup, SWT.BORDER);
