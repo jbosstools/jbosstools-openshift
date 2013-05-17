@@ -42,6 +42,8 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyNameValidator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyValidator;
 
+import com.openshift.client.IOpenShiftSSHKey;
+
 /**
  * @author André Dietisheim
  */
@@ -168,5 +170,9 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		ParametrizableWizardPageSupport.create(
 				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
 				dbc);
+	}
+
+	public IOpenShiftSSHKey getSSHKey() {
+		return pageModel.getSSHKey();
 	}
 }

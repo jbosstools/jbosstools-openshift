@@ -55,7 +55,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -84,6 +83,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisito
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -673,20 +673,23 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		if (ensureHasDomain()) {
-			try {
-				pageModel.reset();
-				// needs to be done before loading resources, otherwise:
-				// dbc.updateModels() will be called and old data could be
-				// restored
-				loadOpenshiftResources(dbc);
-				dbc.updateTargets();
-				enableApplicationWidgets(pageModel.isUseExistingApplication());
-				createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
-				this.newAppNameText.setFocus();
-			} catch (OpenShiftException e) {
-				Logger.error("Failed to reset page fields", e);
-			}
+		if (!ensureHasDomain()
+				|| !ensureHasSSHKeys()) {
+			org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(getWizard());
+			return;
+		}
+		try {
+			pageModel.reset();
+			// needs to be done before loading resources, otherwise:
+			// dbc.updateModels() will be called and old data could be
+			// restored
+			loadOpenshiftResources(dbc);
+			dbc.updateTargets();
+			enableApplicationWidgets(pageModel.isUseExistingApplication());
+			createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
+			this.newAppNameText.setFocus();
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to reset page fields", e);
 		}
 	}
 
@@ -697,26 +700,38 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 */
 	private boolean ensureHasDomain() {
 		try {
-			final Connection user = this.pageModel.getConnection();
-			if (user != null && !user.hasDomain()) {
-				IWizard domainDialog = new NewDomainDialog(user);
-				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), domainDialog);
-				dialog.create();
-				dialog.setBlockOnOpen(true);
-				int result = dialog.open();
-				if (result != Dialog.OK) {
-					final IWizardContainer container = getWizard().getContainer();
-					if (container instanceof WizardDialog) {
-						((WizardDialog) container).close();
-						return false;
-					}
-				}
+			final Connection connection = pageModel.getConnection();
+			if (connection == null
+					|| connection.hasDomain()) {
+				return true;
 			}
+			WizardDialog dialog = new WizardDialog(
+					Display.getCurrent().getActiveShell(), new NewDomainDialog(connection));
+			dialog.create();
+			dialog.setBlockOnOpen(true);
+			return dialog.open() != Dialog.OK;
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to refresh OpenShift account info", e);
 			return false;
 		}
-		return true;
+	}
+
+	private boolean ensureHasSSHKeys() {
+		try {
+			final Connection connection = pageModel.getConnection();
+			if (connection == null 
+					|| connection.hasSSHKeys()) {
+				return true;
+			}
+			WizardDialog dialog = new WizardDialog(
+					Display.getCurrent().getActiveShell(), new NoSSHKeysWizard(connection));
+			dialog.create();
+			dialog.setBlockOnOpen(true);
+			return dialog.open() == Dialog.OK;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
+		}
 	}
 
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {

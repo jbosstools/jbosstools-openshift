@@ -45,6 +45,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.DirectoryValidator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyNameValidator;
 
+import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.SSHKeyType;
 
 /**
@@ -252,4 +253,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	public IOpenShiftSSHKey getSSHKey() {
+		return pageModel.getSSHKey();
+	}
 }

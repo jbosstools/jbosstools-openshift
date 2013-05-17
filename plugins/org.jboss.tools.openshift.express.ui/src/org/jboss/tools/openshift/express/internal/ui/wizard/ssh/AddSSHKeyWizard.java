@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
+import com.openshift.client.IOpenShiftSSHKey;
+
 /**
  * @author André Dietisheim
  */
@@ -38,4 +40,9 @@ public class AddSSHKeyWizard extends Wizard {
 	public void addPages() {
 		addPage(this.addSSHKeyWizardPage = new AddSSHKeyWizardPage(user, this));
 	}
+
+	public IOpenShiftSSHKey getSSHKey() {
+		return addSSHKeyWizardPage.getSSHKey();
+	}
+
 }

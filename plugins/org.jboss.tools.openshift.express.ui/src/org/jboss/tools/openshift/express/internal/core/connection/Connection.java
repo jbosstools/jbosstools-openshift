@@ -48,7 +48,7 @@ public class Connection {
 	private String username;
 	private String password;
 	private String host;
-	private IUser user;
+	private IUser connection;
 	private boolean isDomainLoaded;
 	private boolean rememberPassword;
 	private boolean didPromptForPassword;
@@ -105,11 +105,11 @@ public class Connection {
 	}
 
 	protected void setUser(IUser user) {
-		this.user = user;
+		this.connection = user;
 	}
 
 	private IUser getUser() {
-		return user;
+		return connection;
 	}
 
 	public String getUsername() {
@@ -205,10 +205,10 @@ public class Connection {
 	}
 
 	/**
-	 * Creates an OpenShift user instance for this connection. Prompts for
+	 * Creates an OpenShift connection instance for this connection. Prompts for
 	 * credentials if needed.
 	 * 
-	 * @return <code>true</code> if user could get created, <code>false</code>
+	 * @return <code>true</code> if connection could get created, <code>false</code>
 	 *         otherwise.
 	 */
 	protected boolean createUser() {
@@ -241,11 +241,11 @@ public class Connection {
 	}
 
 	private boolean hasUser() {
-		return user != null;
+		return connection != null;
 	}
 
 	protected void clearUser() {
-		this.user = null;
+		this.connection = null;
 	}
 
 	public void update(Connection connection) {
@@ -280,7 +280,7 @@ public class Connection {
 			final ApplicationScale scale, final IGearProfile gearProfile)
 			throws OpenShiftException {
 		if (connect()) {
-			return user.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
+			return connection.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
 		}
 		return null;
 	}
@@ -296,30 +296,30 @@ public class Connection {
 	 */
 	public IDomain createDomain(String id) throws OpenShiftException {
 		if (connect()) {
-			return user.createDomain(id);
+			return connection.createDomain(id);
 		}
 		return null;
 	}
 
 	public IApplication getApplicationByName(String name) throws OpenShiftException {
 		if (connect()
-				&& user.hasDomain()) {
-			return user.getDefaultDomain().getApplicationByName(name);
+				&& connection.hasDomain()) {
+			return connection.getDefaultDomain().getApplicationByName(name);
 		}
 		return null;
 	}
 
 	public List<IApplication> getApplications() throws OpenShiftException {
 		if (connect()
-				&& user.hasDomain()) {
-			return user.getDefaultDomain().getApplications();
+				&& connection.hasDomain()) {
+			return connection.getDefaultDomain().getApplications();
 		}
 		return null;
 	}
 
 	public List<IStandaloneCartridge> getStandaloneCartridgeNames() throws OpenShiftException {
 		if (connect()) {
-			return user.getConnection().getStandaloneCartridges();
+			return connection.getConnection().getStandaloneCartridges();
 		}
 		return null;
 	}
@@ -330,7 +330,7 @@ public class Connection {
 
 	public IDomain getDefaultDomain() throws OpenShiftException {
 		if (connect()) {
-			IDomain domain = user.getDefaultDomain();
+			IDomain domain = connection.getDefaultDomain();
 			isDomainLoaded = true;
 			return domain;
 		}
@@ -343,28 +343,35 @@ public class Connection {
 
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
 		if (connect()) {
-			return user.getConnection().getEmbeddableCartridges();
+			return connection.getConnection().getEmbeddableCartridges();
 		}
 		return null;
 	}
 
 	public boolean hasApplication(String name) throws OpenShiftException {
 		if (connect()) {
-			return user.getDefaultDomain().hasApplicationByName(name);
+			return connection.getDefaultDomain().hasApplicationByName(name);
 		}
 		return false;
 	}
 
 	public boolean hasApplicationOfType(IStandaloneCartridge type) throws OpenShiftException {
 		if (hasDomain()) {
-			return user.getDefaultDomain().hasApplicationByCartridge(type);
+			return connection.getDefaultDomain().hasApplicationByCartridge(type);
 		}
 		return false;
 	}
 
 	public boolean hasDomain() throws OpenShiftException {
 		if (connect()) {
-			return user.hasDomain();
+			return connection.hasDomain();
+		}
+		return false;
+	}
+
+	public boolean hasSSHKeys() throws OpenShiftException {
+		if (connect()) {
+			return !connection.getSSHKeys().isEmpty();
 		}
 		return false;
 	}
@@ -372,7 +379,7 @@ public class Connection {
 	public void refresh() throws OpenShiftException {
 		isDomainLoaded = false;
 		if (connect()) {
-			user.refresh();
+			connection.refresh();
 		}
 	}
 
@@ -382,7 +389,7 @@ public class Connection {
 
 	public List<IOpenShiftSSHKey> getSSHKeys() {
 		if (connect()) {
-			return user.getSSHKeys();
+			return connection.getSSHKeys();
 		}
 		return null;
 	}
@@ -390,28 +397,28 @@ public class Connection {
 	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException,
 			OpenShiftException {
 		if (connect()) {
-			return user.getSSHKeyByPublicKey(publicKey);
+			return connection.getSSHKeyByPublicKey(publicKey);
 		}
 		return null;
 	}
 
 	public IOpenShiftSSHKey putSSHKey(String name, ISSHPublicKey key) throws OpenShiftException {
 		if (connect()) {
-			return user.putSSHKey(name, key);
+			return connection.putSSHKey(name, key);
 		}
 		return null;
 	}
 
 	public boolean hasSSHKeyName(String name) {
 		if (connect()) {
-			return user.hasSSHKeyName(name);
+			return connection.hasSSHKeyName(name);
 		}
 		return false;
 	}
 
 	public boolean hasSSHPublicKey(String publicKey) {
 		if (connect()) {
-			return user.hasSSHPublicKey(publicKey);
+			return connection.hasSSHPublicKey(publicKey);
 		}
 		return false;
 	}

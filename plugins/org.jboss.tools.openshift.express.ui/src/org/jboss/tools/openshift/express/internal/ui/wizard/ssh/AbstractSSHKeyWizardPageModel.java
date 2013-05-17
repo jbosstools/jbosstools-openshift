@@ -22,10 +22,10 @@ import com.openshift.client.OpenShiftException;
 public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo implements ISSHKeyWizardPageModel {
 
 	private String name;
-	private Connection user;
+	private Connection connection;
 	
 	public AbstractSSHKeyWizardPageModel(Connection user) {
-		this.user = user;
+		this.connection = user;
 	}
 
 	@Override
@@ -40,16 +40,16 @@ public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo imp
 
 	@Override
 	public boolean hasKeyName(String name) {
-		return user.hasSSHKeyName(name);
+		return connection.hasSSHKeyName(name);
 	}
 
 	@Override
 	public boolean hasPublicKey(String publicKeyContent) {
-		return user.hasSSHPublicKey(publicKeyContent);
+		return connection.hasSSHPublicKey(publicKeyContent);
 	}
 	
-	protected Connection getUser() {
-		return user;
+	protected Connection getConnection() {
+		return connection;
 	}
 
 	protected String checkedGetSSH2Home() throws OpenShiftException {
