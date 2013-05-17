@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
@@ -26,8 +24,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -56,16 +56,20 @@ import com.openshift.client.IOpenShiftSSHKey;
 /**
  * @author André Dietisheim
  */
-public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
+class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
-	private ManageSSHKeysWizardPageModel pageModel;
+	private SSHKeysWizardPageModel pageModel;
 	private TableViewer viewer;
 
-	public ManageSSHKeysWizardPage(Connection user, IWizard wizard) {
-		super("Manage SSH Keys",
-				"Manage the SSH keys that are available to your OpenShift user\n" + user.getUsername(),
-				"ManageSSHKeysPage", wizard);
-		this.pageModel = new ManageSSHKeysWizardPageModel(user);
+	ManageSSHKeysWizardPage(Connection connection, IWizard wizard) {
+		this("Manage SSH Keys",
+				"Manage the SSH keys that are available to your OpenShift user\n" + connection.getUsername(),
+				"ManageSSHKeysPage", connection, wizard);
+	}
+	
+	ManageSSHKeysWizardPage(String title, String description, String pageName, Connection connection, IWizard wizard) {
+		super(title, description, pageName, wizard);
+		this.pageModel = new SSHKeysWizardPageModel(connection);
 	}
 
 	@Override
@@ -84,7 +88,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(ManageSSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
+				.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
 				.in(dbc);
 
 		Button addExistingButton = new Button(sshKeysGroup, SWT.PUSH);
@@ -143,18 +147,17 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				String keyName = pageModel.getSelectedSSHKey().getName();
 				if (MessageDialog.openConfirm(getShell(),
 						"Remove SSH Key",
-						MessageFormat.format(
+						NLS.bind(
 								"Are you sure that you want to remove public SSH key {0} from OpenShift?",
 								keyName)))
 					try {
 						WizardUtils.runInWizard(
 								new JobChainBuilder(
-										new RemoveKeyJob()).andRunWhenDone(new RefreshViewerJob())
-										.build()
-								, getContainer());
+										new RemoveKeyJob()).andRunWhenDone(new RefreshViewerJob()).build()
+								, getContainer(), getDatabindingContext() );
 					} catch (Exception ex) {
 						StatusManager.getManager().handle(
-								OpenShiftUIActivator.createErrorStatus("Could not remove key " + keyName + ".", ex),
+								OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not remove key {0}.", keyName), ex),
 								StatusManager.LOG);
 					}
 			}
@@ -166,15 +169,15 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (WizardUtils.openWizardDialog(new AddSSHKeyWizard(pageModel.getUser()), getShell())
-						== Dialog.CANCEL) {
+				AddSSHKeyWizard wizard = new AddSSHKeyWizard(pageModel.getConnection());
+				if (WizardUtils.openWizardDialog(wizard, getShell()) == Dialog.CANCEL) {
 					return;
 				}
 
 				try {
 					WizardUtils.runInWizard(
-							new RefreshViewerJob(),
-							getContainer());
+							new RefreshViewerJob(), getContainer(), getDatabindingContext());
+					pageModel.setSelectedSSHKey(wizard.getSSHKey());
 				} catch (Exception ex) {
 					StatusManager.getManager().handle(
 							OpenShiftUIActivator.createErrorStatus("Could not refresh keys.", ex), StatusManager.LOG);
@@ -188,15 +191,15 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (WizardUtils.openWizardDialog(new NewSSHKeyWizard(pageModel.getUser()), getShell())
-						== Dialog.CANCEL) {
+				NewSSHKeyWizard wizard = new NewSSHKeyWizard(pageModel.getConnection());
+				if (WizardUtils.openWizardDialog(wizard, getShell()) == Dialog.CANCEL) {
 					return;
 				}
 
 				try {
 					WizardUtils.runInWizard(
-							new RefreshViewerJob(),
-							getContainer());
+							new RefreshViewerJob(),	getContainer(), getDatabindingContext());
+					pageModel.setSelectedSSHKey(wizard.getSSHKey());
 				} catch (Exception ex) {
 					StatusManager.getManager().handle(
 							OpenShiftUIActivator.createErrorStatus("Could not refresh keys.", ex), StatusManager.LOG);
@@ -244,7 +247,7 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
-			Job loadKeysJob = new LoadKeysJob(pageModel.getUser());
+			Job loadKeysJob = new LoadKeysJob(pageModel.getConnection());
 			new JobChainBuilder(loadKeysJob).andRunWhenDone(new RefreshViewerJob());
 			WizardUtils.runInWizard(loadKeysJob, getContainer());
 		} catch (Exception e) {
@@ -261,13 +264,12 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				try {
 					Job refreshKeysJob = new RefreshKeysJob();
 					new JobChainBuilder(refreshKeysJob).andRunWhenDone(new RefreshViewerJob());
-					WizardUtils.runInWizard(refreshKeysJob, getContainer());
+					WizardUtils.runInWizard(refreshKeysJob, getContainer(), getDatabindingContext());
 				} catch (Exception ex) {
 					StatusManager.getManager().handle(
 							OpenShiftUIActivator.createErrorStatus("Could not refresh keys.", ex), StatusManager.LOG);
 				}
 			}
-
 		};
 	}
 
@@ -281,10 +283,14 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	protected SSHKeysWizardPageModel getPageModel() {
+		return pageModel;
+	}
+	
 	private class RemoveKeyJob extends Job {
 
 		private RemoveKeyJob() {
-			super("Removing SSH key " + pageModel.getSelectedSSHKey().getName() + "...");
+			super(NLS.bind("Removing SSH key {0}...", pageModel.getSelectedSSHKey().getName()));
 		}
 
 		@Override
@@ -315,7 +321,11 @@ public class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
+			IOpenShiftSSHKey key = pageModel.getSelectedSSHKey();
 			viewer.setInput(pageModel.getSSHKeys());
+			if (key != null) {
+				viewer.setSelection(new StructuredSelection(key), true);
+			}
 			return Status.OK_STATUS;
 		}
 	}

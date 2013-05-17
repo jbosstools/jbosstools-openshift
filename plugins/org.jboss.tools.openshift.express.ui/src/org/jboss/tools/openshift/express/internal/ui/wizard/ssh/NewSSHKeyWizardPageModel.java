@@ -19,6 +19,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
+import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.SSHKeyPair;
 import com.openshift.client.SSHKeyType;
@@ -40,6 +41,7 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	private String privateKeyName;
 	private String privateKeyPathphrase;
 	private String publicKeyName;
+	private IOpenShiftSSHKey key;
 
 	public NewSSHKeyWizardPageModel(Connection user) {
 		super(user);
@@ -102,10 +104,10 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return new File(ssh2Home, publicKeyName);
 	}
 
-	public void addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
 		SSHKeyPair keyPair = createSSHKey();
 		SSHUtils.addToPrivateKeysPreferences(new File(keyPair.getPrivateKeyPath()));
-		getUser().putSSHKey(getName(), keyPair);
+		return this.key = getConnection().putSSHKey(getName(), keyPair);
 	}
 
 	private SSHKeyPair createSSHKey() {
@@ -136,6 +138,11 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		} catch(SecurityException e) {
 			throw new OpenShiftException(e, "Could not create ssh2 home directory at {0}", ssh2Home);
 		}
+	}
+
+	@Override
+	public IOpenShiftSSHKey getSSHKey() {
+		return key;
 	}
 
 	

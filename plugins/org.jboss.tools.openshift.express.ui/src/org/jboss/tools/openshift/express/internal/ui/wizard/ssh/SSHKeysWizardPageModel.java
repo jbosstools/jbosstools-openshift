@@ -20,23 +20,22 @@ import com.openshift.client.IOpenShiftSSHKey;
 /**
  * @author André Dietisheim
  */
-public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
+public class SSHKeysWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_KEY = "selectedSSHKey";
+	public static final String PROPERTY_HAS_KEY = "hasSSHKey";
 
-	private Connection user;
+	private Connection connection;
 	private IOpenShiftSSHKey selectedKey;
 
-	public ManageSSHKeysWizardPageModel(Connection user) {
-		this.user = user;
-	}
-
-	public List<IOpenShiftSSHKey> loadSSHKeys() {
-		return user.getSSHKeys();
+	public SSHKeysWizardPageModel(Connection connection) {
+		this.connection = connection;
 	}
 
 	public List<IOpenShiftSSHKey> getSSHKeys() {
-		return user.getSSHKeys();
+		List<IOpenShiftSSHKey> keys = connection.getSSHKeys();
+		fireHasSSHKey();
+		return keys;
 	}
 	
 	public IOpenShiftSSHKey getSelectedSSHKey() {
@@ -47,20 +46,47 @@ public class ManageSSHKeysWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_SELECTED_KEY, this.selectedKey, this.selectedKey = key);
 	}
 
+	public boolean getHasSSHKey() {
+		return connection.hasSSHKeys();
+	}
+	
+	protected void fireHasSSHKey() {
+		firePropertyChange(PROPERTY_HAS_KEY, null, getHasSSHKey());
+	}
+	
 	public void removeKey() {
 		if (selectedKey == null) {
 			return;
 		}
 		selectedKey.destroy();
+		selectedKey = null;
+		restoreSelectedSSHKey();
 	}
 
 	public void refresh() {
-		user.refresh();
-	}
-	
-	public Connection getUser() {
-		return user;
+		connection.refresh();
+		restoreSelectedSSHKey();
 	}
 
+	private void restoreSelectedSSHKey() {
+		IOpenShiftSSHKey keyToSelect = selectedKey;
+		if (keyToSelect == null
+				|| !connection.hasSSHKeyName(keyToSelect.getName())) {
+			keyToSelect = getFirstKey();
+		}
+		setSelectedSSHKey(keyToSelect);
+	}
+
+	private IOpenShiftSSHKey getFirstKey() {
+		if(getSSHKeys().size() == 0) {
+			return null;
+		} 
+		return getSSHKeys().get(0);
+	}
+
+	
+	public Connection getConnection() {
+		return connection;
+	}
 
 }

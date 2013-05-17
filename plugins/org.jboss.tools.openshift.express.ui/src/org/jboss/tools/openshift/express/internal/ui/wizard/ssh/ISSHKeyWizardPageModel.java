@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -31,7 +32,9 @@ public interface ISSHKeyWizardPageModel {
 
 	public boolean hasPublicKey(String publicKeyContent);
 
-	public void addSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
+	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
 
+	public IOpenShiftSSHKey getSSHKey();
+	
 	public File getPublicKey();
 }
