@@ -420,9 +420,10 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			} else if (!remoteName.matches("\\S+")) {
 				return OpenShiftUIActivator.createErrorStatus(
 						"The custom remote name must not contain spaces.");
-			} else if (hasRemoteName(remoteName, getProject(projectName))) {
+			} else if (!pageModel.isNewProject()
+					&& hasRemoteName(remoteName, getProject(projectName))) {
 				return OpenShiftUIActivator.createErrorStatus(NLS.bind(
-						"The existing project already has a remote named {0}.", remoteName));
+						"The project {0} already has a remote named {1}.", projectName, remoteName));
 			}
 			return status;
 		}
