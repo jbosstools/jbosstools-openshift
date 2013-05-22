@@ -109,7 +109,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			final String domainName = (String) domainNameObservable.getValue();
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Enter a domain name with letters and digits only. Max length is 16 characters.");
+						"Enter a domain name with letters and digits only. Maximum length is 16 characters.");
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
@@ -117,7 +117,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			if (domainName.length() > 16) {
 				return ValidationStatus.error(
-						"The domain name max length is 16 characters.");
+						"The domain name maximum length is 16 characters.");
 			}
 			return ValidationStatus.ok();
 		}
