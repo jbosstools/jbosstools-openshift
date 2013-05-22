@@ -92,6 +92,10 @@ public class EmbedCartridgeWizardPageModel extends ObservableUIPojo implements I
 		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 	
+	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException {
+		return wizardModel.getApplication().hasEmbeddedCartridge(cartridge);
+	}
+
 	public boolean hasApplication(IStandaloneCartridge cartridge) throws SocketTimeoutException, OpenShiftException {
 		IDomain domain = wizardModel.getApplication().getDomain();
 		return domain.hasApplicationByCartridge(cartridge);

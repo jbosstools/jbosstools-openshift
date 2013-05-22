@@ -76,23 +76,11 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
 			EmbedCartridgeStrategy embedCartridgeStrategy = getEmbedCartridgeStrategy(pageModel.getDomain());
 			boolean adding = event.getChecked();
-			EmbeddableCartridgeDiff diff = createEmbeddableCartridgeDiff(adding, cartridge, embedCartridgeStrategy);
+			EmbeddableCartridgeDiff additionalOperations = createEmbeddableCartridgeDiff(adding, cartridge, embedCartridgeStrategy);
 
-			if (diff.hasChanges()) {
-				int result = openAdditionalOperationsDialog(
-						NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
-						createEmbeddingOperationMessage(adding, diff));
-				switch (result) {
-				case 1:
-					executeAdditionalOperations(cartridge, diff);
-					break;
-				case 0:
-					dontExecuteAnyOperation(event, cartridge);
-					break;
-				case 2:
-					// user has chosen to ignore additional requirements
-				}
-			} else if (!adding) {
+			if (additionalOperations.hasChanges()) {
+				onAdditionalOperations(event, cartridge, adding, additionalOperations);
+			} else if (isRemovingExisting(adding, pageModel.isEmbedded(cartridge))) {
 				if(!MessageDialog.openQuestion(getShell(), 
 						NLS.bind("Remove cartridge {0}", cartridge.getName()), 
 								NLS.bind(
@@ -107,6 +95,27 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		} catch (SocketTimeoutException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+		}
+	}
+
+	private boolean isRemovingExisting(boolean adding, boolean isEmbedded) {
+		return !adding && isEmbedded;
+	}
+
+	protected void onAdditionalOperations(CheckStateChangedEvent event, IEmbeddableCartridge cartridge, boolean adding,
+			EmbeddableCartridgeDiff additionalOperations) throws SocketTimeoutException {
+		int result = openAdditionalOperationsDialog(
+				NLS.bind("{0} Cartridges", event.getChecked() ? "Add" : "Remove"),
+				createEmbeddingOperationMessage(adding, additionalOperations));
+		switch (result) {
+		case 1:
+			executeAdditionalOperations(cartridge, additionalOperations);
+			break;
+		case 0:
+			dontExecuteAnyOperation(event, cartridge);
+			break;
+		case 2:
+			// user has chosen to ignore additional requirements
 		}
 	}
 

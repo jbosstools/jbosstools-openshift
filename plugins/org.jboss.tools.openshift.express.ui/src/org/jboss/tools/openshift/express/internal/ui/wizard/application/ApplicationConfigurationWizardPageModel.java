@@ -421,6 +421,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 
+	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException {
+		// no application yet, no cartridge embedded yet
+		return false;
+	}
+	
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
 		return getConnection().hasApplication(applicationName);
 	}
