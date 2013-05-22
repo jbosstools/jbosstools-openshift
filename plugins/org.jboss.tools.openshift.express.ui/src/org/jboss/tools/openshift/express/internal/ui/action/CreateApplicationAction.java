@@ -40,9 +40,14 @@ public class CreateApplicationAction extends AbstractOpenShiftAction {
 		}
 
 		if (connection.connect()) {
-			final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(connection);
-			final WizardDialog wizardDialog = new WizardDialog(new Shell(), wizard);
-			wizardDialog.open();
+			try {
+				final OpenShiftExpressApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(connection);
+				new WizardDialog(new Shell(), wizard).open();
+			} catch(NullPointerException e) {
+				// swallow NPE that's caused by cancelling ssh keys / domain wizard 
+				// https://issues.jboss.org/browse/JBIDE-14575
+			}
+			
 		}
 	}
 
