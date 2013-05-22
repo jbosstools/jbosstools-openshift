@@ -675,6 +675,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	protected void onPageActivated(final DataBindingContext dbc) {
 		if (!ensureHasDomain()
 				|| !ensureHasSSHKeys()) {
+			getWizard().dispose();
 			org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(getWizard());
 			return;
 		}
@@ -709,7 +710,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					Display.getCurrent().getActiveShell(), new NewDomainDialog(connection));
 			dialog.create();
 			dialog.setBlockOnOpen(true);
-			return dialog.open() != Dialog.OK;
+			return dialog.open() == Dialog.OK;
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to refresh OpenShift account info", e);
 			return false;
