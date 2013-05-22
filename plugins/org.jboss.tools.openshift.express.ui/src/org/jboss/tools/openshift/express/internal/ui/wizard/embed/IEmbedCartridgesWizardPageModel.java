@@ -34,5 +34,7 @@ public interface IEmbedCartridgesWizardPageModel {
 	
 	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
 
+	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException;
+
 	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException;
 }
