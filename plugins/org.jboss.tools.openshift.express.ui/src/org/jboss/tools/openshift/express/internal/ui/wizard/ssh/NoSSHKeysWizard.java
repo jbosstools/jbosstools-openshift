@@ -10,11 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import org.eclipse.core.databinding.AggregateValidationStatus;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.value.IValueChangeListener;
-import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -41,14 +38,6 @@ public class NoSSHKeysWizard extends Wizard {
 	}
 
 	@Override
-	public boolean canFinish() {
-		// TODO Auto-generated method stub
-		boolean canFinish = super.canFinish();
-		System.err.println("can finish = " + canFinish + "!!!!!!!!!!!¨");
-		return canFinish;
-	}
-
-	@Override
 	public boolean performFinish() {
 		return true;
 	}
@@ -68,14 +57,6 @@ public class NoSSHKeysWizard extends Wizard {
 
 		@Override
 		protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-			AggregateValidationStatus status = new AggregateValidationStatus(dbc, AggregateValidationStatus.MAX_SEVERITY);
-			status.addValueChangeListener(new IValueChangeListener() {
-				
-				@Override
-				public void handleValueChange(ValueChangeEvent event) {
-					System.err.println("status = " + event.diff.getNewValue());
-				}
-			});
 			Label dummyLabel = new Label(parent, SWT.None);
 			ValueBindingBuilder
 					.bind(WidgetProperties.enabled().observe(dummyLabel))
@@ -86,10 +67,8 @@ public class NoSSHKeysWizard extends Wizard {
 						@Override
 						public IStatus validate(Object value) {
 							if (Boolean.TRUE.equals(value)) {
-								System.err.println("++++++++++++++++++VALID");
 								return ValidationStatus.ok();
 							} else {
-								System.err.println("--------------INVAAAAAAAAAAAAAAAAAALID");
 								return ValidationStatus.cancel(
 										"You have no SSH public keys in your OpenShift account\n" +
 												getPageModel().getConnection().getUsername()
@@ -101,14 +80,5 @@ public class NoSSHKeysWizard extends Wizard {
 					.in(dbc);
 			super.doCreateControls(parent, dbc);
 		}
-
-		@Override
-		public boolean isPageComplete() {
-			boolean isPageComplete = super.isPageComplete();
-			System.err.println("isPageComplete = " + isPageComplete + "============000");
-			return isPageComplete;
-		}
-		
-		
 	}
 }
