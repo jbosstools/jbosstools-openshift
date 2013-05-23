@@ -388,12 +388,13 @@ public class ExpressServerUtils {
 	}
 	
 	protected static String getHost(String url) {
-		if (url != null) {
-			if (url.indexOf("://") != -1)
-				url = url.substring(url.indexOf("://") + 3);
-			if (url.endsWith("/"))
-				url = url.substring(0, url.length() - 1);
+		if (StringUtils.isEmpty(url)) {
+			return url;
 		}
+		if (url.indexOf("://") != -1)
+			url = url.substring(url.indexOf("://") + 3);
+		if (url.endsWith("/"))
+			url = url.substring(0, url.length() - 1);
 		return url;
 	}
 

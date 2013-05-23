@@ -28,11 +28,15 @@ public class ConnectToOpenShiftWizard extends Wizard {
 		this(ConnectionsModelSingleton.getInstance().getRecentConnection());
 	}
 	
+	public ConnectToOpenShiftWizard(final Connection connection) {
+		this(connection, true);
+	}
+
 	/**
 	 * Constructor to use when connection to use is known.
 	 */
-	public ConnectToOpenShiftWizard(final Connection connection) {
-		this.page = new ConnectionWizardPage(this, new ConnectToOpenShiftWizardModel(connection));
+	public ConnectToOpenShiftWizard(final Connection connection, boolean allowConnectionChange) {
+		this.page = new ConnectionWizardPage(this, new ConnectToOpenShiftWizardModel(connection), allowConnectionChange);
 		setNeedsProgressMonitor(true);
 	}
 	
