@@ -61,13 +61,6 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 					OpenShiftUIActivator.PLUGIN_ID,
 					NLS.bind(ExpressMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
 		}
-		Display.getDefault().asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				ConsoleUtils.displayConsoleView(behaviour.getServer());
-			}
-		});
 	}
 
 	@Override
@@ -215,6 +208,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 					NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
+				displayConsoleView(behaviour.getServer());
 				result = push(p, behaviour.getServer(), monitor);
 			}
 		} else {
@@ -225,12 +219,14 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 					if (requestApproval(
 							NLS.bind(ExpressMessages.noChangesPushAnywayMsg, p.getName()),
 							NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
+						displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				} else {
 					if (requestApproval(
 							NLS.bind(ExpressMessages.pushCommitsMsg, p.getName()),
 							NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
+						displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				}
@@ -239,13 +235,19 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			}
 		}
 
-		if (result != null) {
-			ConsoleUtils.appendGitPushToConsole(behaviour.getServer(), result);
-		}
-
 		return result;
 	}
 
+	private void displayConsoleView(final IServer server) {
+		Display.getDefault().asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				ConsoleUtils.displayConsoleView(server);
+			}
+		});
+	}
+	
 	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		String remoteName = ExpressServerUtils.getExpressRemoteName(server.createWorkingCopy());
 		Repository repository = EGitUtils.getRepository(project);
