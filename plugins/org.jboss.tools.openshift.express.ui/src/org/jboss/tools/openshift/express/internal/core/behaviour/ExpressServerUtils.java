@@ -105,7 +105,6 @@ public class ExpressServerUtils {
 	// "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT = "origin";
 	private static final String ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT = "deployments";
-	private static final String ATTRIBUTE_DEPLOY_FOLDER_TOMCAT_DEFAULT = "webapps";
 
 	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";
 
@@ -362,7 +361,7 @@ public class ExpressServerUtils {
 
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
 			String deployProject, String remote, String appName) {
-		host = removeProtocol(host);
+		host = getHost(host);
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
@@ -383,22 +382,19 @@ public class ExpressServerUtils {
 	}
 
 	protected static void setName(IServerWorkingCopy wc, String appName) {
-		if (appName != null
-				&& (StringUtils.isEmpty(wc.getName()) 
-						|| wc.getName().startsWith(ExpressServer.DEFAULT_SERVER_NAME_BASE))) {
-			String newBase = appName + " at OpenShift";
-			wc.setName(ServerUtil.getDefaultServerName(newBase));
+		if (!StringUtils.isEmpty(appName)) {
+			wc.setName(ServerUtil.getDefaultServerName(appName + " at OpenShift"));
 		}
 	}
-
-	protected static String removeProtocol(String host) {
-		if (host != null) {
-			if (host.indexOf("://") != -1)
-				host = host.substring(host.indexOf("://") + 3);
-			if (host.endsWith("/"))
-				host = host.substring(0, host.length() - 1);
+	
+	protected static String getHost(String url) {
+		if (url != null) {
+			if (url.indexOf("://") != -1)
+				url = url.substring(url.indexOf("://") + 3);
+			if (url.endsWith("/"))
+				url = url.substring(0, url.length() - 1);
 		}
-		return host;
+		return url;
 	}
 
 	public static IServer createServerAndRuntime(String runtimeID, String serverID,
