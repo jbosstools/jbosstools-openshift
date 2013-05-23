@@ -84,9 +84,13 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	private Text passwordCompositePasswordText;
 
 	public ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel) {
+		this(wizard, wizardModel, true);
+	}
+
+	protected ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server Connection",
 				wizard);
-		this.pageModel = new ConnectionWizardPageModel(wizardModel);
+		this.pageModel = new ConnectionWizardPageModel(wizardModel, allowConnectionChange);
 		/*
 		 * JBIDE-12999: ensure EclipseAuthenticator is installed and overrides
 		 * NetAuthenticator
@@ -148,7 +152,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		Composite connectionWidgets = createNewConnectionComposite(connectionWidgetsContainer, dbc);
 		Composite passwordWidgets = createExistingConnectionComposite(connectionWidgetsContainer, dbc);
 
-		showConnectionWidgets(pageModel.isCreateNewConnection(), passwordWidgets, connectionWidgets, stackLayout,
+		showConnectionWidgets(
+				pageModel.isCreateNewConnection(), passwordWidgets, connectionWidgets, stackLayout,
 				connectionWidgetsContainer);
 
 		BeanProperties

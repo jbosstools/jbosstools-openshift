@@ -125,7 +125,6 @@ public class ExpressDetailsComposite {
 		initModel(callback, server);
 		createWidgets(container);
 		initWidgets();
-		updateWidgets();
 	}
 
 	public Composite getComposite() {
@@ -133,27 +132,15 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
-
-		this.application = ExpressServerUtils.getApplication(callback);
-		this.deployFolder = getDeployFolder(server, application);
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
-		updateModel(getConnection(callback));
+		updateModel(ConnectionsModelSingleton.getInstance().getRecentConnection());
 	}
 
 	protected String getDeployFolder(IServerAttributes server, IApplication application) {
 		if (application == null) {
 			return null;
-		} else {
-			return ExpressServerUtils.getExpressDeployFolder(server, application);
-		}
-	}
-
-	private Connection getConnection(IServerModeUICallback callback) {
-		Connection connection = ExpressServerUtils.getConnection(callback);
-		if (connection == null) {
-			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
-		}
-		return connection;
+		} 
+		return ExpressServerUtils.getExpressDeployFolder(server, application);
 	}
 
 	private void initWidgets() {
@@ -165,7 +152,6 @@ public class ExpressDetailsComposite {
 		selectDeployProjectCombo(application);
 		remoteText.setText(StringUtils.null2emptyString(remote));
 		deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
-
 	}
 
 	private void createWidgets(Composite composite) {
@@ -286,10 +272,10 @@ public class ExpressDetailsComposite {
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				final Connection connection = UIUtils.getFirstElement(event.getSelection(), Connection.class);
-				if (connection == null ||
-						(ExpressDetailsComposite.this.connection != null
-						&& ExpressDetailsComposite.this.connection.equals(connection))) {
+				final Connection selectedConnection = UIUtils.getFirstElement(event.getSelection(), Connection.class);
+				if (selectedConnection == null ||
+						(connection != null
+						&& connection.equals(selectedConnection))) {
 					return;
 				}
 
@@ -297,7 +283,7 @@ public class ExpressDetailsComposite {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						updateModel(connection);
+						updateModel(selectedConnection);
 						return Status.OK_STATUS;
 					}
 				};
@@ -448,18 +434,18 @@ public class ExpressDetailsComposite {
 		if (connection == null) {
 			selectConnectionCombo(null);
 		}
-		setApplicationComboInput(connection);
+		setApplicationComboInput(applications);
 		selectApplicationCombo(application);
 		selectDeployProjectCombo(application);
 		enableImportLink(application);
 		updateErrorMessage();
 	}
 
-	private void setApplicationComboInput(Connection connection) {
-		if (connection == null) {
+	private void setApplicationComboInput(List<IApplication> applications) {
+		if (applications == null) {
 			applicationComboViewer.setInput(Collections.emptyList());
 		} else {
-			applicationComboViewer.setInput(connection.getApplications());
+			applicationComboViewer.setInput(applications);
 		}
 	}
 
@@ -489,9 +475,6 @@ public class ExpressDetailsComposite {
 	}
 
 	private void updateModel(Connection connection) {
-		if (connection == null) {
-			return;
-		}
 		this.connection = connection;
 		this.applications = safeGetApplications(connection);
 		this.projectsByApplication = createProjectsByApplication(applications);
@@ -517,7 +500,9 @@ public class ExpressDetailsComposite {
 	private List<IApplication> safeGetApplications(Connection connection) {
 		List<IApplication> applications = new ArrayList<IApplication>();
 		try {
-			applications = connection.getApplications();
+			if (connection != null) {
+				applications = connection.getApplications();
+			}
 		} catch (NotFoundOpenShiftException nfose) {
 			// Credentials work, but no domain, so no applications either
 		}

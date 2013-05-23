@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -62,9 +63,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	private String password;
 	private boolean isRememberPassword;
 	private Connection newConnection;
+	private boolean allowConnectionChange;
 
-	ConnectionWizardPageModel(IConnectionAwareModel wizardModel) {
+	ConnectionWizardPageModel(IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		this.wizardModel = wizardModel;
+		this.allowConnectionChange = allowConnectionChange;
 		Connection wizardModelConnection = wizardModel.getConnection();
 		this.selectedConnection = getWizardModelOrRecentConnection(wizardModelConnection);
 		this.servers = getServers(selectedConnection);
@@ -130,9 +133,14 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public List<Connection> getConnections() {
-		List<Connection> connections = CollectionUtils.toList(ConnectionsModelSingleton.getInstance().getConnections());
-		connections.add(new NewConnectionMarker());
-		return connections;
+		if (allowConnectionChange) {
+			List<Connection> connections = 
+					CollectionUtils.toList(ConnectionsModelSingleton.getInstance().getConnections());
+			connections.add(new NewConnectionMarker());
+			return connections;
+		} else {
+			return Collections.singletonList(selectedConnection);
+		}
 	}
 
 	public boolean isUseDefaultServer() {
