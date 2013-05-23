@@ -22,6 +22,7 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
+import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.common.ui.WizardUtils;
 
 /**
@@ -30,7 +31,6 @@ import org.jboss.tools.common.ui.WizardUtils;
 public class ExpressWizardFragment extends WizardFragment implements ICompletable {
 
 	private ExpressDetailsComposite composite;
-	private NewServerWizardBehaviourCallback  callback;
 		
 	public boolean hasComposite() {
 		return true;
@@ -46,7 +46,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		handle.setTitle("Create an OpenShift Server");
 		handle.setDescription("Create an OpenShift Server by choosing your connection, application and deploy project.");
-		callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
+		IServerModeUICallback callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
 			public void executeLongRunning(Job j) {
 				// depends on COMMON, DAMN
 				IWizardContainer container = ((WizardPage)handle).getWizard().getContainer();
@@ -69,7 +69,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 	
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
-		composite.finish(monitor);
+		composite.performFinish(monitor);
 		composite = null;
 	}
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
