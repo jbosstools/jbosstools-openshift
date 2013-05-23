@@ -56,8 +56,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUt
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-
-import com.openshift.client.IApplication;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author Rob Stryker
@@ -105,15 +104,14 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
 		String appName = ExpressServerUtils.getExpressApplicationName(server);
-		appNameText.setText(appName == null ? "" : appName);
+		appNameText.setText(StringUtils.null2emptyString(appName));
 		connectionText.setEnabled(false);
 		appNameText.setEnabled(false);
 
-		IApplication application = ExpressServerUtils.getApplication(server);
 		String outDir = ExpressServerUtils.getExpressDeployFolder(server);
 		deployFolderText.setText(outDir);
 		String remote = ExpressServerUtils.getExpressRemoteName(server);
-		remoteText.setText(remote == null ? "" : remote);
+		remoteText.setText(StringUtils.null2emptyString(remote));
 
 		deployProjectCombo.setItems(getSuitableProjects());
 		java.util.List<String> l = Arrays.asList(deployProjectCombo.getItems());
@@ -163,8 +161,8 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).equalWidth(false).applyTo(composite);
 
-		Label deployLocationLabel = toolkit.createLabel(composite, OpenshiftUIMessages.EditorSectionDeployLocLabel,
-				SWT.NONE);
+		Label deployLocationLabel =
+				toolkit.createLabel(composite, OpenshiftUIMessages.EditorSectionDeployLocLabel, SWT.NONE);
 		deployProjectCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
 
@@ -176,8 +174,8 @@ public class ExpressDetailsSection extends ServerEditorSection {
 
 		overrideProjectSettings = toolkit.createButton(projectSettingGroup,
 				OpenshiftUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1)
-				.applyTo(overrideProjectSettings);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
 
 		Label userLabel = toolkit
 				.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionConnectionLabel, SWT.NONE);
@@ -326,20 +324,18 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
 		String appName = ExpressServerUtils.getExpressApplicationName(server);
-		appNameText.setText(appName == null ? "" : appName);
+		appNameText.setText(StringUtils.null2emptyString(appName));
 
 		browseDestButton.setEnabled(overrideProjectSettings.getSelection());
 		deployFolderText.setEnabled(overrideProjectSettings.getSelection());
 		remoteText.setEnabled(overrideProjectSettings.getSelection());
 		String remote = ExpressServerUtils.getExpressRemoteName(server, ExpressServerUtils.SETTING_FROM_PROJECT);
 		String depFolder = ExpressServerUtils.getExpressDeployFolder(server, ExpressServerUtils.SETTING_FROM_PROJECT);
-		remote = remote == null ? "" : remote;
-		depFolder = depFolder == null ? "" : depFolder;
 
 		remoteText.removeModifyListener(remoteModifyListener);
 		deployFolderText.removeModifyListener(deployDestinationModifyListener);
-		remoteText.setText(remote);
-		deployFolderText.setText(depFolder);
+		remoteText.setText(StringUtils.null2emptyString(remote));
+		deployFolderText.setText(StringUtils.null2emptyString(depFolder));
 		remoteText.addModifyListener(remoteModifyListener);
 		deployFolderText.addModifyListener(deployDestinationModifyListener);
 	}

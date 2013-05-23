@@ -33,13 +33,13 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.jgit.lib.Repository;
@@ -65,6 +65,7 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
+import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
@@ -121,48 +122,49 @@ public class ExpressDetailsComposite {
 		this.callback = callback;
 		this.server = callback.getServer();
 		this.composite = container;
-		try {
-			initModel();
-			createWidgets(container);
-			fillWidgets();
-			updateWidgets();
-		} catch (RuntimeException e) {
-			OpenShiftUIActivator.log(e);
-			throw e;
-		}
+		initModel(callback, server);
+		createWidgets(container);
+		initWidgets();
+		updateWidgets();
 	}
 
 	public Composite getComposite() {
 		return composite;
 	}
 
-	private void initModel() {
-		this.connection = ExpressServerUtils.getConnection(callback);
+	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
+
+		this.application = ExpressServerUtils.getApplication(callback);
+		this.deployFolder = getDeployFolder(server, application);
+		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+		updateModel(getConnection(callback));
+	}
+
+	protected String getDeployFolder(IServerAttributes server, IApplication application) {
+		if (application == null) {
+			return null;
+		} else {
+			return ExpressServerUtils.getExpressDeployFolder(server, application);
+		}
+	}
+
+	private Connection getConnection(IServerModeUICallback callback) {
+		Connection connection = ExpressServerUtils.getConnection(callback);
 		if (connection == null) {
 			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 		}
-		updateModel(connection);
-
-		this.application = ExpressServerUtils.getApplication(callback);
-		this.deployFolder = ExpressServerUtils.getExpressDeployFolder(server, application);
-		this.remote = ExpressServerUtils.getExpressRemoteName(server);
+		return connection;
 	}
 
-	private void fillWidgets() {
+	private void initWidgets() {
 		connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
 		selectConnectionCombo(connection);
 		applicationComboViewer.setInput(applications);
 		selectApplicationCombo(application);
 		setDeployProjectComboInput(application);
 		selectDeployProjectCombo(application);
-
-		if (remote != null) {
-			remoteText.setText(remote);
-		}
-
-		if (deployFolder != null) {
-			deployFolderText.setText(deployFolder);
-		}
+		remoteText.setText(StringUtils.null2emptyString(remote));
+		deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
 
 	}
 
@@ -200,7 +202,7 @@ public class ExpressDetailsComposite {
 		applicationComboViewer.setLabelProvider(new ApplicationColumnLabelProvider());
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(applicationComboViewer.getControl());
-		applicationComboViewer.addSelectionChangedListener(onApplicationChanged());
+		applicationComboViewer.addSelectionChangedListener(onApplicationSelected());
 
 		// deploy project
 		Label deployLocationLabel = new Label(composite, SWT.NONE);
@@ -336,8 +338,7 @@ public class ExpressDetailsComposite {
 					// This is really ugly
 					IWizardHandle handle =
 							((DeploymentTypeUIUtil.NewServerWizardBehaviourCallback) callback).getHandle();
-					IWizardContainer container = ((WizardPage) handle).getWizard().getContainer();
-					((WizardDialog) container).close();
+					org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(((WizardPage) handle).getWizard());
 				}
 			}
 		};
@@ -353,8 +354,9 @@ public class ExpressDetailsComposite {
 				if (deployProject != null
 						&& deployProject.isAccessible()) {
 
-					remoteText.setText(getRemoteConfig(remote, application, deployProject));
-					remoteText.setEnabled(true);
+					String remoteName = getRemoteConfig(remote, application, deployProject);
+					remoteText.setText(remoteName);
+					remoteText.setEnabled(!StringUtils.isEmpty(remoteName));
 
 					String deployFolder = ExpressServerUtils.getExpressDeployFolder(server, application);
 					deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
@@ -369,7 +371,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	private ISelectionChangedListener onApplicationChanged() {
+	private ISelectionChangedListener onApplicationSelected() {
 		return new ISelectionChangedListener() {
 
 			@Override
@@ -487,27 +489,50 @@ public class ExpressDetailsComposite {
 	}
 
 	private void updateModel(Connection connection) {
-		if (connection == null)
+		if (connection == null) {
 			return;
-
-		this.connection = connection;
-
-		try {
-			this.applications = connection.getApplications();
-			if (applications != null
-					&& applications.size() > 0) {
-				this.application = applications.get(0);
-			}
-		} catch (NotFoundOpenShiftException nfose) {
-			// Credentials work, but no domain, so no applications either
-			this.applications = new ArrayList<IApplication>();
 		}
-
+		this.connection = connection;
+		this.applications = safeGetApplications(connection);
 		this.projectsByApplication = createProjectsByApplication(applications);
-
-		fillServerWithDetails(application, remote);
+		this.application = getFirstApplication(applications);
+		this.deployProject = getDeployProject(application);
+		
+		fillServerWithDetails(application, remote, deployProject, callback);
 	}
 
+	private IProject getDeployProject(IApplication application) {
+		if (application == null) {
+			return null;
+		}
+		IProject[] projects = ExpressServerUtils.findProjectsForApplication(application);
+		if (projects == null
+				|| projects.length < 1) {
+			return null;
+		}
+		
+		return projects[0];
+	}
+
+	private List<IApplication> safeGetApplications(Connection connection) {
+		List<IApplication> applications = new ArrayList<IApplication>();
+		try {
+			applications = connection.getApplications();
+		} catch (NotFoundOpenShiftException nfose) {
+			// Credentials work, but no domain, so no applications either
+		}
+		return applications;
+	}
+
+	private IApplication getFirstApplication(List<IApplication> applications) {
+		IApplication application = null; 
+		if (applications != null
+				&& applications.size() > 0) {
+			application = applications.get(0);
+		}
+		return application;
+	}
+	
 	private Map<IApplication, IProject[]> createProjectsByApplication(List<IApplication> applications) {
 		Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
 		if (applications != null) {
@@ -519,19 +544,12 @@ public class ExpressDetailsComposite {
 		return projectsByApplication;
 	}
 
-	public void finish(IProgressMonitor monitor) throws CoreException {
-		try {
-			ConnectionsModelSingleton.getInstance().addConnection(connection);
-			connection.save();
-			fillServerWithDetails(application, remote);
-			updateProjectSettings();
-		} catch (OpenShiftException ose) {
-			throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, ose.getMessage(), ose));
-		}
+	public void performFinish(IProgressMonitor monitor) throws CoreException {
+		fillServerWithDetails(application, remote, deployProject, callback);
+		updateProjectSettings();
 	}
 
-	private void fillServerWithDetails(IApplication application, String remote) throws OpenShiftException {
-		IServerWorkingCopy wc = callback.getServer();
+	private void fillServerWithDetails(IApplication application, String remote, IProject deployProject, IServerModeUICallback callback) throws OpenShiftException {
 		String host = null;
 		String applicationName = null;
 		if (application != null) {
@@ -544,7 +562,7 @@ public class ExpressDetailsComposite {
 			deployProjectName = deployProject.getName();
 		}
 
-		ExpressServerUtils.fillServerWithOpenShiftDetails(wc, host, deployProjectName, remote, applicationName);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(callback.getServer(), host, deployProjectName, remote, applicationName);
 	}
 
 	private void updateProjectSettings() {
@@ -552,7 +570,8 @@ public class ExpressDetailsComposite {
 				deployProject, ExpressServerUtils.SETTING_REMOTE_NAME, null);
 		String projDepFolder = ExpressServerUtils.getProjectAttribute(
 				deployProject, ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
-		if (projRemote == null && projDepFolder == null) {
+		if (projRemote == null 
+				&& projDepFolder == null) {
 			ExpressServerUtils.updateOpenshiftProjectSettings(
 					deployProject, application, connection, remote, deployFolder);
 		}
@@ -568,7 +587,7 @@ public class ExpressDetailsComposite {
 	}
 
 	protected void selectApplicationCombo(IApplication application) {
-		IStructuredSelection selection = new StructuredSelection();
+		ISelection selection = new StructuredSelection();
 		if (application != null) {
 			selection = new StructuredSelection(application);
 		}
