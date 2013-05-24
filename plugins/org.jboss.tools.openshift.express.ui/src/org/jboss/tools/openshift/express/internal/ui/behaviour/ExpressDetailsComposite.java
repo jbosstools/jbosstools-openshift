@@ -78,6 +78,7 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -107,7 +108,7 @@ public class ExpressDetailsComposite {
 	private ComboViewer deployProjectComboViewer;
 	protected Text remoteText;
 	protected Text deployFolderText;
-	protected Button browseDestButton;
+	protected Button browseDeployFolderButton;
 
 	// Data / Model
 	private String remote, deployFolder;
@@ -132,7 +133,6 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
-		this.remote = ExpressServerUtils.getExpressRemoteName(server);
 		updateModel(getConnection(callback), ExpressServerUtils.getApplication(callback));
 	}
 	
@@ -144,11 +144,13 @@ public class ExpressDetailsComposite {
 		return connection;
 	}
 	
-	protected String getDeployFolder(IServerAttributes server, IApplication application) {
+	protected String getDeployFolder(IApplication application, IProject deployProject) {
 		if (application == null) {
 			return null;
-		} 
-		return ExpressServerUtils.getExpressDeployFolder(server, application);
+		} if (!ProjectUtils.isAccessible(deployProject)) {
+			return null;
+		}
+		return ExpressServerUtils.getDefaultDeployFolder(application);
 	}
 
 	private void initWidgets() {
@@ -177,7 +179,7 @@ public class ExpressDetailsComposite {
 		connectionComboViewer.setLabelProvider(new ConnectionColumLabelProvider());
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionCombo);
-		connectionComboViewer.addSelectionChangedListener(onConnectionSelected());
+		connectionComboViewer.addSelectionChangedListener(onSelectConnection());
 
 		Button newConnectionButton = new Button(composite, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -196,7 +198,7 @@ public class ExpressDetailsComposite {
 		applicationComboViewer.setLabelProvider(new ApplicationColumnLabelProvider());
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(applicationComboViewer.getControl());
-		applicationComboViewer.addSelectionChangedListener(onApplicationSelected());
+		applicationComboViewer.addSelectionChangedListener(onSelectApplication());
 
 		// deploy project
 		Label deployLocationLabel = new Label(composite, SWT.NONE);
@@ -215,14 +217,14 @@ public class ExpressDetailsComposite {
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectComboViewer.getControl());
 		deployLocationLabel.setText("Deploy Project: ");
-		deployProjectComboViewer.addSelectionChangedListener(onDeployProjectSelected());
+		deployProjectComboViewer.addSelectionChangedListener(onSelectDeployProject());
 
 		// import
 		importLink = new Link(composite, SWT.None);
 		importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
 		GridDataFactory.fillDefaults()
 				.span(3, 1).applyTo(importLink);
-		importLink.addSelectionListener(onImportClicked());
+		importLink.addSelectionListener(onClickImport());
 
 		// remote
 		Label remoteLabel = new Label(composite, SWT.NONE);
@@ -232,7 +234,7 @@ public class ExpressDetailsComposite {
 		remoteText.setEditable(false);
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
-		remoteText.addModifyListener(onRemoteModified());
+		remoteText.addModifyListener(onModifyRemote());
 
 		Group projectSettings = new Group(composite, SWT.NONE);
 		projectSettings.setText("Project Settings");
@@ -246,14 +248,14 @@ public class ExpressDetailsComposite {
 		Composite zipDestComposite = new Composite(projectSettings, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
-		browseDestButton = new Button(zipDestComposite, SWT.PUSH);
-		browseDestButton.setText("Browse...");
-		browseDestButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
-		browseDestButton.addSelectionListener(onBrowseDeployFolder(deployFolderText));
+		browseDeployFolderButton = new Button(zipDestComposite, SWT.PUSH);
+		browseDeployFolderButton.setText("Browse...");
+		browseDeployFolderButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
+		browseDeployFolderButton.addSelectionListener(onBrowseDeployFolder());
 
 		deployFolderText = new Text(zipDestComposite, SWT.SINGLE | SWT.BORDER);
-		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDestButton, -5));
-		deployFolderText.addModifyListener(onDeployFolderModified());
+		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDeployFolderButton, -5));
+		deployFolderText.addModifyListener(onModifyDeployFolder());
 	}
 
 	private SelectionListener onNewConnection() {
@@ -275,7 +277,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	private ISelectionChangedListener onConnectionSelected() {
+	private ISelectionChangedListener onSelectConnection() {
 		return new ISelectionChangedListener() {
 
 			@Override
@@ -291,7 +293,7 @@ public class ExpressDetailsComposite {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						updateModel(selectedConnection, getFirstApplication(applications));
+						updateModel(selectedConnection, getFirstApplication(selectedConnection.getApplications()));
 						return Status.OK_STATUS;
 					}
 				};
@@ -302,7 +304,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	protected ModifyListener onDeployFolderModified() {
+	protected ModifyListener onModifyDeployFolder() {
 		return new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				deployFolder = deployFolderText.getText();
@@ -310,7 +312,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	protected ModifyListener onRemoteModified() {
+	protected ModifyListener onModifyRemote() {
 		return new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				remote = remoteText.getText();
@@ -318,7 +320,7 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	protected SelectionAdapter onImportClicked() {
+	protected SelectionAdapter onClickImport() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				OpenShiftExpressApplicationWizard wizard =
@@ -338,34 +340,19 @@ public class ExpressDetailsComposite {
 		};
 	}
 
-	private ISelectionChangedListener onDeployProjectSelected() {
+	private ISelectionChangedListener onSelectDeployProject() {
 		return new ISelectionChangedListener() {
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				deployProject = UIUtils.getFirstElement(event.getSelection(), IProject.class);
-
-				if (deployProject != null
-						&& deployProject.isAccessible()) {
-
-					String remoteName = getRemoteConfig(remote, application, deployProject);
-					remoteText.setText(remoteName);
-					remoteText.setEnabled(!StringUtils.isEmpty(remoteName));
-
-					String deployFolder = ExpressServerUtils.getExpressDeployFolder(server, application);
-					deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
-					deployFolderText.setEnabled(!StringUtils.isEmpty(deployFolder));
-					browseDestButton.setEnabled(!StringUtils.isEmpty(deployFolder));
-				} else {
-					deployFolderText.setEnabled(false);
-					browseDestButton.setEnabled(false);
-					remoteText.setEnabled(false);
-				}
+				setRemoteText(application, deployProject);
+				setDeploymentFolderText(application, deployProject);
 			}
 		};
 	}
 
-	private ISelectionChangedListener onApplicationSelected() {
+	private ISelectionChangedListener onSelectApplication() {
 		return new ISelectionChangedListener() {
 
 			@Override
@@ -374,12 +361,17 @@ public class ExpressDetailsComposite {
 				setDeployProjectComboInput(application);
 				selectDeployProjectCombo(application);
 				enableImportLink(application);
+				setDeploymentFolderText(application, deployProject);
+				setRemoteText(application, deployProject);
 				updateErrorMessage();
 			}
 		};
 	}
 
-	private String getRemoteConfig(String remote, IApplication application, IProject project) {
+	private String getRemote(IApplication application, IProject project) {
+		if (!ProjectUtils.isAccessible(project)) {
+			return null;
+		}
 		try {
 			Repository repository = EGitUtils.getRepository(project);
 			if (repository == null) {
@@ -399,7 +391,7 @@ public class ExpressDetailsComposite {
 		}
 	}
 
-	private SelectionAdapter onBrowseDeployFolder(final Text deployFolderText) {
+	private SelectionAdapter onBrowseDeployFolder() {
 		return new SelectionAdapter() {
 
 			@Override
@@ -449,6 +441,32 @@ public class ExpressDetailsComposite {
 		updateErrorMessage();
 	}
 
+	protected void setRemoteText(IApplication application, IProject deployProject) {
+		if (application == null
+				|| !ProjectUtils.isAccessible(deployProject)) {
+			remoteText.setEnabled(false);
+			return;
+		}
+
+		String remoteName = getRemote(application, deployProject);
+		remoteText.setText(remoteName);
+		remoteText.setEnabled(!StringUtils.isEmpty(remoteName));
+	}
+	
+	protected void setDeploymentFolderText(IApplication application, IProject deployProject) {
+		if (application == null
+				|| !ProjectUtils.isAccessible(deployProject)) {
+			deployFolderText.setEnabled(false);
+			browseDeployFolderButton.setEnabled(false);
+			return;
+		}
+
+		deployFolder = getDeployFolder(application, deployProject);
+		deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
+		deployFolderText.setEnabled(!StringUtils.isEmpty(deployFolder));
+		browseDeployFolderButton.setEnabled(true);		
+	}
+
 	private void setApplicationComboInput(List<IApplication> applications) {
 		if (applications == null) {
 			applicationComboViewer.setInput(Collections.emptyList());
@@ -486,14 +504,19 @@ public class ExpressDetailsComposite {
 		this.connection = connection;
 		this.applications = safeGetApplications(connection);
 		this.projectsByApplication = createProjectsByApplication(applications);
-		if (application == null) {
-			this.application = getFirstApplication(applications);	
-		} else {
-			this.application = application;
-		}
+		this.application = getApplication(application);
 		this.deployProject = getDeployProject(application);
-		
-		fillServerWithDetails(application, remote, deployProject, callback);
+		this.deployFolder = getDeployFolder(application, deployProject);
+		this.remote = getRemote(application, deployProject);
+		configureServer(application, remote, deployProject, deployFolder, callback.getServer());
+	}
+
+	protected IApplication getApplication(IApplication application) {
+		if (application == null) {
+			return getFirstApplication(applications);	
+		} else { 
+			return application;
+		}
 	}
 
 	private IProject getDeployProject(IApplication application) {
@@ -542,11 +565,11 @@ public class ExpressDetailsComposite {
 	}
 
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		fillServerWithDetails(application, remote, deployProject, callback);
+		configureServer(application, remote, deployProject, deployFolder, callback.getServer());
 		updateProjectSettings();
 	}
 
-	private void fillServerWithDetails(IApplication application, String remote, IProject deployProject, IServerModeUICallback callback) throws OpenShiftException {
+	private void configureServer(IApplication application, String remote, IProject deployProject, String deployFolder, IServerWorkingCopy server) throws OpenShiftException {
 		String host = null;
 		String applicationName = null;
 		if (application != null) {
@@ -559,7 +582,8 @@ public class ExpressDetailsComposite {
 			deployProjectName = deployProject.getName();
 		}
 
-		ExpressServerUtils.fillServerWithOpenShiftDetails(callback.getServer(), host, deployProjectName, remote, applicationName);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(
+				server, host, deployProjectName, deployFolder, remote, applicationName);
 	}
 
 	private void updateProjectSettings() {
