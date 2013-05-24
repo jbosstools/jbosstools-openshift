@@ -99,7 +99,7 @@ public class ServerAdapterFactory {
 
 		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
 		ExpressServerUtils.fillServerWithOpenShiftDetails(
-				server, application.getApplicationUrl(), deployProject, remoteName, serverName);
+				server, application.getApplicationUrl(), deployProject, remoteName, application);
 		return server;
 	}
 	

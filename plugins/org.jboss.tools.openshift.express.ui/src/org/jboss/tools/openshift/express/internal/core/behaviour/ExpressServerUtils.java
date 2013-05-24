@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -262,10 +263,10 @@ public class ExpressServerUtils {
 			}
 			return null;
 		}
-		
 	}
 	
 	public static String getDefaultDeployFolder(IApplication application) {
+		Assert.isNotNull(application);
 		DeployFolder deployFolder = DeployFolder.getByCartridgeName(application.getCartridge().getName());
 		if (deployFolder == null) {
 			return null;
@@ -338,6 +339,14 @@ public class ExpressServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
+	public static IServer fillServerWithOpenShiftDetails(IServer server, String host,
+			String deployProject, String remote, IApplication application) throws CoreException {
+		ServerWorkingCopy wc = (ServerWorkingCopy) server.createWorkingCopy();
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, remote, application);
+		IServer saved = wc.save(true, new NullProgressMonitor());
+		return saved;
+	}
+
 	/**
 	 * Fills an already-created server with the proper openshift details.
 	 * 
@@ -352,24 +361,32 @@ public class ExpressServerUtils {
 	 * @throws CoreException
 	 */
 	public static IServer fillServerWithOpenShiftDetails(IServer server, String host,
-			String deployProject, String remote, String appName) throws CoreException {
+			String deployProject, String deployFolder, String remote, String appName) throws CoreException {
 		ServerWorkingCopy wc = (ServerWorkingCopy) server.createWorkingCopy();
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, remote, appName);
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, deployFolder, remote, appName);
 		IServer saved = wc.save(true, new NullProgressMonitor());
 		return saved;
 	}
 
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
-			String deployProject, String remote, String appName) {
+			String deployProject, String remote, IApplication application) {
+		Assert.isNotNull(application);
+		String deployFolder = getDefaultDeployFolder(application);
+		String appName = application.getName();
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, deployFolder, remote, appName);
+	}
+
+	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
+			String deployProject, String deployFolder, String remote, String appName) {
 		host = getHost(host);
 		wc.setHost(host);
 		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
 		// wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		// wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
-		// wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
+		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
 		// wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
-		// wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, projectRelativeFolder);
+		 wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, deployFolder);
 		// wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remote);
 		((ServerWorkingCopy) wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
@@ -485,7 +502,7 @@ public class ExpressServerUtils {
 	public static IProject[] findProjectsForApplication(final IApplication application) {
 		if (application == null)
 			return null;
-		final ArrayList<IProject> results = new ArrayList<IProject>();
+		final List<IProject> results = new ArrayList<IProject>();
 		final String gitUri = application.getGitUrl();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
