@@ -39,11 +39,12 @@ public class EclipseLogAppender extends AppenderSkeleton {
 
 	@Override
 	protected void append(LoggingEvent event) {
-		if (Level.TRACE.equals(event.getLevel())) {
+		// always put client-lib logging to tracing, gets too chatty otherwise
+		//if (Level.TRACE.equals(event.getLevel())) {
 			trace(event);
-		} else {
-			log(event);
-		}
+		//} else {
+		//	log(event);
+		//}
 	}	
 
 	private void trace(LoggingEvent event) {
