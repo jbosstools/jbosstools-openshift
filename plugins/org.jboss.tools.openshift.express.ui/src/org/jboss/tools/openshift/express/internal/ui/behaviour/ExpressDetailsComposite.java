@@ -133,9 +133,17 @@ public class ExpressDetailsComposite {
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
 		this.remote = ExpressServerUtils.getExpressRemoteName(server);
-		updateModel(ConnectionsModelSingleton.getInstance().getRecentConnection());
+		updateModel(getConnection(callback), ExpressServerUtils.getApplication(callback));
 	}
-
+	
+	private Connection getConnection(IServerModeUICallback callback) {
+		Connection connection = ExpressServerUtils.getConnection(callback);
+		if (connection == null) {
+			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
+		}
+		return connection;
+	}
+	
 	protected String getDeployFolder(IServerAttributes server, IApplication application) {
 		if (application == null) {
 			return null;
@@ -283,7 +291,7 @@ public class ExpressDetailsComposite {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						updateModel(selectedConnection);
+						updateModel(selectedConnection, getFirstApplication(applications));
 						return Status.OK_STATUS;
 					}
 				};
@@ -474,11 +482,15 @@ public class ExpressDetailsComposite {
 		return error;
 	}
 
-	private void updateModel(Connection connection) {
+	private void updateModel(Connection connection, IApplication application) {
 		this.connection = connection;
 		this.applications = safeGetApplications(connection);
 		this.projectsByApplication = createProjectsByApplication(applications);
-		this.application = getFirstApplication(applications);
+		if (application == null) {
+			this.application = getFirstApplication(applications);	
+		} else {
+			this.application = application;
+		}
 		this.deployProject = getDeployProject(application);
 		
 		fillServerWithDetails(application, remote, deployProject, callback);
