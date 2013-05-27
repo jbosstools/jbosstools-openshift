@@ -144,7 +144,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 		String log = logEntry.getLog();
 		if (logEntry.isTimeouted) {
 			log = createEnvironmentVariablesLink(
-					"<request timeouted, you can look up the credentials in the <a>environment variables</a>>",
+					"<request timed out, you can look up the credentials in the <a>environment variables</a>>",
 					builder.length(), 
 					styles,
 					logEntry.getElement());
