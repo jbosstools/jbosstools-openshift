@@ -45,7 +45,6 @@ import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.errors.UnmergedPathException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -55,6 +54,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -83,16 +83,17 @@ public class TestRepository {
 	 * @throws IOException
 	 */
 	public TestRepository(File gitDir) throws IOException {
-		FileRepository tmpRepository = new FileRepository(gitDir);
-		tmpRepository.create();
-		tmpRepository.close();
+		createFileRepository(gitDir);
 		// use repository instance from RepositoryCache!
 		this.gitDir = gitDir;
 		this.repository = Activator.getDefault().getRepositoryCache().lookupRepository(gitDir);
 		this.workdirPrefix = getWorkdirPrefix(repository);
-		workdirPrefix = workdirPrefix.replace('\\', '/');
-		if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
-			workdirPrefix += "/"; //$NON-NLS-1$
+	}
+
+	protected void createFileRepository(File gitDir) throws IOException {
+		Repository tmpRepository = FileRepositoryBuilder.create(gitDir);
+		tmpRepository.create();
+		tmpRepository.close();
 	}
 	
 	/**
@@ -122,6 +123,9 @@ public class TestRepository {
 		} catch (IOException err) {
 			// ignore;
 		}
+		workdirPrefix = workdirPrefix.replace('\\', '/');
+		if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
+			workdirPrefix += "/"; //$NON-NLS-1$
 		return workdirPrefix;
 	}
 
