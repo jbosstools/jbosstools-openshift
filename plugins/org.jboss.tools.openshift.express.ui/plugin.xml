@@ -172,35 +172,56 @@
 		<actionProvider
 				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.TailServerLogActionProvider"
 				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.tailServerLogActionProvider">
-			<enablement>
-              <and>
-		           <instanceof
-		                 value="org.eclipse.wst.server.core.IServer">
-		           </instanceof>
-		        </and>
-			</enablement>
+           <enablement>
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<instanceof
+						value="org.eclipse.wst.server.core.IServer" />
+                </iterate>
+             </with>
+           </enablement>
 		</actionProvider>
 		<actionProvider
 				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.ApplicationPortForwardingActionProvider"
 				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.applicationPortForwardingActionProvider">
-			<enablement>
-              <and>
-		           <instanceof
-		                 value="org.eclipse.wst.server.core.IServer">
-		           </instanceof>
-		        </and>
-			</enablement>
+           <enablement>
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<instanceof
+						value="org.eclipse.wst.server.core.IServer" />
+                </iterate>
+             </with>
+           </enablement>
 		</actionProvider>
 		<actionProvider
 				class="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.RestartApplicationActionProvider"
 				id="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.restartApplicationActionProvider">
-			<enablement>
-              <and>
-		           <instanceof
-		                 value="org.eclipse.wst.server.core.IServer">
-		           </instanceof>
-		        </and>
-			</enablement>
+           <enablement>
+             <with
+                   variable="selection">
+                <count
+                         value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
+                 <instanceof
+                       value="org.eclipse.wst.server.core.IServer" />
+                </iterate>
+             </with>
+           </enablement>
 		</actionProvider>
     </extension>
 	
@@ -340,8 +361,8 @@
 	       <includes>
            	  <actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
-           	  <!--actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/-->
+           	  <!-- actionExtension
+	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/ -->
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
@@ -367,114 +388,207 @@
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateApplicationActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.createApplicationActionProvider">
            <enablement>
-              <and>
+             <with
+                   variable="selection">
+                <count
+                         value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
-                 </instanceof>
-              </and>
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateOrEditDomainActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.editDomainActionProvider">
            <enablement>
-              <and>
+             <with
+                   variable="selection">
+                <count
+                         value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
-                 </instanceof>
-              </and>
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteDomainActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.deleteDomainActionProvider">
            <enablement>
-              <and>
+             <with
+                   variable="selection">
+                <count
+                         value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
                  <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
-                 </instanceof>
-              </and>
+                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.RefreshElementActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.RefreshElementActionProvider">
            <enablement>
-              <or>
-                 <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
-                 </instanceof>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </or>
+             <with
+					variable="selection">
+				<and>
+	                <count
+						value="1">
+	                </count>
+	                <iterate
+						ifEmpty="false"
+						operator="and">
+			              <or>
+			                 <instanceof
+			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+			                 <instanceof
+			                       value="com.openshift.client.IApplication" />
+			              </or>
+	                </iterate>
+				</and>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteConnectionActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteConnectionActionProvider">
            <enablement>
-              <and>
-                 <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
-                 </instanceof>
-              </and>
+             <with
+					variable="selection">
+				<and>
+	                <count
+						value="1">
+	                </count>
+	                <iterate
+						ifEmpty="false"
+						operator="and">
+			              <or>
+			                 <instanceof
+			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+			              </or>
+	                </iterate>
+				</and>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.OpenInWebBrowserActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.openInWebBrowserActionProvider">
            <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </and> 
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<instanceof
+						value="com.openshift.client.IApplication" />
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.TailServerLogActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.tailServerLogActionProvider">
            <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </and>
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<instanceof
+						value="com.openshift.client.IApplication" />
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ApplicationPortForwardingActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.applicationPortForwardingActionProvider">
            <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </and>
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<instanceof
+						value="com.openshift.client.IApplication">
+					</instanceof>
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
-        
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.EditCartridgesActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.editCartridgesActionProvider">
            <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </and>
+             <with
+                   variable="selection">
+				<or>
+					<and>
+		                <count
+							value="1">
+		                </count>
+		                <iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.IApplication" />
+		                </iterate>
+		            </and>
+					<and>
+		                <count
+							value="+">
+		                </count>
+		                <iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.cartridge.IEmbeddedCartridge" />
+						</iterate>
+					</and>
+                </or>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ImportApplicationActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.importApplicationActionProvider">
            <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </and>
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<instanceof
+						value="com.openshift.client.IApplication">
+					</instanceof>
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider
@@ -503,18 +617,26 @@
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ShowPropertiesActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.showPropertiesActionProvider">
            <enablement>
-              <or>
-                 <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection">
-                 </instanceof>
-                 <!-- Not showing it for IApp since it has show details -->
-                <!-- <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof> -->
-                 <instanceof
-                       value="com.openshift.client.cartridge.IEmbeddedCartridge">
-                 </instanceof>
-              </or>
+             <with
+					variable="selection">
+                <count
+					value="1">
+                </count>
+                <iterate
+					ifEmpty="false"
+					operator="and">
+					<or>
+						<instanceof
+							value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+							<!-- Not showing it for IApp since it has show details -->
+							<!-- <instanceof
+								value="com.openshift.client.IApplication">
+						</instanceof> -->
+						<instanceof
+							value="com.openshift.client.cartridge.IEmbeddedCartridge" />
+					</or>
+                </iterate>
+             </with>
            </enablement>
         </actionProvider>
         <actionProvider

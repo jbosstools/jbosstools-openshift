@@ -33,10 +33,6 @@ public class RefreshElementAction extends AbstractOpenShiftAction {
 		setImageDescriptor(OpenShiftImages.REFRESH);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		Object resource = UIUtils.getFirstElement(getSelection(), IOpenShiftResource.class);

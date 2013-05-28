@@ -63,6 +63,5 @@ public class CreateOrEditDomainAction extends AbstractOpenShiftAction {
 			domainWizard = new NewDomainDialog(user);
 		}
 		return domainWizard;
-	}
-
+	}	
 }

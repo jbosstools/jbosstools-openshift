@@ -76,7 +76,4 @@ public abstract class AbstractOpenShiftAction extends Action implements ISelecti
 	public void setViewer(StructuredViewer viewer) {
 		this.viewer = viewer;
 	}
-	
-	public void validate() {
-	}
 }

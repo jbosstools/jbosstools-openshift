@@ -11,12 +11,14 @@
 package org.jboss.tools.openshift.express.test.core;
 
 import java.util.List;
+import java.util.Map;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.ISSHPublicKey;
 import com.openshift.client.IUser;
+import com.openshift.client.Message;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
 
@@ -133,6 +135,16 @@ public class NoopUserFake implements IUser {
 	
 	@Override
 	public IDomain createDomain(String id) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, Message> getMessages() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Message getMessage(String field) {
 		throw new UnsupportedOperationException();
 	}
 }
