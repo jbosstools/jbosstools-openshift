@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.action;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
@@ -21,6 +22,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridge
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
  * @author Xavier Coulon
@@ -35,7 +37,7 @@ public class EditCartridgesAction extends AbstractOpenShiftAction {
 	
 	@Override
 	public void run() {
-		final IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+		IApplication application = getApplication(getSelection());
 		if (application == null) {
 			return;
 		}
@@ -48,5 +50,16 @@ public class EditCartridgesAction extends AbstractOpenShiftAction {
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to edit cartridges", e);
 		}
+	}
+
+	protected IApplication getApplication(ISelection selection) {
+		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
+		if (application == null) {
+			IEmbeddedCartridge cartridge = UIUtils.getFirstElement(getSelection(), IEmbeddedCartridge.class);
+			if (cartridge != null) {
+				application = cartridge.getApplication();
+			}
+		}
+		return application;
 	}
 }

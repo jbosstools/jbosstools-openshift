@@ -56,7 +56,6 @@ public abstract class AbstractServerViewerActionProvider extends CommonActionPro
 		if (sel instanceof IServer) {
 			IServer server = (IServer) sel;
 			if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
-				action.validate();
 				if (action != null) {
 					MenuManager openshiftMenu = getOpenShiftMenuManager(menu);
 					openshiftMenu.add(action);

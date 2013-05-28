@@ -50,26 +50,4 @@ public class CreateApplicationAction extends AbstractOpenShiftAction {
 			
 		}
 	}
-
-	/**
-	 * @Override public void selectionChanged(SelectionChangedEvent event) {
-	 *           super.selectionChanged(event); enableWhenDomainExists(); }
-	 * @Override public void setSelection(ISelection selection) {
-	 *           super.setSelection(selection); enableWhenDomainExists(); }
-	 * 
-	 *           Enables the current action if the selected User has a default
-	 *           domain. Otherwise, the action is disabled. private void
-	 *           enableWhenDomainExists() { if (selection != null && selection
-	 *           instanceof ITreeSelection) { Object sel = ((ITreeSelection)
-	 *           selection).getFirstElement(); if (sel instanceof UserDelegate)
-	 *           { UserDelegate user = (UserDelegate) sel; try { final IDomain
-	 *           defaultDomain = user.getDefaultDomain();
-	 *           setEnabled(defaultDomain != null); } catch
-	 *           (SocketTimeoutException e) {
-	 *           Logger.error("Failed to check if selected user has a domain",
-	 *           e); } catch (OpenShiftException e) {
-	 *           Logger.error("Failed to check if selected user has a domain",
-	 *           e); } } } }
-	 */
-
 }

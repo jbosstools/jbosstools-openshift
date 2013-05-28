@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,18 +50,7 @@ public class DeleteApplicationAction extends AbstractOpenShiftAction {
 	 */
 	@Override
 	public void run() {
-		if (!(getSelection() instanceof ITreeSelection)) {
-			return;
-		}
-		ITreeSelection treeSelection = (ITreeSelection) getSelection();
-		final List<IApplication> appsToDelete = new ArrayList<IApplication>();
-		for (@SuppressWarnings("unchecked")
-		Iterator<Object> iterator = treeSelection.iterator(); iterator.hasNext();) {
-			final Object element = iterator.next();
-			if (isApplication(element)) {
-				appsToDelete.add((IApplication) element);
-			}
-		}
+		final List<IApplication> appsToDelete = getApplicationsToDelete();
 		if (appsToDelete.size() == 0) {
 			return;
 		}
@@ -131,7 +121,25 @@ public class DeleteApplicationAction extends AbstractOpenShiftAction {
 		}
 	}
 
+	private List<IApplication> getApplicationsToDelete() {
+		if (!(getSelection() instanceof ITreeSelection)) {
+			return Collections.emptyList();
+		}
+		
+		ITreeSelection treeSelection = (ITreeSelection) getSelection();
+		final List<IApplication> appsToDelete = new ArrayList<IApplication>();
+		for (@SuppressWarnings("unchecked")
+		Iterator<Object> iterator = treeSelection.iterator(); iterator.hasNext();) {
+			final Object element = iterator.next();
+			if (isApplication(element)) {
+				appsToDelete.add((IApplication) element);
+			}
+		}
+		return appsToDelete;
+	}
+
 	private boolean isApplication(Object selection) {
 		return selection instanceof IApplication;
 	}
+
 }

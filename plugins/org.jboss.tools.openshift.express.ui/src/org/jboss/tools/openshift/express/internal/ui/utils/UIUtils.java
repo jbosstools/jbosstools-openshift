@@ -177,4 +177,17 @@ public class UIUtils {
 		}
 		return null;
 	}
+	
+	public static boolean areNumOfElementsSelected(int numOf, ISelection selection) {
+		if (!(selection instanceof IStructuredSelection)) {
+			return false;
+		}
+		
+		return ((IStructuredSelection) selection).size() == numOf;
+	}
+
+	public static boolean isSingleSelection(ISelection selection) {
+		return areNumOfElementsSelected(1, selection);
+	}
+
 }

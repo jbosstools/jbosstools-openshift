@@ -38,28 +38,10 @@ public class DeleteDomainAction extends AbstractOpenShiftAction {
 	}
 
 	@Override
-	public void validate() {
-		boolean enable = false;
-		final Connection connection = UIUtils.getFirstElement(getSelection(), Connection.class);
-		if (connection != null) {
-			if (connection.isConnected()) {
-				try {
-					if (connection.getDefaultDomain() != null) {
-						enable = true;
-					}
-				} catch (OpenShiftException e) {
-					Logger.warn("Failed to retrieve User domain, prompting for creation", e);
-				}
-			}
-		}
-		setEnabled(enable);
-	}
-
-	@Override
 	public void run() {
 		final Connection connection = UIUtils.getFirstElement(getSelection(), Connection.class);
 		if (connection == null) {
-		return;
+			return;
 		}
 		try {
 			final IDomain domain = connection.getDefaultDomain();
@@ -74,12 +56,6 @@ public class DeleteDomainAction extends AbstractOpenShiftAction {
 								+ "Do you want to continue?",
 						domain.getId()),
 						"Force applications deletion (data will be lost and operation cannot be undone)");
-				/*
-				 * confirm = MessageDialog.openConfirm(Display.getCurrent()
-				 * .getActiveShell(), "Domain deletion", NLS.bind(
-				 * "You are about to delete the \"{0}\" domain.\n" +
-				 * "Do you want to continue?", domain.getId()));
-				 */
 				int result = dialog.open();
 				if ((result == CheckboxMessageDialog.INCLUDE_APPS) || (result == MessageDialog.OK)) {
 					confirm = true;

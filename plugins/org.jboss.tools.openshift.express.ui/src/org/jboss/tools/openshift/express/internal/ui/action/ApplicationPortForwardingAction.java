@@ -14,8 +14,6 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -90,21 +88,6 @@ public class ApplicationPortForwardingAction extends AbstractOpenShiftAction {
 		job.schedule();
 	}
 
-	@Override
-	public void validate() {
-		ISelection selection = getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(((IStructuredSelection) selection).size() == 1);
-		} else {
-			setEnabled(true);
-		}
-	}
-
-	/**
-	 * Opens the Port Forwarding dialog for good...
-	 * 
-	 * @param application
-	 */
 	private void openWizardDialog(final IApplication application) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -116,6 +99,5 @@ public class ApplicationPortForwardingAction extends AbstractOpenShiftAction {
 				dialog.open();
 			}
 		});
-		
 	}
 }

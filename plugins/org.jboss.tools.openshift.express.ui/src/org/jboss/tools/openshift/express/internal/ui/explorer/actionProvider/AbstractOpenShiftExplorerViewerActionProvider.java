@@ -46,8 +46,7 @@ public abstract class AbstractOpenShiftExplorerViewerActionProvider extends Comm
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
-		if (action != null/* && action.isEnabled()*/) {
-			action.validate();
+		if (action != null) {
 			menu.appendToGroup(group, action);
 		}
 	}
