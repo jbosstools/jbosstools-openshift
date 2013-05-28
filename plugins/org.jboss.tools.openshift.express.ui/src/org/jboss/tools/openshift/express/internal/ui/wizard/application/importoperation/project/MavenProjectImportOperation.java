@@ -27,6 +27,11 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
+import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+
+import com.openshift.client.IApplication;
 
 /**
  * @author Andre Dietisheim <adietish@redhat.com>
@@ -49,7 +54,7 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration();
 		List<IMavenProjectImportResult> importResults =
 				configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
-		return toProjects(importResults);
+		return validate(toProjects(importResults));
 	}
 
 	private List<IProject> toProjects(List<IMavenProjectImportResult> importResults) {
@@ -59,6 +64,20 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 			if (project != null) {
 				projects.add(importResult.getProject());
 			}
+		}
+
+		return projects;
+	}
+
+	private List<IProject> validate(List<IProject> projects) {
+		if (projects.size() == 0) {
+			throw new ImportFailedException(
+					NLS.bind("There was a maven related error that prevented us from importing the project. "
+							+ "We encourage you to look into the pom in the cloned repository at {0}.\n "
+							+ "One of the possible reasons is that there is already a project in your workspace "
+							+ "that matches the maven name of the OpenShift application. "
+							+ "You can then rename your workspace project and start over again.\n"
+							, getProjectDirectory()));
 		}
 		return projects;
 	}
