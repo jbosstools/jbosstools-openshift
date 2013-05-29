@@ -40,7 +40,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author André Dietisheim
  */
-public interface IOpenShiftExpressWizardModel extends IConnectionAwareModel, IObservablePojo {
+public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservablePojo {
 
 	public static final String PROP_NEW_PROJECT = "newProject";
 	public static final String PROP_CONNECTION = "connection";

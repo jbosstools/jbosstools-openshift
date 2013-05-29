@@ -28,13 +28,14 @@ import org.jboss.tools.common.ui.WizardUtils;
 /**
  * @author Rob Stryker
  */
-public class ExpressWizardFragment extends WizardFragment implements ICompletable {
+public class OpenShiftServerWizardFragment extends WizardFragment implements ICompletable {
 
-	private ExpressDetailsComposite composite;
+	private OpenShiftServerWizardComposite composite;
 		
 	public boolean hasComposite() {
 		return true;
 	}
+
 	public void setComplete(boolean complete) {
 		super.setComplete(complete);
 	}
@@ -59,7 +60,7 @@ public class ExpressWizardFragment extends WizardFragment implements ICompletabl
 		};
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
-		this.composite = new ExpressDetailsComposite(composite, callback);
+		this.composite = new OpenShiftServerWizardComposite(composite, callback);
 		return this.composite.getComposite();
 	}
 		

@@ -25,7 +25,7 @@
       </category>
       <wizard
             category="org.jboss.tools.openshift.express.ui.wizard.importCategory"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
             name="Existing OpenShift Application">
@@ -52,7 +52,7 @@
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-            class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenshiftLaunchTabGroup"
+            class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenshiftServerLaunchTabGroup"
             description="OpenShift Launch"
             id="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenshiftLaunchTabGroup"
             type="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"/>
@@ -62,10 +62,10 @@
    <extension
          point="org.jboss.ide.eclipse.as.core.behaviourExtension">
       <behaviour
-            behaviourDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBehaviourDelegate"
-            launchDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressLaunchDelegate"
+            behaviourDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerBehaviourDelegate"
+            launchDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerLaunchDelegate"
             name="OpenShift"
-            publishMethod="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressPublishMethod"
+            publishMethod="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerPublishMethod"
             serverTypes="org.jboss.tools.openshift.express.openshift.server.type"
             typeId="openshift">
       </behaviour>
@@ -74,8 +74,8 @@
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
-            behaviourClass="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressBehaviour"
-            class="org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServer"
+            behaviourClass="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerBehaviour"
+            class="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer"
             name="%openshift.express.name"
             description="%openshift.express.description"
             hasConfiguration="false"
@@ -292,7 +292,7 @@
     <extension
           point="org.eclipse.wst.server.ui.editorPageSections">
        <section
-             class="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressDetailsSection"
+             class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftServerEditorSection"
              id="org.jboss.tools.openshift.express.ui.behaviour.details.section"
              insertionId="org.eclipse.wst.server.editor.overview.left"
              order="10"
@@ -302,7 +302,7 @@
     <extension
           point="org.eclipse.wst.server.ui.wizardFragments">
        <fragment
-             class="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressWizardFragment"
+             class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftServerWizardFragment"
              id="org.jboss.tools.openshift.express.ui.server.fragment"
              typeIds="org.jboss.tools.openshift.express.openshift.server.type">
        </fragment>

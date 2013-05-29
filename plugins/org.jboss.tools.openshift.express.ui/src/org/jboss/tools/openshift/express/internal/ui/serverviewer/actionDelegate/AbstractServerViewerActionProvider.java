@@ -20,7 +20,7 @@ import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.internal.cnf.ServerActionProvider;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.action.AbstractOpenShiftAction;
 
 /**
@@ -55,7 +55,7 @@ public abstract class AbstractServerViewerActionProvider extends CommonActionPro
 		Object sel = getSelection();
 		if (sel instanceof IServer) {
 			IServer server = (IServer) sel;
-			if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
+			if (OpenShiftServerUtils.isOpenShiftRuntime(server) || OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
 				if (action != null) {
 					MenuManager openshiftMenu = getOpenShiftMenuManager(menu);
 					openshiftMenu.add(action);

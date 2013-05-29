@@ -19,7 +19,7 @@ import org.jboss.ide.eclipse.as.core.server.internal.AbstractBehaviourDelegate;
 /**
  * @author Rob Stryker
  */
-public class ExpressBinaryBehaviourDelegate extends AbstractBehaviourDelegate {
+public class OpenShiftServerBinaryBehaviourDelegate extends AbstractBehaviourDelegate {
 
 	public static final String OPENSHIFT_BINARY_ID = "openshiftBinary";
 

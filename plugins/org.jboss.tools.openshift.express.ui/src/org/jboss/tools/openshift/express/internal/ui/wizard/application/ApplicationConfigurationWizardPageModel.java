@@ -54,7 +54,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
 	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
 
-	private final OpenShiftExpressApplicationWizardModel wizardModel;
+	private final OpenShiftApplicationWizardModel wizardModel;
 
 	// start with a null value as a marker of non-initialized state (used during
 	// first pass validation)
@@ -66,7 +66,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private boolean existingApplicationsLoaded = false;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 
-	public ApplicationConfigurationWizardPageModel(OpenShiftExpressApplicationWizardModel wizardModel)
+	public ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel)
 			throws OpenShiftException {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
@@ -75,7 +75,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	/**
 	 * @return the wizardModel
 	 */
-	public final OpenShiftExpressApplicationWizardModel getWizardModel() {
+	public final OpenShiftApplicationWizardModel getWizardModel() {
 		return wizardModel;
 	}
 

@@ -71,7 +71,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWiz
 public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage implements IWizardPage {
 
 	private GitCloningSettingsWizardPageModel pageModel;
-	private IOpenShiftExpressWizardModel wizardModel;
+	private IOpenShiftWizardModel wizardModel;
 	private Button useDefaultRemoteNameButton;
 	private Button useDefaultRepoPathButton;
 	private Text remoteNameText;
@@ -79,8 +79,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private RepoPathValidationStatusProvider repoPathValidator;
 	private Link sshLink;
 
-	public GitCloningSettingsWizardPage(OpenShiftExpressApplicationWizard wizard,
-			IOpenShiftExpressWizardModel wizardModel) {
+	public GitCloningSettingsWizardPage(OpenShiftApplicationWizard wizard,
+			IOpenShiftWizardModel wizardModel) {
 		super(
 				"Import an existing OpenShift application",
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
@@ -188,7 +188,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
 		final IObservableValue projectNameModelObservable =
-				BeanProperties.value(IOpenShiftExpressWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
+				BeanProperties.value(IOpenShiftWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
 
 		dbc.addValidationStatusProvider(
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));

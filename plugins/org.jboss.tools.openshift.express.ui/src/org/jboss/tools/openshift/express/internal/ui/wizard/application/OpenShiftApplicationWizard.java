@@ -62,7 +62,7 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-public abstract class OpenShiftExpressApplicationWizard extends Wizard implements IImportWizard, INewWizard {
+public abstract class OpenShiftApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
 	private static final int APP_CREATE_TIMEOUT = 6 * 60 * 1000;
 	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
@@ -70,17 +70,17 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 	private static final int IMPORT_TIMEOUT = 5 * 60 * 1000;
 
 	private final boolean skipCredentialsPage;
-	private final OpenShiftExpressApplicationWizardModel model;
+	private final OpenShiftApplicationWizardModel model;
 
-	OpenShiftExpressApplicationWizard(final boolean useExistingApplication, final String wizardTitle) {
+	OpenShiftApplicationWizard(final boolean useExistingApplication, final String wizardTitle) {
 		this(null, null, null, useExistingApplication, wizardTitle);
 	}
 
-	OpenShiftExpressApplicationWizard(Connection user, IProject project, IApplication application,
+	OpenShiftApplicationWizard(Connection user, IProject project, IApplication application,
 			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
-		this.model = new OpenShiftExpressApplicationWizardModel(user, project, application,
+		this.model = new OpenShiftApplicationWizardModel(user, project, application,
 				useExistingApplication);
 		this.skipCredentialsPage = (user != null && user.isConnected());
 	}
@@ -312,7 +312,7 @@ public abstract class OpenShiftExpressApplicationWizard extends Wizard implement
 		}
 	}
 
-	OpenShiftExpressApplicationWizardModel getModel() {
+	OpenShiftApplicationWizardModel getModel() {
 		return model;
 	}
 	

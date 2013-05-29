@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Label;
 /**
  * @author Rob Stryker
  */
-public class OpenshiftLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
+public class OpenshiftServerLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		setTabs(createTabs2(dialog, mode));
@@ -54,20 +54,14 @@ public class OpenshiftLaunchTabGroup extends AbstractLaunchConfigurationTabGroup
 
 		@Override
 		public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-			// TODO Auto-generated method stub
-
 		}
 
 		@Override
 		public void initializeFrom(ILaunchConfiguration configuration) {
-			// TODO Auto-generated method stub
-
 		}
 
 		@Override
 		public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-			// TODO Auto-generated method stub
-
 		}
 
 		@Override

@@ -64,7 +64,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 	private Text existingProjectNameText = null;
 
-	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftExpressWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftWizardModel wizardModel) {
 		super(NLS.bind(PAGE_TITLE_FORMAT, wizardModel.getApplicationName()),
 				"Configure your project and server adapter settings, then click 'next' or 'finish'.",
 				"Project Configuration", wizard);

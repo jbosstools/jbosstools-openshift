@@ -15,7 +15,7 @@ import org.jboss.ide.eclipse.as.core.server.internal.AbstractBehaviourDelegate;
 /**
  * @author Rob Stryker
  */
-public class ExpressBehaviourDelegate extends AbstractBehaviourDelegate {
+public class OpenShiftServerBehaviourDelegate extends AbstractBehaviourDelegate {
 	
 	public static final String OPENSHIFT_ID = "openshift";
 	

@@ -24,7 +24,7 @@ import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
 /**
  * @author Rob Stryker
  */
-public class ExpressBehaviour extends DelegatingServerBehavior {
+public class OpenShiftServerBehaviour extends DelegatingServerBehavior {
 
 	private IAdaptable publishAdaptableInfo;
 

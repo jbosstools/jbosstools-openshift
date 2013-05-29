@@ -32,7 +32,7 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
@@ -52,7 +52,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements IOpenShiftExpressWizardModel {
+class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
 	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	private static final String DEFAULT_APPLICATION = "default_application";
@@ -60,11 +60,11 @@ class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements
 	
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	public OpenShiftExpressApplicationWizardModel(Connection connection) {
+	public OpenShiftApplicationWizardModel(Connection connection) {
 		this(connection, null, null, false);
 	}
 
-	public OpenShiftExpressApplicationWizardModel(Connection connection, IProject project, IApplication application,
+	public OpenShiftApplicationWizardModel(Connection connection, IProject project, IApplication application,
 			boolean useExistingApplication) {
 		// default value(s)
 		setProject(project);
@@ -194,7 +194,7 @@ class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements
 						"Could not create a server adapter for your application {0}. No project was found when importing",
 						getApplication().getName());
 			}
-			server = new ServerAdapterFactory().create(project, this, monitor);
+			server = new OpenShiftServerAdapterFactory().create(project, this, monitor);
 			setServerAdapter(server);
 		}
 		return server;
@@ -508,9 +508,9 @@ class OpenShiftExpressApplicationWizardModel extends ObservableUIPojo implements
 		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
 		setNewProject(true);
 		setCreateServerAdapter(true);
-		setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
-		setRemoteName(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		setServerType(ServerCore.findServerType(ExpressServerUtils.OPENSHIFT_SERVER_TYPE));
+		setRepositoryPath(IOpenShiftWizardModel.DEFAULT_REPOSITORY_PATH);
+		setRemoteName(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+		setServerType(ServerCore.findServerType(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE));
 		setServerAdapter(null);
 	}			
 

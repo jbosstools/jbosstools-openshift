@@ -78,7 +78,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Rob Stryker
  */
 @SuppressWarnings("restriction")
-public class ExpressServerUtils {
+public class OpenShiftServerUtils {
 	/* Server Settings */
 	public static final String ATTRIBUTE_DEPLOY_PROJECT = "org.jboss.tools.openshift.binary.deployProject";
 	public static final String ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.override";
@@ -380,7 +380,7 @@ public class ExpressServerUtils {
 			String deployProject, String deployFolder, String remote, String appName) {
 		host = getHost(host);
 		wc.setHost(host);
-		wc.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
+		wc.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
 		// wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		// wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
@@ -411,8 +411,8 @@ public class ExpressServerUtils {
 			return false;
 		}
 
-		return serverName.equals(ExpressServer.DEFAULT_SERVER_NAME_BASE)
-				|| serverName.startsWith(ExpressServer.DEFAULT_SERVER_NAME_BASE);
+		return serverName.equals(OpenShiftServer.DEFAULT_SERVER_NAME_BASE)
+				|| serverName.startsWith(OpenShiftServer.DEFAULT_SERVER_NAME_BASE);
 	}
 	
 	protected static String getHost(String url) {
@@ -448,7 +448,7 @@ public class ExpressServerUtils {
 		serverWC.setRuntime(currentRuntime);
 		serverWC.setName(serverName);
 		serverWC.setServerConfiguration(null);
-		serverWC.setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
+		serverWC.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
 		return serverWC.save(true, new NullProgressMonitor());
 	}
 
@@ -477,8 +477,8 @@ public class ExpressServerUtils {
 			IJBossServerPublishMethodType type = DeploymentPreferenceLoader.getCurrentDeploymentMethodType(server);
 			if (type != null) {
 				String id = type.getId();
-				if (ExpressBinaryBehaviourDelegate.OPENSHIFT_BINARY_ID.equals(id)
-						|| ExpressBehaviourDelegate.OPENSHIFT_ID.equals(id))
+				if (OpenShiftServerBinaryBehaviourDelegate.OPENSHIFT_BINARY_ID.equals(id)
+						|| OpenShiftServerBehaviourDelegate.OPENSHIFT_ID.equals(id))
 					return true;
 			}
 		}
@@ -582,14 +582,14 @@ public class ExpressServerUtils {
 		if (app == null) {
 			return null;
 		}
-		return ExpressServerUtils.findProjectForApplication(app);
+		return OpenShiftServerUtils.findProjectForApplication(app);
 	}
 
 	public static IApplication findApplicationForServer(IServerAttributes server) {
 		try {
-			ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+			ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
 			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
-			String appName = ExpressServerUtils.getExpressApplicationName(server);
+			String appName = OpenShiftServerUtils.getExpressApplicationName(server);
 			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
 			return app;
 		} catch (OpenShiftException ose) {
@@ -603,13 +603,13 @@ public class ExpressServerUtils {
 		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);
-		node.put(ExpressServerUtils.SETTING_APPLICATION_ID, app.getUUID());
-		node.put(ExpressServerUtils.SETTING_APPLICATION_NAME, app.getName());
+		node.put(OpenShiftServerUtils.SETTING_APPLICATION_ID, app.getUUID());
+		node.put(OpenShiftServerUtils.SETTING_APPLICATION_NAME, app.getName());
 		setConnectionUrl(connection, node);
-		node.put(ExpressServerUtils.SETTING_DOMAIN, app.getDomain().getId());
-		node.put(ExpressServerUtils.SETTING_REMOTE_NAME, remoteName);
+		node.put(OpenShiftServerUtils.SETTING_DOMAIN, app.getDomain().getId());
+		node.put(OpenShiftServerUtils.SETTING_REMOTE_NAME, remoteName);
 		if (!StringUtils.isEmpty(deployFolder)) {
-			node.put(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);
+			node.put(OpenShiftServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);
 		}
 		try {
 			node.flush();
@@ -621,9 +621,9 @@ public class ExpressServerUtils {
 	private static void setConnectionUrl(Connection connection, IEclipsePreferences node) {
 		try {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
-			node.put(ExpressServerUtils.SETTING_CONNECTIONURL, connectionUrl.toString());
+			node.put(OpenShiftServerUtils.SETTING_CONNECTIONURL, connectionUrl.toString());
 			if (hasUsername(node)) {
-				node.put(ExpressServerUtils.SETTING_USERNAME, connection.getUsername());
+				node.put(OpenShiftServerUtils.SETTING_USERNAME, connection.getUsername());
 			}
 		} catch (UnsupportedEncodingException e) {
 			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for connection {0}/{1}",
@@ -635,7 +635,7 @@ public class ExpressServerUtils {
 	}
 
 	private static boolean hasUsername(IEclipsePreferences node) {
-		return node.get(ExpressServerUtils.SETTING_USERNAME, null) != null;
+		return node.get(OpenShiftServerUtils.SETTING_USERNAME, null) != null;
 	}
 
 	public static IServer setExpressDeployProject(IServer server, String val) throws CoreException {
@@ -783,10 +783,10 @@ public class ExpressServerUtils {
 	}
 
 	public static void put(IApplication application, TaskModel taskModel) {
-		taskModel.putObject(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
+		taskModel.putObject(OpenShiftServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
 	}
 	
 	public static IApplication getApplication(IServerModeUICallback callback) {
-		return (IApplication) callback.getAttribute(ExpressServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
+		return (IApplication) callback.getAttribute(OpenShiftServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
 	}
 }

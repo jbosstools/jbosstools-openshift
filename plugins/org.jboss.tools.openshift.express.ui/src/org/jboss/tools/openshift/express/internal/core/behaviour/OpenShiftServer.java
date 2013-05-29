@@ -33,14 +33,14 @@ import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 /**
  * @author Rob Stryker
  */
-public class ExpressServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
+public class OpenShiftServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
 
 	public static final String DEFAULT_SERVER_NAME_BASE = "ApplicationName at OpenShift";
 	
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl()));
 		getServerWorkingCopy().setName(ServerUtil.getDefaultServerName(DEFAULT_SERVER_NAME_BASE));
-		setAttribute(IDeployableServer.SERVER_MODE, ExpressBehaviourDelegate.OPENSHIFT_ID);
+		setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
 	}
 
 	public IStatus canModifyModules(IModule[] add, IModule[] remove) {		
@@ -66,14 +66,14 @@ public class ExpressServer extends DeployableServer implements IURLProvider, IEx
 	}
 
 	public URL getModuleRootURL(IModule module) {
-		String appProjString = ExpressServerUtils.getExpressDeployProject(getServer());
+		String appProjString = OpenShiftServerUtils.getExpressDeployProject(getServer());
 		IProject appProj = appProjString == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
 		IProject p =module.getProject();
-		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		
+		boolean shouldIgnore = OpenShiftServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		
 		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore ? "" : null);
 	}
 	
 	public ServerExtendedProperties getExtendedProperties() {
-		return new ExpressServerExtendedProperties(getServer());
+		return new OpenShiftServerExtendedProperties(getServer());
 	}
 }
