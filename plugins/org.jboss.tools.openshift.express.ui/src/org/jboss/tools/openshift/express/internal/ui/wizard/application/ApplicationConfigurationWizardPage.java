@@ -115,7 +115,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	// private ModifyListener modifyListener;
 
-	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel) {
+	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("Set up OpenShift Application",
 				"Select an existing or create a new OpenShift Application.",
 				"Set up OpenShift Application", wizard);
@@ -213,8 +213,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				OpenShiftExpressApplicationWizard wizard = (OpenShiftExpressApplicationWizard) getWizard();
-				OpenShiftExpressApplicationWizardModel wizardModel = wizard.getModel();
+				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
+				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
 				final ApplicationSelectionDialog appSelectionDialog =
 						new ApplicationSelectionDialog(wizard, wizardModel, null, getShell());
 				final int result = appSelectionDialog.open();

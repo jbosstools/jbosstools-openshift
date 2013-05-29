@@ -33,12 +33,12 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	/** whether this a server adapter should be created, or not. */
 	public static final String PROPERTY_CREATE_SERVER_ADAPTER = "createServerAdapter";
 
-	private IOpenShiftExpressWizardModel wizardModel;
+	private IOpenShiftWizardModel wizardModel;
 
-	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setNewProject(true);
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
 	}
 
 	/**

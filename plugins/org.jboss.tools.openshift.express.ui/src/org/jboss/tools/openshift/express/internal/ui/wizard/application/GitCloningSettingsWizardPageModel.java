@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import static org.jboss.tools.openshift.express.internal.ui.wizard.application.IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
-import static org.jboss.tools.openshift.express.internal.ui.wizard.application.IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
+import static org.jboss.tools.openshift.express.internal.ui.wizard.application.IOpenShiftWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
+import static org.jboss.tools.openshift.express.internal.ui.wizard.application.IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -38,16 +38,16 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USE_DEFAULT_REMOTE_NAME = "useDefaultRemoteName";
 	public static final String PROPERTY_HAS_REMOTEKEYS = "hasRemoteKeys";
 
-	private IOpenShiftExpressWizardModel wizardModel;
+	private IOpenShiftWizardModel wizardModel;
 	private boolean useDefaultRepoPath = true;
 	private boolean useDefaultRemoteName = true;
 	private boolean hasRemoteKeys;
 
-	public GitCloningSettingsWizardPageModel(IOpenShiftExpressWizardModel wizardModel) {
+	public GitCloningSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftExpressWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
+		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
 		setRepositoryPath(getDefaultRepositoryPath());
 	}
 
@@ -62,7 +62,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 			public void propertyChange(PropertyChangeEvent evt) {
 				firePropertyChange(PROPERTY_APPLICATION_NAME, evt.getOldValue(), evt.getNewValue());
 				if(wizardModel.isNewProject() && isUseDefaultRepoPath()) {
-					setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
+					setRepositoryPath(IOpenShiftWizardModel.DEFAULT_REPOSITORY_PATH);
 				} 
 			}
 		};
@@ -81,13 +81,13 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 					if(project != null && project.exists()) {
 						setRepositoryPath(project.getLocation().toOSString());
 					} else {
-						setRepositoryPath(IOpenShiftExpressWizardModel.DEFAULT_REPOSITORY_PATH);
+						setRepositoryPath(IOpenShiftWizardModel.DEFAULT_REPOSITORY_PATH);
 					}
 				}
 				if(wizardModel.isNewProject()) {
-					setRemoteName(IOpenShiftExpressWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+					setRemoteName(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 				} else {
-					setRemoteName(IOpenShiftExpressWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
+					setRemoteName(IOpenShiftWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
 				}
 			}
 		};

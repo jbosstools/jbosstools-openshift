@@ -52,7 +52,7 @@ import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyButtonCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
@@ -61,7 +61,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 /**
  * @author Rob Stryker
  */
-public class ExpressDetailsSection extends ServerEditorSection {
+public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private static final String DEFAULT_HOST_MARKER = " (default)";
 
 	private IEditorInput input;
@@ -101,28 +101,28 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	protected void initWidgets() {
 		// Set the widgets
 		deployProjectCombo.setEnabled(true);
-		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
-		String appName = ExpressServerUtils.getExpressApplicationName(server);
+		String appName = OpenShiftServerUtils.getExpressApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
 		connectionText.setEnabled(false);
 		appNameText.setEnabled(false);
 
-		String outDir = ExpressServerUtils.getExpressDeployFolder(server);
+		String outDir = OpenShiftServerUtils.getExpressDeployFolder(server);
 		deployFolderText.setText(outDir);
-		String remote = ExpressServerUtils.getExpressRemoteName(server);
+		String remote = OpenShiftServerUtils.getExpressRemoteName(server);
 		remoteText.setText(StringUtils.null2emptyString(remote));
 
 		deployProjectCombo.setItems(getSuitableProjects());
 		java.util.List<String> l = Arrays.asList(deployProjectCombo.getItems());
-		String depProj = ExpressServerUtils.getExpressDeployProject(server);
+		String depProj = OpenShiftServerUtils.getExpressDeployProject(server);
 		if (depProj != null) {
 			int ind = l.indexOf(depProj);
 			if (ind != -1)
 				deployProjectCombo.select(ind);
 		}
 
-		boolean overrides = ExpressServerUtils.getOverridesProject(server);
+		boolean overrides = OpenShiftServerUtils.getOverridesProject(server);
 		overrideProjectSettings.setSelection(overrides);
 		remoteText.setEnabled(overrides);
 		deployFolderText.setEnabled(overrides);
@@ -144,7 +144,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	}
 
 	private String[] getSuitableProjects() {
-		IProject[] all = ExpressServerUtils.findAllSuitableOpenshiftProjects();
+		IProject[] all = OpenShiftServerUtils.findAllSuitableOpenshiftProjects();
 		String[] s = new String[all.length];
 		for (int i = 0; i < all.length; i++) {
 			s[i] = all[i].getName();
@@ -257,7 +257,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	}
 
 	private IFolder chooseFolder() {
-		String depProject = ExpressServerUtils.getExpressDeployProject(server);
+		String depProject = OpenShiftServerUtils.getExpressDeployProject(server);
 
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(depProject);
 
@@ -269,7 +269,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		dialog.setInput(p);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
-		String depFolder = ExpressServerUtils.getExpressDeployFolder(server);
+		String depFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
 		IResource res = p.findMember(new Path(depFolder));
 		if (res != null)
 			dialog.setInitialSelection(res);
@@ -282,15 +282,15 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	public class SetRemoteCommand extends ServerWorkingCopyPropertyCommand {
 		public SetRemoteCommand(IServerWorkingCopy server) {
 			super(server, "Change Remote Name", remoteText, remoteText.getText(),
-					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener,
-					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+					OpenShiftServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener,
+					OpenShiftServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		}
 	}
 
 	public class SetProjectCommand extends ServerWorkingCopyPropertyComboCommand {
 		public SetProjectCommand(IServerWorkingCopy wc, String newVal) {
 			super(wc, "Change OpenShift Project", deployProjectCombo, newVal,
-					ExpressServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
+					OpenShiftServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
 		}
 
 		@Override
@@ -302,8 +302,8 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	public class SetDeployFolderCommand extends ServerWorkingCopyPropertyCommand {
 		public SetDeployFolderCommand(IServerWorkingCopy server) {
 			super(server, "Change Deployment Folder", deployFolderText, deployFolderText.getText(),
-					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener,
-					ExpressServerUtils.getDefaultDeployFolder(server));
+					OpenShiftServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener,
+					OpenShiftServerUtils.getDefaultDeployFolder(server));
 		}
 	}
 
@@ -311,7 +311,7 @@ public class ExpressDetailsSection extends ServerEditorSection {
 		public SetOverrideCommand(IServerWorkingCopy wc) {
 			super(wc, "Override OpenShift Project Settings Command",
 					overrideProjectSettings, overrideProjectSettings.getSelection(),
-					ExpressServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
+					OpenShiftServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
 		}
 
 		@Override
@@ -321,16 +321,16 @@ public class ExpressDetailsSection extends ServerEditorSection {
 	}
 
 	private void updateWidgetsFromWorkingCopy() {
-		ConnectionURL connectionUrl = ExpressServerUtils.getExpressConnectionUrl(server);
+		ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
-		String appName = ExpressServerUtils.getExpressApplicationName(server);
+		String appName = OpenShiftServerUtils.getExpressApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
 
 		browseDestButton.setEnabled(overrideProjectSettings.getSelection());
 		deployFolderText.setEnabled(overrideProjectSettings.getSelection());
 		remoteText.setEnabled(overrideProjectSettings.getSelection());
-		String remote = ExpressServerUtils.getExpressRemoteName(server, ExpressServerUtils.SETTING_FROM_PROJECT);
-		String depFolder = ExpressServerUtils.getExpressDeployFolder(server, ExpressServerUtils.SETTING_FROM_PROJECT);
+		String remote = OpenShiftServerUtils.getExpressRemoteName(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
+		String depFolder = OpenShiftServerUtils.getExpressDeployFolder(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
 
 		remoteText.removeModifyListener(remoteModifyListener);
 		deployFolderText.removeModifyListener(deployDestinationModifyListener);

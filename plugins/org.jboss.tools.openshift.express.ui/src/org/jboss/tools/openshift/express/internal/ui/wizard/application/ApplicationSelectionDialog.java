@@ -69,7 +69,7 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 	private final IWizard wizard;
 	private TableViewer tableViewer;
 
-	public ApplicationSelectionDialog(OpenShiftExpressApplicationWizard wizard, OpenShiftExpressApplicationWizardModel wizardModel, IApplication selectedApplication,
+	public ApplicationSelectionDialog(OpenShiftApplicationWizard wizard, OpenShiftApplicationWizardModel wizardModel, IApplication selectedApplication,
 			Shell parentShell) {
 		super(parentShell);
 		this.dialogModel = new ApplicationSelectionDialogModel(wizardModel);

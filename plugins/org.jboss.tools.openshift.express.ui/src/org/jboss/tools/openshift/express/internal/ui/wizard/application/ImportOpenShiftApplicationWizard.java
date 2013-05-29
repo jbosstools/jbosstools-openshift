@@ -12,12 +12,12 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  *
  */
-public class ImportOpenShiftExpressApplicationWizard extends OpenShiftExpressApplicationWizard {
+public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 
 	/**
 	 * Constructor
 	 */
-	public ImportOpenShiftExpressApplicationWizard() {
+	public ImportOpenShiftApplicationWizard() {
 		super(true, "Import OpenShift Application");
 	}
 
@@ -27,7 +27,7 @@ public class ImportOpenShiftExpressApplicationWizard extends OpenShiftExpressApp
 	 * @param project
 	 * @param application
 	 */
-	public ImportOpenShiftExpressApplicationWizard(Connection user, IProject project, IApplication application) {
+	public ImportOpenShiftApplicationWizard(Connection user, IProject project, IApplication application) {
 		super(user, project, application, true, "Import OpenShift Application");
 	}
 }

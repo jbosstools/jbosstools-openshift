@@ -75,7 +75,7 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
@@ -84,8 +84,8 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
 
 import com.openshift.client.IApplication;
@@ -96,7 +96,7 @@ import com.openshift.client.OpenShiftException;
  * @author Rob Stryker
  * @author Andre Dietisheim
  */
-public class ExpressDetailsComposite {
+public class OpenShiftServerWizardComposite {
 	// How to display errors, set attributes, etc
 	protected IServerModeUICallback callback;
 
@@ -119,7 +119,7 @@ public class ExpressDetailsComposite {
 	private IServerWorkingCopy server;
 	private Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
 
-	public ExpressDetailsComposite(Composite container, IServerModeUICallback callback) {
+	public OpenShiftServerWizardComposite(Composite container, IServerModeUICallback callback) {
 		this.callback = callback;
 		this.server = callback.getServer();
 		this.composite = container;
@@ -133,11 +133,11 @@ public class ExpressDetailsComposite {
 	}
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
-		updateModel(getConnection(callback), ExpressServerUtils.getApplication(callback));
+		updateModel(getConnection(callback), OpenShiftServerUtils.getApplication(callback));
 	}
 	
 	private Connection getConnection(IServerModeUICallback callback) {
-		Connection connection = ExpressServerUtils.getConnection(callback);
+		Connection connection = OpenShiftServerUtils.getConnection(callback);
 		if (connection == null) {
 			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 		}
@@ -150,7 +150,7 @@ public class ExpressDetailsComposite {
 		} if (!ProjectUtils.isAccessible(deployProject)) {
 			return null;
 		}
-		return ExpressServerUtils.getDefaultDeployFolder(application);
+		return OpenShiftServerUtils.getDefaultDeployFolder(application);
 	}
 
 	private void initWidgets() {
@@ -323,8 +323,8 @@ public class ExpressDetailsComposite {
 	protected SelectionAdapter onClickImport() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				OpenShiftExpressApplicationWizard wizard =
-						new ImportOpenShiftExpressApplicationWizard(connection, null, application);
+				OpenShiftApplicationWizard wizard =
+						new ImportOpenShiftApplicationWizard(connection, null, application);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 				int oldServerCount = ServerCore.getServers().length;
 				dialog.create();
@@ -476,7 +476,7 @@ public class ExpressDetailsComposite {
 	}
 
 	private void enableImportLink(IApplication application) {
-		IProject[] p = ExpressServerUtils.findProjectsForApplication(application);
+		IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 		importLink.setEnabled(p == null || p.length == 0);
 	}
 
@@ -491,7 +491,7 @@ public class ExpressDetailsComposite {
 		} else if (application == null) {
 			error = "Please select an application from the combo below.";
 		} else {
-			IProject[] p = ExpressServerUtils.findProjectsForApplication(application);
+			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 			if (p == null || p.length == 0) {
 				error = "Your workspace does not have a project corresponding to " + application.getName()
 						+ ". Please import one.";
@@ -523,7 +523,7 @@ public class ExpressDetailsComposite {
 		if (application == null) {
 			return null;
 		}
-		IProject[] projects = ExpressServerUtils.findProjectsForApplication(application);
+		IProject[] projects = OpenShiftServerUtils.findProjectsForApplication(application);
 		if (projects == null
 				|| projects.length < 1) {
 			return null;
@@ -558,7 +558,7 @@ public class ExpressDetailsComposite {
 		if (applications != null) {
 			for (int i = 0; i < applications.size(); i++) {
 				projectsByApplication.put(applications.get(i),
-						ExpressServerUtils.findProjectsForApplication(applications.get(i)));
+						OpenShiftServerUtils.findProjectsForApplication(applications.get(i)));
 			}
 		}
 		return projectsByApplication;
@@ -582,18 +582,18 @@ public class ExpressDetailsComposite {
 			deployProjectName = deployProject.getName();
 		}
 
-		ExpressServerUtils.fillServerWithOpenShiftDetails(
+		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
 				server, host, deployProjectName, deployFolder, remote, applicationName);
 	}
 
 	private void updateProjectSettings() {
-		String projRemote = ExpressServerUtils.getProjectAttribute(
-				deployProject, ExpressServerUtils.SETTING_REMOTE_NAME, null);
-		String projDepFolder = ExpressServerUtils.getProjectAttribute(
-				deployProject, ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
+		String projRemote = OpenShiftServerUtils.getProjectAttribute(
+				deployProject, OpenShiftServerUtils.SETTING_REMOTE_NAME, null);
+		String projDepFolder = OpenShiftServerUtils.getProjectAttribute(
+				deployProject, OpenShiftServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
 		if (projRemote == null 
 				&& projDepFolder == null) {
-			ExpressServerUtils.updateOpenshiftProjectSettings(
+			OpenShiftServerUtils.updateOpenshiftProjectSettings(
 					deployProject, application, connection, remote, deployFolder);
 		}
 	}

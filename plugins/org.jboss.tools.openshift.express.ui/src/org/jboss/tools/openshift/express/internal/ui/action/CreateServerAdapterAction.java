@@ -27,7 +27,7 @@ import org.eclipse.wst.server.ui.internal.wizard.fragment.ModifyModulesWizardFra
 import org.eclipse.wst.server.ui.internal.wizard.fragment.NewServerWizardFragment;
 import org.eclipse.wst.server.ui.internal.wizard.fragment.TasksWizardFragment;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -63,14 +63,14 @@ public class CreateServerAdapterAction extends AbstractOpenShiftAction {
 			if (application == null) {
 				return;
 			}
-			NewServerWizard w = new NewServerWizard(ExpressServerUtils.OPENSHIFT_SERVER_TYPE);
-			ExpressServerUtils.put(application, w.getTaskModel());
+			NewServerWizard w = new NewServerWizard(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE);
+			OpenShiftServerUtils.put(application, w.getTaskModel());
 			final IDomain domain = application.getDomain();
-			ExpressServerUtils.put(domain, w.getTaskModel());
+			OpenShiftServerUtils.put(domain, w.getTaskModel());
 			final IUser user = domain.getUser();
 			Assert.isNotNull(user, NLS.bind("application {0} does not reference any user", application.getName()));
 			Connection connection = OpenShiftExplorerUtils.getConnectionFor(treeSelection);
-			ExpressServerUtils.put(connection, w.getTaskModel());
+			OpenShiftServerUtils.put(connection, w.getTaskModel());
 			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), w);
 			dialog.open();
 		} catch (OpenShiftException e) {

@@ -35,7 +35,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -255,8 +255,8 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		// This is our project
 		IApplication app = getApplication();
 		// Add the settings here!
-		ExpressServerUtils.updateOpenshiftProjectSettings(
-				project, app, getUser(), getRemoteName(), ExpressServerUtils.getDefaultDeployFolder(app));
+		OpenShiftServerUtils.updateOpenshiftProjectSettings(
+				project, app, getUser(), getRemoteName(), OpenShiftServerUtils.getDefaultDeployFolder(app));
 		return (IResource) project.getFolder(".settings");
 	}
 

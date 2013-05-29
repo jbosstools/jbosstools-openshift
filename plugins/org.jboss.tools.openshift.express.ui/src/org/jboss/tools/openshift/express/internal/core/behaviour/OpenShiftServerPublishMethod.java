@@ -49,32 +49,32 @@ import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 /**
  * @author Rob Stryker
  */
-public class ExpressPublishMethod implements IJBossServerPublishMethod {
+public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 
 	@Override
 	public void publishStart(final IDeployableServerBehaviour behaviour, final IProgressMonitor monitor) throws CoreException {
-		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		String destProjName = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
 		IProject magicProject = destProjName == null ? 
 				null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if (magicProject == null || !magicProject.isAccessible()) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					OpenShiftUIActivator.PLUGIN_ID,
-					NLS.bind(ExpressMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
+					NLS.bind(OpenShiftServerMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
 		}
 	}
 
 	@Override
 	public int publishFinish(IDeployableServerBehaviour behaviour, IProgressMonitor monitor) throws CoreException {
 
-		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		String destProjName = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		boolean allSubModulesPublished = areAllPublished(behaviour);
 
 		if (destProj != null 
 				&& destProj.exists()) {
 		
-			String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-			IContainer destFolder = ExpressServerUtils.getDeployFolderResource(destinationFolder, destProj);
+			String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
+			IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 			
 			if (allSubModulesPublished 
 					|| (destFolder != null && destFolder.isAccessible())) {
@@ -107,7 +107,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 
 		// Magic Project
-		String destProjName = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		String destProjName = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
 		if (isInDestProjectTree(destProjName, module))
 			return IServer.PUBLISH_STATE_NONE;
 
@@ -158,13 +158,13 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 
 	protected IContainer getDestination(IDeployableServerBehaviour behaviour, IProject destProj) throws CoreException {
-		String destinationFolder = ExpressServerUtils.getExpressDeployFolder(behaviour.getServer());
-		IContainer destFolder = ExpressServerUtils.getDeployFolderResource(destinationFolder, destProj);
+		String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
+		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 ;
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
 			throw new CoreException(OpenShiftUIActivator.createErrorStatus(NLS.bind(
-					ExpressMessages.publishFailMissingFolder,
+					OpenShiftServerMessages.publishFailMissingFolder,
 					behaviour.getServer().getName(),
 					createMissingPath(destProj, destinationFolder, destFolder))));
 		}
@@ -201,11 +201,11 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 			IProgressMonitor monitor) throws CoreException {
 
 		PushOperationResult result = null;
-		int changes = ExpressServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
+		int changes = OpenShiftServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
 		if (changes > 0) {
 			if (requestApproval(
-					NLS.bind(ExpressMessages.commitAndPushMsg, changes, p.getName()),
-					NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
+					NLS.bind(OpenShiftServerMessages.commitAndPushMsg, changes, p.getName()),
+					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
 				displayConsoleView(behaviour.getServer());
@@ -214,18 +214,18 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 		} else {
 			try {
 				String openShiftRemoteName =
-						ExpressServerUtils.getExpressRemoteName(behaviour.getServer());
+						OpenShiftServerUtils.getExpressRemoteName(behaviour.getServer());
 				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
 					if (requestApproval(
-							NLS.bind(ExpressMessages.noChangesPushAnywayMsg, p.getName()),
-							NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
+							NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, p.getName()),
+							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
 						displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				} else {
 					if (requestApproval(
-							NLS.bind(ExpressMessages.pushCommitsMsg, p.getName()),
-							NLS.bind(ExpressMessages.publishTitle, p.getName()))) {
+							NLS.bind(OpenShiftServerMessages.pushCommitsMsg, p.getName()),
+							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
 						displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
@@ -249,7 +249,7 @@ public class ExpressPublishMethod implements IJBossServerPublishMethod {
 	}
 	
 	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
-		String remoteName = ExpressServerUtils.getExpressRemoteName(server.createWorkingCopy());
+		String remoteName = OpenShiftServerUtils.getExpressRemoteName(server.createWorkingCopy());
 		Repository repository = EGitUtils.getRepository(project);
 		try {
 			monitor.beginTask("Publishing " + project.getName(), 200);

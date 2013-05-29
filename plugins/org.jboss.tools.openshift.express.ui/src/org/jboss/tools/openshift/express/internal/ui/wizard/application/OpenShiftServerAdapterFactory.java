@@ -32,7 +32,7 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.client.IApplication;
@@ -42,12 +42,12 @@ import com.openshift.client.OpenShiftException;
  * @author Rob Stryker
  * @author André Dietisheim
  */
-public class ServerAdapterFactory {
+public class OpenShiftServerAdapterFactory {
 
-	ServerAdapterFactory() {
+	OpenShiftServerAdapterFactory() {
 	}
 
-	public IServer create(IProject project, IOpenShiftExpressWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
+	public IServer create(IProject project, IOpenShiftWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
 		return createAdapterAndModules(project, wizardModel.getServerType(), wizardModel.getRuntime(),  
 				wizardModel.getApplication(), wizardModel.getRemoteName(), monitor);
 	}
@@ -97,8 +97,8 @@ public class ServerAdapterFactory {
 		String serverNameBase = application.getName() + " at OpenShift";
 		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);
 
-		IServer server = ExpressServerUtils.createServer(rt, serverType, serverName);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(
+		IServer server = OpenShiftServerUtils.createServer(rt, serverType, serverName);
+		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
 				server, application.getApplicationUrl(), deployProject, remoteName, application);
 		return server;
 	}

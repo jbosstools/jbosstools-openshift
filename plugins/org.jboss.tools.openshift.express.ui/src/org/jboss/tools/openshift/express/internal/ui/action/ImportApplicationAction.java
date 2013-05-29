@@ -19,8 +19,8 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftExpressApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
 
 import com.openshift.client.IApplication;
 
@@ -42,7 +42,7 @@ public class ImportApplicationAction extends AbstractOpenShiftAction {
 		}
 		final Connection connection = OpenShiftExplorerUtils.getConnectionFor(getSelection());
 		final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(application.getName());
-		OpenShiftExpressApplicationWizard wizard = new ImportOpenShiftExpressApplicationWizard(connection, project,
+		OpenShiftApplicationWizard wizard = new ImportOpenShiftApplicationWizard(connection, project,
 				application);
 		WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 		dialog.create();

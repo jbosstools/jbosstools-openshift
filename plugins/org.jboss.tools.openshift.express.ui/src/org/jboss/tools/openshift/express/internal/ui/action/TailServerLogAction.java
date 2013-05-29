@@ -39,7 +39,7 @@ import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.ExpressServerUtils;
+import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
@@ -118,9 +118,9 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	}
 
 	private void run(final IServer server) {
-		if (ExpressServerUtils.isOpenShiftRuntime(server) || ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
+		if (OpenShiftServerUtils.isOpenShiftRuntime(server) || OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
 			final String host = server.getHost();
-			final IApplication app = ExpressServerUtils.getApplication(server);
+			final IApplication app = OpenShiftServerUtils.getApplication(server);
 			if (app == null) {
 				OpenShiftUIActivator.log(
 						OpenShiftUIActivator

@@ -28,7 +28,7 @@ import org.jboss.ide.eclipse.as.core.util.LaunchCommandPreferences;
 /**
  * @author Rob Stryker
  */
-public class ExpressLaunchDelegate implements IJBossLaunchDelegate {
+public class OpenShiftServerLaunchDelegate implements IJBossLaunchDelegate {
 
 	@Override
 	public void actualLaunch(LaunchConfigurationDelegate launchConfig,

@@ -16,7 +16,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
  * @author Xavier Coulon
  *
  */
-public class NewOpenShiftExpressApplicationWizard extends OpenShiftExpressApplicationWizard {
+public class NewOpenShiftExpressApplicationWizard extends OpenShiftApplicationWizard {
 
 	/**
 	 * Constructor

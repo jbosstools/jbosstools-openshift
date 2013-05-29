@@ -29,13 +29,13 @@ import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 /**
  * @author Rob Stryker
  */
-public class ExpressBinaryPublishMethod extends ExpressPublishMethod {
+public class OpenShiftServerBinaryPublishMethod extends OpenShiftServerPublishMethod {
 
 	@Override
 	public int publishFinish(IDeployableServerBehaviour behaviour,
 			IProgressMonitor monitor) throws CoreException {
 
-		String outProject = ExpressServerUtils.getExpressDeployProject(behaviour.getServer());
+		String outProject = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
 		if( outProject != null ) {
 			final IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(outProject);
 			if( destProj.exists() ) {
