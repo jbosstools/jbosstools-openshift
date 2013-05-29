@@ -399,10 +399,20 @@ public class ExpressServerUtils {
 	}
 
 	protected static void setName(IServerWorkingCopy wc, String appName) {
-		if (StringUtils.isEmpty(wc.getName())
+		if ((StringUtils.isEmpty(wc.getName())
+				|| isDefaultName(wc.getName()))
 				&& !StringUtils.isEmpty(appName)) {
 			wc.setName(ServerUtil.getDefaultServerName(appName + " at OpenShift"));
 		}
+	}
+	
+	public static boolean isDefaultName(String serverName) {
+		if (StringUtils.isEmpty(serverName)) {
+			return false;
+		}
+
+		return serverName.equals(ExpressServer.DEFAULT_SERVER_NAME_BASE)
+				|| serverName.startsWith(ExpressServer.DEFAULT_SERVER_NAME_BASE);
 	}
 	
 	protected static String getHost(String url) {
