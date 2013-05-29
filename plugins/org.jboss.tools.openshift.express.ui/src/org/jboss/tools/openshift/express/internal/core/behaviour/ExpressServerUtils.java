@@ -399,7 +399,8 @@ public class ExpressServerUtils {
 	}
 
 	protected static void setName(IServerWorkingCopy wc, String appName) {
-		if (!StringUtils.isEmpty(appName)) {
+		if (StringUtils.isEmpty(wc.getName())
+				&& !StringUtils.isEmpty(appName)) {
 			wc.setName(ServerUtil.getDefaultServerName(appName + " at OpenShift"));
 		}
 	}
