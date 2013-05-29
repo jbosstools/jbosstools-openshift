@@ -4,7 +4,6 @@
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
 		<version>4.1.0.Alpha1-SNAPSHOT</version>
-		<relativePath>../jbosstools-build/parent/pom.xml</relativePath>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>openshift</artifactId>
