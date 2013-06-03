@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
@@ -61,6 +62,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -71,11 +73,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -106,10 +110,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Button browseAppsButton;
 	private Group newAppConfigurationGroup;
 	private Text newAppNameText;
-	private Combo newAppCartridgeCombo;
-	private Button enableScalingButton;
-	private Combo gearProfilesCombo;
-	private Group newAppEmbeddableCartridgesGroup;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
 
@@ -283,7 +283,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		newAppTypeLabel.setText("Type:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(newAppTypeLabel);
-		this.newAppCartridgeCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
+		Combo newAppCartridgeCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(newAppCartridgeCombo);
 
@@ -308,7 +308,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		gearProfileLabel.setText("Gear profile:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).applyTo(gearProfileLabel);
-		this.gearProfilesCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
+		Combo gearProfilesCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(gearProfilesCombo);
 		dbc.bindList(WidgetProperties.items().observe(gearProfilesCombo),
@@ -343,10 +343,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.in(dbc);
 
 		// scaling
-		this.enableScalingButton = new Button(newAppConfigurationGroup, SWT.CHECK);
+		Button enableScalingButton = new Button(newAppConfigurationGroup, SWT.CHECK);
 		enableScalingButton.setText("Enable scaling");
-		IObservableValue enableScalingModelObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_SCALE).observe(pageModel);
+		IObservableValue enableScalingModelObservable =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_SCALE)
+						.observe(pageModel);
 		final IObservableValue enableScalingButtonSelection = WidgetProperties.selection().observe(enableScalingButton);
 		ValueBindingBuilder
 				.bind(enableScalingButtonSelection).converting(new BooleanToApplicationScaleConverter())
@@ -360,15 +361,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new RequiredControlDecorationUpdater());
 
 		// embeddable cartridges
-		this.newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
+		Group newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
 		newAppEmbeddableCartridgesGroup.setText("Embeddable Cartridges");
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1)
-				.applyTo(newAppEmbeddableCartridgesGroup);
+		GridDataFactory.fillDefaults()
+				.grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1).applyTo(newAppEmbeddableCartridgesGroup);
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(newAppEmbeddableCartridgesGroup);
 
 		Composite tableContainer = new Composite(newAppEmbeddableCartridgesGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250)
-				.applyTo(tableContainer);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250).applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
@@ -388,13 +389,104 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		this.uncheckAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
 		uncheckAllButton.setText("&Deselect All");
 		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).grab(false, true).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
+				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
 
-		// bottom filler
-		Composite spacer = new Composite(newAppConfigurationGroup, SWT.NONE);
+		// initial git url
+		createAdvancedGroup(newAppConfigurationGroup, dbc);
+	}
+
+	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
+		// advanced button
+		Button advancedButton = new Button(parent, SWT.NONE);
+		advancedButton.setText(" Advanced >> ");
 		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(spacer);
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(advancedButton);
+
+		// advanced composite
+		Composite advancedComposite = new Composite(parent, SWT.NONE);
+		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).create();
+		advancedComposite.setLayoutData(advancedCompositeGridData);
+		GridLayoutFactory.fillDefaults().applyTo(advancedComposite);
+
+		// source group
+		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
+		sourceGroup.setText("Source Code");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).margins(6, 6).applyTo(sourceGroup);
+
+		// use default source checkbox
+		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
+		useDefaultSourceButton.setText("Use default source code");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
+		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
+		ValueBindingBuilder
+				.bind(defaultSourceCodeObservable)
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.in(dbc);
+
+		// source code text
+		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
+		sourceCodeUrlLabel.setText("Source code:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
+		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceUrlText))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
+		ValueBindingBuilder
+				.bind(sourcecodeUrlObservable)
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
+				.in(dbc);
+
+		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable, sourcecodeUrlObservable);
+		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
+		ControlDecorationSupport.create(
+				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
+		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, getShell(), false);
+		advancedButton.addSelectionListener(onAdvancedClicked(advancedButton, toggleAdapter, sourceUrlText));
+		
+		// explanation
+		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
+		sourceCodeExplanationText
+				.setText("Your application will start with an exact copy of the code and configuration "
+						+ "provided in this Git repository. OpenShift may expect certain files to exist in "
+						+ "certain directories, which may require you to update your repository after creation.");
+		sourceCodeExplanationText.setEnabled(false);
+		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
+	}
+
+	private SelectionListener onAdvancedClicked(final Button toggleButton, final DialogChildToggleAdapter adapter,
+			final Text sourceUrlText) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (adapter.isVisible()) {
+					toggleButton.setText(" << Advanced ");
+				} else {
+					toggleButton.setText(" Advanced >> ");
+				}
+				sourceUrlText.setEnabled(!pageModel.isDefaultSourcecode());
+				adapter.toggle();
+			}
+		};
 	}
 
 	/**
@@ -446,7 +538,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}, newAppConfigurationGroup);
 	}
 
-	protected CheckboxTableViewer createTable(Composite tableContainer) {
+	private CheckboxTableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setLinesVisible(true);
@@ -456,8 +548,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		viewer.setSorter(new ViewerSorter() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
-					return ((IEmbeddableCartridge) e1).getDisplayName().compareTo(((IEmbeddableCartridge) e2).getDisplayName());
+				if (e1 instanceof IEmbeddableCartridge
+						&& e2 instanceof IEmbeddableCartridge) {
+					return ((IEmbeddableCartridge) e1).getDisplayName().compareTo((
+							(IEmbeddableCartridge) e2).getDisplayName());
 				}
 				return super.compare(viewer, e1, e2);
 			}
@@ -720,7 +814,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private boolean ensureHasSSHKeys() {
 		try {
 			final Connection connection = pageModel.getConnection();
-			if (connection == null 
+			if (connection == null
 					|| connection.hasSSHKeys()) {
 				return true;
 			}
@@ -753,7 +847,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load applications, cartridges and gears", e);
+						return OpenShiftUIActivator.createErrorStatus(
+								"Could not load applications, cartridges and gears", e);
 					}
 				}
 			}, getContainer(), dbc);
@@ -852,7 +947,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			return ValidationStatus.ok();
 		}
-		
+
 		@Override
 		public IObservableList getTargets() {
 			WritableList targets = new WritableList();
@@ -891,6 +986,46 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.cancel(getDescription());
 			}
 			return ValidationStatus.ok();
+		}
+	}
+
+	static class SourceCodeUrlValidator extends MultiValidator {
+
+		private static final Pattern PROTO_GITURI_PATTERN =
+				Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
+		private IObservableValue defaultSourcecodeObservable;
+		private IObservableValue sourcecodeUrlObservable;
+
+		public SourceCodeUrlValidator(IObservableValue defaultSourcecodeObservable,
+				IObservableValue sourcecodeUrlObservable) {
+			this.defaultSourcecodeObservable = defaultSourcecodeObservable;
+			this.sourcecodeUrlObservable = sourcecodeUrlObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			if (Boolean.TRUE.equals(defaultSourcecodeObservable.getValue())) {
+				return ValidationStatus.ok();
+			}
+
+			Object value = sourcecodeUrlObservable.getValue();
+			if (value instanceof String) {
+				String gitUri = (String) value;
+				if (StringUtils.isEmpty(gitUri)) {
+					return ValidationStatus.cancel("Please provide a git url for your source code");
+				}
+				if (PROTO_GITURI_PATTERN.matcher(gitUri).matches()) {
+					return ValidationStatus.ok();
+				}
+			}
+			return ValidationStatus.error("You have to provide a valid git url.");
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(sourcecodeUrlObservable);
+			return targets;
 		}
 	}
 

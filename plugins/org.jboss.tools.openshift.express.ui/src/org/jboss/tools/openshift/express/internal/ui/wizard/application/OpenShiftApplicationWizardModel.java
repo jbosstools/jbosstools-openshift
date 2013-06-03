@@ -463,6 +463,16 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	}
 
 	@Override
+	public String getInitialGitUrl() {
+		return (String) getProperty(PROP_INITIAL_GITURL);
+	}
+	
+	@Override
+	public String setInitialGitUrl(String initialGitUrl) {
+		return (String) setProperty(PROP_INITIAL_GITURL, initialGitUrl);
+	}
+
+	@Override
 	public boolean hasConnection() {
 		return getConnection() != null;
 	}

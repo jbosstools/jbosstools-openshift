@@ -12,6 +12,9 @@ package org.jboss.tools.openshift.express.internal.ui.databinding;
 
 import org.eclipse.core.databinding.conversion.Converter;
 
+/**
+ * @author Andre Dietisheim
+ */
 public class TrimmingStringConverter extends Converter {
 
 	public TrimmingStringConverter() {

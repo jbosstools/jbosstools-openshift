@@ -267,4 +267,9 @@ public class NoopApplicationFake implements IApplication {
 	public Message getMessage(String field) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String getInitialGitUrl() {
+		throw new UnsupportedOperationException();
+	}
 }

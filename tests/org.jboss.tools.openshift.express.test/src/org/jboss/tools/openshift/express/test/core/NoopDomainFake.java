@@ -145,5 +145,17 @@ public class NoopDomainFake implements IDomain {
 	public Message getMessage(String field) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public IApplication createApplication(String name, IStandaloneCartridge cartridge, String initialGitUrl)
+			throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IApplication createApplication(String name, IStandaloneCartridge cartridge, ApplicationScale scale,
+			IGearProfile gearProfile, String initialGitUrl) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
 	
 }

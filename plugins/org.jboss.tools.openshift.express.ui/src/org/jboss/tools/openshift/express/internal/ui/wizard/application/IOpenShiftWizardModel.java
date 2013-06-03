@@ -50,6 +50,7 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
 	public static final String PROP_APPLICATION_SCALE = "applicationScale";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
+	public static final String PROP_INITIAL_GITURL = "initialGitUrl";
 	public static final String PROP_REMOTE_NAME = "remoteName";
 	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
 	public static final String PROP_PROJECT_NAME = "projectName";
@@ -210,8 +211,12 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public ApplicationScale getApplicationScale();
 
-	public ApplicationScale setApplicationScale(final ApplicationScale scale);
+	public ApplicationScale setApplicationScale(ApplicationScale scale);
 
+	public String getInitialGitUrl();
+	
+	public String setInitialGitUrl(String initialGitUrl);
+	
 	public IProject getProject();
 
 	public IServer createServerAdapter(IProgressMonitor monitor) throws OpenShiftException;
