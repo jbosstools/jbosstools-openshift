@@ -189,5 +189,9 @@ public class UIUtils {
 	public static boolean isSingleSelection(ISelection selection) {
 		return areNumOfElementsSelected(1, selection);
 	}
+	
+	public static void copyBackground(Control source, Control destination) {
+		destination.setBackground(source.getBackground());
+	}
 
 }

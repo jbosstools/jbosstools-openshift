@@ -53,6 +53,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_EXISTING_APPLICATIONS_LOADED = "existingApplicationsLoaded";
 	public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
 	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
+	public static final String PROPERTY_DEFAULT_SOURCECODE = "defaultSourcecode";
+	public static final String PROPERTY_INITIAL_GITURL = "initialGitUrl";
 
 	private final OpenShiftApplicationWizardModel wizardModel;
 
@@ -65,8 +67,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
-
-	public ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel)
+	private boolean defaultSourcecode = true;
+	
+	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel)
 			throws OpenShiftException {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
@@ -442,4 +445,26 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		setSelectedEmbeddableCartridges(wizardModel.getSelectedEmbeddableCartridges());
 	}
 	
+	public boolean isDefaultSourcecode() {
+		return defaultSourcecode;
+	}
+
+	public void setDefaultSourcecode(boolean defaultSourcecode) {
+		resetInitialGitUrl();
+		firePropertyChange(PROPERTY_DEFAULT_SOURCECODE, this.defaultSourcecode, this.defaultSourcecode = defaultSourcecode);
+	}
+	
+	public String getInitialGitUrl() {
+		return wizardModel.getInitialGitUrl();
+	}
+	
+	public void setInitialGitUrl(String initialGitUrl) {
+		firePropertyChange(PROPERTY_INITIAL_GITURL, 
+				wizardModel.getInitialGitUrl(),
+				wizardModel.setInitialGitUrl(initialGitUrl));
+	}
+	
+	public void resetInitialGitUrl() {
+		setInitialGitUrl(null);
+	}
 }

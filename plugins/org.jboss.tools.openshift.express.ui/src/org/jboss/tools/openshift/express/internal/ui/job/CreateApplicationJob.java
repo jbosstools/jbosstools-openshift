@@ -42,14 +42,21 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	private IGearProfile gear;
 	private IApplication application;
 	private IDomain domain;
+	private String initialGitUrl;
 	
 	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
 			final IGearProfile gear, IDomain domain) {
+		this(name, cartridge, scale, gear, null, domain);
+	}
+
+	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
+			final IGearProfile gear, String initialGitUrl, IDomain domain) {
 		super(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
 		this.name = name;
 		this.cartridge = cartridge;
 		this.scale = scale;
 		this.gear = gear;
+		this.initialGitUrl = initialGitUrl;
 		this.domain = domain;
 	}
 
@@ -57,7 +64,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			try {
-				this.application = domain.createApplication(name, cartridge, scale, gear);
+				this.application = domain.createApplication(name, cartridge, scale, gear, initialGitUrl);
 				return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
