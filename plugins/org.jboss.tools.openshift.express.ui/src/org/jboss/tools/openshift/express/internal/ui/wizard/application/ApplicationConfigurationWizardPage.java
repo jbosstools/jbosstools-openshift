@@ -435,6 +435,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		sourceCodeUrlLabel.setText("Source code:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceCodeUrlLabel))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+		.converting(new InvertingBooleanConverter())
+		.in(dbc);
 		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
@@ -458,14 +465,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
 		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, getShell(), false);
-		advancedButton.addSelectionListener(onAdvancedClicked(advancedButton, toggleAdapter, sourceUrlText));
+		advancedButton.addSelectionListener(onAdvancedClicked(advancedButton, toggleAdapter, sourceUrlText, sourceCodeUrlLabel));
 		
 		// explanation
 		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
 		sourceCodeExplanationText
 				.setText("Your application will start with an exact copy of the code and configuration "
-						+ "provided in this Git repository. OpenShift may expect certain files to exist in "
-						+ "certain directories, which may require you to update your repository after creation.");
+						+ "provided in this Git repository instead of the default application.");
 		sourceCodeExplanationText.setEnabled(false);
 		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
 		GridDataFactory.fillDefaults()
@@ -473,17 +479,18 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	private SelectionListener onAdvancedClicked(final Button toggleButton, final DialogChildToggleAdapter adapter,
-			final Text sourceUrlText) {
+			final Text sourceUrlText, final Label sourceCodeUrlLabel) {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (adapter.isVisible()) {
+				if (!adapter.isVisible()) {
 					toggleButton.setText(" << Advanced ");
 				} else {
 					toggleButton.setText(" Advanced >> ");
 				}
 				sourceUrlText.setEnabled(!pageModel.isDefaultSourcecode());
+				sourceCodeUrlLabel.setEnabled(!pageModel.isDefaultSourcecode());
 				adapter.toggle();
 			}
 		};
