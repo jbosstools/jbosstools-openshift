@@ -42,9 +42,21 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void refreshViewer() {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				if (!DisposeUtils.isDisposed(getCommonViewer())) {
-					getCommonViewer().refresh();
+				if (DisposeUtils.isDisposed(getCommonViewer())) { 
+					return;
 				}
+				getCommonViewer().refresh();
+			}
+		});
+	}
+
+	public void refreshViewer(final Connection connection) {
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				if (DisposeUtils.isDisposed(getCommonViewer())) {
+					return;
+				}
+				getCommonViewer().refresh(connection);
 			}
 		});
 	}
