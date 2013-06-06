@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -23,6 +24,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
 
@@ -38,8 +40,8 @@ import com.openshift.client.OpenShiftException;
 public class MergeIntoUnsharedProject extends AbstractImportApplicationOperation {
 
 	public MergeIntoUnsharedProject(String projectName, IApplication application, String remoteName,
-			Connection user) {
-		super(projectName, application, remoteName, user);
+			List<IOpenShiftMarker> markers, Connection connection) {
+		super(projectName, application, remoteName, markers, connection);
 	}
 
 	/**
@@ -94,9 +96,10 @@ public class MergeIntoUnsharedProject extends AbstractImportApplicationOperation
 		setupGitIgnore(project, monitor);
 		setupOpenShiftMavenProfile(project, monitor);
 		addSettingsFile(project, monitor);
+		setupMarkers(project, monitor);
 		shareProject(project, monitor);
-		addRemoteRepo(getRemoteName(), getApplication().getGitUrl(), EGitUtils.getRepository(project));
-
+		addRemote(getRemoteName(), getApplication().getGitUrl(), project);
+		
 		return project;
 	}
 

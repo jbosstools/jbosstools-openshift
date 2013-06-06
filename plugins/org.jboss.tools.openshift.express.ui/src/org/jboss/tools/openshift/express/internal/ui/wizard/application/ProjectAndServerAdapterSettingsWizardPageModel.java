@@ -27,11 +27,14 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	/** whether this is a new project or not. */
 	public static final String PROPERTY_IS_NEW_PROJECT = "newProject";
 
-	/** The project name, whether it is a new one or not. */
+	/** the project name */
 	public static final String PROPERTY_PROJECT_NAME = "projectName";
 
 	/** whether this a server adapter should be created, or not. */
 	public static final String PROPERTY_CREATE_SERVER_ADAPTER = "createServerAdapter";
+
+	/** whether we create a skip maven build marker */
+	public static final String PROPERTY_SKIP_MAVEN_BUILD = "skipMavenBuild";
 
 	private IOpenShiftWizardModel wizardModel;
 
@@ -65,21 +68,32 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 		return wizardModel.isNewProject();
 	}
 
-	public void setCreateServerAdapter(boolean createServerAdapter) {
-		firePropertyChange(PROPERTY_CREATE_SERVER_ADAPTER, wizardModel.isCreateServerAdapter(),
-				wizardModel.setCreateServerAdapter(createServerAdapter));
-	}
-
-	public boolean isCreateServerAdapter() {
-		return wizardModel.isCreateServerAdapter();
-	}
-
 	public void setProjectName(String projectName) {
 		firePropertyChange(PROPERTY_PROJECT_NAME, wizardModel.getProjectName(), wizardModel.setProjectName(projectName));
 	}
 
 	public String getProjectName() {
 		return wizardModel.getProjectName();
+	}
+
+	public void setCreateServerAdapter(boolean createServerAdapter) {
+		firePropertyChange(
+				PROPERTY_CREATE_SERVER_ADAPTER,
+				wizardModel.isCreateServerAdapter(), wizardModel.setCreateServerAdapter(createServerAdapter));
+	}
+
+	public boolean isCreateServerAdapter() {
+		return wizardModel.isCreateServerAdapter();
+	}
+
+	public void setSkipMavenBuild(boolean skipMavenBuild) {
+		firePropertyChange(
+				PROPERTY_SKIP_MAVEN_BUILD,
+				wizardModel.isSkipMavenBuild(), wizardModel.setSkipMavenBuild(skipMavenBuild));
+	}
+
+	public boolean isSkipMavenBuild() {
+		return wizardModel.isSkipMavenBuild();
 	}
 
 	public String getApplicationName() {

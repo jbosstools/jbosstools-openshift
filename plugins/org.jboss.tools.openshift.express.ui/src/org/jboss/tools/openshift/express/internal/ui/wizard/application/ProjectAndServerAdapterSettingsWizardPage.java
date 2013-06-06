@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -41,12 +38,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -82,29 +79,29 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	private Composite createProjectGroup(Composite parent, DataBindingContext dbc) {
 		Composite projectGroup = new Composite(parent, SWT.NONE);
 		// projectGroup.setText("Project");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(projectGroup);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(projectGroup);
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(projectGroup);
 
 		// new project checkbox
 		Button newProjectRadioBtn = new Button(projectGroup, SWT.CHECK);
 		newProjectRadioBtn.setText("Create a new project");
 		newProjectRadioBtn
-		.setToolTipText("The OpenShift application code will be pulled into the newly created project or merged into the selected one.");
+				.setToolTipText("The OpenShift application code will be pulled into the newly created project or merged into the selected one.");
 		newProjectRadioBtn.setFocus();
-		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
-				.applyTo(newProjectRadioBtn);
+		GridDataFactory.fillDefaults()
+				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(newProjectRadioBtn);
 		final IObservableValue newProjectObservable = BeanProperties.value(
 				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_IS_NEW_PROJECT).observe(pageModel);
-		final ISWTObservableValue newProjectRadioBtnSelection = WidgetProperties.selection()
-				.observe(newProjectRadioBtn);
+		final ISWTObservableValue newProjectRadioBtnSelection = 
+				WidgetProperties.selection().observe(newProjectRadioBtn);
 		dbc.bindValue(newProjectRadioBtnSelection, newProjectObservable);
 
 		// existing project
 		Label existingProjectLabel = new Label(projectGroup, SWT.NONE);
 		existingProjectLabel.setText("Use existing project:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(false, false)
-		.indent(10, 0).applyTo(existingProjectLabel);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(false, false).indent(10, 0).applyTo(existingProjectLabel);
 
 		existingProjectNameText = new Text(projectGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
@@ -136,7 +133,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		AutoCompleteField adapter = new AutoCompleteField(existingProjectNameText, new TextContentAdapter(),
 				new String[] {});
 
-		adapter.setProposals(getOpenProjectsInWorkspace());
+		adapter.setProposals(ProjectUtils.getAllOpenedProjects());
 
 		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
 		browseProjectsButton.setText("Browse...");
@@ -154,16 +151,6 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
 		return projectGroup;
-	}
-
-	private String[] getOpenProjectsInWorkspace() {
-		List<String> projects = new ArrayList<String>();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (project.exists() && project.isOpen()) {
-				projects.add(project.getName());
-			}
-		}
-		return projects.toArray(new String[projects.size()]);
 	}
 
 	/**
@@ -188,29 +175,40 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		};
 	}
 
-	private Group createServerAdapterGroup(Composite container, DataBindingContext dbc) {
-		Group serverAdapterGroup = new Group(container, SWT.NONE);
-		serverAdapterGroup.setText("Server Adapter");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(serverAdapterGroup);
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(serverAdapterGroup);
+	private void createServerAdapterGroup(Composite parent, DataBindingContext dbc) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
+		GridLayoutFactory.fillDefaults()
+				.spacing(12, 8).margins(6, 6).applyTo(container);
 
-		Composite c = new Composite(serverAdapterGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(c);
-		GridLayoutFactory.fillDefaults().numColumns(3).spacing(12, 8).applyTo(c);
-
-		final Button serverAdapterCheckbox = new Button(c, SWT.CHECK);
+		// create server adapter checkbox
+		final Button serverAdapterCheckbox = new Button(container, SWT.CHECK);
 		serverAdapterCheckbox.setText("Create and set up a server for easy publishing");
 		serverAdapterCheckbox
 				.setToolTipText("This Server Adapter will let you publish your local changes onto OpenShift, right from your Eclipse workbench.");
-		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(serverAdapterCheckbox);
-		final IObservableValue serverAdapterCheckboxObservable = WidgetProperties.selection().observe(
-				serverAdapterCheckbox);
-		final IObservableValue serverAdapterModelObservable = BeanProperties.value(
-				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_CREATE_SERVER_ADAPTER).observe(pageModel);
-		ValueBindingBuilder.bind(serverAdapterCheckboxObservable).to(serverAdapterModelObservable).in(dbc);
-		return serverAdapterGroup;
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(serverAdapterCheckbox);
+		ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(serverAdapterCheckbox))
+				.to(BeanProperties
+						.value(ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_CREATE_SERVER_ADAPTER)
+						.observe(pageModel))
+				.in(dbc);
+
+		// disable maven build
+		final Button skipMavenBuildCheckbox = new Button(container, SWT.CHECK);
+		skipMavenBuildCheckbox.setText("Disable automatic maven build when pushing to OpenShift");
+		skipMavenBuildCheckbox
+				.setToolTipText("Configures the project to not get built when pushed to OpenShift.");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(skipMavenBuildCheckbox);
+		ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(skipMavenBuildCheckbox))
+				.to(BeanProperties
+						.value(ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_SKIP_MAVEN_BUILD)
+						.observe(pageModel))
+				.in(dbc);
 	}
 
 	private WorkingSetGroup createWorkingSetGroup(Composite container, DataBindingContext dbc) {

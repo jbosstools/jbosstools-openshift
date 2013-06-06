@@ -57,6 +57,7 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public static final String PROP_MERGE_URI = "mergeUri";
 	public static final String PROP_RUNTIME_DELEGATE = "runtimeDelegate";
 	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
+	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
 	public static final String PROP_SERVER_TYPE = "serverType";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
 	
@@ -182,6 +183,12 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter);
 
+	public boolean isCreateServerAdapter();
+
+	public Boolean setSkipMavenBuild(Boolean binaryDeploy);
+
+	public boolean isSkipMavenBuild();
+
 	public String getProjectName();
 
 	public String setMergeUri(String mergeUri);
@@ -189,8 +196,6 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public String getMergeUri();
 
 	public IRuntime getRuntime();
-
-	public boolean isCreateServerAdapter();
 
 	public IServerType getServerType();
 

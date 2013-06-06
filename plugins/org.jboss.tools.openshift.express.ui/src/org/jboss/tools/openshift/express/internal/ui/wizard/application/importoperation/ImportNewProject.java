@@ -28,6 +28,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project.MavenProjectImportOperation;
@@ -43,8 +44,8 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	private File cloneDestination;
 
 	public ImportNewProject(String projectName, IApplication application, String remoteName,
-			File cloneDestination, Connection user) {
-		super(projectName, application, remoteName, user);
+			File cloneDestination, List<IOpenShiftMarker> markers, Connection connection) {
+		super(projectName, application, remoteName, markers, connection);
 		this.cloneDestination = cloneDestination;
 	}
 
@@ -80,6 +81,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		IProject project = getSettingsProject(importedProjects);
 		addToModified(setupGitIgnore(project, monitor));
 		addSettingsFile(project, monitor);
+		addToModified(setupMarkers(project, monitor));
 		addAndCommitModifiedResource(project, monitor);
 		return getSettingsProject(importedProjects);
 	}
