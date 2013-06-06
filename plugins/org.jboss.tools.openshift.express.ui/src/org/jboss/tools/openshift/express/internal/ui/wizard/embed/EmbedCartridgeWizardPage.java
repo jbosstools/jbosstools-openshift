@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
@@ -133,7 +134,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void update(ViewerCell cell) {
 				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) cell.getElement();
-				cell.setText(cartridge.getDisplayName());
+				cell.setText(OpenShiftResourceUtils.toString(cartridge));
 			}
 		}, viewer, tableLayout);
 		return viewer;

@@ -81,6 +81,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
@@ -566,12 +567,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
-		createTableColumn("Embeddable Cartridge", 1, new CellLabelProvider() {
+		createTableColumn("Name", 1, new CellLabelProvider() {
 
 			@Override
 			public void update(ViewerCell cell) {
 				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) cell.getElement();
-				cell.setText(cartridge.getDisplayName());
+				cell.setText(OpenShiftResourceUtils.toString(cartridge));
 			}
 		}, viewer, tableLayout);
 		return viewer;
@@ -637,7 +638,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			if (!(fromObject instanceof IStandaloneCartridge)) {
 				return null;
 			}
-			return ((IStandaloneCartridge) fromObject).getDisplayName();
+			return OpenShiftResourceUtils.toString((IStandaloneCartridge) fromObject);
 		}
 	}
 
