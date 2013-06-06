@@ -22,6 +22,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -113,7 +114,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	private StyledString createStyledString(IApplication application) {
 		String appName = application.getName();
-		String appType = application.getCartridge().getName();
+		String appType = OpenShiftResourceUtils.toString(application.getCartridge());
 		StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
 		StyledString styledString = new StyledString(sb.toString());
 		styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);
@@ -121,9 +122,11 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	}
 
 	private StyledString createStyledString(IEmbeddedCartridge cartridge) {
-		String label = cartridge.getName();
-		StyledString styledString = new StyledString(label);
-		styledString.setStyle(0, label.length(), StyledString.DECORATIONS_STYLER);
-		return new StyledString(label);
+		String displayName = cartridge.getDisplayName();
+		String name = cartridge.getName();
+		StringBuilder sb = new StringBuilder(displayName).append(' ').append(name);
+		StyledString styledString = new StyledString(sb.toString());
+		styledString.setStyle(displayName.length() + 1, name.length(), StyledString.QUALIFIER_STYLER);
+		return styledString;
 	}
 }
