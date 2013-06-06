@@ -18,10 +18,23 @@ import com.openshift.client.cartridge.ICartridge;
 public class OpenShiftResourceUtils {
 
 	public static String toString(ICartridge cartridge) {
-		return new StringBuilder(
-				cartridge.getDisplayName())
-				.append(" (").append(cartridge.getName()).append(')')
-				.toString();
+		if (cartridge == null) {
+			return null;
+		}
+		
+		String name = cartridge.getName();
+		String displayName = cartridge.getDisplayName();
+		
+		StringBuilder builder = new StringBuilder();
+		if (StringUtils.isEmpty(displayName)) {
+			builder.append(name);
+		} else {
+			builder
+			.append(cartridge.getDisplayName())
+			.append(" (").append(name).append(')');
+		}
+		
+		return builder.toString();
 
 	}
 	
