@@ -15,7 +15,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import com.openshift.client.IApplication;
 
 /**
- * @author Andr?? Dietisheim
+ * @author Andre Dietisheim
  */
 public class TailFilesWizardPageModel extends ObservableUIPojo {
 
@@ -39,8 +39,8 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void resetFilePattern() {
-		setFilePattern("-f -n 100 " + getApplication().getCartridge().getName() + "/logs/*");
-		
+		//setFilePattern("-f -n 100 " + getApplication().getCartridge().getName() + "/logs/*");
+		setFilePattern("-f -n 100 */logs/*");
 	}
 
 	public IApplication getApplication() {
