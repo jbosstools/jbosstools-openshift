@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.action;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -47,6 +46,7 @@ import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.jcraft.jsch.JSch;
@@ -54,6 +54,7 @@ import com.jcraft.jsch.JSchException;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
+import com.openshift.client.utils.Base64Coder;
 
 /**
  * The action associated with the "Show In>Remote Console" menu item.
@@ -68,9 +69,6 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	 */
 	private Map<String, TailServerLogWorker> consoleWorkers = new HashMap<String, TailServerLogWorker>();
 
-	/**
-	 * Constructor
-	 */
 	public TailServerLogAction() {
 		super(OpenShiftExpressUIMessages.TAIL_SERVER_LOG_ACTION, true);
 		IViewRegistry reg = PlatformUI.getWorkbench().getViewRegistry();
@@ -118,7 +116,8 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	}
 
 	private void run(final IServer server) {
-		if (OpenShiftServerUtils.isOpenShiftRuntime(server) || OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
+		if (OpenShiftServerUtils.isOpenShiftRuntime(server) 
+				|| OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
 			final String host = server.getHost();
 			final IApplication app = OpenShiftServerUtils.getApplication(server);
 			if (app == null) {
@@ -146,12 +145,14 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 			new Job("Launching Tail Server Operation") {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						final TailServerLogWorker tailServerLogWorker = startTailProcess(host, app.getUUID(), app.getName(), wizard.getFilePattern(), console);
+						final TailServerLogWorker tailServerLogWorker = 
+								startTailProcess(host, app.getUUID(), app.getName(), wizard.getFilePattern(), console);
 						consoleWorkers.put(console.getName(), tailServerLogWorker);
 						Thread thread = new Thread(tailServerLogWorker);
 						thread.start();
 					} catch (IOException e) {
-						return OpenShiftUIActivator.createErrorStatus(NLS.bind("Failed to tail files for application ''{0}''", app.getName()), e);
+						return OpenShiftUIActivator.createErrorStatus(
+								NLS.bind("Failed to tail files for application ''{0}''", app.getName()), e);
 					}
 					return Status.OK_STATUS;
 				}
@@ -168,7 +169,7 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	 * @param host the remote host to connect to
 	 * @param appId the application id, used as the user to establish the ssh connexion
 	 * @param appName the application name
-	 * @param filePattern the file pattern to use in the tail command
+	 * @param optionsAndFilepattern the file pattern to use in the tail command
 	 * @return the Worker that encapsulate the established RemoteSession, the tail Process and the output console
 	 * @throws OpenShiftSSHOperationException 
 	 * @throws JSchException
@@ -177,43 +178,16 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	 *             in case of underlying exception
 	 */
 	private TailServerLogWorker startTailProcess(final String host, final String appId, final String appName,
-			final String filePattern, final MessageConsole console) throws IOException {
-		final String options = "-f -n 100";
-
+			final String optionsAndFile, final MessageConsole console) throws IOException {
 		JSch.setLogger(new JschToEclipseLogger());
 		final SshSessionFactory sshSessionFactory = SshSessionFactory.getInstance();
 		final URIish uri = new URIish().setHost(host).setUser(appId);
-		RemoteSession remoteSession;
-		remoteSession = sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED,
-				0);
-		// the rhc-tail-files command template
-		// ssh_cmd =
-		// "ssh -t #{app_uuid}@#{app}-#{namespace}.#{rhc_domain} 'tail#{opt['opts'] ? ' --opts ' + Base64::encode64(opt['opts']).chomp : ''} #{file_glob}'"
-		final String command = buildCommand(filePattern, options);
+		RemoteSession remoteSession =
+				sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED, 0);
+		final String command = new TailCommandBuilder(optionsAndFile).build();
+		Logger.debug("ssh command to execute: " + command);
 		Process process = remoteSession.exec(command, 0);
 		return new TailServerLogWorker(console, process, remoteSession);
-	}
-
-	/**
-	 * Builds the 'ssh tail' command that should be executed on the remote OpenShift platform.
-	 * 
-	 * @param filePath
-	 * @param options
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 */
-	private String buildCommand(final String filePath, final String options) throws UnsupportedEncodingException {
-		StringBuilder commandBuilder = new StringBuilder("tail ");
-		// ignored for now,the options are now part of the filePath, given by the user in the TailFilesWizard
-		/*  
-		if (options != null && !options.isEmpty()) {
-			final String opts = new String(Base64Coder.encode(options.getBytes()));
-			commandBuilder.append("--opts ").append(opts).append(" ");
-		}*/
-		commandBuilder.append(filePath);
-		final String command = commandBuilder.toString();
-		Logger.debug("ssh command to execute: " + command);
-		return command;
 	}
 
 	@Override
@@ -241,4 +215,37 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 
 	}
 
+	private class TailCommandBuilder {
+
+		private String options;
+		private String file;
+		
+		public TailCommandBuilder(String optionsAndFile) {
+			init(optionsAndFile);
+		}
+
+		private void init(String optionsAndFile) {
+			if (!StringUtils.isEmpty(optionsAndFile)) {
+				int filePatternStart = optionsAndFile.lastIndexOf(' ');
+				if (filePatternStart > -1) {
+					this.options = optionsAndFile.substring(0, filePatternStart);
+					this.file = optionsAndFile.substring(filePatternStart).trim();
+				} else {
+					this.file = optionsAndFile;
+				}
+			}
+		}
+		
+		public String build() {
+			StringBuilder builder = new StringBuilder("tail");
+			if (options != null) {
+				builder.append(" --opts ").append(Base64Coder.encode(options));
+			}
+			if (file != null) {
+				builder.append(' ').append(file);
+			}
+			return builder.toString();
+		}
+	}
+	
 }
