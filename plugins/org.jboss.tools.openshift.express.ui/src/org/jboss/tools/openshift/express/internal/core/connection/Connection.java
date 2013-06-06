@@ -48,7 +48,7 @@ public class Connection {
 	private String username;
 	private String password;
 	private String host;
-	private IUser connection;
+	private IUser user;
 	private boolean isDomainLoaded;
 	private boolean rememberPassword;
 	private boolean didPromptForPassword;
@@ -105,11 +105,11 @@ public class Connection {
 	}
 
 	protected void setUser(IUser user) {
-		this.connection = user;
+		this.user = user;
 	}
 
 	private IUser getUser() {
-		return connection;
+		return user;
 	}
 
 	public String getUsername() {
@@ -137,7 +137,7 @@ public class Connection {
 	}
 
 	/**
-	 * Returns the host this connection is bound to.
+	 * Returns the host this user is bound to.
 	 * 
 	 * @return
 	 */
@@ -184,7 +184,7 @@ public class Connection {
 	}
 
 	/**
-	 * Connects to OpenShift. Will do nothing if this connection is already
+	 * Connects to OpenShift. Will do nothing if this user is already
 	 * connected.
 	 * 
 	 * @return <code>true</code> if connect succeeed, <code>false</code>
@@ -205,10 +205,10 @@ public class Connection {
 	}
 
 	/**
-	 * Creates an OpenShift connection instance for this connection. Prompts for
+	 * Creates an OpenShift user instance for this user. Prompts for
 	 * credentials if needed.
 	 * 
-	 * @return <code>true</code> if connection could get created, <code>false</code>
+	 * @return <code>true</code> if user could get created, <code>false</code>
 	 *         otherwise.
 	 */
 	protected boolean createUser() {
@@ -241,11 +241,11 @@ public class Connection {
 	}
 
 	private boolean hasUser() {
-		return connection != null;
+		return user != null;
 	}
 
 	protected void clearUser() {
-		this.connection = null;
+		this.user = null;
 	}
 
 	public void update(Connection connection) {
@@ -280,7 +280,7 @@ public class Connection {
 			final ApplicationScale scale, final IGearProfile gearProfile)
 			throws OpenShiftException {
 		if (connect()) {
-			return connection.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
+			return user.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
 		}
 		return null;
 	}
@@ -296,30 +296,30 @@ public class Connection {
 	 */
 	public IDomain createDomain(String id) throws OpenShiftException {
 		if (connect()) {
-			return connection.createDomain(id);
+			return user.createDomain(id);
 		}
 		return null;
 	}
 
 	public IApplication getApplicationByName(String name) throws OpenShiftException {
 		if (connect()
-				&& connection.hasDomain()) {
-			return connection.getDefaultDomain().getApplicationByName(name);
+				&& user.hasDomain()) {
+			return user.getDefaultDomain().getApplicationByName(name);
 		}
 		return null;
 	}
 
 	public List<IApplication> getApplications() throws OpenShiftException {
 		if (connect()
-				&& connection.hasDomain()) {
-			return connection.getDefaultDomain().getApplications();
+				&& user.hasDomain()) {
+			return user.getDefaultDomain().getApplications();
 		}
 		return null;
 	}
 
 	public List<IStandaloneCartridge> getStandaloneCartridgeNames() throws OpenShiftException {
 		if (connect()) {
-			return connection.getConnection().getStandaloneCartridges();
+			return user.getConnection().getStandaloneCartridges();
 		}
 		return null;
 	}
@@ -330,7 +330,7 @@ public class Connection {
 
 	public IDomain getDefaultDomain() throws OpenShiftException {
 		if (connect()) {
-			IDomain domain = connection.getDefaultDomain();
+			IDomain domain = user.getDefaultDomain();
 			isDomainLoaded = true;
 			return domain;
 		}
@@ -343,35 +343,35 @@ public class Connection {
 
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
 		if (connect()) {
-			return connection.getConnection().getEmbeddableCartridges();
+			return user.getConnection().getEmbeddableCartridges();
 		}
 		return null;
 	}
 
 	public boolean hasApplication(String name) throws OpenShiftException {
 		if (connect()) {
-			return connection.getDefaultDomain().hasApplicationByName(name);
+			return user.getDefaultDomain().hasApplicationByName(name);
 		}
 		return false;
 	}
 
 	public boolean hasApplicationOfType(IStandaloneCartridge type) throws OpenShiftException {
 		if (hasDomain()) {
-			return connection.getDefaultDomain().hasApplicationByCartridge(type);
+			return user.getDefaultDomain().hasApplicationByCartridge(type);
 		}
 		return false;
 	}
 
 	public boolean hasDomain() throws OpenShiftException {
 		if (connect()) {
-			return connection.hasDomain();
+			return user.hasDomain();
 		}
 		return false;
 	}
 
 	public boolean hasSSHKeys() throws OpenShiftException {
 		if (connect()) {
-			return !connection.getSSHKeys().isEmpty();
+			return !user.getSSHKeys().isEmpty();
 		}
 		return false;
 	}
@@ -379,7 +379,7 @@ public class Connection {
 	public void refresh() throws OpenShiftException {
 		isDomainLoaded = false;
 		if (connect()) {
-			connection.refresh();
+			user.refresh();
 		}
 	}
 
@@ -389,7 +389,7 @@ public class Connection {
 
 	public List<IOpenShiftSSHKey> getSSHKeys() {
 		if (connect()) {
-			return connection.getSSHKeys();
+			return user.getSSHKeys();
 		}
 		return null;
 	}
@@ -397,28 +397,28 @@ public class Connection {
 	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException,
 			OpenShiftException {
 		if (connect()) {
-			return connection.getSSHKeyByPublicKey(publicKey);
+			return user.getSSHKeyByPublicKey(publicKey);
 		}
 		return null;
 	}
 
 	public IOpenShiftSSHKey putSSHKey(String name, ISSHPublicKey key) throws OpenShiftException {
 		if (connect()) {
-			return connection.putSSHKey(name, key);
+			return user.putSSHKey(name, key);
 		}
 		return null;
 	}
 
 	public boolean hasSSHKeyName(String name) {
 		if (connect()) {
-			return connection.hasSSHKeyName(name);
+			return user.hasSSHKeyName(name);
 		}
 		return false;
 	}
 
 	public boolean hasSSHPublicKey(String publicKey) {
 		if (connect()) {
-			return connection.hasSSHPublicKey(publicKey);
+			return user.hasSSHPublicKey(publicKey);
 		}
 		return false;
 	}
@@ -472,4 +472,19 @@ public class Connection {
 		SecurePasswordStore store = new SecurePasswordStore(key);
 		return store;
 	}
+
+	@Override
+	public String toString() {
+		return "Connection ["
+				+ "username=" + username 
+				+ ", password=" + password 
+				+ ", host=" + host 
+				+ ", user="	+ user 
+				+ ", isDomainLoaded=" + isDomainLoaded  
+				+ ", rememberPassword=" + rememberPassword
+				+ ", didPromptForPassword=" + didPromptForPassword 
+				+ ", passwordLoaded=" + passwordLoaded + "]";
+	}
+
+
 }
