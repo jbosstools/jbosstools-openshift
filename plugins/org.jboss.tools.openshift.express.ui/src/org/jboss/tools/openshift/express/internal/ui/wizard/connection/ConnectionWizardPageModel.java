@@ -308,10 +308,14 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			ConnectionsModelSingleton.getInstance().addConnection(newConnection);
 			// editedConnection.save();
 		} else {
-			selectedConnection.update(newConnection);
-			// we may have get started from new wizard without a connection in
-			// wizard model: set it to wizard model
-			wizardModel.setConnection(selectedConnection);
+			if (selectedConnection != newConnection) {
+				// dont update since we were editing the connection we we already holding
+				// JBIDE-14771
+				selectedConnection.update(newConnection);
+				// we may have get started from new wizard without a connection
+				// in wizard model: set it to wizard model
+				wizardModel.setConnection(selectedConnection);
+			}
 			ConnectionsModelSingleton.getInstance().fireConnectionChanged(selectedConnection);
 			// wizardModelConnection.save();
 		}
