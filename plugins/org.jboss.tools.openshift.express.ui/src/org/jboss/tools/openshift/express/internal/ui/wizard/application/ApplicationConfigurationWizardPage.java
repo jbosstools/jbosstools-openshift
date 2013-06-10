@@ -78,6 +78,7 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNullConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -393,7 +394,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
 
-		// initial git url
+		// advanced configurations
 		createAdvancedGroup(newAppConfigurationGroup, dbc);
 	}
 
@@ -441,8 +442,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.notUpdatingParticipant()
 				.to(BeanProperties.value(
 						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
-		.converting(new InvertingBooleanConverter())
-		.in(dbc);
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
@@ -456,6 +457,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
 		ValueBindingBuilder
 				.bind(sourcecodeUrlObservable)
+				.converting(new EmptyStringToNullConverter())
 				.to(BeanProperties.value(
 						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
