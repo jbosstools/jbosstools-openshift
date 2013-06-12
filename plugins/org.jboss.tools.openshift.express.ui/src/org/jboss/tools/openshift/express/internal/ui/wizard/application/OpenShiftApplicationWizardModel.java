@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -36,6 +38,8 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer
 import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
+import org.jboss.tools.openshift.express.internal.core.marker.SkipMavenBuildMarker;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
@@ -91,14 +95,14 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	@Override
 	public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
 			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
-		IProject project =
-				new ImportNewProject(
-						getProjectName()
-						, getApplication()
-						, getRemoteName()
-						, getRepositoryFile()
-						, getConnection())
-						.execute(monitor);
+		IProject project = new ImportNewProject(
+				getProjectName()
+				, getApplication()
+				, getRemoteName()
+				, getRepositoryFile()
+				, getMarkers()
+				, getConnection())
+				.execute(monitor);
 		setProject(project);
 		return project;
 	}
@@ -137,6 +141,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
+				, getMarkers()
 				, getConnection())
 				.execute(monitor);
 		setProject(project);
@@ -178,6 +183,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 				getProjectName()
 				, getApplication()
 				, getRemoteName()
+				, getMarkers()
 				, getConnection())
 				.execute(monitor);
 		setProject(project);
@@ -313,6 +319,29 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	}
 
 	@Override
+	public boolean isCreateServerAdapter() {
+		return getBooleanProperty(PROP_CREATE_SERVER_ADAPTER);
+	}
+
+	@Override
+	public Boolean setSkipMavenBuild(Boolean skipMavenBuild) {
+		return (Boolean) setProperty(PROP_SKIP_MAVEN_BUILD, skipMavenBuild);
+	}
+
+	@Override
+	public boolean isSkipMavenBuild() {
+		return getBooleanProperty(PROP_SKIP_MAVEN_BUILD);
+	}
+
+	private List<IOpenShiftMarker> getMarkers() {
+		List<IOpenShiftMarker> markers = new ArrayList<IOpenShiftMarker>();
+		if (isSkipMavenBuild()) {
+			markers.add(new SkipMavenBuildMarker());
+		}
+		return markers;
+	}
+	
+	@Override
 	public String getProjectName() {
 		return (String) getProperty(PROP_PROJECT_NAME);
 	}
@@ -330,12 +359,6 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	@Override
 	public IRuntime getRuntime() {
 		return (IRuntime) getProperty(PROP_RUNTIME_DELEGATE);
-	}
-
-	@Override
-	public boolean isCreateServerAdapter() {
-		Boolean isCreateServer = (Boolean) getProperty(PROP_CREATE_SERVER_ADAPTER);
-		return isCreateServer != null && isCreateServer.booleanValue();
 	}
 
 	@Override
@@ -518,6 +541,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
 		setNewProject(true);
 		setCreateServerAdapter(true);
+		setSkipMavenBuild(false);
 		setRepositoryPath(IOpenShiftWizardModel.DEFAULT_REPOSITORY_PATH);
 		setRemoteName(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
 		setServerType(ServerCore.findServerType(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE));
@@ -534,7 +558,12 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		}
 		
 		ConnectionsModelSingleton.getInstance().setRecent(getConnection());
-		
 	}
 
+	private Boolean getBooleanProperty(String name) {
+		Boolean binaryValue = (Boolean) getProperty(name);
+		return binaryValue != null 
+				&& binaryValue.booleanValue();
+	}
+	
 }

@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -29,15 +30,18 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -52,76 +56,16 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	private String remoteName;
 	protected List<IResource> modifiedResources;
 	private Connection user;
+	private List<IOpenShiftMarker> markers;
 
 	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName,
-			Connection user) {
+			List<IOpenShiftMarker> markers, Connection user) {
 		this.projectName = projectName;
 		this.application = application;
 		this.remoteName = remoteName;
+		this.markers = markers;
 		this.modifiedResources = new ArrayList<IResource>();
 		this.user = user;
-	}
-
-	/**
-	 * Clones the repository of the selected OpenShift application to the user
-	 * provided path.
-	 * 
-	 * @param application
-	 *            the application to clone
-	 * @param remoteName
-	 *            the name of the remote repo to clone
-	 * @param destination
-	 *            the destination to clone to
-	 * @param addToRepoView
-	 *            if true, the clone repo will get added to the (egit)
-	 *            repositories view
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * 
-	 * @return the location of the cloned repository
-	 * @throws OpenShiftException
-	 * @throws InvocationTargetException
-	 * @throws InterruptedException
-	 * @throws URISyntaxException
-	 * 
-	 * @see AbstractImportApplicationOperation#getApplication()
-	 * @see #getRepositoryPath()
-	 */
-	protected File cloneRepository(IApplication application, String remoteName, File destination,
-			boolean addToRepoView, IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
-		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
-		EGitUIUtils.ensureEgitUIIsStarted();
-		if (addToRepoView) {
-			EGitUtils.cloneRepository(
-					application.getGitUrl(), remoteName, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
-		} else {
-			EGitUtils.cloneRepository(
-					application.getGitUrl(), remoteName, destination, monitor);
-		}
-		return destination;
-	}
-
-	/**
-	 * Adds the given remote repo (at the given git uri) with the given name to
-	 * the given repository. The remote is not added if the remoteName to use is
-	 * "origin".
-	 * 
-	 * @param remoteName
-	 *            the name to store the remote repo with
-	 * @param gitUri
-	 *            the git uri at which the remote repo is reachable
-	 * @param repository
-	 *            the local repo to add the remote to
-	 * @throws MalformedURLException
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 */
-	protected void addRemoteRepo(String remoteName, String gitUri, Repository repository) throws MalformedURLException,
-			URISyntaxException, IOException {
-		if (remoteName != Constants.DEFAULT_REMOTE_NAME) {
-			EGitUtils.addRemoteTo(remoteName, gitUri, repository);
-		}
 	}
 
 	protected String getProjectName() {
@@ -191,6 +135,46 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	}
 
 	/**
+	 * Clones the repository of the selected OpenShift application to the user
+	 * provided path.
+	 * 
+	 * @param application
+	 *            the application to clone
+	 * @param remoteName
+	 *            the name of the remote repo to clone
+	 * @param destination
+	 *            the destination to clone to
+	 * @param addToRepoView
+	 *            if true, the clone repo will get added to the (egit)
+	 *            repositories view
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * 
+	 * @return the location of the cloned repository
+	 * @throws OpenShiftException
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 * @throws URISyntaxException
+	 * 
+	 * @see AbstractImportApplicationOperation#getApplication()
+	 * @see #getRepositoryPath()
+	 */
+	protected File cloneRepository(IApplication application, String remoteName, File destination,
+			boolean addToRepoView, IProgressMonitor monitor)
+			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
+		EGitUIUtils.ensureEgitUIIsStarted();
+		if (addToRepoView) {
+			EGitUtils.cloneRepository(
+					application.getGitUrl(), remoteName, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+		} else {
+			EGitUtils.cloneRepository(
+					application.getGitUrl(), remoteName, destination, monitor);
+		}
+		return destination;
+	}
+
+	/**
 	 * Adds and commits all (modified) resources in the given project to the git
 	 * repository that it is attached to.
 	 * 
@@ -237,6 +221,25 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		return gitIgnore.write(monitor);
 	}
 
+	protected void addRemote(String remoteName, String gitUrl, IProject project)
+			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException {
+		Repository repository = EGitUtils.getRepository(project);
+		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
+		if (config != null) {
+			if (EGitUtils.hasRemoteUrl(
+					Pattern.compile(RegExUtils.escapeRegex(gitUrl)), config)) {
+				return;
+			}
+			// we shouldn't get here, the UI should validate the remote name and
+			// inform about an error in this case
+			throw new OpenShiftUIException(
+					"Could not enable OpenShift on project \"{0}\". There already is a remote called \"{1}\" that points to a different git repository.",
+					project.getName(), remoteName);
+		}
+
+		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUrl(), repository);
+	}
+	
 	protected IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
 		if (!OpenShiftMavenProfile.isMavenProject(project)) {
 			return null;
@@ -248,6 +251,17 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		}
 		profile.addToPom(project.getName());
 		return profile.savePom(monitor);
+	}
+
+	protected List<IResource> setupMarkers(IProject project, IProgressMonitor monitor) throws CoreException {
+		List<IResource> newMarkers = new ArrayList<IResource>(); 
+		for(IOpenShiftMarker marker : markers) {
+			IFile file = marker.addTo(project, monitor);
+			if (file != null) {
+				newMarkers.add(file);
+			}
+		}
+		return newMarkers;
 	}
 
 	protected IResource addSettingsFile(IProject project, IProgressMonitor monitor) {

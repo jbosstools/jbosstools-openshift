@@ -13,10 +13,9 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.importo
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.regex.Pattern;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -25,14 +24,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
-import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
+import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.ui.UnCommittedChangesException;
 import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
@@ -49,8 +45,8 @@ import com.openshift.client.OpenShiftException;
 public class MergeIntoGitSharedProject extends AbstractImportApplicationOperation {
 
 	public MergeIntoGitSharedProject(String projectName, IApplication application, String remoteName,
-			Connection user) {
-		super(projectName, application, remoteName, user);
+			List<IOpenShiftMarker> markers, Connection user) {
+		super(projectName, application, remoteName, markers, user);
 	}
 
 	/**
@@ -106,31 +102,13 @@ public class MergeIntoGitSharedProject extends AbstractImportApplicationOperatio
 		addToModified(setupGitIgnore(project, monitor));
 		addToModified(setupOpenShiftMavenProfile(project, monitor));
 		addSettingsFile(project, monitor);
+		addToModified(setupMarkers(project, monitor));
 
-		addRemote(getRemoteName(), getApplication().getUUID(), project);
-
+		addRemote(getRemoteName(), getApplication().getGitUrl(), project);
+		
 		addAndCommitModifiedResource(project, monitor);
 
 		return project;
-	}
-
-	private void addRemote(String remoteName, String uuid, IProject project)
-			throws MalformedURLException, URISyntaxException, IOException, OpenShiftException, CoreException {
-		Repository repository = EGitUtils.checkedGetRepository(project);
-		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
-		if (config != null) {
-			if (EGitUtils.hasRemoteUrl(
-					Pattern.compile(RegExUtils.escapeRegex(getApplication().getGitUrl())), config)) {
-				return;
-			}
-			// we shouldn't get here, the UI should validate the remote name and
-			// inform about an error in this case
-			throw new OpenShiftUIException(
-					"Could not enable OpenShift on project \"{0}\". There already is a remote called \"{1}\" that points to a different git repository.",
-					project.getName(), remoteName);
-		}
-
-		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUrl(), repository);
 	}
 
 	/**
