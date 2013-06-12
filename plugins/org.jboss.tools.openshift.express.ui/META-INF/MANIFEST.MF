@@ -57,6 +57,7 @@ Bundle-Vendor: %Bundle-Vendor.0
 Export-Package: org.jboss.tools.openshift.express.internal.core;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.core.behaviour;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.core.connection;x-friends:="org.jboss.tools.openshift.express.test",
+ org.jboss.tools.openshift.express.internal.core.marker;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.core.portforward;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.core.util;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jboss.tools.openshift.express.test",
@@ -84,6 +85,7 @@ Export-Package: org.jboss.tools.openshift.express.internal.core;x-friends:="org.
  org.jboss.tools.openshift.express.internal.ui.wizard.connection;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.domain;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.embed;x-friends:="org.jboss.tools.openshift.express.test",
+ org.jboss.tools.openshift.express.internal.ui.wizard.markers;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.ssh;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding;x-friends:="org.jboss.tools.openshift.express.test"
 

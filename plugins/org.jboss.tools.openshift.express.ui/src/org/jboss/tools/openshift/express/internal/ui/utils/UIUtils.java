@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.ContributionManager;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionManager;
@@ -170,9 +172,16 @@ public class UIUtils {
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
 		if (selection instanceof IStructuredSelection) {
 			Object firstSelectedElement = ((IStructuredSelection) selection).getFirstElement();
-			if (firstSelectedElement != null
-					&& clazz.isAssignableFrom(firstSelectedElement.getClass())) {
+			if (firstSelectedElement == null) {
+				return null;
+			} 
+			
+			if (clazz.isAssignableFrom(firstSelectedElement.getClass())) {
 				return (E) firstSelectedElement;
+			} else if (IAdaptable.class.isAssignableFrom(firstSelectedElement.getClass())) {
+				return (E) ((IAdaptable) firstSelectedElement).getAdapter(clazz);
+			} else {
+				return (E) Platform.getAdapterManager().getAdapter(firstSelectedElement, clazz);
 			}
 		}
 		return null;

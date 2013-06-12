@@ -39,7 +39,6 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdapt
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
-import org.jboss.tools.openshift.express.internal.core.marker.SkipMavenBuildMarker;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
@@ -336,7 +335,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	private List<IOpenShiftMarker> getMarkers() {
 		List<IOpenShiftMarker> markers = new ArrayList<IOpenShiftMarker>();
 		if (isSkipMavenBuild()) {
-			markers.add(new SkipMavenBuildMarker());
+			markers.add(IOpenShiftMarker.SKIP_MAVEN_BUILD);
 		}
 		return markers;
 	}
