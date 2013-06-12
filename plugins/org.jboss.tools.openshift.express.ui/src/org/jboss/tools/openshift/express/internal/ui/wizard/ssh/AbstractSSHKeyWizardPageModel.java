@@ -24,7 +24,7 @@ public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo imp
 	private String name;
 	private Connection connection;
 	
-	public AbstractSSHKeyWizardPageModel(Connection user) {
+	AbstractSSHKeyWizardPageModel(Connection user) {
 		this.connection = user;
 	}
 
