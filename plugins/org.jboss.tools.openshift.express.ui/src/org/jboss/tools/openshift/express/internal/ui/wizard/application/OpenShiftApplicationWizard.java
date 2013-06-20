@@ -264,7 +264,11 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getConnection().getDefaultDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
-			model.setApplication(job.getApplication());
+			IApplication application = job.getApplication();
+			model.setApplication(application);
+			if (status.isOK()) {
+				openLogDialog(application, job.isTimeouted(status));
+			}
 			return status;
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(
@@ -272,6 +276,18 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		}
 	}
 
+	private void openLogDialog(final IApplication application, final boolean isTimeouted) {
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				new CreationLogDialog(getShell(), 
+						LogEntryFactory.create(application, isTimeouted)).open();
+			}
+		});
+	}
+
+	
 	private IStatus addCartridges(final IApplication application, final Set<IEmbeddableCartridge> selectedCartridges) {
 		try {
 			EmbedCartridgesJob job = new EmbedCartridgesJob(
