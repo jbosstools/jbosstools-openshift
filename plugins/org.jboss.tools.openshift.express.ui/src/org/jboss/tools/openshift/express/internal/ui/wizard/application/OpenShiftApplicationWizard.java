@@ -50,6 +50,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
 
@@ -264,7 +265,11 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getConnection().getDefaultDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
-			model.setApplication(job.getApplication());
+			IApplication application = job.getApplication();
+			model.setApplication(application);
+			if (status.isOK()) {
+				openLogDialog(application, job.isTimeouted(status));
+			}
 			return status;
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(
@@ -272,6 +277,20 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		}
 	}
 
+	private void openLogDialog(final IApplication application, final boolean isTimeouted) {
+		final LogEntry[] logEntries = LogEntryFactory.create(application, isTimeouted);
+		if (logEntries.length == 0) {
+			return;
+		}
+		getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				new CreationLogDialog(getShell(), logEntries).open();
+			}
+		});
+	}
+	
 	private IStatus addCartridges(final IApplication application, final Set<IEmbeddableCartridge> selectedCartridges) {
 		try {
 			EmbedCartridgesJob job = new EmbedCartridgesJob(
