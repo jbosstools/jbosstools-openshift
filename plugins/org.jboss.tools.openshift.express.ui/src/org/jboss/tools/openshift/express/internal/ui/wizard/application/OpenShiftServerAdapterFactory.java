@@ -94,12 +94,10 @@ public class OpenShiftServerAdapterFactory {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(application != null);
 
-		String serverNameBase = application.getName() + " at OpenShift";
-		String serverName = org.jboss.ide.eclipse.as.core.util.ServerUtil.getDefaultServerName(serverNameBase);
-
+		String serverName = OpenShiftServerUtils.getDefaultServerName(application);
 		IServer server = OpenShiftServerUtils.createServer(rt, serverType, serverName);
 		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
-				server, application.getApplicationUrl(), deployProject, remoteName, application);
+				server, deployProject, remoteName, serverName, application);
 		return server;
 	}
 	

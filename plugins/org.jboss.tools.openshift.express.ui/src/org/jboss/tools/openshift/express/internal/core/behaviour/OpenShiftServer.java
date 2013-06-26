@@ -35,11 +35,11 @@ import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
  */
 public class OpenShiftServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
 
-	public static final String DEFAULT_SERVER_NAME_BASE = "ApplicationName at OpenShift";
+	public static final String DEFAULT_SERVER_NAME_BASE = "ApplicationName";
 	
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl()));
-		getServerWorkingCopy().setName(ServerUtil.getDefaultServerName(DEFAULT_SERVER_NAME_BASE));
+		getServerWorkingCopy().setName(OpenShiftServerUtils.getDefaultServerName(DEFAULT_SERVER_NAME_BASE));
 		setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
 	}
 
