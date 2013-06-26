@@ -581,27 +581,17 @@ public class OpenShiftServerWizardComposite {
 
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		configureServer(application, remote, deployProject, deployFolder, callback.getServer());
-		updateProjectSettings();
+		updateProjectSettings(application, remote, deployProject, deployFolder, connection);
 	}
 
-	private void configureServer(IApplication application, String remote, IProject deployProject, String deployFolder, IServerWorkingCopy server) throws OpenShiftException {
-		String host = null;
-		String applicationName = null;
-		if (application != null) {
-			host = application.getApplicationUrl();
-			applicationName = application.getName();
-		}
-
-		String deployProjectName = null;
-		if (deployProject != null) {
-			deployProjectName = deployProject.getName();
-		}
-
+	private void configureServer(IApplication application, String remote, IProject deployProject, String deployFolder,
+			IServerWorkingCopy server) throws OpenShiftException {
+		String serverName = OpenShiftServerUtils.getDefaultServerName(application);
 		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
-				server, host, deployProjectName, deployFolder, remote, applicationName);
+				server, serverName, deployProject, deployFolder, remote, application);
 	}
 
-	private void updateProjectSettings() {
+	private void updateProjectSettings(IApplication application, String remote, IProject deployProject, String deployFolder, Connection connection) {
 		String projRemote = OpenShiftServerUtils.getProjectAttribute(
 				deployProject, OpenShiftServerUtils.SETTING_REMOTE_NAME, null);
 		String projDepFolder = OpenShiftServerUtils.getProjectAttribute(

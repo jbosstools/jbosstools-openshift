@@ -339,52 +339,78 @@ public class OpenShiftServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
-	public static IServer fillServerWithOpenShiftDetails(IServer server, String host,
-			String deployProject, String remote, IApplication application) throws CoreException {
+	public static IServer fillServerWithOpenShiftDetails(IServer server, 
+			String deployProject, String remote, String serverName, IApplication application) throws CoreException {
 		ServerWorkingCopy wc = (ServerWorkingCopy) server.createWorkingCopy();
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, remote, application);
+		String deployFolder = getDefaultDeployFolder(application);
+		String host = getHost(application);
+		String applicationName = getApplicationName(application);
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, serverName, host, deployProject, deployFolder, remote, applicationName);
 		IServer saved = wc.save(true, new NullProgressMonitor());
 		return saved;
+	}
+
+	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName,  
+			IProject deployProject, String deployFolder, String remote, IApplication application) {
+		String host = getHost(application);
+		String deployProjectName = getDeployProjectName(deployProject);
+		String applicationName = getApplicationName(application);
+		fillServerWithOpenShiftDetails(wc, serverName, host, deployProjectName, deployFolder, remote, applicationName);
+	}
+
+	private static String getDeployProjectName(IProject deployProject) {
+		String deployProjectName = null;
+		if (deployProject != null) {
+			deployProjectName = deployProject.getName();
+		}
+		return deployProjectName;
+	}
+
+	private static String getHost(IApplication application) {
+		String host = null;
+		if (application != null) {
+			host = application.getApplicationUrl();
+		}
+		return host;
+	}
+
+	private static String getApplicationName(IApplication application) {
+		String name = null;
+		if (application != null) {
+			name = application.getName();
+		}
+		return name;
 	}
 
 	/**
-	 * Fills an already-created server with the proper openshift details.
+	 * Fills the given settings into the given server working copy.
+	 * <b>IMPORTANT:</b> If the server name is matching an existing server, then
+	 * we're updating this existing server. If the name is a new one, then we're
+	 * creating a new server.
 	 * 
-	 * @param server
+	 * @param wc
+	 *            the server working copy to configure
+	 * @param serverName
+	 *            the name for the server
 	 * @param host
-	 * @param username
-	 * @param password
-	 * @param domain
-	 * @param appName
-	 * @param sourceOrBinary
-	 * @return
-	 * @throws CoreException
+	 *            the host for the server
+	 * @param deployProject
+	 *            the deploy project for the server
+	 * @param deployFolder
+	 *            the deploy folder for the server
+	 * @param remote
+	 *            the remote for the server
+	 * @param applicationName
+	 *            the application name for the server
 	 */
-	public static IServer fillServerWithOpenShiftDetails(IServer server, String host,
-			String deployProject, String deployFolder, String remote, String appName) throws CoreException {
-		ServerWorkingCopy wc = (ServerWorkingCopy) server.createWorkingCopy();
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, deployFolder, remote, appName);
-		IServer saved = wc.save(true, new NullProgressMonitor());
-		return saved;
-	}
-
-	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
-			String deployProject, String remote, IApplication application) {
-		Assert.isNotNull(application);
-		String deployFolder = getDefaultDeployFolder(application);
-		String appName = application.getName();
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, host, deployProject, deployFolder, remote, appName);
-	}
-
-	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String host,
-			String deployProject, String deployFolder, String remote, String appName) {
-		host = getHost(host);
-		wc.setHost(host);
+	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName, String host,
+			String deployProject, String deployFolder, String remote, String applicationName) {
+		wc.setHost(trimHost(host));
 		wc.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
 		// wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		// wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
-		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, appName);
+		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, applicationName);
 		// wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		 wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, deployFolder);
 		// wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
@@ -395,15 +421,18 @@ public class OpenShiftServerUtils {
 		wc.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, "false");
 		wc.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
-		setName(wc, appName);
+		wc.setName(serverName);
+	}
+	
+	public static String getDefaultServerName(IApplication application) {
+		if (application == null) {
+			return null;
+		}
+		return getDefaultServerName(application.getName());
 	}
 
-	protected static void setName(IServerWorkingCopy wc, String appName) {
-		if ((StringUtils.isEmpty(wc.getName())
-				|| isDefaultName(wc.getName()))
-				&& !StringUtils.isEmpty(appName)) {
-			wc.setName(ServerUtil.getDefaultServerName(appName + " at OpenShift"));
-		}
+	public static String getDefaultServerName(String baseName) {
+		return ServerUtil.getDefaultServerName(baseName + " at OpenShift");
 	}
 	
 	public static boolean isDefaultName(String serverName) {
@@ -411,11 +440,10 @@ public class OpenShiftServerUtils {
 			return false;
 		}
 
-		return serverName.equals(OpenShiftServer.DEFAULT_SERVER_NAME_BASE)
-				|| serverName.startsWith(OpenShiftServer.DEFAULT_SERVER_NAME_BASE);
+		return serverName.startsWith(OpenShiftServer.DEFAULT_SERVER_NAME_BASE);
 	}
 	
-	protected static String getHost(String url) {
+	protected static String trimHost(String url) {
 		if (StringUtils.isEmpty(url)) {
 			return url;
 		}
