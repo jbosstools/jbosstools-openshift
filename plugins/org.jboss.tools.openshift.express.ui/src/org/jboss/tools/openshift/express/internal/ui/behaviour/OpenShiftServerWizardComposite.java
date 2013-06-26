@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -40,8 +40,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
@@ -67,7 +68,6 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
-import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
@@ -158,8 +158,7 @@ public class OpenShiftServerWizardComposite {
 		selectConnectionCombo(connection);
 		applicationComboViewer.setInput(applications);
 		selectApplicationCombo(application);
-		setDeployProjectComboInput(application);
-		selectDeployProjectCombo(application);
+		setDeployProjectCombo(application, projectsByApplication);
 		remoteText.setText(StringUtils.null2emptyString(remote));
 		deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
 	}
@@ -326,18 +325,34 @@ public class OpenShiftServerWizardComposite {
 				OpenShiftApplicationWizard wizard =
 						new ImportOpenShiftApplicationWizard(connection, null, application);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
-				int oldServerCount = ServerCore.getServers().length;
 				dialog.create();
-				dialog.open();
-				if (ServerCore.getServers().length > oldServerCount) {
+				int success = dialog.open();
+				if (success == Dialog.OK
+						&& wizard.isCreateServerAdapter()) {
 					// Cancel this wizard, a server has already been created
 					// This is really ugly
-					IWizardHandle handle =
-							((DeploymentTypeUIUtil.NewServerWizardBehaviourCallback) callback).getHandle();
-					org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(((WizardPage) handle).getWizard());
+					closeWizard(callback);
+				} else {
+					projectsByApplication = createProjectsByApplication(applications);
+					setDeployProjectCombo(application, projectsByApplication);
+					enableImportLink(application);
+					updateErrorMessage();
 				}
 			}
 		};
+	}
+
+	private void closeWizard(IServerModeUICallback callback) {
+		if (!(callback instanceof DeploymentTypeUIUtil.NewServerWizardBehaviourCallback)) {
+			return;
+		}
+		DeploymentTypeUIUtil.NewServerWizardBehaviourCallback behaviourCallback = (DeploymentTypeUIUtil.NewServerWizardBehaviourCallback) callback;
+		IWizardHandle handle = behaviourCallback.getHandle();
+		if (!(handle instanceof IWizardPage)) {
+			return;
+		}
+		IWizard wizard = ((IWizardPage) handle).getWizard();
+		org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(wizard);
 	}
 
 	private ISelectionChangedListener onSelectDeployProject() {
@@ -358,8 +373,7 @@ public class OpenShiftServerWizardComposite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				application = UIUtils.getFirstElement(event.getSelection(), IApplication.class);
-				setDeployProjectComboInput(application);
-				selectDeployProjectCombo(application);
+				setDeployProjectCombo(application, projectsByApplication);
 				enableImportLink(application);
 				setDeploymentFolderText(application, deployProject);
 				setRemoteText(application, deployProject);
@@ -436,7 +450,7 @@ public class OpenShiftServerWizardComposite {
 		}
 		setApplicationComboInput(applications);
 		selectApplicationCombo(application);
-		selectDeployProjectCombo(application);
+		selectDeployProjectCombo(getImportedProjects(application, projectsByApplication));
 		enableImportLink(application);
 		updateErrorMessage();
 	}
@@ -481,10 +495,10 @@ public class OpenShiftServerWizardComposite {
 	}
 
 	private void updateErrorMessage() {
-		callback.setErrorMessage(getErrorString());
+		callback.setErrorMessage(createErrorMessage());
 	}
 
-	public String getErrorString() {
+	public String createErrorMessage() {
 		String error = null;
 		if (applications == null) {
 			error = "Please select an existing connection or create a new one.";
@@ -493,8 +507,9 @@ public class OpenShiftServerWizardComposite {
 		} else {
 			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 			if (p == null || p.length == 0) {
-				error = "Your workspace does not have a project corresponding to " + application.getName()
-						+ ". Please import one.";
+				error = NLS.bind(
+								"Your workspace does not have a project that was corresponds to application {0}. Please import it first.",
+								application.getName());
 			}
 		}
 		return error;
@@ -615,24 +630,29 @@ public class OpenShiftServerWizardComposite {
 		applicationComboViewer.setSelection(selection);
 	}
 
-	private void setDeployProjectComboInput(IApplication application) {
-		List<IProject> deployProjects = new ArrayList<IProject>();
-		if (application != null) {
-			IProject[] projects = projectsByApplication.get(application);
-			deployProjects.addAll(Arrays.asList(projects));
-		}
-		deployProjectComboViewer.setInput(deployProjects);
+	private void setDeployProjectCombo(IProject[] importedProjects) {
+		deployProjectComboViewer.setInput(importedProjects);
+		selectDeployProjectCombo(importedProjects);
 	}
 
-	private void selectDeployProjectCombo(final IApplication application) {
-		IStructuredSelection selection = new StructuredSelection();
+	private void setDeployProjectCombo(IApplication application, Map<IApplication, IProject[]> projectsByApplication) {
+		setDeployProjectCombo(getImportedProjects(application, projectsByApplication));
+	}
+	
+	private IProject[] getImportedProjects(IApplication application, Map<IApplication, IProject[]> projectsByApplication) {
+		IProject[] importedProjects = new IProject[0];
 		if (application != null) {
-			IProject[] projects = projectsByApplication.get(application);
-			if (projects != null
-					&& projects.length > 0)
-				selection = new StructuredSelection(projects[0]);
+			importedProjects = projectsByApplication.get(application);	
+		}
+		return importedProjects;
+	}
+
+	private void selectDeployProjectCombo(final IProject[] importedProjects) {
+		IStructuredSelection selection = new StructuredSelection();
+		if (importedProjects != null
+				&& importedProjects.length > 0) {
+			selection = new StructuredSelection(importedProjects[0]);
 		}
 		deployProjectComboViewer.setSelection(selection);
-	}
-
+	}	
 }

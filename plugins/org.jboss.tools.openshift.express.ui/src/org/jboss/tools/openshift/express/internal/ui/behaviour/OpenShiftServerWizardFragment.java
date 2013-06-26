@@ -41,7 +41,7 @@ public class OpenShiftServerWizardFragment extends WizardFragment implements ICo
 	}
 
 	public boolean isComplete() {
-		return composite != null && composite.getErrorString() == null;
+		return composite != null && composite.createErrorMessage() == null;
 	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {

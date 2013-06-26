@@ -49,6 +49,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonit
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
@@ -111,14 +112,10 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		Object o = selection.getFirstElement();
-		if (o instanceof Connection) {
-			setUser((Connection) o);
+		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+		if (connection != null) {
+			model.setConnection(connection);
 		}
-	}
-
-	protected void setUser(Connection user) {
-		model.setConnection(user);
 	}
 
 	@Override
@@ -336,6 +333,15 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		return model;
 	}
 	
+	@Override
+	public void dispose() {
+		model.dispose();
+	}
+
+	public boolean isCreateServerAdapter() {
+		return model.isCreateServerAdapter();
+	}
+	
 	/**
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
@@ -426,11 +432,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			return null;
 		}
 
-	}
-
-	@Override
-	public void dispose() {
-		model.dispose();
 	}
 
 	private class IsAheadJob extends AbstractDelegatingMonitorJob {
