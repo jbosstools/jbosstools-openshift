@@ -118,9 +118,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	// private ModifyListener modifyListener;
 
 	public ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
-		super("Set up OpenShift Application",
-				"Select an existing or create a new OpenShift Application.",
-				"Set up OpenShift Application", wizard);
+		super("New or existing OpenShift Application",
+				"",
+				"New or existing OpenShift Application, wizard", wizard);
 		try {
 			this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
 		} catch (OpenShiftException e) {
@@ -132,6 +132,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
+		setWizardPageDescription(pageModel.isUseExistingApplication());
+		
 		GridLayoutFactory.fillDefaults().applyTo(container);
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
 		createApplicationSelectionGroup(container, dbc);
@@ -521,6 +523,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					// resetExistingApplication();
 					// }
 					enableApplicationWidgets(useExisting);
+					setWizardPageDescription(useExisting);
 				}
 			}
 		};
@@ -866,7 +869,16 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			// ignore
 		}
 	}
+	
 
+	private void setWizardPageDescription(boolean useExisting) {
+		if (useExisting) {
+			setDescription("Import an existing OpenShift Application.");
+		} else {
+			setDescription("Create a new OpenShift Application.");
+		}
+	}
+	
 	class ApplicationToSelectNameValidator extends MultiValidator {
 
 		private final IObservableValue useExistingAppBtnbservable;
@@ -945,7 +957,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 			if (applicationName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Please choose the application that you want to import");
+						"Please choose a name for your new application.");
 			}
 			if (!StringUtils.isAlphaNumeric(applicationName)) {
 				return ValidationStatus.error(
