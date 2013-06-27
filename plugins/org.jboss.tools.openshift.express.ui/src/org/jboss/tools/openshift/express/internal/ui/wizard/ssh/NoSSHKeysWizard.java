@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -70,10 +71,9 @@ public class NoSSHKeysWizard extends Wizard {
 								return ValidationStatus.ok();
 							} else {
 								return ValidationStatus.cancel(
-										"You have no SSH public keys in your OpenShift account\n" +
-												getPageModel().getConnection().getUsername()
-												+ "yet, please add your key(s) or\n"
-												+ "create new one(s)");
+										NLS.bind("You have no SSH public keys in your OpenShift account\n"
+												+ "{0} yet, please add your key(s) or\n"
+												+ "create new one(s)", getPageModel().getConnection().getUsername()));
 							}
 						}
 					})
