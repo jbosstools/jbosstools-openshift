@@ -83,8 +83,9 @@ public class CreationLogDialog extends TitleAreaDialog {
 		Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator);
 
-		StyledText logText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(logText);
+		StyledText logText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT).applyTo(logText);
 		writeLogEntries(logEntries, logText);
 		logText.addListener(SWT.MouseDown, onLinkClicked(logText));
 		return container;
