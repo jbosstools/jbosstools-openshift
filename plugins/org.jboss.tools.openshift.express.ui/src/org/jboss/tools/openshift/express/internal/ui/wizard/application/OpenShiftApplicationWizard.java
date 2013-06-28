@@ -73,6 +73,11 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public abstract class OpenShiftApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
+	private static final int APP_CREATE_TIMEOUT = 10 * 60 * 1000;
+	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
+	private static final long EMBED_CARTRIDGES_TIMEOUT = 10 * 60 * 1000;
+	private static final int IMPORT_TIMEOUT = 20 * 60 * 1000;
+
 	private final boolean skipCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
@@ -188,7 +193,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		try {
 			AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
 			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
+					job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
 			return status;
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(
@@ -200,7 +205,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 			IStatus jobResult = WizardUtils.runInWizard(
-					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
+					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer(), IMPORT_TIMEOUT);
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", OpenShiftUIActivator
@@ -259,7 +264,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getSelectedEmbeddableCartridges()
 					, model.getDomain());
 			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
+					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			IApplication application = job.getApplication();
 			model.setApplication(application);
 			if (status.isOK()) {
@@ -294,7 +299,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					true, // dont remove cartridges
 					model.getApplication());
 			IStatus result = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
+					job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
 			if (result.isOK()) {
 				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
 			}
