@@ -94,17 +94,21 @@ public class CreationLogDialog extends TitleAreaDialog {
 	private Listener onLinkClicked(final StyledText logText) {
 		return new Listener() {
 			public void handleEvent(Event event) {
-				int offset = logText.getOffsetAtLocation(new Point(event.x, event.y));
-				Link link = getLink(offset);
-				if (link == null
-						|| !isLinkStyle(offset)) {
-					return;
-				}
 				try {
-					link.execute();
-				} catch (Exception e) {
-					OpenShiftUIActivator.log(e);
-					MessageDialog.openError(getShell(), "Could not execute link", e.getMessage());
+					int offset = logText.getOffsetAtLocation(new Point(event.x, event.y));
+					Link link = getLink(offset);
+					if (link == null
+							|| !isLinkStyle(offset)) {
+						return;
+					}
+					try {
+						link.execute();
+					} catch (Exception e) {
+						OpenShiftUIActivator.log(e);
+						MessageDialog.openError(getShell(), "Could not execute link", e.getMessage());
+					}
+				} catch (IllegalArgumentException e) {
+					// intentional swallowing: empty line clicked
 				}
 			}
 
