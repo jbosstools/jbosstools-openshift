@@ -57,7 +57,7 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 
-	private static final long EMBED_CARTRIDGES_TIMEOUT = 2 * 60 * 1000;
+	private static final long EMBED_CARTRIDGES_TIMEOUT = 10 * 60 * 1000;
 	private EmbedCartridgeWizardPageModel pageModel;
 	private CheckboxTableViewer viewer;
 

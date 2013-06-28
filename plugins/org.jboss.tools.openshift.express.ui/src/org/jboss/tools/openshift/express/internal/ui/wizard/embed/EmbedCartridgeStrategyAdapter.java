@@ -59,8 +59,8 @@ import com.openshift.client.cartridge.selector.LatestVersionOf;
  */
 public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 
-	private static final int APP_CREATE_TIMEOUT = 2 * 60 * 1000;
-	private static final int APP_WAIT_TIMEOUT = 2 * 60 * 1000;
+	private static final int APP_CREATE_TIMEOUT = 10 * 60 * 1000;
+	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
 
 	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
