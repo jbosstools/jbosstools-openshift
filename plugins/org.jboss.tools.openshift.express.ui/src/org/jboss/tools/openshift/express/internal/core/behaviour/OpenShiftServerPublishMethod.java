@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.core.behaviour;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -30,7 +29,6 @@ import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -162,7 +160,6 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 	protected IContainer getDestination(IDeployableServerBehaviour behaviour, IProject destProj) throws CoreException {
 		String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
 		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
-;
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
 			throw new CoreException(OpenShiftUIActivator.createErrorStatus(NLS.bind(
@@ -258,7 +255,6 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			PushOperationResult result = EGitUtils.push(
 					remoteName, repository, new SubProgressMonitor(monitor, 100),
 					ConsoleUtils.getConsoleOutputStream(server));
-			safeFetch(remoteName, repository, monitor);
 			monitor.done();
 			return result;
 		} catch (CoreException ce) {
@@ -305,33 +301,6 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 					throw ce2;
 				}
 			}
-		}
-	}
-
-	/**
-	 * Workaround needed to get correct "isAhead" state for the repository we
-	 * were pushing to. Otherwise git branch state will be erroneous compared to
-	 * the remote, behave as if we did not push yet. push yet.
-	 * 
-	 * @param remoteName
-	 *            the remote to push to
-	 * @param repository
-	 *            the repository to push
-	 * @param monitor
-	 *            the montior to report progress to
-	 * 
-	 * @see <a href="https://issues.jboss.org/browse/JBIDE-15059">https://issues.jboss.org/browse/JBIDE-15059</a>
-	 */
-	private void safeFetch(String remoteName, Repository repository, IProgressMonitor monitor) {
-		try {
-			RemoteConfig remoteConfig = EGitUtils.getRemoteConfig(remoteName, EGitUtils.getAllRemoteConfigs(repository));
-			EGitUtils.fetch(remoteConfig, repository, monitor);
-		} catch (CoreException e) {
-			OpenShiftUIActivator.log(
-					NLS.bind("Could not get remote configs for repository {0}", repository.getDirectory()), e);
-		} catch (InvocationTargetException e) {
-			OpenShiftUIActivator.log(
-					NLS.bind("Could not fetch remote {0} for repository {1}", remoteName, repository.getDirectory()), e);
 		}
 	}
 
