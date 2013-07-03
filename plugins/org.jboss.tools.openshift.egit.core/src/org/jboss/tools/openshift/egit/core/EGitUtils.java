@@ -531,11 +531,19 @@ public class EGitUtils {
 			throws CoreException {
 
 		Collection<URIish> pushURIs = getPushURIs(remoteConfig);
-		Collection<RefSpec> pushRefSpecs = createForceRefSpecs(force, getPushRefSpecs(remoteConfig));
-		PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, repository);
+		Collection<RefSpec> fetchRefSpecs = getFetchRefSpec(remoteConfig);
+		Collection<RefSpec> pushRefSpecs = setForceUpdate(force, getPushRefSpecs(remoteConfig));
+		PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, fetchRefSpecs, repository);
 		PushOperation pushOperation = new PushOperation(repository, pushSpec, false, DEFAULT_TIMEOUT);
 		pushOperation.setOutputStream(out);
 		return pushOperation;
+	}
+
+	private static Collection<RefSpec> getFetchRefSpec(RemoteConfig remoteConfig) {
+		if (remoteConfig == null) {
+			return null;
+		}
+		return remoteConfig.getFetchRefSpecs();
 	}
 
 	/**
@@ -546,21 +554,26 @@ public class EGitUtils {
 	 *            the push uri's
 	 * @param pushRefSpecs
 	 *            the push ref specs
+	 * @param fetchRefSpecs 
 	 * @param repository
 	 *            the repository
 	 * @return the push operation specification
 	 * @throws CoreException
 	 *             the core exception
 	 */
-	private static PushOperationSpecification createPushSpec(
-			Collection<URIish> pushURIs, Collection<RefSpec> pushRefSpecs,
-			Repository repository) throws CoreException {
+	private static PushOperationSpecification createPushSpec(Collection<URIish> pushURIs,
+			Collection<RefSpec> pushRefSpecs, Collection<RefSpec> fetchRefSpecs, Repository repository) throws CoreException {
 		try {
 			PushOperationSpecification pushSpec = new PushOperationSpecification();
+			final Collection<RemoteRefUpdate> updates = 
+					Transport.findRemoteRefUpdatesFor(repository, pushRefSpecs, fetchRefSpecs);
+			if (updates.isEmpty()) {
+				throw new CoreException(
+						new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
+									"There's no local source ref that match the remote refs (local refs changed?)"));
+			}
 			for (URIish uri : pushURIs) {
-				Collection<RemoteRefUpdate> remoteRefUpdates = Transport.open(
-						repository, uri).findRemoteRefUpdatesFor(pushRefSpecs);
-				pushSpec.addURIRefUpdates(uri, remoteRefUpdates);
+				pushSpec.addURIRefUpdates(uri, copy(updates));
 			}
 			return pushSpec;
 		} catch (NotSupportedException e) {
@@ -576,6 +589,13 @@ public class EGitUtils {
 		}
 	}
 
+	private static Collection<RemoteRefUpdate> copy(Collection<RemoteRefUpdate> refUpdates) throws IOException {
+		final Collection<RemoteRefUpdate> copy = new ArrayList<RemoteRefUpdate>(refUpdates.size());
+		for (final RemoteRefUpdate rru : refUpdates)
+			copy.add(new RemoteRefUpdate(rru, null));
+		return copy;
+	}
+	
 	/**
 	 * Gets the push uris from the given remoteConfig.
 	 * 
@@ -616,7 +636,7 @@ public class EGitUtils {
 		return pushRefSpecs;
 	}
 
-	private static Collection<RefSpec> createForceRefSpecs(boolean forceUpdate,
+	private static Collection<RefSpec> setForceUpdate(boolean forceUpdate,
 			Collection<RefSpec> refSpecs) {
 		List<RefSpec> newRefSpecs = new ArrayList<RefSpec>();
 		for (RefSpec refSpec : refSpecs) {
@@ -624,7 +644,7 @@ public class EGitUtils {
 		}
 		return newRefSpecs;
 	}
-
+	
 	public static boolean hasFailedEntries(
 			PushOperationResult pushOperationResult) {
 		return !getFailedUpdates(pushOperationResult).isEmpty();
