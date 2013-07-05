@@ -240,7 +240,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			monitor.beginTask("Publishing " + project.getName(), 200);
 			PushOperationResult result = EGitUtils.push(
 					remoteName, repository, new SubProgressMonitor(monitor, 100),
-					ConsoleUtils.getConsoleOutputStream(server));
+					OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
 			monitor.done();
 			return result;
 		} catch (CoreException ce) {

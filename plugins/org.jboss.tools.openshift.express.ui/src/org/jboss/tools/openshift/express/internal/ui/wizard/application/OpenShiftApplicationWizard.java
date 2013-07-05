@@ -75,10 +75,9 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	private static final int APP_CREATE_TIMEOUT = 10 * 60 * 1000;
 	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
-	private static final long EMBED_CARTRIDGES_TIMEOUT = 10 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 20 * 60 * 1000;
 
-	private final boolean skipCredentialsPage;
+	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
 	OpenShiftApplicationWizard(Connection connection, IDomain domain, IApplication application, IProject project, 
@@ -292,24 +291,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		});
 	}
 	
-	private IStatus addCartridges(final IApplication application, final Set<IEmbeddableCartridge> selectedCartridges) {
-		try {
-			EmbedCartridgesJob job = new EmbedCartridgesJob(
-					new ArrayList<IEmbeddableCartridge>(model.getSelectedEmbeddableCartridges()),
-					true, // dont remove cartridges
-					model.getApplication());
-			IStatus result = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
-			if (result.isOK()) {
-				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
-			}
-			return result;
-		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus(
-					NLS.bind("Could not add/remove cartridges for application {0}", application.getName()), e);
-		}
-	}
-
 	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges, final boolean isTimeouted) {
 		final LogEntry[] logEntries = LogEntryFactory.create(embeddableCartridges, isTimeouted);
 		if (logEntries == null

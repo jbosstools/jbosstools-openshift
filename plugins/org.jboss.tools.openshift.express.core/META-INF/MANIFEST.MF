@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.core;singleton:=true
 Bundle-Vendor: %Bundle-Vendor
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.5.1.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.0",
