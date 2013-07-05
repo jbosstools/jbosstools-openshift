@@ -35,6 +35,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.ToStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 
 import com.openshift.client.ApplicationScale;
@@ -260,12 +261,15 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 	}
 
 	private void openLogDialog(final IApplication application, final boolean isTimeouted) {
+		final LogEntry[] entries = LogEntryFactory.create(application, isTimeouted);
+		if (entries.length == 0) {
+			return;
+		}
 		wizardPage.getControl().getDisplay().syncExec(new Runnable() {
-
+			
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(), 
-						LogEntryFactory.create(application, isTimeouted)).open();
+				new CreationLogDialog(getShell(), entries).open();
 			}
 		});
 	}

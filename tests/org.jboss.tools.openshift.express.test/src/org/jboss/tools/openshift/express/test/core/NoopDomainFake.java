@@ -11,14 +11,13 @@
 package org.jboss.tools.openshift.express.test.core;
 
 import java.util.List;
-import java.util.Map;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.IUser;
-import com.openshift.client.Message;
+import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -137,12 +136,7 @@ public class NoopDomainFake implements IDomain {
 	}
 
 	@Override
-	public Map<String, Message> getMessages() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Message getMessage(String field) {
+	public Messages getMessages() {
 		throw new UnsupportedOperationException();
 	}
 

@@ -141,6 +141,9 @@ public class CreationLogDialog extends TitleAreaDialog {
 	}
 
 	private void createTextAndStyle(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
+		if (logEntry == null) {
+			return;
+		}
 		appendTitle(logEntry.getName(), builder, styles);
 		appendLog(logEntry, builder, styles);
 	}
