@@ -259,13 +259,15 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 						"The credentials for user {0} are not valid", username));
 			} catch (OpenShiftException e) {
 				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-						"Could not verify credentials for {0}: {1}", username, e.getMessage()));
+						"Unknown error, can not verify user {0} - see Error Log for details", username));
+				OpenShiftUIActivator.log(e);
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
 		} catch (Exception e) {
 			status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-					"Could not check user credentials: {0}.", e.getMessage()));
+					"Unknown error, can not verify user {0} - see Error Log for details", username));
+			OpenShiftUIActivator.log(e);
 		}
 		setValid(status);
 		return status;
