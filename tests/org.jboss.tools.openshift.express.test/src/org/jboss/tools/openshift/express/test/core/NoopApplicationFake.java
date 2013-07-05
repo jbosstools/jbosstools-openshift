@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.test.core;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.jcraft.jsch.Session;
@@ -23,7 +22,7 @@ import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearGroup;
 import com.openshift.client.IGearProfile;
-import com.openshift.client.Message;
+import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -259,12 +258,7 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public Map<String, Message> getMessages() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Message getMessage(String field) {
+	public Messages getMessages() {
 		throw new UnsupportedOperationException();
 	}
 

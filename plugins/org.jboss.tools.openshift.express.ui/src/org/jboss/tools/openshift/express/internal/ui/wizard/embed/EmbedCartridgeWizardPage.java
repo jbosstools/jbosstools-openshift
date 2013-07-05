@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -36,6 +37,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -44,6 +46,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
@@ -254,6 +257,9 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			return result.isOK();
 		} catch (Exception e) {
+			String errorMessage = NLS.bind("There was an error when embedding cartridge(s) for application {0}", pageModel.getApplication().getName());
+			ErrorDialog.openError(getShell(), "Error while embedding cartridges", 
+					errorMessage + ": " + StringUtils.null2emptyString(e.getMessage()), OpenShiftUIActivator.createErrorStatus(errorMessage, e)); 
 			return false;
 		}
 	}
