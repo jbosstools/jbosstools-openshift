@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationPropertiesProvider;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
@@ -52,8 +53,11 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationWizardModel;
 
+import com.openshift.client.ApplicationScale;
+import com.openshift.client.IApplication;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author André Dietisheim
@@ -92,7 +96,8 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 						.observe(pageModel));
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
-		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
+		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this,
+				new ApplicationPropertiesProvider(pageModel.getApplication())));
 
 		// hiding buttons for now: https://issues.jboss.org/browse/JBIDE-10399
 		// Button checkAllButton = new Button(embedGroup, SWT.PUSH);
@@ -305,6 +310,29 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 		public int hashCode(Object element) {
 			return element.hashCode();
 		}
+	}
 
+	public class ApplicationPropertiesProvider implements IApplicationPropertiesProvider {
+
+		private IApplication application;
+
+		public ApplicationPropertiesProvider(IApplication application) {
+			this.application = application;
+		}
+
+		@Override
+		public ApplicationScale getApplicationScale() {
+			return application.getApplicationScale();
+		}
+
+		@Override
+		public IStandaloneCartridge getCartridge() {
+			return application.getCartridge();
+		}
+		
+		@Override
+		public String getName() {
+			return application.getName();
+		}
 	}
 }

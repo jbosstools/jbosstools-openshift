@@ -28,6 +28,8 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.ApplicationRequirement;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationPropertiesProvider;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
@@ -65,37 +67,70 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 
 	private IEmbedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
+	private IApplicationPropertiesProvider applicationPropertiesProvider;
 
-	public EmbedCartridgeStrategyAdapter(IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+	public EmbedCartridgeStrategyAdapter(IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage, IApplicationPropertiesProvider provider) {
 		this.wizardPage = wizardPage;
 		this.pageModel = pageModel;
+		this.applicationPropertiesProvider = provider;
 	}
 
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		try {
 			IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-			EmbedCartridgeStrategy embedCartridgeStrategy = getEmbedCartridgeStrategy(pageModel.getDomain());
 			boolean adding = event.getChecked();
+			EmbedCartridgeStrategy embedCartridgeStrategy = getEmbedCartridgeStrategy(pageModel.getDomain());
+			ApplicationRequirement nonMetRequirment = embedCartridgeStrategy.getNonMetRequirement(cartridge, applicationPropertiesProvider);
+			if (adding 
+					&& nonMetRequirment != null) {
+				boolean added = onNonMetRequirement(nonMetRequirment, cartridge, applicationPropertiesProvider);
+				if (!added) {
+					return;
+				}
+			}
 			EmbeddableCartridgeDiff additionalOperations = createEmbeddableCartridgeDiff(adding, cartridge, embedCartridgeStrategy);
-
 			if (additionalOperations.hasChanges()) {
 				onAdditionalOperations(event, cartridge, adding, additionalOperations);
 			} else if (isRemovingExisting(adding, pageModel.isEmbedded(cartridge))) {
-				if(!MessageDialog.openQuestion(getShell(), 
-						NLS.bind("Remove cartridge {0}", cartridge.getName()), 
-								NLS.bind(
-										"You are about to remove cartridge {0}.\n"
-												+ "Removing a cartridge is not reversible and can cause you to loose the data you have stored in it."
-												+ "\nAre you sure?", cartridge.getName()))) {
-					// revert removal
-					pageModel.selectEmbeddedCartridges(cartridge);
-				}
+				onRemove(cartridge);
 			}
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
 		} catch (SocketTimeoutException e) {
 			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+		}
+	}
+
+	private boolean onNonMetRequirement(ApplicationRequirement requirement, IEmbeddableCartridge cartridge,
+			IApplicationPropertiesProvider provider) throws SocketTimeoutException, OpenShiftException {
+		int result = new MessageDialog(getShell(),
+				NLS.bind("Inappropriate application {0}", applicationPropertiesProvider.getName()), 
+				null,
+				requirement.getMessage(cartridge, provider)
+				+ NLS.bind("\n\nAdding may fail, are you sure that you want to add cartridge {0}?", cartridge.getName()), 
+				MessageDialog.QUESTION, 
+				new String[] { "No", "Yes" }, 0).open();
+			// revert
+		switch(result) {
+		default:
+		case 0:
+			pageModel.unselectEmbeddedCartridges(cartridge);
+			return false;
+		case 1:
+			return true;
+		}
+	}
+
+	private void onRemove(IEmbeddableCartridge cartridge) throws SocketTimeoutException {
+		if(!MessageDialog.openQuestion(getShell(), 
+				NLS.bind("Remove cartridge {0}", cartridge.getName()), 
+						NLS.bind(
+								"You are about to remove cartridge {0}.\n"
+										+ "Removing a cartridge is not reversible and can cause you to loose the data you have stored in it."
+										+ "\nAre you sure?", cartridge.getName()))) {
+			// revert removal
+			pageModel.selectEmbeddedCartridges(cartridge);
 		}
 	}
 
