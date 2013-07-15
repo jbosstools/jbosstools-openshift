@@ -26,6 +26,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -49,7 +50,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 public class CreationLogDialog extends TitleAreaDialog {
 
 	private static final Pattern HTTP_LINK_REGEX = Pattern.compile("(http[^ |\n]+)");
-	private static final Pattern ECLIPSE_LINK_REGEX = Pattern.compile("(<a>)(.+)(</a>)");
 	
 	private List<Link> links;
 	private LogEntry[] logEntries;
@@ -151,12 +151,9 @@ public class CreationLogDialog extends TitleAreaDialog {
 	private void appendLog(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
 		String log = logEntry.getLog();
 		if (logEntry.isTimeouted) {
-			log = createEnvironmentVariablesLink(
-					"<request timed out, you can look up the credentials in the <a>environment variables</a>>",
-					builder.length(), 
-					styles,
-					logEntry.getElement());
-			builder.append(log);
+			builder.append(
+					NLS.bind("<The request timed out but we could create {0}. "
+							+ "You can look up eventual credentials in the environment variables>", logEntry.getName()));
 		} else if (StringUtils.isEmpty(log)) {
 			builder.append("<no information reported by OpenShift>");
 		} else {
@@ -164,27 +161,6 @@ public class CreationLogDialog extends TitleAreaDialog {
 			builder.append(log);
 		}
 		builder.append(StringUtils.getLineSeparator());
-	}
-
-	private String createEnvironmentVariablesLink(String log, int baseIndex, List<StyleRange> styles, Object element) {
-		String newLog = log;
-		Matcher matcher = ECLIPSE_LINK_REGEX.matcher(log);
-		while (matcher.find()
-				&& matcher.groupCount() == 3) {
-			newLog = new StringBuilder()
-				.append(log.substring(0, matcher.start(1)))
-				.append(matcher.group(2))
-				.append(log.substring(matcher.end(3), log.length()))
-				.toString();
-			int startOffset = matcher.start(1) + baseIndex;
-			int stopOffset = matcher.start(1) + matcher.group(2).length() + baseIndex;
-			StyleRange linkStyle = createLinkStyleRange(startOffset, stopOffset);
-			styles.add(linkStyle);
-
-			links.add(new EnvironmentVariablesLink(startOffset, stopOffset, element));
-		}
-
-		return newLog;
 	}
 
 	private void createUrlLinks(String log, int baseIndex, List<StyleRange> styles) {
@@ -339,18 +315,4 @@ public class CreationLogDialog extends TitleAreaDialog {
 		}
 	}
 	
-	private static class EnvironmentVariablesLink extends Link {
-
-		private Object element;
-		
-		public EnvironmentVariablesLink(int startOffset, int stopOffset, Object element) {
-			super(startOffset, stopOffset);
-			this.element = element;
-		}
-
-		public void execute() throws ExecutionException, NotDefinedException, NotEnabledException, NotHandledException {
-			IStructuredSelection selection = new StructuredSelection(element);
-			CommandUtils.executeCommand(ICommandIds.SHOW_ENVIRONMENT, selection);
-		}
-	}
 }
