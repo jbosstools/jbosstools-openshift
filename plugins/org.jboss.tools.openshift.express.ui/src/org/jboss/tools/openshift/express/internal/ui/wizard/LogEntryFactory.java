@@ -36,14 +36,22 @@ public class LogEntryFactory {
 				for(Message message : messages) {
 					if (message != null
 							&& !StringUtils.isEmpty(message.getText())) {
-						entries.add(				new LogEntry(
+						entries.add(
+								new LogEntry(
 								application.getName(),
 								message.getText(),
 								isTimeouted,
 								application));
+					} else if (isTimeouted) {
+						// report timeout to the user
+						entries.add(new LogEntry(application.getName(), null, isTimeouted, application));
 					}
 				}
+			} else if (isTimeouted) {
+				// report timeout to the user
+				entries.add(new LogEntry(application.getName(), null, isTimeouted, application));
 			}
+			
 			return entries.toArray(new LogEntry[entries.size()]);
 		}
 		return logEntry;
@@ -68,8 +76,14 @@ public class LogEntryFactory {
 								message.getText(),
 								isTimeouted,
 								cartridge));
+					} else if (isTimeouted) {
+						// report timeout to the user
+						entries.add(new LogEntry(cartridge.getName(), null, isTimeouted, cartridge));
 					}
 				}
+			} else if (isTimeouted) {
+				// report timeout to the user
+				entries.add(new LogEntry(cartridge.getName(), null, isTimeouted, cartridge));
 			}
 		}
 			
@@ -77,6 +91,9 @@ public class LogEntryFactory {
 	}	
 	
 	private static List<Message> getMessages(Messages messages) {
+		if (messages == null) {
+			return null;
+		}
 		List<Message> resultMessages = messages.getBy(IField.RESULT);
 		// workaround(s) for https://issues.jboss.org/browse/JBIDE-15115
 		if (resultMessages == null
