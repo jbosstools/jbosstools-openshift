@@ -69,6 +69,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
 				if (application != null) {
+					// creation went ok, but initial request timed out
 					return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
 				} else {
 					return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
