@@ -940,28 +940,28 @@
 	    	<menu
 	           id="org.jboss.tools.openshift.express.ui.projectExplorerPopup"
 	           label="%openshift.menu.openshift">
+	           <visibleWhen 
+					checkEnabled="false">
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false">
+	 							<test
+			               			forcePluginActivation="true"
+			               			property="org.jboss.tools.openshift.express.isOpenShiftProject" value="true"/>
+					        </iterate>
+						</and>
+					</with>
+				</visibleWhen>
 			</menu>
 		</menuContribution>
         <menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.projectExplorerPopup"> 
 			<command
 			    commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
-			    icon="icons/marker.png"
+			    icon="icons/marker16.png"
 			    id="org.jboss.tools.openshift.express.ui.command.configureMarkers"
 			    mnemonic="M">
-				<visibleWhen 
-					checkEnabled="false">
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false" operator="or">
-	 							<test
-			               			forcePluginActivation="true"
-			               			property="org.jboss.tools.openshift.express.isOpenShiftProject" />
-					        </iterate>
-						</and>
-					</with>
-				</visibleWhen>
 			</command>
         </menuContribution>
 		<menuContribution
@@ -969,30 +969,31 @@
 	    	<menu
 	           id="org.jboss.tools.openshift.express.ui.packageExplorerPopup"
 	           label="%openshift.menu.openshift">
+	           <visibleWhen 
+					checkEnabled="false">
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false">
+								<adapt
+              						type="org.eclipse.core.resources.IProject">
+		 							<test
+		 								forcePluginActivation="true"
+				               			property="org.jboss.tools.openshift.express.isOpenShiftProject" value="true"/>
+								</adapt>
+			               	</iterate>
+						</and>
+					</with>
+				</visibleWhen>
 			</menu>
 		</menuContribution>
         <menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.packageExplorerPopup"> 
 			<command
 			    commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
-			    icon="icons/marker.png"
+			    icon="icons/marker16.png"
 			    id="org.jboss.tools.openshift.express.ui.command.configureMarkers"
 			    mnemonic="M">
-				<visibleWhen 
-					checkEnabled="false">
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false" operator="or">
-								<adapt
-              						type="org.eclipse.core.resources.IProject">
-		 							<test
-				               			property="org.jboss.tools.openshift.express.isOpenShiftProject" />
-								</adapt>
-			               	</iterate>
-						</and>
-					</with>
-				</visibleWhen>
 			</command>
         </menuContribution>
      </extension>
