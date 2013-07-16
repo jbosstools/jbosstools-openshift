@@ -1167,38 +1167,6 @@
 			    mnemonic="M">
 			</command>
         </menuContribution>
-		<menuContribution
-	    	locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
-	    	<menu
-	           id="org.jboss.tools.openshift.express.ui.resourceNavigatorPopup"
-	           label="%openshift.menu.openshift">
-	           <visibleWhen 
-					checkEnabled="false">
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false">
-								<adapt
-              						type="org.eclipse.core.resources.IProject">
-		 							<test
-		 								forcePluginActivation="true"
-				               			property="org.jboss.tools.openshift.express.isOpenShiftProject" value="true"/>
-								</adapt>
-			               	</iterate>
-						</and>
-					</with>
-				</visibleWhen>
-			</menu>
-		</menuContribution>
-        <menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.resourceNavigatorPopup"> 
-			<command
-			    commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
-			    icon="icons/marker16.png"
-			    id="org.jboss.tools.openshift.express.ui.command.configureMarkers"
-			    mnemonic="M">
-			</command>
-        </menuContribution>
 	</extension>
     <extension
        point="org.eclipse.core.expressions.propertyTesters">
