@@ -106,4 +106,11 @@ public class StringUtils {
 		}
 		return stringNoSuffix;
 	}
+	
+	public static String trim(String string) {
+		if (string == null) {
+			return string;
+		}
+		return string.trim();
+	}
 }
