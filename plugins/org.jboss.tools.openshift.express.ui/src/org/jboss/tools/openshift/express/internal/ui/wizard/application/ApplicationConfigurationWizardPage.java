@@ -79,7 +79,9 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNullConverter;
+import org.jboss.tools.openshift.express.internal.ui.databinding.MultiConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
@@ -459,7 +461,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
 		ValueBindingBuilder
 				.bind(sourcecodeUrlObservable)
-				.converting(new EmptyStringToNullConverter())
+				.converting(new MultiConverter(new TrimmingStringConverter(), new EmptyStringToNullConverter()))
 				.to(BeanProperties.value(
 						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
@@ -1032,7 +1034,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			Object value = sourcecodeUrlObservable.getValue();
 			if (value instanceof String) {
-				String gitUri = (String) value;
+				String gitUri = StringUtils.trim((String) value);
 				if (StringUtils.isEmpty(gitUri)) {
 					return ValidationStatus.cancel("Please provide a git url for your source code");
 				}
