@@ -16,16 +16,16 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
  * @author Xavier Coulon
  *
  */
-public class NewOpenShiftExpressApplicationWizard extends OpenShiftApplicationWizard {
+public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 
 	/**
 	 * Constructor
 	 */
-	public NewOpenShiftExpressApplicationWizard() {
+	public NewOpenShiftApplicationWizard() {
 		super(false, "New OpenShift Application");
 	}
 
-	public NewOpenShiftExpressApplicationWizard(Connection user) {
-		super(user, null, null, false, "New OpenShift Application");
+	public NewOpenShiftApplicationWizard(Connection connection) {
+		super(connection, null, null, false, false, "New OpenShift Application");
 	}
 }

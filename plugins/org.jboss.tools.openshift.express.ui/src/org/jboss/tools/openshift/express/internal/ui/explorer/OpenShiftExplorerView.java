@@ -24,16 +24,19 @@ import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsModelListener {
 
+	@Override
 	protected Object getInitialInput() {
 		return ConnectionsModelSingleton.getInstance();
 	}
 
+	@Override
 	protected CommonViewer createCommonViewer(Composite aParent) {
 		CommonViewer v = super.createCommonViewer(aParent);
 		ConnectionsModelSingleton.getInstance().addListener(this);
 		return v;
 	}
 
+	@Override
 	public void dispose() {
 		ConnectionsModelSingleton.getInstance().removeListener(this);
 		super.dispose();
@@ -61,14 +64,17 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		});
 	}
 
+	@Override
 	public void connectionAdded(Connection user) {
 		refreshViewer();
 	}
 
+	@Override
 	public void connectionRemoved(Connection user) {
 		refreshViewer();
 	}
 
+	@Override
 	public void connectionChanged(Connection user) {
 		refreshViewer();
 	}

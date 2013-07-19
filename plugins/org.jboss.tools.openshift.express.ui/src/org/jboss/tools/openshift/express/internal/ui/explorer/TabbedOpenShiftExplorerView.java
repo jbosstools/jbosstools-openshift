@@ -31,7 +31,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
 
 /**
  * @author Xavier Coulon
@@ -76,7 +76,7 @@ public class TabbedOpenShiftExplorerView extends ViewPart implements ITabbedProp
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final IWizard connectToOpenShiftWizard = new ConnectToOpenShiftWizard();
+				final IWizard connectToOpenShiftWizard = new ConnectionWizard();
 				int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, commonViewer.getTree().getShell());
 				if (returnCode == Window.OK) {
 					Logger.debug("OpenShift Auth succeeded.");

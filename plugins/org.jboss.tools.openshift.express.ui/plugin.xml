@@ -9,7 +9,7 @@
       </category>
       <wizard
             category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftExpressApplicationWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
             name="OpenShift Application"
@@ -652,30 +652,6 @@
         </actionProvider>
      </extension>
      
-     <extension
-           point="org.eclipse.ui.viewActions">
-        <viewContribution
-              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewContribution"
-              targetID="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-           <!--action
-                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.RefreshViewerActionDelegate"
-                 icon="icons/refresh.gif"
-                 id="org.jboss.tools.openshift.express.ui.viewActions.refreshAction"
-                 label="Refresh"
-                 style="push"
-                 toolbarPath="openshift">
-           </action-->
-           <action
-                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.OpenConnectionDialogActionDelegate"
-                 icon="icons/resource_obj.gif"
-                 id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
-                 label="Connect"
-                 style="push"
-                 toolbarPath="openshift"
-                 tooltip="Connect to OpenShift">
-           </action>
-        </viewContribution>
-     </extension>
      <!-- when using the 'classic' properties view. -->
      <extension
            point="org.eclipse.core.runtime.adapters">
@@ -791,16 +767,91 @@
          </view>
       	</perspectiveExtension> 
      </extension>
-	<!-- ssh keys -->
+	<!-- New Connection OpenShift Explorer -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.newconnection"
+              name="%openshift.command.newconnection">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
+              class="org.jboss.tools.openshift.express.internal.ui.command.NewConnectionHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
+                icon="icons/resource_obj.gif"
+                id="org.jboss.tools.openshift.express.ui.command.newconnection"
+                mnemonic="N">
+			<visibleWhen>
+				<or>
+					<with variable="activePartId">
+						<equals value="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView" />
+					</with>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+		         			<iterate ifEmpty="false" operator="or">
+		            			<instanceof
+		                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+		                    </iterate>
+						</and>
+	                </with>
+				</or>
+			</visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+	<!-- Edit Connection -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.editconnection"
+              name="%openshift.command.editconnection">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.EditConnectionHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.editconnection">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editconnection"
+                icon="icons/resource_obj.gif"
+                mnemonic="E">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+     </extension>
      <extension
            point="org.eclipse.ui.commands">
         <command
               id="org.jboss.tools.openshift.express.ui.command.manageKeys"
               name="%openshift.command.managekeys">
-        </command>
-        <command
-              id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
-              name="%openshift.command.showenvironment">
         </command>
      </extension>
      <extension
@@ -809,12 +860,9 @@
               class="org.jboss.tools.openshift.express.internal.ui.command.ManageSSHKeysHandler"
               commandId="org.jboss.tools.openshift.express.ui.command.manageKeys">
         </handler>
-        <handler
-              class="org.jboss.tools.openshift.express.internal.ui.command.ShowEnvironmentHandler"
-              commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment">
-        </handler>
      </extension>
-     <extension
+	<!-- manage keys OpenShift Explorer -->
+    <extension
            point="org.eclipse.ui.menus">
         <menuContribution
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.server">
@@ -836,7 +884,24 @@
               </visibleWhen>
           </command>
         </menuContribution>
-		<!-- show environment OpenShift Explorer -->
+	</extension>
+    <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+              name="%openshift.command.showenvironment">
+        </command>
+    </extension>
+    <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.ShowEnvironmentHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment">
+        </handler>
+    </extension>
+	<!-- show environment OpenShift Explorer -->
+    <extension
+           point="org.eclipse.ui.menus">
         <menuContribution
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
           <command

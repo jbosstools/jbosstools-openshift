@@ -42,6 +42,7 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -71,20 +72,19 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	private static final long EMBED_CARTRIDGES_TIMEOUT = 10 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 20 * 60 * 1000;
 
-	private final boolean skipCredentialsPage;
+	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
 	OpenShiftApplicationWizard(final boolean useExistingApplication, final String wizardTitle) {
-		this(null, null, null, useExistingApplication, wizardTitle);
+		this(ConnectionsModelSingleton.getInstance().getRecentConnection(), null, null, useExistingApplication, true, wizardTitle);
 	}
 
-	OpenShiftApplicationWizard(Connection user, IProject project, IApplication application,
-			boolean useExistingApplication, String wizardTitle) {
+	OpenShiftApplicationWizard(Connection connection, IProject project, IApplication application,
+			boolean useExistingApplication, boolean showCredentialsPage, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
-		this.model = new OpenShiftApplicationWizardModel(user, project, application,
-				useExistingApplication);
-		this.skipCredentialsPage = (user != null && user.isConnected());
+		this.model = new OpenShiftApplicationWizardModel(connection, project, application, useExistingApplication);
+		this.showCredentialsPage = showCredentialsPage;
 	}
 
 	protected void openError(final String title, final String message) {
@@ -120,7 +120,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	@Override
 	public void addPages() {
-		if (!skipCredentialsPage) {
+		if (showCredentialsPage) {
 			addPage(new ConnectionWizardPage(this, model));
 		}
 		addPage(new ApplicationConfigurationWizardPage(this, model));

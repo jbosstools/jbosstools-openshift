@@ -23,11 +23,11 @@ public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard
 
 	/**
 	 * Constructor
-	 * @param user
+	 * @param connection
 	 * @param project
 	 * @param application
 	 */
-	public ImportOpenShiftApplicationWizard(Connection user, IProject project, IApplication application) {
-		super(user, project, application, true, "Import OpenShift Application");
+	public ImportOpenShiftApplicationWizard(Connection connection, IProject project, IApplication application) {
+		super(connection, project, application, true, false, "Import OpenShift Application");
 	}
 }
