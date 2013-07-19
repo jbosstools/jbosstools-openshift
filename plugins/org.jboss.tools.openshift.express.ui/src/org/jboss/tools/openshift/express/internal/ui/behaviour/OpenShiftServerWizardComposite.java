@@ -86,7 +86,7 @@ import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLab
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.NotFoundOpenShiftException;
@@ -263,7 +263,7 @@ public class OpenShiftServerWizardComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Connection connection = UIUtils.getFirstElement(connectionComboViewer.getSelection(), Connection.class);
-				ConnectToOpenShiftWizard wizard = new ConnectToOpenShiftWizard(connection);
+				ConnectionWizard wizard = new ConnectionWizard(connection);
 				if (WizardUtils.openWizardDialog(
 						wizard, connectionComboViewer.getControl().getShell()) == Window.OK) {
 					connectionComboViewer.getControl().setEnabled(true);

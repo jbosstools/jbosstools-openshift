@@ -17,26 +17,26 @@ import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsMod
 /**
  * @author Xavier Coulon
  */
-public class ConnectToOpenShiftWizard extends Wizard {
+public class ConnectionWizard extends Wizard {
 
 	private final ConnectionWizardPage page;
 	
 	/**
 	 * Constructor to use when connecting with the default connection.
 	 */
-	public ConnectToOpenShiftWizard() {
+	public ConnectionWizard() {
 		this(ConnectionsModelSingleton.getInstance().getRecentConnection());
 	}
 	
-	public ConnectToOpenShiftWizard(final Connection connection) {
+	public ConnectionWizard(final Connection connection) {
 		this(connection, true);
 	}
 
 	/**
 	 * Constructor to use when connection to use is known.
 	 */
-	public ConnectToOpenShiftWizard(final Connection connection, boolean allowConnectionChange) {
-		this.page = new ConnectionWizardPage(this, new ConnectToOpenShiftWizardModel(connection), allowConnectionChange);
+	public ConnectionWizard(final Connection connection, boolean allowConnectionChange) {
+		this.page = new ConnectionWizardPage(this, new ConnectionWizardModel(connection), allowConnectionChange);
 		setNeedsProgressMonitor(true);
 	}
 	

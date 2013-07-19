@@ -68,8 +68,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	ConnectionWizardPageModel(IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		this.wizardModel = wizardModel;
 		this.allowConnectionChange = allowConnectionChange;
-		Connection wizardModelConnection = wizardModel.getConnection();
-		this.selectedConnection = getWizardModelOrRecentConnection(wizardModelConnection);
+		this.selectedConnection = null2NewConnectionMarker(wizardModel.getConnection());
 		this.servers = getServers(selectedConnection);
 		updateFrom(selectedConnection);
 	}
@@ -107,16 +106,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return username;
 	}
 
-	private Connection getWizardModelOrRecentConnection(Connection wizardModelConnection) {
-		if (wizardModelConnection == null) {
-			Connection recentConnection = ConnectionsModelSingleton.getInstance().getRecentConnection();
-			if (recentConnection != null) {
-				return recentConnection;
-			} else {
-				return new NewConnectionMarker();
-			}
+	private Connection null2NewConnectionMarker(Connection connection) {
+		if (connection == null) {
+			return new NewConnectionMarker();
 		} else {
-			return wizardModelConnection;
+			return connection;
 		}
 	}
 

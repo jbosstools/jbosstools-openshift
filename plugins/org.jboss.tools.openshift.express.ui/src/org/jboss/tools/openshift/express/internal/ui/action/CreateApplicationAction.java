@@ -16,7 +16,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
 
 /**
@@ -41,7 +41,7 @@ public class CreateApplicationAction extends AbstractOpenShiftAction {
 
 		if (connection.connect()) {
 			try {
-				final OpenShiftApplicationWizard wizard = new NewOpenShiftExpressApplicationWizard(connection);
+				final OpenShiftApplicationWizard wizard = new NewOpenShiftApplicationWizard(connection);
 				new WizardDialog(new Shell(), wizard).open();
 			} catch(NullPointerException e) {
 				// swallow NPE that's caused by cancelling ssh keys / domain wizard 
