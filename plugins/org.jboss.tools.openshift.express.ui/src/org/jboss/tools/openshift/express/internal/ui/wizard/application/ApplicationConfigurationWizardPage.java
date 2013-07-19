@@ -76,6 +76,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationPropertiesProvider;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNullConverter;
@@ -384,7 +385,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						.observe(pageModel));
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
-		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this));
+		viewer.addCheckStateListener(new EmbedCartridgeStrategyAdapter(pageModel, this,
+				new ApplicationFormPropertiesProvider()));
 
 		this.checkAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
 		checkAllButton.setText("&Select All");
@@ -1059,4 +1061,24 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
 				dbc);
 	}
+
+	private class ApplicationFormPropertiesProvider implements IApplicationPropertiesProvider {
+
+		@Override
+		public ApplicationScale getApplicationScale() {
+			return pageModel.getScale();
+		}
+
+		@Override
+		public IStandaloneCartridge getCartridge() {
+			return pageModel.getSelectedCartridge();
+		}
+
+		@Override
+		public String getName() {
+			return pageModel.getApplicationName();
+		}
+
+	}
+
 }

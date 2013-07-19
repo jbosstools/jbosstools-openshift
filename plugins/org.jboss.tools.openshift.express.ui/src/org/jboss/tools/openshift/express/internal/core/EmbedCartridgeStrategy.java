@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.osgi.util.NLS;
+
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -35,7 +38,13 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class EmbedCartridgeStrategy {
 
-	private final EmbeddableCartridgeRelations[] dependencies =
+	private final ApplicationRequirement[] applicationRequirements =
+			new ApplicationRequirement[] {
+				new JBossApplicationRequirement(new EmbeddableCartridgeSelector("switchyard")),
+				new NonScalableApplicationRequirement(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN))
+	};
+
+	private final EmbeddableCartridgeRelations[] cartridgeDependencies =
 			new EmbeddableCartridgeRelations[] {
 					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("jenkins-client-"),
 							null, null, new CartridgeSelector("jenkins-")),
@@ -59,7 +68,7 @@ public class EmbedCartridgeStrategy {
 		this.allEmbeddableCartridges = allEmbeddableCartridges;
 		this.allStandaloneCartridges = allStandaloneCartridges;
 		this.allApplications = allApplications;
-		initDependencyMaps(allEmbeddableCartridges, allStandaloneCartridges, dependencies);
+		initDependencyMaps(allEmbeddableCartridges, allStandaloneCartridges, cartridgeDependencies);
 	}
 
 	private void initDependencyMaps(Collection<IEmbeddableCartridge> allEmbeddableCartridges,
@@ -94,7 +103,17 @@ public class EmbedCartridgeStrategy {
 		IEmbeddableCartridge requiringCartridge = dependency.getSubject(allEmbeddableCartridges);
 		dependenciesByCartridge.put(requiringCartridge, dependency);
 	}
-
+	
+	public ApplicationRequirement getNonMetRequirement(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application) {
+		for (ApplicationRequirement requirement : applicationRequirements) {
+			if (requirement.isForCartridge(requestedCartridge)
+					&& !requirement.meetsRequirements(application)) {
+				return requirement;
+			}
+		}
+		return null;
+	}
+	
 	public EmbeddableCartridgeDiff add(IEmbeddableCartridge cartridge, Set<IEmbeddableCartridge> currentCartridges)
 			throws OpenShiftException {
 		EmbeddableCartridgeDiff cartridgeDiff = new EmbeddableCartridgeDiff(cartridge);
@@ -217,6 +236,80 @@ public class EmbedCartridgeStrategy {
 		}
 	}
 
+	public static abstract class ApplicationRequirement {
+
+		private EmbeddableCartridgeSelector cartridge;
+
+		protected ApplicationRequirement(EmbeddableCartridgeSelector cartridgeSelector) {
+			this.cartridge = cartridgeSelector;
+		}
+
+		public boolean isForCartridge(IEmbeddableCartridge requestedCartridge) {
+			return cartridge.matches(requestedCartridge);
+		}
+		
+		public String getCartridgeName() {
+			return cartridge.getName();
+		}
+		
+		protected abstract boolean meetsRequirements(IApplicationPropertiesProvider application);
+
+		public abstract String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application);
+	}
+	
+	private static class NonScalableApplicationRequirement extends ApplicationRequirement {
+
+		protected NonScalableApplicationRequirement(EmbeddableCartridgeSelector cartridgeSelector) {
+			super(cartridgeSelector);
+		}
+
+		@Override
+		protected boolean meetsRequirements(IApplicationPropertiesProvider application) {
+			return application.getApplicationScale() == ApplicationScale.NO_SCALE;
+		}
+
+		@Override
+		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application) {
+			return NLS.bind(
+							"It is not recommended to add cartridge {0} to your application {1}."
+							+ " The cartridge cannot scale and requires a non-scalable application. "
+							+ "Your application is scalable.",
+					requestedCartridge.getName(), application.getName());
+		}
+	}
+
+	private static class JBossApplicationRequirement extends ApplicationRequirement {
+
+		private CartridgeSelector eapSelector;
+		private CartridgeSelector asSelector;
+
+		protected JBossApplicationRequirement(EmbeddableCartridgeSelector cartridgeSelector) {
+			super(cartridgeSelector);
+			this.eapSelector = new CartridgeSelector("jbosseap");
+			this.asSelector = new CartridgeSelector("jbossas");			
+		}
+
+		@Override
+		protected boolean meetsRequirements(IApplicationPropertiesProvider application) {
+			IStandaloneCartridge applicationType = application.getCartridge();
+			return eapSelector.isMatching(applicationType)
+					|| asSelector.isMatching(applicationType);
+		}
+
+		@Override
+		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application) {
+			return NLS.bind("It is not recommended to add cartridge {0} to your application {1}."
+					+ " The cartridge requires a {3} or {4} application and your application is a {2}."
+							, new String[] { 
+									requestedCartridge.getName(), 
+									application.getName(),
+									application.getCartridge().getName(),
+									eapSelector.getName(),
+									asSelector.getName()});
+		}
+
+	}
+
 	public static class EmbeddableCartridgeDiff {
 
 		private List<IEmbeddableCartridge> removals;
@@ -286,21 +379,28 @@ public class EmbedCartridgeStrategy {
 			this.nameStartsWith = nameStartsWith;
 		}
 
-		private IEmbeddableCartridge getCartridge(Collection<IEmbeddableCartridge> embeddableCartridges) {
+		public IEmbeddableCartridge getCartridge(Collection<IEmbeddableCartridge> embeddableCartridges) {
 			if (embeddableCartridges == null
 					|| embeddableCartridges.isEmpty()) {
 				return null;
 			}
 			
 			for(IEmbeddableCartridge cartridge : embeddableCartridges) {
-				if (cartridge.getName() != null
-						&& cartridge.getName().startsWith(nameStartsWith)) {
+				if (matches(cartridge)) {
 					return cartridge;
 				}
 			}
 			return null;
 		}
-		
+
+		private boolean matches(IEmbeddableCartridge cartridge) {
+			return cartridge.getName() != null
+					&& cartridge.getName().startsWith(nameStartsWith);
+		}
+
+		public String getName() {
+			return nameStartsWith;
+		}
 	}
 	
 	private static class CartridgeSelector {
@@ -311,20 +411,34 @@ public class EmbedCartridgeStrategy {
 			this.nameStartsWith = nameStartsWith;
 		}
 
-		private IStandaloneCartridge getCartridge(Collection<IStandaloneCartridge> cartridges) {
+		public IStandaloneCartridge getCartridge(Collection<IStandaloneCartridge> cartridges) {
 			if (cartridges == null
 					|| cartridges.isEmpty()) {
 				return null;
 			}
 			
 			for(IStandaloneCartridge cartridge : cartridges) {
-				if (cartridge.getName() != null
-						&& cartridge.getName().startsWith(nameStartsWith)) {
+				if (isMatching(cartridge)) {
 					return cartridge;
 				}
 			}
 			return null;
 		}
 		
+		public boolean isMatching(IStandaloneCartridge cartridge) {
+			return cartridge != null
+					&& cartridge.getName() != null
+					&& cartridge.getName().startsWith(nameStartsWith);
+		}
+		
+		public String getName() {
+			return nameStartsWith;
+		}
+	}
+	
+	public interface IApplicationPropertiesProvider {
+		public ApplicationScale getApplicationScale();
+		public IStandaloneCartridge getCartridge();
+		public String getName();
 	}
 }
