@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2013 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.markers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -23,15 +22,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.ViewersObservables;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -95,9 +93,8 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IOpenShiftMarker.class).observe(viewer),
 				BeanProperties.set(
-						ConfigureMarkersWizardPageModel.PROPERTY_PRESENT_MARKERS)
+						ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS)
 						.observe(pageModel));
-		viewer.addCheckStateListener(onMarkerChecked());
 		ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(viewer))
 				.to(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER)
@@ -116,6 +113,9 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 		descriptionText.setBackground(descriptionGroup.getBackground());
 		GridDataFactory.fillDefaults()
 				.hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionText);
+		dbc.bindSet(
+				ViewersObservables.observeCheckedElements(viewer, IOpenShiftMarker.class),
+				BeanProperties.set(ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS).observe(pageModel));
 		ValueBindingBuilder
 				.bind(WidgetProperties.text().observe(descriptionText))
 				.notUpdating(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER)
@@ -132,31 +132,6 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 
 				})
 				.in(dbc);
-
-	}
-
-	private ICheckStateListener onMarkerChecked() {
-		return new ICheckStateListener() {
-
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				Object element = event.getElement();
-				if (!(element instanceof IOpenShiftMarker)) {
-					return;
-				}
-
-				IOpenShiftMarker marker = (IOpenShiftMarker) element;
-				try {
-					AddRemoveMarkerJob job = new AddRemoveMarkerJob(event.getChecked(), marker);
-					IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
-					if (!result.isOK()) {
-						viewer.refresh();
-					}
-				} catch (Exception e) {
-					OpenShiftUIActivator.log(e);
-				}
-			}
-		};
 	}
 
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
@@ -218,10 +193,6 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 	
-	private void clearViewer() {
-		setViewerInput(new ArrayList<IOpenShiftMarker>());
-	}
-
 	private void setViewerCheckedElements(final Collection<IOpenShiftMarker> markers) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
@@ -240,6 +211,24 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 				viewer.setInput(marker);
 			}
 		});
+	}
+	
+	/**
+	 * Returns the markers that the user has removed.
+	 * 
+	 * @return the markers that the user removed
+	 */
+	public Collection<IOpenShiftMarker> getRemovedMarkers() {
+		return pageModel.getRemovedMarkers();
+	}
+	
+	/**
+	 * Returns the markers that the user has added.
+	 * 
+	 * @return the markers that the user added
+	 */
+	public Collection<IOpenShiftMarker> getAddedMarkers() {
+		return pageModel.getAddedMarkers();
 	}
 
 	/**
@@ -271,33 +260,6 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private class AddRemoveMarkerJob extends AbstractDelegatingMonitorJob {
-
-		private boolean add;
-		private IOpenShiftMarker marker;
-
-		public AddRemoveMarkerJob(boolean add, IOpenShiftMarker marker) {
-			super(NLS.bind("{0} marker {1}", add ? "Add" : "Remove", marker.getName()));
-			this.add = add;
-			this.marker = marker;
-		}
-
-		@Override
-		protected IStatus doRun(IProgressMonitor monitor) {
-			try {
-				if (add) {
-					pageModel.addToProject(marker, monitor);
-				} else {
-					pageModel.removeFromProject(marker, monitor);
-				}
-				return Status.OK_STATUS;
-			} catch (CoreException e) {
-				return OpenShiftUIActivator.createErrorStatus(
-						NLS.bind("Could not {0} marker {1}", add ? "add" : "remove", marker.getName()), e);
-			}
-		}
-	}
-
 	private class LoadMarkersJob extends AbstractDelegatingMonitorJob {
 
 		public LoadMarkersJob() {
@@ -309,7 +271,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 			try {
 				pageModel.loadMarkers();
 				setViewerInput(pageModel.getAvailableMarkers());
-				setViewerCheckedElements(pageModel.getPresentMarkers());
+				setViewerCheckedElements(pageModel.getCheckedMarkers());
 				return Status.OK_STATUS;
 			} catch (CoreException e) {
 				return OpenShiftUIActivator.createErrorStatus(

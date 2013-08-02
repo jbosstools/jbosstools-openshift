@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -198,8 +199,12 @@ public class EGitUtils {
 
 	public static void addToRepository(IProject project, Repository repository,
 			IProgressMonitor monitor) throws CoreException {
-		AddToIndexOperation add = new AddToIndexOperation(
-				Collections.singletonList(project));
+		AddToIndexOperation add = new AddToIndexOperation(Collections.singletonList(project));
+		add.execute(monitor);
+	}
+
+	public static void addToRepository(Collection<IResource> resources, IProgressMonitor monitor) throws CoreException {
+		AddToIndexOperation add = new AddToIndexOperation(resources);
 		add.execute(monitor);
 	}
 
