@@ -203,4 +203,12 @@ public class UIUtils {
 		destination.setBackground(source.getBackground());
 	}
 
+	public static void copyMenuOf(Control source, final Control target) {
+		Menu menu = source.getMenu();
+		if (menu != null) {
+			target.setMenu(menu);
+		}
+	}
+
+	
 }
