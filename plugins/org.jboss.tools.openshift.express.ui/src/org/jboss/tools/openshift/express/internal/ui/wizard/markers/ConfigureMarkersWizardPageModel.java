@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2013 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.markers;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.marker.OpenShiftMarkers;
+import org.jboss.tools.openshift.express.internal.core.util.DiffUtils;
 
 /**
  * @author André Dietisheim
@@ -27,11 +29,12 @@ import org.jboss.tools.openshift.express.internal.core.marker.OpenShiftMarkers;
 public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_AVAILABLE_MARKERS = "availableMarkers";
-	public static final String PROPERTY_PRESENT_MARKERS = "presentMarkers";
+	public static final String PROPERTY_CHECKED_MARKERS = "checkedMarkers";
 	public static final String PROPERTY_SELECTED_MARKER = "selectedMarker";
 	
 	private List<IOpenShiftMarker> availableMarkers;
 	private Set<IOpenShiftMarker> presentMarkers = new HashSet<IOpenShiftMarker>();
+	private Set<IOpenShiftMarker> checkedMarkers = new HashSet<IOpenShiftMarker>();
 	private IOpenShiftMarker selectedMarker;
 	private IProject project;
 
@@ -42,7 +45,8 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 	public void loadMarkers() throws CoreException {
 		OpenShiftMarkers markers = new OpenShiftMarkers(project);
 		setAvailableMarkers(markers.getAll());
-		setPresentMarkers(toSet(markers.getPresent()));
+		this.presentMarkers = toSet(markers.getPresent());
+		setCheckedMarkers(presentMarkers);
 	}
 	
 	private Set<IOpenShiftMarker> toSet(List<IOpenShiftMarker> markers) {
@@ -60,17 +64,17 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 		return availableMarkers;
 	}
 
-	public Set<IOpenShiftMarker> getPresentMarkers() throws CoreException {
-		return presentMarkers;
+	public Set<IOpenShiftMarker> getCheckedMarkers() {
+		return checkedMarkers;
 	}
 
-	public void setPresentMarkers(Set<IOpenShiftMarker> markers) throws CoreException {
-		Set<IOpenShiftMarker> oldValue = getPresentMarkers();
-		if (markers != presentMarkers) {
-			presentMarkers.clear();
-			presentMarkers.addAll(markers);
+	public void setCheckedMarkers(Set<IOpenShiftMarker> markers) {
+		Set<IOpenShiftMarker> oldValue = getCheckedMarkers();
+		if (markers != checkedMarkers) {
+			checkedMarkers.clear();
+			checkedMarkers.addAll(markers);
 		}
-		firePropertyChange(PROPERTY_PRESENT_MARKERS, oldValue, presentMarkers);
+		firePropertyChange(PROPERTY_CHECKED_MARKERS, oldValue, checkedMarkers);
 	}
 	
 	public void setSelectedMarker(IOpenShiftMarker marker) {
@@ -82,13 +86,24 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 		return selectedMarker;
 	}
 
-	public void addToProject(IOpenShiftMarker marker, IProgressMonitor monitor) throws CoreException {
-		if (marker == null) {
-			return;
-		}
-		marker.addTo(project, monitor);
+	/**
+	 * Returns the markers that the user removed.
+	 * 
+	 * @return the markers that the user removed
+	 */
+	public Collection<IOpenShiftMarker> getRemovedMarkers() {
+		return DiffUtils.getRemovals(presentMarkers, checkedMarkers);
 	}
 
+	/**
+	 * Returns the markers that the user has added.
+	 * 
+	 * @return the markers that the user added
+	 */
+	public Collection<IOpenShiftMarker> getAddedMarkers() {
+		return DiffUtils.getAdditions(presentMarkers, checkedMarkers);
+	}
+	
 	public void removeFromProject(IOpenShiftMarker marker, IProgressMonitor monitor) throws CoreException {
 		if (marker == null) {
 			return;
