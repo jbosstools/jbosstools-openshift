@@ -91,7 +91,6 @@ public class ConfigureMarkersWizard extends Wizard {
 			for (IOpenShiftMarker marker : removedMarkers) {
 				try {
 					monitor.subTask("Removing marker {0}...");
-					monitor.internalWorked(1);
 					marker.removeFrom(project, monitor);
 				} catch (CoreException e) {
 					multiStatus.add(OpenShiftUIActivator.createErrorStatus(
@@ -107,7 +106,6 @@ public class ConfigureMarkersWizard extends Wizard {
 			for (IOpenShiftMarker marker : markersToAdd) {
 				try {
 					monitor.subTask("Adding marker {0}...");
-					monitor.internalWorked(1);
 					IResource markerFile = marker.addTo(project, monitor);
 					if (repository != null) {
 						EGitUtils.addToRepository(Collections.singletonList(markerFile), monitor);
