@@ -31,7 +31,7 @@ public class OkButtonWizardDialog extends WizardDialog {
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control control = super.createButtonBar(parent);
-		getButton(IDialogConstants.FINISH_ID).setText("OK");
+		getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
 		hideButton(getButton(CANCEL));
 		return control;
 	}
