@@ -30,7 +30,7 @@ public class OpenshiftUIMessages extends NLS {
 	public static String EditorSectionBrowseDestButton;
 	public static String EditorSectionProjectSettingsGroup;
 	public static String EditorSectionOverrideProjectSettings;
-
+	public static String EditorDeploymentPageDescription;
 
 
 
