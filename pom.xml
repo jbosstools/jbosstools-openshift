@@ -10,6 +10,9 @@
 	<name>openshift.all</name>
 	<version>2.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<properties>
+		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
+	</properties>
 	<modules>
 		<module>plugins</module>
 		<module>tests</module>
