@@ -13,8 +13,6 @@
    
   <edition>5.0.0</edition>
    
-  <pubsnumber>15</pubsnumber>
-   
   <abstract>
     <para>
 		The OpenShift Tools Reference Guide explains how to create a connection and utilize the <application>OpenShift</application> service from within <application>JBoss Developer Studio</application>.
