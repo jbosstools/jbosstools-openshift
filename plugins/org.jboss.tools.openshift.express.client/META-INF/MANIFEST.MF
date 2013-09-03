@@ -6,11 +6,11 @@ Bundle-Version: 2.5.0.qualifier
 Bundle-Vendor: JBoss by Red Hat
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- jboss-dmr-1.0.0.Final.jar,
- log4j-1.2.17.jar,
- slf4j-api-1.6.1.jar,
- slf4j-log4j12-1.6.1.jar,
- openshift-java-client-2.3.0.jar
+ lib/jboss-dmr-1.0.0.Final.jar,
+ lib/log4j-1.2.17.jar,
+ lib/slf4j-api-1.6.1.jar,
+ lib/openshift-java-client-2.3.0.Final.jar,
+ lib/org.slf4j.log4j12
 Export-Package: com.openshift.client,
  com.openshift.client.cartridge,
  com.openshift.client.cartridge.selector,
@@ -23,5 +23,4 @@ Export-Package: com.openshift.client,
  com.openshift.internal.client.utils;x-friends:="org.jboss.tools.openshift.express.test"
 Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44",
  org.eclipse.core.runtime;bundle-version="3.8.0"
-Import-Package: org.jboss.dmr
 Bundle-ActivationPolicy: lazy
