@@ -300,6 +300,16 @@
        </section>
     </extension>
     <extension
+          point="org.eclipse.wst.server.ui.editorPages">
+       <page
+             class="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressModuleDeploymentPage"
+             id="org.jboss.tools.openshift.express.internal.ui.behaviour.ExpressModuleDeploymentPage"
+             name="Deployment"
+             typeIds="org.jboss.tools.openshift.express.openshift.server.type">
+       </page>
+    </extension>
+
+    <extension
           point="org.eclipse.wst.server.ui.wizardFragments">
        <fragment
              class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftServerWizardFragment"
