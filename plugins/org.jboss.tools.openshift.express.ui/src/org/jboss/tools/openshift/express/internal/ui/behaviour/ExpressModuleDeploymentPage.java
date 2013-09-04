@@ -18,11 +18,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.jboss.ide.eclipse.as.ui.editor.DeploymentPage;
 import org.jboss.ide.eclipse.as.ui.editor.ModuleDeploymentOptionsComposite;
-import org.jboss.ide.eclipse.as.ui.editor.ModuleDeploymentPage;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
-public class ExpressModuleDeploymentPage extends ModuleDeploymentPage implements IEditorPart {
+public class ExpressModuleDeploymentPage extends DeploymentPage implements IEditorPart {
 
 	protected void addDeploymentLocationControls(Composite parent, Control top) {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
