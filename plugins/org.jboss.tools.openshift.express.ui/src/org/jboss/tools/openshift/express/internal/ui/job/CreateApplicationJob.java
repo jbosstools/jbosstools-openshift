@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.job;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +31,8 @@ import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftTimeoutException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.IEmbeddedCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -36,6 +40,8 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
+	private static final int TIMEOUT = 60 * 10 * 1000;
+	
 	private String name;
 	private IStandaloneCartridge cartridge;
 	private ApplicationScale scale;
@@ -43,28 +49,39 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	private IApplication application;
 	private IDomain domain;
 	private String initialGitUrl;
+	private Collection<IEmbeddableCartridge> embeddableCartridges;
 	
 	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
 			final IGearProfile gear, IDomain domain) {
-		this(name, cartridge, scale, gear, null, domain);
+		this(name, cartridge, scale, gear, null, null, domain);
 	}
 
 	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
-			final IGearProfile gear, String initialGitUrl, IDomain domain) {
-		super(NLS.bind(OpenShiftExpressUIMessages.CREATING_APPLICATION, name));
+			final IGearProfile gear, String initialGitUrl, Collection<IEmbeddableCartridge> embeddableCartridges, IDomain domain) {
+		super(NLS.bind((embeddableCartridges == null ?
+				OpenShiftExpressUIMessages.CREATING_APPLICATION : OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
+				, name));
 		this.name = name;
 		this.cartridge = cartridge;
 		this.scale = scale;
 		this.gear = gear;
 		this.initialGitUrl = initialGitUrl;
 		this.domain = domain;
+		this.embeddableCartridges = embeddableCartridges;
 	}
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			try {
-				this.application = domain.createApplication(name, cartridge, scale, gear, initialGitUrl);
+				if (embeddableCartridges == null
+						|| embeddableCartridges.isEmpty()) {
+					this.application = domain.createApplication(
+							name, cartridge, scale, gear, initialGitUrl, TIMEOUT);
+				} else {
+					this.application = domain.createApplication(
+							name, cartridge, scale, gear, initialGitUrl, TIMEOUT, embeddableCartridges.toArray(new IEmbeddableCartridge[embeddableCartridges.size()]));
+				}
 				return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
@@ -116,6 +133,10 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	
 	public IApplication getApplication() {
 		return application;
+	}
+	
+	public List<IEmbeddedCartridge> getAddedCartridges() {
+		return application.getEmbeddedCartridges();
 	}
 
 	protected boolean openKeepTryingDialog() {
