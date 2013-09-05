@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="openshift-java-client-2.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="log4j-1.2.17.jar" sourcepath="/home/adietish/Downloads/log4j-1.2.17.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="jboss-dmr-1.0.0.Final.jar"/>
-	<classpathentry kind="lib" path="slf4j-api-1.6.1.jar" sourcepath="/home/adietish/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1-sources.jar"/>
-	<classpathentry kind="lib" path="slf4j-log4j12-1.6.1.jar" sourcepath="/home/adietish/.m2/repository/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1-sources.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" path="src/"/>
+	<classpathentry exported="true" kind="lib" path="lib/jboss-dmr-1.0.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-java-client-2.4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

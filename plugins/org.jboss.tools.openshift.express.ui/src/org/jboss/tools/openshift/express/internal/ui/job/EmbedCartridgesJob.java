@@ -36,18 +36,11 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 	private List<IEmbeddableCartridge> selectedCartridges;
 	private IApplication application;
 	private List<IEmbeddedCartridge> addedCartridges;
-	private boolean dontRemove;
-
-	public EmbedCartridgesJob(List<IEmbeddableCartridge> selectedCartridges, boolean dontRemove,
-			IApplication application) {
-		super(NLS.bind(OpenShiftExpressUIMessages.ADDING_REMOVING_CARTRIDGES, application.getName()));
-		this.selectedCartridges = selectedCartridges;
-		this.dontRemove = dontRemove;
-		this.application = application;
-	}
 
 	public EmbedCartridgesJob(List<IEmbeddableCartridge> selectedCartridges, IApplication application) {
-		this(selectedCartridges, false, application);
+		super(NLS.bind(OpenShiftExpressUIMessages.ADDING_REMOVING_CARTRIDGES, application.getName()));
+		this.selectedCartridges = selectedCartridges;
+		this.application = application;
 	}
 
 	@Override
@@ -57,11 +50,9 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		}
 
 		try {
-			if (!dontRemove) {
-				removeEmbeddedCartridges(
-						getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()),
-						application, monitor);
-			}
+			removeEmbeddedCartridges(
+					getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()),
+					application, monitor);
 			this.addedCartridges = addEmbeddedCartridges(
 					getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), 
 					application, monitor);
