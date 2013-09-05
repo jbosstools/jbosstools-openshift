@@ -19,6 +19,7 @@ import com.openshift.client.IGearProfile;
 import com.openshift.client.IUser;
 import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -149,6 +150,12 @@ public class NoopDomainFake implements IDomain {
 	@Override
 	public IApplication createApplication(String name, IStandaloneCartridge cartridge, ApplicationScale scale,
 			IGearProfile gearProfile, String initialGitUrl) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IApplication createApplication(String name, IStandaloneCartridge standaloneCartridge, ApplicationScale scale,
+			IGearProfile profile, String initialGitUrl, int timeout, IEmbeddableCartridge... embeddableCartridges) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 	
