@@ -13,9 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.core.resources.IProject;
@@ -48,7 +46,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
@@ -58,7 +55,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.connection.Connectio
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
@@ -69,7 +65,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	private static final int APP_CREATE_TIMEOUT = 10 * 60 * 1000;
 	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
-	private static final long EMBED_CARTRIDGES_TIMEOUT = 10 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 20 * 60 * 1000;
 
 	private final boolean showCredentialsPage;
@@ -139,13 +134,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 			status = waitForApplication(model.getApplication());
 			if (!handleOpenShiftError("waiting to become reachable", status)) {
-				return false;
-			}
-
-			status = addCartridges(
-					model.getApplication(),
-					model.getSelectedEmbeddableCartridges());
-			if (!handleOpenShiftError("add/remove cartridges", status)) {
 				return false;
 			}
 
@@ -259,6 +247,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getApplicationScale()
 					, model.getApplicationGearProfile()
 					, model.getInitialGitUrl()
+					, model.getSelectedEmbeddableCartridges()
 					, model.getConnection().getDefaultDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
@@ -266,6 +255,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			model.setApplication(application);
 			if (status.isOK()) {
 				openLogDialog(application, job.isTimeouted(status));
+				openLogDialog(job.getAddedCartridges(), job.isTimeouted(status));
 			}
 			return status;
 		} catch (Exception e) {
@@ -288,35 +278,18 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		});
 	}
 	
-	private IStatus addCartridges(final IApplication application, final Set<IEmbeddableCartridge> selectedCartridges) {
-		try {
-			EmbedCartridgesJob job = new EmbedCartridgesJob(
-					new ArrayList<IEmbeddableCartridge>(model.getSelectedEmbeddableCartridges()),
-					true, // dont remove cartridges
-					model.getApplication());
-			IStatus result = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
-			if (result.isOK()) {
-				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
-			}
-			return result;
-		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus(
-					NLS.bind("Could not add/remove cartridges for application {0}", application.getName()), e);
-		}
-	}
-
 	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges, final boolean isTimeouted) {
-		if (embeddableCartridges == null
-				|| embeddableCartridges.isEmpty()) {
+		final LogEntry[] logEntries = LogEntryFactory.create(embeddableCartridges, isTimeouted);
+		if (logEntries == null
+				|| logEntries.length == 0) {
 			return;
 		}
+
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				new CreationLogDialog(getShell(), 
-						LogEntryFactory.create(embeddableCartridges, isTimeouted)).open();
+				new CreationLogDialog(getShell(), logEntries).open();
 			}
 		});
 	}
