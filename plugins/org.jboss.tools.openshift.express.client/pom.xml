@@ -23,7 +23,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.7</version>
+				<version>2.7</version><!--$NO-MVN-MAN-VER$-->
 				<executions>
 					<execution>
 						<id>get-libs</id>
@@ -36,6 +36,9 @@
 				<configuration>
 					<skip>false</skip>
 					<outputDirectory>${basedir}/lib/</outputDirectory>
+					<!-- baseVersion is to avoid SNAPSHOT dependencies being copied with 
+						ever daily changing timestamp -->
+					<useBaseVersion>true</useBaseVersion>
 					<artifactItems>
 						<artifactItem>
 							<groupId>com.openshift</groupId>
@@ -57,11 +60,11 @@
 							<artifactId>slf4j-api</artifactId>
 							<version>${slf4j-api.version}</version>
 						</artifactItem>
- 						<artifactItem>
+						<artifactItem>
 							<groupId>org.slf4j</groupId>
 							<artifactId>slf4j-log4j12</artifactId>
 							<version>${slf4j-log4j12.version}</version>
-						</artifactItem> 
+						</artifactItem>
 					</artifactItems>
 				</configuration>
 			</plugin>
@@ -78,5 +81,68 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.7,)
+										</versionRange>
+										<goals>
+											<goal>copy</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute runOnConfiguration="true"></execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
+	<dependencies>
+		<dependency>
+			<groupId>com.openshift</groupId>
+			<artifactId>openshift-java-client</artifactId>
+			<version>${openshift-java-client.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss</groupId>
+			<artifactId>jboss-dmr</artifactId>
+			<version>${jboss-dmr.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j-log4j12.version}</version>
+		</dependency>
+	</dependencies>
 </project>
