@@ -7,11 +7,11 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
+ lib/openshift-java-client-2.4.0-SNAPSHOT.jar,
  lib/jboss-dmr-1.0.0.Final.jar,
  lib/log4j-1.2.17.jar,
- lib/openshift-java-client-2.4.0.Final.jar,
  lib/slf4j-api-1.6.1.jar,
- lib/slf4j-log4j12-1.6.1.jar
+ lib/org.slf4j.log4j12
 Export-Package: com.openshift.client,
  com.openshift.client.cartridge,
  com.openshift.client.cartridge.selector,
