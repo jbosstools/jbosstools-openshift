@@ -71,6 +71,7 @@
 			<plugin>
 				<!-- make sure lib dir is removed after clean to avoid "dirty" build -->
 				<artifactId>maven-clean-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
 				<version>2.5</version>
 				<configuration>
 					<filesets>

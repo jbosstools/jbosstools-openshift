@@ -3,8 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.client;singleton:=true
 Bundle-Version: 2.5.1.qualifier
-Bundle-Vendor: %Bundle-Vendor
-Bundle-Localization: plugin
+Bundle-Vendor: JBoss by Red Hat
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/jboss-dmr-1.0.0.Final.jar,
