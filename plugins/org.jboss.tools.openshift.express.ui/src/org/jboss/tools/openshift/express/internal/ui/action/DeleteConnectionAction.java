@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.action;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
  * @author Xavier Coulon
@@ -26,11 +27,22 @@ public class DeleteConnectionAction extends AbstractOpenShiftAction {
 
 	@Override
 	public void run() {
-		final Connection connection = UIUtils.getFirstElement(getSelection(), Connection.class);
-		if (connection == null) {
+		ISelection selection = getSelection();
+		if (!(selection instanceof StructuredSelection)) {
 			return;
 		}
-		ConnectionsModelSingleton.getInstance().removeConnection(connection);
+		for(Object selectedItem : ((StructuredSelection) selection).toList()) {
+			removeConnection(selectedItem);
+		};
+	}
+
+	private void removeConnection(Object selectedItem) {
+		if (selectedItem == null 
+				|| !Connection.class.isAssignableFrom(selectedItem.getClass())) {
+			return;
+		}
+		
+		ConnectionsModelSingleton.getInstance().removeConnection((Connection) selectedItem);
 	}
 
 }
