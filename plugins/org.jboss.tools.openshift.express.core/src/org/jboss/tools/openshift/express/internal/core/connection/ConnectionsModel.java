@@ -20,10 +20,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
 
 /**
  * @author Rob Stryker
@@ -67,10 +66,10 @@ public class ConnectionsModel {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
 			return addConnection(connectionUrl, connection);
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftUIException(
+			throw new OpenShiftCoreException(
 					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
 		} catch (MalformedURLException e) {
-			throw new OpenShiftUIException(
+			throw new OpenShiftCoreException(
 					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
 		}
 	}
@@ -87,7 +86,8 @@ public class ConnectionsModel {
 
 	protected boolean addConnection(ConnectionURL connectionUrl) {
 		Connection connection =
-				new Connection(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost(), new CredentialsPrompter());
+				new Connection(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost(), 
+						OpenShiftCoreActivator.getDefault().getCredentialPrompter());
 		return addConnection(connectionUrl, connection);
 	}
 
@@ -96,11 +96,11 @@ public class ConnectionsModel {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
 			return getConnectionByUrl(connectionUrl) != null;
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftUIException(e,
+			throw new OpenShiftCoreException(e,
 					NLS.bind("Could not get url for connection {0} - {1}", connection.getUsername(),
 							connection.getHost()));
 		} catch (MalformedURLException e) {
-			throw new OpenShiftUIException(e,
+			throw new OpenShiftCoreException(e,
 					NLS.bind("Could not get url for connection {0} - {1}", connection.getUsername(),
 							connection.getHost()));
 		}
@@ -124,10 +124,10 @@ public class ConnectionsModel {
 			fireModelChange(connection, REMOVED);
 			return true;
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftUIException(e,
+			throw new OpenShiftCoreException(e,
 					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
 		} catch (MalformedURLException e) {
-			throw new OpenShiftUIException(e,
+			throw new OpenShiftCoreException(e,
 					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
 		}
 	}
@@ -178,9 +178,9 @@ public class ConnectionsModel {
 		try {
 			return getConnectionByUrl(ConnectionURL.forUsername(username));
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftUIException(NLS.bind("Could not get url for connection {0}", username), e);
+			throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
 		} catch (MalformedURLException e) {
-			throw new OpenShiftUIException(NLS.bind("Could not get url for connection {0}", username), e);
+			throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
 		}
 	}
 
@@ -204,11 +204,11 @@ public class ConnectionsModel {
 				ConnectionURL connectionUrl = ConnectionURL.forUsername(username);
 				addConnection(connectionUrl);
 			} catch (MalformedURLException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", username), e);
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", username), e);
 			} catch (UnsupportedEncodingException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", username), e);
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", username), e);
 			} catch (IllegalArgumentException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", username), e);
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", username), e);
 			}
 		}
 	}
@@ -222,11 +222,11 @@ public class ConnectionsModel {
 				ConnectionURL connectionUrl = ConnectionURL.forURL(connectionUrlString);
 				addConnection(connectionUrl);
 			} catch (MalformedURLException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connectionUrlString), e);
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrlString), e);
 			} catch (UnsupportedEncodingException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connectionUrlString), e);
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrlString), e);
 			} catch (IllegalArgumentException e) {
-				OpenShiftUIActivator.log(NLS.bind("Could not add connection for {0}.", connectionUrlString), e);
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrlString), e);
 			}
 		}
 	}

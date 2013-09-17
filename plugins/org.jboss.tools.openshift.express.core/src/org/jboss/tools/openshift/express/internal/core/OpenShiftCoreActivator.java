@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.express.internal.core.connection.ICredentialsPrompter;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -73,4 +74,17 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 		return getDefault().statusFactoryInternal();
 	}
 
+	/* Since the prompter is in UI, we'll just store it here */
+	private ICredentialsPrompter credentialPrompter = null;
+	
+	/* Get access to the credential prompter */
+	public ICredentialsPrompter getCredentialPrompter() {
+		return credentialPrompter;
+	}
+	
+	/* Set the credential prompter */
+	public void setCredentialPrompter(ICredentialsPrompter prompter) {
+		this.credentialPrompter = prompter;
+	}
+	
 }

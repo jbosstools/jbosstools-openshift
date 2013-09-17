@@ -13,14 +13,13 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.core.secure.OpenShiftPasswordStorageKey;
 import org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStore;
 import org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStoreException;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -43,7 +42,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 public class Connection {
 
 	private static final String USER_ID =
-			OpenShiftUIActivator.PLUGIN_ID + " " + OpenShiftUIActivator.getDefault().getBundle().getVersion();
+			OpenShiftCoreActivator.PLUGIN_ID + " " + OpenShiftCoreActivator.getDefault().getBundle().getVersion();
 
 	private String username;
 	private String password;
@@ -271,7 +270,7 @@ public class Connection {
 			didPromptForPassword = true;
 			prompter.promptAndAuthenticate(this);
 		} catch (Exception e) {
-			Logger.error("Failed to retrieve User's password", e);
+			OpenShiftCoreActivator.pluginLog().logError("Failed to retrieve User's password", e);
 		}
 		return hasUser();
 	}
@@ -443,7 +442,7 @@ public class Connection {
 					store.remove();
 				}
 			} catch (SecurePasswordStoreException e) {
-				Logger.error(e.getMessage(), e);
+				OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 		}
 	}
@@ -455,7 +454,7 @@ public class Connection {
 			try {
 				password = store.getPassword();
 			} catch (SecurePasswordStoreException e) {
-				Logger.error(e.getMessage(), e);
+				OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 		}
 		return password;

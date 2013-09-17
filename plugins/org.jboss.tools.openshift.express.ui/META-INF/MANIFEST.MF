@@ -56,7 +56,6 @@ Import-Package: org.jboss.tools.common.databinding,
  org.jboss.tools.common.ui.ssh
 Bundle-Vendor: %Bundle-Vendor.0
 Export-Package: org.jboss.tools.openshift.express.internal.core.behaviour;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.core.connection;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.action;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.behaviour;x-friends:="org.jboss.tools.openshift.express.test",
