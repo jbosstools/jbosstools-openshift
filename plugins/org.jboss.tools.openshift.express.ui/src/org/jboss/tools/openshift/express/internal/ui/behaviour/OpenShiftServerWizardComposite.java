@@ -79,8 +79,8 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;

@@ -19,9 +19,9 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.AddSSHKeyWizardPageModel;
 
 import com.openshift.client.OpenShiftException;

@@ -16,8 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.OpenShiftException;
 
@@ -38,14 +36,14 @@ public abstract class AbstractThreadedOperation {
 			Future<E> future = executor.submit(callable);
 			while (!future.isDone()) {
 				if (monitor.isCanceled()) {
-					throw new OpenShiftException(OpenShiftExpressUIMessages.OPERATION_CANCELLED);
+					throw new OpenShiftException(OpenShiftExpressCoreMessages.OPERATION_CANCELLED);
 				}
 				Thread.sleep(THREAD_SLEEP);
 			}
 			return future.get();
 		} catch (Exception e) { // InterruptedException and ExecutionException
 			Throwable cause = e.getCause() != null ? e.getCause() : e;
-			Logger.error("Failed to create application", cause);
+			OpenShiftCoreActivator.pluginLog().logError("Failed to create application", cause);
 			throw new OpenShiftException("Failed to create application: {0}", cause.getMessage());
 		} finally {
 			executor.shutdown();

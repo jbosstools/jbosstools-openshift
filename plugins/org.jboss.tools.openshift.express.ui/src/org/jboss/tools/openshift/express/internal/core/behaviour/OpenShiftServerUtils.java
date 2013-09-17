@@ -60,9 +60,9 @@ import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;

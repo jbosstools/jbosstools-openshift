@@ -12,10 +12,10 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.io.IOException;
 
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.configuration.IOpenShiftConfiguration;
 import com.openshift.client.configuration.OpenShiftConfiguration;

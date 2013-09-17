@@ -8,17 +8,22 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.utils;
 
+package org.jboss.tools.openshift.express.internal.core;
 
-/**
- * @author Andre Dietisheim
- * @author Xavier Coulon
- * 
- */
-public class SecurePasswordStore extends org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStore {
+import org.eclipse.osgi.util.NLS;
 
-	public SecurePasswordStore(IStorageKey key) {
-		super(key);
+public class OpenShiftExpressCoreMessages extends NLS {
+
+	private static final String BUNDLE_NAME = OpenShiftExpressCoreMessages.class.getName();
+
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, OpenShiftExpressCoreMessages.class);
 	}
+
+	private OpenShiftExpressCoreMessages() {
+		// Do not instantiate
+	}
+
+	public static String OPERATION_CANCELLED;
 }

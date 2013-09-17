@@ -15,9 +15,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.OpenShiftException;

@@ -17,9 +17,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * An url-alike connection identifier that holds all relevant part for an
