@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.portforward;
+package org.jboss.tools.openshift.express.internal.ui.portforward;
 
 import org.eclipse.jface.wizard.Wizard;
 

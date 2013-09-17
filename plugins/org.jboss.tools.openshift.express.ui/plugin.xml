@@ -362,7 +362,7 @@
            	  <actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
            	  <!-- actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/ -->
+	                pattern="org.jboss.tools.openshift.express.internal.ui.portforward.applicationPortForwardActionProvider"/ -->
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
@@ -678,7 +678,7 @@
      <!--extension
            point="org.eclipse.debug.core.launchConfigurationTypes">
         <launchConfigurationType
-              delegate="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
+              delegate="org.jboss.tools.openshift.express.internal.ui.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
               delegateName="Remote OpenShift Application "
               id="org.jboss.tools.openshift.launchDebugConfigurationType"
               modes="debug"
@@ -697,7 +697,7 @@
      <extension
            point="org.eclipse.debug.ui.launchConfigurationTabGroups">
         <launchConfigurationTabGroup
-              class="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationConfigurationTabGroup"
+              class="org.jboss.tools.openshift.express.internal.ui.portforward.RemoteOpenShiftApplicationConfigurationTabGroup"
               id="org.jboss.tools.openshift.launchDebugConfigurationTabGroup"
               type="org.jboss.tools.openshift.launchDebugConfigurationType">
         </launchConfigurationTabGroup>
@@ -706,7 +706,7 @@
      <!--extension
            point="org.eclipse.debug.core.launchDelegates">
         <launchDelegate
-              delegate="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
+              delegate="org.jboss.tools.openshift.express.internal.ui.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
               id="org.jboss.tools.openshift.express.ui.launchDelegate2"
               modes="debug"
               name="Remote OpenShift application"
