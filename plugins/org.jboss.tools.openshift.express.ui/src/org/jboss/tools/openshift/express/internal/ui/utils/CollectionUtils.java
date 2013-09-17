@@ -10,20 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Andre Dietisheim
+ * @deprecated
  */
-public class CollectionUtils {
-
-	public static <E> List<E> toList(E[] elements) {
-		List<E> list = new ArrayList<E>(elements.length);
-		for (E element : elements) {
-			list.add(element);
-		}
-		return list;
-	}
-	
+public class CollectionUtils extends org.jboss.tools.openshift.express.internal.core.util.CollectionUtils {	
 }

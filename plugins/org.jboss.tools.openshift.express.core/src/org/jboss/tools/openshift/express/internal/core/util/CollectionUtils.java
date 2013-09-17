@@ -5,20 +5,25 @@
  * Eclipse Public License v1.0 which accompanies this distribution, 
  * and is available at http://www.eclipse.org/legal/epl-v10.html 
  * 
- * Contributors:
- *     Red Hat Incorporated - initial API and implementation
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.utils;
+package org.jboss.tools.openshift.express.internal.core.util;
 
-import org.eclipse.core.runtime.jobs.Job;
-
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Andre Dietisheim
- * @deprecated
  */
-public class JobChainBuilder extends org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder {
-	public JobChainBuilder(Job job) {
-		super(job);
+public class CollectionUtils {
+
+	public static <E> List<E> toList(E[] elements) {
+		List<E> list = new ArrayList<E>(elements.length);
+		for (E element : elements) {
+			list.add(element);
+		}
+		return list;
 	}
+	
 }

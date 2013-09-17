@@ -18,7 +18,6 @@ import java.net.URLEncoder;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.Assert;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author Andre Dietisheim
