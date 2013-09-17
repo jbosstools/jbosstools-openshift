@@ -13,14 +13,14 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import org.jboss.tools.openshift.express.internal.core.secure.OpenShiftPasswordStorageKey;
+import org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStoreException;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftPasswordStorageKey;
 import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStore;
-import org.jboss.tools.openshift.express.internal.ui.utils.SecurePasswordStoreException;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;

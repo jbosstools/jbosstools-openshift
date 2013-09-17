@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 
 /**
  * @author Andre Dietisheim

@@ -8,14 +8,13 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.utils;
-
+package org.jboss.tools.openshift.express.internal.core.secure;
 
 /**
  * @author Xavier Coulon
- * @deprecated
+ *
  */
-public class SecurePasswordStoreException extends org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStoreException {
+public class SecurePasswordStoreException extends Exception {
 
 	/** generated serialVersionUID. */
 	private static final long serialVersionUID = -1732042851833545771L;
