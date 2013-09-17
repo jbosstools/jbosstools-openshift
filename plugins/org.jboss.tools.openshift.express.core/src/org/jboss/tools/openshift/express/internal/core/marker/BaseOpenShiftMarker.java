@@ -19,8 +19,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 
 /**
  * 
@@ -80,11 +80,11 @@ public class BaseOpenShiftMarker implements IOpenShiftMarker {
 
 	private void assertProjectIsOpen(IProject project) throws CoreException {
 		if (!project.exists()) {
-			throw new CoreException(OpenShiftUIActivator.createErrorStatus(NLS.bind("Project {0} does not exist",
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} does not exist",
 					project.getName())));
 		}
 		if (!project.isOpen()) {
-			throw new CoreException(OpenShiftUIActivator.createErrorStatus(NLS.bind("Project {0} is not opened",
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} is not opened",
 					project.getName())));
 		}
 	}
