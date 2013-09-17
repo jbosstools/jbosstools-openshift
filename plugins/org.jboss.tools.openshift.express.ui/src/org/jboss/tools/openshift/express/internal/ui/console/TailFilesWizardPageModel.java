@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.console;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 
 /**
@@ -20,13 +21,21 @@ import com.openshift.client.IApplication;
 public class TailFilesWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_FILE_PATTERN = "filePattern";
+
+	public static final String PROPERTY_ALL_GEARS = "allGears";
 	
 	private final IApplication application;
 	
 	private String filePattern = null;
 	
+	private boolean allGears = false;
+	
 	public TailFilesWizardPageModel(final IApplication app) {
 		this.application = app;
+		if (this.application != null && this.application.getApplicationScale() != null
+				&& this.application.getApplicationScale() == ApplicationScale.SCALE) {
+			allGears = true;
+		}
 	}
 
 	public void setFilePattern(final String filePattern) {
@@ -39,10 +48,18 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void resetFilePattern() {
-		//setFilePattern("-f -n 100 " + getApplication().getCartridge().getName() + "/logs/*");
 		setFilePattern("-f -n 100 */logs/*");
 	}
 
+	public void setAllGears(final boolean allGears) {
+		firePropertyChange(
+				PROPERTY_ALL_GEARS, this.allGears, this.allGears = allGears);
+	}
+
+	public boolean getAllGears() {
+		return this.allGears;
+	}
+	
 	public IApplication getApplication() {
 		return application;
 	}

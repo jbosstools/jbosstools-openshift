@@ -146,7 +146,7 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						final TailServerLogWorker tailServerLogWorker = 
-								startTailProcess(host, app.getUUID(), app.getName(), wizard.getFilePattern(), console);
+								startTailProcess(host, app.getUUID(), app.getName(), wizard.getFilePattern(), wizard.isAllGears(), console);
 						consoleWorkers.put(console.getName(), tailServerLogWorker);
 						Thread thread = new Thread(tailServerLogWorker);
 						thread.start();
@@ -169,7 +169,8 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	 * @param host the remote host to connect to
 	 * @param appId the application id, used as the user to establish the ssh connexion
 	 * @param appName the application name
-	 * @param optionsAndFilepattern the file pattern to use in the tail command
+	 * @param optionsAndFile the file pattern to use in the tail command
+	 * @param allGears should the 'tail' command be executed on all gears (if the application is scalable)
 	 * @return the Worker that encapsulate the established RemoteSession, the tail Process and the output console
 	 * @throws OpenShiftSSHOperationException 
 	 * @throws JSchException
@@ -178,13 +179,14 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	 *             in case of underlying exception
 	 */
 	private TailServerLogWorker startTailProcess(final String host, final String appId, final String appName,
-			final String optionsAndFile, final MessageConsole console) throws IOException {
+			final String optionsAndFile, final boolean allGears, final MessageConsole console) throws IOException {
 		JSch.setLogger(new JschToEclipseLogger());
 		final SshSessionFactory sshSessionFactory = SshSessionFactory.getInstance();
 		final URIish uri = new URIish().setHost(host).setUser(appId);
 		RemoteSession remoteSession =
 				sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED, 0);
-		final String command = new TailCommandBuilder(optionsAndFile).build();
+		final String command = new TailCommandBuilder(optionsAndFile).allGears(allGears).build();
+		
 		Logger.debug("ssh command to execute: " + command);
 		Process process = remoteSession.exec(command, 0);
 		return new TailServerLogWorker(console, process, remoteSession);
@@ -219,9 +221,15 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 
 		private String options;
 		private String file;
+		private boolean allGears;
 		
 		public TailCommandBuilder(String optionsAndFile) {
 			init(optionsAndFile);
+		}
+
+		public TailCommandBuilder allGears(boolean allGears) {
+			this.allGears = allGears;
+			return this;
 		}
 
 		private void init(String optionsAndFile) {
@@ -238,6 +246,9 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 		
 		public String build() {
 			StringBuilder builder = new StringBuilder("tail");
+			if(allGears) {
+				builder.append(" --gears");
+			}
 			if (options != null) {
 				builder.append(" --opts ").append(Base64Coder.encode(options));
 			}
