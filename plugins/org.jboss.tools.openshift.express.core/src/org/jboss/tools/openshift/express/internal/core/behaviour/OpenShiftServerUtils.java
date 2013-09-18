@@ -113,12 +113,6 @@ public class OpenShiftServerUtils {
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";//$NON-NLS-1$
 
-	/* For use inside express wizard fragment */
-	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";//$NON-NLS-1$
-	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";//$NON-NLS-1$
-	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";//$NON-NLS-1$
-	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";//$NON-NLS-1$
-
 	/*
 	 * For use in finding not just the effective value, but values stored either
 	 * in project or server
