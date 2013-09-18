@@ -7,7 +7,9 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.openshift.express.internal.core.OpenshiftBehaviorUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -37,6 +39,8 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		OpenshiftBehaviorUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
+		OpenshiftBehaviorUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
 	}
 
 	/*

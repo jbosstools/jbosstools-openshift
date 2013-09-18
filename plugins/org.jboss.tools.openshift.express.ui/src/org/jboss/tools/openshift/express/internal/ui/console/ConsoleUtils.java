@@ -31,6 +31,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
+import org.jboss.tools.openshift.express.internal.core.IConsoleUtility;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -40,7 +41,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
  * @author Xavier Coulon
  * 
  */
-public class ConsoleUtils {
+public class ConsoleUtils implements IConsoleUtility {
 
 	/**
 	 * Constant key set into the created message console attributes to mark the
@@ -215,5 +216,20 @@ public class ConsoleUtils {
 
 			ConsoleUtils.displayConsoleView(console);
 		}
+	}
+
+	@Override
+	public void displayServerConsoleView(IServer server) {
+		displayConsoleView(server);
+	}
+
+	@Override
+	public OutputStream getServerConsoleOutputStream(IServer server) {
+		return getConsoleOutputStream(server);
+	}
+
+	@Override
+	public void appendToServerConsole(IServer server, String msg) {
+		appendToConsole(server, msg);
 	}
 }

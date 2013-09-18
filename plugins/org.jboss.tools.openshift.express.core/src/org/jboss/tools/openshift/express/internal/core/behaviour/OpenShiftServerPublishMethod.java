@@ -26,12 +26,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
@@ -43,8 +39,8 @@ import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.OpenshiftBehaviorUIIntegration;
 
 /**
  * @author Rob Stryker
@@ -58,7 +54,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if (magicProject == null || !magicProject.isAccessible()) {
 			throw new CoreException(new Status(IStatus.ERROR,
-					OpenShiftUIActivator.PLUGIN_ID,
+					OpenShiftCoreActivator.PLUGIN_ID,
 					NLS.bind(OpenShiftServerMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
 		}
 	}
@@ -148,11 +144,11 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				try {
 					operation.execute(new SubProgressMonitor(monitor, 60));
 				} catch (CoreException e) {
-					OpenShiftUIActivator.log(e.getStatus());
+					OpenShiftCoreActivator.pluginLog().logStatus((e.getStatus()));
 				}
 			}
 		} catch (Exception e) {
-			OpenShiftUIActivator.log(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getMessage(), e));
+			OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
 		}
 		return IServer.PUBLISH_STATE_NONE;
 	}
@@ -162,7 +158,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
-			throw new CoreException(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
 					OpenShiftServerMessages.publishFailMissingFolder,
 					behaviour.getServer().getName(),
 					createMissingPath(destProj, destinationFolder, destFolder))));
@@ -202,12 +198,12 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		PushOperationResult result = null;
 		int changes = OpenShiftServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
 		if (changes > 0) {
-			if (requestApproval(
+			if (OpenshiftBehaviorUIIntegration.requestApproval(
 					NLS.bind(OpenShiftServerMessages.commitAndPushMsg, changes, p.getName()),
 					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
-				displayConsoleView(behaviour.getServer());
+				OpenshiftBehaviorUIIntegration.displayConsoleView(behaviour.getServer());
 				result = push(p, behaviour.getServer(), monitor);
 			}
 		} else {
@@ -215,36 +211,26 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				String openShiftRemoteName =
 						OpenShiftServerUtils.getExpressRemoteName(behaviour.getServer());
 				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
-					if (requestApproval(
+					if (OpenshiftBehaviorUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, p.getName()),
 							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						displayConsoleView(behaviour.getServer());
+						OpenshiftBehaviorUIIntegration.displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				} else {
-					if (requestApproval(
+					if (OpenshiftBehaviorUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.pushCommitsMsg, p.getName()),
 							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						displayConsoleView(behaviour.getServer());
+						OpenshiftBehaviorUIIntegration.displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				}
 			} catch (Exception e) {
-				OpenShiftUIActivator.log(e);
+				OpenShiftCoreActivator.pluginLog().logError(e);
 			}
 		}
 
 		return result;
-	}
-
-	private void displayConsoleView(final IServer server) {
-		Display.getDefault().asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				ConsoleUtils.displayConsoleView(server);
-			}
-		});
 	}
 	
 	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
@@ -254,18 +240,18 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			monitor.beginTask("Publishing " + project.getName(), 200);
 			PushOperationResult result = EGitUtils.push(
 					remoteName, repository, new SubProgressMonitor(monitor, 100),
-					ConsoleUtils.getConsoleOutputStream(server));
+					OpenshiftBehaviorUIIntegration.getConsoleOutputStream(server));
 			monitor.done();
 			return result;
 		} catch (CoreException ce) {
 			// Comes if push has failed
 			if (ce.getMessage() != null && ce.getMessage().contains("UP_TO_DATE")) {
-				ConsoleUtils.appendToConsole(server, "\n\nRepository already uptodate.");
+				OpenshiftBehaviorUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
 				return null;
 			}
 
 			try {
-				if (requestApproval(
+				if (OpenshiftBehaviorUIIntegration.requestApproval(
 						"Error: '"
 								+ ce.getMessage()
 								+ "' occurred while pushing.\n\nIf the commit history is not correct on the remote repository, "
@@ -274,12 +260,11 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 						"Attempt push force ?", false)) {
 					return EGitUtils.pushForce(
 							remoteName, repository, new SubProgressMonitor(monitor, 100),
-							ConsoleUtils.getConsoleOutputStream(server));
+							OpenshiftBehaviorUIIntegration.getConsoleOutputStream(server));
 				} else {
 					// printing out variation of the standard git output
 					// meesage.
-					ConsoleUtils
-							.appendToConsole(
+					OpenshiftBehaviorUIIntegration.appendToConsole(
 									server,
 									"\n\nERROR: "
 											+ ce.getLocalizedMessage()
@@ -293,7 +278,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			} catch (CoreException ce2) {
 				if (ce.getMessage() != null 
 						&& ce.getMessage().contains("UP_TO_DATE")) {
-					ConsoleUtils.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
+					OpenshiftBehaviorUIIntegration.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
 					return null;
 				} else {
 					// even the push force failed, and we don't have a valid
@@ -308,51 +293,6 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		return module[module.length - 1].getProject().getName();
 	}
 
-	protected boolean requestApproval(final String message, final String title) {
-		final boolean[] b = new boolean[1];
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				b[0] = openQuestion(getActiveShell(), title, message, true);
-			}
-		});
-		return b[0];
-	}
-
-	private boolean openQuestion(Shell shell, String title, String message, boolean defaultAnswer) {
-		String[] labels = new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL };
-		int defaultValue = defaultAnswer ? 0 : 1;
-		MessageDialog dialog = new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, labels,
-				defaultValue);
-		return dialog.open() == 0;
-	}
-
-	/**
-	 * Opens question dialog where you can control what will be the default
-	 * button activated.
-	 * 
-	 * @parem defaultAnswer if true Yes is the default answer, if false No
-	 * 
-	 **/
-	protected boolean requestApproval(final String message, final String title, final boolean defaultAnswer) {
-		final boolean[] b = new boolean[1];
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				b[0] = openQuestion(getActiveShell(), title, message, defaultAnswer);
-			}
-		});
-		return b[0];
-	}
-
-	protected static Shell getActiveShell() {
-		Display display = Display.getDefault();
-		final Shell[] ret = new Shell[1];
-		display.syncExec(new Runnable() {
-			public void run() {
-				ret[0] = Display.getCurrent().getActiveShell();
-			}
-		});
-		return ret[0];
-	}
 
 	public IPublishCopyCallbackHandler getCallbackHandler(IPath path,
 			IServer server) {

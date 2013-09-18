@@ -43,7 +43,6 @@ import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
-import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
@@ -54,19 +53,16 @@ import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
-import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -79,44 +75,49 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 @SuppressWarnings("restriction")
 public class OpenShiftServerUtils {
+	
+	/* Project settings always had .ui qualifier, so this cannot be changed */
+	public static final String QUALIFIER = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
+
+	
 	/* Server Settings */
-	public static final String ATTRIBUTE_DEPLOY_PROJECT = "org.jboss.tools.openshift.binary.deployProject";
-	public static final String ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.override";
+	public static final String ATTRIBUTE_DEPLOY_PROJECT = "org.jboss.tools.openshift.binary.deployProject"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.override";//$NON-NLS-1$
 
 	/* Legacy Server Settings: Please usage scan before removal */
-	public static final String ATTRIBUTE_DEPLOY_PROJECT_LEGACY = "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";
-	public static final String ATTRIBUTE_REMOTE_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";
-	public static final String ATTRIBUTE_APPLICATION_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";
-	public static final String ATTRIBUTE_APPLICATION_ID = "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";
-	public static final String ATTRIBUTE_DOMAIN = "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";
-	public static final String ATTRIBUTE_USERNAME = "org.jboss.tools.openshift.express.internal.core.behaviour.Username";
-	public static final String ATTRIBUTE_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.DEPLOY_FOLDER_LOC";
+	public static final String ATTRIBUTE_DEPLOY_PROJECT_LEGACY = "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";//$NON-NLS-1$
+	public static final String ATTRIBUTE_REMOTE_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";//$NON-NLS-1$
+	public static final String ATTRIBUTE_APPLICATION_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";//$NON-NLS-1$
+	public static final String ATTRIBUTE_APPLICATION_ID = "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";//$NON-NLS-1$
+	public static final String ATTRIBUTE_DOMAIN = "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";//$NON-NLS-1$
+	public static final String ATTRIBUTE_USERNAME = "org.jboss.tools.openshift.express.internal.core.behaviour.Username";//$NON-NLS-1$
+	public static final String ATTRIBUTE_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.DEPLOY_FOLDER_LOC";//$NON-NLS-1$
 
 	/* New Settings inside the project */
-	public static final String SETTING_REMOTE_NAME = "org.jboss.tools.openshift.RemoteName";
-	public static final String SETTING_APPLICATION_NAME = "org.jboss.tools.openshift.ApplicationName";
-	public static final String SETTING_APPLICATION_ID = "org.jboss.tools.openshift.ApplicationId";
-	public static final String SETTING_DOMAIN = "org.jboss.tools.openshift.Domain";
-	public static final String SETTING_USERNAME = "org.jboss.tools.openshift.Username";
-	public static final String SETTING_CONNECTIONURL = "org.jboss.tools.openshift.Connection";
-	public static final String SETTING_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.DeployFolder";
+	public static final String SETTING_REMOTE_NAME = "org.jboss.tools.openshift.RemoteName";//$NON-NLS-1$
+	public static final String SETTING_APPLICATION_NAME = "org.jboss.tools.openshift.ApplicationName";//$NON-NLS-1$
+	public static final String SETTING_APPLICATION_ID = "org.jboss.tools.openshift.ApplicationId";//$NON-NLS-1$
+	public static final String SETTING_DOMAIN = "org.jboss.tools.openshift.Domain";//$NON-NLS-1$
+	public static final String SETTING_USERNAME = "org.jboss.tools.openshift.Username";//$NON-NLS-1$
+	public static final String SETTING_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
+	public static final String SETTING_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.DeployFolder";//$NON-NLS-1$
 
 	// Legacy, not to be used
 	// public static final String ATTRIBUTE_PASSWORD =
 	// "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
-	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT = "origin";
-	private static final String ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT = "deployments";
+	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT = "origin";//$NON-NLS-1$
+	private static final String ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT = "deployments";//$NON-NLS-1$
 
-	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";
+	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";//$NON-NLS-1$
 
 	/** the OpensHift Server Type as defined in the plugin.xml. */
-	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";
+	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";//$NON-NLS-1$
 
 	/* For use inside express wizard fragment */
-	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
-	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";
-	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
-	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
+	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";//$NON-NLS-1$
+	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";//$NON-NLS-1$
+	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";//$NON-NLS-1$
+	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";//$NON-NLS-1$
 
 	/*
 	 * For use in finding not just the effective value, but values stored either
@@ -129,7 +130,7 @@ public class OpenShiftServerUtils {
 	public static String getProjectAttribute(IProject project, String attributeName, String defaultVal) {
 		if (project == null)
 			return defaultVal;
-		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
+		String qualifier = QUALIFIER;
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);
 		return node.get(attributeName, defaultVal);
@@ -160,10 +161,10 @@ public class OpenShiftServerUtils {
 			if (connection != null) {
 				return connection.getApplicationByName(appName); // May be long running
 			} else {
-				Logger.error(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
 			}
 		} catch (OpenShiftException e) {
-			Logger.error(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
 		}
 		return null;
 	}
@@ -204,9 +205,9 @@ public class OpenShiftServerUtils {
 				return ConnectionURL.forUsername(username);
 			}
 		} catch (UnsupportedEncodingException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		} catch (MalformedURLException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		}
 
 		return null;
@@ -563,7 +564,7 @@ public class OpenShiftServerUtils {
 				return EGitUtils.hasRemoteUrl(gitURIPattern, repository);
 			}
 		} catch (CoreException ce) {
-			OpenShiftUIActivator.log(NLS.bind("Could not look up remotes for project {0}", project), ce);
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not look up remotes for project {0}", project), ce);
 		}
 		return false;
 	}
@@ -621,14 +622,14 @@ public class OpenShiftServerUtils {
 			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
 			return app;
 		} catch (OpenShiftException ose) {
-			Logger.error(NLS.bind("Could not find application for server {0}", server.getName()));
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not find application for server {0}", server.getName()));
 			return null;
 		}
 	}
 
 	public static void updateOpenshiftProjectSettings(IProject project, IApplication app,
 			Connection connection, String remoteName, String deployFolder) {
-		String qualifier = OpenShiftUIActivator.getDefault().getBundle().getSymbolicName();
+		String qualifier = QUALIFIER;
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);
 		node.put(OpenShiftServerUtils.SETTING_APPLICATION_ID, app.getUUID());
@@ -642,7 +643,7 @@ public class OpenShiftServerUtils {
 		try {
 			node.flush();
 		} catch (BackingStoreException e) {
-			OpenShiftUIActivator.log(e);
+			OpenShiftCoreActivator.pluginLog().logError(e);
 		}
 	}
 
@@ -654,10 +655,10 @@ public class OpenShiftServerUtils {
 				node.put(OpenShiftServerUtils.SETTING_USERNAME, connection.getUsername());
 			}
 		} catch (UnsupportedEncodingException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for connection {0}/{1}",
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for connection {0}/{1}",
 					connection.getUsername(), connection.getHost()), e);
 		} catch (MalformedURLException e) {
-			OpenShiftUIActivator.log(NLS.bind("Could not get connection url for connection {0}/{1}",
+			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for connection {0}/{1}",
 					connection.getUsername(), connection.getHost()), e);
 		}
 	}
@@ -792,29 +793,5 @@ public class OpenShiftServerUtils {
 			appNames[i] = apps.get(i).getName();
 		}
 		return appNames;
-	}
-
-	public static void put(Connection connection, TaskModel taskModel) {
-		taskModel.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
-	}
-
-	public static Connection getConnection(IServerModeUICallback callback) {
-		return (Connection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
-	}
-
-	public static void put(IDomain domain, TaskModel taskModel) {
-		taskModel.putObject(TASK_WIZARD_ATTR_DOMAIN, domain);
-	}
-
-	public static IDomain getDomain(IServerModeUICallback callback) {
-		return (IDomain) callback.getAttribute(TASK_WIZARD_ATTR_DOMAIN);
-	}
-
-	public static void put(IApplication application, TaskModel taskModel) {
-		taskModel.putObject(OpenShiftServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
-	}
-	
-	public static IApplication getApplication(IServerModeUICallback callback) {
-		return (IApplication) callback.getAttribute(OpenShiftServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
 	}
 }
