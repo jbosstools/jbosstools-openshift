@@ -133,11 +133,11 @@ public class OpenShiftServerWizardComposite {
 	}
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
-		updateModel(getConnection(callback), OpenShiftServerUtils.getApplication(callback));
+		updateModel(getConnection(callback), BehaviorTaskModelUtil.getApplication(callback));
 	}
 	
 	private Connection getConnection(IServerModeUICallback callback) {
-		Connection connection = OpenShiftServerUtils.getConnection(callback);
+		Connection connection = BehaviorTaskModelUtil.getConnection(callback);
 		if (connection == null) {
 			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 		}

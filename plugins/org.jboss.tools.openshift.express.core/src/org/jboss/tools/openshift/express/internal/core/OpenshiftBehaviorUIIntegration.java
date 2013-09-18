@@ -42,7 +42,7 @@ public class OpenshiftBehaviorUIIntegration {
 	}
 
 	public static boolean isUserInitiatedAction(IAdaptable adaptable) {
-		return "user".equals(adaptable.getAdapter(String.class)) || adaptable.getAdapter(Shell.class) != null; //$NON-NLS-1$
+		return "user".equals(adaptable.getAdapter(String.class)); //$NON-NLS-1$
 	}
 	
 	public static void displayConsoleView(final IServer server) {
