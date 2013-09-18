@@ -42,11 +42,11 @@ public class BehaviorTaskModelUtil {
 	}
 
 	public static void put(IApplication application, TaskModel taskModel) {
-		taskModel.putObject(OpenShiftServerUtils.TASK_WIZARD_ATTR_SELECTED_APP, application);
+		taskModel.putObject(TASK_WIZARD_ATTR_SELECTED_APP, application);
 	}
 	
 	public static IApplication getApplication(IServerModeUICallback callback) {
-		return (IApplication) callback.getAttribute(OpenShiftServerUtils.TASK_WIZARD_ATTR_SELECTED_APP);
+		return (IApplication) callback.getAttribute(TASK_WIZARD_ATTR_SELECTED_APP);
 	}
 
 }
