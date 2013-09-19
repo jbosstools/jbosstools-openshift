@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
+import org.jboss.tools.openshift.express.core.OpenShiftCoreException;
+import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 
 /**
@@ -87,7 +89,7 @@ public class ConnectionsModel {
 	protected boolean addConnection(ConnectionURL connectionUrl) {
 		Connection connection =
 				new Connection(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost(), 
-						OpenShiftCoreActivator.getDefault().getCredentialPrompter());
+						OpenshiftCoreUIIntegration.getDefault().getCredentialPrompter());
 		return addConnection(connectionUrl, connection);
 	}
 

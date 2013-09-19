@@ -8,13 +8,30 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.connection;
+package org.jboss.tools.openshift.express.core;
+
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
- * @author Rob Stryker
+ *   A listener for the connections model. 
  */
 public interface IConnectionsModelListener {
+	
+	/**
+	 * Be alerted that a connection has been added
+	 * @param connection
+	 */
 	public void connectionAdded(Connection connection);
+	
+	/**
+	 * Be alerted that a connection has been removed
+	 * @param connection
+	 */
 	public void connectionRemoved(Connection connection);
+	
+	/**
+	 * Be alerted that a connection has been changed
+	 * @param connection
+	 */
 	public void connectionChanged(Connection connection);
 }

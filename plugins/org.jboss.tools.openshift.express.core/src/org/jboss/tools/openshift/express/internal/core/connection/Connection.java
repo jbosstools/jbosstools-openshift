@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.core.connection;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.core.secure.OpenShiftPasswordStorageKey;

@@ -39,8 +39,8 @@ import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.express.internal.core.OpenshiftBehaviorUIIntegration;
 
 /**
  * @author Rob Stryker
@@ -198,12 +198,12 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		PushOperationResult result = null;
 		int changes = OpenShiftServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
 		if (changes > 0) {
-			if (OpenshiftBehaviorUIIntegration.requestApproval(
+			if (OpenshiftCoreUIIntegration.requestApproval(
 					NLS.bind(OpenShiftServerMessages.commitAndPushMsg, changes, p.getName()),
 					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
 				monitor.beginTask("Publishing " + p.getName(), 300);
 				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
-				OpenshiftBehaviorUIIntegration.displayConsoleView(behaviour.getServer());
+				OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
 				result = push(p, behaviour.getServer(), monitor);
 			}
 		} else {
@@ -211,17 +211,17 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				String openShiftRemoteName =
 						OpenShiftServerUtils.getExpressRemoteName(behaviour.getServer());
 				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
-					if (OpenshiftBehaviorUIIntegration.requestApproval(
+					if (OpenshiftCoreUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, p.getName()),
 							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						OpenshiftBehaviorUIIntegration.displayConsoleView(behaviour.getServer());
+						OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				} else {
-					if (OpenshiftBehaviorUIIntegration.requestApproval(
+					if (OpenshiftCoreUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.pushCommitsMsg, p.getName()),
 							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						OpenshiftBehaviorUIIntegration.displayConsoleView(behaviour.getServer());
+						OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
 						result = push(p, behaviour.getServer(), monitor);
 					}
 				}
@@ -240,18 +240,18 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			monitor.beginTask("Publishing " + project.getName(), 200);
 			PushOperationResult result = EGitUtils.push(
 					remoteName, repository, new SubProgressMonitor(monitor, 100),
-					OpenshiftBehaviorUIIntegration.getConsoleOutputStream(server));
+					OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
 			monitor.done();
 			return result;
 		} catch (CoreException ce) {
 			// Comes if push has failed
 			if (ce.getMessage() != null && ce.getMessage().contains("UP_TO_DATE")) {
-				OpenshiftBehaviorUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
+				OpenshiftCoreUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
 				return null;
 			}
 
 			try {
-				if (OpenshiftBehaviorUIIntegration.requestApproval(
+				if (OpenshiftCoreUIIntegration.requestApproval(
 						"Error: '"
 								+ ce.getMessage()
 								+ "' occurred while pushing.\n\nIf the commit history is not correct on the remote repository, "
@@ -260,11 +260,11 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 						"Attempt push force ?", false)) {
 					return EGitUtils.pushForce(
 							remoteName, repository, new SubProgressMonitor(monitor, 100),
-							OpenshiftBehaviorUIIntegration.getConsoleOutputStream(server));
+							OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
 				} else {
 					// printing out variation of the standard git output
 					// meesage.
-					OpenshiftBehaviorUIIntegration.appendToConsole(
+					OpenshiftCoreUIIntegration.appendToConsole(
 									server,
 									"\n\nERROR: "
 											+ ce.getLocalizedMessage()
@@ -278,7 +278,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			} catch (CoreException ce2) {
 				if (ce.getMessage() != null 
 						&& ce.getMessage().contains("UP_TO_DATE")) {
-					OpenshiftBehaviorUIIntegration.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
+					OpenshiftCoreUIIntegration.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
 					return null;
 				} else {
 					// even the push force failed, and we don't have a valid

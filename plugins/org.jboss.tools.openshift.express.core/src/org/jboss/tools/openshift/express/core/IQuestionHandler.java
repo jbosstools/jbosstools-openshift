@@ -8,11 +8,11 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/ 
-package org.jboss.tools.openshift.express.internal.core;
+package org.jboss.tools.openshift.express.core;
 
 /**
  * Handle a question to the user, to be 
- * presented in some UI
+ * presented in some UI. 
  */
 public interface IQuestionHandler {
 	
@@ -21,7 +21,7 @@ public interface IQuestionHandler {
 	 * @param title
 	 * @param message
 	 * @param defaultAnswer
-	 * @return
+	 * @return  true if the user responded in the affirmative, false otherwise
 	 */
 	public boolean openQuestion(final String title, final String message, final boolean defaultAnswer);
 }

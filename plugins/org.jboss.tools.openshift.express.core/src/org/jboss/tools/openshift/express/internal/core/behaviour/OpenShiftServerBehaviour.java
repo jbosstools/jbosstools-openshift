@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IModule;
 import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
-import org.jboss.tools.openshift.express.internal.core.OpenshiftBehaviorUIIntegration;
+import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 
 /**
  * @author Rob Stryker
@@ -31,7 +31,8 @@ public class OpenShiftServerBehaviour extends DelegatingServerBehavior {
 	public IStatus publish(int kind, IProgressMonitor monitor) {
 		boolean shouldPublish = false;
 		if( publishAdaptableInfo != null ) {
-			shouldPublish = OpenshiftBehaviorUIIntegration.isUserInitiatedAction(publishAdaptableInfo);
+			// Previous reference to Shell.class was redundant and unnecessary
+			shouldPublish = "user".equals(publishAdaptableInfo.getAdapter(String.class));
 		}
 		if( shouldPublish )
 			return super.publish(kind, monitor);

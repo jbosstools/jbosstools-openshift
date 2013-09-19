@@ -14,7 +14,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.core.IQuestionHandler;
+import org.jboss.tools.openshift.express.core.IQuestionHandler;
 
 public class QuestionHandler implements IQuestionHandler {
 

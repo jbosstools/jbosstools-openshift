@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2012 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,23 +8,21 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core;
+package org.jboss.tools.openshift.express.core;
 
-import com.openshift.client.OpenShiftException;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftCoreException extends OpenShiftException {
+public interface ICredentialsPrompter {
 
-	private static final long serialVersionUID = 1L;
-
-	public OpenShiftCoreException(String message, Object... arguments) {
-		super(message, arguments);
-	}
-
-	public OpenShiftCoreException(Throwable cause, String message, Object... arguments) {
-		super(cause, message, arguments);
-	}
-
+	/**
+	 * Prompt that the given connection requires 
+	 * authentication. 
+	 * 
+	 * @param connection  The connection
+	 */
+	public void promptAndAuthenticate(Connection connection);
+	
 }
