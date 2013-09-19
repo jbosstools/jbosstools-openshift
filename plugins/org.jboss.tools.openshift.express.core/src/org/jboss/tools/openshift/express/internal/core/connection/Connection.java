@@ -16,9 +16,9 @@ import java.util.List;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.core.secure.OpenShiftPasswordStorageKey;
-import org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStore;
-import org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStoreException;
+import org.jboss.tools.openshift.express.internal.core.security.OpenShiftPasswordStorageKey;
+import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStore;
+import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStoreException;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 

@@ -16,6 +16,7 @@ import org.jboss.ide.eclipse.as.core.server.internal.launch.DelegatingStartLaunc
 /**
  * @author Rob Stryker
  */
-public class OpenshiftDelegatingStartLaunchConfiguration extends DelegatingStartLaunchConfiguration {
+public class OpenshiftDelegatingStartLaunchConfiguration 
+	extends DelegatingStartLaunchConfiguration implements ILaunchConfigurationDelegate {
 
 }

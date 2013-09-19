@@ -13,6 +13,12 @@ package org.jboss.tools.openshift.express.core;
 /**
  * Handle a question to the user, to be 
  * presented in some UI. 
+ * 
+ * Since the method of presenting a question to a user is 
+ * most likely done via a UI construct, no direct
+ * references to the UI may be done in a core plugin. 
+ * Instead, the UI plugin should set a proper handler
+ * in the {@link OpenshiftCoreUIIntegration} class. 
  */
 public interface IQuestionHandler {
 	

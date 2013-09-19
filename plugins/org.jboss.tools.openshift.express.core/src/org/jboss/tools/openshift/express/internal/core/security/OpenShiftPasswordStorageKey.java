@@ -8,12 +8,12 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.secure;
+package org.jboss.tools.openshift.express.internal.core.security;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jboss.tools.openshift.express.internal.core.secure.SecurePasswordStore.IStorageKey;
+import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStore.IStorageKey;
 
 
 /**

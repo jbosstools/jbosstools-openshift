@@ -26,5 +26,5 @@ Export-Package: org.jboss.tools.openshift.express.core,
  org.jboss.tools.openshift.express.internal.core.connection;x-friends:="org.jboss.tools.openshift.express.ui",
  org.jboss.tools.openshift.express.internal.core.marker;x-friends:="org.jboss.tools.openshift.express.ui",
  org.jboss.tools.openshift.express.internal.core.preferences;x-friends:="org.jboss.tools.openshift.express.ui",
- org.jboss.tools.openshift.express.internal.core.secure;x-friends:="org.jboss.tools.openshift.express.ui",
+ org.jboss.tools.openshift.express.internal.core.security;x-friends:="org.jboss.tools.openshift.express.ui",
  org.jboss.tools.openshift.express.internal.core.util;x-friends:="org.jboss.tools.openshift.express.ui"

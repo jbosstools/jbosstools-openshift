@@ -13,6 +13,14 @@ package org.jboss.tools.openshift.express.core;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
+ * 
+ * Since the method of prompting a user for credentials is 
+ * most likely done via a UI construct, no direct
+ * references to the UI may be done in a core plugin. 
+ * 
+ * Instead, the UI plugin should set a proper handler
+ * in the {@link OpenshiftCoreUIIntegration} class. 
+ * 
  * @author Andre Dietisheim
  */
 public interface ICredentialsPrompter {
