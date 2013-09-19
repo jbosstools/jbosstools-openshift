@@ -41,4 +41,12 @@ public class TailFilesWizard extends Wizard {
 		return model.getFilePattern();
 	}
 
+	/**
+	 * @return true if the 'tail' command be executed on all gears (if the
+	 *         application is scalable), false otherwise.
+	 */
+	public boolean isAllGears() {
+		return model.getAllGears();
+	}
+
 }

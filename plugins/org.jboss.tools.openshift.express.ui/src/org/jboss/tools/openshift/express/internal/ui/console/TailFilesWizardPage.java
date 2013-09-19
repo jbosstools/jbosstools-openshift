@@ -74,6 +74,17 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 				pageModel.resetFilePattern();
 			}
 		});
+		// enable tail logs on all gears at the same time
+		final Button allGearsBtn = new Button(container, SWT.CHECK);
+		allGearsBtn.setText("Tail logs on all gears");
+		
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(3, 1).grab(true, false).applyTo(allGearsBtn);
+		IObservableValue allGearsBtnObservable = WidgetProperties.selection().observe(allGearsBtn);
+		IObservableValue allGearsModelObservable = BeanProperties.value(
+				TailFilesWizardPageModel.PROPERTY_ALL_GEARS).observe(pageModel);
+		ValueBindingBuilder.bind(allGearsBtnObservable).to(allGearsModelObservable).in(dbc);
+
 	}
 
 	// private SelectionListener onCheckAll() {
