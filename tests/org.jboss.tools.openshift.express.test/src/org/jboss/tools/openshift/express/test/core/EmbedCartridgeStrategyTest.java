@@ -29,9 +29,10 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.EmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
-import com.openshift.internal.client.StandaloneCartridge;
+import com.openshift.client.cartridge.StandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -39,24 +40,24 @@ import com.openshift.internal.client.StandaloneCartridge;
 public class EmbedCartridgeStrategyTest {
 
 	private static final IStandaloneCartridge JENKINS_14 =
-			new StandaloneCartridge(IStandaloneCartridge.NAME_JENKINS, "14");
+			new StandaloneCartridge(IStandaloneCartridge.NAME_JENKINS + ICartridge.NAME_VERSION_DELIMITER + "14");
 	private static final IStandaloneCartridge JBOSSAS_7 =
-			new StandaloneCartridge(IStandaloneCartridge.NAME_JBOSSAS, "7");
+			new StandaloneCartridge(IStandaloneCartridge.NAME_JBOSSAS + ICartridge.NAME_VERSION_DELIMITER + "7");
 
 	private static final IEmbeddableCartridge CARTRIDGE_MYSQL =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MYSQL, "51");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MYSQL + ICartridge.NAME_VERSION_DELIMITER +"51");
 	private static final IEmbeddableCartridge CARTRIDGE_PHPMYADMIN =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_PHPMYADMIN, "34");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_PHPMYADMIN + ICartridge.NAME_VERSION_DELIMITER +"34");
 	private static final IEmbeddableCartridge CARTRIDGE_POSTGRESQL =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_POSTGRESQL, "84");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_POSTGRESQL + ICartridge.NAME_VERSION_DELIMITER +"84");
 	private static final IEmbeddableCartridge CARTRIDGE_ROCKMONGO =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_ROCKMONGO, "11");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_ROCKMONGO + ICartridge.NAME_VERSION_DELIMITER +"11");
 	private static final IEmbeddableCartridge CARTRIDGE_MONGODB =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MONGODB, "22");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_MONGODB + ICartridge.NAME_VERSION_DELIMITER +"22");
 	private static final IEmbeddableCartridge CARTRIDGE_JENKINS_CLIENT =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_JENKINS_CLIENT, "14");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_JENKINS_CLIENT + ICartridge.NAME_VERSION_DELIMITER +"14");
 	private static final IEmbeddableCartridge CARTRIDGE_10GEN_MMS_AGENT =
-			new EmbeddableCartridge(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT, "01");
+			new EmbeddableCartridge(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT + ICartridge.NAME_VERSION_DELIMITER + "01");
 
 	private EmbedCartridgeStrategy embedStrategy;
 
