@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 /**
  * @author Andre Dietisheim

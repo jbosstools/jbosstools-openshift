@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 
 /**
  * Property tester used to compare the given Server's serverTypeId with a given value. 

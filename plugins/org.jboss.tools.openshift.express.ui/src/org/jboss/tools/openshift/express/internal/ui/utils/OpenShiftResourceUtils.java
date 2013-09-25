@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+
 import com.openshift.client.cartridge.ICartridge;
 
 /**

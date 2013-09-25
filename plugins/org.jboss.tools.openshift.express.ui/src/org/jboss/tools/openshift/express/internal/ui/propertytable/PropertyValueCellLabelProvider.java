@@ -21,8 +21,8 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.jboss.tools.common.ui.BrowserUtil;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TreeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
