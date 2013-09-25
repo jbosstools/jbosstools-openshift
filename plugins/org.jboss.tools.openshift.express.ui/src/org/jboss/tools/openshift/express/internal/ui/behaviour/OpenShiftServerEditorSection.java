@@ -55,8 +55,8 @@ import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 
 /**
  * @author Rob Stryker

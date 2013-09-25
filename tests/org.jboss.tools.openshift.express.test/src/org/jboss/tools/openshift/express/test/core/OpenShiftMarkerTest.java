@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.marker.OpenShiftMarkers;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -39,6 +39,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
@@ -46,7 +47,6 @@ import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.jcraft.jsch.JSch;

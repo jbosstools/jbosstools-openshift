@@ -44,8 +44,8 @@ import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**

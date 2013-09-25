@@ -78,6 +78,7 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationPropertiesProvider;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNullConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.MultiConverter;
@@ -86,7 +87,6 @@ import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringC
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;

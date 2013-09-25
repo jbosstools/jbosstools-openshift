@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.express.test.core.connection;
 
 import java.util.List;
 
+import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
-import org.jboss.tools.openshift.express.internal.core.connection.IConnectionsModelListener;
 
 /**
  * @author adietish

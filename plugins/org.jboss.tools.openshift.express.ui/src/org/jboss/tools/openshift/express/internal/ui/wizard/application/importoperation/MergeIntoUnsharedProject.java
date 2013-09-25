@@ -25,8 +25,8 @@ import org.jboss.ide.eclipse.as.core.util.FileUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
-import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.ResourceUtils;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ResourceUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;

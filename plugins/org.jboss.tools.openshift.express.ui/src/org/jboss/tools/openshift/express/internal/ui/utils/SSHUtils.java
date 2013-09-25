@@ -19,6 +19,8 @@ import org.eclipse.jsch.internal.core.IConstants;
 import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 /**
  * @author Andre Dietisheim

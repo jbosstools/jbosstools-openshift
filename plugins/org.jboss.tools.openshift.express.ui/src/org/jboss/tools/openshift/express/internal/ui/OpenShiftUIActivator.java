@@ -7,7 +7,10 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -37,6 +40,9 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		OpenshiftCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
+		OpenshiftCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
+		OpenshiftCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());
 	}
 
 	/*

@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.databinding;
 
 import org.eclipse.core.databinding.conversion.Converter;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 /**
  * A converter that turns empty strings to null. Leaves them untouched
