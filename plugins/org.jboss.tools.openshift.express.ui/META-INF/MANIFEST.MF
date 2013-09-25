@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OpenShift UI
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.ui;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Localization: plugin
@@ -54,7 +54,7 @@ Import-Package: org.jboss.tools.common.databinding,
  org.jboss.tools.common.ui.databinding,
  org.jboss.tools.common.ui.preferencevalue,
  org.jboss.tools.common.ui.ssh
-Bundle-Vendor: %Bundle-Vendor.0
+Bundle-Vendor: %Bundle-Vendor
 Export-Package: org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.action;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.behaviour;x-friends:="org.jboss.tools.openshift.express.test",

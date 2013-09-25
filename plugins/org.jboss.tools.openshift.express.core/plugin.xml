@@ -35,7 +35,7 @@
     <extension
          point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
-             vendor="%providerName"
+             vendor="%ProviderName"
              class="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftRuntime"
              description="%openshift.express.runtime.name"
              name="%openshift.express.runtime.name"
