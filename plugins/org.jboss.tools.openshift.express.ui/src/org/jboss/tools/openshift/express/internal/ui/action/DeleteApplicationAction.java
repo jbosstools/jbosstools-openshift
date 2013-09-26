@@ -64,7 +64,7 @@ public class DeleteApplicationAction extends AbstractOpenShiftAction {
 									"You are about to destroy the \"{0}\" application.\n"
 											+
 											"This is NOT reversible, all remote data for this application will be removed.",
-									appsToDelete.get(0)));
+									appsToDelete.get(0).getName()));
 		} else if (appsToDelete.size() > 1) {
 			confirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(),
 					"Application deletion",
