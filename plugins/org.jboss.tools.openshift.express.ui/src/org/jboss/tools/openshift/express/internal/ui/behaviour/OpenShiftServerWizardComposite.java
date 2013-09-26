@@ -79,8 +79,8 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
@@ -133,11 +133,11 @@ public class OpenShiftServerWizardComposite {
 	}
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
-		updateModel(getConnection(callback), OpenShiftServerUtils.getApplication(callback));
+		updateModel(getConnection(callback), BehaviorTaskModelUtil.getApplication(callback));
 	}
 	
 	private Connection getConnection(IServerModeUICallback callback) {
-		Connection connection = OpenShiftServerUtils.getConnection(callback);
+		Connection connection = BehaviorTaskModelUtil.getConnection(callback);
 		if (connection == null) {
 			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 		}

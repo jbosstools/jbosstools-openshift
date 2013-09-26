@@ -28,6 +28,7 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -210,5 +211,13 @@ public class UIUtils {
 		}
 	}
 
+	public static void ensureDisplayExec(Runnable runnable) {
+		Display display = Display.getCurrent();
+		if (display == null) {
+			Display.getDefault().asyncExec(runnable);
+		} else {
+			runnable.run();
+		}
+	}
 	
 }

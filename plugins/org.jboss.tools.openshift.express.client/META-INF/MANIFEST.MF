@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Client
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.client;singleton:=true
 Bundle-Version: 2.6.0.qualifier
-Bundle-Vendor: JBoss by Red Hat
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/openshift-java-client-2.4.0-SNAPSHOT.jar,

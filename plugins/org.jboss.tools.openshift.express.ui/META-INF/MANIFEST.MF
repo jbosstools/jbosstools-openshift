@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OpenShift UI
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.ui;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Localization: plugin
@@ -45,7 +45,8 @@ Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,
  org.jboss.ide.eclipse.as.dmr;bundle-version="2.3.0",
  org.eclipse.jsch.ui;bundle-version="1.1.300",
  org.eclipse.jdt.debug.ui;bundle-version="3.6.1",
- org.jboss.tools.common.ui;bundle-version="3.3.0"
+ org.jboss.tools.common.ui;bundle-version="3.3.0",
+ org.jboss.tools.openshift.express.core;bundle-version="2.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.jboss.tools.common.databinding,
@@ -53,14 +54,8 @@ Import-Package: org.jboss.tools.common.databinding,
  org.jboss.tools.common.ui.databinding,
  org.jboss.tools.common.ui.preferencevalue,
  org.jboss.tools.common.ui.ssh
-Bundle-Vendor: %Bundle-Vendor.0
-Export-Package: org.jboss.tools.openshift.express.internal.core;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.core.behaviour;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.core.connection;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.core.marker;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.core.portforward;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.core.util;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jboss.tools.openshift.express.test",
+Bundle-Vendor: %Bundle-Vendor
+Export-Package: org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.action;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.behaviour;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.command;x-friends:="org.jboss.tools.openshift.express.test",
@@ -71,7 +66,7 @@ Export-Package: org.jboss.tools.openshift.express.internal.core;x-friends:="org.
  org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.job;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.messages;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.ui.preferences;x-friends:="org.jboss.tools.openshift.express.test",
+ org.jboss.tools.openshift.express.internal.ui.portforward;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.property;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.propertytable;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate;x-friends:="org.jboss.tools.openshift.express.test",
