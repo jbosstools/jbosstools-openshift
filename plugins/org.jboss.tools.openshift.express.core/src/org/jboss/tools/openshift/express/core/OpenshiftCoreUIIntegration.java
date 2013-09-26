@@ -19,6 +19,8 @@ import org.eclipse.wst.server.core.IServer;
  * A class to aid in any tasks that may be relevant to a UI, 
  * for example, displaying a question, or any interactions
  * with an eclipse console, or prompting for credentials
+ * 
+ * @author Rob Stryker
  */
 public class OpenshiftCoreUIIntegration {
 	
