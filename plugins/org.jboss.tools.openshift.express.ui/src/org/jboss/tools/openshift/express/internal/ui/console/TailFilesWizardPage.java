@@ -106,7 +106,7 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 	// }
 
 	private void resetFilePatternText() {
-		pageModel.resetFilePattern();
+//		pageModel.resetFilePattern();
 	}
 	
 	@Override
