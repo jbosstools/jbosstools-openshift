@@ -10,9 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.preferences;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+
+import com.openshift.client.IApplication;
 
 /**
  * @author Andre Dietisheim
@@ -31,6 +38,9 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 	private StringsPreferenceValue UI_connectionsPreferenceValue;
 	private StringsPreferenceValue UI_legacyConnections;
 
+	private StringsPreferenceValue tailFileOptionsPreferenceValues;
+	private Map<String, String> tailOptionsByUUID = new HashMap<String, String>();
+	
 	private OpenShiftPreferences() {
 		this.connectionsPreferenceValue =
 				new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
@@ -40,6 +50,20 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 				new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
 		this.UI_legacyConnections = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, UI_PLUGIN_ID);
 
+		this.tailFileOptionsPreferenceValues = new StringsPreferenceValue('|', TAIL_FILE_OPTIONS, OpenShiftCoreActivator.PLUGIN_ID);
+		initTailFileOptions(tailFileOptionsPreferenceValues.get());
+	}
+
+	private void initTailFileOptions(String[] options) {
+		if (options == null
+				|| options.length == 0) {
+			return;
+		}
+		for (int i = 0; i < options.length - 1; i += 2) {
+			String uuid = options[i];
+			String tailOptions = options[i + 1];
+			tailOptionsByUUID.put(uuid, tailOptions);
+		}
 	}
 
 	private IEclipsePreferences getPrefs(String id) {
@@ -65,6 +89,37 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 		getPrefs(OpenShiftCoreActivator.PLUGIN_ID).put(LAST_USERNAME, username);
 	}
 
+	public String getTailFileOptions(IApplication application) {
+		String tailFileOptions = null;
+		if (application != null) {
+			 tailFileOptions = tailOptionsByUUID.get(application.getUUID());
+		}
+		if (tailFileOptions == null
+				|| tailFileOptions.isEmpty()) {
+			tailFileOptions = "-f -n 100 */logs/*";
+		}
+		return tailFileOptions;
+	}
+
+	public void saveTailFileOptions(IApplication application, String tailFileOptions) {
+		if (application != null) {
+			tailOptionsByUUID.put(application.getUUID(), tailFileOptions);
+		}
+		saveAllTailOptions();
+	}
+
+	private void saveAllTailOptions() {
+		List<String> uuidsAndOptions = new ArrayList<String>();
+		for (Map.Entry<String, String> entry : tailOptionsByUUID.entrySet()) {
+			String uuid = entry.getKey();
+			String options = entry.getValue();
+			uuidsAndOptions.add(uuid);
+			uuidsAndOptions.add(options);
+		}
+		tailFileOptionsPreferenceValues.store(
+				uuidsAndOptions.toArray(new String[uuidsAndOptions.size()]));
+	}
+	
 	public String[] getConnections() {
 		String[] ret = connectionsPreferenceValue.get();
 		return ret == null ? UI_connectionsPreferenceValue.get() : ret;
