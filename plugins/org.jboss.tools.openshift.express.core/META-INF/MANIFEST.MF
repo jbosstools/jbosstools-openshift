@@ -9,7 +9,6 @@ Bundle-Activator: org.jboss.tools.openshift.express.internal.core.OpenShiftCoreA
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.0",
  org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,3.0.0)",
  org.jboss.tools.openshift.egit.core;bundle-version="[2.5.0,3.0.0)",
- org.jboss.tools.openshift.egit.ui;bundle-version="[2.5.0,3.0.0)",
  org.jboss.tools.foundation.core;bundle-version="1.1.0",
  org.eclipse.core.resources;bundle-version="3.8.100",
  org.eclipse.debug.core;bundle-version="3.8.0",
