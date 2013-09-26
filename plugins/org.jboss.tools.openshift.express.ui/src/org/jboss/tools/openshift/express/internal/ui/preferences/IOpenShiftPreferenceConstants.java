@@ -25,5 +25,7 @@ public interface IOpenShiftPreferenceConstants {
 	public static final String SERVERS = "org.jboss.tools.openshift.express.SERVERS";
 	/** default server */
 	public static final String DEFAULT_HOST = "org.jboss.tools.openshift.express.SERVER";
+	/** tail command */
+	public static final String TAIL_FILE_OPTIONS = "org.jboss.tools.openshift.express.TAILCOMMAND";
 
 }
