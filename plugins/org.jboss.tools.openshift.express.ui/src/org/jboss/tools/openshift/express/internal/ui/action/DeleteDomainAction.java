@@ -57,10 +57,10 @@ public class DeleteDomainAction extends AbstractOpenShiftAction {
 						domain.getId()),
 						"Force applications deletion (data will be lost and operation cannot be undone)");
 				int result = dialog.open();
-				if ((result == CheckboxMessageDialog.INCLUDE_APPS) || (result == MessageDialog.OK)) {
+				if ((result == CheckboxMessageDialog.CHECKBOX_SELECTED) || (result == MessageDialog.OK)) {
 					confirm = true;
 				}
-				final boolean includeApps = ((result & CheckboxMessageDialog.INCLUDE_APPS) > 0);
+				final boolean includeApps = ((result & CheckboxMessageDialog.CHECKBOX_SELECTED) > 0);
 				if (confirm) {
 					Job job = new Job("Deleting OpenShift Domain...") {
 						@Override
