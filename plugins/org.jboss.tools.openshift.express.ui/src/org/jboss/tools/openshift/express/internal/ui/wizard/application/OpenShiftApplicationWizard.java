@@ -134,6 +134,10 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		addPage(new ApplicationConfigurationWizardPage(this, model));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));
 		addPage(new GitCloningSettingsWizardPage(this, model));
+		/*
+		 * This may be where I should add the new page.
+		 */
+		//addPage(new ProjectAndServerEnvironmentalVariablesWizardPage(this, model));
 	}
 
 	@Override
