@@ -11,21 +11,39 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+
+import com.openshift.client.IDomain;
 
 /**
+ * A wizard to create a new OpenShift application.
+ * 
  * @author Xavier Coulon
- *
+ * @author Andre Dietisheim
+ * 
  */
 public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 
 	/**
-	 * Constructor
+	 * Constructor invoked via File->Import
 	 */
 	public NewOpenShiftApplicationWizard() {
-		super(false, "New OpenShift Application");
+		super(ConnectionsModelSingleton.getInstance().getRecentConnection(),
+				null, null, null, false, true, "New OpenShift Application");
 	}
 
+	/**
+	 * Constructor invoked via OpenShift Explorer context menu
+	 */
+	public NewOpenShiftApplicationWizard(IDomain domain) {
+		super(ConnectionsModelSingleton.getInstance().getConnectionByResource(domain.getUser()),
+				domain, null, null, false, false, "New OpenShift Application");
+	}
+
+	/**
+	 * Constructor invoked via OpenShift Explorer context menu
+	 */
 	public NewOpenShiftApplicationWizard(Connection connection) {
-		super(connection, null, null, false, false, "New OpenShift Application");
+		super(connection, null, null, null, false, false, "New OpenShift Application");
 	}
 }

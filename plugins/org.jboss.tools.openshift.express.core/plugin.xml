@@ -97,5 +97,37 @@
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
     </extension>
+	<!-- Connection adapter factory -->
+    <extension
+           point="org.eclipse.core.runtime.adapters">
+        <factory
+              adaptableType="org.jboss.tools.openshift.express.internal.core.connection.Connection"
+              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+           <adapter
+                 type="org.jboss.tools.openshift.express.internal.core.connection.Connection">
+           </adapter>
+        </factory>
+        <factory
+              adaptableType="com.openshift.client.IDomain"
+              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+           <adapter
+                 type="org.jboss.tools.openshift.express.internal.core.connection.Connection">
+           </adapter>
+        </factory>
+        <factory
+              adaptableType="com.openshift.client.IUser"
+              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+           <adapter
+                 type="org.jboss.tools.openshift.express.internal.core.connection.Connection">
+           </adapter>
+        </factory>
+        <factory
+              adaptableType="com.openshift.client.IApplication"
+              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+           <adapter
+                 type="org.jboss.tools.openshift.express.internal.core.connection.Connection">
+           </adapter>
+        </factory>
+     </extension>
 
 </plugin>

@@ -63,6 +63,7 @@ import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -97,7 +98,7 @@ public class OpenShiftServerUtils {
 	public static final String SETTING_REMOTE_NAME = "org.jboss.tools.openshift.RemoteName";//$NON-NLS-1$
 	public static final String SETTING_APPLICATION_NAME = "org.jboss.tools.openshift.ApplicationName";//$NON-NLS-1$
 	public static final String SETTING_APPLICATION_ID = "org.jboss.tools.openshift.ApplicationId";//$NON-NLS-1$
-	public static final String SETTING_DOMAIN = "org.jboss.tools.openshift.Domain";//$NON-NLS-1$
+	public static final String SETTING_DOMAIN_ID = "org.jboss.tools.openshift.Domain";//$NON-NLS-1$
 	public static final String SETTING_USERNAME = "org.jboss.tools.openshift.Username";//$NON-NLS-1$
 	public static final String SETTING_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
 	public static final String SETTING_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.DeployFolder";//$NON-NLS-1$
@@ -152,15 +153,16 @@ public class OpenShiftServerUtils {
 		}
 		try {
 			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
-			if (connection != null) {
-				return connection.getApplicationByName(appName); // May be long running
-			} else {
+			if (connection == null) {
 				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
+				return null;
 			}
+			IDomain domain = connection.getDomain(getExpressDomainName(server));
+			return connection.getApplication(appName, domain);
 		} catch (OpenShiftException e) {
 			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
+			return null;
 		}
-		return null;
 	}
 
 	/* Settings stored only in the project */
@@ -176,8 +178,8 @@ public class OpenShiftServerUtils {
 				attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String) null));
 	}
 
-	public static String getExpressDomain(IServerAttributes attributes) {
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DOMAIN,
+	public static String getExpressDomainName(IServerAttributes attributes) {
+		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DOMAIN_ID,
 				attributes.getAttribute(ATTRIBUTE_DOMAIN, (String) null));
 	}
 
@@ -334,23 +336,26 @@ public class OpenShiftServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
-	public static IServer fillServerWithOpenShiftDetails(IServer server, 
-			String deployProject, String remote, String serverName, IApplication application) throws CoreException {
+	public static IServer fillServerWithOpenShiftDetails(IServer server, String deployProject, String remote,
+			String serverName, IApplication application, IDomain domain) throws CoreException {
 		ServerWorkingCopy wc = (ServerWorkingCopy) server.createWorkingCopy();
 		String deployFolder = getDefaultDeployFolder(application);
 		String host = getHost(application);
 		String applicationName = getApplicationName(application);
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, serverName, host, deployProject, deployFolder, remote, applicationName);
+		String domainId = getDomainId(domain);
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, serverName,
+				host, deployProject, deployFolder, remote, applicationName, domainId);
 		IServer saved = wc.save(true, new NullProgressMonitor());
 		return saved;
 	}
 
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName,  
-			IProject deployProject, String deployFolder, String remote, IApplication application) {
+			IProject deployProject, String deployFolder, String remote, IApplication application, IDomain domain) {
 		String host = getHost(application);
 		String deployProjectName = getDeployProjectName(deployProject);
 		String applicationName = getApplicationName(application);
-		fillServerWithOpenShiftDetails(wc, serverName, host, deployProjectName, deployFolder, remote, applicationName);
+		String domainId = getDomainId(domain);
+		fillServerWithOpenShiftDetails(wc, serverName, host, deployProjectName, deployFolder, remote, applicationName, domainId);
 	}
 
 	private static String getDeployProjectName(IProject deployProject) {
@@ -377,6 +382,14 @@ public class OpenShiftServerUtils {
 		return name;
 	}
 
+	private static String getDomainId(IDomain domain) {
+		String id = null;
+		if (domain != null) {
+			id = domain.getId();
+		}
+		return id;
+	}
+
 	/**
 	 * Fills the given settings into the given server working copy.
 	 * <b>IMPORTANT:</b> If the server name is matching an existing server, then
@@ -399,12 +412,12 @@ public class OpenShiftServerUtils {
 	 *            the application name for the server
 	 */
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName, String host,
-			String deployProject, String deployFolder, String remote, String applicationName) {
+			String deployProject, String deployFolder, String remote, String applicationName, String domainName) {
 		wc.setHost(trimHost(host));
 		wc.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
 		// wc.setAttribute(ATTRIBUTE_USERNAME, username);
-		// wc.setAttribute(ATTRIBUTE_DOMAIN, domain);
+		wc.setAttribute(ATTRIBUTE_DOMAIN, domainName);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, applicationName);
 		// wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
 		 wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, deployFolder);
@@ -586,7 +599,7 @@ public class OpenShiftServerUtils {
 	private static boolean hasOpenShiftSettings(IProject project) {
 		String appName = getProjectAttribute(project, SETTING_APPLICATION_NAME, null);
 		String appId = getProjectAttribute(project, SETTING_APPLICATION_ID, null);
-		String domain = getProjectAttribute(project, SETTING_DOMAIN, null);
+		String domain = getProjectAttribute(project, SETTING_DOMAIN_ID, null);
 		String connectionUrl = getProjectAttribute(project, SETTING_CONNECTIONURL, null);
 		String username = getProjectAttribute(project, SETTING_USERNAME, null);
 		return appName != null
@@ -600,36 +613,15 @@ public class OpenShiftServerUtils {
 		return p == null ? null : p.length == 0 ? null : p[0];
 	}
 
-	public static IProject findProjectForServersApplication(IServerAttributes server) {
-		IApplication app = findApplicationForServer(server);
-		if (app == null) {
-			return null;
-		}
-		return OpenShiftServerUtils.findProjectForApplication(app);
-	}
-
-	public static IApplication findApplicationForServer(IServerAttributes server) {
-		try {
-			ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
-			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
-			String appName = OpenShiftServerUtils.getExpressApplicationName(server);
-			IApplication app = connection == null ? null : connection.getApplicationByName(appName);
-			return app;
-		} catch (OpenShiftException ose) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not find application for server {0}", server.getName()));
-			return null;
-		}
-	}
-
 	public static void updateOpenshiftProjectSettings(IProject project, IApplication app,
-			Connection connection, String remoteName, String deployFolder) {
+			IDomain domain, Connection connection, String remoteName, String deployFolder) {
 		String qualifier = QUALIFIER;
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);
 		node.put(OpenShiftServerUtils.SETTING_APPLICATION_ID, app.getUUID());
 		node.put(OpenShiftServerUtils.SETTING_APPLICATION_NAME, app.getName());
+		node.put(OpenShiftServerUtils.SETTING_DOMAIN_ID, app.getDomain().getId());
 		setConnectionUrl(connection, node);
-		node.put(OpenShiftServerUtils.SETTING_DOMAIN, app.getDomain().getId());
 		node.put(OpenShiftServerUtils.SETTING_REMOTE_NAME, remoteName);
 		if (!StringUtils.isEmpty(deployFolder)) {
 			node.put(OpenShiftServerUtils.SETTING_DEPLOY_FOLDER_NAME, deployFolder);

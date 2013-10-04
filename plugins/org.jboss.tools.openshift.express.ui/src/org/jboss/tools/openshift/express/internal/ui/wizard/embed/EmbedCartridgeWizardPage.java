@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IA
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
+import org.jboss.tools.openshift.express.internal.ui.job.RefreshConnectionsModelJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
@@ -260,6 +261,7 @@ public class EmbedCartridgeWizardPage extends AbstractOpenShiftWizardPage {
 			} else {
 				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
 			}
+			new RefreshConnectionsModelJob(pageModel.getDomain().getUser()).schedule();
 			return result.isOK();
 		} catch (Exception e) {
 			String errorMessage = NLS.bind("There was an error when embedding cartridge(s) for application {0}", pageModel.getApplication().getName());

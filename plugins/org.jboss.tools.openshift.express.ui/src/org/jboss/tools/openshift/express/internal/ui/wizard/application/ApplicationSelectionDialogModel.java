@@ -13,11 +13,12 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -39,22 +40,25 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 	}
 
 	public void refresh() {
+		IDomain domain = getDomain();
 		try {
-			getUser().refresh();
+			if (domain == null) {
+				return;
+			}
+			domain.refresh();
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to refresh User's account", e);
+			Logger.error(NLS.bind("Could not refresh domain {0}", domain.getId()), e);
 		}
 	}
 	
 	public List<IApplication> getApplications() {
 		try {
-			Connection user = getUser();
-			if (user == null) {
-				return Collections.emptyList();
+			IDomain domain = getDomain();
+			if (domain != null) {
+				return domain.getApplications();
 			}
-			return user.getApplications();
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve User's applications", e);
+			Logger.error("Failed to retrieve applications", e);
 		}
 		return Collections.emptyList();
 	}
@@ -64,13 +68,11 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedApplication(IApplication application) {
-		firePropertyChange(PROPERTY_SELECTED_APPLICATION, this.selectedApplication,
-				this.selectedApplication = application);
+		firePropertyChange(PROPERTY_SELECTED_APPLICATION, 
+				this.selectedApplication, this.selectedApplication = application);
 	}
 
-	public Connection getUser() {
-//		return OpenShiftUIActivator.getDefault().getUser();
-		return wizardModel.getConnection();
+	protected IDomain getDomain() {
+		return wizardModel.getDomain();
 	}
-
 }
