@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.test.core.connection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
@@ -22,9 +23,12 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
+import org.jboss.tools.openshift.express.test.core.NoopUserFake;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionsModelFake.ConnectionsChange;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.openshift.client.IUser;
 
 /**
  * @author Andre Dietisheim
@@ -174,6 +178,33 @@ public class ConnectionsModelTest {
 		// operations
 		ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
 		Connection queriedConnection = connectionsModel.getConnectionByUrl(connectionUrl);
+
+		// verifications
+		assertEquals(connection, queriedConnection);
+	}
+
+	@Test
+	public void shouldGetConnectionByUserResource() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		final String server = "http://localhost";
+		final String username = "adietish@redhat.com";
+		Connection connection = new ConnectionFake(username, server);
+		connectionsModel.addConnection(connection);
+		IUser user = new NoopUserFake() {
+
+			@Override
+			public String getServer() {
+				return server;
+			}
+
+			@Override
+			public String getRhlogin() {
+				return username;
+			}
+		};
+
+		// operations
+		Connection queriedConnection = connectionsModel.getConnectionByResource(user);
 
 		// verifications
 		assertEquals(connection, queriedConnection);

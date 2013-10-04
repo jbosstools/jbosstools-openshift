@@ -10,8 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
+import java.util.List;
+
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
+import com.openshift.client.IDomain;
 import com.openshift.client.cartridge.ICartridge;
 
 /**
@@ -39,5 +42,32 @@ public class OpenShiftResourceUtils {
 		return builder.toString();
 
 	}
+	
+	public static String toString(List<IDomain> domains) {
+		StringBuilder builder = new StringBuilder();
+		if (domains == null
+				|| domains.isEmpty()) {
+			return builder.toString();
+		}
+		for (IDomain domain : domains) {
+			if (domain == null) {
+				continue;
+			}
+			if (builder.length() > 0) {
+				builder.append(", ");
+			}
+			builder.append(toString(domain));
+		}
+		return builder.toString();
+	}
+
+	public static String toString(IDomain domain) {
+		if (domain == null) {
+			return null;
+		}
+				
+		return domain.getId();
+	}
+
 	
 }

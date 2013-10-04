@@ -26,6 +26,9 @@ import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 
+import com.openshift.client.IApplication;
+import com.openshift.client.IUser;
+
 /**
  * @author Rob Stryker
  * @author Andre Dietisheim
@@ -110,7 +113,19 @@ public class ConnectionsModel {
 
 	// TODO: dont allow/require external trigger to changer notification
 	public void fireConnectionChanged(Connection connection) {
+		if (connection == null) {
+			return;
+		}
 		fireModelChange(connection, CHANGED);
+	}
+
+	// TODO: dont allow/require external trigger to changer notification
+	public void fireConnectionChanged(IUser user) {
+		if (user == null) {
+			return;
+		}
+		Connection connection = getConnectionByResource(user);
+		fireConnectionChanged(connection);
 	}
 
 	public boolean removeConnection(Connection connection) {
@@ -135,6 +150,9 @@ public class ConnectionsModel {
 	}
 
 	private void fireModelChange(Connection connection, int type) {
+		if (connection == null) {
+			return;
+		}
 		Iterator<IConnectionsModelListener> i = listeners.iterator();
 		while (i.hasNext()) {
 			IConnectionsModelListener l = i.next();
@@ -157,6 +175,34 @@ public class ConnectionsModel {
 
 	public Connection getRecentConnection() {
 		return recentConnection;
+	}
+
+	public Connection getConnectionByResource(IApplication application) {
+		if (application == null) {
+			return null;
+		}
+		
+		return getConnectionByResource(application.getDomain().getUser());
+	}
+	
+	public Connection getConnectionByResource(IUser user) throws OpenShiftCoreException {
+		if (user == null) {
+			return null;
+		}
+		try {
+			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndServer(user.getRhlogin(), user.getServer());
+			return connectionsByUrl.get(connectionUrl);
+		} catch (UnsupportedEncodingException e) {
+			throw new OpenShiftCoreException(e, 
+					NLS.bind(
+					"Could not get connection for user resource {0} - {1}",
+					user.getRhlogin(), user.getServer()));
+		} catch (MalformedURLException e) {
+			throw new OpenShiftCoreException(e, 
+					NLS.bind(
+					"Could not get connection for user resource {0} - {1}",
+					user.getRhlogin(), user.getServer()));
+		}
 	}
 
 	public Connection getConnectionByUrl(ConnectionURL connectionUrl) {

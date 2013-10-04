@@ -45,10 +45,11 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void refreshViewer() {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				if (DisposeUtils.isDisposed(getCommonViewer())) { 
+				CommonViewer viewer = getCommonViewer();
+				if (DisposeUtils.isDisposed(viewer)) { 
 					return;
 				}
-				getCommonViewer().refresh();
+				viewer.refresh();
 			}
 		});
 	}
@@ -56,26 +57,27 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void refreshViewer(final Connection connection) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				if (DisposeUtils.isDisposed(getCommonViewer())) {
+				CommonViewer viewer = getCommonViewer();
+				if (DisposeUtils.isDisposed(viewer)) {
 					return;
 				}
-				getCommonViewer().refresh(connection);
+				viewer.refresh(connection);
 			}
 		});
 	}
 
 	@Override
-	public void connectionAdded(Connection user) {
+	public void connectionAdded(Connection connection) {
 		refreshViewer();
 	}
 
 	@Override
-	public void connectionRemoved(Connection user) {
+	public void connectionRemoved(Connection connection) {
 		refreshViewer();
 	}
 
 	@Override
-	public void connectionChanged(Connection user) {
-		refreshViewer();
+	public void connectionChanged(Connection connection) {
+		refreshViewer(connection);
 	}
 }

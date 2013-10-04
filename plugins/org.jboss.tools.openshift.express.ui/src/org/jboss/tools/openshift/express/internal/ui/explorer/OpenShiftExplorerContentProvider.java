@@ -29,6 +29,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsMod
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -54,14 +55,14 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	}
 
 	public static class NotConnectedUserStub {
-		public NotConnectedUserStub () {
+		public NotConnectedUserStub() {
 		}
 	}
 
 	// Keep track of what's loading and what's finished
 	private List<Object> loadedElements = new ArrayList<Object>();
 	private List<Object> loadingElements = new ArrayList<Object>();
-	
+
 	private Map<Object, Exception> errors = new HashMap<Object, Exception>();
 
 	/**
@@ -75,26 +76,29 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		errors.clear();
 		if (parentElement instanceof IWorkspaceRoot) {
 			return ConnectionsModelSingleton.getInstance().getConnections();
-		}
-		if (parentElement instanceof ConnectionsModel) {
+		} else if (parentElement instanceof ConnectionsModel) {
 			Connection[] users = ((ConnectionsModel) parentElement).getConnections();
 			return users;
 		}
 		return new Object[0];
 	}
-	
+
 	/**
-	 * Called to obtain the children of any element in the tree viewer, ie, from a user or an application
+	 * Called to obtain the children of any element in the tree viewer, ie, from
+	 * a user or an application
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof Connection) {
 			Connection user = (Connection) parentElement;
-			if(!user.isConnected() && !user.canPromptForPassword()) {
-				return new Object[]{new NotConnectedUserStub()};
+			if (!user.isConnected() 
+					&& !user.canPromptForPassword()) {
+				return new Object[] { new NotConnectedUserStub() };
 			}
 			return loadChildren(parentElement);
-		} else if(parentElement instanceof IApplication) {
+		} else if (parentElement instanceof IDomain) {
+			return loadChildren(parentElement);
+		} else if (parentElement instanceof IApplication) {
 			return loadChildren(parentElement);
 		}
 		return getChildrenForElement(parentElement);
@@ -102,7 +106,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	/**
 	 * @param parentElement
-	 * @return 
+	 * @return
 	 */
 	private Object[] loadChildren(Object parentElement) {
 		if (!loadedElements.contains(parentElement)) {
@@ -114,30 +118,28 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return new Object[] { new LoadingStub() };
 		}
 		Exception ose = errors.get(parentElement);
-		if( ose != null ) {
-			return new Object[]{ose};
+		if (ose != null) {
+			return new Object[] { ose };
 		}
 		return getChildrenForElement(parentElement);
 	}
 
-	
-	
 	private Object[] getChildrenForElement(Object parentElement) {
-		// .... the actual work is done here...
 		Object[] children = new Object[0];
 		try {
 			if (parentElement instanceof OpenShiftExplorerContentCategory) {
 				Connection user = ((OpenShiftExplorerContentCategory) parentElement).getUser();
 				children = new Object[] { user };
 			} else if (parentElement instanceof Connection) {
-				final Connection user = (Connection) parentElement;
-				if (user.hasDomain()) {
-					children = user.getApplications().toArray();
-				}
+				final Connection connection = (Connection) parentElement;
+				children = connection.getDomains().toArray();
+			} else if (parentElement instanceof IDomain) {
+				final IDomain domain = (IDomain) parentElement;
+				children = domain.getApplications().toArray();
 			} else if (parentElement instanceof IApplication) {
 				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
 			}
-		} catch(OpenShiftException e) {
+		} catch (OpenShiftException e) {
 			errors.put(parentElement, e);
 		}
 
@@ -153,10 +155,10 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 				monitor.worked(1);
 				// Get the actual children, with the delay
 				loadingElements.add(element);
-				getChildrenForElement(element); //Boolean.valueOf(System.getProperty("org.jboss.tools.openshift.express.ui.eagerloading", "true"))); // JBIDE-11680 false = fast, but blocks ui while loading cartridges, true = slow, but no blocking since cartridges is forced loaded.
+				getChildrenForElement(element); 
 				loadedElements.add(element);
 				loadingElements.remove(element);
-				refreshViewerObject(element); 
+				refreshViewerObject(element);
 				monitor.done();
 				return Status.OK_STATUS;
 			}
@@ -180,13 +182,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof Connection) {
-			return true;
-		}
-		if (element instanceof IApplication) {
-			return true;
-		}
-		return false;
+		return element instanceof Connection
+				|| element instanceof IDomain
+				|| element instanceof IApplication;
 	}
 
 }
