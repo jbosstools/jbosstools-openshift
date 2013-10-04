@@ -61,7 +61,10 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 	}
 	
-	private SelectionListener onBrowseApps(final DataBindingContext dbc) {
+	/*
+	 * A running instance of SelectionListener interface, which allows the button being referenced to activate some action.
+	 */
+	private SelectionListener onVariablesButtonSelect(final DataBindingContext dbc) {
 		return new SelectionAdapter() {
 
 			@Override
