@@ -61,45 +61,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 	}
 	
-	/*
-	 * A running instance of SelectionListener interface, which allows the button being referenced to activate some action.
-	 */
-	private SelectionListener onVariablesButtonSelect(final DataBindingContext dbc) {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
-				ApplicationEnvironmentalVariableConfigurationWizardPageModel wizardModel = wizard.getModel();
-				final ApplicationSelectionDialog appSelectionDialog =
-						new ApplicationSelectionDialog(wizard, wizardModel, null, getShell());
-				final int result = appSelectionDialog.open();
-				if (result == IDialogConstants.OK_ID) {
-					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
-					if (selectedApplication != null) {
-						// This setter may be long-running
-						Job j = new Job("Setting Application") {
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								try {
-									pageModel.setExistingApplicationName(selectedApplication.getName());
-								} catch (OpenShiftException ex) {
-									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
-											"Could not get embedded cartridges for application {0}",
-											selectedApplication.getName()), ex));
-								}
-								return Status.OK_STATUS;
-							}
-						};
-						try {
-							WizardUtils.runInWizard(j, getContainer(), dbc);
-						} catch (InvocationTargetException ite) {
-						} catch (InterruptedException ie) {
-						}
-					}
-				}
-			}
-		};
-	}
+	
 
 }
