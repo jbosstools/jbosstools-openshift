@@ -578,7 +578,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		
 		// advanced configurations
 		createAdvancedGroup(newAppConfigurationGroup, dbc);
-		
+		// environmental variables button area
+		createAppVariableConfigurationGroup(newAppConfigurationGroup,dbc);
 		
 	}
 
@@ -674,86 +675,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 * @author Martes G Wigglesworth
 	 */
 	private void createAppVariableConfigurationGroup(Composite parent, DataBindingContext dbc) {
-		// advanced button
-		Button variablesButton = new Button(parent, SWT.NONE);
-		variablesButton.setText(" Environmental Variables >> ");
+		// environmental variables button
+		browseAppVariablesButton = new Button(parent, SWT.NONE);
+		browseAppVariablesButton.setText(" Environmental Variables... ");
 		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(variablesButton);
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
 
-		// advanced composite
-		Composite advancedComposite = new Composite(parent, SWT.NONE);
-		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).create();
-		advancedComposite.setLayoutData(advancedCompositeGridData);
-		GridLayoutFactory.fillDefaults().applyTo(advancedComposite);
+		//TODO - Connect this button to the ApplicationEnvironmentalVariablesWizardPage object
 
-		// source group
-		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
-		sourceGroup.setText("Source Code");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(sourceGroup);
-
-		// use default source checkbox
-		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
-		useDefaultSourceButton.setText("Use default source code");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
-		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
-		ValueBindingBuilder
-				.bind(defaultSourceCodeObservable)
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
-				.in(dbc);
-
-		// source code text
-		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
-		sourceCodeUrlLabel.setText("Source code:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(sourceCodeUrlLabel))
-				.notUpdatingParticipant()
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
-		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(sourceUrlText))
-				.notUpdatingParticipant()
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
-		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
-		ValueBindingBuilder
-				.bind(sourcecodeUrlObservable)
-				.converting(new MultiConverter(new TrimmingStringConverter(), new EmptyStringToNullConverter()))
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
-				.in(dbc);
-
-		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable, sourcecodeUrlObservable);
-		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
-		ControlDecorationSupport.create(
-				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
-		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, getShell(), false);
-		variablesButton.addSelectionListener(onAdvancedClicked(variablesButton, toggleAdapter, sourceUrlText, sourceCodeUrlLabel));
-		
-		// explanation
-		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
-		sourceCodeExplanationText
-				.setText("Your application will start with an exact copy of the code and configuration "
-						+ "provided in this Git repository instead of the default application.");
-		sourceCodeExplanationText.setEnabled(false);
-		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
 	}
 
 	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
@@ -880,7 +809,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 	
 
-	/**
+	/*
 	 * Triggered when the user checks "use existing application". It will
 	 * enable/disable the application widgets and reset existing values.
 	 * 
@@ -908,7 +837,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	/**
+	/*
 	 * Enables/disables the given widgets based on the flag to use an existing
 	 * app or create a new application.
 	 * 
