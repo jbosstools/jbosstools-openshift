@@ -106,6 +106,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Martes G Wigglesworth
  */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
 
@@ -118,6 +119,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Text newAppNameText;
 	private Button checkAllButton;
 	private Button uncheckAllButton;
+	private Button browseAppVariablesButton;
 
 	// private ModifyListener modifyListener;
 
@@ -340,6 +342,84 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 		};
 	}
+	
+	private SelectionListener onBrowseAppVariables(final DataBindingContext dbc) {
+		return new SelectionAdapter()
+        {
+			/*
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
+				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
+				final ApplicationEnvironmentalVariableSelectionDialog appSelectionDialog =
+						new ApplicationEnvironmentalVariableSelectionDialog(wizard, wizardModel, null, getShell());
+				final int result = appSelectionDialog.open();
+				if (result == IDialogConstants.OK_ID) {
+					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
+					if (selectedApplication != null) {
+						// This setter may be long-running
+						Job j = new Job("Setting Environmental Variables") {
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									pageModel.setExistingApplicationName(selectedApplication.getName());
+								} catch (OpenShiftException ex) {
+									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+											"Could not get embedded cartridges for application {0}",
+											selectedApplication.getName()), ex));
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						try {
+							WizardUtils.runInWizard(j, getContainer(), dbc);
+						} catch (InvocationTargetException ite) {
+						} catch (InterruptedException ie) {
+						}
+					}
+				}
+			}
+		*/
+		};
+	}
+	
+	private SelectionListener onBrowseAppVariables(final DataBindingContext dbc) {
+		return new SelectionAdapter()
+        {
+			/*
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
+				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
+				final ApplicationEnvironmentalVariableSelectionDialog appSelectionDialog =
+						new ApplicationEnvironmentalVariableSelectionDialog(wizard, wizardModel, null, getShell());
+				final int result = appSelectionDialog.open();
+				if (result == IDialogConstants.OK_ID) {
+					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
+					if (selectedApplication != null) {
+						// This setter may be long-running
+						Job j = new Job("Setting Environmental Variables") {
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									pageModel.setExistingApplicationName(selectedApplication.getName());
+								} catch (OpenShiftException ex) {
+									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+											"Could not get embedded cartridges for application {0}",
+											selectedApplication.getName()), ex));
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						try {
+							WizardUtils.runInWizard(j, getContainer(), dbc);
+						} catch (InvocationTargetException ite) {
+						} catch (InterruptedException ie) {
+						}
+					}
+				}
+			}
+		*/
+		};
+	}
 
 	private void createApplicationConfigurationGroup(Composite parent, DataBindingContext dbc) {
 		this.newAppConfigurationGroup = new Group(parent, SWT.NONE);
@@ -485,15 +565,191 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults()
 				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(checkAllButton);
 		checkAllButton.addSelectionListener(onCheckAll());
-
+		
 		this.uncheckAllButton = new Button(newAppEmbeddableCartridgesGroup, SWT.PUSH);
 		uncheckAllButton.setText("&Deselect All");
 		GridDataFactory.fillDefaults()
 				.hint(110, SWT.DEFAULT).grab(false, false).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
 		uncheckAllButton.addSelectionListener(onUncheckAll());
-
+		
 		// advanced configurations
 		createAdvancedGroup(newAppConfigurationGroup, dbc);
+		
+		
+	}
+
+	/*
+	 * Create environmental variable configuration group
+	 * @author Martes G Wigglesworth
+	 */
+	private void createAppVariableConfigurationGroup(Composite parent, DataBindingContext dbc) {
+		// advanced button
+		Button variablesButton = new Button(parent, SWT.NONE);
+		variablesButton.setText(" Environmental Variables >> ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(variablesButton);
+
+		// advanced composite
+		Composite advancedComposite = new Composite(parent, SWT.NONE);
+		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).create();
+		advancedComposite.setLayoutData(advancedCompositeGridData);
+		GridLayoutFactory.fillDefaults().applyTo(advancedComposite);
+
+		// source group
+		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
+		sourceGroup.setText("Source Code");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).margins(6, 6).applyTo(sourceGroup);
+
+		// use default source checkbox
+		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
+		useDefaultSourceButton.setText("Use default source code");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
+		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
+		ValueBindingBuilder
+				.bind(defaultSourceCodeObservable)
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.in(dbc);
+
+		// source code text
+		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
+		sourceCodeUrlLabel.setText("Source code:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceCodeUrlLabel))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceUrlText))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
+		ValueBindingBuilder
+				.bind(sourcecodeUrlObservable)
+				.converting(new MultiConverter(new TrimmingStringConverter(), new EmptyStringToNullConverter()))
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
+				.in(dbc);
+
+		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable, sourcecodeUrlObservable);
+		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
+		ControlDecorationSupport.create(
+				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
+		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, getShell(), false);
+		variablesButton.addSelectionListener(onAdvancedClicked(variablesButton, toggleAdapter, sourceUrlText, sourceCodeUrlLabel));
+		
+		// explanation
+		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
+		sourceCodeExplanationText
+				.setText("Your application will start with an exact copy of the code and configuration "
+						+ "provided in this Git repository instead of the default application.");
+		sourceCodeExplanationText.setEnabled(false);
+		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
+	}
+
+	/*
+	 * Create environmental variable configuration group
+	 * @author Martes G Wigglesworth
+	 */
+	private void createAppVariableConfigurationGroup(Composite parent, DataBindingContext dbc) {
+		// advanced button
+		Button variablesButton = new Button(parent, SWT.NONE);
+		variablesButton.setText(" Environmental Variables >> ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(variablesButton);
+
+		// advanced composite
+		Composite advancedComposite = new Composite(parent, SWT.NONE);
+		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).create();
+		advancedComposite.setLayoutData(advancedCompositeGridData);
+		GridLayoutFactory.fillDefaults().applyTo(advancedComposite);
+
+		// source group
+		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
+		sourceGroup.setText("Source Code");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).margins(6, 6).applyTo(sourceGroup);
+
+		// use default source checkbox
+		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
+		useDefaultSourceButton.setText("Use default source code");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
+		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
+		ValueBindingBuilder
+				.bind(defaultSourceCodeObservable)
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.in(dbc);
+
+		// source code text
+		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
+		sourceCodeUrlLabel.setText("Source code:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceCodeUrlLabel))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceUrlText))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
+		ValueBindingBuilder
+				.bind(sourcecodeUrlObservable)
+				.converting(new MultiConverter(new TrimmingStringConverter(), new EmptyStringToNullConverter()))
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
+				.in(dbc);
+
+		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable, sourcecodeUrlObservable);
+		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
+		ControlDecorationSupport.create(
+				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
+		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, getShell(), false);
+		variablesButton.addSelectionListener(onAdvancedClicked(variablesButton, toggleAdapter, sourceUrlText, sourceCodeUrlLabel));
+		
+		// explanation
+		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
+		sourceCodeExplanationText
+				.setText("Your application will start with an exact copy of the code and configuration "
+						+ "provided in this Git repository instead of the default application.");
+		sourceCodeExplanationText.setEnabled(false);
+		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
 	}
 
 	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
@@ -618,6 +874,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 		};
 	}
+	
 
 	/**
 	 * Triggered when the user checks "use existing application". It will
@@ -730,6 +987,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 
 	private SelectionListener onUncheckAll() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				viewer.setAllChecked(false);
+			}
+
+		};
+	}
+	/*
+	 * Returns a listener to the button group action.
+	 */
+	private SelectionListener onBrowseAppVariables() {
 		return new SelectionAdapter() {
 
 			@Override
