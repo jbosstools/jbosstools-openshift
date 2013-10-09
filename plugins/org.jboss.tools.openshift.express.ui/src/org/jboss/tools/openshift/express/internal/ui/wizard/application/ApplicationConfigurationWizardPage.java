@@ -93,6 +93,14 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.ApplicationEnvironmentalVariableConfigurationWizardPageModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.ApplicationEnvironmentalVariablesWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.ApplicationEnvironmentalVariableSelectionDialog;
+
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -635,6 +643,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		// environmental variables button
 		browseAppVariablesButton = new Button(parent, SWT.NONE);
 		browseAppVariablesButton.setText(" Environmental Variables... ");
+		browseAppVariablesButton.addSelectionListener(onBrowseAppVariables(dbc));
+		
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
 		//TODO - Connect this button to the ApplicationEnvironmentalVariablesWizardPage object
@@ -642,39 +652,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	
 	private SelectionListener onBrowseAppVariables(final DataBindingContext dbc) {
 		return new SelectionAdapter(){
-			/*
+			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
-				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
-				final ApplicationEnvironmentalVariableSelectionDialog appSelectionDialog =
-						new ApplicationEnvironmentalVariableSelectionDialog(wizard, wizardModel, null, getShell());
-				final int result = appSelectionDialog.open();
-				if (result == IDialogConstants.OK_ID) {
-					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
-					if (selectedApplication != null) {
-						// This setter may be long-running
-						Job j = new Job("Setting Environmental Variables") {
-							protected IStatus run(IProgressMonitor monitor) {
-								try {
-									pageModel.setExistingApplicationName(selectedApplication.getName());
-								} catch (OpenShiftException ex) {
-									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
-											"Could not get embedded cartridges for application {0}",
-											selectedApplication.getName()), ex));
-								}
-								return Status.OK_STATUS;
-							}
-						};
-						try {
-							WizardUtils.runInWizard(j, getContainer(), dbc);
-						} catch (InvocationTargetException ite) {
-						} catch (InterruptedException ie) {
-						}
-					}
+				WizardDialog manageVariablesWizard =
+						new OkButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesWizard());
+				if (manageVariablesWizard.open() == Dialog.OK) {
 				}
 			}
-		*/
+		
 		};
 	}
 
