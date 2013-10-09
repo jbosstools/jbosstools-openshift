@@ -25,6 +25,11 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
+	public void addPages() {
+		addPage(new ApplicationEnvironmentalVariableConfigurationWizardPage("Variables View Dialog","Used to create and edit variables for OpenShift Applications", "Variables Table View", this));
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -34,5 +39,4 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 	public boolean performFinish() {
 		return true;
 	}
-	
 }
