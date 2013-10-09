@@ -73,7 +73,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 						return key.getName();
 					}
 				})
-				.name("Name").align(SWT.LEFT).weight(2).minWidth(200).buildColumn()
+				.name("Variable Name").align(SWT.LEFT).weight(2).minWidth(200).buildColumn()
 				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
 					@Override
@@ -81,15 +81,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 						return key.getKeyType().getTypeId();
 					}
 				})
-				.name("Type").align(SWT.LEFT).weight(1).minWidth(50).buildColumn()
-				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
-
-					@Override
-					public String getValue(IOpenShiftSSHKey key) {
-						return StringUtils.shorten(key.getPublicKey(), 24);
-					}
-				})
-				.name("Content").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
+				.name("Value").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
 				.buildViewer();
 
 		return viewer;
@@ -106,17 +98,17 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc)
 	{
-		setWizardPageDescription("Environmental Variables Configuration Wizard");
+		//setWizardPageDescription("Environmental Variables Configuration Wizard");
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
 
-		Group sshKeysGroup = new Group(container, SWT.NONE);
-		sshKeysGroup.setText("SSH Public Keys");
+		Group keysGroup = new Group(container, SWT.NONE);
+		keysGroup.setText("Environmental Variables for this Application");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sshKeysGroup);
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(keysGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(sshKeysGroup);
+				.numColumns(2).margins(6, 6).applyTo(keysGroup);
 
-		Composite tableContainer = new Composite(sshKeysGroup, SWT.NONE);
+		Composite tableContainer = new Composite(keysGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
@@ -124,23 +116,36 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 				.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
 				.in(dbc);
 
-		Button addExistingButton = new Button(sshKeysGroup, SWT.PUSH);
+		Button addExistingButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addExistingButton);
-		addExistingButton.setText("Add Existing...");
+		addExistingButton.setText("Add...");
 		addExistingButton.addSelectionListener(onAddExisting());
 
-		Button addNewButton = new Button(sshKeysGroup, SWT.PUSH);
+		Button addNewButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addNewButton);
-		addNewButton.setText("New...");
+		addNewButton.setText("Edit...");
 		addNewButton.addSelectionListener(onAddNew());
 
-		Button removeButton = new Button(sshKeysGroup, SWT.PUSH);
+		Button removeButton = new Button(keysGroup, SWT.PUSH);		
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove());
+		
+		Button importButton = new Button(keysGroup, SWT.PUSH);		
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(importButton);
+		importButton.setText("Import...");
+		importButton.addSelectionListener(onImport());
+		
+		Button exportButton = new Button(keysGroup, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(exportButton);
+		exportButton.setText("Export...");
+		exportButton.addSelectionListener(onExport());
+		
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(removeButton))
 				.to(ViewerProperties.singleSelection().observe(viewer))
@@ -154,7 +159,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 				})
 				.in(dbc);
 
-		Composite filler = new Composite(sshKeysGroup, SWT.None);
+		Composite filler = new Composite(keysGroup, SWT.None);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(filler);
 
@@ -165,7 +170,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
 			// Load current environmental variables into model.
-
+System.out.print("testing");
 		} catch (Exception e) {
 			StatusManager.getManager().handle(
 					OpenShiftUIActivator.createErrorStatus("Could not load Environmental Variables.", e),
@@ -219,6 +224,42 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			 */
 		};
 	}
+	private SelectionListener onImport() {
+		return new SelectionAdapter() {
+			/*
+			 * @Override public void widgetSelected(SelectionEvent e) {
+			 * NewSSHKeyWizard wizard = new
+			 * NewSSHKeyWizard(pageModel.getConnection()); if
+			 * (WizardUtils.openWizardDialog(wizard, getShell()) ==
+			 * Dialog.CANCEL) { return; }
+			 * 
+			 * try { WizardUtils.runInWizard( new RefreshViewerJob(),
+			 * getContainer(), getDatabindingContext());
+			 * pageModel.setSelectedSSHKey(wizard.getSSHKey()); } catch
+			 * (Exception ex) { StatusManager.getManager().handle(
+			 * OpenShiftUIActivator.createErrorStatus("Could not refresh keys.",
+			 * ex), StatusManager.LOG); } }
+			 */
+		};
+	}
+	private SelectionListener onExport() {
+		return new SelectionAdapter() {
+			/*
+			 * @Override public void widgetSelected(SelectionEvent e) {
+			 * NewSSHKeyWizard wizard = new
+			 * NewSSHKeyWizard(pageModel.getConnection()); if
+			 * (WizardUtils.openWizardDialog(wizard, getShell()) ==
+			 * Dialog.CANCEL) { return; }
+			 * 
+			 * try { WizardUtils.runInWizard( new RefreshViewerJob(),
+			 * getContainer(), getDatabindingContext());
+			 * pageModel.setSelectedSSHKey(wizard.getSSHKey()); } catch
+			 * (Exception ex) { StatusManager.getManager().handle(
+			 * OpenShiftUIActivator.createErrorStatus("Could not refresh keys.",
+			 * ex), StatusManager.LOG); } }
+			 */
+		};
+	}
 
 	private SelectionListener onRefresh() {
 		return new SelectionAdapter() {
@@ -248,7 +289,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 	private void setWizardPageDescription(String newDescription)
 	{
-		pageModel.setDescription(newDescription);
+		//pageModel.setDescription(newDescription);
 	}
 
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel;
