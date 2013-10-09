@@ -10,21 +10,28 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+
 
 /**
+ * 
  * @author Martes G Wigglesworth
- *
  */
-public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extends ObservableUIPojo {
+public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extends AbstractEnvironmentalVariablesWizardPageModel {
 
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
 	 */
 	public ApplicationEnvironmentalVariableConfigurationWizardPageModel() {
-		// TODO Auto-generated constructor stub
+		setPageTitle("Environmental Variables Configuration Wizard");
+	}
+	public ApplicationEnvironmentalVariableConfigurationWizardPageModel(Connection newConnection) {
+		setPageTitle("Environmental Variables Configuration Wizard");setUserConnection(newConnection);
 	}
 	
+	public ApplicationEnvironmentalVariableConfigurationWizardPageModel(String pageTitle,Connection newConnection) {
+		setPageTitle(pageTitle);setUserConnection(newConnection);
+	}
 	// #TODO - Create data bindings for all fields necessary for this view.
-
+	
 }
