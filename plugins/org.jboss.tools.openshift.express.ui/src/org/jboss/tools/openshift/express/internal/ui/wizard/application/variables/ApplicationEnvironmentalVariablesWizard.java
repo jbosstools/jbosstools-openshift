@@ -25,6 +25,7 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 	 * Constructs a new instance of ApplicationEnvironmentalVariablesWizard
 	 */
 	public ApplicationEnvironmentalVariablesWizard() {
+
 	};
 
 	public ApplicationEnvironmentalVariablesWizard(DataBindingContext dbc)
@@ -60,5 +61,6 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 
 
 	private DataBindingContext dbc;
+
 
 }
