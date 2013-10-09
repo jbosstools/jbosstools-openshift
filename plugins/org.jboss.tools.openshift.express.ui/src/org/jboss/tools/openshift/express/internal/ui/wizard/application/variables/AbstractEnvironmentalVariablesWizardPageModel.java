@@ -16,23 +16,45 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
- * @author Martes G Wigglesworth 
- *
+ * @author Martes G Wigglesworth
+ * 
  */
 public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo {
+
+	/**
+	 * Constructs a new instance of
+	 * AbstractEnvironmentalVariablesWizardPageModel
+	 */
+	public AbstractEnvironmentalVariablesWizardPageModel() {
+		pageTitle = null;
+		userConnection = null;
+		variablesDB = null;
+	}
+
+	/**
+	 * @return the pageTitle
+	 */
+	public String getPageTitle() {
+		return pageTitle;
+	}
+
+	private String description;
+	
+	public String getDescription()
+	{
+		return description;
+	}
+	
+	public void setDescription(String description)
+	{
+		this.description= description;
+	}
 
 	/**
 	 * @return the userConnection
 	 */
 	public Connection getUserConnection() {
 		return userConnection;
-	}
-
-	/**
-	 * @param userConnection the userConnection to set
-	 */
-	public void setUserConnection(Connection userConnection) {
-		this.userConnection = userConnection;
 	}
 
 	/**
@@ -43,37 +65,37 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	}
 
 	/**
-	 * @param variablesDB the variablesDB to set
+	 * @param string
+	 */
+	public void setPageTitle(String newTitle) {
+		pageTitle=newTitle;
+	}
+
+	/**
+	 * @param userConnection
+	 *            the userConnection to set
+	 */
+	public void setUserConnection(Connection userConnection) {
+		this.userConnection = userConnection;
+	}
+
+	/**
+	 * @param variablesDB
+	 *            the variablesDB to set
 	 */
 	public void setVariablesDB(HashMap<String, String> variablesDB) {
 		this.variablesDB = variablesDB;
-	}
+	};
 
-	/**
-	 * @return the pageTitle
-	 */
-	public String getPageTitle() {
-		return pageTitle;
-	}
-
-	/**
-	 * Constructs a new instance of AbstractEnvironmentalVariablesWizardPageModel
-	 */
-	public AbstractEnvironmentalVariablesWizardPageModel() {
-		pageTitle = null;
-		userConnection = null;
-		variablesDB = null;
-	}
-	
 	/**
 	 * 
 	 * @param newKey
 	 */
-	protected String add(String newKey,String newValue)
+	protected String add(String newKey, String newValue)
 	{
-		return this.variablesDB.put(newKey,newValue);
-	};
-	
+		return this.variablesDB.put(newKey, newValue);
+	}
+
 	/**
 	 * 
 	 * @param target
@@ -82,18 +104,18 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	{
 		return this.variablesDB.remove(key);
 	}
-	
+
 	/**
 	 * 
 	 * @param target
 	 * @param value
 	 */
-	protected String updateKey(String target,String updateValue)
+	protected String updateKey(String target, String updateValue)
 	{
 		return this.variablesDB.put(target, updateValue);
 	}
-	
+
 	private String pageTitle;
 	private Connection userConnection;
-	private HashMap<String,String> variablesDB;
+	private HashMap<String, String> variablesDB;
 }
