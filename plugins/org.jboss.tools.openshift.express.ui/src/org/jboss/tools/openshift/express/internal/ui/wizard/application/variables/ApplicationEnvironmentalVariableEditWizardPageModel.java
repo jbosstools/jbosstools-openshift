@@ -16,7 +16,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
  * @author Martes G Wigglesworth
  *
  */
-public class ApplicationEnvironmentalVariableEditWizardPageModel extends ObservableUIPojo {
+public class ApplicationEnvironmentalVariableEditWizardPageModel extends AbstractEnvironmentalVariablesWizardPageModel {
 
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
@@ -24,7 +24,10 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Observa
 	public ApplicationEnvironmentalVariableEditWizardPageModel() {
 		// TODO Auto-generated constructor stub
 	}
-	
+	public String update(String target, String updateValue)
+	{
+		return super.updateKey(target, updateValue);
+	}
 	// #TODO - Create data bindings for all fields necessary for this view.
 
 }
