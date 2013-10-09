@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
+
 import org.eclipse.core.databinding.DataBindingContext;
+
 import org.eclipse.jface.wizard.Wizard;
 
 /**
@@ -25,6 +27,7 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 	public ApplicationEnvironmentalVariablesWizard() {
 		// TODO Auto-generated constructor stub
 	}
+
 
 	public ApplicationEnvironmentalVariablesWizard(DataBindingContext dbc)
 	{
@@ -42,6 +45,7 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 		return dbc;
 	}
 
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -52,5 +56,7 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 		return true;
 	}
 
+
 	private DataBindingContext dbc;
+
 }
