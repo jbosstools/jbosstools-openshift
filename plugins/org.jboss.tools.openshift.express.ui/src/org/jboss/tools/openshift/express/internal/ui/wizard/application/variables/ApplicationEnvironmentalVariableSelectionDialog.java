@@ -13,34 +13,38 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.variabl
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizardModel;
 
 /**
  * @author Martes G Wigglesworth
- *
+ * 
  */
 public class ApplicationEnvironmentalVariableSelectionDialog extends TitleAreaDialog {
 
 	/**
-	 * Constructs a new instance of ApplicationEnvironmentalVariableSelectionDialog
-	 * @param parentShell
-	 */
-	public ApplicationEnvironmentalVariableSelectionDialog(Shell parentShell) {
-		super(parentShell);
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * Constructs a new instance of ApplicationEnvironmentalVariableSelectionDialog
+	 * Constructs a new instance of
+	 * ApplicationEnvironmentalVariableSelectionDialog
+	 * 
 	 * @param wizard
 	 * @param wizardModel
 	 * @param object
 	 * @param shell
 	 */
 	public ApplicationEnvironmentalVariableSelectionDialog(OpenShiftApplicationWizard wizard,
-			OpenShiftApplicationWizardModel wizardModel, Object object, Shell shell) {
-		// TODO - Still need to resolve the lack of a wizard model within this package.
-		super(wizard,wizardModel,object,shell);
+			ApplicationEnvironmentalVariableConfigurationWizardPageModel wizardModel, Object object, Shell shell) {
+		// TODO - Still need to resolve the lack of a wizard model within this
+		// package.
+		super(shell);
+	}
+
+	/**
+	 * Constructs a new instance of
+	 * ApplicationEnvironmentalVariableSelectionDialog
+	 * 
+	 * @param parentShell
+	 */
+	public ApplicationEnvironmentalVariableSelectionDialog(Shell parentShell) {
+		super(parentShell);
+		// TODO Auto-generated constructor stub
 	}
 
 }
