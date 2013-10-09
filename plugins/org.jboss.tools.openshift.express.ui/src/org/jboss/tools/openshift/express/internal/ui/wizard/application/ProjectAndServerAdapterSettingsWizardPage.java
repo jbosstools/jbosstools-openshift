@@ -51,12 +51,13 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Martes G Wigglesworth
  */
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
 	
-	private static final String PAGE_TITLE_FORMAT = "Set up Project for OpenShift Application \"{0}\""; 
+	private static final String PAGE_TITLE_FORMAT = "Set up Project for new OpenShift Appplication named: \"{0}\""; 
 	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 	private Text existingProjectNameText = null;
@@ -74,7 +75,10 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		createProjectGroup(container, dbc);
 		createServerAdapterGroup(container, dbc);
 //		createWorkingSetGroup(container, dbc);
+		createAppVariableCollapsibleConfigurationGroup(container,dbc);
+		createAppVariableConfigurationGroup(container, dbc);
 	}
+	
 
 	private Composite createProjectGroup(Composite parent, DataBindingContext dbc) {
 		Composite projectGroup = new Composite(parent, SWT.NONE);
@@ -216,6 +220,68 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 				"org.eclipse.jdt.ui.JavaWorkingSetPage" /* JavaWorkingSetUpdater.ID */});
 	}
 
+	/*
+	 * Create environmental variable configuration group
+	 * @author Martes G Wigglesworth
+	 */
+	private void createAppVariableConfigurationGroup(Composite parent, DataBindingContext dbc) {
+		// environmental variables button
+		Button browseAppVariablesButton = new Button(parent, SWT.NONE);
+		browseAppVariablesButton.setText(" Environmental Variables... ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
+		//TODO - Connect this button to the ApplicationEnvironmentalVariablesWizardPage object
+	}
+	/*
+	 * Create environmental variable configuration group
+	 * @author Martes G Wigglesworth
+	 */
+	private void createAppVariableCollapsibleConfigurationGroup(Composite parent, DataBindingContext dbc) {
+		// environmental variables button
+		Button browseAppVariablesButton = new Button(parent, SWT.NONE);
+		browseAppVariablesButton.setText(" Environmental Variables >> ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
+		//TODO - Connect this button to the ApplicationEnvironmentalVariablesWizardPage object
+	}
+	
+	private SelectionListener onBrowseAppVariables(final DataBindingContext dbc) {
+		return new SelectionAdapter(){
+			/*
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
+				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
+				final ApplicationEnvironmentalVariableSelectionDialog appSelectionDialog =
+						new ApplicationEnvironmentalVariableSelectionDialog(wizard, wizardModel, null, getShell());
+				final int result = appSelectionDialog.open();
+				if (result == IDialogConstants.OK_ID) {
+					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
+					if (selectedApplication != null) {
+						// This setter may be long-running
+						Job j = new Job("Setting Environmental Variables") {
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									pageModel.setExistingApplicationName(selectedApplication.getName());
+								} catch (OpenShiftException ex) {
+									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+											"Could not get embedded cartridges for application {0}",
+											selectedApplication.getName()), ex));
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						try {
+							WizardUtils.runInWizard(j, getContainer(), dbc);
+						} catch (InvocationTargetException ite) {
+						} catch (InterruptedException ie) {
+						}
+					}
+				}
+			}
+		*/
+		};
+	}
 	/**
 	 * Verify that if the 'use an existing project' option was chose, then the project name actually matches an open
 	 * project in the workspace.
