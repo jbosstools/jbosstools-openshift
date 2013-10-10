@@ -181,7 +181,65 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 			return new String[0];
 		}*/
 	}
+
+	public List<IApplication> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
+		/*
+		Connection user = getConnection();
+		if (user == null || !user.isConnected() || !user.hasDomain()) {
+			return Collections.emptyList();
+		}
+		return user.getApplicationEnvironmentalVariables();
+		*/
+		throw new OpenShiftException("getApplicationEnvironmentalVariables() is not implemented yet.");
+	}
+	public String[] getApplicationEnvironmentalVariableNames()
+	{
+		throw new OpenShiftException("getApplicationEnvironmentalVariableNamess() is not implemented yet.");
+		
+		 // Placeholder code to support retrieval of environmental variables from relevant api call(s).
+		/*
+		try {
+			List<IApplication> applications = getApplications();
+			String[] applicationNames = new String[applications.size()];
+			for (int i = 0; i < applications.size(); i++) {
+				applicationNames[i] = applications.get(i).getName();
+			}
+			return applicationNames;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications", e);
+			return new String[0];
+		} catch (SocketTimeoutException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications", e);
+			return new String[0];
+		}
+		*/
+		
+	}
 	
+	public String[] getApplicationEnvironmentalVariableValues()
+	{
+		throw new OpenShiftException("getApplicationEnvironmentalVariableValues() is not implemented yet.");
+		
+		 // Placeholder code to support retrieval of environmental variables from relivant api call(s).
+		/*
+		try {
+			List<IApplication> applications = getApplications();
+			String[] applicationNames = new String[applications.size()];
+			for (int i = 0; i < applications.size(); i++) {
+				applicationNames[i] = applications.get(i).getName();
+			}
+			return applicationNames;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications", e);
+			return new String[0];
+		} catch (SocketTimeoutException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications", e);
+			return new String[0];
+		}
+		*/
+	}
+	
+
 	
 
 	public boolean isUseExistingApplication() {

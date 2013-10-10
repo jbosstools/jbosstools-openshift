@@ -563,6 +563,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						pageModel.loadGearProfiles();
 						// Will probably need to load in the environmental
 						// variables here.
+						monitor.setTaskName("Loading environment variables...");
 						pageModel.getApplicationEnvironmentalVariables();
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
