@@ -481,12 +481,42 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		createApplicationConfigurationGroup(container, dbc);
 	}
 
+
 	private void createDomainGroup(Composite container, DataBindingContext dbc) {
 		Composite domainGroup = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(domainGroup);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(3).margins(6, 6).applyTo(domainGroup);
+
+	protected void loadOpenshiftResources(final DataBindingContext dbc) {
+		try {
+			WizardUtils.runInWizard(new Job("Loading applications, cartridges and gears...") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						monitor.setTaskName("Loading existing applications...");
+						pageModel.loadExistingApplications();
+						monitor.setTaskName("Loading application cartridges...");
+						pageModel.loadStandaloneCartridges();
+						monitor.setTaskName("Loading embeddable cartridges...");
+						setViewerInput(pageModel.loadEmbeddedCartridges());
+						monitor.setTaskName("Loading gear profiles...");
+						pageModel.loadGearProfiles();
+						//Will probably need to load in the environmental variables here.
+						return Status.OK_STATUS;
+					} catch (NotFoundOpenShiftException e) {
+						return Status.OK_STATUS;
+					} catch (Exception e) {
+						return OpenShiftUIActivator.createErrorStatus(
+								"Could not load applications, cartridges and gears", e);
+					}
+				}
+			}, getContainer(), dbc);
+		} catch (Exception ex) {
+			// ignore
+		}
+	}
 
 		// domain
 		final Label domainLabel = new Label(domainGroup, SWT.NONE);
@@ -1140,8 +1170,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
-		// TODO - Connect this button to the
-		// ApplicationEnvironmentalVariablesWizardPage object
+		
 	}
 
 	/*
