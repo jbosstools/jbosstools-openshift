@@ -17,6 +17,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -32,6 +33,8 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
+import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
 /**
  * @author Martes G Wigglesworth
@@ -52,6 +55,21 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			IWizard wizard) {
 		super(title, description, pageName, wizard);
 		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * Constructs a new instance of
+	 * ApplicationEnvironmentalVariableConfigurationWizardPage
+	 * 
+	 * @param title
+	 * @param description
+	 * @param pageName
+	 * @param wizard
+	 */
+	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
+			IWizard wizard,DataBindingContext dbc) {
+		super(title, description, pageName, wizard);
+		//pageModel.setVariableDB(dbc.)
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
@@ -105,6 +123,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
 
 		Group keysGroup = new Group(container, SWT.NONE);
+		//TODO - Add call to method to generate "on-demand" application name.
 		keysGroup.setText("Environmental Variables for this Application");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(keysGroup);
@@ -177,6 +196,15 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 	private SelectionListener onAdd() {
 		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+					OkCancelButtonWizardDialog addVariableWizardDialog =
+						new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesAddWizard());
+				addVariableWizardDialog.open();
+				/*if (manageVariablesWizard.open() == Window.OK) {
+				}*/
+			}
+
 		};
 	}
 	
