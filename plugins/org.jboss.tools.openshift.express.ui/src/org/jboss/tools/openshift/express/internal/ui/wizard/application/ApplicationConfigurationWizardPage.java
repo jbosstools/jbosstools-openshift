@@ -54,6 +54,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -118,18 +119,350 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
 
-	private CheckboxTableViewer viewer;
-	private ApplicationConfigurationWizardPageModel pageModel;
-	private Button useExistingAppBtn;
-	private Text existingAppNameText;
-	private Button browseAppsButton;
-	private Group newAppConfigurationGroup;
-	private Text newAppNameText;
-	private Button checkAllButton;
-	private Button uncheckAllButton;
+	class ApplicationToSelectNameValidator extends MultiValidator {
+
+		public ApplicationToSelectNameValidator(IObservableValue useExistingAppBtnbservable,
+				IObservableValue existingAppNameTextObservable, IObservableValue existingApplicationsLoadedObservable) {
+			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
+			this.existingAppNameTextObservable = existingAppNameTextObservable;
+			this.existingApplicationsLoadedObservable = existingApplicationsLoadedObservable;
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			IObservableList targets = new WritableList();
+			targets.add(existingAppNameTextObservable);
+			return targets;
+		}
+
+		@Override
+		protected IStatus validate() {
+			final boolean useExistingApp = (Boolean) useExistingAppBtnbservable.getValue();
+			final String appName = (String) existingAppNameTextObservable.getValue();
+			final Boolean existingApplicationsLoaded = (Boolean) existingApplicationsLoadedObservable.getValue();
+
+			if (!useExistingApp) {
+				return ValidationStatus.ok();
+			}
+
+			if (StringUtils.isEmpty(appName)) {
+				return ValidationStatus.cancel("Please select an existing OpenShift application");
+			}
+
+			if (!StringUtils.isAlphaNumeric(appName)) {
+				return ValidationStatus.error(
+						"The name may only contain letters and digits.");
+			}
+
+			if (existingApplicationsLoaded != null
+					&& !existingApplicationsLoaded) {
+				return ValidationStatus.cancel("Existing applications are not loaded yet.");
+			} else {
+				try {
+					if (!pageModel.hasApplication(appName)) {
+						return ValidationStatus.error(NLS.bind("The application \"{0}\" does not exist.", appName));
+					}
+				} catch (OpenShiftException e) {
+					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.",
+							appName));
+				}
+			}
+
+			return ValidationStatus.ok();
+
+		}
+
+		private final IObservableValue existingApplicationsLoadedObservable;
+
+		private final IObservableValue existingAppNameTextObservable;
+
+		private final IObservableValue useExistingAppBtnbservable;
+	}
+
+	class NewApplicationNameValidator extends MultiValidator {
+
+		public NewApplicationNameValidator(IObservableValue useExistingAppObservable,
+				IObservableValue applicationNameObservable) {
+			this.useExistingAppbservable = useExistingAppObservable;
+			this.applicationNameObservable = applicationNameObservable;
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(applicationNameObservable);
+			return targets;
+		}
+
+		@Override
+		protected IStatus validate() {
+			final String applicationName = (String) applicationNameObservable.getValue();
+			final boolean useExistingApp = (Boolean) useExistingAppbservable.getValue();
+			if (useExistingApp) {
+				return ValidationStatus.ok();
+			}
+			if (applicationName.isEmpty()) {
+				return ValidationStatus.cancel(
+						"Please choose a name for your new application.");
+			}
+			if (!StringUtils.isAlphaNumeric(applicationName)) {
+				return ValidationStatus.error(
+						"The name may only contain letters and digits.");
+			}
+			if (pageModel.isExistingApplication(applicationName)) {
+				return ValidationStatus.error(
+						"An application with the same name already exists on OpenShift.");
+			}
+			return ValidationStatus.ok();
+		}
+
+		private final IObservableValue applicationNameObservable;
+
+		private final IObservableValue useExistingAppbservable;
+
+	}
+
+	/**
+	 * Validates that the new application type is selected
+	 * 
+	 * @author Xavier Coulon
+	 * 
+	 */
+	class NewApplicationTypeValidator extends MultiValidator {
+
+		public NewApplicationTypeValidator(IObservableValue useExistingAppBtnbservable,
+				IObservableValue selectedApplicationTypeObservable) {
+			this.useExistingAppBtnObservable = useExistingAppBtnbservable;
+			this.selectedApplicationTypeObservable = selectedApplicationTypeObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			final boolean useExistingApp = (Boolean) useExistingAppBtnObservable.getValue();
+			final Integer selectedCartridgeIndex = (Integer) selectedApplicationTypeObservable.getValue();
+			if (useExistingApp) {
+				return ValidationStatus.ok();
+			}
+			if (selectedCartridgeIndex == null
+					|| selectedCartridgeIndex == -1) {
+				return ValidationStatus.cancel(getDescription());
+			}
+			return ValidationStatus.ok();
+		}
+
+		private final IObservableValue selectedApplicationTypeObservable;
+
+		private final IObservableValue useExistingAppBtnObservable;
+	}
+
+	static class SourceCodeUrlValidator extends MultiValidator {
+
+		private static final Pattern PROTO_GITURI_PATTERN =
+				Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
+
+		public SourceCodeUrlValidator(IObservableValue defaultSourcecodeObservable,
+				IObservableValue sourcecodeUrlObservable) {
+			this.defaultSourcecodeObservable = defaultSourcecodeObservable;
+			this.sourcecodeUrlObservable = sourcecodeUrlObservable;
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(sourcecodeUrlObservable);
+			return targets;
+		}
+
+		@Override
+		protected IStatus validate() {
+			if (Boolean.TRUE.equals(defaultSourcecodeObservable.getValue())) {
+				return ValidationStatus.ok();
+			}
+
+			Object value = sourcecodeUrlObservable.getValue();
+			if (value instanceof String) {
+				String gitUri = StringUtils.trim((String) value);
+				if (StringUtils.isEmpty(gitUri)) {
+					return ValidationStatus.cancel("Please provide a git url for your source code");
+				}
+				if (PROTO_GITURI_PATTERN.matcher(gitUri).matches()) {
+					return ValidationStatus.ok();
+				}
+			}
+			return ValidationStatus.error("You have to provide a valid git url.");
+		}
+
+		private IObservableValue defaultSourcecodeObservable;
+
+		private IObservableValue sourcecodeUrlObservable;
+	}
+
+	private class ApplicationFormPropertiesProvider implements IApplicationPropertiesProvider {
+
+		@Override
+		public ApplicationScale getApplicationScale() {
+			return pageModel.getScale();
+		}
+
+		@Override
+		public IStandaloneCartridge getCartridge() {
+			return pageModel.getSelectedCartridge();
+		}
+
+		@Override
+		public String getName() {
+			return pageModel.getApplicationName();
+		}
+
+	}
+
+	private static final class ApplicationScaleToBooleanConverter extends Converter {
+		private ApplicationScaleToBooleanConverter() {
+			super(Object.class, Boolean.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof ApplicationScale)) {
+				return null;
+			}
+			switch ((ApplicationScale) fromObject) {
+			case SCALE:
+				return Boolean.TRUE;
+			default:
+				return Boolean.FALSE;
+			}
+		}
+	}
+
+	private final class BooleanToApplicationScaleConverter extends Converter {
+		private BooleanToApplicationScaleConverter() {
+			super(Boolean.class, ApplicationScale.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (fromObject instanceof Boolean) {
+				return ((Boolean) fromObject).booleanValue() ? ApplicationScale.SCALE : ApplicationScale.NO_SCALE;
+			}
+			return null;
+		}
+	}
+
+	private final class CartridgesIndexToCartridge extends Converter {
+
+		public CartridgesIndexToCartridge() {
+			super(Integer.class, IStandaloneCartridge.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof Integer)) {
+				return null;
+			}
+
+			int index = ((Integer) fromObject).intValue();
+			List<IStandaloneCartridge> cartridges = pageModel.getCartridges();
+			if (index >= cartridges.size()
+					|| index == -1) {
+				return null;
+			}
+			return cartridges.get(index);
+		}
+	}
+
+	private final class CartridgeToCartridgesIndex extends Converter {
+
+		public CartridgeToCartridgesIndex() {
+			super(IStandaloneCartridge.class, Integer.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof IStandaloneCartridge)) {
+				return null;
+			}
+
+			IStandaloneCartridge cartridge = ((IStandaloneCartridge) fromObject);
+			List<IStandaloneCartridge> cartridges = pageModel.getCartridges();
+			return cartridges.indexOf(cartridge);
+		}
+	}
+
+	private static final class CartridgeToStringConverter extends Converter {
+		private CartridgeToStringConverter() {
+			super(Object.class, String.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof IStandaloneCartridge)) {
+				return null;
+			}
+			return OpenShiftResourceUtils.toString((IStandaloneCartridge) fromObject);
+		}
+	}
 	private Button browseAppVariablesButton;
 
 	// private ModifyListener modifyListener;
+
+	/**
+	 * Viewer element comparer based on #equals(). The default implementation in
+	 * CheckboxTableViewer compares elements based on instance identity.
+	 * <p>
+	 * We need this since the available cartridges (item listed in the viewer)
+	 * are not the same instance as the ones in the embedded application (items
+	 * to check in the viewer).
+	 */
+	private static class EqualityComparer implements IElementComparer {
+
+		@Override
+		public boolean equals(Object thisObject, Object thatObject) {
+			if (thisObject == null) {
+				return thatObject != null;
+			}
+
+			if (thatObject == null) {
+				return false;
+			}
+
+			return thisObject.equals(thatObject);
+		}
+
+		@Override
+		public int hashCode(Object element) {
+			return element.hashCode();
+		}
+
+	}
+
+	private static final class GearProfileToStringConverter extends Converter {
+		private GearProfileToStringConverter() {
+			super(Object.class, String.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (!(fromObject instanceof IGearProfile)) {
+				return null;
+			}
+			return ((IGearProfile) fromObject).getName();
+		}
+	}
+
+	private final class StringToGearProfileConverter extends Converter {
+		private StringToGearProfileConverter() {
+			super(String.class, IGearProfile.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			if (fromObject instanceof String) {
+				return pageModel.getGearProfileByName((String) fromObject);
+			}
+			return null;
+		}
+	}
 
 	ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("New or existing OpenShift Application", "", "New or existing OpenShift Application, wizard", wizard);
@@ -243,11 +576,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.applyTo(existingAppSelectionGroup);
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
 
-		// existing app checkbox
-		useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
-		useExistingAppBtn.setText("Use existing application:");
-		useExistingAppBtn.setToolTipText("Select an existing application or uncheck to create a new one.");
-		useExistingAppBtn.setFocus();
+		// use default source checkbox
+		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
+		useDefaultSourceButton.setText("Use default source code");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(useExistingAppBtn);
 		IObservableValue useExistingAppObservable = BeanProperties.value(
@@ -255,40 +586,50 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		final IObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
 		dbc.bindValue(useExistingAppBtnSelection, useExistingAppObservable);
 
-		// existing app name
-		this.existingAppNameText = new Text(existingAppSelectionGroup, SWT.BORDER);
+		// source code text
+		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
+		sourceCodeUrlLabel.setText("Source code:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceCodeUrlLabel))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(existingAppNameText);
 		IObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingAppNameText);
 		IObservableValue existingAppNameModelObservable = BeanProperties.value(
 				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
 		ValueBindingBuilder
-				.bind(existingAppNameTextObservable)
-				.to(existingAppNameModelObservable)
+				.bind(sourcecodeUrlObservable)
+				.converting(new MultiConverter(new TrimmingStringConverter(), new EmptyStringToNullConverter()))
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
 		UIUtils.focusOnSelection(useExistingAppBtn, existingAppNameText);
 		createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
 
-		// observe the list of application, get notified once they have been
-		// loaded
-		IObservableValue existingApplicationsLoaded =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
-						.observe(pageModel);
-		final ApplicationToSelectNameValidator existingAppValidator =
-				new ApplicationToSelectNameValidator(
-						useExistingAppBtnSelection, existingAppNameTextObservable, existingApplicationsLoaded);
-		dbc.addValidationStatusProvider(existingAppValidator);
+		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable,
+				sourcecodeUrlObservable);
+		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
 		ControlDecorationSupport.create(
-				existingAppValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		useExistingAppBtnSelection.addValueChangeListener(
-				onUseExistingApplication(
-						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
+		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, getShell(), false);
+		advancedButton.addSelectionListener(onAdvancedClicked(advancedButton, toggleAdapter, sourceUrlText,
+				sourceCodeUrlLabel));
 
-		// browse button
-		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
-		browseAppsButton.setText("Browse...");
-		browseAppsButton.addSelectionListener(onBrowseApps(dbc));
+		// explanation
+		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
+		sourceCodeExplanationText
+				.setText("Your application will start with an exact copy of the code and configuration "
+						+ "provided in this Git repository instead of the default application.");
+		sourceCodeExplanationText.setEnabled(false);
+		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).grab(false, false)
 				.applyTo(browseAppsButton);
@@ -350,7 +691,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 		};
 	}
-	
+	/*
+     * @author Martes G Wigglesworth
+     */
 	private SelectionListener onBrowseAppVariables(final DataBindingContext dbc) {
 		return new SelectionAdapter()
         {
@@ -474,6 +817,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					 * 
 					 * @see https://issues.jboss.org/browse/JBIDE-11954
 					 */
+					@Override
 					protected boolean useMoveAndReplace() {
 						return false;
 					}
@@ -522,7 +866,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(
-						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
+						IEmbedCartridgesWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES)
 						.observe(pageModel));
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
@@ -664,39 +1008,38 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
-		// advanced button
-		Button advancedButton = new Button(parent, SWT.NONE);
-		advancedButton.setText(" Advanced >> ");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(advancedButton);
+	private Composite createApplicationSelectionGroup(Composite container, DataBindingContext dbc) {
+		Composite existingAppSelectionGroup = new Composite(container, SWT.NONE);
+		// projectGroup.setText("Project");
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.applyTo(existingAppSelectionGroup);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
 
-		// advanced composite
-		Composite advancedComposite = new Composite(parent, SWT.NONE);
-		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).create();
-		advancedComposite.setLayoutData(advancedCompositeGridData);
-		GridLayoutFactory.fillDefaults().applyTo(advancedComposite);
-
-		// source group
-		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
-		sourceGroup.setText("Source Code");
+		// existing app checkbox
+		useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
+		useExistingAppBtn.setText("Use existing application:");
+		useExistingAppBtn.setToolTipText("Select an existing application or uncheck to create a new one.");
+		useExistingAppBtn.setFocus();
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(sourceGroup);
+				.span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(useExistingAppBtn);
+		IObservableValue useExistingAppObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel);
+		final IObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
+		dbc.bindValue(useExistingAppBtnSelection, useExistingAppObservable);
 
-		// use default source checkbox
-		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
-		useDefaultSourceButton.setText("Use default source code");
+		// existing app name
+		this.existingAppNameText = new Text(existingAppSelectionGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
-		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
+				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(existingAppNameText);
+		IObservableValue existingAppNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingAppNameText);
+		IObservableValue existingAppNameModelObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel);
 		ValueBindingBuilder
-				.bind(defaultSourceCodeObservable)
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+				.bind(existingAppNameTextObservable)
+				.to(existingAppNameModelObservable)
 				.in(dbc);
+		UIUtils.focusOnSelection(useExistingAppBtn, existingAppNameText);
+		createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
 
 		// source code text
 		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
@@ -769,51 +1112,36 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	private SelectionListener onAdvancedClicked(final Button toggleButton, final DialogChildToggleAdapter adapter,
-			final Text sourceUrlText, final Label sourceCodeUrlLabel) {
-		return new SelectionAdapter() {
+		useExistingAppBtnSelection.addValueChangeListener(
+				onUseExistingApplication(
+						newAppConfigurationGroup, existingAppNameText, browseAppsButton));
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (!adapter.isVisible()) {
-					toggleButton.setText(" << Advanced ");
-				} else {
-					toggleButton.setText(" Advanced >> ");
-				}
-				sourceUrlText.setEnabled(!pageModel.isDefaultSourcecode());
-				sourceCodeUrlLabel.setEnabled(!pageModel.isDefaultSourcecode());
-				adapter.toggle();
-			}
-		};
+		// browse button
+		this.browseAppsButton = new Button(existingAppSelectionGroup, SWT.NONE);
+		browseAppsButton.setText("Browse...");
+		browseAppsButton.addSelectionListener(onBrowseApps(dbc));
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
+				.applyTo(browseAppsButton);
+		return existingAppSelectionGroup;
 	}
 	
 
 	/*
-	 * Triggered when the user checks "use existing application". It will
-	 * enable/disable the application widgets and reset existing values.
+	 * Create environmental variable configuration group
 	 * 
-	 * @param applicationConfigurationGroup
-	 * @param applicationNameText
-	 * @param applicationBrowseButton
-	 * @return
+	 * @author Martes G Wigglesworth
 	 */
-	private IValueChangeListener onUseExistingApplication(final Group applicationConfigurationGroup,
-			final Text applicationNameText, final Button applicationBrowseButton) {
-		return new IValueChangeListener() {
+	private void createAppVariableConfigurationGroup(Composite parent, DataBindingContext dbc) {
+		// environmental variables button
+		browseAppVariablesButton = new Button(parent, SWT.NONE);
+		browseAppVariablesButton.setText(" Environmental Variables... ");
+		browseAppVariablesButton.addSelectionListener(onBrowseAppVariables(dbc));
 
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				Object newValue = event.diff.getNewValue();
-				if (newValue instanceof Boolean) {
-					Boolean useExisting = (Boolean) newValue;
-					// if (!useExisting) {
-					// resetExistingApplication();
-					// }
-					enableApplicationWidgets(useExisting);
-					setWizardPageDescription(useExisting);
-				}
-			}
-		};
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
+		// TODO - Connect this button to the
+		// ApplicationEnvironmentalVariablesWizardPage object
 	}
 
 	/*
@@ -829,13 +1157,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		existingAppNameText.setEnabled(useExisting);
 		browseAppsButton.setEnabled(useExisting);
 
-		UIUtils.doForAllChildren(new IWidgetVisitor() {
-
-			@Override
-			public void visit(Control control) {
-				control.setEnabled(!useExisting);
-			}
-		}, newAppConfigurationGroup);
+		AutoCompleteField adapter =
+				new AutoCompleteField(existingAppNameText, new TextContentAdapter(), new String[] {});
+		adapter.setProposals(applicationNames);
 	}
 
 	private CheckboxTableViewer createTable(Composite tableContainer) {
@@ -878,35 +1202,29 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-	private SelectionListener onCheckAll() {
-		return new SelectionAdapter() {
+	/*
+	 * Enables/disables the given widgets based on the flag to use an existing
+	 * app or create a new application.
+	 * 
+	 * @param useExisting
+	 * 
+	 * @param applicationConfigurationGroup
+	 * 
+	 * @param applicationNameText
+	 * 
+	 * @param applicationBrowseButton
+	 */
+	private void enableApplicationWidgets(final Boolean useExisting) {
+		existingAppNameText.setEnabled(useExisting);
+		browseAppsButton.setEnabled(useExisting);
+
+		UIUtils.doForAllChildren(new IWidgetVisitor() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// viewer.setAllChecked(true);
-				// try {
-				// addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
-				// } catch (OpenShiftException ex) {
-				// OpenShiftUIActivator.log("Could not select jenkins cartridge",
-				// ex);
-				// } catch (SocketTimeoutException ex) {
-				// OpenShiftUIActivator.log("Could not select jenkins cartridge",
-				// ex);
-				// }
+			public void visit(Control control) {
+				control.setEnabled(!useExisting);
 			}
-
-		};
-	}
-
-	private SelectionListener onUncheckAll() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				viewer.setAllChecked(false);
-			}
-
-		};
+		}, newAppConfigurationGroup);
 	}
 	/*
 	 * Returns a listener to the button group action.
@@ -1179,25 +1497,58 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 								"Could not load applications, cartridges and gears", e);
 					}
 				}
-			}, getContainer(), dbc);
-		} catch (Exception ex) {
-			// ignore
-		}
+				sourceUrlText.setEnabled(!pageModel.isDefaultSourcecode());
+				sourceCodeUrlLabel.setEnabled(!pageModel.isDefaultSourcecode());
+				adapter.toggle();
+			}
+		};
 	}
 
-	private void setWizardPageDescription(boolean useExisting) {
-		if (useExisting) {
-			setDescription("Import an existing OpenShift Application.");
-		} else {
-			setDescription("Create a new OpenShift Application.");
-		}
+	private SelectionListener onBrowseApps(final DataBindingContext dbc) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
+				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
+				final ApplicationSelectionDialog appSelectionDialog =
+						new ApplicationSelectionDialog(wizard, wizardModel, null, getShell());
+				final int result = appSelectionDialog.open();
+				if (result == IDialogConstants.OK_ID) {
+					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
+					if (selectedApplication != null) {
+						// This setter may be long-running
+						Job j = new Job("Setting Application") {
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									pageModel.setExistingApplicationName(selectedApplication.getName());
+								} catch (OpenShiftException ex) {
+									OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+											"Could not get embedded cartridges for application {0}",
+											selectedApplication.getName()), ex));
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						try {
+							WizardUtils.runInWizard(j, getContainer(), dbc);
+						} catch (InvocationTargetException ite) {
+						} catch (InterruptedException ie) {
+						}
+					}
+				}
+			}
+		};
 	}
 
 	class ApplicationToSelectNameValidator extends MultiValidator {
 
-		private final IObservableValue useExistingAppBtnbservable;
-		private final IObservableValue existingAppNameTextObservable;
-		private final IObservableValue existingApplicationsLoadedObservable;
+	/*
+	 * Returns a listener to the button group action.
+	 */
+	private SelectionListener onBrowseAppVariables() {
+		return new SelectionAdapter() {
 
 		public ApplicationToSelectNameValidator(IObservableValue useExistingAppBtnbservable,
 				IObservableValue existingAppNameTextObservable,
@@ -1217,42 +1568,45 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.ok();
 			}
 
-			if (StringUtils.isEmpty(appName)) {
-				return ValidationStatus.cancel("Please select an existing OpenShift application");
-			}
+		};
+	}
 
-			if (!StringUtils.isAlphaNumeric(appName)) {
-				return ValidationStatus.error(
-						"The name may only contain letters and digits.");
-			}
+	private SelectionListener onBrowseAppVariables(final DataBindingContext dbc) {
+		return new SelectionAdapter() {
 
-			if (existingApplicationsLoaded != null
-					&& !existingApplicationsLoaded) {
-				return ValidationStatus.cancel("Existing applications are not loaded yet.");
-			} else {
-				try {
-					if (!pageModel.hasApplication(appName)) {
-						return ValidationStatus.error(NLS.bind("The application \"{0}\" does not exist.", appName));
-					}
-				} catch (OpenShiftException e) {
-					return ValidationStatus.error(NLS.bind("The application \"{0}\" existance could not be verified.",
-							appName));
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WizardDialog manageVariablesWizard =
+						new OkButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesWizard());
+				if (manageVariablesWizard.open() == Window.OK) {
 				}
 			}
 
-			return ValidationStatus.ok();
-
-		}
-
-		@Override
-		public IObservableList getTargets() {
-			IObservableList targets = new WritableList();
-			targets.add(existingAppNameTextObservable);
-			return targets;
-		}
+		};
 	}
 
-	class NewApplicationNameValidator extends MultiValidator {
+	private SelectionListener onCheckAll() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// viewer.setAllChecked(true);
+				// try {
+				// addJenkinsCartridge(IEmbeddableCartridge.JENKINS_14);
+				// } catch (OpenShiftException ex) {
+				// OpenShiftUIActivator.log("Could not select jenkins cartridge",
+				// ex);
+				// } catch (SocketTimeoutException ex) {
+				// OpenShiftUIActivator.log("Could not select jenkins cartridge",
+				// ex);
+				// }
+			}
+
+		};
+	}
+
+	private SelectionListener onUncheckAll() {
+		return new SelectionAdapter() {
 
 		private final IObservableValue useExistingAppbservable;
 		private final IObservableValue applicationNameObservable;
@@ -1293,111 +1647,77 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return ValidationStatus.ok();
 		}
 
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(applicationNameObservable);
-			return targets;
-		}
-
+		};
 	}
 
-	/**
-	 * Validates that the new application type is selected
+	/*
+	 * Triggered when the user checks "use existing application". It will
+	 * enable/disable the application widgets and reset existing values.
 	 * 
-	 * @author Xavier Coulon
+	 * @param applicationConfigurationGroup
 	 * 
+	 * @param applicationNameText
+	 * 
+	 * @param applicationBrowseButton
+	 * 
+	 * @return
 	 */
-	class NewApplicationTypeValidator extends MultiValidator {
+	private IValueChangeListener onUseExistingApplication(final Group applicationConfigurationGroup,
+			final Text applicationNameText, final Button applicationBrowseButton) {
+		return new IValueChangeListener() {
 
-		private final IObservableValue useExistingAppBtnObservable;
-		private final IObservableValue selectedApplicationTypeObservable;
-
-		public NewApplicationTypeValidator(IObservableValue useExistingAppBtnbservable,
-				IObservableValue selectedApplicationTypeObservable) {
-			this.useExistingAppBtnObservable = useExistingAppBtnbservable;
-			this.selectedApplicationTypeObservable = selectedApplicationTypeObservable;
-		}
-
-		@Override
-		protected IStatus validate() {
-			final boolean useExistingApp = (Boolean) useExistingAppBtnObservable.getValue();
-			final Integer selectedCartridgeIndex = (Integer) selectedApplicationTypeObservable.getValue();
-			if (useExistingApp) {
-				return ValidationStatus.ok();
-			}
-			if (selectedCartridgeIndex == null
-					|| selectedCartridgeIndex == -1) {
-				return ValidationStatus.cancel(getDescription());
-			}
-			return ValidationStatus.ok();
-		}
-	}
-
-	static class SourceCodeUrlValidator extends MultiValidator {
-
-		private static final Pattern PROTO_GITURI_PATTERN =
-				Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
-		private IObservableValue defaultSourcecodeObservable;
-		private IObservableValue sourcecodeUrlObservable;
-
-		public SourceCodeUrlValidator(IObservableValue defaultSourcecodeObservable,
-				IObservableValue sourcecodeUrlObservable) {
-			this.defaultSourcecodeObservable = defaultSourcecodeObservable;
-			this.sourcecodeUrlObservable = sourcecodeUrlObservable;
-		}
-
-		@Override
-		protected IStatus validate() {
-			if (Boolean.TRUE.equals(defaultSourcecodeObservable.getValue())) {
-				return ValidationStatus.ok();
-			}
-
-			Object value = sourcecodeUrlObservable.getValue();
-			if (value instanceof String) {
-				String gitUri = StringUtils.trim((String) value);
-				if (StringUtils.isEmpty(gitUri)) {
-					return ValidationStatus.cancel("Please provide a git url for your source code");
-				}
-				if (PROTO_GITURI_PATTERN.matcher(gitUri).matches()) {
-					return ValidationStatus.ok();
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				Object newValue = event.diff.getNewValue();
+				if (newValue instanceof Boolean) {
+					Boolean useExisting = (Boolean) newValue;
+					// if (!useExisting) {
+					// resetExistingApplication();
+					// }
+					enableApplicationWidgets(useExisting);
+					setWizardPageDescription(useExisting);
 				}
 			}
-			return ValidationStatus.error("You have to provide a valid git url.");
-		}
+		};
+	}
 
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(sourcecodeUrlObservable);
-			return targets;
+	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (viewer != null) {
+					viewer.setInput(cartridges);
+				}
+			}
+		});
+	}
+
+	private void setWizardPageDescription(boolean useExisting) {
+		if (useExisting) {
+			setDescription("Import an existing OpenShift Application.");
+		} else {
+			setDescription("Create a new OpenShift Application.");
 		}
 	}
 
-	@Override
-	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(
-				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
-				dbc);
-	}
+	private Button browseAppsButton;
 
-	private class ApplicationFormPropertiesProvider implements IApplicationPropertiesProvider {
+	private Button browseAppVariablesButton;
 
-		@Override
-		public ApplicationScale getApplicationScale() {
-			return pageModel.getScale();
-		}
+	private Button checkAllButton;
 
-		@Override
-		public IStandaloneCartridge getCartridge() {
-			return pageModel.getSelectedCartridge();
-		}
+	private Text existingAppNameText;
 
-		@Override
-		public String getName() {
-			return pageModel.getApplicationName();
-		}
+	private Group newAppConfigurationGroup;
 
-	}
+	private Text newAppNameText;
+
+	private ApplicationConfigurationWizardPageModel pageModel;
+
+	private Button uncheckAllButton;
+
+	private Button useExistingAppBtn;
+
+	private CheckboxTableViewer viewer;
 
 }
