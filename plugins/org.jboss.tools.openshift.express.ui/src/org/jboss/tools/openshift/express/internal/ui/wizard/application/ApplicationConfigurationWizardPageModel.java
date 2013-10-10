@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +36,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
- * 
+ * @author Martes G Wigglesworth
  */
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo implements
 		IEmbedCartridgesWizardPageModel {
@@ -65,6 +66,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private List<IStandaloneCartridge> cartridges = new ArrayList<IStandaloneCartridge>();
 	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
+	private List<Object> environmentalVariables = new ArrayList<Object>();
+	//private List<IEnvironmentalVariable> variableList = new ArrayList<IEnvironmentalVariable>();
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
@@ -86,6 +89,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel.getConnection();
 	}
 
+	//public List<I> getApplications() throws OpenShiftException, SocketTimeoutException {
 	public List<IApplication> getApplications() throws OpenShiftException {
 		Connection connection = getConnection();
 		IDomain domain = wizardModel.getDomain();
@@ -109,6 +113,76 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 			return new String[0];
 		}
 	}
+	//public List<IEnvironmentalVaraible> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
+	public List<Object> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
+		/*
+		Connection user = getConnection();
+		if (user == null || !user.isConnected() || !user.hasDomain()) {
+			return Collections.emptyList();
+		}
+		return user.getApplicationEnvironmentalVariables();
+		*/
+		throw new OpenShiftException("getApplicationEnvironmentalVariables() is not implemented yet.");
+	}
+	public String[] getApplicationEnvironmentalVariableNames(String appTargetName)
+	{
+		throw new OpenShiftException("getApplicationEnvironmentalVariableNamess() is not implemented yet.");
+		// Placeholder code to support retrieval of environmental variables from relevant api call(s).
+		/*
+		try {
+			List<IApplication> applications = this.getApplications();
+			String[] applicationVariableNames = null;
+			for (int i = 0; i < applications.size(); i++) {
+				IApplication currentApp = applications.get(i);
+				if(  currentApp.getName()== appTargetName)
+				{
+					List<IEnvironmentalVariable> targetAppVariableList = currentApp.getEnvironmentalVariables();
+					applicationVariableNames = new String[currentVariableList.size()];
+					for(int j=0;j<currentVariableList.size();j++)
+						applicationvariableValues[j]=currentVaribleList.get(j).getName();
+				}
+			}
+			return applicationVariableNames;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve list of OpenShift application Variables", e);
+			return new String[0];
+		} catch (SocketTimeoutException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications Variables due to time out.", e);
+			return new String[0];
+		}
+		*/
+		
+	}
+	
+	public String[] getApplicationEnvironmentalVariableValues(String appTargetName)
+	{
+		throw new OpenShiftException("getApplicationEnvironmentalVariableValues() is not implemented yet.");
+		
+		 // Placeholder code to support retrieval of environmental variables from relivant api call(s).
+		/*try {
+			List<IApplication> applications = this.getApplications();
+			String[] applicationVariableNames = null;
+			for (int i = 0; i < applications.size(); i++) {
+				IApplication currentApp = applications.get(i);
+				if(  currentApp.getName()== appTargetName)
+				{
+					List<IEnvironmentalVariable> targetAppVariableList = currentApp.getEnvironmentalVariables();
+					applicationVariableNames = new String[currentVariableList.size()];
+					for(int j=0;j<currentVariableList.size();j++)
+						applicationvariableValues[j]=currentVaribleList.get(j).getValue();
+				}
+			}
+			return applicationVariableNames;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to retrieve list of OpenShift application Variables", e);
+			return new String[0];
+		} catch (SocketTimeoutException e) {
+			Logger.error("Failed to retrieve list of OpenShift applications Variables due to time out.", e);
+			return new String[0];
+		}*/
+	}
+	
+	
 
 	public boolean isUseExistingApplication() {
 		return wizardModel.isUseExistingApplication();
