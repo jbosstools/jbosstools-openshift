@@ -10,6 +10,8 @@
  *****************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
+import java.util.HashMap;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
@@ -20,8 +22,10 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +33,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
@@ -206,8 +211,18 @@ System.out.print("testing");
 		};
 	}
 
+	/**
+	 * Edit Button Method
+	 * @return
+	 */
 	private SelectionListener onAddNew() {
 		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO the following has temporary values until it is hooked up properly.
+				WizardDialog dialog = new WizardDialog(getShell(), new ApplicationEnvironmentalVariableEditWizard(new Connection(), "Temorary Variable Name Holder"/*pageModel.getVariableName()*/,new HashMap<String,String>()));
+				dialog.open(); 
+			}
 			/*
 			 * @Override public void widgetSelected(SelectionEvent e) {
 			 * NewSSHKeyWizard wizard = new
