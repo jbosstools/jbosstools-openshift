@@ -13,10 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.variabl
 import java.util.HashMap;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -32,16 +28,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.SSHKeysWizardPageModel;
-
-import com.openshift.client.IOpenShiftSSHKey;
 
 /**
  * @author Martes G Wigglesworth
@@ -71,22 +61,30 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		table.setHeaderVisible(true);
 		this.viewer = new TableViewerBuilder(table, tableContainer)
 				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
+				.column(new IColumnLabelProvider<HashMap<String, String>>() {
 
+					/*
+					 * Placeholder for environmental variable information
+					 */
 					@Override
-					public String getValue(IOpenShiftSSHKey key) {
-						return key.getName();
+					public String getValue(HashMap<String, String> e) {
+						// TODO Auto-generated method stub
+						return null;
 					}
 				})
-				.name("Variable Name").align(SWT.LEFT).weight(2).minWidth(200).buildColumn()
-				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
+				.name("Variable Name").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
+				.column(new IColumnLabelProvider<HashMap<String, String>>() {
 
+					/*
+					 * Placeholder for environmental variable information
+					 */
 					@Override
-					public String getValue(IOpenShiftSSHKey key) {
-						return key.getKeyType().getTypeId();
+					public String getValue(HashMap<String, String> e) {
+						// TODO Auto-generated method stub
+						return null;
 					}
 				})
-				.name("Value").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
+				.name("Variable Value").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
 				.buildViewer();
 
 		return viewer;
@@ -103,7 +101,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc)
 	{
-		//setWizardPageDescription("Environmental Variables Configuration Wizard");
+
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
 
 		Group keysGroup = new Group(container, SWT.NONE);
@@ -117,52 +115,36 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
-				.in(dbc);
 
-		Button addExistingButton = new Button(keysGroup, SWT.PUSH);
+		Button addButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addExistingButton);
-		addExistingButton.setText("Add...");
-		addExistingButton.addSelectionListener(onAddExisting());
+				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
+		addButton.setText("Add...");
+		addButton.addSelectionListener(onAdd());
 
-		Button addNewButton = new Button(keysGroup, SWT.PUSH);
+		Button editExistingButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addNewButton);
-		addNewButton.setText("Edit...");
-		addNewButton.addSelectionListener(onAddNew());
+				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+		editExistingButton.setText("Edit...");
+		editExistingButton.addSelectionListener(onEditExisting());
 
-		Button removeButton = new Button(keysGroup, SWT.PUSH);		
+		Button removeButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove());
-		
-		Button importButton = new Button(keysGroup, SWT.PUSH);		
+
+		Button importButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(importButton);
 		importButton.setText("Import...");
 		importButton.addSelectionListener(onImport());
-		
+
 		Button exportButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(exportButton);
 		exportButton.setText("Export...");
 		exportButton.addSelectionListener(onExport());
-		
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.to(ViewerProperties.singleSelection().observe(viewer))
-				.converting(new Converter(IOpenShiftSSHKey.class, Boolean.class) {
-
-					@Override
-					public Object convert(Object fromObject) {
-						IOpenShiftSSHKey key = (IOpenShiftSSHKey) fromObject;
-						return key != null;
-					}
-				})
-				.in(dbc);
 
 		Composite filler = new Composite(keysGroup, SWT.None);
 		GridDataFactory.fillDefaults()
@@ -175,7 +157,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
 			// Load current environmental variables into model.
-System.out.print("testing");
 		} catch (Exception e) {
 			StatusManager.getManager().handle(
 					OpenShiftUIActivator.createErrorStatus("Could not load Environmental Variables.", e),
@@ -192,119 +173,39 @@ System.out.print("testing");
 
 	}
 
-	private SelectionListener onAddExisting() {
+	private SelectionListener onAdd() {
 		return new SelectionAdapter() {
-			/*
-			 * @Override public void widgetSelected(SelectionEvent e) {
-			 * AddSSHKeyWizard wizard = new
-			 * AddSSHKeyWizard(pageModel.getConnection()); if
-			 * (WizardUtils.openWizardDialog(wizard, getShell()) ==
-			 * Dialog.CANCEL) { return; }
-			 * 
-			 * try { WizardUtils.runInWizard( new RefreshViewerJob(),
-			 * getContainer(), getDatabindingContext());
-			 * pageModel.setSelectedSSHKey(wizard.getSSHKey()); } catch
-			 * (Exception ex) { StatusManager.getManager().handle(
-			 * OpenShiftUIActivator.createErrorStatus("Could not refresh keys.",
-			 * ex), StatusManager.LOG); } }
-			 */
 		};
 	}
-
+	
 	/**
 	 * Edit Button Method
+	 * 
 	 * @return
 	 */
-	private SelectionListener onAddNew() {
+	private SelectionListener onEditExisting() {
 		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				//TODO the following has temporary values until it is hooked up properly.
-				WizardDialog dialog = new WizardDialog(getShell(), new ApplicationEnvironmentalVariableEditWizard(new Connection(), "Temorary Variable Name Holder"/*pageModel.getVariableName()*/,new HashMap<String,String>()));
-				dialog.open(); 
-			}
-			/*
-			 * @Override public void widgetSelected(SelectionEvent e) {
-			 * NewSSHKeyWizard wizard = new
-			 * NewSSHKeyWizard(pageModel.getConnection()); if
-			 * (WizardUtils.openWizardDialog(wizard, getShell()) ==
-			 * Dialog.CANCEL) { return; }
-			 * 
-			 * try { WizardUtils.runInWizard( new RefreshViewerJob(),
-			 * getContainer(), getDatabindingContext());
-			 * pageModel.setSelectedSSHKey(wizard.getSSHKey()); } catch
-			 * (Exception ex) { StatusManager.getManager().handle(
-			 * OpenShiftUIActivator.createErrorStatus("Could not refresh keys.",
-			 * ex), StatusManager.LOG); } }
-			 */
+
 		};
 	}
+
+	
 	private SelectionListener onImport() {
-		return new SelectionAdapter() {
-			/*
-			 * @Override public void widgetSelected(SelectionEvent e) {
-			 * NewSSHKeyWizard wizard = new
-			 * NewSSHKeyWizard(pageModel.getConnection()); if
-			 * (WizardUtils.openWizardDialog(wizard, getShell()) ==
-			 * Dialog.CANCEL) { return; }
-			 * 
-			 * try { WizardUtils.runInWizard( new RefreshViewerJob(),
-			 * getContainer(), getDatabindingContext());
-			 * pageModel.setSelectedSSHKey(wizard.getSSHKey()); } catch
-			 * (Exception ex) { StatusManager.getManager().handle(
-			 * OpenShiftUIActivator.createErrorStatus("Could not refresh keys.",
-			 * ex), StatusManager.LOG); } }
-			 */
+			return new SelectionAdapter() {
+
 		};
 	}
+
 	private SelectionListener onExport() {
 		return new SelectionAdapter() {
-			/*
-			 * @Override public void widgetSelected(SelectionEvent e) {
-			 * NewSSHKeyWizard wizard = new
-			 * NewSSHKeyWizard(pageModel.getConnection()); if
-			 * (WizardUtils.openWizardDialog(wizard, getShell()) ==
-			 * Dialog.CANCEL) { return; }
-			 * 
-			 * try { WizardUtils.runInWizard( new RefreshViewerJob(),
-			 * getContainer(), getDatabindingContext());
-			 * pageModel.setSelectedSSHKey(wizard.getSSHKey()); } catch
-			 * (Exception ex) { StatusManager.getManager().handle(
-			 * OpenShiftUIActivator.createErrorStatus("Could not refresh keys.",
-			 * ex), StatusManager.LOG); } }
-			 */
 		};
 	}
 
-	private SelectionListener onRefresh() {
-		return new SelectionAdapter() {
-
-		};
-	}
+	
 
 	private SelectionListener onRemove() {
 		return new SelectionAdapter() {
-			/*
-			 * @Override public void widgetSelected(SelectionEvent e) { String
-			 * keyName = pageModel.getSelectedSSHKey().getName(); if
-			 * (MessageDialog.openConfirm(getShell(), "Remove SSH Key",
-			 * NLS.bind(
-			 * "Are you sure that you want to remove public SSH key {0} from OpenShift?"
-			 * , keyName))) try { WizardUtils.runInWizard( new JobChainBuilder(
-			 * new RemoveKeyJob()).andRunWhenDone(new
-			 * RefreshViewerJob()).build() , getContainer(),
-			 * getDatabindingContext() ); } catch (Exception ex) {
-			 * StatusManager.getManager().handle(
-			 * OpenShiftUIActivator.createErrorStatus
-			 * (NLS.bind("Could not remove key {0}.", keyName), ex),
-			 * StatusManager.LOG); } }
-			 */
 		};
-	}
-
-	private void setWizardPageDescription(String newDescription)
-	{
-		//pageModel.setDescription(newDescription);
 	}
 
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel;
