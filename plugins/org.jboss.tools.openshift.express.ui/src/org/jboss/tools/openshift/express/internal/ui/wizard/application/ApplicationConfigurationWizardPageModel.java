@@ -186,8 +186,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 	
 
-	
-
 	public boolean isUseExistingApplication() {
 		return wizardModel.isUseExistingApplication();
 	}
