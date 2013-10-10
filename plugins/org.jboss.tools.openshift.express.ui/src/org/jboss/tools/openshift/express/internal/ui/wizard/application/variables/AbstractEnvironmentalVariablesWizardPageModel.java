@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
@@ -20,8 +21,31 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
  * @author Martin Rieman
  *
  */
-public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo {
+public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo{
 
+	/**
+	 * @author Martes G Wigglesworth <martes.wigglesworth@redhat.com>
+	 *
+	 */
+	public class EnvironmentalVariableIterator implements Iterable<Object> {
+
+		/**
+		 * Constructs a new instance of EnvironmentalVariableIterator
+		 */
+		public EnvironmentalVariableIterator() {
+			// TODO Auto-generated constructor stub
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Iterable#iterator()
+		 */
+		@Override
+		public Iterator<Object> iterator() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+	}
 	/**
 	 * Constructs a new instance of
 	 * AbstractEnvironmentalVariablesWizardPageModel
@@ -42,23 +66,16 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		this.variablesDB = variables;
 	}
 
+	public String getDescription()
+	{
+		return description;
+	}
+
 	/**
 	 * @return the pageTitle
 	 */
 	public String getPageTitle() {
 		return pageTitle;
-	}
-
-	private String description;
-	
-	public String getDescription()
-	{
-		return description;
-	}
-	
-	public void setDescription(String description)
-	{
-		this.description= description;
 	}
 
 	/**
@@ -75,11 +92,16 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		return variablesDB;
 	}
 
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
+
 	/**
 	 * @param string
 	 */
 	public void setPageTitle(String newTitle) {
-		pageTitle=newTitle;
+		pageTitle = newTitle;
 	}
 
 	/**
@@ -96,7 +118,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	 */
 	public void setVariablesDB(HashMap<String, String> variablesDB) {
 		this.variablesDB = variablesDB;
-	};
+	}
 
 	/**
 	 * 
@@ -105,7 +127,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	protected String add(String newKey, String newValue)
 	{
 		return this.variablesDB.put(newKey, newValue);
-	}
+	};
 
 	/**
 	 * 
@@ -126,7 +148,15 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		return this.variablesDB.put(target, updateValue);
 	}
 
+	private String description;
+
 	private String pageTitle;
 	private Connection userConnection;
 	private HashMap<String, String> variablesDB;
+	/*
+	 * Another complex data type that works on the specific object that is used
+	 * in the client branch from JBIDE-15598 may make more sense.
+	 */
+	
+	
 }
