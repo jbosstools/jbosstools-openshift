@@ -201,8 +201,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 					OkCancelButtonWizardDialog addVariableWizardDialog =
 						new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesAddWizard());
 				addVariableWizardDialog.open();
-				/*if (manageVariablesWizard.open() == Window.OK) {
-				}*/
 			}
 
 		};
