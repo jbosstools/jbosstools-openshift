@@ -96,6 +96,9 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.ApplicationEnvironmentalVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.embed.IEmbedCartridgesWizardPageModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
+
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -112,6 +115,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 * @author Martes G Wigglesworth
 */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
+
 
 
         private CheckboxTableViewer viewer;
@@ -1255,8 +1259,5 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
                 }
 
         }
-
-
-
 
 }
