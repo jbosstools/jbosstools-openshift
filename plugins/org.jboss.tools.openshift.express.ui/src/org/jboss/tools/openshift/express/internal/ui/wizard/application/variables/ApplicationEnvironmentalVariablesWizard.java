@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
+import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.wizard.Wizard;
 
 /**
@@ -25,9 +26,20 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 		// TODO Auto-generated constructor stub
 	}
 
+	public ApplicationEnvironmentalVariablesWizard(DataBindingContext dbc)
+	{
+		this.dbc = dbc;
+	}
+
 	@Override
 	public void addPages() {
-		addPage(new ApplicationEnvironmentalVariableConfigurationWizardPage("Variables View Dialog","Used to create and edit variables for OpenShift Applications", "Variables Table View", this));
+		addPage(new ApplicationEnvironmentalVariableConfigurationWizardPage("Variables View Dialog",
+				"Used to create and edit variables for OpenShift Applications", "Variables Table View", this));
+	}
+
+	public DataBindingContext getDataBindingContext()
+	{
+		return dbc;
 	}
 
 	/*
@@ -39,4 +51,6 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 	public boolean performFinish() {
 		return true;
 	}
+
+	private DataBindingContext dbc;
 }
