@@ -175,6 +175,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return matchingCartridge;
 	}
 
+
 	public List<IStandaloneCartridge> getCartridges() {
 		return cartridges;
 	}
