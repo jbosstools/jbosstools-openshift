@@ -16,8 +16,9 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
- * @author Martes G Wigglesworth
- * 
+ * @author Martes G Wigglesworth 
+ * @author Martin Rieman
+ *
  */
 public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo {
 
@@ -28,7 +29,17 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	public AbstractEnvironmentalVariablesWizardPageModel() {
 		pageTitle = null;
 		userConnection = null;
-		variablesDB = null;
+		variablesDB = new HashMap<String, String>();
+	}
+	
+	/**
+	 * Fully constructs a new instance of 
+	 * AbstractEnvironmentalVariablesWizardPageModel
+	 */
+	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, Connection user, HashMap<String, String> variables) {
+		this.pageTitle = pageTitle;
+		this.userConnection = user;
+		this.variablesDB = variables;
 	}
 
 	/**
