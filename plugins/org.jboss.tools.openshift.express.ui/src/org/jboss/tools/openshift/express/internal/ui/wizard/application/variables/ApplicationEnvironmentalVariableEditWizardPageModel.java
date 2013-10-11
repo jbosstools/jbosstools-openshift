@@ -40,23 +40,25 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
+	 * @param envVariables 
+	 * @param variableName 
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPageModel() {
+	public ApplicationEnvironmentalVariableEditWizardPageModel(String variableName, HashMap<String, String> envVariables) {
 		// TODO Auto-generated constructor stub
 	}
+	
 	
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizardPageModel
 	 * @param variableName
 	 * @param variableValue
+	 * @param wizardModel
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPageModel(Connection connection, String variableName, HashMap<String,String> envVariables) {
-		super(PAGE_TITLE, connection, envVariables);
-		this.variableName = variableName;
-		this.variableValue = envVariables.containsKey(variableName)?
-				envVariables.get(variableName):"";
+	public ApplicationEnvironmentalVariableEditWizardPageModel(String variableName, String variableValue,ApplicationEnvironmentalVariableConfigurationWizardPageModel wizardModel) {
+		//super.setVariablesDB(variablesDB);
 	}
-
+	
+	
 	/**
 	 * Update method to update the value in the EnvironmentalVariables HashMap
 	 * using class variables
