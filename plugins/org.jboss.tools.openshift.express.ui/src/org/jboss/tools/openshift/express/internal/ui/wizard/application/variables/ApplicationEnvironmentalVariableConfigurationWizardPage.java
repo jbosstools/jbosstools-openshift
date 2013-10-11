@@ -141,12 +141,13 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		editExistingButton.addSelectionListener(onEditExisting());
+		editExistingButton.setEnabled(pageModel.isEmpty());
 
 		Button removeButton = new Button(keysGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
-		removeButton.setEnabled(false);//This should be bound to the existence of variables in the table.
+		removeButton.setEnabled(pageModel.isEmpty());//This should be bound to the existence of variables in the table.
 		removeButton.addSelectionListener(onRemove());
 
 		Button importButton = new Button(keysGroup, SWT.PUSH);
@@ -159,7 +160,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(exportButton);
 		exportButton.setText("Export...");
-		exportButton.setEnabled(false);//This should be bound to the existence of variables in the table.
+		exportButton.setEnabled(pageModel.isEmpty());//This should be bound to the existence of variables in the table.
 		exportButton.addSelectionListener(onExport());
 
 		Composite filler = new Composite(keysGroup, SWT.None);
@@ -233,8 +234,11 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 	private SelectionListener onRemove() {
 		return new SelectionAdapter() {
+			
 		};
 	}
+	
+
 
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel;
 	private TableViewer viewer;
