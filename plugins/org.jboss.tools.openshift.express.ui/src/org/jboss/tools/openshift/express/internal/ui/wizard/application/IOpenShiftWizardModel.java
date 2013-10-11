@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -31,6 +32,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareMode
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.ICartridge;
@@ -42,25 +44,30 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservablePojo {
 
-	public static final String PROP_NEW_PROJECT = "newProject";
-	public static final String PROP_CONNECTION = "connection";
 	public static final String PROP_APPLICATION = "application";
 	public static final String PROP_APPLICATION_NAME = "applicationName";
 	public static final String PROP_APPLICATION_CARTRIDGE = "applicationCartridge";
 	public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
 	public static final String PROP_APPLICATION_SCALE = "applicationScale";
-	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
+	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
+	public static final String PROP_CONNECTION = "connection";
+	public static final String PROP_DEFAULT_APPLICATION = "default_application";
+	public static final String PROP_DEFAULT_USE_EXISTING_APPLICATION = "default_useExistingApplication";
+	public static final String PROP_DOMAIN = "domain";
+	public static final String PROP_DOMAINS = "domains";
 	public static final String PROP_INITIAL_GITURL = "initialGitUrl";
+	public static final String PROP_KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+	public static final String PROP_MERGE_URI = "mergeUri";
+	public static final String PROP_NEW_PROJECT = "newProject";
+	public static final String PROP_PROJECT_NAME = "projectName";
 	public static final String PROP_REMOTE_NAME = "remoteName";
 	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
-	public static final String PROP_PROJECT_NAME = "projectName";
-	public static final String PROP_MERGE_URI = "mergeUri";
 	public static final String PROP_RUNTIME_DELEGATE = "runtimeDelegate";
-	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
 	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
 	public static final String PROP_SERVER_TYPE = "serverType";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
-	
+	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
+
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
 	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
@@ -151,6 +158,12 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public Object getProperty(String key);
 
+	public IDomain setDomain(IDomain domain);
+
+	public boolean hasDomain();
+
+	public IDomain getDomain();
+
 	public IApplication getApplication();
 
 	public String setApplicationName(String name);
@@ -227,4 +240,8 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public IServer createServerAdapter(IProgressMonitor monitor) throws OpenShiftException;
 
 	public IStatus publishServerAdapter(IProgressMonitor monitor);
+
+	public List<IDomain> setDomains(List<IDomain> domains);
+
+	public List<IDomain> getDomains();
 }

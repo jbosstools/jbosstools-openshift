@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -68,6 +69,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	protected Text connectionText, remoteText;
 	protected Text deployFolderText;
 	protected Text appNameText;
+	protected Text domainNameText;
 	protected Combo deployProjectCombo;
 	protected Button verifyButton, browseDestButton, overrideProjectSettings;
 	protected Group projectSettingGroup;
@@ -81,11 +83,12 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		super.createSection(parent);
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 
-		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED
-				| ExpandableComposite.TITLE_BAR);
+		Section section = toolkit.createSection(parent,
+				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
 		section.setText("OpenShift Server");
-		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL
-				| GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL));
+		section.setLayoutData(new GridData(
+				GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL
+						| GridData.GRAB_VERTICAL));
 		Composite c = toolkit.createComposite(section, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).equalWidth(true).applyTo(c);
@@ -103,9 +106,12 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		deployProjectCombo.setEnabled(true);
 		ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
+		String domainName = OpenShiftServerUtils.getExpressDomainName(server);
+		domainNameText.setText(StringUtils.null2emptyString(domainName));
 		String appName = OpenShiftServerUtils.getExpressApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
 		connectionText.setEnabled(false);
+		domainNameText.setEnabled(false);
 		appNameText.setEnabled(false);
 
 		String outDir = OpenShiftServerUtils.getExpressDeployFolder(server);
@@ -114,12 +120,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		remoteText.setText(StringUtils.null2emptyString(remote));
 
 		deployProjectCombo.setItems(getSuitableProjects());
-		java.util.List<String> l = Arrays.asList(deployProjectCombo.getItems());
-		String depProj = OpenShiftServerUtils.getExpressDeployProject(server);
-		if (depProj != null) {
-			int ind = l.indexOf(depProj);
-			if (ind != -1)
-				deployProjectCombo.select(ind);
+		int index = getProjectIndex(
+				OpenShiftServerUtils.getExpressDeployProject(server), Arrays.asList(deployProjectCombo.getItems()));
+		if (index > -1) {
+			deployProjectCombo.select(index);
 		}
 
 		boolean overrides = OpenShiftServerUtils.getOverridesProject(server);
@@ -127,6 +131,13 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		remoteText.setEnabled(overrides);
 		deployFolderText.setEnabled(overrides);
 		browseDestButton.setEnabled(overrides);
+	}
+
+	private int getProjectIndex(String deployProject, List<String> deployProjectNames) {
+		if (deployProject == null) {
+			return -1;
+		}
+		return deployProjectNames.indexOf(deployProject);
 	}
 
 	private String createConnectionLabel(ConnectionURL connectionUrl) {
@@ -144,12 +155,12 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private String[] getSuitableProjects() {
-		IProject[] all = OpenShiftServerUtils.findAllSuitableOpenshiftProjects();
-		String[] s = new String[all.length];
-		for (int i = 0; i < all.length; i++) {
-			s[i] = all[i].getName();
+		IProject[] allProjects = OpenShiftServerUtils.findAllSuitableOpenshiftProjects();
+		String[] allProjectNames = new String[allProjects.length];
+		for (int i = 0; i < allProjects.length; i++) {
+			allProjectNames[i] = allProjects[i].getName();
 		}
-		return s;
+		return allProjectNames;
 	}
 
 	protected Composite createComposite(Section section) {
@@ -183,26 +194,37 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		connectionText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionText);
 
-		Label appNameLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionAppNameLabel,
-				SWT.NONE);
+		// domain name
+		Label domainNameLabel = toolkit.createLabel(
+				projectSettingGroup, OpenshiftUIMessages.EditorSectionDomainNameLabel, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
+		domainNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(domainNameText);
+
+		// application name
+		Label appNameLabel = toolkit.createLabel(
+				projectSettingGroup, OpenshiftUIMessages.EditorSectionAppNameLabel,SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 		appNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameText);
 
-		Label zipDestLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionZipDestLabel,
-				SWT.NONE);
-		Composite zipDestComposite = toolkit.createComposite(projectSettingGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
-		zipDestComposite.setLayout(new FormLayout());
-		browseDestButton = toolkit.createButton(zipDestComposite, OpenshiftUIMessages.EditorSectionBrowseDestButton,
-				SWT.PUSH);
+		Label outputDestLabel = 
+				toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionOutputDestLabel, SWT.NONE);
+		Composite outputDestComposite = toolkit.createComposite(projectSettingGroup, SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(outputDestComposite);
+		outputDestComposite.setLayout(new FormLayout());
+
+		browseDestButton = toolkit.createButton(
+				outputDestComposite, OpenshiftUIMessages.EditorSectionBrowseDestButton, SWT.PUSH);
 		browseDestButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
-		deployFolderText = toolkit.createText(zipDestComposite, "", SWT.SINGLE | SWT.BORDER);
+		deployFolderText = toolkit.createText(outputDestComposite, "", SWT.SINGLE | SWT.BORDER);
 		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDestButton, -5));
 
-		Label remoteLabel = toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionRemoteLabel,
-				SWT.NONE);
+		Label remoteLabel = toolkit.createLabel(
+				projectSettingGroup, OpenshiftUIMessages.EditorSectionRemoteLabel, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
@@ -325,6 +347,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		connectionText.setText(createConnectionLabel(connectionUrl));
 		String appName = OpenShiftServerUtils.getExpressApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
+		String domainName = OpenShiftServerUtils.getExpressDomainName(server);
+		domainNameText.setText(StringUtils.null2emptyString(domainName));
 
 		browseDestButton.setEnabled(overrideProjectSettings.getSelection());
 		deployFolderText.setEnabled(overrideProjectSettings.getSelection());

@@ -10,20 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
 /**
  * @author André Dietisheim
  */
-public class ManageSSHKeysWizard extends Wizard {
+public class ManageSSHKeysWizard extends AbstractOpenShiftWizard<Connection> {
 
-	private Connection user;
-
-	public ManageSSHKeysWizard(Connection user) {
-		this.user = user;
-		setWindowTitle("Manage SSH Keys");
-		setNeedsProgressMonitor(true);
+	public ManageSSHKeysWizard(Connection connection) {
+		super("Manage SSH Keys", connection);
 	}
 
 	@Override
@@ -33,6 +29,6 @@ public class ManageSSHKeysWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		addPage(new ManageSSHKeysWizardPage(user, this));
+		addPage(new ManageSSHKeysWizardPage(getModel(), this));
 	}
 }

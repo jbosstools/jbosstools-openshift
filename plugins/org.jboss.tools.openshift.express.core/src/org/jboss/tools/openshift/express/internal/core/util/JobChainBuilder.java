@@ -25,6 +25,10 @@ public class JobChainBuilder {
 		this.job = job;
 	}
 
+	public JobConstraint andRunWhenSuccessfull(Job constrainedJob) {
+		return new JobConstraint(job).runWhenSuccessfullyDone(constrainedJob);
+	}
+
 	public JobConstraint andRunWhenDone(Job constrainedJob) {
 		return new JobConstraint(job).runWhenDone(constrainedJob);
 	}
@@ -42,6 +46,18 @@ public class JobChainBuilder {
 				@Override
 				public void done(IJobChangeEvent event) {
 					constrainedJob.schedule();
+				}});
+			return new JobConstraint(constrainedJob);
+		}
+
+		public JobConstraint runWhenSuccessfullyDone(final Job constrainedJob) {
+			job.addJobChangeListener(new JobChangeAdapter() {
+
+				@Override
+				public void done(IJobChangeEvent event) {
+					if (event.getResult().isOK()) {
+						constrainedJob.schedule();
+					}
 				}});
 			return new JobConstraint(constrainedJob);
 		}
