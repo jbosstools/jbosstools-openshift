@@ -55,5 +55,39 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extend
 		return null;// TODO - Need to complete this once the client project
 					// object is identified and integrated.
 	}
+
+	/**
+	 * @return
+	 */
+	public String getSingleSelectedVariableName() {
+		
+		return selectionName;
+	}
+
+	private List<String> selectionNameList;
+	
+	public List<String> getSelectionList()
+	{
+		return selectionNameList;
+	}
+
+	private String selectionName;
+	
+	public void setSelection(String variableName)
+	{
+		 selectionName=variableName;
+	}
+	
+	public void setSelection(List<String> variableNameList)
+	{
+		selectionNameList = variableNameList;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getSingleSelectedVariableValue() {
+		return super.getVariablesDB().get(selectionName);
+	}
 	
 }
