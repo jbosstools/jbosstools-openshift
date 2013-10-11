@@ -29,6 +29,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationConfigurationWizardPageModel;
 
 
 /**
@@ -50,9 +51,15 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 		super(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE, 
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION,
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_NAME, wizard);
-		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(connection, variableName, envVariables);
+		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(variableName, envVariables);
 	}
 
+	public ApplicationEnvironmentalVariableEditWizardPage(ApplicationConfigurationWizardPageModel wizardModel, IWizard wizard) {
+		super(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE, 
+			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION,
+			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_NAME, wizard);
+		//pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(/*variableName, wizardModel.getSelectedVariable().getValue() */);
+	}
 	/** 
 	 * Creates the UI for ApplicationEnvironmentalVariableConfigurationWizardPage
 	 * @param parent
