@@ -154,35 +154,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		
 	}
 	
-	public String[] getApplicationEnvironmentalVariableValues(String appTargetName)
-	{
-		throw new OpenShiftException("getApplicationEnvironmentalVariableValues() is not implemented yet.");
-		
-		 // Placeholder code to support retrieval of environmental variables from relivant api call(s).
-		/*try {
-			List<IApplication> applications = this.getApplications();
-			String[] applicationVariableNames = null;
-			for (int i = 0; i < applications.size(); i++) {
-				IApplication currentApp = applications.get(i);
-				if(  currentApp.getName()== appTargetName)
-				{
-					List<IEnvironmentalVariable> targetAppVariableList = currentApp.getEnvironmentalVariables();
-					applicationVariableNames = new String[currentVariableList.size()];
-					for(int j=0;j<currentVariableList.size();j++)
-						applicationvariableValues[j]=currentVaribleList.get(j).getValue();
-				}
-			}
-			return applicationVariableNames;
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve list of OpenShift application Variables", e);
-			return new String[0];
-		} catch (SocketTimeoutException e) {
-			Logger.error("Failed to retrieve list of OpenShift applications Variables due to time out.", e);
-			return new String[0];
-		}*/
-	}
 
-	public List<IApplication> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
+	public List<Object> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
 		/*
 		Connection user = getConnection();
 		if (user == null || !user.isConnected() || !user.hasDomain()) {
