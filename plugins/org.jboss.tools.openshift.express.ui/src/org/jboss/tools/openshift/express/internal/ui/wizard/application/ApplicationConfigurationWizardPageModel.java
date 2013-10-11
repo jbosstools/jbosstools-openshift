@@ -67,7 +67,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private List<Object> environmentalVariables = new ArrayList<Object>();
-	//private List<IEnvironmentalVariable> variableList = new ArrayList<IEnvironmentalVariable>();
+
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
@@ -114,7 +114,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 			return new String[0];
 		}
 	}
-	//public List<IEnvironmentalVaraible> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
+
 	public List<Object> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
 		/*
 		Connection user = getConnection();
