@@ -116,6 +116,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
 
+
         private CheckboxTableViewer viewer;
         private ApplicationConfigurationWizardPageModel pageModel;
         private Button useExistingAppBtn;
@@ -1257,6 +1258,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
                 }
 
         }
+
 
 
 

@@ -67,7 +67,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
 	private List<Object> environmentalVariables = new ArrayList<Object>();
-
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
@@ -90,11 +89,13 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	//public List<I> getApplications() throws OpenShiftException, SocketTimeoutException {
+
 	public List<IApplication> getApplications() throws OpenShiftException {
 		Connection connection = getConnection();
 		IDomain domain = wizardModel.getDomain();
 		if (!isValid(connection)
 				|| domain == null) {
+
 
 			return Collections.emptyList();
 		}
@@ -125,7 +126,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		*/
 		throw new OpenShiftException("getApplicationEnvironmentalVariables() is not implemented yet.");
 	}
-	
+
 	public String[] getApplicationEnvironmentalVariableNames(String appTargetName)
 	{
 		throw new OpenShiftException("getApplicationEnvironmentalVariableNamess() is not implemented yet.");
