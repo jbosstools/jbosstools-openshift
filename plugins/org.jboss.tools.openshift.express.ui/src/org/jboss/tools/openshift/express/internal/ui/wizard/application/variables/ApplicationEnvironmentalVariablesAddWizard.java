@@ -30,8 +30,8 @@ public class ApplicationEnvironmentalVariablesAddWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		// TODO Auto-generated method stub
-		return false;
+		//The model should be updated in the body of this method.
+		return true;
 	}
 	
 	public void addPages()
