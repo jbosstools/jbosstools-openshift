@@ -113,6 +113,17 @@ public class ConnectionURL {
 		return new ConnectionURL(username, null, portions.getScheme());
 	}
 
+	public static ConnectionURL forUsernameAndServer(String username, String host) throws UnsupportedEncodingException, MalformedURLException {
+		if (StringUtils.isEmpty(username)) {
+			throw new IllegalArgumentException("Username is empty");
+		}
+		if (StringUtils.isEmpty(host)) {
+			throw new IllegalArgumentException("Host is empty");
+		}
+		UrlPortions portions = UrlUtils.toPortions(host);
+		return new ConnectionURL(username, portions.getHost(), portions.getScheme());
+	}
+	
 	public static ConnectionURL forConnection(Connection connection) throws UnsupportedEncodingException,
 			MalformedURLException {
 		if (connection.isDefaultHost()) {

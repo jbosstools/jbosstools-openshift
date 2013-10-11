@@ -32,7 +32,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		if (!OpenShiftServerUtils.isOpenShiftRuntime(server)) {
 			return null;
 		}
-		final IApplication application = OpenShiftServerUtils.findApplicationForServer(server);
+		final IApplication application = OpenShiftServerUtils.getApplication(server);
 		if (application != null) {
 			return application.getApplicationUrl();
 		}

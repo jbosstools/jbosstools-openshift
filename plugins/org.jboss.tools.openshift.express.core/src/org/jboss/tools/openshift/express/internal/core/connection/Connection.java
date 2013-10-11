@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 
 import java.net.SocketTimeoutException;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
@@ -221,7 +222,7 @@ public class Connection {
 			// force domain loading so that there is no 'lazy domain
 			// loading' cost
 			// after that.
-			user.getDefaultDomain();
+//			user.getDefaultDomain();
 			setUser(user);
 			return true;
 		}
@@ -277,10 +278,10 @@ public class Connection {
 	}
 
 	public IApplication createApplication(final String applicationName, final IStandaloneCartridge applicationType,
-			final ApplicationScale scale, final IGearProfile gearProfile)
+			final ApplicationScale scale, final IGearProfile gearProfile, final IDomain domain)
 			throws OpenShiftException {
 		if (connect()) {
-			return user.getDefaultDomain().createApplication(applicationName, applicationType, scale, gearProfile);
+			return domain.createApplication(applicationName, applicationType, scale, gearProfile);
 		}
 		return null;
 	}
@@ -301,22 +302,6 @@ public class Connection {
 		return null;
 	}
 
-	public IApplication getApplicationByName(String name) throws OpenShiftException {
-		if (connect()
-				&& user.hasDomain()) {
-			return user.getDefaultDomain().getApplicationByName(name);
-		}
-		return null;
-	}
-
-	public List<IApplication> getApplications() throws OpenShiftException {
-		if (connect()
-				&& user.hasDomain()) {
-			return user.getDefaultDomain().getApplications();
-		}
-		return null;
-	}
-
 	public List<IStandaloneCartridge> getStandaloneCartridgeNames() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getStandaloneCartridges();
@@ -325,18 +310,51 @@ public class Connection {
 	}
 
 	public void load() {
-		getDefaultDomain();
+		getDomains();
 	}
 
-	public IDomain getDefaultDomain() throws OpenShiftException {
-		if (connect()) {
-			IDomain domain = user.getDefaultDomain();
-			isDomainLoaded = true;
-			return domain;
+	public IApplication getApplication(String name, IDomain domain) throws OpenShiftException {
+		if (domain == null) {
+			return null;
 		}
-		return null;
+		return domain.getApplicationByName(name);
 	}
 
+	public boolean hasApplication(String name, IDomain domain) throws OpenShiftException {
+		return getApplication(name, domain) != null;
+	}
+
+	public List<IApplication> getApplications(IDomain domain) throws OpenShiftException {
+		if (domain == null) {
+			return Collections.emptyList();
+		}
+		return domain.getApplications();
+	}
+
+	public IDomain getDomain(String id) throws OpenShiftException {
+		if (StringUtils.isEmpty(id)) {
+			return null;
+		}
+		// trigger authentication, domain loading
+		getDomains(); 
+		return user.getDomain(id);
+	}
+
+	public List<IDomain> getDomains() throws OpenShiftException {
+		if (connect()) {
+			List<IDomain> domains = user.getDomains();
+			isDomainLoaded = true;
+			return domains;
+		}
+		return Collections.emptyList();
+	}
+
+	public void destroy(IDomain domain, boolean force) {
+		if (connect()) {
+			domain.destroy(force);
+		}
+	}
+	
 	public boolean isLoaded() throws OpenShiftException {
 		return isDomainLoaded;
 	}
@@ -347,14 +365,7 @@ public class Connection {
 		}
 		return null;
 	}
-
-	public boolean hasApplication(String name) throws OpenShiftException {
-		if (connect()) {
-			return user.getDefaultDomain().hasApplicationByName(name);
-		}
-		return false;
-	}
-
+	
 	public boolean hasApplicationOfType(IStandaloneCartridge type) throws OpenShiftException {
 		if (hasDomain()) {
 			return user.getDefaultDomain().hasApplicationByCartridge(type);
@@ -473,6 +484,11 @@ public class Connection {
 		return store;
 	}
 
+	public String getId() {
+		return new StringBuilder(username)
+				.append(" (").append(host).append(')').toString();
+	}
+	
 	@Override
 	public String toString() {
 		return "Connection ["
@@ -485,6 +501,4 @@ public class Connection {
 				+ ", didPromptForPassword=" + didPromptForPassword 
 				+ ", passwordLoaded=" + passwordLoaded + "]";
 	}
-
-
 }

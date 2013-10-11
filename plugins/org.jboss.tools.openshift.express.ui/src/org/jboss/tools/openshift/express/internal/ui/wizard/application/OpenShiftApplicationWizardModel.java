@@ -46,6 +46,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.importop
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -57,23 +58,19 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
-	private static final String KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
-	private static final String DEFAULT_APPLICATION = "default_application";
-	private static final String DEFAULT_USE_EXISTING_APPLICATION = "default_useExistingApplication";
-	
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	public OpenShiftApplicationWizardModel(Connection connection) {
-		this(connection, null, null, false);
+	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain) {
+		this(connection, domain, null, null, false);
 	}
 
-	public OpenShiftApplicationWizardModel(Connection connection, IProject project, IApplication application,
+	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication) {
-		// default value(s)
 		setProject(project);
 		setDefaultApplication(application);
 		setDefaultUseExistingApplication(useExistingApplication);
 		setConnection(connection);
+		setDomain(domain);
 	}
 
 	/**
@@ -227,18 +224,58 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		return dataModel.get(key);
 	}
 
+	
+	@Override
+	public boolean hasDomain() {
+		return getDomain() != null;
+	}
+	
+	@Override
+	public IDomain setDomain(IDomain domain) {
+		if (domain == null) {
+			return resetDomain();
+		} else {
+			return (IDomain) setProperty(PROP_DOMAIN, domain);
+		}
+	}
+
+	private IDomain resetDomain() {
+		setApplicationCartridge((IStandaloneCartridge) null);
+		setApplicationName((String) null);
+		setApplicationScale((ApplicationScale) null);
+		setApplicationGearProfile((IGearProfile) null);
+		return (IDomain) setProperty(PROP_DOMAIN, null);
+	}
+	
+	@Override
+	public IDomain getDomain() {
+		return (IDomain) getProperty(PROP_DOMAIN);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<IDomain> setDomains(List<IDomain> domains) {
+		return (List<IDomain>) setProperty(PROP_DOMAINS, domains);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<IDomain> getDomains() {
+		return (List<IDomain>) getProperty(PROP_DOMAINS);
+	}
+
 	@Override
 	public IApplication getApplication() {
 		return (IApplication) getProperty(PROP_APPLICATION);
 	}
 
 	public void setDefaultApplication(IApplication application) {
-		setProperty(DEFAULT_APPLICATION, application);
+		setProperty(PROP_DEFAULT_APPLICATION, application);
 		setApplication(application);
 	}
 
 	public IApplication getDefaultApplication() {
-		return (IApplication) getProperty(DEFAULT_APPLICATION);
+		return (IApplication) getProperty(PROP_DEFAULT_APPLICATION);
 	}		
 
 	@Override
@@ -247,9 +284,8 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		setUseExistingApplication(application);
 		setApplicationCartridge(application);
 		setApplicationName(application);
-		setApplicationScaling(application);
+		setApplicationScale(application);
 		setApplicationGearProfile(application);
-
 	}
 
 	@Override
@@ -376,13 +412,13 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	}
 
 	public boolean setDefaultUseExistingApplication(boolean useExistingApplication) {
-		setProperty(DEFAULT_USE_EXISTING_APPLICATION, useExistingApplication);
+		setProperty(PROP_DEFAULT_USE_EXISTING_APPLICATION, useExistingApplication);
 		setUseExistingApplication(useExistingApplication);
 		return useExistingApplication;
 	}
 
 	public boolean getDefaultUseExistingApplication() {
-		Object useExistingApp = getProperty(DEFAULT_USE_EXISTING_APPLICATION);
+		Object useExistingApp = getProperty(PROP_DEFAULT_USE_EXISTING_APPLICATION);
 		if (useExistingApp != null) {
 			return (Boolean) useExistingApp;
 		}
@@ -409,7 +445,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		return (ApplicationScale) setProperty(PROP_APPLICATION_SCALE, scale);
 	}
 
-	protected void setApplicationScaling(IApplication application) {
+	protected void setApplicationScale(IApplication application) {
 		if (application != null) {
 			setApplicationScale(application.getApplicationScale());
 		}
@@ -419,7 +455,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
 		@SuppressWarnings("unchecked")
 		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
-				(Set<IEmbeddableCartridge>) getProperty(KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
+				(Set<IEmbeddableCartridge>) getProperty(PROP_KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
 		if (selectedEmbeddableCartridges == null) {
 			selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
 			setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
@@ -431,7 +467,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	@Override
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-		return (Set<IEmbeddableCartridge>) setProperty(KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
+		return (Set<IEmbeddableCartridge>) setProperty(PROP_KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 	}
 
 	@Override

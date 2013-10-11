@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,6 +47,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
 	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
 	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
+	public static final String PROPERTY_DOMAIN = "domain";
+	public static final String PROPERTY_DOMAINS = "domains";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
 	public static final String PROPERTY_EXISTING_APPLICATIONS_LOADED = "existingApplicationsLoaded";
@@ -69,8 +70,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 	private boolean defaultSourcecode = true;
 	
-	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel)
-			throws OpenShiftException {
+	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
 	}
@@ -86,12 +86,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel.getConnection();
 	}
 
-	public List<IApplication> getApplications() throws OpenShiftException, SocketTimeoutException {
-		Connection user = getConnection();
-		if (user == null || !user.isConnected() || !user.hasDomain()) {
+	public List<IApplication> getApplications() throws OpenShiftException {
+		Connection connection = getConnection();
+		IDomain domain = wizardModel.getDomain();
+		if (!isValid(connection)
+				|| domain == null) {
 			return Collections.emptyList();
 		}
-		return user.getApplications();
+		return domain.getApplications();
 	}
 
 	public String[] getApplicationNames() {
@@ -103,9 +105,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 			}
 			return applicationNames;
 		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve list of OpenShift applications", e);
-			return new String[0];
-		} catch (SocketTimeoutException e) {
 			Logger.error("Failed to retrieve list of OpenShift applications", e);
 			return new String[0];
 		}
@@ -140,13 +139,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	/**
-	 * Sets the existing application in this model by name. If there's an
+	 * Sets the existing application in this model for the given application name. If there's an
 	 * existing application with the given name, all properties related to an
 	 * existing application are also set.
 	 * 
 	 * @param applicationName
 	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException
 	 * 
 	 * @see #doSetExistingApplication(IApplication)
 	 */
@@ -160,12 +158,13 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		}
 	}
 
-	public void loadExistingApplications() throws OpenShiftException, SocketTimeoutException {
-		Connection user = getConnection();
-		if (user != null) {
-			setExistingApplications(user.getApplications());
-			setExistingApplicationsLoaded(true);
+	public void loadExistingApplications() throws OpenShiftException {
+		IDomain domain = wizardModel.getDomain();
+		if (domain == null) {
+			return;
 		}
+		setExistingApplications(domain.getApplications());
+		setExistingApplicationsLoaded(true);
 	}
 
 	public void setExistingApplicationsLoaded(boolean loaded) {
@@ -191,10 +190,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return getExistingApplication(applicationName) != null;
 	}
 
-	/**
-	 * @param existingApplications
-	 *            the existingApplications to set
-	 */
 	public void setExistingApplications(List<IApplication> existingApplications) {
 		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS
 				, this.existingApplications
@@ -205,9 +200,28 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return existingApplications;
 	}
 
-	public void loadStandaloneCartridges() throws OpenShiftException, SocketTimeoutException {
+	public void loadDomains() throws OpenShiftException {
+		Connection connection = wizardModel.getConnection();
+		if (connection == null) {
+			return;
+		}
+		List<IDomain> domains = connection.getDomains();
+		setDomains(domains);
+		setFirstIfNoDomain(domains);
+	}
+
+	private void setFirstIfNoDomain(List<IDomain> domains) {
+		if (getDomain() == null
+				&& domains != null
+				&& !domains.isEmpty()) {
+			setDomain(domains.get(0));
+		}
+	}
+
+	public void loadStandaloneCartridges() throws OpenShiftException {
 		Connection connection = getConnection();
-		if (connection != null) {
+		if (connection != null
+				&& connection.isConnected()) {
 			setCartridges(connection.getStandaloneCartridgeNames());
 			refreshSelectedCartridge();
 		}
@@ -229,8 +243,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel.getApplicationCartridge();
 	}
 
-	public void loadGearProfiles() throws OpenShiftException, SocketTimeoutException {
-		setGearProfiles(getConnection().getDefaultDomain().getAvailableGearProfiles());
+	public void loadGearProfiles() throws OpenShiftException {
+		IDomain domain = getDomain();
+		if (domain == null) {
+			return;
+		}
+		setGearProfiles(domain.getAvailableGearProfiles());
 		// refreshSelectedCartridge();
 	}
 
@@ -309,19 +327,22 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		setSelectedCartridge(applicationCartridge);
 	}
 
-	public List<IEmbeddableCartridge> loadEmbeddedCartridges() throws OpenShiftException, SocketTimeoutException {
-		List<IEmbeddableCartridge> cartridges = getConnection().getEmbeddableCartridges();
+	public List<IEmbeddableCartridge> loadEmbeddedCartridges() throws OpenShiftException {
+		Connection connection = getConnection();
+		if (connection == null
+				|| !connection.isConnected()) {
+			return Collections.emptyList();
+		}
+		List<IEmbeddableCartridge> cartridges = connection.getEmbeddableCartridges();
 		setEmbeddedCartridges(cartridges);
 		return cartridges;
 	}
 
 	/**
-	 * Sets the properties in this model that are related to an existing
-	 * application. The name of the existing application is set!.
+	 * Sets the given application as existing application in this model.
 	 * 
 	 * @param application
 	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException
 	 * 
 	 * @see #setExistingApplicationName(String)
 	 * @see #setApplicationName(IApplication)
@@ -329,7 +350,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	 * @see #setSelectedEmbeddableCartridges(Set)
 	 * @see #wizardModel#setApplication
 	 */
-	public void setExistingApplication(IApplication application) throws OpenShiftException {
+	public void setExistingApplication(IApplication application) {
 		if (application != null) {
 			setExistingApplicationName(application.getName());
 			// already called within setExistingApplicationName(String) above
@@ -340,12 +361,36 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	/**
+	 * Sets the first application in the given domain as the existing
+	 * application in this model. If there are no application in the given
+	 * domain, then the existing application in this model is reseted.
+	 * 
+	 * @param domain of which the first application is used as existing application 
+	 * @throws OpenShiftException
+	 * 
+	 * @see #setExistingApplicationName(String)
+	 * @see #setApplicationName(IApplication)
+	 * @see #setSelectedCartridge(IApplication)
+	 * @see #setSelectedEmbeddableCartridges(Set)
+	 * @see #wizardModel#setApplication
+	 */
+	public void setExistingApplication(IDomain domain) {
+		IApplication existingApplication = null;
+		List<IApplication> applications = domain.getApplications();
+		if (applications != null
+				&& !applications.isEmpty()) {
+			existingApplication = applications.get(0);
+		}
+		setExistingApplication(existingApplication);
+	}
+
+	
+	/**
 	 * Sets the properties in this model that are related to an existing
 	 * application. It does not set the name of the existing application!.
 	 * 
 	 * @param application
 	 * @throws OpenShiftException
-	 * @throws SocketTimeoutException
 	 * 
 	 * @see #setApplicationName(IApplication)
 	 * @see #setSelectedCartridge(IApplication)
@@ -393,14 +438,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	@Override
 	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
-			throws OpenShiftException,SocketTimeoutException {
+			throws OpenShiftException {
 		getSelectedEmbeddableCartridges().add(cartridge);
 		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, null, getSelectedEmbeddableCartridges());
 	}
 
 	@Override
 	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) 
-			throws OpenShiftException,SocketTimeoutException {
+			throws OpenShiftException {
 		getSelectedEmbeddableCartridges().remove(cartridge);
 		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, null, getSelectedEmbeddableCartridges());
 	}
@@ -420,7 +465,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 				wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges));
 	}
 
-	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException {
+	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException {
 		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 
@@ -430,14 +475,31 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 	
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
-		return getConnection().hasApplication(applicationName);
+		Connection connection = getConnection();
+		if (connection == null
+				|| !connection.isConnected()) {
+			return false;
+		}
+		return connection.hasApplication(applicationName, getDomain());
 	}
 
 	@Override
-	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException {
-		return wizardModel.getConnection().getDefaultDomain();
+	public IDomain getDomain() throws OpenShiftException {
+		return wizardModel.getDomain();
 	}
 	
+	public void setDomain(IDomain domain) throws OpenShiftException {
+		firePropertyChange(PROPERTY_DOMAIN, wizardModel.getDomain(), wizardModel.setDomain(domain));
+	}
+	
+	public List<IDomain> getDomains() throws OpenShiftException {
+		return wizardModel.getDomains();
+	}
+	
+	public void setDomains(List<IDomain> domains) throws OpenShiftException {
+		firePropertyChange(PROPERTY_DOMAINS, wizardModel.getDomains(), wizardModel.setDomains(domains));
+	}
+
 	public void reset() throws OpenShiftException {
 		setApplicationName(wizardModel.getApplication());
 		setExistingApplication(wizardModel.getApplication());
@@ -467,4 +529,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public void resetInitialGitUrl() {
 		setInitialGitUrl(null);
 	}
+
+	private boolean isValid(Connection connection) {
+		return connection != null
+				&& connection.isConnected();
+	}
+
 }

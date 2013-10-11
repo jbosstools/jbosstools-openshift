@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 
@@ -57,7 +58,9 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	public Image getImage(Object element) {
 		Image image = null;
 		if (element instanceof Connection) {
-			image = OpenShiftImages.REPO_MIDDLE_IMG;
+			image = OpenShiftImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+		} else if (element instanceof IDomain) {
+			image = OpenShiftImages.LIBRARY_IMG;
 		} else if (element instanceof IApplication) {
 			image = OpenShiftImages.QUERY_IMG;
 		} else if (element instanceof IEmbeddedCartridge) {
@@ -80,20 +83,17 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		StyledString styledString = null;
 		if (element instanceof Connection) {
 			styledString = createStyledString((Connection) element);
-		}
-		else if (element instanceof IApplication) {
+		} else if (element instanceof IDomain) {
+			styledString = createStyledString((IDomain) element);
+		} else if (element instanceof IApplication) {
 			styledString = createStyledString((IApplication) element);
-		}
-		else if (element instanceof IEmbeddedCartridge) {
+		} else if (element instanceof IEmbeddedCartridge) {
 			styledString = createStyledString((IEmbeddedCartridge) element);
-		}
-		else if (element instanceof LoadingStub) {
+		} else if (element instanceof LoadingStub) {
 			styledString = new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
-		}
-		else if (element instanceof NotConnectedUserStub) {
+		} else if (element instanceof NotConnectedUserStub) {
 			styledString = new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
-		}
-		else if (element instanceof OpenShiftException) {
+		} else if (element instanceof OpenShiftException) {
 			styledString = new StyledString(((OpenShiftException) element).getMessage());
 		}
 		return styledString;
@@ -109,6 +109,16 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		String label = builder.toString();
 		StyledString styledString = new StyledString(label);
 		styledString.setStyle(name.length() + 1, builder.length() - name.length() - 1, StyledString.QUALIFIER_STYLER);
+		return styledString;
+	}
+
+	private StyledString createStyledString(IDomain domain) {
+		String id = domain.getId();
+		String suffix = domain.getSuffix();
+		String label = new StringBuilder(id).append(' ').append(id).append('.').append(suffix)
+				.toString();
+		StyledString styledString = new StyledString(label);
+		styledString.setStyle(id.length() + 1, label.length() - id.length() - 1, StyledString.QUALIFIER_STYLER);
 		return styledString;
 	}
 

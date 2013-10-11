@@ -27,7 +27,7 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
 		if(adapterType == IPropertySource.class) {
 			if(adaptableObject instanceof Connection) {
-				return new UserPropertySource((Connection)adaptableObject);
+				return new ConnectionPropertySource((Connection)adaptableObject);
 			}
 			if(adaptableObject instanceof IApplication) {
 				return new ApplicationPropertySource((IApplication)adaptableObject);
