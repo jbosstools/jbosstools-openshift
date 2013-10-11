@@ -10,16 +10,12 @@
  *****************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.HashMap;
-
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,7 +29,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
 /**
@@ -79,25 +74,25 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		table.setHeaderVisible(true);
 		this.viewer = new TableViewerBuilder(table, tableContainer)
 				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<HashMap<String, String>>() {
+				.column(new IColumnLabelProvider<Object>() {
 
 					/*
 					 * Placeholder for environmental variable information
 					 */
 					@Override
-					public String getValue(HashMap<String, String> e) {
+					public String getValue(Object e) {
 						// TODO Auto-generated method stub
 						return null;
 					}
 				})
 				.name("Variable Name").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
-				.column(new IColumnLabelProvider<HashMap<String, String>>() {
+				.column(new IColumnLabelProvider<Object>() {
 
 					/*
 					 * Placeholder for environmental variable information
 					 */
 					@Override
-					public String getValue(HashMap<String, String> e) {
+					public String getValue(Object e) {
 						// TODO Auto-generated method stub
 						return null;
 					}
@@ -151,7 +146,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
-		removeButton.setEnabled(false);//This should be bound to the existance of variables in the table.
+		removeButton.setEnabled(false);//This should be bound to the existence of variables in the table.
 		removeButton.addSelectionListener(onRemove());
 
 		Button importButton = new Button(keysGroup, SWT.PUSH);
@@ -164,7 +159,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(exportButton);
 		exportButton.setText("Export...");
-		exportButton.setEnabled(false);//This should be bound to the existance of variables in the table.
+		exportButton.setEnabled(false);//This should be bound to the existence of variables in the table.
 		exportButton.addSelectionListener(onExport());
 
 		Composite filler = new Composite(keysGroup, SWT.None);
@@ -213,7 +208,12 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	 */
 	private SelectionListener onEditExisting() {
 		return new SelectionAdapter() {
-
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+					OkCancelButtonWizardDialog editVariableWizardDialog =
+						new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariableEditWizard(pageModel));
+			editVariableWizardDialog.open();
+			}
 		};
 	}
 
