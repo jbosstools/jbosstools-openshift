@@ -504,7 +504,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						monitor.setTaskName("Loading gear profiles...");
 						pageModel.loadGearProfiles();
 						//Will probably need to load in the environmental variables here.
-						//pageModel.getApplicationEnvironmentalVariables();
+						pageModel.getApplicationEnvironmentalVariables();
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
