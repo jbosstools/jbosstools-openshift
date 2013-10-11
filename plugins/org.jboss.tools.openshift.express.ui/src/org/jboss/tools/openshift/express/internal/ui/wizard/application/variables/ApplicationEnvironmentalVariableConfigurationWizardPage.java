@@ -49,7 +49,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
 			IWizard wizard) {
 		super(title, description, pageName, wizard);
-		// TODO Auto-generated constructor stub
+		pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel(/*This should be populated with a reference to the incoming model's variable database.*/);
 	}
 
 	/**
