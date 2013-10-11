@@ -58,6 +58,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
 
+
 	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setExistingApplication(wizardModel.getApplication());
@@ -154,7 +155,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		IDomain domain = wizardModel.getDomain();
 		if (!isValid(connection)
 				|| domain == null) {
-
 			return Collections.emptyList();
 		}
 		return domain.getApplications();
