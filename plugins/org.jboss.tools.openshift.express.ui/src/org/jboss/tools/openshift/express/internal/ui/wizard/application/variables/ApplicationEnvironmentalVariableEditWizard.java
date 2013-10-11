@@ -28,8 +28,14 @@ public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 	 */
 	public ApplicationEnvironmentalVariableEditWizard(
 			ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel) {
+		try{
 		variableName = pageModel.getSingleSelectedVariableName();
 		variableValue = pageModel.getSingleSelectedVariableValue();
+		}
+		catch (NullPointerException e)
+		{
+			//Handle empty lists, by causing the edit button to become disabled upon page load with empty variable list.
+		}
 	}
 
 	public ApplicationEnvironmentalVariableEditWizard(Connection user, String variableName,
