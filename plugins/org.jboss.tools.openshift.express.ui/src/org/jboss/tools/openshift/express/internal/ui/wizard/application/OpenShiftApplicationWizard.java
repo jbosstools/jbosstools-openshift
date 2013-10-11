@@ -261,7 +261,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getApplicationGearProfile()
 					, model.getInitialGitUrl()
 					, model.getSelectedEmbeddableCartridges()
-					, model.getConnection().getDefaultDomain());
+					, model.getDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			IApplication application = job.getApplication();
