@@ -1280,5 +1280,4 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	private CheckboxTableViewer viewer;
 
-
 }
