@@ -11,8 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.console;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 
 import com.openshift.client.IApplication;
 
@@ -29,7 +28,7 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 
 	public TailFilesWizardPageModel(final IApplication app) {
 		this.application = app;
-		this.filePattern = ensureValidDefault(OpenShiftPreferences.INSTANCE.getTailFileOptions(application));
+		this.filePattern = OpenShiftPreferences.INSTANCE.getTailFileOptions(application);
 	}
 
 	public void setFilePattern(final String filePattern) {
@@ -43,14 +42,7 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void resetFilePattern() {
-		setFilePattern(ensureValidDefault(null));
-	}
-
-	private String ensureValidDefault(String filePattern) {
-		if (StringUtils.isEmpty(filePattern)) {
-			filePattern = "-f -n 100 */logs/*";
-		}
-		return filePattern;
+		setFilePattern(OpenShiftPreferences.INSTANCE.getTailFileOptions(null));
 	}
 
 	public IApplication getApplication() {

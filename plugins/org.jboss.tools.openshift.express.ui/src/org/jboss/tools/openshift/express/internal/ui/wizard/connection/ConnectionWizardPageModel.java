@@ -24,11 +24,11 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
+import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.ui.utils.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
@@ -68,8 +68,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	ConnectionWizardPageModel(IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		this.wizardModel = wizardModel;
 		this.allowConnectionChange = allowConnectionChange;
-		Connection wizardModelConnection = wizardModel.getConnection();
-		this.selectedConnection = getWizardModelOrRecentConnection(wizardModelConnection);
+		this.selectedConnection = null2NewConnectionMarker(wizardModel.getConnection());
 		this.servers = getServers(selectedConnection);
 		updateFrom(selectedConnection);
 	}
@@ -107,16 +106,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return username;
 	}
 
-	private Connection getWizardModelOrRecentConnection(Connection wizardModelConnection) {
-		if (wizardModelConnection == null) {
-			Connection recentConnection = ConnectionsModelSingleton.getInstance().getRecentConnection();
-			if (recentConnection != null) {
-				return recentConnection;
-			} else {
-				return new NewConnectionMarker();
-			}
+	private Connection null2NewConnectionMarker(Connection connection) {
+		if (connection == null) {
+			return new NewConnectionMarker();
 		} else {
-			return wizardModelConnection;
+			return connection;
 		}
 	}
 

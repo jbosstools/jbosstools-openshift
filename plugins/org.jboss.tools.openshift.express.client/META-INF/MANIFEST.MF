@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Client
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.client;singleton:=true
 Bundle-Version: 2.5.1.qualifier
-Bundle-Vendor: JBoss by Red Hat
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/openshift-java-client-2.4.0.Final.jar,
@@ -23,5 +24,4 @@ Export-Package: com.openshift.client,
  com.openshift.internal.client.utils;x-friends:="org.jboss.tools.openshift.express.test"
 Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44",
  org.eclipse.core.runtime;bundle-version="3.8.0"
-Import-Package: org.jboss.dmr
 Bundle-ActivationPolicy: lazy

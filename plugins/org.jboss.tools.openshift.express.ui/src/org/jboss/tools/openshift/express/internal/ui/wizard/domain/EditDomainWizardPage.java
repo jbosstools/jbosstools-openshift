@@ -30,8 +30,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
@@ -39,36 +39,36 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
  */
 public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 
-	private EditDomainWizardPageModel pageModel;
+	private EditDomainWizardModel pageModel;
 
-	public EditDomainWizardPage(EditDomainWizardPageModel model, IWizard wizard) {
-		super("OpenShift Domain Edition", "Rename your domain", "Domain Name Edition", wizard);
+	public EditDomainWizardPage(String title, String description, EditDomainWizardModel model, IWizard wizard) {
+		super(title, description, "", wizard);
 		this.pageModel = model;
 	}
 
-	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(container);
-		createDomainGroup(container, dbc);
-	}
+	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(parent);
+		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(parent);
 
-	private void createDomainGroup(Composite container, DataBindingContext dbc) {
-		Composite domainGroup = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).span(2, 1).applyTo(domainGroup);
-		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(4).applyTo(domainGroup);
-		Label namespaceLabel = new Label(domainGroup, SWT.NONE);
+		Label namespaceLabel = new Label(parent, SWT.NONE);
 		namespaceLabel.setText("&Domain name");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
-		Text namespaceText = new Text(domainGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
-		ISWTObservableValue namespaceTextObservable = WidgetProperties.text(SWT.Modify)
-				.observe(namespaceText);
+		GridDataFactory.fillDefaults()
+			.align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
+		Text namespaceText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
+		ISWTObservableValue namespaceTextObservable = 
+				WidgetProperties.text(SWT.Modify).observe(namespaceText);
 		final NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
 		dbc.addValidationStatusProvider(namespaceValidator);
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
-		final IObservableValue namespaceModelObservable = BeanProperties.value(
-				EditDomainWizardPageModel.PROPERTY_DOMAIN_ID).observe(pageModel);
-		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
+		final IObservableValue namespaceModelObservable = 
+				BeanProperties.value(EditDomainWizardModel.PROPERTY_DOMAIN_ID).observe(pageModel);
+		ValueBindingBuilder
+			.bind(namespaceTextObservable)
+			.to(namespaceModelObservable)
+			.in(dbc);
 	}
 
 	@Override

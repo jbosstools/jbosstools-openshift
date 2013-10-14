@@ -18,6 +18,7 @@ public class OpenShiftExpressUIMessages extends NLS {
 	public static String CREATING_APPLICATION;
 	public static String CREATING_APPLICATION_WITH_EMBEDDED;
 	public static String COULD_NOT_CREATE_APPLICATION;
+	public static String DESTROYING_DOMAIN;
 	public static String OPERATION_CANCELLED;
 	public static String WAITING_FOR_REACHABLE;
 	public static String APPLICATION_NOT_ANSWERING;

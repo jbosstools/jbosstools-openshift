@@ -18,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.junit.Test;
@@ -76,4 +77,21 @@ public class ConnectionURLTest {
 		assertEquals(username, connectionUrl.getUsername());
 		assertEquals(scheme, connectionUrl.getScheme());
 	}
+
+	@Test
+	public void shouldGetForUsernameAndServer() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		String username = "adietish@redhat.com";
+		String server = "https://openshift.redhat.com";
+		
+		// operation
+		ConnectionURL connectionUrl = ConnectionURL.forUsernameAndServer(username, server);
+		
+		// verifications
+		assertEquals("openshift.redhat.com", connectionUrl.getHost());
+		assertFalse(connectionUrl.isDefaultHost());
+		assertEquals(username, connectionUrl.getUsername());
+		assertEquals("https://", connectionUrl.getScheme());
+	}
+
 }

@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,6 +32,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -46,19 +48,28 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
+ * A wizard to import and create OpenShift applications. 
+ * 
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * 
+ * @see NewOpenShiftApplicationWizard
+ * @see ImportOpenShiftApplicationWizard
  */
 public abstract class OpenShiftApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
@@ -66,20 +77,15 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
 	private static final int IMPORT_TIMEOUT = 20 * 60 * 1000;
 
-	private final boolean skipCredentialsPage;
+	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
-	OpenShiftApplicationWizard(final boolean useExistingApplication, final String wizardTitle) {
-		this(null, null, null, useExistingApplication, wizardTitle);
-	}
-
-	OpenShiftApplicationWizard(Connection user, IProject project, IApplication application,
-			boolean useExistingApplication, String wizardTitle) {
+	OpenShiftApplicationWizard(Connection connection, IDomain domain, IApplication application, IProject project, 
+			boolean useExistingApplication, boolean showCredentialsPage, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
-		this.model = new OpenShiftApplicationWizardModel(user, project, application,
-				useExistingApplication);
-		this.skipCredentialsPage = (user != null && user.isConnected());
+		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
+		this.showCredentialsPage = showCredentialsPage;
 	}
 
 	protected void openError(final String title, final String message) {
@@ -111,11 +117,18 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		if (connection != null) {
 			model.setConnection(connection);
 		}
+
+		if (!ensureHasDomain()
+					|| !ensureHasSSHKeys()) {
+				dispose();
+				org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(this);
+			return;
+		}
 	}
 
 	@Override
 	public void addPages() {
-		if (!skipCredentialsPage) {
+		if (showCredentialsPage) {
 			addPage(new ConnectionWizardPage(this, model));
 		}
 		addPage(new ApplicationConfigurationWizardPage(this, model));
@@ -248,7 +261,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getApplicationGearProfile()
 					, model.getInitialGitUrl()
 					, model.getSelectedEmbeddableCartridges()
-					, model.getConnection().getDefaultDomain());
+					, model.getDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			IApplication application = job.getApplication();
@@ -435,4 +448,46 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			return isAhead;
 		}
 	}
+	
+	/**
+	 * Checks that the user has a domain, opens the creation dialog in case he
+	 * hasn't, closes the wizard if the user does not create a domain (required
+	 * for any application creation). Otherwise, returns true.
+	 */
+	protected boolean ensureHasDomain() {
+		try {
+			final Connection connection = getModel().getConnection();
+			if (connection == null
+					|| connection.hasDomain()) {
+				return true;
+			}
+			WizardDialog dialog = new WizardDialog(
+					Display.getCurrent().getActiveShell(), new NewDomainWizard(connection));
+			dialog.create();
+			dialog.setBlockOnOpen(true);
+			return dialog.open() == Dialog.OK;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
+		}
+	}
+
+	protected boolean ensureHasSSHKeys() {
+		try {
+			final Connection connection = getModel().getConnection();
+			if (connection == null
+					|| connection.hasSSHKeys()) {
+				return true;
+			}
+			WizardDialog dialog = new WizardDialog(
+					Display.getCurrent().getActiveShell(), new NoSSHKeysWizard(connection));
+			dialog.create();
+			dialog.setBlockOnOpen(true);
+			return dialog.open() == Dialog.OK;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
+		}
+	}
+
 }

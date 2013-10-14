@@ -36,6 +36,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
@@ -49,12 +50,12 @@ public class OpenShiftServerAdapterFactory {
 
 	public IServer create(IProject project, IOpenShiftWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
 		return createAdapterAndModules(project, wizardModel.getServerType(), wizardModel.getRuntime(),  
-				wizardModel.getApplication(), wizardModel.getRemoteName(), monitor);
+				wizardModel.getApplication(), wizardModel.getDomain(), wizardModel.getRemoteName(), monitor);
 	}
 
 	public IServer create(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, IProgressMonitor monitor) throws OpenShiftException {
-		return createAdapterAndModules(project, serverType, runtime, application, null, monitor);
+			IApplication application, IDomain domain, IProgressMonitor monitor) throws OpenShiftException {
+		return createAdapterAndModules(project, serverType, runtime, application, domain, null, monitor);
 	}
 
 	/**
@@ -66,13 +67,13 @@ public class OpenShiftServerAdapterFactory {
 	 * @throws OpenShiftException
 	 */
 	protected IServer createAdapterAndModules(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, String remoteName, IProgressMonitor monitor)
+			IApplication application, IDomain domain, String remoteName, IProgressMonitor monitor)
 			throws OpenShiftException {
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
 		
 		IServer server = null;
 		try {
-			server = createAdapter(serverType, runtime, application, project.getName(), remoteName);
+			server = createAdapter(serverType, runtime, application, domain, project.getName(), remoteName);
 			addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
@@ -88,8 +89,8 @@ public class OpenShiftServerAdapterFactory {
 		return server;
 	}
 	
-	private IServer createAdapter(IServerType serverType, IRuntime rt, 
-			IApplication application, String deployProject, String remoteName) throws CoreException,
+	private IServer createAdapter(IServerType serverType, IRuntime rt,
+			IApplication application, IDomain domain, String deployProject, String remoteName) throws CoreException,
 			OpenShiftException, SocketTimeoutException {
 		Assert.isLegal(serverType != null);
 		Assert.isLegal(application != null);
@@ -97,7 +98,7 @@ public class OpenShiftServerAdapterFactory {
 		String serverName = OpenShiftServerUtils.getDefaultServerName(application);
 		IServer server = OpenShiftServerUtils.createServer(rt, serverType, serverName);
 		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
-				server, deployProject, remoteName, serverName, application);
+				server, deployProject, remoteName, serverName, application, domain);
 		return server;
 	}
 	

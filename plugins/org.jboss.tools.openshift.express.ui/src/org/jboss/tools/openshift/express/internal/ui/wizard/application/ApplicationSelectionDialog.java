@@ -86,8 +86,9 @@ public class ApplicationSelectionDialog extends TitleAreaDialog {
 	}
 
 	private void setupDialog(Composite parent) {
-		parent.getShell().setText("Application selection");
-		setTitle("Select an application in the list");
+		parent.getShell().setText("Select Existing Application");
+		setTitle("Select Existing Application");
+		setMessage("Please choose the existing application that you want to import.");
 		setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 		setDialogHelpAvailable(false);
 	}

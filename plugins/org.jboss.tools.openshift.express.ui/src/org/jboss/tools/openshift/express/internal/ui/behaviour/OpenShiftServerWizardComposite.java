@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -79,16 +78,18 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
+import org.jboss.tools.openshift.express.internal.ui.viewer.DomainColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectToOpenShiftWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 
@@ -104,6 +105,7 @@ public class OpenShiftServerWizardComposite {
 	private Composite composite;
 	private Link importLink;
 	private ComboViewer connectionComboViewer;
+	private ComboViewer domainComboViewer;
 	private ComboViewer applicationComboViewer;
 	private ComboViewer deployProjectComboViewer;
 	protected Text remoteText;
@@ -113,8 +115,10 @@ public class OpenShiftServerWizardComposite {
 	// Data / Model
 	private String remote, deployFolder;
 	private IProject deployProject;
+	private IDomain domain;
 	private IApplication application;
 	private Connection connection;
+	private List<IDomain> domains;
 	private List<IApplication> applications;
 	private IServerWorkingCopy server;
 	private Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
@@ -133,11 +137,13 @@ public class OpenShiftServerWizardComposite {
 	}
 
 	private void initModel(IServerModeUICallback callback, IServerAttributes server) {
-		updateModel(getConnection(callback), OpenShiftServerUtils.getApplication(callback));
+		IApplication application = BehaviorTaskModelUtil.getApplication(callback);
+		IDomain domain = BehaviorTaskModelUtil.getDomain(callback);
+		updateModel(getConnection(callback), domain, application);
 	}
 	
 	private Connection getConnection(IServerModeUICallback callback) {
-		Connection connection = OpenShiftServerUtils.getConnection(callback);
+		Connection connection = BehaviorTaskModelUtil.getConnection(callback);
 		if (connection == null) {
 			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
 		}
@@ -156,6 +162,8 @@ public class OpenShiftServerWizardComposite {
 	private void initWidgets() {
 		connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
 		selectConnectionCombo(connection);
+		domainComboViewer.setInput(domains);
+		selectDomainCombo(domain);
 		applicationComboViewer.setInput(applications);
 		selectApplicationCombo(application);
 		setDeployProjectCombo(application, projectsByApplication);
@@ -185,6 +193,19 @@ public class OpenShiftServerWizardComposite {
 				.align(SWT.FILL, SWT.CENTER).applyTo(newConnectionButton);
 		newConnectionButton.setText("New...");
 		newConnectionButton.addSelectionListener(onNewConnection());
+
+		// domain
+		Label domainNameLabel = new Label(composite, SWT.NONE);
+		domainNameLabel.setText("Domain Name: ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
+
+		this.domainComboViewer = new ComboViewer(new Combo(composite, SWT.DEFAULT));
+		domainComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		domainComboViewer.setLabelProvider(new DomainColumnLabelProvider());
+		GridDataFactory.fillDefaults()
+				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(domainComboViewer.getControl());
+		domainComboViewer.addSelectionChangedListener(onSelectDomain());
 
 		// application
 		Label appNameLabel = new Label(composite, SWT.NONE);
@@ -263,7 +284,7 @@ public class OpenShiftServerWizardComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Connection connection = UIUtils.getFirstElement(connectionComboViewer.getSelection(), Connection.class);
-				ConnectToOpenShiftWizard wizard = new ConnectToOpenShiftWizard(connection);
+				ConnectionWizard wizard = new ConnectionWizard(connection);
 				if (WizardUtils.openWizardDialog(
 						wizard, connectionComboViewer.getControl().getShell()) == Window.OK) {
 					connectionComboViewer.getControl().setEnabled(true);
@@ -283,22 +304,12 @@ public class OpenShiftServerWizardComposite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Connection selectedConnection = UIUtils.getFirstElement(event.getSelection(), Connection.class);
 				if (selectedConnection == null ||
-						(connection != null
-						&& connection.equals(selectedConnection))) {
+						(selectedConnection.equals(connection))) {
 					return;
 				}
-
-				Job j = new Job("Verifying connection...") {
-
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						updateModel(selectedConnection, getFirstApplication(selectedConnection.getApplications()));
-						return Status.OK_STATUS;
-					}
-				};
-				callback.executeLongRunning(j);
+				
+				callback.executeLongRunning(new UpdateModelJob(selectedConnection, domain, getFirstApplication(applications)));
 				updateWidgets();
-				updateErrorMessage();
 			}
 		};
 	}
@@ -323,7 +334,7 @@ public class OpenShiftServerWizardComposite {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				OpenShiftApplicationWizard wizard =
-						new ImportOpenShiftApplicationWizard(connection, null, application);
+						new ImportOpenShiftApplicationWizard(connection, application);
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 				dialog.create();
 				int success = dialog.open();
@@ -336,7 +347,7 @@ public class OpenShiftServerWizardComposite {
 					projectsByApplication = createProjectsByApplication(applications);
 					setDeployProjectCombo(application, projectsByApplication);
 					enableImportLink(application);
-					updateErrorMessage();
+					updateErrorMessage(null);
 				}
 			}
 		};
@@ -367,6 +378,22 @@ public class OpenShiftServerWizardComposite {
 		};
 	}
 
+	private ISelectionChangedListener onSelectDomain() {
+		return new ISelectionChangedListener() {
+
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IDomain selectedDomain = UIUtils.getFirstElement(event.getSelection(), IDomain.class);				
+				if (selectedDomain == null
+						|| selectedDomain.equals(domain)) {
+					return;
+				}	
+				callback.executeLongRunning(new UpdateModelJob(connection, selectedDomain, application));
+				updateWidgets();
+			}
+		};
+	}
+
 	private ISelectionChangedListener onSelectApplication() {
 		return new ISelectionChangedListener() {
 
@@ -377,13 +404,15 @@ public class OpenShiftServerWizardComposite {
 				enableImportLink(application);
 				setDeploymentFolderText(application, deployProject);
 				setRemoteText(application, deployProject);
-				updateErrorMessage();
+				updateErrorMessage(null);
 			}
 		};
 	}
 
 	private String getRemote(IApplication application, IProject project) {
-		if (!ProjectUtils.isAccessible(project)) {
+		if (application == null
+				|| project == null
+				|| !ProjectUtils.isAccessible(project)) {
 			return null;
 		}
 		try {
@@ -448,11 +477,13 @@ public class OpenShiftServerWizardComposite {
 		if (connection == null) {
 			selectConnectionCombo(null);
 		}
+		setDomainComboInput(domains);
+		selectDomainCombo(domain);
 		setApplicationComboInput(applications);
 		selectApplicationCombo(application);
 		selectDeployProjectCombo(getImportedProjects(application, projectsByApplication));
 		enableImportLink(application);
-		updateErrorMessage();
+		updateErrorMessage(null);
 	}
 
 	protected void setRemoteText(IApplication application, IProject deployProject) {
@@ -481,6 +512,14 @@ public class OpenShiftServerWizardComposite {
 		browseDeployFolderButton.setEnabled(true);		
 	}
 
+	private void setDomainComboInput(List<IDomain> domains) {
+		if (domains == null) {
+			domainComboViewer.setInput(Collections.emptyList());
+		} else {
+			domainComboViewer.setInput(domains);
+		}
+	}
+
 	private void setApplicationComboInput(List<IApplication> applications) {
 		if (applications == null) {
 			applicationComboViewer.setInput(Collections.emptyList());
@@ -494,13 +533,19 @@ public class OpenShiftServerWizardComposite {
 		importLink.setEnabled(p == null || p.length == 0);
 	}
 
-	private void updateErrorMessage() {
-		callback.setErrorMessage(createErrorMessage());
+	private void updateErrorMessage(String message) {
+		callback.setErrorMessage(createErrorMessage(message));
 	}
 
 	public String createErrorMessage() {
+		return createErrorMessage(null);
+	}
+	
+	public String createErrorMessage(String message) {
 		String error = null;
-		if (applications == null) {
+		if (message != null) {
+			error = message;
+		} else if (applications == null) {
 			error = "Please select an existing connection or create a new one.";
 		} else if (application == null) {
 			error = "Please select an application from the combo below.";
@@ -515,21 +560,47 @@ public class OpenShiftServerWizardComposite {
 		return error;
 	}
 
-	private void updateModel(Connection connection, IApplication application) {
+	private void updateModel(Connection connection, IDomain domain, IApplication application) {
 		this.connection = connection;
-		this.applications = safeGetApplications(connection);
+		this.domains = safeGetDomains(connection);
+		this.domain = getDomain(domain, domains);
+		this.applications = safeGetApplications(this.domain);
 		this.projectsByApplication = createProjectsByApplication(applications);
-		this.application = getApplication(application);
-		this.deployProject = getDeployProject(application);
-		this.deployFolder = getDeployFolder(application, deployProject);
-		this.remote = getRemote(application, deployProject);
-		configureServer(application, remote, deployProject, deployFolder, callback.getServer());
+		this.application = getApplication(application, applications);
+		this.deployProject = getDeployProject(this.application);
+		this.deployFolder = getDeployFolder(this.application, deployProject);
+		this.remote = getRemote(this.application, deployProject);
+		configureServer(this.application, this.domain, this.remote, this.deployProject, this.deployFolder, callback.getServer());
 	}
 
-	protected IApplication getApplication(IApplication application) {
+	protected IDomain getDomain(final IDomain domain, final List<IDomain> domains) {
+		if (domain == null) {
+			return getFirstDomain(domains);
+		} else if (domains != null
+				&& domains.indexOf(domain) == -1) {
+			// domain switched, current domain not contained within new list
+			return getFirstDomain(domains);
+		} else {
+			return domain;
+		}
+	}
+
+	private IDomain getFirstDomain(final List<IDomain> domains) {
+		if (domains != null
+				&& domains.size() > 0) {
+			return domains.get(0);
+		}
+		return null;
+	}
+
+	protected IApplication getApplication(final IApplication application, final List<IApplication> applications) {
 		if (application == null) {
-			return getFirstApplication(applications);	
-		} else { 
+			return getFirstApplication(applications);
+		} else if (applications != null
+				&& applications.indexOf(application) == -1){ 
+			// domain changed, application not within list of applications of new domain
+			return getFirstApplication(applications);
+		} else {
 			return application;
 		}
 	}
@@ -547,16 +618,32 @@ public class OpenShiftServerWizardComposite {
 		return projects[0];
 	}
 
-	private List<IApplication> safeGetApplications(Connection connection) {
-		List<IApplication> applications = new ArrayList<IApplication>();
+	private List<IApplication> safeGetApplications(IDomain domain) {
 		try {
-			if (connection != null) {
-				applications = connection.getApplications();
+			if (domain == null) {
+				return Collections.emptyList();
 			}
+			return domain.getApplications();
 		} catch (NotFoundOpenShiftException nfose) {
 			// Credentials work, but no domain, so no applications either
+			return Collections.emptyList();
 		}
-		return applications;
+	}
+
+	private List<IDomain> safeGetDomains(Connection connection) {
+		try {
+			if (connection == null) {
+				return Collections.emptyList();
+			}
+			return connection.getDomains();
+		} catch (NotFoundOpenShiftException e) {
+			// Credentials work, but no domain, so no applications either
+			return Collections.emptyList();
+		} catch (OpenShiftException e) {
+			// Credentials work, but no domain, so no applications either
+			updateErrorMessage(NLS.bind("Could not load domains for connection {0}: {1}", connection.getId(), e.getMessage()));
+			return Collections.emptyList();
+		}
 	}
 
 	private IApplication getFirstApplication(List<IApplication> applications) {
@@ -580,36 +667,43 @@ public class OpenShiftServerWizardComposite {
 	}
 
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		configureServer(application, remote, deployProject, deployFolder, callback.getServer());
-		updateProjectSettings(application, remote, deployProject, deployFolder, connection);
+		configureServer(application, domain, remote, deployProject, deployFolder, callback.getServer());
+		updateProjectSettings(application, domain, remote, deployProject, deployFolder, connection);
 	}
 
-	private void configureServer(IApplication application, String remote, IProject deployProject, String deployFolder,
+	private void configureServer(IApplication application, IDomain domain, String remote, IProject deployProject, String deployFolder,
 			IServerWorkingCopy server) throws OpenShiftException {
 		String serverName = OpenShiftServerUtils.getDefaultServerName(application);
 		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
-				server, serverName, deployProject, deployFolder, remote, application);
+				server, serverName, deployProject, deployFolder, remote, application, domain);
 	}
 
-	private void updateProjectSettings(IApplication application, String remote, IProject deployProject, String deployFolder, Connection connection) {
-		String projRemote = OpenShiftServerUtils.getProjectAttribute(
-				deployProject, OpenShiftServerUtils.SETTING_REMOTE_NAME, null);
-		String projDepFolder = OpenShiftServerUtils.getProjectAttribute(
-				deployProject, OpenShiftServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
+	private void updateProjectSettings(IApplication application, IDomain domain, String remote, IProject deployProject, String deployFolder, Connection connection) {
+		String projRemote = 
+				OpenShiftServerUtils.getProjectAttribute(deployProject, OpenShiftServerUtils.SETTING_REMOTE_NAME, null);
+		String projDepFolder = 
+				OpenShiftServerUtils.getProjectAttribute(deployProject, OpenShiftServerUtils.SETTING_DEPLOY_FOLDER_NAME, null);
 		if (projRemote == null 
 				&& projDepFolder == null) {
 			OpenShiftServerUtils.updateOpenshiftProjectSettings(
-					deployProject, application, connection, remote, deployFolder);
+					deployProject, application, domain, connection, remote, deployFolder);
 		}
 	}
 
 	private void selectConnectionCombo(final Connection connection) {
 		IStructuredSelection selection = new StructuredSelection();
-		if (connection != null
-				&& connection.isConnected()) {
+		if (connection != null) {
 			selection = new StructuredSelection(connection);
 		}
 		connectionComboViewer.setSelection(selection);
+	}
+
+	private void selectDomainCombo(final IDomain domain) {
+		IStructuredSelection selection = new StructuredSelection();
+		if (domain != null) {
+			selection = new StructuredSelection(domain);
+		}
+		domainComboViewer.setSelection(selection);
 	}
 
 	protected void selectApplicationCombo(IApplication application) {
@@ -645,4 +739,25 @@ public class OpenShiftServerWizardComposite {
 		}
 		deployProjectComboViewer.setSelection(selection);
 	}	
+
+	private class UpdateModelJob extends Job {
+		
+		private Connection connection;
+		private IDomain domain;
+		private IApplication application;
+
+		private UpdateModelJob(Connection connection, IDomain domain, IApplication application) {
+			super(NLS.bind("Fetching domains and applications for connection {0}...", connection.getUsername()));
+			this.connection = connection;
+			this.domain = domain;
+			this.application = application;
+			
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			updateModel(this.connection, this.domain, this.application);
+			return Status.OK_STATUS;
+		}
+	}
 }
