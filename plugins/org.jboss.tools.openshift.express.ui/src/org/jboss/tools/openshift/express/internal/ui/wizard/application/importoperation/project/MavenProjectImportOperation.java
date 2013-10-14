@@ -29,9 +29,6 @@ import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
-
-import com.openshift.client.IApplication;
 
 /**
  * @author Andre Dietisheim <adietish@redhat.com>

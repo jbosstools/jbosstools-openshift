@@ -3,7 +3,7 @@
  */
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.details;
 
-import static org.jboss.tools.openshift.express.internal.ui.utils.StringUtils.toStringOrNull;
+import static org.jboss.tools.openshift.express.internal.core.util.StringUtils.toStringOrNull;
 
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;

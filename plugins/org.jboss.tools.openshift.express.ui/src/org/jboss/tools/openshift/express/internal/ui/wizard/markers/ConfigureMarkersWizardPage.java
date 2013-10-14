@@ -48,9 +48,9 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.marker.BaseOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.cartridge.IEmbeddableCartridge;

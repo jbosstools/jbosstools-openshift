@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
-import java.net.SocketTimeoutException;
 import java.util.Set;
 
 import com.openshift.client.IDomain;
@@ -24,17 +23,18 @@ public interface IEmbedCartridgesWizardPageModel {
 
 	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException;
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException;
 
-	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
+	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
-	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
+	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
-	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) throws SocketTimeoutException, OpenShiftException;
+	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) throws OpenShiftException;
 	
-	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException, SocketTimeoutException;
+	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
 	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
-	public IDomain getDomain() throws SocketTimeoutException, OpenShiftException;
+	public IDomain getDomain() throws OpenShiftException;
+
 }

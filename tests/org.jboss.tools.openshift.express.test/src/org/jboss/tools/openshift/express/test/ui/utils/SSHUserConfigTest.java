@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jboss.tools.openshift.express.internal.ui.utils.FileUtils;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUserConfig;
 import org.junit.Test;
 

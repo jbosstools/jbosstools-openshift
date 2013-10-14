@@ -21,9 +21,10 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.jboss.tools.common.ui.BrowserUtil;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TreeUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
  * @author Xavier Coulon
@@ -53,9 +54,10 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 		link.setText(property.getValue());
 		link.setBackground(cell.getBackground());
 		link.addMouseListener(onLinkClicked(property.getValue()));
-
+		UIUtils.copyMenuOf(cell.getControl(), link);
 		TreeUtils.createTreeEditor(link, property.getValue(), cell);
 	}
+
 
 	private void createStyledText(IProperty property, final ViewerCell cell) {
 		StyledString.Styler style = new StyledString.Styler() {

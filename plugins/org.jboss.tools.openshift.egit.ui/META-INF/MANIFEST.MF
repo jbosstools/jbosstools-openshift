@@ -1,9 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: EGit integration UI
+Bundle-Name: %Bundle-Name
+Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.jboss.tools.openshift.egit.ui;singleton:=true
 Bundle-Version: 2.5.1.qualifier
 Bundle-Activator: org.jboss.tools.openshift.egit.ui.EGitUIActivator
+Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.egit.core;bundle-version="[2.3.0,3.0.0)",
  org.eclipse.egit.core;bundle-version="2.0.0",
  org.eclipse.egit.ui;bundle-version="2.0.0",
@@ -16,5 +18,4 @@ Require-Bundle: org.jboss.tools.openshift.egit.core;bundle-version="[2.3.0,3.0.0
  org.eclipse.ui.ide;bundle-version="[3.7.0,4.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Vendor: JBoss by Red Hat
 Export-Package: org.jboss.tools.openshift.egit.ui.util

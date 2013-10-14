@@ -68,7 +68,6 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
 		fillApplicationDetailsTable(viewer);
-		createContextMenu(viewer);
 
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults()
@@ -99,6 +98,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
 
 		final TreeViewer viewer = new TreeViewer(tree);
+		createContextMenu(viewer);
 		viewer.setContentProvider(new ApplicationDetailsContentProvider());
 		createTreeColumn("Property", 1, new PropertyNameCellLabelProvider(), viewer, treeLayout);
 		createTreeColumn("Value", 3, new PropertyValueCellLabelProvider(), viewer, treeLayout);

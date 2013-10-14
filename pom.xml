@@ -3,13 +3,16 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.1.1.Alpha2-SNAPSHOT</version>
+		<version>4.2.0.Alpha1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>openshift</artifactId>
 	<name>openshift.all</name>
 	<version>2.5.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<properties>
+		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
+	</properties>
 	<modules>
 		<module>plugins</module>
 		<module>tests</module>

@@ -9,7 +9,7 @@
       </category>
       <wizard
             category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftExpressApplicationWizard"
+            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard"
             icon="icons/openshift-logo-white-icon.png"
             id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
             name="OpenShift Application"
@@ -49,112 +49,6 @@
             typeIds="org.jboss.tools.openshift.express.openshift.server.type,org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
             id="org.jboss.ide.eclipse.as.ui.jbossIcon"/>
    </extension>
-   <extension
-         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-      <launchConfigurationTabGroup
-            class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenshiftServerLaunchTabGroup"
-            description="OpenShift Launch"
-            id="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenshiftLaunchTabGroup"
-            type="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"/>
-   </extension>
-   
-   <!-- Core Extensions, should be moved out one day -->
-   <extension
-         point="org.jboss.ide.eclipse.as.core.behaviourExtension">
-      <behaviour
-            behaviourDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerBehaviourDelegate"
-            launchDelegate="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerLaunchDelegate"
-            name="OpenShift"
-            publishMethod="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerPublishMethod"
-            serverTypes="org.jboss.tools.openshift.express.openshift.server.type"
-            typeId="openshift">
-      </behaviour>
-   </extension>
-
-   <extension
-         point="org.eclipse.wst.server.core.serverTypes">
-      <serverType
-            behaviourClass="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerBehaviour"
-            class="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer"
-            name="%openshift.express.name"
-            description="%openshift.express.description"
-            hasConfiguration="false"
-            id="org.jboss.tools.openshift.express.openshift.server.type"
-            initialState="started"
-            launchConfigId="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
-            launchModes="run,debug,profile"
-            runtime="false"
-            runtimeTypeId="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-            startBeforePublish="false"
-            startTimeout="450000"
-            stopTimeout="450000"
-            supportsRemoteHosts="true"/>
-    </extension>
-    <extension
-         point="org.eclipse.wst.server.core.runtimeTypes">
-      <runtimeType
-             vendor="%providerName"
-             class="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftRuntime"
-             description="%openshift.express.runtime.name"
-             name="%openshift.express.runtime.name"
-             id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-             version="1.0">
-          <moduleType types="jst.appclient" versions="5.0, 6.0"/>
-          <moduleType types="wst.web" versions="1.0,1.2,1.3,1.4"/>
-          <moduleType types="jst.web" versions="2.2, 2.3, 2.4, 2.5, 3.0"/>
-          <moduleType types="jst.ejb" versions="1.0, 1.1, 2.0, 2.1, 3.0, 3.1"/>
-          <moduleType types="jst.ear" versions="1.2, 1.3, 1.4, 5.0, 6.0"/>
-          <moduleType types="jst.connector" versions="1.0, 1.5, 1.6"/>
-	      <moduleType types="jst.utility" versions="1.0"/>
-          <moduleType types="jboss.package" versions="1.0"/>
-          <moduleType types="jboss.singlefile" versions="1.0"/>
-          <moduleType types="jst.jboss.esb" versions="4.2,4.3,4.4,4.5,4.6,4.7,4.9"/>
-          <moduleType types="jst.jboss.sar" versions="1.0"/>
-          <moduleType types="jbt.bpel.module" versions="1.1, 2.0"/>
-          <moduleType types="bpel.module" versions="1.1, 2.0"/>
-          <moduleType types="jboss.osgi" versions="1.0"/>          
-      </runtimeType>
-    </extension>
-    <extension
-         point="org.eclipse.jst.server.core.runtimeFacetMappings">
-      <runtimeFacetMapping
-            runtimeTypeId="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-            runtime-component="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"
-            version="1.0"/>
-    </extension>
-   <extension
-         point="org.eclipse.wst.common.project.facet.core.runtimes">
-      <runtime-component-type id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"/>
-      <runtime-component-version
-            type="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"
-            version="1.0"/>
-      <supported>
-        <runtime-component
-         	id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"
-         	version="1.0"/>
-       <facet id="wst.web"  version="1.0,1.2,1.3,1.4"/>
-       <facet id="jst.web"  version="2.2,2.3,2.4,2.5,3.0"/>
-       <facet id="jst.java" version="5.0,6.0,1.7"/>
-       <facet id="jst.utility" version="1.0"/>
-       <facet id="jst.connector" version="1.0,1.5,1.6"/>
-       <facet id="jst.ejb" version="2.0,2.1,3.0,3.1"/>
-       <facet id="jst.ear" version="1.2,1.3,1.4,5.0,6.0"/>
-       <facet id="jst.appclient" version="1.2,1.3,1.4,5.0,6.0"/>
-       <facet id="jst.webfragment" version="3.0"/>
-     </supported>
-   </extension>
-   <extension
-         point="org.eclipse.debug.core.launchConfigurationTypes">
-      <launchConfigurationType
-            category="JBoss"
-            delegate="org.jboss.tools.openshift.express.internal.core.behaviour.OpenshiftDelegatingStartLaunchConfiguration"
-            id="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
-            modes="run,debug,profile"
-            name="JBoss OpenShift Server Startup Configuration"
-            public="true"
-            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
-            sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
-    </extension>
     
 	<extension point="org.eclipse.ui.navigator.viewer">
 		<viewerContentBinding viewerId="org.eclipse.wst.server.ui.ServersView">
@@ -243,7 +137,6 @@
           </enablement>
        </consolePageParticipant>
     </extension>
-    
     
     <extension
        point="org.eclipse.core.expressions.propertyTesters">
@@ -334,21 +227,23 @@
                allowsPlatformContributions="true"
                id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup">
             <insertionPoint
-                  name="group.showIn"
-                  separator="true">
-            </insertionPoint>
+                  name="group.new"
+                  separator="true"/>
             <insertionPoint
                   name="group.edition"
-                  separator="true">
-            </insertionPoint>
+                  separator="true"/>
+            <insertionPoint
+                  name="group.showIn"
+                  separator="true"/>
             <insertionPoint
                   name="group.server"
-                  separator="true">
-            </insertionPoint>
+                  separator="true"/>
+            <insertionPoint
+                  name="additions"
+                  separator="true"/>
             <insertionPoint
                   name="group.properties"
-                  separator="true">
-            </insertionPoint>
+                  separator="true"/>
          </popupMenu>
          <options>
             <property
@@ -357,12 +252,12 @@
             </property>
          </options>
       </viewer>
-    	<viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+      <viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
 	       <includes>
            	  <actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
            	  <!-- actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.core.portforward.applicationPortForwardActionProvider"/ -->
+	                pattern="org.jboss.tools.openshift.express.internal.ui.portforward.applicationPortForwardActionProvider"/ -->
            	  </includes>
 	    </viewerActionBinding>
         <viewerContentBinding
@@ -373,7 +268,17 @@
                     pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
               </contentExtension>
            </includes>
-        </viewerContentBinding>
+      </viewerContentBinding>
+     </extension>
+     <extension 
+         point="org.eclipse.ui.menus">
+       <menuContribution
+             locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.new">
+	    	<menu
+	           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new"
+	           label="%openshift.menu.expressConsoleView.new">
+			</menu>
+		</menuContribution>
      </extension>
      <extension
            point="org.eclipse.ui.navigator.navigatorContent">
@@ -384,106 +289,6 @@
               name="OpenShift Explorer Content">
            <triggerPoints></triggerPoints>
         </navigatorContent>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.createApplicationActionProvider">
-           <enablement>
-             <with
-                   variable="selection">
-                <count
-                         value="1">
-                </count>
-                <iterate
-                      ifEmpty="false"
-                      operator="and">
-                 <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-                </iterate>
-             </with>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateOrEditDomainActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.editDomainActionProvider">
-           <enablement>
-             <with
-                   variable="selection">
-                <count
-                         value="1">
-                </count>
-                <iterate
-                      ifEmpty="false"
-                      operator="and">
-                 <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-                </iterate>
-             </with>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteDomainActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.deleteDomainActionProvider">
-           <enablement>
-             <with
-                   variable="selection">
-                <count
-                         value="1">
-                </count>
-                <iterate
-                      ifEmpty="false"
-                      operator="and">
-                 <instanceof
-                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-                </iterate>
-             </with>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.RefreshElementActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.RefreshElementActionProvider">
-           <enablement>
-             <with
-					variable="selection">
-				<and>
-	                <count
-						value="1">
-	                </count>
-	                <iterate
-						ifEmpty="false"
-						operator="and">
-			              <or>
-			                 <instanceof
-			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-			                 <instanceof
-			                       value="com.openshift.client.IApplication" />
-			              </or>
-	                </iterate>
-				</and>
-             </with>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteConnectionActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteConnectionActionProvider">
-           <enablement>
-             <with
-					variable="selection">
-				<and>
-	                <count
-						value="1">
-	                </count>
-	                <iterate
-						ifEmpty="false"
-						operator="and">
-			              <or>
-			                 <instanceof
-			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-			              </or>
-	                </iterate>
-				</and>
-             </with>
-           </enablement>
-        </actionProvider>
         <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.OpenInWebBrowserActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.openInWebBrowserActionProvider">
@@ -540,69 +345,6 @@
            </enablement>
         </actionProvider>
         <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.EditCartridgesActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.editCartridgesActionProvider">
-           <enablement>
-             <with
-                   variable="selection">
-				<or>
-					<and>
-		                <count
-							value="1">
-		                </count>
-		                <iterate
-							ifEmpty="false"
-							operator="and">
-							<instanceof
-								value="com.openshift.client.IApplication" />
-		                </iterate>
-		            </and>
-					<and>
-		                <count
-							value="+">
-		                </count>
-		                <iterate
-							ifEmpty="false"
-							operator="and">
-							<instanceof
-								value="com.openshift.client.cartridge.IEmbeddedCartridge" />
-						</iterate>
-					</and>
-                </or>
-             </with>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.ImportApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.importApplicationActionProvider">
-           <enablement>
-             <with
-					variable="selection">
-                <count
-					value="1">
-                </count>
-                <iterate
-					ifEmpty="false"
-					operator="and">
-					<instanceof
-						value="com.openshift.client.IApplication">
-					</instanceof>
-                </iterate>
-             </with>
-           </enablement>
-        </actionProvider>
-        <actionProvider
-              class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.DeleteApplicationActionProvider"
-              id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.deleteApplicationActionProvider">
-           <enablement>
-              <and>
-                 <instanceof
-                       value="com.openshift.client.IApplication">
-                 </instanceof>
-              </and>
-           </enablement>
-        </actionProvider>
-        <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.CreateServerAdapterActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.createServerAdapterActionProvider">
            <enablement>
@@ -652,30 +394,6 @@
         </actionProvider>
      </extension>
      
-     <extension
-           point="org.eclipse.ui.viewActions">
-        <viewContribution
-              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewContribution"
-              targetID="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-           <!--action
-                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.RefreshViewerActionDelegate"
-                 icon="icons/refresh.gif"
-                 id="org.jboss.tools.openshift.express.ui.viewActions.refreshAction"
-                 label="Refresh"
-                 style="push"
-                 toolbarPath="openshift">
-           </action-->
-           <action
-                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.OpenConnectionDialogActionDelegate"
-                 icon="icons/resource_obj.gif"
-                 id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
-                 label="Connect"
-                 style="push"
-                 toolbarPath="openshift"
-                 tooltip="Connect to OpenShift">
-           </action>
-        </viewContribution>
-     </extension>
      <!-- when using the 'classic' properties view. -->
      <extension
            point="org.eclipse.core.runtime.adapters">
@@ -701,86 +419,6 @@
            </adapter>
         </factory>
      </extension>
-     <!-- Launch configuration type to debug remote openshift applications. Not fully implemented yet... -->
-     <!--extension
-           point="org.eclipse.debug.core.launchConfigurationTypes">
-        <launchConfigurationType
-              delegate="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
-              delegateName="Remote OpenShift Application "
-              id="org.jboss.tools.openshift.launchDebugConfigurationType"
-              modes="debug"
-              name="Remote OpenShift Application "
-              public="true">
-        </launchConfigurationType>
-     </extension>
-     <extension
-           point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-        <launchConfigurationTypeImage
-              configTypeID="org.jboss.tools.openshift.launchDebugConfigurationType"
-              icon="icons/openshift-logo-white-icon.png"
-              id="org.jboss.tools.openshift.launchDebugConfigurationTypeImage">
-        </launchConfigurationTypeImage>
-     </extension>
-     <extension
-           point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-        <launchConfigurationTabGroup
-              class="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationConfigurationTabGroup"
-              id="org.jboss.tools.openshift.launchDebugConfigurationTabGroup"
-              type="org.jboss.tools.openshift.launchDebugConfigurationType">
-        </launchConfigurationTabGroup>
-     </extension -->
-     
-     <!--extension
-           point="org.eclipse.debug.core.launchDelegates">
-        <launchDelegate
-              delegate="org.jboss.tools.openshift.express.internal.core.portforward.RemoteOpenShiftApplicationDebuggingLaunchConfigurationDelegate"
-              id="org.jboss.tools.openshift.express.ui.launchDelegate2"
-              modes="debug"
-              name="Remote OpenShift application"
-              type="org.jboss.tools.openshift.launchDebugConfigurationType">
-        </launchDelegate>
-     </extension-->
-     <!-- when using the new 'tabbed' properties view. -->
-     
-     <!--extension
-           point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
-        <propertyContributor
-              contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
-              typeMapper="org.jboss.tools.openshift.express.internal.ui.explorerTypeMapper">
-           <propertyCategory
-                 category="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTabCategory"></propertyCategory>
-        </propertyContributor>
-     </extension>
-     <extension
-           point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
-        <propertyTabs
-              contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-           <propertyTab
-                 category="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTabCategory"
-                 id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleUserTab"
-                 label="Account">
-           </propertyTab>
-           <propertyTab
-                 category="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTabCategory"
-                 id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleApplicationsTab"
-                 label="Account">
-           </propertyTab>
-        </propertyTabs>
-     </extension>
-     <extension
-           point="org.eclipse.ui.views.properties.tabbed.propertySections">
-        <propertySections
-              contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-           <propertySection
-                 class="org.jboss.tools.openshift.express.internal.ui.explorerproperty.UserPropertySection"
-                 id="org.jboss.tools.openshift.express.ui.userPropertySection"
-                 tab="org.jboss.tools.openshift.express.ui.explorer.expressConsolePropertyTab">
-              <input
-                    type="org.jboss.tools.openshift.express.internal.core.console.UserDelegate">
-              </input>
-           </propertySection>
-        </propertySections>
-     </extension -->
      <extension
          point="org.eclipse.ui.perspectiveExtensions">
       	<perspectiveExtension
@@ -791,16 +429,176 @@
          </view>
       	</perspectiveExtension> 
      </extension>
-	<!-- ssh keys -->
+	<!-- New Connection -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.newconnection"
+              name="%openshift.command.newconnection">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
+              class="org.jboss.tools.openshift.express.internal.ui.command.NewConnectionHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
+                icon="icons/resource_obj.gif"
+                id="org.jboss.tools.openshift.express.ui.command.newconnection"
+                mnemonic="N">
+			<visibleWhen>
+				<or>
+					<with variable="activePartId">
+						<equals value="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView" />
+					</with>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+		         			<iterate ifEmpty="false" operator="or">
+		            			<instanceof
+		                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+		                    </iterate>
+						</and>
+	                </with>
+				</or>
+			</visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+	<!-- Edit Connection -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.editconnection"
+              name="%openshift.command.editconnection">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.EditConnectionHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.editconnection">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editconnection"
+                icon="icons/edit.gif"
+                mnemonic="E">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+     </extension>
+	<!-- Remove Connection -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.removeconnection"
+              name="%openshift.command.removeconnection">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
+              class="org.jboss.tools.openshift.express.internal.ui.command.RemoveConnectionHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
+                icon="icons/delete_edit.gif"
+                id="org.jboss.tools.openshift.express.ui.command.removeconnection"
+                mnemonic="R">
+			<visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="and">
+	            			<instanceof
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                    </iterate>
+					</and>
+                </with>
+			</visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+    
+	<!-- Refresh OpenShift resource (connection, domain, application) -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.refreshresource"
+              name="%openshift.command.refreshresource">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.refreshresource"
+              class="org.jboss.tools.openshift.express.internal.ui.command.RefreshResourceHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.refreshresource"
+                icon="icons/refresh.gif"
+                id="org.jboss.tools.openshift.express.ui.command.refreshresource"
+                mnemonic="R">
+			<visibleWhen>
+				<and>
+	                <count
+						value="1">
+	                </count>
+	                <iterate
+						ifEmpty="false"
+						operator="and">
+			              <or>
+			                 <instanceof
+			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+			                 <instanceof
+			                       value="com.openshift.client.IOpenShiftResource" />
+			              </or>
+	                </iterate>
+				</and>
+			</visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+    
+	<!-- manage keys -->
      <extension
            point="org.eclipse.ui.commands">
         <command
               id="org.jboss.tools.openshift.express.ui.command.manageKeys"
               name="%openshift.command.managekeys">
-        </command>
-        <command
-              id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
-              name="%openshift.command.showenvironment">
         </command>
      </extension>
      <extension
@@ -809,15 +607,11 @@
               class="org.jboss.tools.openshift.express.internal.ui.command.ManageSSHKeysHandler"
               commandId="org.jboss.tools.openshift.express.ui.command.manageKeys">
         </handler>
-        <handler
-              class="org.jboss.tools.openshift.express.internal.ui.command.ShowEnvironmentHandler"
-              commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment">
-        </handler>
      </extension>
-     <extension
+    <extension
            point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.server">
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.manageKeys"
                 icon="icons/key-icon.png"
@@ -836,12 +630,30 @@
               </visibleWhen>
           </command>
         </menuContribution>
-		<!-- show environment OpenShift Explorer -->
+	</extension>
+	<!-- show environment -->
+    <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
+              name="%openshift.command.showenvironment">
+        </command>
+    </extension>
+    <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.ShowEnvironmentHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment">
+        </handler>
+    </extension>
+	<!-- show environment OpenShift Explorer -->
+    <extension
+           point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment"
-                icon="icons/key-icon.png"
+                icon="icons/task.gif"
                 id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
                 mnemonic="E">
               <visibleWhen>
@@ -862,7 +674,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.serverviewer.menu">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.showEnvironment"
-                icon="icons/key-icon.png"
+                icon="icons/task.gif"
                 id="org.jboss.tools.openshift.express.ui.command.showEnvironment"
                 mnemonic="E">
               <visibleWhen>
@@ -879,8 +691,367 @@
           </command>
         </menuContribution>
      </extension>
+     
+    <!-- Manage domains -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.manageDomains"
+              name="%openshift.command.managedomains">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="org.jboss.tools.openshift.express.internal.ui.command.ManageDomainsHandler"
+              commandId="org.jboss.tools.openshift.express.ui.command.manageDomains">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.manageDomains"
+                icon="icons/library.png"
+                mnemonic="M">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+     </extension>
+	<!-- New Domain -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.newdomain"
+              name="%openshift.command.newdomain">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.newdomain"
+              class="org.jboss.tools.openshift.express.internal.ui.command.NewDomainHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.newdomain"
+                icon="icons/library_new.png"
+                id="org.jboss.tools.openshift.express.ui.command.newdomain"
+                mnemonic="D">
+           <visibleWhen>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                	<or>
+		                <iterate
+		                      ifEmpty="false"
+		                      operator="and">
+			                 <instanceof
+			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+		                </iterate>
+		                <iterate
+		                      ifEmpty="false"
+		                      operator="and">
+			                 <instanceof
+			                       value="com.openshift.client.IDomain" />
+		                </iterate>
+		            </or>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
 
-	<!-- restart application -->
+	<!-- Edit Domain OpenShift Explorer -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.editdomain"
+              name="%openshift.command.editdomain">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.editdomain"
+              class="org.jboss.tools.openshift.express.internal.ui.command.EditDomainHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editdomain"
+                icon="icons/library_edit.png"
+                id="org.jboss.tools.openshift.express.ui.command.editdomain"
+                mnemonic="E">
+           <visibleWhen>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
+                 <instanceof
+                       value="com.openshift.client.IDomain" />
+                </iterate>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+
+	<!-- Delete Domain OpenShift Explorer -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.deletedomain"
+              name="%openshift.command.deletedomain">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.deletedomain"
+              class="org.jboss.tools.openshift.express.internal.ui.command.DeleteDomainHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.deletedomain"
+                icon="icons/library_delete.png"
+                id="org.jboss.tools.openshift.express.ui.command.deletedomain"
+                mnemonic="D">
+           <visibleWhen>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
+                 <instanceof
+                       value="com.openshift.client.IDomain" />
+                </iterate>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+    
+    <!-- New Application -->
+    <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.newapplication"
+              name="%openshift.command.newapplication">
+        </command>
+    </extension>
+    <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.newapplication"
+              class="org.jboss.tools.openshift.express.internal.ui.command.NewApplicationHandler">
+     	</handler>
+    </extension>
+    <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.newapplication"
+                icon="icons/query-new.gif"
+                id="org.jboss.tools.openshift.express.ui.command.newapplication"
+                mnemonic="A">
+           <visibleWhen>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <or>
+	                <iterate
+	                      ifEmpty="false"
+	                      operator="and">
+	                 <instanceof
+	                       value="com.openshift.client.IDomain" />
+	                </iterate>
+	                <iterate
+	                      ifEmpty="false"
+	                      operator="and">
+	                 <instanceof
+	                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                </iterate>
+	            </or>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+
+    <!-- Import Application -->
+    <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.importapplication"
+              name="%openshift.command.importapplication">
+        </command>
+    </extension>
+    <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.importapplication"
+              class="org.jboss.tools.openshift.express.internal.ui.command.ImportApplicationHandler">
+     	</handler>
+    </extension>
+    <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edition">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.importapplication"
+                icon="icons/application_import.gif"
+                id="org.jboss.tools.openshift.express.ui.command.importapplication"
+                mnemonic="A">
+           <visibleWhen>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
+                 <instanceof
+                       value="com.openshift.client.IApplication" />
+                </iterate>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+     
+     <!-- Delete Applications -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+              name="%openshift.command.application.delete">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+              class="org.jboss.tools.openshift.express.internal.ui.command.DeleteApplicationHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edition">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+                icon="icons/application_delete.gif"
+                id="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+                mnemonic="D">
+           <visibleWhen>
+             <with
+                   variable="selection">
+                <iterate
+                      ifEmpty="false"
+                      operator="or">
+                 <instanceof
+                       value="com.openshift.client.IApplication" />
+                </iterate>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+    
+     <!-- Edit embeddable cartridges -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.editcartridges"
+              name="%openshift.command.application.editcartridges">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.editcartridges"
+              class="org.jboss.tools.openshift.express.internal.ui.command.EditCartridgesHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edition">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editcartridges"
+                icon="icons/cartridges-edit.gif"
+                id="org.jboss.tools.openshift.express.ui.command.editcartridges"
+                mnemonic="C">
+           <visibleWhen>
+             <with
+                   variable="selection">
+				<or>
+					<and>
+		                <count
+							value="1">
+		                </count>
+		                <iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.IApplication" />
+		                </iterate>
+		            </and>
+					<and>
+		                <count
+							value="+">
+		                </count>
+		                <iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.cartridge.IEmbeddedCartridge" />
+						</iterate>
+					</and>
+                </or>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+    </extension>
+     
+	<!-- restart application OpenShift Explorer -->
 	     <extension
            point="org.eclipse.ui.commands">
         <command
@@ -898,10 +1069,10 @@
      <extension
            point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.server">
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edition">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.restartApplication"
-                icon="icons/arrow_rotate_clockwise.png"
+                icon="icons/key-icon.png"
                 id="org.jboss.tools.openshift.express.ui.command.manageKeys"
                 mnemonic="R">
               <visibleWhen>
@@ -988,7 +1159,7 @@
 			</menu>
 		</menuContribution>
         <menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.packageExplorerPopup"> 
+			locationURI="popup:org.jboss.tools.openshift.express.ui.projectExplorerPopup"> 
 			<command
 			    commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
 			    icon="icons/marker16.png"
@@ -996,7 +1167,39 @@
 			    mnemonic="M">
 			</command>
         </menuContribution>
-     </extension>
+		<menuContribution
+	    	locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
+	    	<menu
+	           id="org.jboss.tools.openshift.express.ui.resourceNavigatorPopup"
+	           label="%openshift.menu.openshift">
+	           <visibleWhen 
+					checkEnabled="false">
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false">
+								<adapt
+              						type="org.eclipse.core.resources.IProject">
+		 							<test
+		 								forcePluginActivation="true"
+				               			property="org.jboss.tools.openshift.express.isOpenShiftProject" value="true"/>
+								</adapt>
+			               	</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</menu>
+		</menuContribution>
+        <menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.resourceNavigatorPopup"> 
+			<command
+			    commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
+			    icon="icons/marker16.png"
+			    id="org.jboss.tools.openshift.express.ui.command.configureMarkers"
+			    mnemonic="M">
+			</command>
+        </menuContribution>
+	</extension>
     <extension
        point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester

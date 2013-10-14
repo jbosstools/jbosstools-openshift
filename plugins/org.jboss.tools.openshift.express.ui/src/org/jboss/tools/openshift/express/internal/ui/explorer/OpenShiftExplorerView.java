@@ -14,9 +14,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
+import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.core.connection.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 
 /**
@@ -24,16 +24,19 @@ import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsModelListener {
 
+	@Override
 	protected Object getInitialInput() {
 		return ConnectionsModelSingleton.getInstance();
 	}
 
+	@Override
 	protected CommonViewer createCommonViewer(Composite aParent) {
 		CommonViewer v = super.createCommonViewer(aParent);
 		ConnectionsModelSingleton.getInstance().addListener(this);
 		return v;
 	}
 
+	@Override
 	public void dispose() {
 		ConnectionsModelSingleton.getInstance().removeListener(this);
 		super.dispose();
@@ -42,10 +45,11 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void refreshViewer() {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				if (DisposeUtils.isDisposed(getCommonViewer())) { 
+				CommonViewer viewer = getCommonViewer();
+				if (DisposeUtils.isDisposed(viewer)) { 
 					return;
 				}
-				getCommonViewer().refresh();
+				viewer.refresh();
 			}
 		});
 	}
@@ -53,23 +57,27 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void refreshViewer(final Connection connection) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				if (DisposeUtils.isDisposed(getCommonViewer())) {
+				CommonViewer viewer = getCommonViewer();
+				if (DisposeUtils.isDisposed(viewer)) {
 					return;
 				}
-				getCommonViewer().refresh(connection);
+				viewer.refresh(connection);
 			}
 		});
 	}
 
-	public void connectionAdded(Connection user) {
+	@Override
+	public void connectionAdded(Connection connection) {
 		refreshViewer();
 	}
 
-	public void connectionRemoved(Connection user) {
+	@Override
+	public void connectionRemoved(Connection connection) {
 		refreshViewer();
 	}
 
-	public void connectionChanged(Connection user) {
-		refreshViewer();
+	@Override
+	public void connectionChanged(Connection connection) {
+		refreshViewer(connection);
 	}
 }

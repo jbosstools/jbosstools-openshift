@@ -31,8 +31,10 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
+import org.jboss.tools.openshift.express.core.IConsoleUtility;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 /**
  * A utility class to manager the message consoles creations and retrivals
@@ -40,7 +42,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
  * @author Xavier Coulon
  * 
  */
-public class ConsoleUtils {
+public class ConsoleUtils implements IConsoleUtility {
 
 	/**
 	 * Constant key set into the created message console attributes to mark the
@@ -107,20 +109,31 @@ public class ConsoleUtils {
 	 * 
 	 * @param console the console to display
 	 */
-	public static void displayConsoleView(IConsole console) {
-		IWorkbenchPart part = null;
-		try {
-			part = UIUtil.bringViewToFront(IConsoleConstants.ID_CONSOLE_VIEW);
-		} catch (PartInitException e) {
-			Logger.warn("Could not open console view", e);
-		}
+	public static void displayConsoleView(final IConsole console) {
+		UIUtils.ensureDisplayExec(new Runnable() {
 
-		if (part != null) {
-			IConsoleView view = (IConsoleView) part.getAdapter(IConsoleView.class);
-			if (view != null) {
-				view.display(console);
+			@Override
+			public void run() {
+				IWorkbenchPart part = null;
+				try {
+					part = UIUtil.bringViewToFront(IConsoleConstants.ID_CONSOLE_VIEW);
+					if (part == null) {
+						Logger.warn("Could not open console, " + IConsoleConstants.ID_CONSOLE_VIEW + " was not found");
+						return;
+					}
+					final IConsoleView view = (IConsoleView) part.getAdapter(IConsoleView.class);
+					if (view == null) {
+						return;
+					}
+					view.display(console);
+				} catch (PartInitException e) {
+					Logger.warn("Could not open console view", e);
+				}
+
+				
 			}
-		}
+			
+		});
 	}
 	
 	public static OutputStream getConsoleOutputStream(IServer server) {
@@ -213,7 +226,22 @@ public class ConsoleUtils {
 				// ignore 
 			}
 
-			ConsoleUtils.displayConsoleView(console);
+			displayConsoleView(console);
 		}
+	}
+
+	@Override
+	public void displayServerConsoleView(IServer server) {
+		displayConsoleView(server);
+	}
+
+	@Override
+	public OutputStream getServerConsoleOutputStream(IServer server) {
+		return getConsoleOutputStream(server);
+	}
+
+	@Override
+	public void appendToServerConsole(IServer server, String msg) {
+		appendToConsole(server, msg);
 	}
 }

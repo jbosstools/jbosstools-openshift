@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,11 +41,12 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -109,17 +109,10 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove());
 		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(removeButton))
-			.to(ViewerProperties.singleSelection().observe(viewer))
-			.converting(new Converter(IOpenShiftSSHKey.class, Boolean.class) {
-
-				@Override
-				public Object convert(Object fromObject) {
-					IOpenShiftSSHKey key = (IOpenShiftSSHKey) fromObject;
-					return key != null;
-				}
-		})
-		.in(dbc);
+				.bind(WidgetProperties.enabled().observe(removeButton))
+				.to(ViewerProperties.singleSelection().observe(viewer))
+				.converting(new IsNotNull2BooleanConverter())
+				.in(dbc);
 		
 		Composite filler = new Composite(sshKeysGroup, SWT.None);
 		GridDataFactory.fillDefaults()
