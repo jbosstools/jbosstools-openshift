@@ -31,6 +31,8 @@ import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IC
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
+import com.openshift.client.IEnvironmentVariable;
+
 /**
  * @author Martes G Wigglesworth
  * 
@@ -74,28 +76,26 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		table.setHeaderVisible(true);
 		this.viewer = new TableViewerBuilder(table, tableContainer)
 				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<Object>() {
+				.column(new IColumnLabelProvider<IEnvironmentalVariable>() {
 
-					/*
-					 * Placeholder for environmental variable information
-					 */
 					@Override
-					public String getValue(Object e) {
-						// TODO Auto-generated method stub
-						return null;
+					public String getValue(IEnvironmentVariable e) {
+						e.getName();
 					}
+
+					
+					
 				})
 				.name("Variable Name").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
-				.column(new IColumnLabelProvider<Object>() {
+				.column(new IColumnLabelProvider<IEnvironmentalVariable>() {
 
-					/*
-					 * Placeholder for environmental variable information
-					 */
+					
 					@Override
-					public String getValue(Object e) {
+					public String getValue(IEnvironmentalVariable e) {
 						// TODO Auto-generated method stub
-						return null;
+						return e.getValue();
 					}
+					 
 				})
 				.name("Variable Value").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
 				.buildViewer();
