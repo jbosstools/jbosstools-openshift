@@ -10,49 +10,30 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
+import com.openshift.client.IEnvironmentVariable;
+
 /**
  * @author Martin Rieman
- * @author Martes G Wigglesworth
  */
 public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 
-	/**
-	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizard
-	 * 
-	 * @param pageModel
-	 */
-	public ApplicationEnvironmentalVariableEditWizard(
-			ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel) {
-		try{
-		variableName = pageModel.getSingleSelectedVariableName();
-		variableValue = pageModel.getSingleSelectedVariableValue();
-		}
-		catch (NullPointerException e)
-		{
-			//Handle empty lists, by causing the edit button to become disabled upon page load with empty variable list.
-		}
-	}
-
-	public ApplicationEnvironmentalVariableEditWizard(Connection user, String variableName,
-			HashMap<String, String> envVariables) {
-		this.user = user;// Not needed if all data comes from the incident model
-							// instance.
-		this.variableName = variableName;
+	//private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
+	private Connection user;
+	private IEnvironmentVariable envVariable;
+	private List<IEnvironmentVariable> envVariables;
+	private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
+	
+	public ApplicationEnvironmentalVariableEditWizard(Connection user, IEnvironmentVariable envVariable, List<IEnvironmentVariable> envVariables) {
+		this.user = user;
+		this.envVariable = envVariable;
 		this.envVariables = envVariables;
 		setWindowTitle(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE);
 		setNeedsProgressMonitor(true);
-	}
-
-	@Override
-	public void addPages() {
-		applicationEnvironmentalVariableEditWizardPage = new ApplicationEnvironmentalVariableEditWizardPage(user,
-				variableName, envVariables, this);
-		addPage(applicationEnvironmentalVariableEditWizardPage);
 	}
 
 	@Override
@@ -61,15 +42,9 @@ public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 		return true;
 	}
 
-	private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
-
-	private HashMap<String, String> envVariables;
-
-	// private ApplicationEnvironmentalVariableEditWizardPage
-	// applicationEnvironmentalVariableEditWizardPage;
-	private Connection user;
-
-	private String variableName;
-
-	private String variableValue;
+	@Override
+	public void addPages() {
+		applicationEnvironmentalVariableEditWizardPage = new ApplicationEnvironmentalVariableEditWizardPage(user, envVariable, envVariables, this);
+		addPage(applicationEnvironmentalVariableEditWizardPage);
+	}
 }

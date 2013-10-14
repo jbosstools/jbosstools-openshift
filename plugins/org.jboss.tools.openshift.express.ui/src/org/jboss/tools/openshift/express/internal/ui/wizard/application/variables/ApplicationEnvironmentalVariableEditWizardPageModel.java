@@ -10,9 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.HashMap;
+import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+
+import com.openshift.client.IEnvironmentVariable;
 
 /**
  * @author Martes G Wigglesworth
@@ -35,30 +37,25 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	private final String PROPERTY_NAME_INPUT_TITLE = "Variable Name:";
 	private final String PROPERTY_VALUE_INPUT_TITLE = "Variable Value:";
 	
-	private String variableName;
-	private String variableValue;
+	private IEnvironmentVariable envVariable;
 	
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
-	 * @param envVariables 
-	 * @param variableName 
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPageModel(String variableName, HashMap<String, String> envVariables) {
+	public ApplicationEnvironmentalVariableEditWizardPageModel() {
 		// TODO Auto-generated constructor stub
 	}
-	
 	
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizardPageModel
 	 * @param variableName
 	 * @param variableValue
-	 * @param wizardModel
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPageModel(String variableName, String variableValue,ApplicationEnvironmentalVariableConfigurationWizardPageModel wizardModel) {
-		//super.setVariablesDB(variablesDB);
+	public ApplicationEnvironmentalVariableEditWizardPageModel(Connection connection, IEnvironmentVariable selectedVariable, List<IEnvironmentVariable> envVariables) {
+		super(PAGE_TITLE, connection, envVariables, selectedVariable);
+		this.envVariable = selectedVariable;
 	}
-	
-	
+
 	/**
 	 * Update method to update the value in the EnvironmentalVariables HashMap
 	 * using class variables
@@ -66,7 +63,7 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	 */
 	public String update()
 	{
-		return update(variableName, variableValue);
+		return update(envVariable);
 	}
 	
 	/**
@@ -75,40 +72,25 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	 * @param updateValue
 	 * @return
 	 */
-	public String update(String target, String updateValue)
+	public String updateVariable()
 	{
-		return super.updateKey(target, updateValue);
-	}
-	// #TODO - Create data bindings for all fields necessary for this view.
-	
-	/**
-	 * @return the variableName
-	 */
-	public String getVariableName() {
-		return variableName;
-	}
-
-	/**
-	 * @param variableName the variableName to set
-	 */
-	public void setVariableName(String variableName) {
-		this.variableName = variableName;
-	}
-
-	/**
-	 * @return the variableValue
-	 */
-	public String getVariableValue() {
-		return variableValue;
-	}
-
-	/**
-	 * @param variableValue the variableValue to set
-	 */
-	public void setVariableValue(String variableValue) {
-		this.variableValue = variableValue;
+		return super.update(envVariable);
 	}
 	
+	/**
+	 * @return the envVariable
+	 */
+	public IEnvironmentVariable getEnvVariable() {
+		return envVariable;
+	}
+
+	/**
+	 * @param envVariable the envVariable to set
+	 */
+	public void setEnvVariable(IEnvironmentVariable envVariable) {
+		this.envVariable = envVariable;
+	}
+
 	/*
 	 * Property values getters
 	 */
@@ -146,6 +128,5 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	public String getPROPERTY_VALUE_INPUT_TITLE() {
 		return PROPERTY_VALUE_INPUT_TITLE;
 	}
-	// #TODO - Create data bindings for all fields necessary for this view.
 
 }
