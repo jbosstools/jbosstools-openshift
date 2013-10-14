@@ -159,6 +159,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void loadExistingApplications() throws OpenShiftException {
+		setExistingApplicationsLoaded(false);
 		IDomain domain = wizardModel.getDomain();
 		if (domain == null) {
 			return;

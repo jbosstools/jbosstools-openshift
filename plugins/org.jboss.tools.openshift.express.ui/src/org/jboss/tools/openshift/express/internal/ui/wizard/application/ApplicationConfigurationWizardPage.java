@@ -198,10 +198,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					@Override
 					protected IStatus doRun(IProgressMonitor monitor) {
 							pageModel.loadExistingApplications();
-							
-							String applicationName = pageModel.getApplicationName();
-							if (!StringUtils.isEmpty(applicationName)
-									&& !domain.hasApplicationByName(applicationName)) {
+							if (!pageModel.isUseExistingApplication()) {
+								return Status.OK_STATUS;
+							}
+
+							String existingApplicationName = pageModel.getExistingApplicationName();
+							if (!StringUtils.isEmpty(existingApplicationName)
+									&& !domain.hasApplicationByName(existingApplicationName)) {
 								pageModel.setExistingApplication(domain);
 							}
 							return Status.OK_STATUS;
@@ -211,11 +214,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				try {
 					WizardUtils.runInWizard(job, getContainer(), dbc);
 				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+							"Could not load applications for domain {0}.",
+							domain), e));
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+							"Could not load applications for domain {0}.",
+							domain), e));
 				}
 			}
 		};
@@ -363,8 +368,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.in(dbc);
 
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
+		IObservableValue existingApplicationsLoaded =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
+						.observe(pageModel);
 		final NewApplicationNameValidator newApplicationNameValidator =
-				new NewApplicationNameValidator(useExistingAppBtnSelection, applicationNameTextObservable);
+				new NewApplicationNameValidator(useExistingAppBtnSelection, existingApplicationsLoaded, applicationNameTextObservable);
 		dbc.addValidationStatusProvider(newApplicationNameValidator);
 		ControlDecorationSupport.create(
 				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -1010,7 +1018,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		private final IObservableValue existingApplicationsLoadedObservable;
 
 		public ApplicationToSelectNameValidator(IObservableValue useExistingAppBtnbservable,
-				IObservableValue existingAppNameTextObservable, IObservableValue existingApplicationsLoadedObservable) {
+				IObservableValue existingAppNameTextObservable,
+				IObservableValue existingApplicationsLoadedObservable) {
 			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
 			this.existingAppNameTextObservable = existingAppNameTextObservable;
 			this.existingApplicationsLoadedObservable = existingApplicationsLoadedObservable;
@@ -1065,10 +1074,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		private final IObservableValue useExistingAppbservable;
 		private final IObservableValue applicationNameObservable;
+		private IObservableValue existingApplicationsLoadedObservable;
 
 		public NewApplicationNameValidator(IObservableValue useExistingAppObservable,
-				IObservableValue applicationNameObservable) {
+				IObservableValue existingApplicationsLoadedObservable, IObservableValue applicationNameObservable) {
 			this.useExistingAppbservable = useExistingAppObservable;
+			this.existingApplicationsLoadedObservable = existingApplicationsLoadedObservable; 
 			this.applicationNameObservable = applicationNameObservable;
 		}
 
@@ -1076,6 +1087,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		protected IStatus validate() {
 			final String applicationName = (String) applicationNameObservable.getValue();
 			final boolean useExistingApp = (Boolean) useExistingAppbservable.getValue();
+			final Boolean existingApplicationsLoaded = (Boolean) existingApplicationsLoadedObservable.getValue();
+			
 			if (useExistingApp) {
 				return ValidationStatus.ok();
 			}
@@ -1087,7 +1100,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.error(
 						"The name may only contain letters and digits.");
 			}
-			if (pageModel.isExistingApplication(applicationName)) {
+			
+			if (existingApplicationsLoaded != null
+					&& !existingApplicationsLoaded) {
+				return ValidationStatus.cancel("Existing applications are not loaded yet.");
+			} else if (pageModel.isExistingApplication(applicationName)) {
 				return ValidationStatus.error(
 						"An application with the same name already exists on OpenShift.");
 			}
