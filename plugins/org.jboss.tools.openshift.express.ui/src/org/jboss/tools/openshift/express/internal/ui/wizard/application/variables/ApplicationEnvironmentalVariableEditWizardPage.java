@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -29,7 +29,8 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationConfigurationWizardPageModel;
+
+import com.openshift.client.IEnvironmentVariable;
 
 
 /**
@@ -47,19 +48,13 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 	 * @param variableValue
 	 * @param wizard
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPage(Connection connection, String variableName, HashMap<String, String> envVariables, IWizard wizard) {
+	public ApplicationEnvironmentalVariableEditWizardPage(Connection connection, IEnvironmentVariable envVariable, List<IEnvironmentVariable> envVariables, IWizard wizard) {
 		super(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE, 
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION,
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_NAME, wizard);
-		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(variableName, envVariables);
+		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(connection, envVariable, envVariables);
 	}
 
-	public ApplicationEnvironmentalVariableEditWizardPage(ApplicationConfigurationWizardPageModel wizardModel, IWizard wizard) {
-		super(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE, 
-			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION,
-			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_NAME, wizard);
-		//pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(/*variableName, wizardModel.getSelectedVariable().getValue() */);
-	}
 	/** 
 	 * Creates the UI for ApplicationEnvironmentalVariableConfigurationWizardPage
 	 * @param parent
