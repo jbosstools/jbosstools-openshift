@@ -74,7 +74,7 @@ public class OpenShiftServerAdapterFactory {
 		IServer server = null;
 		try {
 			server = createAdapter(serverType, runtime, application, domain, project.getName(), remoteName);
-			addModules(getModules(Collections.singletonList(project)), server, monitor);
+			server = addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
 		} catch (OpenShiftException ose) {
@@ -106,16 +106,17 @@ public class OpenShiftServerAdapterFactory {
 		addModules(getModules(importedProjects), server, monitor);
 	}
 
-	private void addModules(List<IModule> modules, IServer server, IProgressMonitor monitor) throws CoreException {
+	private IServer addModules(List<IModule> modules, IServer server, IProgressMonitor monitor) throws CoreException {
 		if (modules == null
 				|| modules.size() == 0) {
-			return;
+			return server;
 		}
 		IServerWorkingCopy wc = server.createWorkingCopy();
 		IModule[] add = modules.toArray(new IModule[modules.size()]);
 		wc.modifyModules(add, new IModule[0], new NullProgressMonitor());
 		server = wc.save(true, monitor);
 		((Server) server).setModulePublishState(add, IServer.PUBLISH_STATE_NONE);
+		return server;
 	}
 
 	private List<IModule> getModules(List<IProject> importedProjects) {
