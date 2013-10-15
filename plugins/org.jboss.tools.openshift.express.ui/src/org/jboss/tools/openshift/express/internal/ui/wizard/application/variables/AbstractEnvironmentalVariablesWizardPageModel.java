@@ -148,7 +148,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	protected String delete(IEnvironmentVariable envVariable)
 	{
 		this.variablesDB.remove(envVariable);
-		envVariable.delete();
+		envVariable.destroy();
 		return "true";
 	}
 
@@ -235,7 +235,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 			@Override public void update(String value) throws OpenShiftException {}
 			@Override public String getValue() {return "Value";}
 			@Override public String getName() {return "Name";}
-			@Override public void delete() throws OpenShiftException {}
+			@Override public void destroy() throws OpenShiftException {}
 		};
 	}
 

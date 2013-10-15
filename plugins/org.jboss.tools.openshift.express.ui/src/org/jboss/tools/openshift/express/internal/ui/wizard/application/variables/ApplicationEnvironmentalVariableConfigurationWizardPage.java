@@ -92,8 +92,8 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		//Fake data for initial tests
 		/*pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel();
 		ArrayList<IEnvironmentVariable> testList = new ArrayList<IEnvironmentVariable>();
-		testList.add(pageModel.fakeIEnvironmentVariable());*/
-		pageModel.setVariablesDB(testList);
+		testList.add(pageModel.fakeIEnvironmentVariable());
+		pageModel.setVariablesDB(testList);*/
 		//End fake data for initial tests
 	}
 

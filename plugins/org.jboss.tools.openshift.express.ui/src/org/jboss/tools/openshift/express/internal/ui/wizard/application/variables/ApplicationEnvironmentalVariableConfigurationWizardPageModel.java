@@ -91,7 +91,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extend
 	 * @return
 	 */
 	public String getSingleSelectedVariableValue() {
-		return super.getVariablesDB().get(selectionName);
+		return super.getVariablesDB().get(super.getVariablesDB().lastIndexOf(super.getSelectedVariable())).getValue();
 	}
 	
 	public boolean isEmpty()
