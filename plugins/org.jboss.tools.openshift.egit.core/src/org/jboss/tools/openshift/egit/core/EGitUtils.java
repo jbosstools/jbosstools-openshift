@@ -86,7 +86,7 @@ import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
  */
 public class EGitUtils {
 
-	private static final int DEFAULT_TIMEOUT = 10 * 1024;
+	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
 	//	private static final RefSpec DEFAULT_PUSH_REF_SPEC = new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
 	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD
 	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS
