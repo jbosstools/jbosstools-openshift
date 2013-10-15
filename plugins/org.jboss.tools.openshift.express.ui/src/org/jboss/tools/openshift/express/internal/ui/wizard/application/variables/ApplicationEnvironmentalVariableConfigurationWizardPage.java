@@ -65,7 +65,9 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
 			IWizard wizard) {
 		super(title, description, pageName, wizard);
+
 		pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel();
+
 	}
 
 	/**
@@ -80,6 +82,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
 			IWizard wizard,DataBindingContext dbc) {
 		super(title, description, pageName, wizard);
+
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
