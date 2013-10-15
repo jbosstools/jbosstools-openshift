@@ -48,11 +48,11 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 	 * @param variableValue
 	 * @param wizard
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPage(Connection connection, IEnvironmentVariable envVariable, List<IEnvironmentVariable> envVariables, IWizard wizard) {
+	public ApplicationEnvironmentalVariableEditWizardPage(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel, IWizard wizard) {
 		super(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE, 
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION,
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_NAME, wizard);
-		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(connection, envVariable, envVariables);
+		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(confPageModel);
 	}
 
 	/** 

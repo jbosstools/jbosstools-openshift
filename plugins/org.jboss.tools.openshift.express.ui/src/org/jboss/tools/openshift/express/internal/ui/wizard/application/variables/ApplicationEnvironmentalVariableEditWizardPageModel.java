@@ -39,6 +39,8 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	
 	private IEnvironmentVariable envVariable;
 	
+	private ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel;
+	
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
 	 */
@@ -46,16 +48,12 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 		// TODO Auto-generated constructor stub
 	}
 	
-	/**
-	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizardPageModel
-	 * @param variableName
-	 * @param variableValue
-	 */
-	public ApplicationEnvironmentalVariableEditWizardPageModel(Connection connection, IEnvironmentVariable selectedVariable, List<IEnvironmentVariable> envVariables) {
-		super(PAGE_TITLE, connection, envVariables, selectedVariable);
-		this.envVariable = selectedVariable;
+	public ApplicationEnvironmentalVariableEditWizardPageModel(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
+		super(PAGE_TITLE, null, confPageModel.getVariablesDB(), confPageModel.getSelectedVariable());
+		this.envVariable = confPageModel.getSelectedVariable();
+		this.confPageModel = confPageModel;
 	}
-
+	
 	/**
 	 * Update method to update the value in the EnvironmentalVariables HashMap
 	 * using class variables
@@ -63,17 +61,8 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	 */
 	public String update()
 	{
-		return update(envVariable);
-	}
-	
-	/**
-	 * Update method to update the value in the EnvironmentalVariables HashMap
-	 * @param target
-	 * @param updateValue
-	 * @return
-	 */
-	public String updateVariable()
-	{
+		confPageModel.getVariablesDB().get(confPageModel.getVariablesDB().lastIndexOf(confPageModel.getSelectedVariable())).update(envVariable.getValue());
+		confPageModel.setSelectedVariable(envVariable);
 		return super.update(envVariable);
 	}
 	

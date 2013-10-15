@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2013 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,16 +22,11 @@ import com.openshift.client.IEnvironmentVariable;
  */
 public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 
-	//private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
-	private Connection user;
-	private IEnvironmentVariable envVariable;
-	private List<IEnvironmentVariable> envVariables;
 	private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
+	private ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel;
 	
-	public ApplicationEnvironmentalVariableEditWizard(Connection user, IEnvironmentVariable envVariable, List<IEnvironmentVariable> envVariables) {
-		this.user = user;
-		this.envVariable = envVariable;
-		this.envVariables = envVariables;
+	public ApplicationEnvironmentalVariableEditWizard(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
+		this.confPageModel = confPageModel;
 		setWindowTitle(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE);
 		setNeedsProgressMonitor(true);
 	}
@@ -44,7 +39,7 @@ public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		applicationEnvironmentalVariableEditWizardPage = new ApplicationEnvironmentalVariableEditWizardPage(user, envVariable, envVariables, this);
+		applicationEnvironmentalVariableEditWizardPage = new ApplicationEnvironmentalVariableEditWizardPage(confPageModel, this);
 		addPage(applicationEnvironmentalVariableEditWizardPage);
 	}
 }
