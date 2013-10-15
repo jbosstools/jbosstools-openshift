@@ -14,21 +14,23 @@ import org.eclipse.jface.wizard.Wizard;
 
 /**
  * @author Martin Rieman <mrieman@redhat.com>
+ * @author Martes G Wigglesworth
  */
 public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 
 	private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel;
 	
+
 	/**
-	 * 
 	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizard
-	 * @param confPageModel
+	 * @param pageModel
 	 */
-	public ApplicationEnvironmentalVariableEditWizard(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
-		this.confPageModel = confPageModel;
+	public ApplicationEnvironmentalVariableEditWizard(
+			ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel) {
 		setWindowTitle(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE);
 		setNeedsProgressMonitor(true);
+		this.confPageModel = pageModel;
 	}
 
 	@Override
