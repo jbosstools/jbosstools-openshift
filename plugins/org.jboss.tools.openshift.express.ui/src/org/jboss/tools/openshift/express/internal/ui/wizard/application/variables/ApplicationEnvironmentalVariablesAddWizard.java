@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
  * @author Martes G Wigglesworth <martes.wigglesworth@redhat.com>
@@ -38,7 +37,8 @@ public class ApplicationEnvironmentalVariablesAddWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		applicationEnvironmentalVariablesAddWizardPage.getPageModel().add();
-		//TODO put refresh here!!!
+		confPageModel.setVariablesDB(applicationEnvironmentalVariablesAddWizardPage.getPageModel().getVariablesDB());
+		confPageModel.setSelectedVariable(applicationEnvironmentalVariablesAddWizardPage.getPageModel().getSelectedVariable());
 		return true;
 	}
 
@@ -46,6 +46,13 @@ public class ApplicationEnvironmentalVariablesAddWizard extends Wizard {
 	{
 		applicationEnvironmentalVariablesAddWizardPage = new ApplicationEnvironmentalVariablesAddWizardPage(confPageModel, this);
 		addPage(applicationEnvironmentalVariablesAddWizardPage);
+	}
+
+	/**
+	 * @return the confPageModel
+	 */
+	public ApplicationEnvironmentalVariableConfigurationWizardPageModel getConfPageModel() {
+		return confPageModel;
 	}
 
 }

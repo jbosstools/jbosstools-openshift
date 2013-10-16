@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -208,8 +209,9 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				ApplicationEnvironmentalVariablesAddWizard wizard = new ApplicationEnvironmentalVariablesAddWizard(pageModel);
 				OkCancelButtonWizardDialog addVariableWizardDialog =
-					new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesAddWizard(pageModel));
+					new OkCancelButtonWizardDialog(getShell(), wizard);
 				addVariableWizardDialog.open();
 				refreshView();
 			}
@@ -284,26 +286,12 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		}
 	}
 	
-	private class RefreshKeysJob extends Job {
-
-		private RefreshKeysJob() {
-			super("Refreshing Environment Variable... ");
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			pageModel.refresh();
-			return Status.OK_STATUS;
-		}
-	}
-	
 	public void refreshView(){
 		try {
-			System.out.println("Poogass: "+pageModel.getVariablesDB().get(0).getClass().getName());
-			WizardUtils.runInWizard(
-				new JobChainBuilder(new RemoveKeyJob()).andRunWhenDone(
-					new RefreshViewerJob()).build(), getContainer(), getDatabindingContext() );
+			WizardUtils.runInWizard(new RefreshViewerJob(), getContainer(), getDatabindingContext() );
 		} catch (Exception ex) {
+			StatusManager.getManager().handle(
+					OpenShiftUIActivator.createErrorStatus("Could not refresh variables.", ex), StatusManager.LOG);
 		}
 	}
 
@@ -318,17 +306,12 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			IEnvironmentVariable envVariable = pageModel.getSelectedVariable();
 			viewer.setInput(pageModel.getVariablesDB());
 			if (envVariable != null) {
-				viewer.setSelection(new StructuredSelection(envVariable), true);
+//				viewer.setSelection(new StructuredSelection(envVariable), true);
 			}
 			return Status.OK_STATUS;
 		}
 	}
 	
-	private void setWizardPageDescription(String newDescription)
-	{
-		//pageModel.setDescription(newDescription);
-	}
-
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel;
 	private TableViewer viewer;
 }
