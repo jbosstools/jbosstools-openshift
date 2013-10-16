@@ -47,6 +47,6 @@ public class OpenShiftImages {
 	public static final Image TASK_REPO_IMG = repo.getImage("task-repository.gif"); //$NON-NLS-1$ 
 	public static final ImageDescriptor SYSTEM_PROCESS = repo.create("systemprocess.gif"); //$NON-NLS-1$ 
 	public static final Image SYSTEM_PROCESS_IMG = repo.getImage("systemprocess.gif"); //$NON-NLS-1$ 
-	public static final ImageDescriptor LIBRARY = repo.create("library.png"); //$NON-NLS-1$ 
-	public static final Image LIBRARY_IMG = repo.getImage("library.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor GLOBE = repo.create("globe.png"); //$NON-NLS-1$ 
+	public static final Image GLOBE_IMG = repo.getImage("globe.png"); //$NON-NLS-1$ 
 }

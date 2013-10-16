@@ -713,7 +713,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.manageDomains"
-                icon="icons/library.png"
+                icon="icons/globe.png"
                 mnemonic="M">
               <visibleWhen>
 				<with variable="selection">
@@ -750,7 +750,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.newdomain"
-                icon="icons/library_new.png"
+                icon="icons/globe_new.png"
                 id="org.jboss.tools.openshift.express.ui.command.newdomain"
                 mnemonic="D">
            <visibleWhen>
@@ -800,7 +800,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.editdomain"
-                icon="icons/library_edit.png"
+                icon="icons/globe_edit.png"
                 id="org.jboss.tools.openshift.express.ui.command.editdomain"
                 mnemonic="E">
            <visibleWhen>
@@ -842,7 +842,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edition">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.deletedomain"
-                icon="icons/library_delete.png"
+                icon="icons/globe_delete.png"
                 id="org.jboss.tools.openshift.express.ui.command.deletedomain"
                 mnemonic="D">
            <visibleWhen>
