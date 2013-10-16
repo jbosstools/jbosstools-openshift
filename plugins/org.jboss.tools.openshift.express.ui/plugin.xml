@@ -218,7 +218,22 @@
             id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
             name="OpenShift Explorer">
       </view>
-      
+   </extension>
+   <extension
+           point="org.eclipse.ui.viewActions">
+        <viewContribution
+              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewContribution"
+              targetID="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+           <action
+                 class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.ConnectionWizardActionDelegate"
+                 icon="icons/resource_obj.gif"
+                 id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
+                 label="Connect"
+                 style="push"
+                 toolbarPath="openshift"
+                 tooltip="Connect to OpenShift">
+           </action>
+        </viewContribution>
    </extension>
    <extension point="org.eclipse.ui.navigator.viewer">
       <viewer
