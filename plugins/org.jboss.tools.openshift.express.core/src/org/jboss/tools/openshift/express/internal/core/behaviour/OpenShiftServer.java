@@ -75,4 +75,10 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 	public ServerExtendedProperties getExtendedProperties() {
 		return new OpenShiftServerExtendedProperties(getServer());
 	}
+
+	@Override
+	public boolean isUseProjectSpecificSchedulingRuleOnPublish() {
+		// ensure we're locking the whole workspace while publishing.
+		return false;
+	}
 }

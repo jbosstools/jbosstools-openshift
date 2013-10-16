@@ -15,7 +15,6 @@ import java.io.File;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceRuleFactory;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -25,8 +24,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.lib.Repository;
@@ -75,25 +72,15 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
 			IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 			
-			if (allSubModulesPublished 
+			if (allSubModulesPublished
 					|| (destFolder != null && destFolder.isAccessible())) {
-				ISchedulingRule originalRule = Job.getJobManager().currentRule();
-				Job.getJobManager().endRule(originalRule);
-
-				IResourceRuleFactory ruleFactory = ResourcesPlugin.getWorkspace().getRuleFactory();
-				ISchedulingRule workspaceLock = ruleFactory.modifyRule(ResourcesPlugin.getWorkspace().getRoot());
-				try {
-					Job.getJobManager().beginRule(workspaceLock, monitor);
-					refreshProject(destProj, submon(monitor, 100));
-					commitAndPushProject(destProj, behaviour, submon(monitor, 100));
-				} finally {
-					Job.getJobManager().endRule(workspaceLock);
-					Job.getJobManager().beginRule(originalRule, monitor);
-				}
+				refreshProject(destProj, submon(monitor, 100));
+				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
 			} // else ignore. (one or more modules not published AND magic
 				// folder doesn't exist
 				// The previous exception will be propagated.
 		}
+		
 		return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;
 	}
 
