@@ -60,7 +60,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		if (element instanceof Connection) {
 			image = OpenShiftImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
 		} else if (element instanceof IDomain) {
-			image = OpenShiftImages.LIBRARY_IMG;
+			image = OpenShiftImages.GLOBE_IMG;
 		} else if (element instanceof IApplication) {
 			image = OpenShiftImages.QUERY_IMG;
 		} else if (element instanceof IEmbeddedCartridge) {
