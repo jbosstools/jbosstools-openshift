@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,31 +71,35 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 	}
 
 	public Session createSession(final IApplication application) throws OpenShiftSSHOperationException {
-		final URIish uri = getSshUri(application);
-		final Session session = cache.get(uri);
-		if (session == null || !session.isConnected()) {
-			final FS fs = FS.DETECTED;
-			if (config == null) {
-				config = OpenSshConfig.get(fs);
+		try {
+			final URIish uri = getSshUri(application);
+			final Session session = cache.get(uri);
+			if (session == null || !session.isConnected()) {
+				final FS fs = FS.DETECTED;
+				if (config == null) {
+					config = OpenSshConfig.get(fs);
+				}
+				String user = uri.getUser();
+				String host = uri.getHost();
+				int port = uri.getPort();
+				JSch.setLogger(new JschToEclipseLogger());
+				final OpenSshConfig.Host hc = config.lookup(host);
+				try {
+					cache.put(uri, createSession(hc, user, host, port, fs));
+				} catch (JSchException e) {
+					throw new OpenShiftSSHOperationException(e, "Unable to create SSH session for application ''{0}''", application);
+				}
 			}
-			String user = uri.getUser();
-			String host = uri.getHost();
-			int port = uri.getPort();
-			JSch.setLogger(new JschToEclipseLogger());
-			final OpenSshConfig.Host hc = config.lookup(host);
-			try {
-				cache.put(uri, createSession(hc, user, host, port, fs));
-			} catch (JSchException e) {
-				throw new OpenShiftSSHOperationException(e, "Unable to create SSH session for application ''{0}''", application);
-			}
+			return cache.get(uri);
+		} catch (URISyntaxException e1) {
+			throw new OpenShiftSSHOperationException(e1, "Failed to create SSH Session for application ''{0}''", application.getName());
 		}
-		return cache.get(uri);
 	}
 
-	static URIish getSshUri(IApplication application) {
-		final String host = application.getName() + "-" + application.getDomain().getId() + "."
-				+ application.getDomain().getSuffix();
-		final String user = application.getUUID();
+	static URIish getSshUri(IApplication application) throws URISyntaxException {
+		final URI sshURI = new URI(application.getSshUrl());
+		final String host = sshURI.getHost();
+		final String user = sshURI.getUserInfo();
 		final URIish uri = new URIish().setHost(host).setPort(22).setUser(user);
 		return uri;
 	}
