@@ -53,9 +53,35 @@ public class ApplicationEnvironmentalVariablesAddWizardPageModel extends Abstrac
 	public String add()	{
 		envVariable = initializeIEnvironmentVariable(variableName, variableValue);
 		String returnString = super.add(envVariable);
-		confPageModel.setVariablesDB(getVariablesDB());
-		confPageModel.setSelectedVariable(getSelectedVariable());
 		return returnString;
+	}
+
+	/**
+	 * @return the variableName
+	 */
+	public String getVariableName() {
+		return variableName;
+	}
+
+	/**
+	 * @param variableName the variableName to set
+	 */
+	public void setVariableName(String variableName) {
+		this.variableName = variableName;
+	}
+
+	/**
+	 * @return the variableValue
+	 */
+	public String getVariableValue() {
+		return variableValue;
+	}
+
+	/**
+	 * @param variableValue the variableValue to set
+	 */
+	public void setVariableValue(String variableValue) {
+		this.variableValue = variableValue;
 	}
 
 }

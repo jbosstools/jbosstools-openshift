@@ -249,7 +249,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	public IEnvironmentVariable initializeIEnvironmentVariable(String variableName, String variableValue){
 		ApplicationEnvironmentVariable environmentVariable =  new ApplicationEnvironmentVariable();
 		environmentVariable.setEnvironmentVariable(variableName, variableValue);
-		return environmentVariable;
+		return (IEnvironmentVariable) environmentVariable;
 	}
 	
 	/**
