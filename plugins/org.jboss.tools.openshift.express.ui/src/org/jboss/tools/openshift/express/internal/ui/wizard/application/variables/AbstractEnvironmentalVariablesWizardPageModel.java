@@ -12,17 +12,27 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.variabl
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.action.ImportApplicationAction;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
+import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 import com.openshift.client.IField;
 import com.openshift.client.Message;
 import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
+import com.openshift.internal.client.ApplicationResource;
+import com.openshift.internal.client.DomainResource;
+import com.openshift.internal.client.EnvironmentVariableResource;
+import com.openshift.internal.client.response.ApplicationResourceDTO;
+import com.openshift.internal.client.response.Link;
 
 /**
  * @author Martes G Wigglesworth 
@@ -72,6 +82,16 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, Connection user, List<IEnvironmentVariable> variables, IEnvironmentVariable selectedVariable) {
 		this.pageTitle = pageTitle;
 		this.userConnection = user;
+		this.variablesDB = variables;
+		this.selectedVariable = selectedVariable;
+	}
+	
+	/**
+	 * Partial constructs a new instance of 
+	 * AbstractEnvironmentalVariablesWizardPageModel
+	 */
+	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, List<IEnvironmentVariable> variables, IEnvironmentVariable selectedVariable) {
+		this.pageTitle = pageTitle;
 		this.variablesDB = variables;
 		this.selectedVariable = selectedVariable;
 	}
@@ -215,7 +235,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	
 	private String pageTitle;
 	private Connection userConnection;
-	private List<IEnvironmentVariable> variablesDB;
+	private List<IEnvironmentVariable> variablesDB = new LinkedList<IEnvironmentVariable>();
 	/*
 	 * Another complex data type that works on the specific object that is used
 	 * in the client branch from JBIDE-15598 may make more sense.
@@ -226,17 +246,31 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	public static final String PROPERTY_SELECTED_VARIABLE = "selectedVariable";
 	public static final String PROPERTY_VARIABLES_DB = "variablesDB";
 	
-	public IEnvironmentVariable fakeIEnvironmentVariable(){
-		return new IEnvironmentVariable() {
-			@Override public void refresh() throws OpenShiftException {}
-			@Override public boolean hasCreationLog() {return false;}
-			@Override public Messages getMessages() {return new Messages(new HashMap<IField, List<Message>>());}
-			@Override public String getCreationLog() {return null;}
-			@Override public void update(String value) throws OpenShiftException {}
-			@Override public String getValue() {return "Value";}
-			@Override public String getName() {return "Name";}
-			@Override public void destroy() throws OpenShiftException {}
-		};
+	public IEnvironmentVariable initializeIEnvironmentVariable(String variableName, String variableValue){
+		ApplicationEnvironmentVariable environmentVariable =  new ApplicationEnvironmentVariable();
+		environmentVariable.setEnvironmentVariable(variableName, variableValue);
+		return environmentVariable;
+	}
+	
+	/**
+	 * @author Martin Rieman <mrieman@redhat.com>
+	 *
+	 */
+	protected class ApplicationEnvironmentVariable implements IEnvironmentVariable {
+		String name;
+		String value;
+		public void setEnvironmentVariable(String name, String value){
+			this.name = name;
+			this.value = value;
+		}
+		@Override public void refresh() throws OpenShiftException {}
+		@Override public boolean hasCreationLog() {return false;}
+		@Override public Messages getMessages() {return new Messages(new HashMap<IField, List<Message>>());}
+		@Override public String getCreationLog() {return null;}
+		@Override public void update(String value) throws OpenShiftException {this.value=value;}
+		@Override public String getValue() {return value;}
+		@Override public String getName() {return name;}
+		@Override public void destroy() throws OpenShiftException {}
 	}
 
 }

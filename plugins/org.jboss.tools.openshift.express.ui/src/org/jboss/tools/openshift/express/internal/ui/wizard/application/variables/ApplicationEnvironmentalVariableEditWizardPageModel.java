@@ -10,10 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.List;
-
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-
 import com.openshift.client.IEnvironmentVariable;
 
 /**
@@ -49,7 +45,7 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	}
 	
 	public ApplicationEnvironmentalVariableEditWizardPageModel(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
-		super(PAGE_TITLE, null, confPageModel.getVariablesDB(), confPageModel.getSelectedVariable());
+		super(PAGE_TITLE, confPageModel.getVariablesDB(), confPageModel.getSelectedVariable());
 		this.envVariable = confPageModel.getSelectedVariable();
 		this.confPageModel = confPageModel;
 	}
