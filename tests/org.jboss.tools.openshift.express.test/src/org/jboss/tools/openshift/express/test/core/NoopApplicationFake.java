@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.test.core;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.jcraft.jsch.Session;
@@ -20,6 +21,7 @@ import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.IDomain;
+import com.openshift.client.IEnvironmentVariable;
 import com.openshift.client.IGearGroup;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.Messages;
@@ -264,6 +266,47 @@ public class NoopApplicationFake implements IApplication {
 
 	@Override
 	public String getInitialGitUrl() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IEnvironmentVariable addEnvironmentVariable(String arg0, String arg1) throws OpenShiftSSHOperationException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, IEnvironmentVariable> addEnvironmentVariables(Map<String, String> arg0)
+			throws OpenShiftSSHOperationException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean canGetEnvironmentVariables() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean canUpdateEnvironmentVariables() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IEnvironmentVariable getEnvironmentVariable(String arg0) throws OpenShiftSSHOperationException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, IEnvironmentVariable> getEnvironmentVariables() throws OpenShiftSSHOperationException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getSshUrl() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean hasEnvironmentVariable(String arg0) throws OpenShiftSSHOperationException {
 		throw new UnsupportedOperationException();
 	}
 }
