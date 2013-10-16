@@ -11,18 +11,25 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
  * @author Martes G Wigglesworth <martes.wigglesworth@redhat.com>
- *
+ * @author Martin Rieman
+ * 
  */
 public class ApplicationEnvironmentalVariablesAddWizard extends Wizard {
+
+	private ApplicationEnvironmentalVariablesAddWizardPage applicationEnvironmentalVariablesAddWizardPage;
+	private ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel;
 
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariablesAddWizard
 	 */
-	public ApplicationEnvironmentalVariablesAddWizard() {
-		// TODO Auto-generated constructor stub
+	public ApplicationEnvironmentalVariablesAddWizard(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
+		this.confPageModel = confPageModel;
+		setWindowTitle(ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_TITLE);
+		setNeedsProgressMonitor(true);
 	}
 
 	/* (non-Javadoc)
@@ -30,13 +37,15 @@ public class ApplicationEnvironmentalVariablesAddWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		//The model should be updated in the body of this method.
+		applicationEnvironmentalVariablesAddWizardPage.getPageModel().add();
+		//TODO put refresh here!!!
 		return true;
 	}
-	
+
 	public void addPages()
 	{
-		addPage(new ApplicationEnvironmentalVariablesAddWizardPage("Variables Add Dialog", "Used to add a new variable to your application","New Variable Page", this));
+		applicationEnvironmentalVariablesAddWizardPage = new ApplicationEnvironmentalVariablesAddWizardPage(confPageModel, this);
+		addPage(applicationEnvironmentalVariablesAddWizardPage);
 	}
 
 }

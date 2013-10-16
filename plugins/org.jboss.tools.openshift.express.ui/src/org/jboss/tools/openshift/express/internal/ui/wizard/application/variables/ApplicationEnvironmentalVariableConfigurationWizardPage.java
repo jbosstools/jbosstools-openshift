@@ -10,7 +10,7 @@
  *****************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -40,7 +39,6 @@ import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
@@ -48,6 +46,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IC
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
+import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 
 /**
@@ -69,11 +68,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			IWizard wizard) {
 		super(title, description, pageName, wizard);
 		pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel();
-		// Fake Data for initial tests
-		/*ArrayList<IEnvironmentVariable> testList = new ArrayList<IEnvironmentVariable>();
-		testList.add(pageModel.fakeIEnvironmentVariable());
-		pageModel.setVariablesDB(testList);*/
-		// End fake data for initial tests
 	}
 
 	/**
@@ -88,13 +82,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
 			IWizard wizard,DataBindingContext dbc) {
 		super(title, description, pageName, wizard);
-		//pageModel.setVariableDB(dbc.)
-		//Fake data for initial tests
-		/*pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel();
-		ArrayList<IEnvironmentVariable> testList = new ArrayList<IEnvironmentVariable>();
-		testList.add(pageModel.fakeIEnvironmentVariable());
-		pageModel.setVariablesDB(testList);*/
-		//End fake data for initial tests
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
@@ -117,7 +104,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 					@Override
 					public String getValue(IEnvironmentVariable e) {
-						// TODO Auto-generated method stub
 						return e.getValue();
 					}
 					 
@@ -221,12 +207,12 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	private SelectionListener onAdd() {
 		return new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-					OkCancelButtonWizardDialog addVariableWizardDialog =
-						new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesAddWizard());
+			public void widgetSelected(SelectionEvent event) {
+				OkCancelButtonWizardDialog addVariableWizardDialog =
+					new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesAddWizard(pageModel));
 				addVariableWizardDialog.open();
+				refreshView();
 			}
-
 		};
 	}
 	
@@ -288,7 +274,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	private class RemoveKeyJob extends Job {
 
 		private RemoveKeyJob() {
-			super(NLS.bind("Removing SSH key {0}...", pageModel.getSelectedVariable()));
+			super(NLS.bind("Removing Environment Variable {0}...", pageModel.getSelectedVariable()));
 		}
 
 		@Override
@@ -301,7 +287,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	private class RefreshKeysJob extends Job {
 
 		private RefreshKeysJob() {
-			super("Refreshing SSH keys... ");
+			super("Refreshing Environment Variable... ");
 		}
 
 		@Override
@@ -310,11 +296,21 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			return Status.OK_STATUS;
 		}
 	}
+	
+	public void refreshView(){
+		try {
+			System.out.println("Poogass: "+pageModel.getVariablesDB().get(0).getClass().getName());
+			WizardUtils.runInWizard(
+				new JobChainBuilder(new RemoveKeyJob()).andRunWhenDone(
+					new RefreshViewerJob()).build(), getContainer(), getDatabindingContext() );
+		} catch (Exception ex) {
+		}
+	}
 
 	private class RefreshViewerJob extends UIJob {
 
 		public RefreshViewerJob() {
-			super("Refreshing ssh keys...");
+			super("Refreshing Environment Variables ...");
 		}
 
 		@Override

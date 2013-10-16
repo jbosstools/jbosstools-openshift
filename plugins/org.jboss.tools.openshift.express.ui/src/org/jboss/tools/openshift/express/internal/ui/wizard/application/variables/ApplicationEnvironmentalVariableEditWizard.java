@@ -10,12 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.List;
-
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-
-import com.openshift.client.IEnvironmentVariable;
 
 /**
  * @author Martin Rieman

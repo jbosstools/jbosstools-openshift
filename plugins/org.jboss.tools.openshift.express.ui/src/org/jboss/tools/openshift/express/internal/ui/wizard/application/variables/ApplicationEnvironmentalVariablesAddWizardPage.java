@@ -10,7 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
+import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
@@ -19,14 +23,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
  * @author Martes G Wigglesworth <martes.wigglesworth@redhat.com>
+ * @author Martin Rieman
  * 
  */
 public class ApplicationEnvironmentalVariablesAddWizardPage extends AbstractOpenShiftWizardPage {
 
+	private ApplicationEnvironmentalVariablesAddWizardPageModel pageModel;
 	/**
 	 * Constructs a new instance of
 	 * ApplicationEnvironmentalVariablesAddWizardPage
@@ -36,10 +45,11 @@ public class ApplicationEnvironmentalVariablesAddWizardPage extends AbstractOpen
 	 * @param pageName
 	 * @param wizard
 	 */
-	public ApplicationEnvironmentalVariablesAddWizardPage(String title, String description, String pageName,
-			IWizard wizard) {
-		super(title, description, pageName, wizard);
-		pageModel = new ApplicationEnvironmentalVariablesAddWizardPageModel();
+	public ApplicationEnvironmentalVariablesAddWizardPage(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel, IWizard wizard) {
+		super(ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_TITLE, 
+				ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_DESCRIPTION, 
+				ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_NAME, wizard);
+		pageModel = new ApplicationEnvironmentalVariablesAddWizardPageModel(confPageModel);
 	}
 
 	/*
@@ -71,16 +81,13 @@ public class ApplicationEnvironmentalVariablesAddWizardPage extends AbstractOpen
 		Text nameText = new Text(addApplicationEnvironmentalVariableGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
-		/*
-		 * Binding nameBinding = ValueBindingBuilder
-		 * .bind(WidgetProperties.text(SWT.Modify).observe(nameText))
-		 * .to(BeanProperties
-		 * .value(pageModel.getPROPERTY_VARIABLE_NAME()).observe(pageModel))
-		 * .notUpdatingParticipant() .in(dbc); ControlDecorationSupport.create(
-		 * nameBinding, SWT.LEFT | SWT.TOP, null, new
-		 * RequiredControlDecorationUpdater());
-		 */
-
+		Binding nameBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
+				.to(BeanProperties.value(ApplicationEnvironmentalVariablesAddWizardPageModel.PROPERTY_VARIABLE_NAME).observe(pageModel))
+				.in(dbc);
+		ControlDecorationSupport.create(
+				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
 		Label valueLabel = new Label(addApplicationEnvironmentalVariableGroup, SWT.NONE);
 		valueLabel.setText("New Variable Value:");
 		GridDataFactory.fillDefaults()
@@ -89,18 +96,19 @@ public class ApplicationEnvironmentalVariablesAddWizardPage extends AbstractOpen
 		Text valueText = new Text(addApplicationEnvironmentalVariableGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
-		/*
-		 * Binding valeuBinding = ValueBindingBuilder
-		 * .bind(WidgetProperties.text(SWT.Modify).observe(valueText))
-		 * .to(BeanProperties
-		 * .value(pageModel.getPROPERTY_VARIABLE_VALUE()).observe(pageModel))
-		 * .notUpdatingParticipant() .in(dbc);
-		 * 
-		 * ControlDecorationSupport.create( valeuBinding, SWT.LEFT | SWT.TOP,
-		 * null, new RequiredControlDecorationUpdater());
-		 */
+		Binding valeuBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(valueText))
+				.to(BeanProperties.value(ApplicationEnvironmentalVariablesAddWizardPageModel.PROPERTY_VARIABLE_VALUE).observe(pageModel))
+				.in(dbc);
+		ControlDecorationSupport.create(
+				valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 
-	private ApplicationEnvironmentalVariablesAddWizardPageModel pageModel;
+	/**
+	 * @return the pageModel
+	 */
+	public ApplicationEnvironmentalVariablesAddWizardPageModel getPageModel() {
+		return pageModel;
+	}
 
 }
