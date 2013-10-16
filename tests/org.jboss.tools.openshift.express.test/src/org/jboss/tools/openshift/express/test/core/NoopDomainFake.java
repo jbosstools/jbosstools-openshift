@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.test.core;
 
 import java.util.List;
+import java.util.Map;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -156,6 +157,13 @@ public class NoopDomainFake implements IDomain {
 	@Override
 	public IApplication createApplication(String name, IStandaloneCartridge standaloneCartridge, ApplicationScale scale,
 			IGearProfile profile, String initialGitUrl, int timeout, IEmbeddableCartridge... embeddableCartridges) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IApplication createApplication(String arg0, IStandaloneCartridge arg1, ApplicationScale arg2,
+			IGearProfile arg3, String arg4, int arg5, Map<String, String> arg6, IEmbeddableCartridge... arg7)
+			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 	
