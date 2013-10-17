@@ -355,7 +355,7 @@ public class EGitUtils {
 	 * 
 	 * @see #connect(IProject, Repository)
 	 */
-	private static RevCommit commit(IProject project, String commitMessage,
+	public static RevCommit commit(IProject project, String commitMessage,
 			IProgressMonitor monitor) throws CoreException {
 		Repository repository = getRepository(project);
 		Assert.isLegal(repository != null,

@@ -39,6 +39,7 @@ import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
 import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.core.IQuestionHandler;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 
@@ -198,11 +199,21 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		PushOperationResult result = null;
 		int changes = OpenShiftServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
 		if (changes > 0) {
-			if (OpenshiftCoreUIIntegration.requestApproval(
-					NLS.bind(OpenShiftServerMessages.commitAndPushMsg, changes, p.getName()),
-					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
+			String[] data = new String[]{
+					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()),
+					NLS.bind(OpenShiftServerMessages.commitAndPushMsg, changes, p.getName())
+			};
+			
+			Object[] ret = OpenshiftCoreUIIntegration.openMultiReturnQuestion(IQuestionHandler.COMMIT_AND_PUSH_QUESTION, data);
+			if( ret != null && ret.length > 0 && ret[0] != null && ((Boolean)ret[0]).booleanValue()) {
+				String msg = (ret.length > 1 && ret[1] != null) ? ((String)ret[1]) : null;
+				
 				monitor.beginTask("Publishing " + p.getName(), 300);
-				EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
+				if( msg == null )
+					EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
+				else
+					EGitUtils.commit(p, msg, new SubProgressMonitor(monitor, 100));
+					
 				OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
 				result = push(p, behaviour.getServer(), monitor);
 			}
