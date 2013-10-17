@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.EclipseGitProgressTransformer;
 import org.eclipse.egit.core.IteratorService;
@@ -86,7 +87,12 @@ import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
  */
 public class EGitUtils {
 
-	private static final int DEFAULT_TIMEOUT = 10 * 1024;
+	private static final String EGIT_UI_PLUGIN_ID = "org.eclipse.egit.ui";
+	/*
+	 * @see org.eclipse.egit.ui.UIPreferences#REMOTE_CONNECTION_TIMEOUT
+	 */
+	private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
+	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
 	//	private static final RefSpec DEFAULT_PUSH_REF_SPEC = new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
 	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD
 	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS
@@ -257,7 +263,7 @@ public class EGitUtils {
 			InvocationTargetException, InterruptedException {
 		URIish gitUri = new URIish(uri);
 		CloneOperation cloneOperation = new CloneOperation(gitUri, true, null,
-				destination, Constants.HEAD, remoteName, DEFAULT_TIMEOUT);
+				destination, Constants.HEAD, remoteName, getEgitTimeout());
 		if (postCloneTask != null) {
 			cloneOperation.addPostCloneTask(postCloneTask);
 		}
@@ -539,7 +545,7 @@ public class EGitUtils {
 		Collection<RefSpec> fetchRefSpecs = getFetchRefSpec(remoteConfig);
 		Collection<RefSpec> pushRefSpecs = setForceUpdate(force, getPushRefSpecs(remoteConfig));
 		PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, fetchRefSpecs, repository);
-		PushOperation pushOperation = new PushOperation(repository, pushSpec, false, DEFAULT_TIMEOUT);
+		PushOperation pushOperation = new PushOperation(repository, pushSpec, false, getEgitTimeout());
 		pushOperation.setOutputStream(out);
 		return pushOperation;
 	}
@@ -1173,11 +1179,11 @@ public class EGitUtils {
 	public static FetchResult fetch(RemoteConfig config, Repository repo, IProgressMonitor monitor) throws InvocationTargetException {
 		FetchOperation op = null;
 		if (!config.getFetchRefSpecs().isEmpty()) {
-			op = new FetchOperation(repo, config, DEFAULT_TIMEOUT, false);
+			op = new FetchOperation(repo, config, getEgitTimeout(), false);
 		} else {
 			List<RefSpec> refSpecs = Arrays.asList(new RefSpec("+refs/heads/*:refs/remotes/" + config.getName() + "/*"));
 			URIish fetchURI = getFetchURI(config);
-			op = new FetchOperation(repo, fetchURI, refSpecs, DEFAULT_TIMEOUT, false);
+			op = new FetchOperation(repo, fetchURI, refSpecs, getEgitTimeout(), false);
 		}
 		
 		op.run(monitor);
@@ -1290,5 +1296,8 @@ public class EGitUtils {
 		return matcher.group(group);
 	}
 
-	
+	private static final int getEgitTimeout() {
+		return Platform.getPreferencesService().
+		    	  getInt(EGIT_UI_PLUGIN_ID, REMOTE_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, null);
+	}
 }
