@@ -125,47 +125,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		*/
 		throw new OpenShiftException("getApplicationEnvironmentalVariables() is not implemented yet.");
 	}
-	public String[] getApplicationEnvironmentalVariableNames(String appTargetName)
-	{
-		throw new OpenShiftException("getApplicationEnvironmentalVariableNamess() is not implemented yet.");
-		// Placeholder code to support retrieval of environmental variables from relevant api call(s).
-		/*
-		try {
-			List<IApplication> applications = this.getApplications();
-			String[] applicationVariableNames = null;
-			for (int i = 0; i < applications.size(); i++) {
-				IApplication currentApp = applications.get(i);
-				if(  currentApp.getName()== appTargetName)
-				{
-					List<IEnvironmentalVariable> targetAppVariableList = currentApp.getEnvironmentalVariables();
-					applicationVariableNames = new String[currentVariableList.size()];
-					for(int j=0;j<currentVariableList.size();j++)
-						applicationvariableValues[j]=currentVaribleList.get(j).getName();
-				}
-			}
-			return applicationVariableNames;
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve list of OpenShift application Variables", e);
-			return new String[0];
-		} catch (SocketTimeoutException e) {
-			Logger.error("Failed to retrieve list of OpenShift applications Variables due to time out.", e);
-			return new String[0];
-		}
-		*/
-		
-	}
-
-	//public List<IEnvironmentalVaraible> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
-	public List<Object> getApplicationEnvironmentalVariables() throws OpenShiftException, SocketTimeoutException {
-		/*
-		Connection user = getConnection();
-		if (user == null || !user.isConnected() || !user.hasDomain()) {
-			return Collections.emptyList();
-		}
-		return user.getApplicationEnvironmentalVariables();
-		*/
-		throw new OpenShiftException("getApplicationEnvironmentalVariables() is not implemented yet.");
-	}
+	
 	public String[] getApplicationEnvironmentalVariableNames(String appTargetName)
 	{
 		throw new OpenShiftException("getApplicationEnvironmentalVariableNamess() is not implemented yet.");
