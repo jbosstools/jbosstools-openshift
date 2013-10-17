@@ -40,12 +40,10 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel;
 	
 	/**
-	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
+	 * 
+	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizardPageModel
+	 * @param confPageModel
 	 */
-	public ApplicationEnvironmentalVariableEditWizardPageModel() {
-		// TODO Auto-generated constructor stub
-	}
-	
 	public ApplicationEnvironmentalVariableEditWizardPageModel(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
 		super(PAGE_TITLE, confPageModel.getVariablesDB(), confPageModel.getSelectedVariable());
 		this.envVariable = confPageModel.getSelectedVariable();
@@ -61,6 +59,7 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 	 */
 	public String update()
 	{
+		envVariable.update(variableValue);
 		confPageModel.getVariablesDB().get(confPageModel.getVariablesDB().lastIndexOf(confPageModel.getSelectedVariable())).update(envVariable.getValue());
 		confPageModel.setSelectedVariable(envVariable);
 		return super.update(envVariable);
