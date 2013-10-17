@@ -14,8 +14,6 @@ import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
-import com.openshift.client.OpenShiftException;
-
 /**
  * Used to persist information associated with the
  * ApplicationEnvironmentalVariableConfigurationWizardPage vew.
@@ -42,22 +40,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extend
 	public ApplicationEnvironmentalVariableConfigurationWizardPageModel(String pageTitle, Connection newConnection) {
 		setPageTitle(pageTitle);
 		setUserConnection(newConnection);
-	}
-
-	
-	public List<String> getEnvironmentalVariablesNameList()
-	{
-		throw new OpenShiftException("Unemplimented method.");
-		//return null// TODO - Need to complete this once the client project
-					// object is identified and integrated.
-	}
-
-	// #TODO - Create data bindings for all fields necessary for this view.
-	public List<String> getEnvironmentalVariablesValueList()
-	{
-		throw new OpenShiftException("Unemplimented method.");
-		//return null;// TODO - Need to complete this once the client project
-					// object is identified and integrated.
 	}
 
 	/**
