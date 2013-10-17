@@ -177,6 +177,14 @@ public class ConnectionsModel {
 		return recentConnection;
 	}
 
+	/**
+	 * Returns the connection for a given application (OpenShift REST resource).
+	 * 
+	 * @param application the openshift application that we want the connection for
+	 * @return the connection that this applicaiton belongs to.
+	 * 
+	 * @throws OpenShiftCoreException
+	 */
 	public Connection getConnectionByResource(IApplication application) {
 		if (application == null) {
 			return null;
@@ -184,14 +192,28 @@ public class ConnectionsModel {
 		
 		return getConnectionByResource(application.getDomain().getUser());
 	}
-	
+
+	/**
+	 * Returns the connection for a given user (OpenShift REST resource).
+	 * 
+	 * @param user the openshift user
+	 * @return the connection that this user belongs to.
+	 * 
+	 * @throws OpenShiftCoreException
+	 */
 	public Connection getConnectionByResource(IUser user) throws OpenShiftCoreException {
 		if (user == null) {
 			return null;
 		}
 		try {
 			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndServer(user.getRhlogin(), user.getServer());
-			return connectionsByUrl.get(connectionUrl);
+			Connection c = connectionsByUrl.get(connectionUrl);
+			String defHost = ConnectionUtils.getDefaultHostUrl();
+			if (c == null && defHost.equals(user.getServer())) {
+				connectionUrl = ConnectionURL.forUsername(user.getRhlogin());
+				c = connectionsByUrl.get(connectionUrl);
+			}
+			return c;
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftCoreException(e, 
 					NLS.bind(
