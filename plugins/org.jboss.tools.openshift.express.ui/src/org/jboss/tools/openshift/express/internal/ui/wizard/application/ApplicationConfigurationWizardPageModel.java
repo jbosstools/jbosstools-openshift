@@ -501,6 +501,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	}
 
 	public void reset() throws OpenShiftException {
+		setDomain(wizardModel.getDomain());
 		setApplicationName(wizardModel.getApplication());
 		setExistingApplication(wizardModel.getApplication());
 		setUseExistingApplication(wizardModel.isUseExistingApplication());

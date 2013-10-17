@@ -402,7 +402,7 @@ public class Connection {
 		if (connect()) {
 			return user.getSSHKeys();
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException,
