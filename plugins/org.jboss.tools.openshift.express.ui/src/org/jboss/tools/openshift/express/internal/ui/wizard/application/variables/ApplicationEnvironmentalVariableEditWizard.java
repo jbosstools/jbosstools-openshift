@@ -20,6 +20,11 @@ public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 	private ApplicationEnvironmentalVariableEditWizardPage applicationEnvironmentalVariableEditWizardPage;
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel;
 	
+	/**
+	 * 
+	 * Constructs a new instance of ApplicationEnvironmentalVariableEditWizard
+	 * @param confPageModel
+	 */
 	public ApplicationEnvironmentalVariableEditWizard(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
 		this.confPageModel = confPageModel;
 		setWindowTitle(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE);
@@ -31,7 +36,6 @@ public class ApplicationEnvironmentalVariableEditWizard extends Wizard {
 		applicationEnvironmentalVariableEditWizardPage.getPageModel().update();
 		confPageModel.setVariablesDB(applicationEnvironmentalVariableEditWizardPage.getPageModel().getVariablesDB());
 		confPageModel.setSelectedVariable(applicationEnvironmentalVariableEditWizardPage.getPageModel().getSelectedVariable());
-		
 		return true;
 	}
 

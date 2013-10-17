@@ -52,6 +52,9 @@ public class ApplicationEnvironmentalVariablesAddWizardPage extends AbstractOpen
 		pageModel = new ApplicationEnvironmentalVariablesAddWizardPageModel(confPageModel);
 	}
 
+	/**
+	 * Creates the display for the Add wizard page
+	 */
 	/*
 	 * (non-Javadoc)
 	 * 

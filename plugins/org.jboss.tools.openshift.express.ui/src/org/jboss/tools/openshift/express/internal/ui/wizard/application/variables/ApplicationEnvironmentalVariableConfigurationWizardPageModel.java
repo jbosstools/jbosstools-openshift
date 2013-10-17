@@ -32,50 +32,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extend
 		setDescription("Used to configure application specific environmental variables for your OpenShift Gear");
 	}
 
-	public ApplicationEnvironmentalVariableConfigurationWizardPageModel(Connection newConnection) {
-		setPageTitle("Environmental Variables Configuration Wizard");
-		setUserConnection(newConnection);
-	}
-
-	public ApplicationEnvironmentalVariableConfigurationWizardPageModel(String pageTitle, Connection newConnection) {
-		setPageTitle(pageTitle);
-		setUserConnection(newConnection);
-	}
-
-	/**
-	 * @return
-	 */
-	public String getSingleSelectedVariableName() {
-		
-		return selectionName;
-	}
-
-	private List<String> selectionNameList;
-	
-	public List<String> getSelectionList()
-	{
-		return selectionNameList;
-	}
-
-	private String selectionName;
-	
-	public void setSelection(String variableName)
-	{
-		 selectionName=variableName;
-	}
-	
-	public void setSelection(List<String> variableNameList)
-	{
-		selectionNameList = variableNameList;
-	}
-
-	/**
-	 * @return
-	 */
-	public String getSingleSelectedVariableValue() {
-		return super.getVariablesDB().get(super.getVariablesDB().lastIndexOf(super.getSelectedVariable())).getValue();
-	}
-	
 	public boolean isEmpty()
 	{
 		return !( super.getVariablesDB().isEmpty());

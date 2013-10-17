@@ -25,9 +25,7 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 	 * Constructs a new instance of ApplicationEnvironmentalVariablesWizard
 	 */
 	public ApplicationEnvironmentalVariablesWizard() {
-		// TODO Auto-generated constructor stub
-	}
-
+	};
 
 	public ApplicationEnvironmentalVariablesWizard(DataBindingContext dbc)
 	{
@@ -40,6 +38,10 @@ public class ApplicationEnvironmentalVariablesWizard extends Wizard {
 				"Used to create and edit variables for OpenShift Applications", "Variables Table View", this));
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public DataBindingContext getDataBindingContext()
 	{
 		return dbc;

@@ -81,6 +81,7 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 		
 		Text nameText = new Text(editApplicationEnvironmentalVariableGroup, SWT.BORDER);
+		nameText.setEditable(false);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
@@ -99,6 +100,7 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 		
 		Text valueText = new Text(editApplicationEnvironmentalVariableGroup, SWT.BORDER);
+		valueText.setFocus();
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
 		Binding valeuBinding = ValueBindingBuilder
@@ -118,6 +120,4 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 		return pageModel;
 	}
 	
-
-
 }
