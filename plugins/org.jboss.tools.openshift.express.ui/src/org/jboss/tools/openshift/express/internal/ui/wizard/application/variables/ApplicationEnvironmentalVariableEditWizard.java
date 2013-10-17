@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.variabl
 import org.eclipse.jface.wizard.Wizard;
 
 /**
+ * 
  * @author Martin Rieman <mrieman@redhat.com>
  * @author Martes G Wigglesworth
  */
