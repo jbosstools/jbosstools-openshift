@@ -152,4 +152,19 @@ public class OpenshiftCoreUIIntegration {
 		IQuestionHandler handler = getDefault().getQuestionHandler();
 		return handler == null ? false : handler.openQuestion(title, message, defaultAnswer);
 	}
+	
+	
+	/**
+	 * Open a dialog or question that has multiple pieces of data to return. 
+	 * 
+	 * @param type an integer representing the specific question type being asked
+	 * @param data an array of object for use by the dialog
+	 * @return
+	 */
+	public static Object[] openMultiReturnQuestion(int type, Object[] data) {
+		IQuestionHandler handler = getDefault().getQuestionHandler();
+		return handler == null ? null : handler.openMultiReturnQuestion(type, data);
+	}
+
+	
 }
