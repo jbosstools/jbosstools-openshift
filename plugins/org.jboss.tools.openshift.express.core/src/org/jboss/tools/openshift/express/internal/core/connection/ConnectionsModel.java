@@ -191,7 +191,13 @@ public class ConnectionsModel {
 		}
 		try {
 			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndServer(user.getRhlogin(), user.getServer());
-			return connectionsByUrl.get(connectionUrl);
+			Connection c = connectionsByUrl.get(connectionUrl);
+			String defHost = ConnectionUtils.getDefaultHostUrl();
+			if( c == null && defHost.equals(user.getServer())) {
+				connectionUrl = ConnectionURL.forUsername(user.getRhlogin());
+				c = connectionsByUrl.get(connectionUrl);
+			}
+			return c;
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftCoreException(e, 
 					NLS.bind(
