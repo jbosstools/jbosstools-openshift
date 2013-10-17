@@ -10,9 +10,6 @@
  *****************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,11 +44,11 @@ import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IC
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
-import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 
 /**
  * @author Martes G Wigglesworth
+ * @author Martin Rieman <mrieman@redhat.com>
  * 
  */
 public class ApplicationEnvironmentalVariableConfigurationWizardPage extends AbstractOpenShiftWizardPage {
@@ -98,7 +95,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 					public String getValue(IEnvironmentVariable e) {
 						return e.getName();
 					}
-					
 				})
 				.name("Variable Name").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
 				.column(new IColumnLabelProvider<IEnvironmentVariable>() {
@@ -107,7 +103,6 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 					public String getValue(IEnvironmentVariable e) {
 						return e.getValue();
 					}
-					 
 				})
 				.name("Variable Value").align(SWT.CENTER).weight(2).minWidth(100).buildColumn()
 				.buildViewer();
@@ -129,59 +124,65 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
 
-		Group keysGroup = new Group(container, SWT.NONE);
+		Group envVariableGroup = new Group(container, SWT.NONE);
 		//TODO - Add call to method to generate "on-demand" application name.
-		keysGroup.setText("Environmental Variables for this Application");
+		envVariableGroup.setText("Environmental Variables for this Application");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(keysGroup);
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envVariableGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(keysGroup);
+				.numColumns(2).margins(6, 6).applyTo(envVariableGroup);
 
-		Composite tableContainer = new Composite(keysGroup, SWT.NONE);
+		Composite tableContainer = new Composite(envVariableGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-			.to(BeanProperties.value(ApplicationEnvironmentalVariableConfigurationWizardPageModel.PROPERTY_VARIABLES_DB).observe(pageModel))
+			.to(BeanProperties.value(ApplicationEnvironmentalVariableConfigurationWizardPageModel.PROPERTY_SELECTED_VARIABLE).observe(pageModel))
 			.in(dbc);
 
-		Button addButton = new Button(keysGroup, SWT.PUSH);
+		Button addButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
 		addButton.setText("Add...");
 		addButton.addSelectionListener(onAdd());
 
-		Button editExistingButton = new Button(keysGroup, SWT.PUSH);
+		Button editExistingButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		editExistingButton.addSelectionListener(onEditExisting());
 		editExistingButton.setEnabled(pageModel.isEmpty());
 
-		Button removeButton = new Button(keysGroup, SWT.PUSH);
+		Button removeButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.setEnabled(pageModel.isEmpty());//This should be bound to the existence of variables in the table.
 		removeButton.addSelectionListener(onRemove());
 
-		Button importButton = new Button(keysGroup, SWT.PUSH);
+		Button importButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(importButton);
 		importButton.setText("Import...");
 		importButton.addSelectionListener(onImport());
 
-		Button exportButton = new Button(keysGroup, SWT.PUSH);
+		Button exportButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(exportButton);
 		exportButton.setText("Export...");
 		exportButton.setEnabled(pageModel.isEmpty());//This should be bound to the existence of variables in the table.
 		exportButton.addSelectionListener(onExport());
 
-		Composite filler = new Composite(keysGroup, SWT.None);
+		Composite filler = new Composite(envVariableGroup, SWT.None);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(filler);
 
+		addButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
+		editExistingButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
+		removeButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
+		importButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
+		
+		
 		createAppVariableConfigurationGroup(container, dbc);
 	}
 
@@ -258,11 +259,11 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 						"Remove Environment Variable",
 						NLS.bind(
 							"Are you sure that you want to remove the variable {0} from your OpenShift application?",
-							selectedVariable)))
+							selectedVariable.getName()+"="+selectedVariable.getValue())))
 					try {
 						pageModel.delete(selectedVariable);
 						WizardUtils.runInWizard(
-							new JobChainBuilder(new RemoveKeyJob()).andRunWhenDone(
+							new JobChainBuilder(new RemoveVarJob()).andRunWhenDone(
 								new RefreshViewerJob()).build(), getContainer(), getDatabindingContext() );
 					} catch (Exception ex) {
 						StatusManager.getManager().handle(
@@ -273,9 +274,9 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		};
 	}
 	
-	private class RemoveKeyJob extends Job {
+	private class RemoveVarJob extends Job {
 
-		private RemoveKeyJob() {
+		private RemoveVarJob() {
 			super(NLS.bind("Removing Environment Variable {0}...", pageModel.getSelectedVariable()));
 		}
 
@@ -306,9 +307,25 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			IEnvironmentVariable envVariable = pageModel.getSelectedVariable();
 			viewer.setInput(pageModel.getVariablesDB());
 			if (envVariable != null) {
-//				viewer.setSelection(new StructuredSelection(envVariable), true);
+				viewer.setSelection(new StructuredSelection(envVariable),true);
 			}
 			return Status.OK_STATUS;
+		}
+	}
+	
+	private SelectionListener variablesListListerner(final Button... buttons) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateButtonsEnabled(buttons);
+			}
+		};
+	}
+
+	private void updateButtonsEnabled(Button... buttons) {
+		for (Button button : buttons){
+			button.setEnabled(pageModel.isEmpty());
 		}
 	}
 	

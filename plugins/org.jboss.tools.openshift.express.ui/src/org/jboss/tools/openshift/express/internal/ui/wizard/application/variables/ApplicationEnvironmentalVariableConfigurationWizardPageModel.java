@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
-import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
 
 /**
