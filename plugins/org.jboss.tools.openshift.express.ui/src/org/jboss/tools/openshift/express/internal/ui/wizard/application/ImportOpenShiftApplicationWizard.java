@@ -3,11 +3,8 @@
  */
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils;
 
 import com.openshift.client.IApplication;
 
@@ -38,15 +35,5 @@ public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard
 	public ImportOpenShiftApplicationWizard(IApplication application, boolean showCredentialsPage) {
 		super(ConnectionsModelSingleton.getInstance().getConnectionByResource(application),
 				application.getDomain(), application, null, true, showCredentialsPage, "Import OpenShift Application");
-	}
-
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		if (!ensureHasDomain()
-				|| !ensureHasSSHKeys()) {
-			dispose();
-			WizardUtils.close(this);
-			return;
-		}
 	}
 }

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.job;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,7 +27,7 @@ import com.openshift.client.IOpenShiftSSHKey;
 public class LoadKeysJob extends Job {
 
 	private Connection user;
-	private List<IOpenShiftSSHKey> keys;
+	private List<IOpenShiftSSHKey> keys = new ArrayList<IOpenShiftSSHKey>();
 
 	public LoadKeysJob(Connection user) {
 		super("Loading SSH keys... ");
