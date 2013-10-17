@@ -10,12 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.console;
 
+import java.util.Collection;
+
 import org.eclipse.jface.wizard.Wizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IGearGroup;
 
 /**
- * @author Andr?? Dietisheim
+ * @author Andre Dietisheim
+ * @author Xavier Coulon
  */
 public class TailFilesWizard extends Wizard {
 
@@ -28,6 +32,13 @@ public class TailFilesWizard extends Wizard {
 	}
 
 	@Override
+	public boolean canFinish() {
+		final Collection<IGearGroup> selectedGearGroups = getSelectedGearGroups();
+		return selectedGearGroups != null && !selectedGearGroups.isEmpty();
+	}
+	
+	
+	@Override
 	public boolean performFinish() {
 		return true;
 	}
@@ -39,6 +50,14 @@ public class TailFilesWizard extends Wizard {
 	
 	public String getFilePattern() {
 		return model.getFilePattern();
+	}
+
+	/**
+	 * @return true if the 'tail' command be executed on all gears (if the
+	 *         application is scalable), false otherwise.
+	 */
+	public Collection<IGearGroup> getSelectedGearGroups() {
+		return model.getSelectedGearGroups();
 	}
 
 }

@@ -12,7 +12,10 @@ package org.jboss.tools.openshift.express.internal.ui.action;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +45,7 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
+import org.jboss.tools.openshift.express.internal.ui.console.GearGroupsUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
 import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
@@ -50,10 +54,10 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
 import com.openshift.client.IApplication;
+import com.openshift.client.IGear;
+import com.openshift.client.IGearGroup;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftSSHOperationException;
 import com.openshift.client.utils.Base64Coder;
 
 /**
@@ -65,7 +69,8 @@ import com.openshift.client.utils.Base64Coder;
 public class TailServerLogAction extends AbstractOpenShiftAction implements IConsoleListener {
 
 	/**
-	 * The message consoles associated with the 'tail' workers that write the output.
+	 * The message consoles associated with the 'tail' workers that write the
+	 * output.
 	 */
 	private Map<String, TailServerLogWorker> consoleWorkers = new HashMap<String, TailServerLogWorker>();
 
@@ -78,8 +83,9 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	}
 
 	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no Console/Worker existed, a new one is
-	 * created, otherwise, it is displayed. {@inheritDoc}
+	 * Operation called when the user clicks on 'Show In>Remote Console'. If no
+	 * Console/Worker existed, a new one is created, otherwise, it is displayed.
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void run() {
@@ -101,24 +107,32 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 		}
 	}
 
-	private void run(final IApplication application) throws OpenShiftException, MalformedURLException {
-		final String host = new URL(application.getApplicationUrl()).getHost();
-		final String appName = application.getName();
-		final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(appName, host));
-		ConsoleUtils.displayConsoleView(console);
-		if (!this.consoleWorkers.containsKey(console.getName())) {
-			launchTailServerJob(host, application, console);
+	private void run(final IApplication app) throws OpenShiftException, MalformedURLException {
+		final TailFilesWizard wizard = new TailFilesWizard(app);
+		if (WizardUtils.openWizardDialog(
+				wizard, Display.getCurrent().getActiveShell()) == Window.OK) {
+			final String host = new URL(app.getApplicationUrl()).getHost();
+			for(IGearGroup gearGroup : wizard.getSelectedGearGroups()) {
+				final Collection<IGear> gears = gearGroup.getGears();
+				final String cartridgeNames = GearGroupsUtils.getCartridgeDisplayNames(gearGroup);
+				for(IGear gear : gears) {
+					final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(host, gear.getId(), cartridgeNames));
+					ConsoleUtils.displayConsoleView(console);
+					if (!this.consoleWorkers.containsKey(console.getName())) {
+						launchTailServerJob(gear.getSshUrl(), wizard.getFilePattern(), console);
+					}
+				}
+			}
 		}
 	}
 
-	private static String createConsoleId(String appName, String host) {
-		return host;
+	private static String createConsoleId(final String host, final String gearId, final String cartridgeNames) {
+		return host + " [" + cartridgeNames + " on gear #" + gearId + "]" ;
 	}
 
-	private void run(final IServer server) {
-		if (OpenShiftServerUtils.isOpenShiftRuntime(server) 
+	private void run(final IServer server) throws OpenShiftException, MalformedURLException {
+		if (OpenShiftServerUtils.isOpenShiftRuntime(server)
 				|| OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
-			final String host = server.getHost();
 			final IApplication app = OpenShiftServerUtils.getApplication(server);
 			if (app == null) {
 				OpenShiftUIActivator.log(
@@ -127,68 +141,62 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 										"Please verify that the associated OpenShift Application still exists."));
 				return;
 			}
-			final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(app.getName(), host));
-			ConsoleUtils.displayConsoleView(console);
-			console.newMessageStream().println("Loading....");
-			if (!this.consoleWorkers.containsKey(console.getName())) {
-				launchTailServerJob(host, app, console);
-			}
+			run(app);
 		}
 	}
 
-	private void launchTailServerJob(final String host, final IApplication app,
-			final MessageConsole console) {
-		final TailFilesWizard wizard = new TailFilesWizard(app);
-		if (WizardUtils.openWizardDialog(
-				wizard, Display.getCurrent().getActiveShell()) == Window.OK) {
-			console.newMessageStream().println("Loading....");
-			new Job("Launching Tail Server Operation") {
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						final TailServerLogWorker tailServerLogWorker = 
-								startTailProcess(host, app.getUUID(), app.getName(), wizard.getFilePattern(), console);
-						consoleWorkers.put(console.getName(), tailServerLogWorker);
-						Thread thread = new Thread(tailServerLogWorker);
-						thread.start();
-					} catch (IOException e) {
-						return OpenShiftUIActivator.createErrorStatus(
-								NLS.bind("Failed to tail files for application ''{0}''", app.getName()), e);
-					}
-					return Status.OK_STATUS;
+	private void launchTailServerJob(final String sshUrl, final String filePattern, final MessageConsole console) {
+		new Job("Launching Tail Logs Operation") {
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					final TailServerLogWorker tailServerLogWorker =
+							startTailProcess(sshUrl, filePattern, console);
+					consoleWorkers.put(console.getName(), tailServerLogWorker);
+					Thread thread = new Thread(tailServerLogWorker);
+					thread.start();
+				} catch (IOException e) {
+					return OpenShiftUIActivator.createErrorStatus(
+							NLS.bind("Failed to tail files from ''{0}''", sshUrl), e);
+				} catch (URISyntaxException e) {
+					return OpenShiftUIActivator.createErrorStatus(
+							NLS.bind("Failed to tail files from ''{0}''", sshUrl), e);
 				}
-	
-			}.schedule();
-		}
+				return Status.OK_STATUS;
+			}
+
+		}.schedule();
 	}
 
 	/**
-	 * Starting the tail process on the remote OpenShift Platform. This method relies on the JGit SSH support (including
-	 * JSch) to open a connection AND execute a command in a single invocation. The connection establishement requires
-	 * an SSH key, and the passphrase is prompted to the user if necessary.
-	 * 
-	 * @param host the remote host to connect to
-	 * @param appId the application id, used as the user to establish the ssh connexion
-	 * @param appName the application name
-	 * @param optionsAndFilepattern the file pattern to use in the tail command
-	 * @return the Worker that encapsulate the established RemoteSession, the tail Process and the output console
-	 * @throws OpenShiftSSHOperationException 
-	 * @throws JSchException
-	 *             in case of underlying exception
-	 * @throws IOException
-	 *             in case of underlying exception
+	 * Starting the tail process on the remote OpenShift Platform. This method
+	 * relies on the JGit SSH support (including JSch) to open a connection AND
+	 * execute a command in a single invocation. The connection establishement
+	 * requires an SSH key, and the passphrase is prompted to the user if
+	 * necessary.
+	 
+	 * @param sshUrl
+	 * @param filePattern
+	 * @param optionsAndFile
+	 * @param console
+	 * @return
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	private TailServerLogWorker startTailProcess(final String host, final String appId, final String appName,
-			final String optionsAndFile, final MessageConsole console) throws IOException {
+	private TailServerLogWorker startTailProcess(final String sshUrl, final String optionsAndFile, final MessageConsole console) throws URISyntaxException, IOException {
 		JSch.setLogger(new JschToEclipseLogger());
 		final SshSessionFactory sshSessionFactory = SshSessionFactory.getInstance();
-		final URIish uri = new URIish().setHost(host).setUser(appId);
+		URI uri = new URI(sshUrl);
+		uri.getHost();
+		final URIish urish = new URIish().setHost(uri.getHost()).setUser(uri.getUserInfo());
 		RemoteSession remoteSession =
-				sshSessionFactory.getSession(uri, CredentialsProvider.getDefault(), FS.DETECTED, 0);
+				sshSessionFactory.getSession(urish, CredentialsProvider.getDefault(), FS.DETECTED, 0);
 		final String command = new TailCommandBuilder(optionsAndFile).build();
+
 		Logger.debug("ssh command to execute: " + command);
 		Process process = remoteSession.exec(command, 0);
 		return new TailServerLogWorker(console, process, remoteSession);
 	}
+
 
 	@Override
 	public void consolesAdded(IConsole[] consoles) {
@@ -196,10 +204,12 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	}
 
 	/**
-	 * Operation to perform when the console is removed (through the CloseConsoleAction that was brung by the
-	 * <code>TailConsolePageParticipant</code>). In the current case, the associated worker is stopped and the
-	 * console/worker are removed from the map, so that further 'Show In>Remote Console' invocation will trigger a new
-	 * worker process.
+	 * Operation to perform when the console is removed (through the
+	 * CloseConsoleAction that was brung by the
+	 * <code>TailConsolePageParticipant</code>). In the current case, the
+	 * associated worker is stopped and the console/worker are removed from the
+	 * map, so that further 'Show In>Remote Console' invocation will trigger a
+	 * new worker process.
 	 */
 	@Override
 	public void consolesRemoved(IConsole[] consoles) {
@@ -219,7 +229,7 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 
 		private String options;
 		private String file;
-		
+
 		public TailCommandBuilder(String optionsAndFile) {
 			init(optionsAndFile);
 		}
@@ -235,7 +245,7 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 				}
 			}
 		}
-		
+
 		public String build() {
 			StringBuilder builder = new StringBuilder("tail");
 			if (options != null) {
@@ -247,5 +257,5 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 			return builder.toString();
 		}
 	}
-	
+
 }
