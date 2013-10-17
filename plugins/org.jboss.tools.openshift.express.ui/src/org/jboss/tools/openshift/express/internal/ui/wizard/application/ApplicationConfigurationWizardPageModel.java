@@ -135,8 +135,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		if(this.existingApplicationsLoaded)
 			for (IApplication appTarget: getApplications())
 				if(appTarget.getName() == this.getApplicationName())
-					tempList = this.applicationEnvironmentalVariablesDB.get(appTarget.getName());
-		
+					tempList =  applicationEnvironmentalVariablesDB.get(appTarget.getName());		
 		return tempList;
 	}
 
