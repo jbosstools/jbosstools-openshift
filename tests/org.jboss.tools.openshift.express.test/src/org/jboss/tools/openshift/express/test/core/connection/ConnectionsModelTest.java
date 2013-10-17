@@ -183,6 +183,24 @@ public class ConnectionsModelTest {
 		assertEquals(connection, queriedConnection);
 	}
 
+	
+	private static class NoopUserFake2 extends NoopUserFake {
+		private String server, user;
+		public NoopUserFake2(String user, String server) {
+			this.server= server; 
+			this.user = user;
+		}
+		@Override
+		public String getServer() {
+			return server;
+		}
+
+		@Override
+		public String getRhlogin() {
+			return user;
+		}
+	}
+	
 	@Test
 	public void shouldGetConnectionByUserResource() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
@@ -190,18 +208,24 @@ public class ConnectionsModelTest {
 		final String username = "adietish@redhat.com";
 		Connection connection = new ConnectionFake(username, server);
 		connectionsModel.addConnection(connection);
-		IUser user = new NoopUserFake() {
+		IUser user = new NoopUserFake2(username, server);
 
-			@Override
-			public String getServer() {
-				return server;
-			}
+		// operations
+		Connection queriedConnection = connectionsModel.getConnectionByResource(user);
 
-			@Override
-			public String getRhlogin() {
-				return username;
-			}
-		};
+		// verifications
+		assertEquals(connection, queriedConnection);
+	}
+
+
+	@Test
+	public void shouldGetConnectionByUserResourceNullConnectionHost() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		final String server = ConnectionUtils.getDefaultHostUrl();
+		final String username = "adietish@redhat.com";
+		Connection connection = new ConnectionFake(username, null);
+		connectionsModel.addConnection(connection);
+		IUser user = new NoopUserFake2(username, server);
 
 		// operations
 		Connection queriedConnection = connectionsModel.getConnectionByResource(user);
@@ -224,6 +248,7 @@ public class ConnectionsModelTest {
 		assertEquals(connection, queriedConnection);
 	}
 
+	
 	@Test
 	public void shouldNotGetConnectionByUsername() throws UnsupportedEncodingException {
 		// pre-conditions
