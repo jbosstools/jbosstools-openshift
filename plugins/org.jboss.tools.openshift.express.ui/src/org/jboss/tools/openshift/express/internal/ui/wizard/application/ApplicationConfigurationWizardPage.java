@@ -55,6 +55,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -65,6 +66,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -92,7 +94,9 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisito
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -957,6 +961,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
+		if (!ensureHasDomain()
+					|| !ensureHasSSHKeys()) {
+				dispose();
+				org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(getWizard());
+			return;
+		}
+
 		try {
 			pageModel.reset();
 			// needs to be done before loading resources, otherwise:
@@ -971,7 +982,49 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			Logger.error("Failed to reset page fields", e);
 		}
 	}
+	
+	/**
+	 * Checks that the user has a domain, opens the creation dialog in case he
+	 * hasn't, closes the wizard if the user does not create a domain (required
+	 * for any application creation). Otherwise, returns true.
+	 */
+	protected boolean ensureHasDomain() {
+		try {
+			final Connection connection = pageModel.getConnection();
+			if (connection == null
+					|| connection.hasDomain()) {
+				return true;
+			}
+			NewDomainWizard domainWizard = new NewDomainWizard(connection); 
+			WizardDialog dialog = new WizardDialog(
+					Display.getCurrent().getActiveShell(), domainWizard);
+			dialog.create();
+			dialog.setBlockOnOpen(true);
+			return dialog.open() == Dialog.OK;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
+		}
+	}
 
+	protected boolean ensureHasSSHKeys() {
+		try {
+			final Connection connection = pageModel.getConnection();
+			if (connection == null
+					|| connection.hasSSHKeys()) {
+				return true;
+			}
+			WizardDialog dialog = new WizardDialog(
+					Display.getCurrent().getActiveShell(), new NoSSHKeysWizard(connection));
+			dialog.create();
+			dialog.setBlockOnOpen(true);
+			return dialog.open() == Dialog.OK;
+		} catch (OpenShiftException e) {
+			Logger.error("Failed to refresh OpenShift account info", e);
+			return false;
+		}
+	}
+	
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Loading applications, cartridges and gears...") {
