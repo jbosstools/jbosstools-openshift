@@ -14,25 +14,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Iterator;
-import java.util.Map;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.action.ImportApplicationAction;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
-import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 import com.openshift.client.IField;
 import com.openshift.client.Message;
 import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
-import com.openshift.internal.client.ApplicationResource;
-import com.openshift.internal.client.DomainResource;
-import com.openshift.internal.client.EnvironmentVariableResource;
-import com.openshift.internal.client.response.ApplicationResourceDTO;
-import com.openshift.internal.client.response.Link;
 
 /**
  * @author Martes G Wigglesworth 
@@ -41,29 +31,6 @@ import com.openshift.internal.client.response.Link;
  */
 public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo{
 
-	/**
-	 * @author Martes G Wigglesworth <martes.wigglesworth@redhat.com>
-	 *
-	 */
-	public class EnvironmentalVariableIterator implements Iterable<Object> {
-
-		/**
-		 * Constructs a new instance of EnvironmentalVariableIterator
-		 */
-		public EnvironmentalVariableIterator() {
-			// TODO Auto-generated constructor stub
-		}
-
-		/* (non-Javadoc)
-		 * @see java.lang.Iterable#iterator()
-		 */
-		@Override
-		public Iterator<Object> iterator() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-	}
 	/**
 	 * Constructs a new instance of
 	 * AbstractEnvironmentalVariablesWizardPageModel
