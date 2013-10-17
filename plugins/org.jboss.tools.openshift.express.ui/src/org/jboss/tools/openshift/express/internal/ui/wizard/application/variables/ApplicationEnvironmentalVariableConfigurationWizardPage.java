@@ -206,6 +206,11 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 
 	}
 
+	/**
+	 * Add Button Method
+	 * 
+	 * @return
+	 */
 	private SelectionListener onAdd() {
 		return new SelectionAdapter() {
 			@Override
@@ -231,24 +236,37 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 					OkCancelButtonWizardDialog editVariableWizardDialog =
 						new OkCancelButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariableEditWizard(pageModel));
 			editVariableWizardDialog.open();
+			refreshView();
 			}
 		};
 	}
 
-	
+	/**
+	 * Import button method
+	 * 
+	 * @return
+	 */
 	private SelectionListener onImport() {
 			return new SelectionAdapter() {
 
 		};
 	}
 
+	/**
+	 * Export Button Method
+	 * 
+	 * @return
+	 */
 	private SelectionListener onExport() {
 		return new SelectionAdapter() {
 		};
 	}
 
-	
-
+	/**
+	 * remove button Method
+	 * 
+	 * @return
+	 */
 	private SelectionListener onRemove() {
 		return new SelectionAdapter() {
 
@@ -274,6 +292,12 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		};
 	}
 	
+	/**
+	 * private class used in the removal of an Environment Variable from the list
+	 * 
+	 * @author Martin Rieman <mrieman@redhat.com>
+	 *
+	 */
 	private class RemoveVarJob extends Job {
 
 		private RemoveVarJob() {
@@ -287,6 +311,9 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		}
 	}
 	
+	/**
+	 * Method to refresh the list of environment variables
+	 */
 	public void refreshView(){
 		try {
 			WizardUtils.runInWizard(new RefreshViewerJob(), getContainer(), getDatabindingContext() );
@@ -296,6 +323,11 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		}
 	}
 
+	/**
+	 * Private class used used to assist in refreshing the variables in the current window
+	 * @author Martin Rieman <mrieman@redhat.com>
+	 *
+	 */
 	private class RefreshViewerJob extends UIJob {
 
 		public RefreshViewerJob() {
@@ -313,20 +345,21 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		}
 	}
 	
+	/**
+	 * Listener to refresh the enabled/disabled buttons
+	 * @param buttons
+	 * @return
+	 */
 	private SelectionListener variablesListListerner(final Button... buttons) {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				updateButtonsEnabled(buttons);
+				for (Button button : buttons){
+					button.setEnabled(pageModel.isEmpty());
+				}
 			}
 		};
-	}
-
-	private void updateButtonsEnabled(Button... buttons) {
-		for (Button button : buttons){
-			button.setEnabled(pageModel.isEmpty());
-		}
 	}
 	
 	private ApplicationEnvironmentalVariableConfigurationWizardPageModel pageModel;

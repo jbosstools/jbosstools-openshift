@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.List;
-
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -26,16 +24,13 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
-
-import com.openshift.client.IEnvironmentVariable;
 
 
 /**
  * @author Martes G Wigglesworth
- * @author Martin Rieman
+ * @author Martin Rieman <mrieman@redhat.com>
  *
  */
 public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpenShiftWizardPage {
@@ -71,7 +66,8 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 		.margins(10, 10).applyTo(parent);
 
 		Group editApplicationEnvironmentalVariableGroup = new Group(parent, SWT.NONE);
-		editApplicationEnvironmentalVariableGroup.setText(pageModel.getPROPERTY_GRID_TITLE());
+		editApplicationEnvironmentalVariableGroup.setText(
+				ApplicationEnvironmentalVariableEditWizardPageModel.PROPERTY_GRID_TITLE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(editApplicationEnvironmentalVariableGroup);
 		GridLayoutFactory.fillDefaults()
@@ -79,7 +75,8 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 		
 		// Variable Name Input
 		Label nameLabel = new Label(editApplicationEnvironmentalVariableGroup, SWT.NONE);
-		nameLabel.setText(pageModel.getPROPERTY_NAME_INPUT_TITLE());
+		nameLabel.setText(
+				ApplicationEnvironmentalVariableEditWizardPageModel.PROPERTY_NAME_INPUT_TITLE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 		
@@ -88,14 +85,16 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
-			.to(BeanProperties.value(pageModel.getPROPERTY_VARIABLE_NAME()).observe(pageModel))
+			.to(BeanProperties.value(
+					ApplicationEnvironmentalVariableEditWizardPageModel.PROPERTY_VARIABLE_NAME).observe(pageModel))
 			.in(dbc);
 		ControlDecorationSupport.create(
 			nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
 		//Variable Value Input
 		Label valueLabel = new Label(editApplicationEnvironmentalVariableGroup, SWT.NONE);
-		valueLabel.setText(pageModel.getPROPERTY_VALUE_INPUT_TITLE());
+		valueLabel.setText(
+				ApplicationEnvironmentalVariableEditWizardPageModel.PROPERTY_VALUE_INPUT_TITLE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 		
@@ -104,7 +103,8 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
 		Binding valeuBinding = ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(valueText))
-			.to(BeanProperties.value(pageModel.getPROPERTY_VARIABLE_VALUE()).observe(pageModel))
+			.to(BeanProperties.value(
+					ApplicationEnvironmentalVariableEditWizardPageModel.PROPERTY_VARIABLE_VALUE).observe(pageModel))
 			.in(dbc);
 		ControlDecorationSupport.create(
 			valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
