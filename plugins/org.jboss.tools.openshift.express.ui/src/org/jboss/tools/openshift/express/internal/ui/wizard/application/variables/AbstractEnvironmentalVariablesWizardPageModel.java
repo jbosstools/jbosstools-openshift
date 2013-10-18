@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
+import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 import com.openshift.client.IField;
 import com.openshift.client.Message;
@@ -25,11 +27,67 @@ import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
 
 /**
- * @author Martes G Wigglesworth 
+ * @author Martes G Wigglesworth
  * @author Martin Rieman
- *
+ * 
  */
-public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo{
+public abstract class AbstractEnvironmentalVariablesWizardPageModel extends ObservableUIPojo {
+
+	/**
+	 * @author Martin Rieman <mrieman@redhat.com>
+	 * 
+	 */
+	protected class ApplicationEnvironmentVariable implements IEnvironmentVariable {
+		@Override
+		public void destroy() throws OpenShiftException {
+		}
+
+		@Override
+		public String getCreationLog() {
+			return null;
+		}
+
+		@Override
+		public Messages getMessages() {
+			return new Messages(new HashMap<IField, List<Message>>());
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+
+		@Override
+		public boolean hasCreationLog() {
+			return false;
+		}
+
+		@Override
+		public void refresh() throws OpenShiftException {
+		}
+
+		public void setEnvironmentVariable(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		@Override
+		public void update(String value) throws OpenShiftException {
+			this.value = value;
+		}
+
+		String name;
+		String value;
+	}
+
+	public static final String PROPERTY_SELECTED_VARIABLE = "selectedVariable";
+
+	public static final String PROPERTY_VARIABLES_DB = "variablesDB";
 
 	/**
 	 * Constructs a new instance of
@@ -41,23 +99,37 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		variablesDB = new ArrayList<IEnvironmentVariable>();
 		this.selectedVariable = null;
 	}
-	
+
 	/**
-	 * Fully constructs a new instance of 
+	 * Constructs a new instance of
+	 * AbstractEnvironmentalVariablesWizardPageModel
+	 * 
+	 * @param iApplication
+	 */
+	public AbstractEnvironmentalVariablesWizardPageModel(IApplication iApplication) {
+		setIApplication(iApplication);
+
+		setVariablesDB(iApplication.getEnvironmentVariables());
+	}
+
+	/**
+	 * Fully constructs a new instance of
 	 * AbstractEnvironmentalVariablesWizardPageModel
 	 */
-	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, Connection user, List<IEnvironmentVariable> variables, IEnvironmentVariable selectedVariable) {
+	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, Connection user,
+			List<IEnvironmentVariable> variables, IEnvironmentVariable selectedVariable) {
 		this.pageTitle = pageTitle;
 		this.userConnection = user;
 		this.variablesDB = variables;
 		this.selectedVariable = selectedVariable;
 	}
-	
+
 	/**
-	 * Partial constructs a new instance of 
+	 * Partial constructs a new instance of
 	 * AbstractEnvironmentalVariablesWizardPageModel
 	 */
-	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, List<IEnvironmentVariable> variables, IEnvironmentVariable selectedVariable) {
+	public AbstractEnvironmentalVariablesWizardPageModel(String pageTitle, List<IEnvironmentVariable> variables,
+			IEnvironmentVariable selectedVariable) {
 		this.pageTitle = pageTitle;
 		this.variablesDB = variables;
 		this.selectedVariable = selectedVariable;
@@ -68,11 +140,23 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		return description;
 	}
 
+	public IApplication getIApplication()
+	{
+		return iApplication;
+	}
+
 	/**
 	 * @return the pageTitle
 	 */
 	public String getPageTitle() {
 		return pageTitle;
+	}
+
+	/**
+	 * @return the selectedVariable
+	 */
+	public IEnvironmentVariable getSelectedVariable() {
+		return selectedVariable;
 	}
 
 	/**
@@ -87,6 +171,41 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	 */
 	public List<IEnvironmentVariable> getVariablesDB() {
 		return variablesDB;
+	};
+
+	public IEnvironmentVariable initializeIEnvironmentVariable(String variableName, String variableValue) {
+		ApplicationEnvironmentVariable environmentVariable = new ApplicationEnvironmentVariable();
+		environmentVariable.setEnvironmentVariable(variableName, variableValue);
+		return environmentVariable;
+	}
+
+	public boolean isPopulatedModel()
+	{
+		return !(variablesDB.isEmpty());
+	}
+
+	/**
+	 * 
+	 */
+	public void refresh() {
+		/*
+		 * There probably should not be any references to a user connection,
+		 * since the variables are always directly associated with an
+		 * IApplication.
+		 * 
+		 * @author Martes G Wiggleswroth
+		 */
+		userConnection.refresh();
+		restoreSelectedEnvironmentVariable();
+	}
+
+	public void removeVariable() {
+		if (selectedVariable == null) {
+			return;
+		}
+		// selectedVariable..destroy();
+		selectedVariable = null;
+		restoreSelectedEnvironmentVariable();
 	}
 
 	public void setDescription(String description)
@@ -94,11 +213,25 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		this.description = description;
 	}
 
+	public void setIApplication(IApplication iApplication)
+	{
+		this.iApplication = iApplication;
+
+	}
+
 	/**
 	 * @param string
 	 */
 	public void setPageTitle(String newTitle) {
-		pageTitle=newTitle;
+		pageTitle = newTitle;
+	}
+
+	/**
+	 * @param selectedVariable
+	 *            the selectedVariable to set
+	 */
+	public void setSelectedVariable(IEnvironmentVariable selectedVariable) {
+		firePropertyChange(PROPERTY_SELECTED_VARIABLE, this.selectedVariable, this.selectedVariable = selectedVariable);
 	}
 
 	/**
@@ -115,7 +248,7 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 	 */
 	public void setVariablesDB(List<IEnvironmentVariable> variablesDB) {
 		this.variablesDB = variablesDB;
-	};
+	}
 
 	/**
 	 * 
@@ -151,23 +284,11 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		return envVariable.getName();
 	}
 
-	/**
-	 * @return the selectedVariable
-	 */
-	public IEnvironmentVariable getSelectedVariable() {
-		return selectedVariable;
-	}
-
-	/**
-	 * @param selectedVariable the selectedVariable to set
-	 */
-	public void setSelectedVariable(IEnvironmentVariable selectedVariable) {
-		firePropertyChange(PROPERTY_SELECTED_VARIABLE, this.selectedVariable, this.selectedVariable = selectedVariable);
-	}
-	
-	public void refresh() {
-		userConnection.refresh();
-		restoreSelectedEnvironmentVariable();
+	private IEnvironmentVariable getFirstKey() {
+		if (getVariablesDB().size() == 0) {
+			return null;
+		}
+		return getVariablesDB().get(0);
 	}
 
 	/**
@@ -181,63 +302,33 @@ public abstract class AbstractEnvironmentalVariablesWizardPageModel extends Obse
 		}
 		setSelectedVariable(variableToSelect);
 	}
-	
-	private IEnvironmentVariable getFirstKey() {
-		if(getVariablesDB().size() == 0) {
-			return null;
-		} 
-		return getVariablesDB().get(0);
-	}
-	
-	public void removeVariable() {
-		if (selectedVariable == null) {
-			return;
-		}
-		//selectedVariable..destroy();
-		selectedVariable = null;
-		restoreSelectedEnvironmentVariable();
-	}
-	
-	private String description;
-	
-	private String pageTitle;
-	private Connection userConnection;
-	private List<IEnvironmentVariable> variablesDB = new LinkedList<IEnvironmentVariable>();
+
 	/*
-	 * Another complex data type that works on the specific object that is used
-	 * in the client branch from JBIDE-15598 may make more sense.
+	 * A work-around method, for use in populating the variable list from the
+	 * IApplication.getEnvironmentVariables():Map<String,IEnvironmentVariable>
+	 * HashMap. Will need a method that returns a simple
+	 * List<IEnvironmentVariable> object instance from IApplication to avoid
+	 * this extra work.
+	 * 
+	 * @param variablesMap - Instance of Map<String,IEnvironmentVariable> used
+	 * to populate the current instance's variables list.
 	 */
-	
-	private IEnvironmentVariable selectedVariable;
-	
-	public static final String PROPERTY_SELECTED_VARIABLE = "selectedVariable";
-	public static final String PROPERTY_VARIABLES_DB = "variablesDB";
-	
-	public IEnvironmentVariable initializeIEnvironmentVariable(String variableName, String variableValue){
-		ApplicationEnvironmentVariable environmentVariable =  new ApplicationEnvironmentVariable();
-		environmentVariable.setEnvironmentVariable(variableName, variableValue);
-		return (IEnvironmentVariable) environmentVariable;
-	}
-	
-	/**
-	 * @author Martin Rieman <mrieman@redhat.com>
-	 *
-	 */
-	protected class ApplicationEnvironmentVariable implements IEnvironmentVariable {
-		String name;
-		String value;
-		public void setEnvironmentVariable(String name, String value){
-			this.name = name;
-			this.value = value;
+	private void setVariablesDB(Map<String, IEnvironmentVariable> variablesMap) {
+
+		for (Map.Entry<String, IEnvironmentVariable> entry : variablesMap.entrySet()) {
+			variablesDB.add(entry.getValue());
 		}
-		@Override public void refresh() throws OpenShiftException {}
-		@Override public boolean hasCreationLog() {return false;}
-		@Override public Messages getMessages() {return new Messages(new HashMap<IField, List<Message>>());}
-		@Override public String getCreationLog() {return null;}
-		@Override public void update(String value) throws OpenShiftException {this.value=value;}
-		@Override public String getValue() {return value;}
-		@Override public String getName() {return name;}
-		@Override public void destroy() throws OpenShiftException {}
 	}
+
+	private String description;
+
+	private IApplication iApplication;
+
+	private String pageTitle;
+	private IEnvironmentVariable selectedVariable;
+
+	private Connection userConnection;
+
+	private List<IEnvironmentVariable> variablesDB = new LinkedList<IEnvironmentVariable>();
 
 }
