@@ -45,7 +45,7 @@ public class ApplicationEnvironmentalVariableEditWizardPage extends AbstractOpen
 	 */
 	public ApplicationEnvironmentalVariableEditWizardPage(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel, IWizard wizard) {
 		super(ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_TITLE, 
-			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION,
+			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_DESCRIPTION+confPageModel.getIApplication().getName(),
 			ApplicationEnvironmentalVariableEditWizardPageModel.PAGE_NAME, wizard);
 		pageModel = new ApplicationEnvironmentalVariableEditWizardPageModel(confPageModel);
 	}
