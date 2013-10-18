@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
 
-import java.util.List;
+import com.openshift.client.IApplication;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 /**
  * Used to persist information associated with the
@@ -28,12 +27,19 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPageModel extend
 	 * ApplicationEnvironmentalVariableConfigurationWizardPageModel
 	 */
 	public ApplicationEnvironmentalVariableConfigurationWizardPageModel() {
-		setPageTitle("Environmental Variables Configuration Wizard");
+		setPageTitle("Environmental Variable Configuration Wizard");
 		setDescription("Used to configure application specific environmental variables for your OpenShift Gear");
 	}
 
-	public boolean isEmpty()
-	{
-		return !( super.getVariablesDB().isEmpty());
+	/**
+	 * Constructs a new instance of ApplicationEnvironmentalVariableConfigurationWizardPageModel
+	 * @param iApplication
+	 */
+	public ApplicationEnvironmentalVariableConfigurationWizardPageModel(IApplication iApplication) {
+		super(iApplication);		
+		setPageTitle("Environmental Variable Configuration Wizard");
+		setDescription("Used to configure application specific environmental variables for:"+iApplication.getName());
 	}
+
+	
 }
