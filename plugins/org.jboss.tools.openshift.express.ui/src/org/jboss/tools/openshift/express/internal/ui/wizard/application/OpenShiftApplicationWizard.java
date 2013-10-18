@@ -80,7 +80,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
-	OpenShiftApplicationWizard(Connection connection, IDomain domain, IApplication application, IProject project, 
+	public OpenShiftApplicationWizard(Connection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication, boolean showCredentialsPage, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
@@ -319,7 +319,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		}
 	}
 
-	OpenShiftApplicationWizardModel getModel() {
+	public OpenShiftApplicationWizardModel getModel() {
 		return model;
 	}
 	
@@ -336,7 +336,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
 	 */
-	class ImportJob extends WorkspaceJob {
+	private class ImportJob extends WorkspaceJob {
 
 		private DelegatingProgressMonitor delegatingMonitor;
 
