@@ -96,9 +96,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.ApplicationEnvironmentalVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
-import org.jboss.tools.openshift.express.internal.ui.wizard.embed.IEmbedCartridgesWizardPageModel;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
-
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -305,6 +302,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
     		browseAppVariablesButton = new Button(parent, SWT.NONE);
     		browseAppVariablesButton.setText(" Environmental Variables... ");
     		browseAppVariablesButton.addSelectionListener(onBrowseAppVariables(dbc));
+    		
 
     		GridDataFactory.fillDefaults()
     				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(browseAppVariablesButton);
@@ -621,8 +619,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
                                                                 , pageModel.getDomain(), connection);
                                 if (new OkButtonWizardDialog(getShell(), domainWizard).open() == Dialog.OK) {
                                         pageModel.setDomain(domainWizard.getDomain());
-                                }
-                                ;
+                                };
                         }
                 };
         }
@@ -649,8 +646,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
   			@Override
   			public void widgetSelected(SelectionEvent e) {
+  				if(((OpenShiftApplicationWizard) getWizard()) == null)
+  					throw new OpenShiftException("getMode().getApplication() is null");
   				WizardDialog manageVariablesWizard =
-  						new OkButtonWizardDialog(getShell(), new ApplicationEnvironmentalVariablesWizard());
+  						new OkButtonWizardDialog(getShell(), 
+  								new ApplicationEnvironmentalVariablesWizard(getShell().toString(),
+  										((OpenShiftApplicationWizard) getWizard()).getModel().getApplication()));
   				if (manageVariablesWizard.open() == Window.OK) {
   				}
   			}
