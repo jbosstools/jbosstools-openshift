@@ -23,7 +23,7 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 
 	// Page Properties
 	public static final String PAGE_TITLE = "Edit Environment Variable";
-	public static final String PAGE_DESCRIPTION = "Used to edit current Environment Variable associated with:";
+	public static final String PAGE_DESCRIPTION = "Used to edit current Environment Variable associated with: ";
 	public static final String PAGE_NAME = "ApplicationEnvironmentalVariableEditWizardPage";
 	
 	// Properties for UI ease
