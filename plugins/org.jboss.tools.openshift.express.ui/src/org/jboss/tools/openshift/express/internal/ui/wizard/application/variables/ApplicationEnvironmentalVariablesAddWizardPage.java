@@ -47,14 +47,15 @@ public class ApplicationEnvironmentalVariablesAddWizardPage extends AbstractOpen
 	 */
 	public ApplicationEnvironmentalVariablesAddWizardPage(ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel, IWizard wizard) {
 		super(ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_TITLE, 
-				ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_DESCRIPTION, 
+				/*
+				 * Messy work-around to get the dynamicly allocated application name. (IApplication.getName())
+				 */
+				ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_DESCRIPTION+confPageModel.getIApplication().getName(), 
 				ApplicationEnvironmentalVariablesAddWizardPageModel.PAGE_NAME, wizard);
 		pageModel = new ApplicationEnvironmentalVariablesAddWizardPageModel(confPageModel);
 	}
 
-	/**
-	 * Creates the display for the Add wizard page
-	 */
+	
 	/*
 	 * (non-Javadoc)
 	 * 
