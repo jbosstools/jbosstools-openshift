@@ -44,6 +44,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IC
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
+import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 
 /**
@@ -61,12 +62,13 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	 * @param description
 	 * @param pageName
 	 * @param wizard
+	 * @param iApplication 
 	 */
 	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
-			IWizard wizard) {
+			IWizard wizard, IApplication iApplication) {
 		super(title, description, pageName, wizard);
 
-		pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel();
+		pageModel = new ApplicationEnvironmentalVariableConfigurationWizardPageModel(iApplication);
 
 	}
 
@@ -82,6 +84,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 	public ApplicationEnvironmentalVariableConfigurationWizardPage(String title, String description, String pageName,
 			IWizard wizard,DataBindingContext dbc) {
 		super(title, description, pageName, wizard);
+		//pageModel = wizardModel;
 
 	}
 
@@ -154,15 +157,15 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		editExistingButton.addSelectionListener(onEditExisting());
-		editExistingButton.setEnabled(pageModel.isEmpty());
+		editExistingButton.setEnabled(pageModel.isPopulatedModel());
 
 		Button removeButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
-		removeButton.setEnabled(pageModel.isEmpty());//This should be bound to the existence of variables in the table.
+		removeButton.setEnabled(pageModel.isPopulatedModel());//This should be bound to the existence of variables in the table.
 		removeButton.addSelectionListener(onRemove());
-
+		/*
 		Button importButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(importButton);
@@ -173,17 +176,17 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(exportButton);
 		exportButton.setText("Export...");
-		exportButton.setEnabled(pageModel.isEmpty());//This should be bound to the existence of variables in the table.
+		exportButton.setEnabled(pageModel.isPopulatedModel());//This should be bound to the existence of variables in the table.
 		exportButton.addSelectionListener(onExport());
-
+		 */
 		Composite filler = new Composite(envVariableGroup, SWT.None);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(filler);
 
-		addButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
-		editExistingButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
-		removeButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
-		importButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));
+		addButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton/*, exportButton*/));
+		editExistingButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton/*, exportButton*/));
+		removeButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton/*, exportButton*/));
+		/*importButton.addSelectionListener(variablesListListerner(editExistingButton, removeButton, exportButton));*/
 		
 		
 		createAppVariableConfigurationGroup(container, dbc);
@@ -359,7 +362,7 @@ public class ApplicationEnvironmentalVariableConfigurationWizardPage extends Abs
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				for (Button button : buttons){
-					button.setEnabled(pageModel.isEmpty());
+					button.setEnabled(pageModel.isPopulatedModel());
 				}
 			}
 		};
