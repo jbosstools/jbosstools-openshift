@@ -23,7 +23,7 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 
 	// Page Properties
 	public static final String PAGE_TITLE = "Edit Environment Variable";
-	public static final String PAGE_DESCRIPTION = "Please provide name and value for your environment ";
+	public static final String PAGE_DESCRIPTION = "Used to edit current Environment Variable associated with:";
 	public static final String PAGE_NAME = "ApplicationEnvironmentalVariableEditWizardPage";
 	
 	// Properties for UI ease
@@ -48,6 +48,7 @@ public class ApplicationEnvironmentalVariableEditWizardPageModel extends Abstrac
 		super(PAGE_TITLE, confPageModel.getVariablesDB(), confPageModel.getSelectedVariable());
 		this.envVariable = confPageModel.getSelectedVariable();
 		this.confPageModel = confPageModel;
+		setDescription(PAGE_DESCRIPTION+confPageModel.getIApplication().getName());
 		this.variableName = this.envVariable.getName();
 		this.variableValue = this.envVariable.getValue();
 	}
