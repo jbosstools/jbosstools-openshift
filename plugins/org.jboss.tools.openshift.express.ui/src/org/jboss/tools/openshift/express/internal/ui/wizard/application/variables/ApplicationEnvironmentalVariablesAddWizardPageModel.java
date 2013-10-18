@@ -21,7 +21,7 @@ public class ApplicationEnvironmentalVariablesAddWizardPageModel extends Abstrac
 
 	// Page Properties
 	public static final String PAGE_TITLE = "Variables Add Dialog";
-	public static final String PAGE_DESCRIPTION = "Used to add a new variable to your application";
+	public static final String PAGE_DESCRIPTION = "Use this view to add an Environment Variable to: ";
 	public static final String PAGE_NAME = "New Variable Page";
 	
 	// Properties for UI ease
@@ -41,6 +41,11 @@ public class ApplicationEnvironmentalVariablesAddWizardPageModel extends Abstrac
 	public ApplicationEnvironmentalVariablesAddWizardPageModel(
 			ApplicationEnvironmentalVariableConfigurationWizardPageModel confPageModel) {
 		super(PAGE_TITLE, confPageModel.getVariablesDB(), confPageModel.getSelectedVariable());
+		/*
+		 * A messy attempt to quickly insert the current IApplication's name into the page 
+		 * description for this view. (Does not currently function since this constructor is not called.)
+		 */
+		this.setDescription(PAGE_DESCRIPTION+ confPageModel.getIApplication().getName());
 		this.envVariable = confPageModel.getSelectedVariable();
 		this.confPageModel = confPageModel;
 	}
