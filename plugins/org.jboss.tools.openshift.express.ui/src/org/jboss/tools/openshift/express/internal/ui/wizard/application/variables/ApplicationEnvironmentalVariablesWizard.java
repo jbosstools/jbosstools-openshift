@@ -12,31 +12,34 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.variabl
 
 
 import org.eclipse.core.databinding.DataBindingContext;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
-import org.eclipse.jface.wizard.Wizard;
+import com.openshift.client.IApplication;
 
 /**
  * @author Martes G Wigglesworth
  * 
  */
-public class ApplicationEnvironmentalVariablesWizard extends Wizard {
+public class ApplicationEnvironmentalVariablesWizard extends AbstractOpenShiftWizard<IApplication> {	
 
 	/**
 	 * Constructs a new instance of ApplicationEnvironmentalVariablesWizard
+	 * @param title
+	 * @param model
 	 */
-	public ApplicationEnvironmentalVariablesWizard() {
-
-	};
-
-	public ApplicationEnvironmentalVariablesWizard(DataBindingContext dbc)
-	{
-		this.dbc = dbc;
+	public ApplicationEnvironmentalVariablesWizard(String wizardTitle, IApplication model) {
+		super("Manage Application Environment Variable(s)", model);
+		
+		
 	}
+	
+	
 
 	@Override
 	public void addPages() {
+		
 		addPage(new ApplicationEnvironmentalVariableConfigurationWizardPage("Variables View Dialog",
-				"Used to create and edit variables for OpenShift Applications", "Variables Table View", this));
+				"Used to create and edit variables for: "+ getModel().getName(), "Variables Table View", this,getModel()));
 	}
 
 	/**
