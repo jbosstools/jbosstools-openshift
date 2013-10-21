@@ -51,12 +51,13 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Martes G Wigglesworth
  */
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
 	
-	private static final String PAGE_TITLE_FORMAT = "Set up Project for OpenShift Application \"{0}\""; 
+	private static final String PAGE_TITLE_FORMAT = "Set up Project for new OpenShift Appplication named: \"{0}\""; 
 	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 	private Text existingProjectNameText = null;
@@ -75,6 +76,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		createServerAdapterGroup(container, dbc);
 //		createWorkingSetGroup(container, dbc);
 	}
+	
 
 	private Composite createProjectGroup(Composite parent, DataBindingContext dbc) {
 		Composite projectGroup = new Composite(parent, SWT.NONE);
@@ -215,6 +217,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		return new WorkingSetGroup(container, null, new String[] { "org.eclipse.ui.resourceWorkingSetPage", //$NON-NLS-1$
 				"org.eclipse.jdt.ui.JavaWorkingSetPage" /* JavaWorkingSetUpdater.ID */});
 	}
+
 
 	/**
 	 * Verify that if the 'use an existing project' option was chose, then the project name actually matches an open

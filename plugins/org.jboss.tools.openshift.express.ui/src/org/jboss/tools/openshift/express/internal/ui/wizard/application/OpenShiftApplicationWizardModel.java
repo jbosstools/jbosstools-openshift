@@ -56,14 +56,14 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
+public class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
 	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain) {
 		this(connection, domain, null, null, false);
 	}
-
+	
 	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication) {
 		setProject(project);

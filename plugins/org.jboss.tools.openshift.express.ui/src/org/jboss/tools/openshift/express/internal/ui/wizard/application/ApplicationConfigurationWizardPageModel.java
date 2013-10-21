@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.embed.IEmbedCartridg
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
+import com.openshift.client.IEnvironmentVariable;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -35,7 +38,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
- * 
+ * @author Martes G Wigglesworth
  */
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo implements
 		IEmbedCartridgesWizardPageModel {
@@ -56,6 +59,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
 	public static final String PROPERTY_DEFAULT_SOURCECODE = "defaultSourcecode";
 	public static final String PROPERTY_INITIAL_GITURL = "initialGitUrl";
+	private static final String PROPERTY_EXISTING_APPLICATION_VARIABLES_LOADED = "existingApplicationVariablesLoaded";
 
 	private final OpenShiftApplicationWizardModel wizardModel;
 
@@ -65,8 +69,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	private List<IStandaloneCartridge> cartridges = new ArrayList<IStandaloneCartridge>();
 	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
 	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
+
+	private List<IEnvironmentVariable> environmentalVariables = new ArrayList<IEnvironmentVariable>();
+	private HashMap<String, List<IEnvironmentVariable>> applicationEnvironmentalVariablesDB;
+	private List<IEnvironmentVariable> variableList = new ArrayList<IEnvironmentVariable>();
+
 	private String existingApplicationName;
 	private boolean existingApplicationsLoaded = false;
+	private boolean existingApplicatoinVariablesLoaded = false;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 	private boolean defaultSourcecode = true;
 	
@@ -86,11 +96,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return wizardModel.getConnection();
 	}
 
+	//public List<I> getApplications() throws OpenShiftException, SocketTimeoutException {
+
 	public List<IApplication> getApplications() throws OpenShiftException {
 		Connection connection = getConnection();
 		IDomain domain = wizardModel.getDomain();
 		if (!isValid(connection)
 				|| domain == null) {
+
+
 			return Collections.emptyList();
 		}
 		return domain.getApplications();
@@ -109,6 +123,35 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 			return new String[0];
 		}
 	}
+
+	
+	public List<IEnvironmentVariable> getApplicationEnvironmentalVariables() throws OpenShiftException{
+		List<IEnvironmentVariable> tempList = new ArrayList<IEnvironmentVariable>();
+
+		Connection user = getConnection();
+		if (user == null || !user.isConnected() || !user.hasDomain()) {
+			return Collections.emptyList();
+		}
+		if(this.existingApplicationsLoaded)
+			for (IApplication appTarget: getApplications())
+				if(appTarget.getName() == this.getApplicationName())
+					tempList =  applicationEnvironmentalVariablesDB.get(appTarget.getName());		
+		return tempList;
+	}
+
+	public String[] getApplicationEnvironmentalVariableNames(String appTargetName)
+	{
+		/*
+		 * Will need to be augmented to account for the necessary change to reflect the key names.
+		 */
+		return (String[]) applicationEnvironmentalVariablesDB.get(appTargetName).toArray();
+	}
+	
+	public String[] getApplicationEnvironmentalVariableValues(String appTargetName)
+	{
+		return (String[]) applicationEnvironmentalVariablesDB.get(appTargetName).toArray();
+	}
+	
 
 	public boolean isUseExistingApplication() {
 		return wizardModel.isUseExistingApplication();
@@ -166,6 +209,45 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		}
 		setExistingApplications(domain.getApplications());
 		setExistingApplicationsLoaded(true);
+	}
+	
+	public void loadExistingApplicationEnvironmentalVariables()
+	{
+		Connection user = getConnection();
+		if (user != null) {
+			setExistingApplicationVariables(getApplications());
+			setExistingApplicationVariablesLoaded(true);
+		}
+	}
+
+	/**
+	 * @param applications
+	 */
+	private void setExistingApplicationVariables(List<IApplication> applications) {
+		
+		if(this.isExistingApplicationsLoaded())
+		{
+			setExistingApplicationVariables(existingApplications);
+			setExistingApplicationVariablesLoaded(true);
+		}
+		else {
+			Connection user = getConnection();
+			if (user != null) {		
+			setExistingApplicationVariables(getApplications());
+			setExistingApplicationVariablesLoaded(true);
+			}
+		}
+		
+	}
+
+	/**
+	 * @param areLoaded
+	 */
+	private void setExistingApplicationVariablesLoaded(boolean areLoaded) {
+		firePropertyChange(PROPERTY_EXISTING_APPLICATION_VARIABLES_LOADED
+				, this.existingApplicatoinVariablesLoaded
+				, this.existingApplicatoinVariablesLoaded = areLoaded);
+		
 	}
 
 	public void setExistingApplicationsLoaded(boolean loaded) {
