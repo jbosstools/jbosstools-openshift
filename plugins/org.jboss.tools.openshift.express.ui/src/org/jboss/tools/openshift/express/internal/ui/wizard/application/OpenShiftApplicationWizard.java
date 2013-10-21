@@ -113,17 +113,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if (connection != null) {
-			model.setConnection(connection);
-		}
-
-		if (!ensureHasDomain()
-					|| !ensureHasSSHKeys()) {
-				dispose();
-				org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(this);
-			return;
-		}
 	}
 
 	@Override
@@ -452,46 +441,4 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			return isAhead;
 		}
 	}
-	
-	/**
-	 * Checks that the user has a domain, opens the creation dialog in case he
-	 * hasn't, closes the wizard if the user does not create a domain (required
-	 * for any application creation). Otherwise, returns true.
-	 */
-	protected boolean ensureHasDomain() {
-		try {
-			final Connection connection = getModel().getConnection();
-			if (connection == null
-					|| connection.hasDomain()) {
-				return true;
-			}
-			WizardDialog dialog = new WizardDialog(
-					Display.getCurrent().getActiveShell(), new NewDomainWizard(connection));
-			dialog.create();
-			dialog.setBlockOnOpen(true);
-			return dialog.open() == Dialog.OK;
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to refresh OpenShift account info", e);
-			return false;
-		}
-	}
-
-	protected boolean ensureHasSSHKeys() {
-		try {
-			final Connection connection = getModel().getConnection();
-			if (connection == null
-					|| connection.hasSSHKeys()) {
-				return true;
-			}
-			WizardDialog dialog = new WizardDialog(
-					Display.getCurrent().getActiveShell(), new NoSSHKeysWizard(connection));
-			dialog.create();
-			dialog.setBlockOnOpen(true);
-			return dialog.open() == Dialog.OK;
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to refresh OpenShift account info", e);
-			return false;
-		}
-	}
-
 }

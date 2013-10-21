@@ -67,6 +67,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -95,7 +96,9 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.ApplicationEnvironmentalVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -112,7 +115,6 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 * @author Martes G Wigglesworth
 */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
-
 
         private CheckboxTableViewer viewer;
         private ApplicationConfigurationWizardPageModel pageModel;
@@ -1259,7 +1261,5 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
                 }
 
         }
-
-
 
 }
