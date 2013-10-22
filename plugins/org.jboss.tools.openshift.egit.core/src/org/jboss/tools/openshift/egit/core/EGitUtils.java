@@ -92,6 +92,7 @@ public class EGitUtils {
 	 * @see org.eclipse.egit.ui.UIPreferences#REMOTE_CONNECTION_TIMEOUT
 	 */
 	private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
+
 	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
 	//	private static final RefSpec DEFAULT_PUSH_REF_SPEC = new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
 	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD

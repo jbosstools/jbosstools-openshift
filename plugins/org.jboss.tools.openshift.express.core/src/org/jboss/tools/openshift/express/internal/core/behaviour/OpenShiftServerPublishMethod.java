@@ -73,7 +73,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
 			IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 			
-			if (allSubModulesPublished 
+			if (allSubModulesPublished
 					|| (destFolder != null && destFolder.isAccessible())) {
 				refreshProject(destProj, submon(monitor, 100));
 				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
@@ -81,7 +81,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				// folder doesn't exist
 				// The previous exception will be propagated.
 		}
-
+		
 		return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;
 	}
 
