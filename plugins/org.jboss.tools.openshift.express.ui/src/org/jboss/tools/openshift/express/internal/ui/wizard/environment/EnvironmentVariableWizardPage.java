@@ -8,7 +8,7 @@
  * Contributors: Red Hat, Inc. - initial API and implementation
  *
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
+package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -43,30 +43,30 @@ public class EnvironmentVariableWizardPage extends AbstractOpenShiftWizardPage {
 	private EnvironmentVariableWizardModel model;
 
 	public EnvironmentVariableWizardPage(EnvironmentVariableWizardModel model, IWizard wizard) {
-		super("Add environment variable", "Please choose a name and a value for your new environment variable", "",
+		super((model.isEditing()? "Edit an existing environment variable" : "Add a new environment variable"),
+				"Please choose a name and a value for environment variable", "",
 				wizard);
 		this.model = model;
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-
 		GridLayoutFactory.fillDefaults()
 				.margins(10, 10).applyTo(parent);
 
-		Group addApplicationEnvironmentalVariableGroup = new Group(parent, SWT.NONE);
-		addApplicationEnvironmentalVariableGroup.setText("New Variable Edit Dialog");
+		Group addApplicationEnvironmentVariableGroup = new Group(parent, SWT.NONE);
+		addApplicationEnvironmentVariableGroup.setText("Enviroment Variable");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(addApplicationEnvironmentalVariableGroup);
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(addApplicationEnvironmentVariableGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(4).margins(6, 6).applyTo(addApplicationEnvironmentalVariableGroup);
+				.numColumns(4).margins(6, 6).applyTo(addApplicationEnvironmentVariableGroup);
 
-		Label nameLabel = new Label(addApplicationEnvironmentalVariableGroup, SWT.NONE);
+		Label nameLabel = new Label(addApplicationEnvironmentVariableGroup, SWT.NONE);
 		nameLabel.setText("Name:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
-		Text nameText = new Text(addApplicationEnvironmentalVariableGroup, SWT.BORDER);
+		Text nameText = new Text(addApplicationEnvironmentVariableGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
@@ -75,7 +75,7 @@ public class EnvironmentVariableWizardPage extends AbstractOpenShiftWizardPage {
 
 					@Override
 					public IStatus validateString(String value) {
-						if (model.hasVariable(value)) {
+						if (model.isExistingName(value)) {
 							return ValidationStatus.error(NLS.bind("There's already an environment variable with the name {0}", value));
 						}
 						if (!StringUtils.startsWithLetterOrUnderscore(value)
@@ -92,12 +92,12 @@ public class EnvironmentVariableWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		Label valueLabel = new Label(addApplicationEnvironmentalVariableGroup, SWT.NONE);
+		Label valueLabel = new Label(addApplicationEnvironmentVariableGroup, SWT.NONE);
 		valueLabel.setText("Value:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 
-		Text valueText = new Text(addApplicationEnvironmentalVariableGroup, SWT.BORDER);
+		Text valueText = new Text(addApplicationEnvironmentVariableGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
 		Binding valeuBinding = ValueBindingBuilder

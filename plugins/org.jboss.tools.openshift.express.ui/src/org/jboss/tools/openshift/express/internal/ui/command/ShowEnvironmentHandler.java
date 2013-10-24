@@ -93,9 +93,6 @@ public class ShowEnvironmentHandler extends AbstractHandler {
 		job.schedule();
 	}
 
-	/**
-	 * @param application
-	 */
 	private void showEnvironmentProperties(final IApplication application) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override

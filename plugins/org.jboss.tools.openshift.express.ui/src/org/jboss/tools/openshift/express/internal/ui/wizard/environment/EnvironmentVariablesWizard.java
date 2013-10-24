@@ -8,7 +8,7 @@
  * Contributors: Red Hat, Inc. - initial API and implementation
  *
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
+package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -37,14 +37,13 @@ public class EnvironmentVariablesWizard extends AbstractOpenShiftWizard<Environm
 
 	private Map<String, String> environmentVarriableValueByKey;
 
-	public EnvironmentVariablesWizard() {
-		this(null);
+	public EnvironmentVariablesWizard(Map<String, String> environmentVariables) {
+		super("Manage Application Environment Variable(s)",
+				new EnvironmentVariablesWizardModel(environmentVariables));
 	}
 
 	public EnvironmentVariablesWizard(IApplication application) {
-		super(application == null ?
-				"Manage Application Environment Variable(s)" : NLS.bind(
-						"Manage Application Environment Variable(s) for application {0}", application.getName()),
+		super(NLS.bind("Manage Application Environment Variable(s) for application {0}", application.getName()),
 				new EnvironmentVariablesWizardModel(application));
 	}
 

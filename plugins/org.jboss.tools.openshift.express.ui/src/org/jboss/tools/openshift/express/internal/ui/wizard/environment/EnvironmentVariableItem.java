@@ -7,7 +7,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
+package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 /**
  * An environment variable for the view.

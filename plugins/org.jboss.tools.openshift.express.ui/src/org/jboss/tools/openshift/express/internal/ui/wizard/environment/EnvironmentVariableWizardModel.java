@@ -8,7 +8,7 @@
  * Contributors: Red Hat, Inc. - initial API and implementation
  *
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
+package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 
@@ -74,15 +74,23 @@ public class EnvironmentVariableWizardModel extends ObservableUIPojo {
 		return variable;
 	}
 
-	public boolean hasVariable(String name) {
+	public boolean isExistingName(String name) {
 		EnvironmentVariableItem variable = allVariablesModel.getVariable(name);
-		return variable != null // ignore if editing current one
+		return variable != null
+				// ignore only if editing current one (not other one)
 				&& !variable.equals(this.variable);
 	}
 
+	public boolean isEditing() {
+		return allVariablesModel.contains(variable);
+	}
+	
 	public void updateVariable() {
 		variable.setName(name);
 		variable.setValue(value);
+		if (!isEditing()) {
+			allVariablesModel.add(variable);
+		}
 		// TODO: find a way to fire a list member change so that we can get rid
 		// of refreshing the viewer when we close the env var wizard
 	}

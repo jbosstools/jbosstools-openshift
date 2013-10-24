@@ -8,7 +8,9 @@
  * Contributors: Red Hat, Inc. - initial API and implementation
  *
  *****************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
+package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
+
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -18,7 +20,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -36,12 +37,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -96,7 +96,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
-		editExistingButton.addSelectionListener(onEditExisting());
+		editExistingButton.addSelectionListener(onEdit());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
 				.notUpdatingParticipant()
@@ -159,10 +159,10 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
 			WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), dbc);
-		} catch (Exception e) {
-			StatusManager.getManager().handle(
-					OpenShiftUIActivator.createErrorStatus("Could not load Environment Variables.", e),
-					StatusManager.LOG);
+		} catch (InvocationTargetException e) {
+			Logger.error(NLS.bind("Could not load environment variables for applciation {0}.", model.getApplication()), e);
+		} catch (InterruptedException e) {
+			Logger.error(NLS.bind("Could not load environment variables for application {0}.", model.getApplication()), e);
 		}
 	}
 
@@ -171,16 +171,12 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				EnvironmentVariableWizard wizard = new EnvironmentVariableWizard(model);
-				OkCancelButtonWizardDialog dialog =
-						new OkCancelButtonWizardDialog(getShell(), wizard);
-				if (dialog.open() == Dialog.OK) {
-					model.add(wizard.getVariable());
-				}
+				new OkCancelButtonWizardDialog(getShell(), wizard).open();
 			}
 		};
 	}
 
-	private SelectionListener onEditExisting() {
+	private SelectionListener onEdit() {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -220,10 +216,14 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 			public void widgetSelected(SelectionEvent event) {
 				try {
 					WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
-				} catch (Exception ex) {
-					StatusManager.getManager().handle(
-							OpenShiftUIActivator.createErrorStatus("Could not refresh variables.", ex),
-							StatusManager.LOG);
+				} catch (InvocationTargetException e) {
+					Logger.error(
+							NLS.bind("Could not refresh environment variables for application {0}.",
+									model.getApplication()), e);
+				} catch (InterruptedException e) {
+					Logger.error(
+							NLS.bind("Could not refresh environment variables for application {0}.",
+									model.getApplication()), e);
 				}
 			}
 		};

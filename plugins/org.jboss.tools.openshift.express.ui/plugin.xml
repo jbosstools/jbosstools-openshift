@@ -1066,7 +1066,7 @@
         </menuContribution>
     </extension>
      
-     <!-- Edit environment variables -->
+    <!-- Edit environment variables -->
      <extension
            point="org.eclipse.ui.commands">
         <command
@@ -1084,12 +1084,12 @@
      <extension
            point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edition">
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
                 icon="icons/env_vars.png"
                 id="org.jboss.tools.openshift.express.ui.command.editEnvironmentVars"
-                mnemonic="C">
+                mnemonic="E">
            <visibleWhen>
              <with
                    variable="selection">
@@ -1110,10 +1110,30 @@
            </visibleWhen>
           </command>
         </menuContribution>
-    </extension>
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.serverviewer.menu">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
+                icon="icons/env_vars.png"
+                id="org.jboss.tools.openshift.express.ui.command.editEnvironmentVars"
+                mnemonic="E">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.eclipse.wst.server.core.IServer" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+     </extension>
 
 	<!-- restart application OpenShift Explorer -->
-	     <extension
+	<extension
            point="org.eclipse.ui.commands">
         <command
               id="org.jboss.tools.openshift.express.ui.command.restartApplication"

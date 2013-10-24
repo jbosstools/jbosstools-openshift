@@ -93,10 +93,10 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.variables.EnvironmentVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.environment.EnvironmentVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.ApplicationScale;
@@ -575,14 +575,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
 
-		// environment variables
+		// environment variables		
 		Button environmentVariablesButton = new Button(advancedComposite, SWT.NONE);
-		environmentVariablesButton.setText(" Environmental Variables... ");
-		environmentVariablesButton.addSelectionListener(onBrowseEnvironmentVariables(dbc));
-
+		environmentVariablesButton.setText("Environment Variables... ");
 		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(environmentVariablesButton);
-
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(environmentVariablesButton);
+		environmentVariablesButton.addSelectionListener(onBrowseEnvironmentVariables(dbc));
 	}
 
 	protected SelectionListener onManageDomains() {
@@ -628,7 +626,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				EnvironmentVariablesWizard environmentVariablesWizard = new EnvironmentVariablesWizard();
+				EnvironmentVariablesWizard environmentVariablesWizard = 
+						new EnvironmentVariablesWizard(pageModel.getEnvironmentVariables());
 				if (new OkButtonWizardDialog(getShell(), environmentVariablesWizard).open() == Dialog.OK) {
 					pageModel.setEnvironmentVariables(environmentVariablesWizard.getEnvironmentVariables());
 				}

@@ -215,20 +215,6 @@ public class OpenShiftApplicationWizardModel extends ObservableUIPojo implements
 	}
 
 	@Override
-	public Object setProperty(String key, Object value) {
-		Object oldVal = dataModel.get(key);
-		dataModel.put(key, value);
-		firePropertyChange(key, oldVal, value);
-		return value;
-	}
-
-	@Override
-	public Object getProperty(String key) {
-		return dataModel.get(key);
-	}
-
-	
-	@Override
 	public boolean hasDomain() {
 		return getDomain() != null;
 	}
@@ -608,6 +594,17 @@ public class OpenShiftApplicationWizardModel extends ObservableUIPojo implements
 	@Override
 	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables) {
 		return (Map<String, String>) setProperty(PROP_ENVIRONMENT_VARIABLES, environmentVariables);
+	}
+
+	private Object setProperty(String key, Object value) {
+		Object oldVal = dataModel.get(key);
+		dataModel.put(key, value);
+		firePropertyChange(key, oldVal, value);
+		return value;
+	}
+
+	private Object getProperty(String key) {
+		return dataModel.get(key);
 	}
 
 	private Boolean getBooleanProperty(String name) {

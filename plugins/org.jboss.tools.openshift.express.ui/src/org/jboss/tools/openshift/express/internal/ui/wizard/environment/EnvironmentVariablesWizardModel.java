@@ -7,10 +7,11 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.variables;
+package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
@@ -33,20 +34,50 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 	private List<EnvironmentVariableItem> variables = new ArrayList<EnvironmentVariableItem>();
 	private EnvironmentVariableItem selected;
 	private IApplication application;
+	private Map<String, String> environmentVariables;
 	
+	/**
+	 * Constructs a new model instance when no application but a map of variables is present
+	 * 
+	 * @param environmentVariables a map of key/values 
+	 */
+	public EnvironmentVariablesWizardModel(Map<String, String> environmentVariables) {
+		this.environmentVariables = environmentVariables;
+	}
+
+	/**
+	 * Constructs a new model instance when an application is present
+	 * 
+	 * @param environmentVariables a map of key/values 
+	 */
 	public EnvironmentVariablesWizardModel(IApplication application) {
 		this.application = application;		
 	}
 
 	public void loadEnvironmentVariables() {
-		variables.clear();
-		initVariables(variables, application);
+		initVariables(environmentVariables, application);
 	}
 
-	private void initVariables(List<EnvironmentVariableItem> variables, IApplication application) {
-		if (application == null) {
+	private void initVariables(Map<String, String> environmentVariables, IApplication application) {
+		variables.clear();
+		if (application != null) {
+			initVariablesFor(application);
+		} else {
+			initVariablesFor(environmentVariables);
+		}
+	}
+
+	private void initVariablesFor(Map<String, String> environmentVariables) {
+		if (environmentVariables == null
+				|| environmentVariables.isEmpty()) {
 			return;
 		}
+		for (Map.Entry<String, String> entry : environmentVariables.entrySet()) {
+			add(new EnvironmentVariableItem(entry.getKey(), entry.getValue()));
+		}
+	}
+
+	private void initVariablesFor(IApplication application) {
 		for (IEnvironmentVariable variable : application.getEnvironmentVariables().values()) {
 			add(new EnvironmentVariableItem(variable.getName(), variable.getValue()));
 		}

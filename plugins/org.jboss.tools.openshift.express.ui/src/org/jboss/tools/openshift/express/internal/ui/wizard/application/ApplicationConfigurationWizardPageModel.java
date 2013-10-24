@@ -539,12 +539,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 				&& connection.isConnected();
 	}
 	
-	public Map<String, String> getEnvironmentVariables(String appTargetName)	{
+	public Map<String, String> getEnvironmentVariables()	{
 		return wizardModel.getEnvironmentVariables();
 	}
 
 	public void setEnvironmentVariables(Map<String, String> environmentVariables) {
-		firePropertyChange(PROPERTY_INITIAL_GITURL, 
+		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, 
 				wizardModel.getEnvironmentVariables(),
 				wizardModel.setEnvironmentVariables(environmentVariables));
 

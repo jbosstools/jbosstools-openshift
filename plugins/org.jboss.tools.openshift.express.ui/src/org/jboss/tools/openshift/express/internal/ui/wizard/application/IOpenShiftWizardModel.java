@@ -156,10 +156,6 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public File getRepositoryFile();
 
-	public Object setProperty(String key, Object value);
-
-	public Object getProperty(String key);
-
 	public IDomain setDomain(IDomain domain);
 
 	public boolean hasDomain();
