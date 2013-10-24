@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -32,7 +31,6 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -48,14 +46,10 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
-import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -249,6 +243,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getApplicationScale()
 					, model.getApplicationGearProfile()
 					, model.getInitialGitUrl()
+					, model.getEnvironmentVariables()
 					, model.getSelectedEmbeddableCartridges()
 					, model.getDomain());
 			IStatus status = WizardUtils.runInWizard(
@@ -321,7 +316,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
 	 */
-	class ImportJob extends WorkspaceJob {
+	private class ImportJob extends WorkspaceJob {
 
 		private DelegatingProgressMonitor delegatingMonitor;
 

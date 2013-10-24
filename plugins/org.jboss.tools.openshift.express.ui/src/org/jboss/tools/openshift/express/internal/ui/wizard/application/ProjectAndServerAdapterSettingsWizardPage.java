@@ -51,12 +51,13 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Martes G Wigglesworth
  */
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
 	
-	private static final String PAGE_TITLE_FORMAT = "Set up Project for OpenShift Application \"{0}\""; 
+	private static final String PAGE_TITLE_FORMAT = "Set up Project for new OpenShift Appplication named: \"{0}\""; 
 	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 	private Text existingProjectNameText = null;
