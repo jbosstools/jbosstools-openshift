@@ -11,7 +11,9 @@
 package org.jboss.tools.openshift.express.internal.ui.job;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,15 +51,16 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	private IApplication application;
 	private IDomain domain;
 	private String initialGitUrl;
+	private Map<String, String> environmentVariables;
 	private Collection<IEmbeddableCartridge> embeddableCartridges;
 	
 	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
 			final IGearProfile gear, IDomain domain) {
-		this(name, cartridge, scale, gear, null, null, domain);
+		this(name, cartridge, scale, gear, null, new LinkedHashMap<String, String>(), null, domain);
 	}
 
 	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
-			final IGearProfile gear, String initialGitUrl, Collection<IEmbeddableCartridge> embeddableCartridges, IDomain domain) {
+			final IGearProfile gear, String initialGitUrl, Map<String, String> environmentVariables, Collection<IEmbeddableCartridge> embeddableCartridges, IDomain domain) {
 		super(NLS.bind((embeddableCartridges == null ?
 				OpenShiftExpressUIMessages.CREATING_APPLICATION : OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
 				, name));
@@ -67,6 +70,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		this.gear = gear;
 		this.initialGitUrl = initialGitUrl;
 		this.domain = domain;
+		this.environmentVariables = environmentVariables;
 		this.embeddableCartridges = embeddableCartridges;
 	}
 
@@ -77,10 +81,10 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 				if (embeddableCartridges == null
 						|| embeddableCartridges.isEmpty()) {
 					this.application = domain.createApplication(
-							name, cartridge, scale, gear, initialGitUrl, TIMEOUT);
+							name, cartridge, scale, gear, initialGitUrl, TIMEOUT, environmentVariables);
 				} else {
 					this.application = domain.createApplication(
-							name, cartridge, scale, gear, initialGitUrl, TIMEOUT, embeddableCartridges.toArray(new IEmbeddableCartridge[embeddableCartridges.size()]));
+							name, cartridge, scale, gear, initialGitUrl, TIMEOUT, environmentVariables, embeddableCartridges.toArray(new IEmbeddableCartridge[embeddableCartridges.size()]));
 				}
 				return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {

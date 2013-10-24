@@ -82,6 +82,27 @@ public class StringUtils {
 		return true;
 	}
 	
+	public static boolean isAlphaNumericOrUnderscore(String value) {
+		for (int i = 0; i < value.length(); ++i) {
+			final char c = value.charAt(i);
+			if (c != '_') {
+				if (!Character.isLetterOrDigit(c)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static boolean startsWithLetterOrUnderscore(String value) {
+		if (isEmpty(value)) {
+			return false;
+		}
+		char character = value.charAt(0);
+		return character == '_' 
+				|| Character.isLetter(character);
+	}
+
 	public static boolean isEmptyOrNull(String value) {
 		return value == null
 				|| value.isEmpty();

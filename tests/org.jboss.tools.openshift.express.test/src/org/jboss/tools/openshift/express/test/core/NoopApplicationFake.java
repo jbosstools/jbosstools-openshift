@@ -309,4 +309,9 @@ public class NoopApplicationFake implements IApplication {
 	public boolean hasEnvironmentVariable(String arg0) throws OpenShiftSSHOperationException {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void removeEnvironmentVariable(String name) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
 }

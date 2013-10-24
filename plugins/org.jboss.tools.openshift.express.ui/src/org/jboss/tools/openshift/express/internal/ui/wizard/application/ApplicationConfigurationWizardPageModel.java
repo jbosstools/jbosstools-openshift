@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
@@ -35,7 +36,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
- * 
+ * @author Martes G Wigglesworth
  */
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo implements
 		IEmbedCartridgesWizardPageModel {
@@ -56,6 +57,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
 	public static final String PROPERTY_DEFAULT_SOURCECODE = "defaultSourcecode";
 	public static final String PROPERTY_INITIAL_GITURL = "initialGitUrl";
+	public static final String PROPERTY_ENVIRONMENT_VARIABLES = "EnvironmentVariables";
 
 	private final OpenShiftApplicationWizardModel wizardModel;
 
@@ -536,5 +538,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		return connection != null
 				&& connection.isConnected();
 	}
+	
+	public Map<String, String> getEnvironmentVariables()	{
+		return wizardModel.getEnvironmentVariables();
+	}
 
+	public void setEnvironmentVariables(Map<String, String> environmentVariables) {
+		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, 
+				wizardModel.getEnvironmentVariables(),
+				wizardModel.setEnvironmentVariables(environmentVariables));
+
+	}
 }

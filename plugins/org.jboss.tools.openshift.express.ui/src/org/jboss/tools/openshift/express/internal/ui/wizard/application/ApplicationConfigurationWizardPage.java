@@ -96,6 +96,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.environment.EnvironmentVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.ApplicationScale;
@@ -583,6 +584,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
+
+		// environment variables		
+		Button environmentVariablesButton = new Button(advancedComposite, SWT.NONE);
+		environmentVariablesButton.setText("Environment Variables... ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(environmentVariablesButton);
+		environmentVariablesButton.addSelectionListener(onBrowseEnvironmentVariables(dbc));
 	}
 
 	protected SelectionListener onManageDomains() {
@@ -623,6 +631,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
+	private SelectionListener onBrowseEnvironmentVariables(final DataBindingContext dbc) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				EnvironmentVariablesWizard environmentVariablesWizard = 
+						new EnvironmentVariablesWizard(pageModel.getEnvironmentVariables());
+				if (new OkButtonWizardDialog(getShell(), environmentVariablesWizard).open() == Dialog.OK) {
+					pageModel.setEnvironmentVariables(environmentVariablesWizard.getEnvironmentVariables());
+				}
+			}
+		};
+	}
+	
 	/**
 	 * Triggered when the user checks "use existing application". It will
 	 * enable/disable the application widgets and reset existing values.
