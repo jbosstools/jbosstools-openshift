@@ -1240,7 +1240,7 @@
 			</menu>
 		</menuContribution>
         <menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.projectExplorerPopup"> 
+			locationURI="popup:org.jboss.tools.openshift.express.ui.packageExplorerPopup"> 
 			<command
 			    commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
 			    icon="icons/marker16.png"
