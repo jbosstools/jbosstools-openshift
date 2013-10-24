@@ -1066,8 +1066,74 @@
         </menuContribution>
     </extension>
      
+    <!-- Edit environment variables -->
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
+              name="%openshift.command.application.envvars">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
+              class="org.jboss.tools.openshift.express.internal.ui.command.EditEnvironmentVariablesHandler">
+     	</handler>
+     </extension>
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
+                icon="icons/env_vars.png"
+                id="org.jboss.tools.openshift.express.ui.command.editEnvironmentVars"
+                mnemonic="E">
+           <visibleWhen>
+             <with
+                   variable="selection">
+				<or>
+					<and>
+		                <count
+							value="1">
+		                </count>
+		                <iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.IApplication" />
+		                </iterate>
+		            </and>
+                </or>
+             </with>
+           </visibleWhen>
+          </command>
+        </menuContribution>
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.serverviewer.menu">
+          <command
+                commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
+                icon="icons/env_vars.png"
+                id="org.jboss.tools.openshift.express.ui.command.editEnvironmentVars"
+                mnemonic="E">
+              <visibleWhen>
+				<with variable="selection">
+					<and>
+						<count value="1" />
+	         			<iterate ifEmpty="false" operator="or">
+	            			<instanceof
+	                       		value="org.eclipse.wst.server.core.IServer" />
+	                    </iterate>
+					</and>
+                </with>
+              </visibleWhen>
+          </command>
+        </menuContribution>
+     </extension>
+
 	<!-- restart application OpenShift Explorer -->
-	     <extension
+	<extension
            point="org.eclipse.ui.commands">
         <command
               id="org.jboss.tools.openshift.express.ui.command.restartApplication"

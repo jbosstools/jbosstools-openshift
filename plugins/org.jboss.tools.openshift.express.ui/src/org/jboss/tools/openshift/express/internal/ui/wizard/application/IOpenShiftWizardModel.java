@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -67,6 +68,7 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public static final String PROP_SERVER_TYPE = "serverType";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
+	public static final String PROP_ENVIRONMENT_VARIABLES = "environmentVariables";
 
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
@@ -154,10 +156,6 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public File getRepositoryFile();
 
-	public Object setProperty(String key, Object value);
-
-	public Object getProperty(String key);
-
 	public IDomain setDomain(IDomain domain);
 
 	public boolean hasDomain();
@@ -244,4 +242,8 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public List<IDomain> setDomains(List<IDomain> domains);
 
 	public List<IDomain> getDomains();
+	
+	public Map<String, String> getEnvironmentVariables();
+	
+	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables);
 }

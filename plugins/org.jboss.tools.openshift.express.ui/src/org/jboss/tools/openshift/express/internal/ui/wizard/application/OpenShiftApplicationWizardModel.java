@@ -17,7 +17,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -56,14 +58,14 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
+public class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
 	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain) {
 		this(connection, domain, null, null, false);
 	}
-
+	
 	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication) {
 		setProject(project);
@@ -71,6 +73,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		setDefaultUseExistingApplication(useExistingApplication);
 		setConnection(connection);
 		setDomain(domain);
+		setEnvironmentVariables(new LinkedHashMap<String, String>());
 	}
 
 	/**
@@ -211,20 +214,6 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		return new File(repositoryPath, getApplicationName());
 	}
 
-	@Override
-	public Object setProperty(String key, Object value) {
-		Object oldVal = dataModel.get(key);
-		dataModel.put(key, value);
-		firePropertyChange(key, oldVal, value);
-		return value;
-	}
-
-	@Override
-	public Object getProperty(String key) {
-		return dataModel.get(key);
-	}
-
-	
 	@Override
 	public boolean hasDomain() {
 		return getDomain() != null;
@@ -593,6 +582,29 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		}
 		
 		ConnectionsModelSingleton.getInstance().setRecent(getConnection());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, String> getEnvironmentVariables() {
+		return (Map<String, String>) getProperty(PROP_ENVIRONMENT_VARIABLES);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables) {
+		return (Map<String, String>) setProperty(PROP_ENVIRONMENT_VARIABLES, environmentVariables);
+	}
+
+	private Object setProperty(String key, Object value) {
+		Object oldVal = dataModel.get(key);
+		dataModel.put(key, value);
+		firePropertyChange(key, oldVal, value);
+		return value;
+	}
+
+	private Object getProperty(String key) {
+		return dataModel.get(key);
 	}
 
 	private Boolean getBooleanProperty(String name) {
