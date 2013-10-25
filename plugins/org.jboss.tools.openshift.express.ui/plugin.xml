@@ -226,7 +226,7 @@
               targetID="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
            <action
                  class="org.jboss.tools.openshift.express.internal.ui.explorer.actionDelegate.ConnectionWizardActionDelegate"
-                 icon="icons/resource_obj.gif"
+                 icon="icons/openshift-new.png"
                  id="org.jboss.tools.openshift.express.ui.viewActions.openConnectionWizard"
                  label="Connect"
                  style="push"
@@ -508,7 +508,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.editconnection"
-                icon="icons/edit.gif"
+                icon="icons/openshift-edit.png"
                 mnemonic="E">
               <visibleWhen>
 				<with variable="selection">
