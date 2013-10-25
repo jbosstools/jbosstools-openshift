@@ -465,7 +465,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
-                icon="icons/resource_obj.gif"
+                icon="icons/openshift-new.png"
                 id="org.jboss.tools.openshift.express.ui.command.newconnection"
                 mnemonic="N">
 			<visibleWhen>
@@ -1087,7 +1087,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
-                icon="icons/env_vars.png"
+                icon="icons/task_edit.gif"
                 id="org.jboss.tools.openshift.express.ui.command.editEnvironmentVars"
                 mnemonic="E">
            <visibleWhen>
@@ -1114,7 +1114,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.serverviewer.menu">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.editEnvitonmentVars"
-                icon="icons/env_vars.png"
+                icon="icons/task_edit.gif"
                 id="org.jboss.tools.openshift.express.ui.command.editEnvironmentVars"
                 mnemonic="E">
               <visibleWhen>
@@ -1153,7 +1153,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edition">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.restartApplication"
-                icon="icons/key-icon.png"
+                icon="icons/arrow_rotate_clockwise_red.png"
                 id="org.jboss.tools.openshift.express.ui.command.manageKeys"
                 mnemonic="R">
               <visibleWhen>
