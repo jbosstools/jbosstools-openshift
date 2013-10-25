@@ -202,23 +202,29 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					protected IStatus doRun(IProgressMonitor monitor) {
 							pageModel.loadExistingApplications();
 							
-							String applicationName = pageModel.getApplicationName();
-							if (!StringUtils.isEmpty(applicationName)
-									&& !domain.hasApplicationByName(applicationName)) {
-								pageModel.setExistingApplication(domain);
-							}
+						if (!pageModel.isUseExistingApplication()) {
 							return Status.OK_STATUS;
+						}
+
+						String existingApplicationName = pageModel.getExistingApplicationName();
+						if (!StringUtils.isEmpty(existingApplicationName)
+								&& !domain.hasApplicationByName(existingApplicationName)) {
+							pageModel.setExistingApplication(domain);
+						}
+						return Status.OK_STATUS;
 					}
 				};
 
 				try {
 					WizardUtils.runInWizard(job, getContainer(), dbc);
 				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+							"Could not load applications for domain {0}.",
+							domain), e));
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+							"Could not load applications for domain {0}.",
+							domain), e));
 				}
 			}
 		};
@@ -366,8 +372,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.in(dbc);
 
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
+		IObservableValue existingApplicationsLoaded =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
+						.observe(pageModel);
 		final NewApplicationNameValidator newApplicationNameValidator =
-				new NewApplicationNameValidator(useExistingAppBtnSelection, applicationNameTextObservable);
+				new NewApplicationNameValidator(
+						useExistingAppBtnSelection, existingApplicationsLoaded, applicationNameTextObservable);
 		dbc.addValidationStatusProvider(newApplicationNameValidator);
 		ControlDecorationSupport.create(
 				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -1136,19 +1146,22 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	class NewApplicationNameValidator extends MultiValidator {
 
-		private final IObservableValue useExistingAppbservable;
+		private final IObservableValue useExistingAppObservable;
 		private final IObservableValue applicationNameObservable;
+		private IObservableValue existingApplicationsLoadedObservable;
 
 		public NewApplicationNameValidator(IObservableValue useExistingAppObservable,
-				IObservableValue applicationNameObservable) {
-			this.useExistingAppbservable = useExistingAppObservable;
+				IObservableValue existingApplicationsLoadedObservable, IObservableValue applicationNameObservable) {
+			this.useExistingAppObservable = useExistingAppObservable;
+			this.existingApplicationsLoadedObservable = existingApplicationsLoadedObservable; 
 			this.applicationNameObservable = applicationNameObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
 			final String applicationName = (String) applicationNameObservable.getValue();
-			final boolean useExistingApp = (Boolean) useExistingAppbservable.getValue();
+			final boolean useExistingApp = (Boolean) useExistingAppObservable.getValue();
+			final Boolean existingApplicationsLoaded = (Boolean) existingApplicationsLoadedObservable.getValue();
 			if (useExistingApp) {
 				return ValidationStatus.ok();
 			}
@@ -1160,7 +1173,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return ValidationStatus.error(
 						"The name may only contain letters and digits.");
 			}
-			if (pageModel.isExistingApplication(applicationName)) {
+			if (existingApplicationsLoaded != null
+					&& !existingApplicationsLoaded) {
+				return ValidationStatus.cancel("Existing applications are not loaded yet.");
+			} else if (pageModel.isExistingApplication(applicationName)) {
 				return ValidationStatus.error(
 						"An application with the same name already exists on OpenShift.");
 			}
