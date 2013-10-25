@@ -49,4 +49,6 @@ public class OpenShiftImages {
 	public static final Image SYSTEM_PROCESS_IMG = repo.getImage("systemprocess.gif"); //$NON-NLS-1$ 
 	public static final ImageDescriptor GLOBE = repo.create("globe.png"); //$NON-NLS-1$ 
 	public static final Image GLOBE_IMG = repo.getImage("globe.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor SERVER_NEW = repo.create("server_new.png"); //$NON-NLS-1$ 
+	public static final Image SERVER_NEW_IMG = repo.getImage("server_new.png"); //$NON-NLS-1$ 
 }

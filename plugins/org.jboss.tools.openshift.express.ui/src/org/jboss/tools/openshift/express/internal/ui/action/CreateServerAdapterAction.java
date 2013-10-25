@@ -50,7 +50,7 @@ public class CreateServerAdapterAction extends AbstractOpenShiftAction {
 
 	public CreateServerAdapterAction() {
 		super(OpenShiftExpressUIMessages.CREATE_SERVER_ADAPTER_ACTION, true);
-		setImageDescriptor(OpenShiftImages.EDIT);
+		setImageDescriptor(OpenShiftImages.SERVER_NEW);
 	}
 
 	@Override
