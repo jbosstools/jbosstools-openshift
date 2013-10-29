@@ -10,13 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate;
 
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.action.AbstractOpenShiftAction;
 import org.jboss.tools.openshift.express.internal.ui.job.RestartApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+
+import com.openshift.client.IApplication;
 
 /**
  * @author Andre Dietisheim
@@ -43,10 +46,21 @@ public class RestartApplicationActionProvider extends AbstractServerViewerAction
 		}
 
 		protected void restartApplication(IServer server) {
-			final RetrieveApplicationJob retrieveAppliaction = new RetrieveApplicationJob(server);
-			new JobChainBuilder(retrieveAppliaction)
-					.andRunWhenSuccessfull(new RestartApplicationJob(retrieveAppliaction.getApplication()))
-					.build().schedule();
+			final RetrieveApplicationJob retrieveApplicationJob = new RetrieveApplicationJob(server);
+			retrieveApplicationJob.addJobChangeListener(new JobChangeAdapter() {
+
+				@Override
+				public void done(IJobChangeEvent event) {
+					if (!event.getResult().isOK()) {
+						return;
+					}
+					IApplication application = retrieveApplicationJob.getApplication();
+					if (application == null) {
+						return;
+					}
+					new RestartApplicationJob(application).schedule(); 
+				}});
+			retrieveApplicationJob.schedule();
 		}
 	}
 	
