@@ -198,6 +198,8 @@ public class Connection {
 			return true;
 		}
 		if (createUser()) {
+			/* JBIDE-15847: user may get rewritten in case of kerberos */
+			updateUsername(user);
 			save();
 			return true;
 		} else {
@@ -219,10 +221,6 @@ public class Connection {
 		} else {
 			IUser user = new OpenShiftConnectionFactory().getConnection(USER_ID, username, password, getHost())
 					.getUser();
-			// force domain loading so that there is no 'lazy domain
-			// loading' cost
-			// after that.
-//			user.getDefaultDomain();
 			setUser(user);
 			return true;
 		}
@@ -264,6 +262,11 @@ public class Connection {
 		setUser(connection.getUser());
 	}
 
+	private String updateUsername(IUser user) {
+		this.username = user.getRhlogin();
+		return username;
+	}
+	
 	private boolean promptForCredentials() {
 		if (prompter == null) {
 			return false;
