@@ -549,4 +549,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 				wizardModel.setEnvironmentVariables(environmentVariables));
 
 	}
+	
+	public boolean isEnvironmentVariablesSupported() {
+		return wizardModel.getDomain() != null
+				&& wizardModel.getDomain().canCreateApplicationWithEnvironmentVariables();
+	}
 }
