@@ -586,11 +586,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
 
 		// environment variables		
-		Button environmentVariablesButton = new Button(advancedComposite, SWT.NONE);
-		environmentVariablesButton.setText("Environment Variables... ");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).applyTo(environmentVariablesButton);
-		environmentVariablesButton.addSelectionListener(onBrowseEnvironmentVariables(dbc));
+		if (pageModel.isEnvironmentVariablesSupported()) {
+			Button environmentVariablesButton = new Button(advancedComposite, SWT.NONE);
+			environmentVariablesButton.setText("Environment Variables... ");
+			GridDataFactory.fillDefaults()
+					.align(SWT.BEGINNING, SWT.CENTER).applyTo(environmentVariablesButton);
+			environmentVariablesButton.addSelectionListener(onBrowseEnvironmentVariables(dbc));
+		}
 	}
 
 	protected SelectionListener onManageDomains() {
