@@ -75,11 +75,6 @@ public class NoopDomainFake implements IDomain {
 	}
 
 	@Override
-	public boolean waitForAccessible(long timeout) throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public IApplication createApplication(String name, IStandaloneCartridge cartridge, ApplicationScale scale,
 			IGearProfile gearProfile) throws OpenShiftException {
 		throw new UnsupportedOperationException();
@@ -164,6 +159,11 @@ public class NoopDomainFake implements IDomain {
 	public IApplication createApplication(String arg0, IStandaloneCartridge arg1, ApplicationScale arg2,
 			IGearProfile arg3, String arg4, int arg5, Map<String, String> arg6, IEmbeddableCartridge... arg7)
 			throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean canCreateApplicationWithEnvironmentVariables() {
 		throw new UnsupportedOperationException();
 	}
 	
