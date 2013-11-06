@@ -54,6 +54,10 @@ public class EnvironmentVariablesWizard extends AbstractOpenShiftWizard<Environm
 
 	@Override
 	public boolean performFinish() {
+		if (!getModel().isSupported()) {
+			return true;
+		}
+		
 		IApplication application = getModel().getApplication();
 		if (isEditApplication(application)) {
 			try {

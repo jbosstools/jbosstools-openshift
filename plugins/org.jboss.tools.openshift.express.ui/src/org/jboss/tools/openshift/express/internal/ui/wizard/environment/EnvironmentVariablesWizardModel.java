@@ -30,6 +30,7 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED = "selected";
 	public static final String PROPERTY_VARIABLES = "variables";
+	public static final String PROPERTY_SUPPORTED = "supported";
 	
 	private List<EnvironmentVariableItem> variables = new ArrayList<EnvironmentVariableItem>();
 	private EnvironmentVariableItem selected;
@@ -60,7 +61,8 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 
 	private void initVariables(Map<String, String> environmentVariables, IApplication application) {
 		variables.clear();
-		if (application != null) {
+		if (application != null
+				&& application.canGetEnvironmentVariables()) {
 			initVariablesFor(application);
 		} else {
 			initVariablesFor(environmentVariables);
@@ -129,4 +131,18 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 		return getVariable(name) != null;
 	}
 	
+	public boolean isSupported() {
+		return application != null
+				&& application.canUpdateEnvironmentVariables()
+				&& application.canGetEnvironmentVariables();
+	}
+	
+	public String getHost() {
+		if (application == null
+				|| application.getDomain() == null
+				|| application.getDomain().getUser() == null) {
+			return null;
+		}
+		return application.getDomain().getUser().getServer();
+	}
 }

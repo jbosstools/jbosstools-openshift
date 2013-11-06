@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,6 +36,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -44,6 +47,8 @@ import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonit
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 
@@ -73,7 +78,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envVariableGroup);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(6, 6).applyTo(envVariableGroup);
-
+		
 		Composite tableContainer = new Composite(envVariableGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
@@ -125,6 +130,27 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				.align(SWT.FILL, SWT.FILL).applyTo(refreshButton);
 		refreshButton.setText("Refresh");
 		refreshButton.addSelectionListener(onRefresh());
+		
+		// not supported
+		enableEnvVariableGroup(model.isSupported(), envVariableGroup);
+		Label validationLabel = new Label(envVariableGroup, SWT.NONE);
+		validationLabel.setVisible(false);
+		GridDataFactory.fillDefaults().exclude(true).applyTo(validationLabel);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(validationLabel))
+			.notUpdating(BeanProperties.value(EnvironmentVariablesWizardModel.PROPERTY_SUPPORTED).observe(model))
+			.validatingAfterGet(new IValidator() {
+				
+				@Override
+				public IStatus validate(Object value) {
+					if (Boolean.FALSE.equals((Boolean) value)) {
+						return ValidationStatus.warning(NLS.bind(
+								"Server at {0} does not support\nchanging environment variables", model.getHost()));
+					}
+					return ValidationStatus.ok();
+				}
+			})
+			.in(dbc);
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
@@ -153,6 +179,17 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				.buildViewer();
 
 		return viewer;
+	}
+
+	private void enableEnvVariableGroup(final boolean enable, Group envVariableGroup) {
+		envVariableGroup.setEnabled(enable);
+		UIUtils.doForAllChildren(new IWidgetVisitor() {
+			
+			@Override
+			public void visit(Control control) {
+				control.setEnabled(enable);
+			}
+		}, envVariableGroup);
 	}
 
 	@Override
