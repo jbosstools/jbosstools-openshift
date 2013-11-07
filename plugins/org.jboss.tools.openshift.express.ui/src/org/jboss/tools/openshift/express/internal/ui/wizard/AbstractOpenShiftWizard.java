@@ -22,7 +22,7 @@ public class AbstractOpenShiftWizard<MODEL> extends Wizard {
 	public AbstractOpenShiftWizard(String title, MODEL model) {
 		this.model = model;
 		setNeedsProgressMonitor(true);
-		setWindowTitle("Select Domain");
+		setWindowTitle(title);
 	}
 
 	@Override
