@@ -1291,5 +1291,13 @@
           type="org.eclipse.core.resources.IProject">
       </propertyTester>
 	</extension>
-	
+    <extension
+          point="org.eclipse.ui.preferencePages">
+       <page
+             class="org.jboss.tools.openshift.express.internal.ui.preferences.OpenShiftPreferencePage"
+             id="org.jboss.tools.openshift.express.ui.preferences.OpenShiftPreferencePage"
+             name="%openshift.preferences.page.title"
+             category="org.jboss.tools.common.model.ui.MainPreferencePage">
+       </page>
+    </extension>
 </plugin>

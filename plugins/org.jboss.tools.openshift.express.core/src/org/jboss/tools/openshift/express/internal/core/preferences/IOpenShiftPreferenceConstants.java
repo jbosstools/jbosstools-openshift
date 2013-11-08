@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.preferences;
 
+import com.openshift.client.IHttpClient;
+
 /**
  * @author Andre Dietisheim
  */
@@ -27,5 +29,6 @@ public interface IOpenShiftPreferenceConstants {
 	public static final String DEFAULT_HOST = "org.jboss.tools.openshift.express.SERVER";
 	/** tail command */
 	public static final String TAIL_FILE_OPTIONS = "org.jboss.tools.openshift.express.TAILFILEOPTIONS";
-
+	/** the timeout that's the client's using when reading the OpenShift response */ 
+	public static final String CLIENT_READ_TIMEOUT = IHttpClient.SYSPROP_OPENSHIFT_READ_TIMEOUT;
 }
