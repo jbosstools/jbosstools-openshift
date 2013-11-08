@@ -5,9 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
@@ -24,10 +28,13 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	// The shared instance
 	private static OpenShiftUIActivator plugin;
 
+	private IPreferenceStore corePreferenceStore;
+
 	/**
 	 * The constructor
 	 */
 	public OpenShiftUIActivator() {
+		this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, OpenShiftCoreActivator.PLUGIN_ID);
 	}
 
 	/*
@@ -124,7 +131,15 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 			return ((Exception) t).getCause();
 		}
 		return null;
-
 	}
+	
+    public IPreferenceStore getCorePreferenceStore() {
+        // Create the preference store lazily.
+        if (corePreferenceStore == null) {
+        	this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, OpenShiftCoreActivator.PLUGIN_ID);
+
+        }
+        return corePreferenceStore;
+    }
 	
 }
