@@ -13,14 +13,16 @@ package org.jboss.tools.openshift.express.internal.ui;
 import org.eclipse.osgi.util.NLS;
 
 public class OpenshiftUIMessages extends NLS {
+	
 	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages"; //$NON-NLS-1$
-	public static final String CREATING_APPLICATION = null;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OpenshiftUIMessages.class);
 	}
+	
 	private OpenshiftUIMessages() {
 	}
-	
+
 	public static String OpenshiftWizardSavePassword;
 	public static String EditorSectionDomainNameLabel;
 	public static String EditorSectionAppNameLabel;
@@ -33,4 +35,7 @@ public class OpenshiftUIMessages extends NLS {
 	public static String EditorSectionOverrideProjectSettings;
 	public static String PublishDialogCustomizeGitCommitMsg;
 	public static String PublishDialogDefaultGitCommitMsg;
+	public static String ClientReadTimeout;
+	public static String ClientTimeoutExplanation;
+
 }
