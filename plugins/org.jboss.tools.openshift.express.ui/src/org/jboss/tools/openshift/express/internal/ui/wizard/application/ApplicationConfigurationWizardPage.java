@@ -162,7 +162,21 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindList(WidgetProperties.items().observe(domainCombo),
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAINS).observe(pageModel),
 				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy().setConverter(new DomainToStringConverter()));
+				new UpdateListStrategy() {
+			/**
+			 * Needed to avoid buggy list update strategy in
+			 * ListBinding. The bug appears if the model list changes
+			 * its ordering and the strategy then tries to apply the
+			 * move in the target (widget). It does not apply the
+			 * conversion and ends up in a class cast exception when
+			 * updating the target (widget) items list.
+			 * 
+			 * @see https://issues.jboss.org/browse/JBIDE-11954/JBIDE-15813
+			 */
+			protected boolean useMoveAndReplace() {
+				return false;
+			}
+		}.setConverter(new DomainToStringConverter()));
 
 		final ISWTObservableValue selectedDomainIndexObservable =
 				WidgetProperties.singleSelectionIndex().observe(domainCombo);
@@ -175,10 +189,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.converting(new DomainToDomainsIndex())
 				.in(dbc);
 
-		IObservableValue domainModelObservable =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAIN).observe(pageModel);
 		DataBindingUtils.addDisposableValueChangeListener(
-				onDomainChanged(dbc), domainModelObservable, domainCombo);
+				onDomainChanged(dbc), selectedDomainModelObservable, domainCombo);
 
 		Link manageDomainsLink = new Link(domainGroup, SWT.NONE);
 		manageDomainsLink
