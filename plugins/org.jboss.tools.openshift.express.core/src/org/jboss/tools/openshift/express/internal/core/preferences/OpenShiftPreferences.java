@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jgit.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.IApplication;
@@ -75,7 +76,6 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 		String ret = getPrefs(OpenShiftCoreActivator.PLUGIN_ID).get(DEFAULT_HOST, null);
 		return ret == null ? getPrefs(UI_PLUGIN_ID).get(DEFAULT_HOST, null) : ret;
 	}
-	
 	public void setDefaultHost(String host) {
 		getPrefs(OpenShiftCoreActivator.PLUGIN_ID).put(DEFAULT_HOST, host);
 	}
@@ -138,8 +138,28 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 		legacyConnections.store(connections);
 	}
 
+	public void setClientReadTimeout(int timeout) {
+		getPrefs(OpenShiftCoreActivator.PLUGIN_ID).put(CLIENT_READ_TIMEOUT, String.valueOf(timeout));
+	}
+	
+	public int getClientReadTimeout(int defaultTimeout) {
+		String timeout = getPrefs(
+				OpenShiftCoreActivator.PLUGIN_ID).get(CLIENT_READ_TIMEOUT,String.valueOf(defaultTimeout));
+		return toInteger(timeout);
+	}
+
 	public void flush() {
 		// TODO: implement
 	}
 
+	private int toInteger(String value) {
+		if (StringUtils.isEmptyOrNull(value)) {
+			return 0;
+		}
+		try {
+			return Integer.parseInt(value);
+		} catch(NumberFormatException e) {
+			return 0;
+		}
+	}
 }

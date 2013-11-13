@@ -14,6 +14,7 @@ import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.tools.openshift.express.client.ClientSystemProperties;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
@@ -55,7 +56,7 @@ public class Connection {
 	private boolean didPromptForPassword;
 	private boolean passwordLoaded;
 	private ICredentialsPrompter prompter;
-
+	
 	public Connection() {
 		this(null, null, null, null, false, null);
 	}
@@ -217,17 +218,20 @@ public class Connection {
 		if (password == null) {
 			return promptForCredentials();
 		} else {
-			IUser user = new OpenShiftConnectionFactory().getConnection(USER_ID, username, password, getHost())
-					.getUser();
-			// force domain loading so that there is no 'lazy domain
-			// loading' cost
-			// after that.
-//			user.getDefaultDomain();
+			setClientTimeout();
+			IUser user = new OpenShiftConnectionFactory()
+					.getConnection(USER_ID, username, password, getHost()).getUser();
 			setUser(user);
 			return true;
 		}
 	}
 
+	private void setClientTimeout() {
+		int timeout = OpenShiftPreferences.INSTANCE
+				.getClientReadTimeout(ClientSystemProperties.getReadTimeoutSeconds());
+		ClientSystemProperties.setReadTimeoutSeconds(timeout);
+	}
+	
 	/**
 	 * Attempts to load the password from the secure storage, only at first time
 	 * it is called.
