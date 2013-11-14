@@ -135,7 +135,7 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 	}
 	
 	public boolean isEditing() {
-		return application == null;
+		return application != null;
 	}
 	
 	public boolean isSupported() {
