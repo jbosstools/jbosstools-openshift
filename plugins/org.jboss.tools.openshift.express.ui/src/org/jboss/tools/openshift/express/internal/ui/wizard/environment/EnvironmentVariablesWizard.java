@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEnvironmentVariable;
 
 /**
@@ -37,9 +38,9 @@ public class EnvironmentVariablesWizard extends AbstractOpenShiftWizard<Environm
 
 	private Map<String, String> environmentVarriableValueByKey;
 
-	public EnvironmentVariablesWizard(Map<String, String> environmentVariables) {
+	public EnvironmentVariablesWizard(Map<String, String> environmentVariables, IDomain domain) {
 		super("Manage Application Environment Variable(s)",
-				new EnvironmentVariablesWizardModel(environmentVariables));
+				new EnvironmentVariablesWizardModel(environmentVariables, domain));
 	}
 
 	public EnvironmentVariablesWizard(IApplication application) {
