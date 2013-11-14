@@ -14,6 +14,8 @@ import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
@@ -56,7 +58,7 @@ public class Connection {
 	private boolean didPromptForPassword;
 	private boolean passwordLoaded;
 	private ICredentialsPrompter prompter;
-	
+
 	public Connection() {
 		this(null, null, null, null, false, null);
 	}
@@ -199,6 +201,8 @@ public class Connection {
 			return true;
 		}
 		if (createUser()) {
+			/* JBIDE-15847: user may get rewritten in case of kerberos */
+			updateUsername(user);
 			save();
 			return true;
 		} else {
@@ -268,6 +272,20 @@ public class Connection {
 		setUser(connection.getUser());
 	}
 
+	private String updateUsername(IUser user) {
+		if (user.getRhlogin().equals(username)) {
+			OpenShiftCoreActivator.getDefault().getLog().log(
+					new Status(Status.INFO, OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("User {0} was authenticated", username)));
+		} else {
+			OpenShiftCoreActivator.getDefault().getLog().log(
+					new Status(Status.WARNING, OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("User {0} was logged in as {1}", username, user.getRhlogin())));
+		}
+		this.username = user.getRhlogin();
+		return username;
+	}
+	
 	private boolean promptForCredentials() {
 		if (prompter == null) {
 			return false;
