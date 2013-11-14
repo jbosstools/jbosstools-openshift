@@ -57,7 +57,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
 	public static final String PROPERTY_DEFAULT_SOURCECODE = "defaultSourcecode";
 	public static final String PROPERTY_INITIAL_GITURL = "initialGitUrl";
-	public static final String PROPERTY_ENVIRONMENT_VARIABLES = "EnvironmentVariables";
+	public static final String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
+	public static final String PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED = "environmentVariablesSupported";
 
 	private final OpenShiftApplicationWizardModel wizardModel;
 
@@ -493,6 +494,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 	
 	public void setDomain(IDomain domain) throws OpenShiftException {
 		firePropertyChange(PROPERTY_DOMAIN, wizardModel.getDomain(), wizardModel.setDomain(domain));
+		setEnvironmentVariablesSupported(isEnvironmentVariablesSupported());
 	}
 	
 	public List<IDomain> getDomains() throws OpenShiftException {
@@ -550,8 +552,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	}
 	
+	public void setEnvironmentVariablesSupported(boolean supported) {
+		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED, null, isEnvironmentVariablesSupported());
+	}
+
 	public boolean isEnvironmentVariablesSupported() {
-		return wizardModel.getDomain() != null
-				&& wizardModel.getDomain().canCreateApplicationWithEnvironmentVariables();
+		return getDomain() != null
+				&& getDomain().canCreateApplicationWithEnvironmentVariables();
 	}
 }
