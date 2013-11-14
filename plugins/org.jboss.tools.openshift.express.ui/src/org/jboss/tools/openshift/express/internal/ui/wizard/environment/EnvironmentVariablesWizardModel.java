@@ -17,6 +17,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.IEnvironmentVariable;
 
 
@@ -36,14 +37,16 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 	private EnvironmentVariableItem selected;
 	private IApplication application;
 	private Map<String, String> environmentVariables;
+	private IDomain domain;
 	
 	/**
 	 * Constructs a new model instance when no application but a map of variables is present
 	 * 
 	 * @param environmentVariables a map of key/values 
 	 */
-	public EnvironmentVariablesWizardModel(Map<String, String> environmentVariables) {
+	public EnvironmentVariablesWizardModel(Map<String, String> environmentVariables, IDomain domain) {
 		this.environmentVariables = environmentVariables;
+		this.domain = domain;
 	}
 
 	/**
@@ -131,18 +134,43 @@ public class EnvironmentVariablesWizardModel extends ObservableUIPojo {
 		return getVariable(name) != null;
 	}
 	
+	public boolean isEditing() {
+		return application == null;
+	}
+	
 	public boolean isSupported() {
+		if (isEditing()) {
+			return isSupported(application);
+		} else {
+			return isSupported(domain);
+		}
+	}
+	
+	private boolean isSupported(IApplication application) {
 		return application != null
 				&& application.canUpdateEnvironmentVariables()
 				&& application.canGetEnvironmentVariables();
 	}
 	
+	private boolean isSupported(IDomain domain) {
+		return domain != null
+				&& domain.canCreateApplicationWithEnvironmentVariables();
+	}
+	
 	public String getHost() {
-		if (application == null
-				|| application.getDomain() == null
-				|| application.getDomain().getUser() == null) {
+		IDomain domain = null;
+		if (isEditing()) {
+			if (application != null) {
+				domain = application.getDomain();
+			}
+		} else {
+			domain = this.domain;
+		}
+
+		if (domain == null
+				|| domain.getUser() == null) {
 			return null;
 		}
-		return application.getDomain().getUser().getServer();
+		return domain.getUser().getServer();
 	}
 }
