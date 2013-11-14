@@ -314,4 +314,9 @@ public class NoopApplicationFake implements IApplication {
 	public void removeEnvironmentVariable(String name) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void removeEnvironmentVariable(IEnvironmentVariable arg0) {
+		throw new UnsupportedOperationException();
+	}
 }
