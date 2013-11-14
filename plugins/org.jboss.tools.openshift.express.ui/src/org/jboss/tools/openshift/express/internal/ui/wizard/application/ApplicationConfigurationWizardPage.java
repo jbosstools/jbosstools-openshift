@@ -651,7 +651,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				EnvironmentVariablesWizard environmentVariablesWizard = 
-						new EnvironmentVariablesWizard(pageModel.getEnvironmentVariables());
+						new EnvironmentVariablesWizard(pageModel.getEnvironmentVariables(), pageModel.getDomain());
 				if (new OkButtonWizardDialog(getShell(), environmentVariablesWizard).open() == Dialog.OK) {
 					pageModel.setEnvironmentVariables(environmentVariablesWizard.getEnvironmentVariables());
 				}
