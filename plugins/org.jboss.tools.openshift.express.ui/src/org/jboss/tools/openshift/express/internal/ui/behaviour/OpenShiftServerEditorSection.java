@@ -290,8 +290,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		dialog.setInput(p);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
-		String depFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
-		IResource res = p.findMember(new Path(depFolder));
+		IResource res = p.findMember(new Path(
+				StringUtils.null2emptyString(OpenShiftServerUtils.getExpressDeployFolder(server))));
 		if (res != null)
 			dialog.setInitialSelection(res);
 
