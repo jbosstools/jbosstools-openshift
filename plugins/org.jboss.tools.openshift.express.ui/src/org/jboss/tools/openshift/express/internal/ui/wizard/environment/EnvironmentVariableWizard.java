@@ -25,7 +25,7 @@ public class EnvironmentVariableWizard extends Wizard {
 	 * 
 	 * @param application the application that we create an environment variable for
 	 */
-	public EnvironmentVariableWizard(EnvironmentVariablesWizardModel variablesModel) {
+	public EnvironmentVariableWizard(AbstractEnvironmentVariablesWizardModel variablesModel) {
 		this(new EnvironmentVariableItem(), variablesModel);
 	}
 	
@@ -35,7 +35,7 @@ public class EnvironmentVariableWizard extends Wizard {
 	 * @param variable the variable that shall get edited
 	 * @param variablesModel 
 	 */
-	public EnvironmentVariableWizard(EnvironmentVariableItem variable, EnvironmentVariablesWizardModel variablesModel) {
+	public EnvironmentVariableWizard(EnvironmentVariableItem variable, AbstractEnvironmentVariablesWizardModel variablesModel) {
 		this.model = new EnvironmentVariableWizardModel(variable, variablesModel);
 		setWindowTitle(variable);
 		setNeedsProgressMonitor(true);

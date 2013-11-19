@@ -96,7 +96,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeStrategyAdapter;
-import org.jboss.tools.openshift.express.internal.ui.wizard.environment.EnvironmentVariablesWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.environment.NewEnvironmentVariablesWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.ApplicationScale;
@@ -655,8 +655,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				EnvironmentVariablesWizard environmentVariablesWizard = 
-						new EnvironmentVariablesWizard(pageModel.getEnvironmentVariables(), pageModel.getDomain());
+				NewEnvironmentVariablesWizard environmentVariablesWizard = 
+						new NewEnvironmentVariablesWizard(pageModel.getEnvironmentVariables(), pageModel.getDomain());
 				if (new OkButtonWizardDialog(getShell(), environmentVariablesWizard).open() == Dialog.OK) {
 					pageModel.setEnvironmentVariables(environmentVariablesWizard.getEnvironmentVariables());
 				}

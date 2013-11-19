@@ -27,7 +27,7 @@ public class EnvironmentVariableWizardModel extends ObservableUIPojo {
 	private String value;
 
 	private EnvironmentVariableItem variable;
-	private EnvironmentVariablesWizardModel allVariablesModel;
+	private AbstractEnvironmentVariablesWizardModel allVariablesModel;
 
 	/**
 	 * Creates a new wizard model for creating a new environment variable
@@ -36,7 +36,7 @@ public class EnvironmentVariableWizardModel extends ObservableUIPojo {
 	 *            the application that the environment variable shall get added
 	 *            to
 	 */
-	public EnvironmentVariableWizardModel(EnvironmentVariablesWizardModel variablesModel) {
+	public EnvironmentVariableWizardModel(AbstractEnvironmentVariablesWizardModel variablesModel) {
 		this(new EnvironmentVariableItem(), variablesModel);
 	}
 
@@ -47,7 +47,7 @@ public class EnvironmentVariableWizardModel extends ObservableUIPojo {
 	 *            the environment variable that shall get edited
 	 */
 	public EnvironmentVariableWizardModel(EnvironmentVariableItem variable,
-			EnvironmentVariablesWizardModel variablesModel) {
+			AbstractEnvironmentVariablesWizardModel variablesModel) {
 		this.variable = variable;
 		this.name = variable.getName();
 		this.value = variable.getValue();

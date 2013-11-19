@@ -60,10 +60,10 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizard
  */
 public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage {
 
-	private EnvironmentVariablesWizardModel model;
+	private AbstractEnvironmentVariablesWizardModel model;
 	private TableViewer viewer;
 
-	public EnvironmentVariablesWizardPage(EnvironmentVariablesWizardModel model, IWizard wizard) {
+	public EnvironmentVariablesWizardPage(AbstractEnvironmentVariablesWizardModel model, IWizard wizard) {
 		super("Environment Variables", "Please provide new environment variables or edit the existing ones", "", wizard);
 		this.model = model;
 	}
@@ -84,12 +84,12 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(EnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
+				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
 				.in(dbc);
 		viewer.setSorter(new ViewerSorter());
 		viewer.setContentProvider(new ObservableListContentProvider());
 		viewer.setInput(BeanProperties.list(
-				EnvironmentVariablesWizardModel.PROPERTY_VARIABLES).observe(model));
+				AbstractEnvironmentVariablesWizardModel.PROPERTY_VARIABLES).observe(model));
 
 		Button addButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -105,7 +105,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(EnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
+				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 
@@ -117,7 +117,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(removeButton))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(EnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
+				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 
@@ -138,7 +138,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		GridDataFactory.fillDefaults().exclude(true).applyTo(validationLabel);
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(validationLabel))
-			.notUpdating(BeanProperties.value(EnvironmentVariablesWizardModel.PROPERTY_SUPPORTED).observe(model))
+			.notUpdating(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SUPPORTED).observe(model))
 			.validatingAfterGet(new IValidator() {
 				
 				@Override
@@ -197,9 +197,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		try {
 			WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), dbc);
 		} catch (InvocationTargetException e) {
-			Logger.error(NLS.bind("Could not load environment variables for applciation {0}.", model.getApplication()), e);
+			Logger.error("Could not load environment variables", e);
 		} catch (InterruptedException e) {
-			Logger.error(NLS.bind("Could not load environment variables for application {0}.", model.getApplication()), e);
+			Logger.error("Could not load environment variables", e);
 		}
 	}
 
@@ -254,13 +254,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				try {
 					WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
 				} catch (InvocationTargetException e) {
-					Logger.error(
-							NLS.bind("Could not refresh environment variables for application {0}.",
-									model.getApplication()), e);
+					Logger.error("Could not refresh environment variables.", e);
 				} catch (InterruptedException e) {
-					Logger.error(
-							NLS.bind("Could not refresh environment variables for application {0}.",
-									model.getApplication()), e);
+					Logger.error("Could not refresh environment variables.", e);
 				}
 			}
 		};
