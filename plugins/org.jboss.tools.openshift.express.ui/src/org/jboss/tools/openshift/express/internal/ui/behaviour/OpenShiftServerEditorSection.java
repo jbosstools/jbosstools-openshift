@@ -114,8 +114,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		domainNameText.setEnabled(false);
 		appNameText.setEnabled(false);
 
-		String outDir = OpenShiftServerUtils.getExpressDeployFolder(server);
-		deployFolderText.setText(outDir);
+		deployFolderText.setText(StringUtils.null2emptyString(OpenShiftServerUtils.getExpressDeployFolder(server)));
 		String remote = OpenShiftServerUtils.getExpressRemoteName(server);
 		remoteText.setText(StringUtils.null2emptyString(remote));
 
