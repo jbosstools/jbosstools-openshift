@@ -23,7 +23,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.environment.EnvironmentVariablesWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.environment.EditEnvironmentVariablesWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -52,7 +52,7 @@ public class EditEnvironmentVariablesHandler extends AbstractDomainHandler {
 	private Object openEnvironmentVariablesWizard(IApplication application, Shell shell) {
 		try {
 			WizardUtils.openWizardDialog(
-					new EnvironmentVariablesWizard(application), shell);
+					new EditEnvironmentVariablesWizard(application), shell);
 			return null;
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to edit cartridges", e);

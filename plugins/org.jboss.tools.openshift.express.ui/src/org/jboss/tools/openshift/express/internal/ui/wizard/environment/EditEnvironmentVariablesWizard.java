@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,76 +22,42 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
 import com.openshift.client.IEnvironmentVariable;
 
 /**
  * @author Martes G Wigglesworth
  * @author Andre Dietisheim
  */
-public class EnvironmentVariablesWizard extends AbstractOpenShiftWizard<EnvironmentVariablesWizardModel> {
+public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariablesWizard<EditEnvironmentVariablesWizardModel> {
 
-	private Map<String, String> environmentVarriableValueByKey;
-
-	public EnvironmentVariablesWizard(Map<String, String> environmentVariables, IDomain domain) {
-		super("Manage Application Environment Variable(s)",
-				new EnvironmentVariablesWizardModel(environmentVariables, domain));
-	}
-
-	public EnvironmentVariablesWizard(IApplication application) {
+	public EditEnvironmentVariablesWizard(IApplication application) {
 		super(NLS.bind("Manage Application Environment Variable(s) for application {0}", application.getName()),
-				new EnvironmentVariablesWizardModel(application));
-	}
-
-	@Override
-	public void addPages() {
-		addPage(new EnvironmentVariablesWizardPage(getModel(), this));
+				new EditEnvironmentVariablesWizardModel(application));
 	}
 
 	@Override
 	public boolean performFinish() {
-		if (!getModel().isSupported()) {
+		if (!isSupported()) {
 			return true;
 		}
 		
 		IApplication application = getModel().getApplication();
-		if (isEditApplication(application)) {
-			try {
-				WizardUtils.runInWizard(new UpdateEnvironmentVariableJob(application, getModel().getVariables()), getContainer());
-			} catch (InvocationTargetException e) {
-				Logger.error((application == null ?
-						"Could not edit environment variables"
-						: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
-						e);
-			} catch (InterruptedException e) {
-				Logger.error((application == null ?
-						"Could not edit environment variables"
-						: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
-						e);
-			}
-		} else {
-			this.environmentVarriableValueByKey = (toMap(getModel().getVariables()));
+		try {
+			WizardUtils.runInWizard(new UpdateEnvironmentVariableJob(application, getModel().getVariables()), getContainer());
+		} catch (InvocationTargetException e) {
+			Logger.error((application == null ?
+					"Could not edit environment variables"
+					: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
+					e);
+		} catch (InterruptedException e) {
+			Logger.error((application == null ?
+					"Could not edit environment variables"
+					: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
+					e);
 		}
 		return true;
-	}
-
-	private boolean isEditApplication(IApplication application) {
-		return application != null;
-	}
-
-	private Map<String, String> toMap(List<EnvironmentVariableItem> variables) {
-		HashMap<String, String> environmentVariables = new LinkedHashMap<String, String>();
-		for (EnvironmentVariableItem variable : variables) {
-			environmentVariables.put(variable.getName(), variable.getValue());
-		}
-		return environmentVariables;
-	}
-	
-	public Map<String, String> getEnvironmentVariables() {
-		return environmentVarriableValueByKey;
 	}
 
 	private class UpdateEnvironmentVariableJob extends AbstractDelegatingMonitorJob {
