@@ -97,10 +97,7 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 
 		private void remove(List<String> namesToRemove, IApplication application) {
 			for (String name : namesToRemove) {
-				IEnvironmentVariable environmentVariable = application.getEnvironmentVariable(name);
-				if (environmentVariable != null) {
-					environmentVariable.destroy();
-				}
+				application.removeEnvironmentVariable(name);
 			}
 		}
 	}
