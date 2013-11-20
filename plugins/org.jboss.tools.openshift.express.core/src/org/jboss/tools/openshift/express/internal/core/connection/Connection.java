@@ -507,8 +507,14 @@ public class Connection {
 	}
 
 	public String getId() {
-		return new StringBuilder(username)
-				.append(" (").append(host).append(')').toString();
+		StringBuilder builder = new StringBuilder(username);
+		builder
+			.append(" at ")
+			.append(getHost());
+		if (isDefaultHost()) {
+			builder.append(" (default)");
+		}
+		return builder.toString();
 	}
 	
 	@Override
