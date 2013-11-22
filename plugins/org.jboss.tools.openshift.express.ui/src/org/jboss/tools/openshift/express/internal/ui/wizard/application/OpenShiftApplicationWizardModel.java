@@ -563,7 +563,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		setApplication(getDefaultApplication());
 		setUseExistingApplication(getDefaultUseExistingApplication());
 		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
-		setNewProject(true);
+		setNewProject(getProject() == null);
 		setCreateServerAdapter(true);
 		setSkipMavenBuild(false);
 		setRepositoryPath(IOpenShiftWizardModel.DEFAULT_REPOSITORY_PATH);
