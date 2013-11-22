@@ -46,6 +46,7 @@ import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
@@ -107,6 +108,16 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		if (!UIUtils.isSingleSelection(selection)) {
+			return; // we can't decide which selected project to use
+			// Note that we could try to be more clever and check if multiple selection 
+			// contains only one open project
+		}
+		
+		IProject project = UIUtils.getFirstElement(selection, IProject.class);
+		if (project != null && project.isAccessible()) {
+			getModel().setProject(project);
+		}
 	}
 
 	@Override
