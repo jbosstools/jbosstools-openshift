@@ -64,7 +64,7 @@ public class OpenShiftMavenProfileTests {
 					+ "  <plugins>\n"
 					+ "    <plugin>\n"
 					+ "      <artifactId>maven-war-plugin</artifactId>\n"
-					+ "      <version>2.1.1</version>\n"
+					+ "      <version>2.4</version>\n"
 					+ "      <configuration>\n"
 					+ "        <outputDirectory>deployments</outputDirectory>\n"
 					+ "        <warName>ROOT</warName>\n"
