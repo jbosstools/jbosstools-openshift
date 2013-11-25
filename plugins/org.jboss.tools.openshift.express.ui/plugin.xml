@@ -171,7 +171,7 @@
       &lt;plugins&gt;
         &lt;plugin&gt;
           &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;
-          &lt;version&gt;2.1.1&lt;/version&gt;
+          &lt;version&gt;2.4&lt;/version&gt;
           &lt;configuration&gt;
             &lt;outputDirectory&gt;deployments&lt;/outputDirectory&gt;
             &lt;warName&gt;ROOT&lt;/warName&gt;
