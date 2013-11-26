@@ -33,7 +33,7 @@ public class VerifySSHSessionJob extends Job {
 	private boolean validSession = false;
 
 	public VerifySSHSessionJob(final IApplication application) {
-		super("Verifying SSH session to retrieve Application's ports...");
+		super("Verifying SSH session...");
 		this.application = application;
 	}
 
