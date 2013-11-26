@@ -252,7 +252,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				try {
-					WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
+					WizardUtils.runInWizard(new RefreshEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
 				} catch (InvocationTargetException e) {
 					Logger.error("Could not refresh environment variables.", e);
 				} catch (InterruptedException e) {
@@ -274,4 +274,18 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 			return Status.OK_STATUS;
 		}
 	}
+
+	private class RefreshEnvironmentVariablesJob extends AbstractDelegatingMonitorJob {
+
+		public RefreshEnvironmentVariablesJob() {
+			super("Refreshing Environment Variables ...");
+		}
+
+		@Override
+		protected IStatus doRun(IProgressMonitor monitor) {
+			model.refreshEnvironmentVariables();
+			return Status.OK_STATUS;
+		}
+	}
+
 }

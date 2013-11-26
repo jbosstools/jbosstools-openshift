@@ -31,9 +31,9 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	private List<EnvironmentVariableItem> variables = new ArrayList<EnvironmentVariableItem>();
 	private EnvironmentVariableItem selected;
 	
-	public void loadEnvironmentVariables() {
-		variables.clear();
-	}
+	public abstract void refreshEnvironmentVariables();
+
+	public abstract void loadEnvironmentVariables();
 
 	public List<EnvironmentVariableItem> getVariables() {
 		return variables;
@@ -80,4 +80,9 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	public abstract boolean isSupported();
 	
 	public abstract String getHost();
+	
+	protected void clear() {
+		variables.clear();
+		firePropertyChange(PROPERTY_VARIABLES, null, variables);
+	}
 }
