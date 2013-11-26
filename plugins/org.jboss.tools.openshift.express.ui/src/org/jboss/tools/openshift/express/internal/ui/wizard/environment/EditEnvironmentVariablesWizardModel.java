@@ -27,13 +27,26 @@ public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVari
 	}
 
 	@Override
+	public void refreshEnvironmentVariables() {
+		if (!isSupported()) {
+			return;
+		}
+		
+		application.refresh();
+		loadEnvironmentVariables();
+	}
+
+	@Override
 	public void loadEnvironmentVariables() {
 		if (!isSupported()) {
 			return;
 		}
 		
-		super.loadEnvironmentVariables();
+		clear();
+		add(application);
+	}
 
+	private void add(IApplication application) {
 		for (IEnvironmentVariable variable : application.getEnvironmentVariables().values()) {
 			add(new EnvironmentVariableItem(variable.getName(), variable.getValue()));
 		}

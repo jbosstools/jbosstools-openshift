@@ -30,14 +30,22 @@ public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVaria
 		this.domain = domain;
 	}
 
+	public void refreshEnvironmentVariables() {
+		loadEnvironmentVariables();
+	}
+
 	@Override
 	public void loadEnvironmentVariables() {
-		super.loadEnvironmentVariables();
-
+		clear();
 		if (environmentVariables == null
 				|| environmentVariables.isEmpty()) {
 			return;
 		}
+
+		add(environmentVariables);
+	}
+
+	private void add(Map<String, String> environmentVariables) {
 		for (Map.Entry<String, String> entry : environmentVariables.entrySet()) {
 			add(new EnvironmentVariableItem(entry.getKey(), entry.getValue()));
 		}
