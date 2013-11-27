@@ -69,7 +69,7 @@ public class OpenShiftMavenProfile {
 					+ "       <artifactId>maven-war-plugin</artifactId>\n"
 					+ "       <version>2.2</version>\n"
 					+ "       <configuration>\n"
-					+ "         <outputDirectory>deployments</outputDirectory>\n"
+					+ "         <outputDirectory>{1}</outputDirectory>\n"
 					+ "         <warName>ROOT</warName>\n"
 					+ "       </configuration>\n"
 					+ "     </plugin>\n"
@@ -160,19 +160,20 @@ public class OpenShiftMavenProfile {
 	/**
 	 * Adds the openshift profile to the pom this is instance is bound to.
 	 * Returns <code>true</code> if it was added, <code>false</code> otherwise.
+	 * @param string 
 	 * 
 	 * @return true if the profile was added to the pom this instance is bound
 	 *         to.
 	 * @throws CoreException
 	 */
-	public boolean addToPom(String finalName) throws CoreException {
+	public boolean addToPom(String finalName, String outputDirectory) throws CoreException {
 		try {
 			if (existsInPom()) {
 				return false;
 			}
 			Document document = getDocument();
 			Element profilesElement = getOrCreateProfilesElement(document);
-			Node profileNode = document.importNode(createOpenShiftProfileElement(finalName), true);
+			Node profileNode = document.importNode(createOpenShiftProfileElement(finalName, outputDirectory), true);
 			profilesElement.appendChild(profileNode);
 			return true;
 		} catch (SAXException e) {
@@ -184,16 +185,15 @@ public class OpenShiftMavenProfile {
 		}
 	}
 
-	private Element createOpenShiftProfileElement(String finalName) throws ParserConfigurationException, SAXException,
+	private Element createOpenShiftProfileElement(String finalName, String outputDirectory) throws ParserConfigurationException, SAXException,
 			IOException {
 		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		String openShiftProfile = MessageFormat.format(getProfileTemplate(), finalName);
+		String openShiftProfile = MessageFormat.format(getProfileTemplate(), finalName, outputDirectory);
 		Document document = documentBuilder.parse(new ByteArrayInputStream(openShiftProfile.getBytes()));
 		return document.getDocumentElement();
 	}
 
 	private String getProfileTemplate() {
-		
 		return OPENSHIFT_WAR_PROFILE;
 	}
 

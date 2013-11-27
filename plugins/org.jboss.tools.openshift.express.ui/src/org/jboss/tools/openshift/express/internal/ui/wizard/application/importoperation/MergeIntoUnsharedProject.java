@@ -94,7 +94,7 @@ public class MergeIntoUnsharedProject extends AbstractImportApplicationOperation
 
 		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
 		setupGitIgnore(project, monitor);
-		setupOpenShiftMavenProfile(project, monitor);
+		setupOpenShiftMavenProfile(getApplication(), project, monitor);
 		addSettingsFile(project, monitor);
 		setupMarkers(project, monitor);
 		shareProject(project, monitor);
