@@ -323,7 +323,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				OpenShiftApplicationWizard wizard = (OpenShiftApplicationWizard) getWizard();
 				OpenShiftApplicationWizardModel wizardModel = wizard.getModel();
 				final ApplicationSelectionDialog appSelectionDialog =
-						new ApplicationSelectionDialog(wizard, wizardModel, null, getShell());
+						new ApplicationSelectionDialog(wizard, wizardModel, wizardModel.getApplication(), getShell());
 				if (appSelectionDialog.open() == IDialogConstants.OK_ID) {
 					final IApplication selectedApplication = appSelectionDialog.getSelectedApplication();
 					if (selectedApplication != null) {
