@@ -38,7 +38,10 @@ public class OpenShiftMavenProfileTests {
 
 	private static final String PLUGIN_ID = "org.jboss.tools.openshift.express.test";
 	private static final String POM_FILENAME = "pom.xml";
-
+	private static final String JBOSSAS_DEPLOYMENTS_FOLDER = "deployments";
+	private static final String JBOSSEWS_DEPLOYMENTS_FOLDER = "webapps";
+	private static final String OUTPUT_DIRECTORY_TAG = "<outputDirectory>";
+	
 	private static final String POM_WITHOUT_OPENSHIFT =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 					+ "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" "
@@ -314,14 +317,14 @@ public class OpenShiftMavenProfileTests {
 	@Test
 	public void canAddOpenShiftProfile() throws CoreException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(pomWithoutOpenShiftProfile, PLUGIN_ID);
-		boolean added = profile.addToPom(nonOpenShiftProject.getName());
+		boolean added = profile.addToPom(nonOpenShiftProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
 		assertTrue(added);
 	}
 
 	@Test
 	public void pomHasOpenShiftProfileAfterAdd() throws CoreException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(pomWithoutOpenShiftProfile, PLUGIN_ID);
-		profile.addToPom(nonOpenShiftProject.getName());
+		profile.addToPom(nonOpenShiftProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
 		profile.savePom(new NullProgressMonitor());
 		profile = new OpenShiftMavenProfile(pomWithoutOpenShiftProfile, PLUGIN_ID);
 		assertTrue(profile.existsInPom());
@@ -330,7 +333,7 @@ public class OpenShiftMavenProfileTests {
 	@Test
 	public void canAddOpenShiftProfileToComplexPom() throws CoreException, IOException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
-		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName());
+		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
 		assertTrue(added);
 		profile.savePom(new NullProgressMonitor());
 		profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
@@ -340,7 +343,7 @@ public class OpenShiftMavenProfileTests {
 	@Test
 	public void addedOpenShiftProfileIsCorrect() throws CoreException, IOException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
-		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName());
+		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
 		assertTrue(added);
 		profile.savePom(new NullProgressMonitor());
 		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
@@ -348,9 +351,33 @@ public class OpenShiftMavenProfileTests {
 	}
 
 	@Test
+	public void addedOpenShiftProfileHasDeploymentsOutputDirectory() throws CoreException, IOException {
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
+		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
+		assertTrue(added);
+		profile.savePom(new NullProgressMonitor());
+		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
+		int tagIndex = pomContent.indexOf(OUTPUT_DIRECTORY_TAG);
+		assertTrue(tagIndex >= 0);
+		assertTrue(pomContent.substring(tagIndex + OUTPUT_DIRECTORY_TAG.length()).startsWith(JBOSSAS_DEPLOYMENTS_FOLDER));
+	}
+
+	@Test
+	public void addedOpenShiftProfileHasWebappsOutputDirectory() throws CoreException, IOException {
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(nonOpenShiftProfilesProject, PLUGIN_ID);
+		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName(), JBOSSEWS_DEPLOYMENTS_FOLDER);
+		assertTrue(added);
+		profile.savePom(new NullProgressMonitor());
+		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
+		int tagIndex = pomContent.indexOf(OUTPUT_DIRECTORY_TAG);
+		assertTrue(tagIndex >= 0);
+		assertTrue(pomContent.substring(tagIndex + OUTPUT_DIRECTORY_TAG.length()).startsWith(JBOSSEWS_DEPLOYMENTS_FOLDER));
+	}
+
+	@Test
 	public void doesNotAddOpenShiftProfileIfAlreadyPresent() throws CoreException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(pomWithOpenShiftProfile, PLUGIN_ID);
-		boolean added = profile.addToPom(openShiftProject.getName());
+		boolean added = profile.addToPom(openShiftProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
 		assertFalse(added);
 	}
 

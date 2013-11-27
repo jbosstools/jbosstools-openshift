@@ -40,6 +40,7 @@ import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
+import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 
@@ -240,7 +241,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUrl(), repository);
 	}
 	
-	protected IResource setupOpenShiftMavenProfile(IProject project, IProgressMonitor monitor) throws CoreException {
+	protected IResource setupOpenShiftMavenProfile(IApplication application, IProject project, IProgressMonitor monitor) throws CoreException {
 		if (!OpenShiftMavenProfile.isMavenProject(project)) {
 			return null;
 		}
@@ -249,8 +250,17 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		if (profile.existsInPom()) {
 			return null;
 		}
-		profile.addToPom(project.getName());
+		
+		profile.addToPom(project.getName(), getDeployFolder(application));
 		return profile.savePom(monitor);
+	}
+
+	private String getDeployFolder(IApplication application) {
+		DeployFolder deployFolder = DeployFolder.getByCartridgeName(application.getCartridge().getName());
+		if (deployFolder == null) {
+			return null;
+		}
+		return deployFolder.getDeployFolder();
 	}
 
 	protected List<IResource> setupMarkers(IProject project, IProgressMonitor monitor) throws CoreException {

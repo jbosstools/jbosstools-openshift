@@ -100,7 +100,7 @@ public class MergeIntoGitSharedProject extends AbstractImportApplicationOperatio
 
 		addToModified(copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor));
 		addToModified(setupGitIgnore(project, monitor));
-		addToModified(setupOpenShiftMavenProfile(project, monitor));
+		addToModified(setupOpenShiftMavenProfile(getApplication(), project, monitor));
 		addSettingsFile(project, monitor);
 		addToModified(setupMarkers(project, monitor));
 

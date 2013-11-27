@@ -59,13 +59,13 @@ import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * This class holds the attribute names whose values will be stored inside a
@@ -231,36 +231,6 @@ public class OpenShiftServerUtils {
 		return getDefaultDeployFolder(getApplication(server));
 	}
 	
-	private enum DeployFolder {
-		JBOSSAS(IStandaloneCartridge.NAME_JBOSSAS, "deployments"), 
-		JBOSSEAP(IStandaloneCartridge.NAME_JBOSSEAP, "deployments"), 
-		JBOSSEWS(IStandaloneCartridge.NAME_JBOSSEWS, "webapps");
-
-		private String cartridgeName;
-		private String deployFolder;
-
-		DeployFolder(String cartridgeName, String deployFolder) {
-			this.cartridgeName = cartridgeName;
-			this.deployFolder = deployFolder;
-		}
-		
-		public String getDeployFolder() {
-			return deployFolder;
-		}
-		
-		public static DeployFolder getByCartridgeName(String cartridgeName) {
-			if (cartridgeName == null) {
-				return null;
-			}
-			
-			for (DeployFolder deployFolder : values()) {
-				if (cartridgeName.startsWith(deployFolder.cartridgeName)) {
-					return deployFolder;
-				}
-			}
-			return null;
-		}
-	}
 	
 	public static String getDefaultDeployFolder(IApplication application) {
 		Assert.isNotNull(application);
