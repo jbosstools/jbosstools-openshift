@@ -13,8 +13,14 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.MultiValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -73,6 +79,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults()
 				.numColumns(4).margins(6, 6).applyTo(newSSHKeyGroup);
 
+		// name
 		Label nameLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		nameLabel.setText("Name:");
 		GridDataFactory.fillDefaults()
@@ -90,6 +97,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
+		// type
 		Label typeLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		typeLabel.setText("Key Type:");
 		GridDataFactory.fillDefaults()
@@ -109,6 +117,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(fillerLabel);
 
+		// ssh2 home
 		Label ssh2HomeLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(ssh2HomeLabel);
@@ -140,6 +149,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(ssh2HomeBrowseButton);
 
+		// private key
 		Label privateKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(privateKeyLabel);
@@ -156,6 +166,8 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				privateKeyBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
+		
+		// Passphrase
 		Label passphraseLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(passphraseLabel);
@@ -164,11 +176,34 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		Text passphraseText = new Text(newSSHKeyGroup, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(passphraseText);
+		ISWTObservableValue passphraseObservable = WidgetProperties.text(SWT.Modify).observe(passphraseText);
 		ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passphraseText))
+				.bind(passphraseObservable)
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_PASSPHRASE).observe(pageModel))
 				.in(dbc);
+		
+		// Passphrase Confirmation
+		Label passphraseConfirmLabel = new Label(newSSHKeyGroup, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(passphraseLabel);
+		passphraseConfirmLabel.setText("Confirm Private Key Passphrase:");
 
+		Text passphraseConfirmText = new Text(newSSHKeyGroup, SWT.BORDER | SWT.PASSWORD);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(passphraseConfirmText);
+		ISWTObservableValue passphraseConfirmObservable = WidgetProperties.text(SWT.Modify).observe(passphraseConfirmText);
+		ValueBindingBuilder
+				.bind(passphraseConfirmObservable)
+				.to(BeanProperties.value(
+						NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE).observe(pageModel))
+				.in(dbc);
+		
+		PassPhraseConfirmValidator passPhraseConfrimValidator = 
+				new PassPhraseConfirmValidator(passphraseObservable, passphraseConfirmObservable);
+		dbc.addValidationStatusProvider(passPhraseConfrimValidator);
+		ControlDecorationSupport.create(passPhraseConfrimValidator, SWT.LEFT | SWT.TOP);
+		
+		// public key
 		Label publicKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
@@ -192,7 +227,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs());
 
-	}
+	}	
 
 	private SelectionListener onBrowse(final Text ssh2HomeText) {
 		return new SelectionAdapter() {
@@ -256,4 +291,41 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 	public IOpenShiftSSHKey getSSHKey() {
 		return pageModel.getSSHKey();
 	}
+	
+	/**
+	 * Validates a given passphrase confirmation value such that it matches the 
+	 * model's passphrase value
+	 */
+	public class PassPhraseConfirmValidator extends MultiValidator {
+
+		private IObservableValue passphrase;
+		private IObservableValue passphraseConfirm;
+
+		public PassPhraseConfirmValidator(IObservableValue passphrase,
+				IObservableValue passphraseConfirm) {
+			this.passphrase = passphrase;
+			this.passphraseConfirm = passphraseConfirm;
+		}
+
+		@Override
+		protected IStatus validate() {
+			Object o1 = passphrase.getValue();
+			Object o2 = passphraseConfirm.getValue();
+			boolean bothEmpty = (o1 == null || "".equals(o1)) && (o2 == null || "".equals(o2));
+			if( !bothEmpty ) {
+				// At least one is not null.  if non-null object NOT EQUAL possibly-null object, show error
+				if( !(o1 == null ? o2 : o1).equals( o1 == null ? o1 :o2)) 
+					return ValidationStatus.error("Please ensure the two passphrases match.");
+			}
+			return ValidationStatus.ok();
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			WritableList targets = new WritableList();
+			targets.add(passphraseConfirm);
+			return targets;
+		}
+	}
+
 }
