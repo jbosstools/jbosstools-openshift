@@ -15,6 +15,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -40,6 +41,7 @@ import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.DirectoryValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.FileNameValidator;
+import org.jboss.tools.openshift.express.internal.ui.databinding.PassPhraseConfirmValidator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -156,6 +158,9 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				privateKeyBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
+		
+		/* Begin Passphrase */
+		
 		Label passphraseLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(passphraseLabel);
@@ -169,6 +174,30 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_PASSPHRASE).observe(pageModel))
 				.in(dbc);
 
+		
+		/* Begin Passphrase Confirmation  */
+		Label passphraseConfirmLabel = new Label(newSSHKeyGroup, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(passphraseLabel);
+		passphraseConfirmLabel.setText("Confirm Private Key Passphrase:");
+
+		Text passphraseConfirmText = new Text(newSSHKeyGroup, SWT.BORDER | SWT.PASSWORD);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(passphraseConfirmText);
+		ValueBindingBuilder
+		.bind(WidgetProperties.text(SWT.Modify).observe(passphraseConfirmText))
+		.to(BeanProperties.value(NewSSHKeyWizardPageModel.PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE).observe(pageModel))
+		.in(dbc);
+
+		
+		
+		ISWTObservableValue passphraseObservable = WidgetProperties.text(SWT.Modify).observe(passphraseText);
+		ISWTObservableValue passphraseConfirmObservable = WidgetProperties.text(SWT.Modify).observe(passphraseConfirmText);
+		PassPhraseConfirmValidator passphasesMatch = new PassPhraseConfirmValidator(passphraseObservable, passphraseConfirmObservable);
+		dbc.addValidationStatusProvider(passphasesMatch);
+		
+		
+		
 		Label publicKeyLabel = new Label(newSSHKeyGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
@@ -192,7 +221,7 @@ public class NewSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs());
 
-	}
+	}	
 
 	private SelectionListener onBrowse(final Text ssh2HomeText) {
 		return new SelectionAdapter() {

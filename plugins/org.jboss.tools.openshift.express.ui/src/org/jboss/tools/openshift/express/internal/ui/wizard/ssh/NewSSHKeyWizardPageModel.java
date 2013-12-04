@@ -32,7 +32,8 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_SSH2_HOME = "SSH2Home";
 	public static final String PROPERTY_PRIVATEKEY_FILENAME = "privateKeyName";
-	public static final String PROPERTY_PRIVATEKEY_PASSPHRASE = "privateKeyPassphrase";
+	public static final String PROPERTY_PRIVATEKEY_PASSPHRASE = "privateKeyPathphrase";
+	public static final String PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE = "privateKeyPassphraseConfirm";
 	public static final String PROPERTY_PUBLICKEY_FILENAME = "publicKeyName";
 	private static final String PUBLICKEY_SUFFIX = ".pub";
 
@@ -40,6 +41,7 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	private String ssh2Home = SSHUtils.getSSH2Home();
 	private String privateKeyName;
 	private String privateKeyPathphrase;
+	private String privateKeyPathphraseConfirm;
 	private String publicKeyName;
 	private IOpenShiftSSHKey key;
 
@@ -59,6 +61,16 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return privateKeyPathphrase;
 	}
 
+	public String getPrivateKeyPassphraseConfirm() {
+		return privateKeyPathphraseConfirm;
+	}
+
+	
+	public void setPrivateKeyPassphraseConfirm(String confirm) {
+		firePropertyChange(PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE, this.privateKeyPathphraseConfirm, 
+				this.privateKeyPathphraseConfirm = confirm);
+	}
+	
 	public void setPrivateKeyPathphrase(String privateKeyPathphrase) {
 		firePropertyChange(PROPERTY_PRIVATEKEY_PASSPHRASE,
 				this.privateKeyPathphrase, this.privateKeyPathphrase = privateKeyPathphrase);
