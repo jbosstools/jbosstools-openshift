@@ -51,6 +51,9 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 	}
 
 	private boolean isValid(IProject project) {
+		if (!project.isAccessible()) {
+			return false;
+		}
 		if (EGitUtils.isShared(project)) {
 			if (!EGitUtils.isSharedWithGit(project)) {
 				return false;
