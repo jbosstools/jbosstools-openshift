@@ -56,15 +56,14 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PREF_CONTENTASSISTKEY = "prefContentAssistKey";
-	
-	private static final String PAGE_TITLE_FORMAT = "Set up Project for new OpenShift Appplication named: \"{0}\""; 
+	private static final String PAGE_DESCRIPTION_PATTERN = "Configure your project and server adapter settings for application \"{0}\".";
 	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
 	private Text existingProjectNameText = null;
 
 	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftWizardModel wizardModel) {
-		super(NLS.bind(PAGE_TITLE_FORMAT, wizardModel.getApplicationName()),
-				"Configure your project and server adapter settings, then click 'next' or 'finish'.",
+		super("Set up Project for new OpenShift Application",
+				NLS.bind(PAGE_DESCRIPTION_PATTERN, wizardModel.getApplicationName()),
 				"Project Configuration", wizard);
 		this.pageModel = new ProjectAndServerAdapterSettingsWizardPageModel(wizardModel);
 	}
@@ -310,11 +309,11 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
-		setPageTitle();
+		setPageDescription();
 		dbc.updateTargets();
 	}
 
-	private void setPageTitle() {
-		setTitle(NLS.bind(PAGE_TITLE_FORMAT, pageModel.getApplicationName()));
+	private void setPageDescription() {
+		setDescription(NLS.bind(PAGE_DESCRIPTION_PATTERN, pageModel.getApplicationName()));
 	}
 }
