@@ -40,20 +40,20 @@ public class EmbedCartridgeStrategy {
 
 	private final ApplicationRequirement[] applicationRequirements =
 			new ApplicationRequirement[] {
-				new JBossApplicationRequirement(new EmbeddableCartridgeSelector("switchyard")),
+				new JBossApplicationRequirement(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_SWITCHYARD)),
 				new NonScalableApplicationRequirement(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN))
 	};
 
 	private final EmbeddableCartridgeRelations[] cartridgeDependencies =
 			new EmbeddableCartridgeRelations[] {
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("jenkins-client-"),
-							null, null, new CartridgeSelector("jenkins-")),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("phpmyadmin-"),
-							null, new EmbeddableCartridgeSelector("mysql-"), null),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("rockmongo-"),
-							null, new EmbeddableCartridgeSelector("mongodb-"), null),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector("10gen-mms-agent-"),
-							null, new EmbeddableCartridgeSelector("mongodb-"), null)
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_JENKINS_CLIENT),
+							null, null, new CartridgeSelector(IStandaloneCartridge.NAME_JENKINS)),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN),
+							null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MYSQL), null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_ROCKMONGO),
+							null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MONGODB), null),
+					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT),
+							null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MONGODB), null)
 			};
 
 	private Map<IEmbeddableCartridge, EmbeddableCartridgeRelations> dependenciesByCartridge;
@@ -285,8 +285,8 @@ public class EmbedCartridgeStrategy {
 
 		protected JBossApplicationRequirement(EmbeddableCartridgeSelector cartridgeSelector) {
 			super(cartridgeSelector);
-			this.eapSelector = new CartridgeSelector("jbosseap");
-			this.asSelector = new CartridgeSelector("jbossas");			
+			this.eapSelector = new CartridgeSelector(IStandaloneCartridge.NAME_JBOSSEAP);
+			this.asSelector = new CartridgeSelector(IStandaloneCartridge.NAME_JBOSSAS);			
 		}
 
 		@Override
