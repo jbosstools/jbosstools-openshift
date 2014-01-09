@@ -251,7 +251,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(existingAppSelectionGroup);
 
 		// existing app checkbox
-		useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
+		this.useExistingAppBtn = new Button(existingAppSelectionGroup, SWT.CHECK);
 		useExistingAppBtn.setText("Use existing application:");
 		useExistingAppBtn.setToolTipText("Select an existing application or uncheck to create a new one.");
 		useExistingAppBtn.setFocus();
@@ -261,7 +261,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel);
 		final IObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
 		dbc.bindValue(useExistingAppBtnSelection, useExistingAppObservable);
-
+		
 		// existing app name
 		this.existingAppNameText = new Text(existingAppSelectionGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
@@ -682,9 +682,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				Object newValue = event.diff.getNewValue();
 				if (newValue instanceof Boolean) {
 					Boolean useExisting = (Boolean) newValue;
-					// if (!useExisting) {
-					// resetExistingApplication();
-					// }
+					if (!useExisting) {
+						pageModel.resetNewApplication();
+					} else {
+						IApplication existingApplication = pageModel.getExistingApplication(pageModel.getExistingApplicationName());
+						pageModel.setExistingApplication(existingApplication);
+					}
 					enableApplicationWidgets(useExisting);
 					setWizardPageDescription(useExisting);
 				}
@@ -1008,16 +1011,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(getWizard());
 			return;
 		}
-
+		
 		try {
-			pageModel.reset();
 			// needs to be done before loading resources, otherwise:
 			// dbc.updateModels() will be called and old data could be
 			// restored
 			loadOpenshiftResources(dbc);
-			dbc.updateTargets();
-			enableApplicationWidgets(pageModel.isUseExistingApplication());
-			createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
 			this.newAppNameText.setFocus();
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to reset page fields", e);
@@ -1068,6 +1067,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
+
+			if (pageModel.isExistingApplicationsLoaded()) {
+				return;
+			}
+			
 			WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Loading applications, cartridges and gears...") {
 
 				@Override
@@ -1092,6 +1096,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					}
 				}
 			}, getContainer(), dbc);
+			
+			dbc.updateTargets();
+			enableApplicationWidgets(pageModel.isUseExistingApplication());
+			createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
 		} catch (Exception ex) {
 			// ignore
 		}
