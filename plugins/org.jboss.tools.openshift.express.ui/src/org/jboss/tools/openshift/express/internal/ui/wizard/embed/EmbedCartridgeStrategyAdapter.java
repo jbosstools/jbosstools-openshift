@@ -14,7 +14,9 @@ import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -31,6 +33,7 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.Ap
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationPropertiesProvider;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils.ToStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
@@ -38,13 +41,13 @@ import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils.ToStringConverter;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.IOpenShiftConnection;
+import com.openshift.client.OpenShiftEndpointException;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
@@ -255,10 +258,18 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 		try {
 			IDomain domain = pageModel.getDomain();
+			IGearProfile gear;
+			gear = getFirstAvailableGearProfile(domain);
+			if (gear == null) {
+				IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not find any available gear profiles.");
+				new ErrorDialog(getShell(), "Error", "Could create jenkins application.", status, -1).open();
+				return false;
+			}
+			
 			IStandaloneCartridge jenkinsCartridge = LatestVersionOf.jenkins().get(domain.getUser());
 			CreateApplicationJob createJob =
-					new CreateApplicationJob(name, jenkinsCartridge , ApplicationScale.NO_SCALE,
-							IGearProfile.SMALL, domain);
+					new CreateApplicationJob(
+							name, jenkinsCartridge , ApplicationScale.NO_SCALE, gear, domain);
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			IStatus result = createJob.getResult();
@@ -271,12 +282,21 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 						job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
 				return JobUtils.isOk(waitStatus);
 			}
-
 		} catch (Exception e) {
-			// ignore
-			e.printStackTrace();
+			IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getMessage());
+			new ErrorDialog(getShell(), "Error", "Could not create jenkins application.", status, -1).open();		
 		}
 		return false;
+	}
+
+	private IGearProfile getFirstAvailableGearProfile(IDomain domain) throws OpenShiftEndpointException {
+		IGearProfile gear = null;
+		List<IGearProfile> gears = domain.getAvailableGearProfiles();
+		if (gears != null
+				&& !gears.isEmpty()) {
+			gear = gears.get(0);
+		}
+		return gear;
 	}
 
 	private String openJenkinsApplicationDialog() {
