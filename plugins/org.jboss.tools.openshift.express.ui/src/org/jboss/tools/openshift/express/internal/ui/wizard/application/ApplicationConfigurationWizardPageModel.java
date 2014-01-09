@@ -211,10 +211,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 		}
 		List<IDomain> domains = connection.getDomains();
 		setDomains(domains);
-		setFirstIfNoDomain(domains);
+		setFirstDomainIfNoSet(domains);
 	}
 
-	private void setFirstIfNoDomain(List<IDomain> domains) {
+	private void setFirstDomainIfNoSet(List<IDomain> domains) {
 		if (getDomain() == null
 				&& domains != null
 				&& !domains.isEmpty()) {
@@ -507,10 +507,22 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo im
 
 	public void reset() throws OpenShiftException {
 		setDomain(wizardModel.getDomain());
-		setApplicationName(wizardModel.getApplication());
+		resetNewApplication();
 		setExistingApplication(wizardModel.getApplication());
 		setUseExistingApplication(wizardModel.isUseExistingApplication());
-		setSelectedEmbeddableCartridges(wizardModel.getSelectedEmbeddableCartridges());
+	}
+	
+	/**
+	 * Resets the settings for a new application (vs. existing application)
+	 * 
+	 * @throws OpenShiftException
+	 */
+	public void resetNewApplication() {
+		setApplicationName("");
+		setSelectedCartridge((IStandaloneCartridge) null);
+		setSelectedEmbeddableCartridges(Collections.<IEmbeddableCartridge> emptyList());
+		setSelectedGearProfile(null);
+		resetInitialGitUrl();
 	}
 	
 	public boolean isDefaultSourcecode() {
