@@ -32,8 +32,9 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.ApplicationRequirement;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationPropertiesProvider;
+import org.jboss.tools.openshift.express.internal.core.util.EmbeddableCartridgeToStringConverter;
+import org.jboss.tools.openshift.express.internal.core.util.StandaloneCartridgeToStringConverter;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils.ToStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
@@ -191,7 +192,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 				new EmbeddableCartridgeToStringConverter().toString(diff.getCartridge())));
 		if (diff.hasApplicationAdditions()) {
 			builder.append(NLS.bind("\n- Create {0}",
-					StringUtils.toString(diff.getApplicationAdditions(), new CartridgeToStringConverter())));
+					StringUtils.toString(diff.getApplicationAdditions(), new StandaloneCartridgeToStringConverter())));
 		}
 		if (diff.hasRemovals()) {
 			builder.append(NLS.bind("\n- Remove {0}",
@@ -353,28 +354,6 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 				}
 				return null;
 			}
-		}
-	}
-
-	private static class EmbeddableCartridgeToStringConverter implements ToStringConverter<IEmbeddableCartridge> {
-
-		@Override
-		public String toString(IEmbeddableCartridge cartridge) {
-			if (cartridge == null) {
-				return null;
-			}
-			return cartridge.getName();
-		}
-	}
-
-	private static class CartridgeToStringConverter implements ToStringConverter<IStandaloneCartridge> {
-
-		@Override
-		public String toString(IStandaloneCartridge cartridge) {
-			if (cartridge == null) {
-				return null;
-			}
-			return cartridge.getName();
 		}
 	}
 }

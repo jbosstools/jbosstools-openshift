@@ -324,7 +324,7 @@ public class Connection {
 		return null;
 	}
 
-	public List<IStandaloneCartridge> getStandaloneCartridgeNames() throws OpenShiftException {
+	public List<IStandaloneCartridge> getStandaloneCartridges() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getStandaloneCartridges();
 		}
@@ -342,6 +342,10 @@ public class Connection {
 		return domain.getApplicationByName(name);
 	}
 
+	public boolean hasDomain(IDomain domain) {
+		return user.hasDomain();
+	}
+	
 	public boolean hasApplication(String name, IDomain domain) throws OpenShiftException {
 		return getApplication(name, domain) != null;
 	}
@@ -362,6 +366,15 @@ public class Connection {
 		return user.getDomain(id);
 	}
 
+	public IDomain getFirstDomain() throws OpenShiftException {
+		List<IDomain> domains = getDomains();
+		if (domains == null
+				|| domains.isEmpty()) {
+			return null;
+		}
+		return domains.get(0);
+	}
+	
 	public List<IDomain> getDomains() throws OpenShiftException {
 		if (connect()) {
 			List<IDomain> domains = user.getDomains();

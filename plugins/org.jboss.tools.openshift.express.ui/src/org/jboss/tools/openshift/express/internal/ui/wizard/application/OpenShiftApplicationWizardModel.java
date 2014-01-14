@@ -33,10 +33,8 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
-import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
@@ -69,8 +67,8 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication) {
 		setProject(project);
-		setDefaultApplication(application);
-		setDefaultUseExistingApplication(useExistingApplication);
+		setApplication(application);
+		setUseExistingApplication(useExistingApplication);
 		setConnection(connection);
 		setDomain(domain);
 		setEnvironmentVariables(new LinkedHashMap<String, String>());
@@ -221,21 +219,9 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	
 	@Override
 	public IDomain setDomain(IDomain domain) {
-		if (domain == null) {
-			return resetDomain();
-		} else {
-			return (IDomain) setProperty(PROP_DOMAIN, domain);
-		}
+		return (IDomain) setProperty(PROP_DOMAIN, domain);
 	}
 
-	private IDomain resetDomain() {
-		setApplicationCartridge((IStandaloneCartridge) null);
-		setApplicationName((String) null);
-		setApplicationScale((ApplicationScale) null);
-		setApplicationGearProfile((IGearProfile) null);
-		return (IDomain) setProperty(PROP_DOMAIN, null);
-	}
-	
 	@Override
 	public IDomain getDomain() {
 		return (IDomain) getProperty(PROP_DOMAIN);
@@ -258,19 +244,9 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		return (IApplication) getProperty(PROP_APPLICATION);
 	}
 
-	public void setDefaultApplication(IApplication application) {
-		setProperty(PROP_DEFAULT_APPLICATION, application);
-		setApplication(application);
-	}
-
-	public IApplication getDefaultApplication() {
-		return (IApplication) getProperty(PROP_DEFAULT_APPLICATION);
-	}		
-
 	@Override
 	public void setApplication(IApplication application) {
 		setProperty(PROP_APPLICATION, application);
-		setUseExistingApplication(application);
 		setApplicationCartridge(application);
 		setApplicationName(application);
 		setApplicationScale(application);
@@ -300,7 +276,9 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 
 	@Override
 	public boolean isNewProject() {
-		return (Boolean) getProperty(PROP_NEW_PROJECT);
+		Boolean isNewProject = (Boolean) getProperty(PROP_NEW_PROJECT);
+		return isNewProject != null
+				&& isNewProject;
 	}
 
 	@Override
@@ -398,20 +376,6 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	@Override
 	public boolean isUseExistingApplication() {
 		return (Boolean) getProperty(PROP_USE_EXISTING_APPLICATION);
-	}
-
-	public boolean setDefaultUseExistingApplication(boolean useExistingApplication) {
-		setProperty(PROP_DEFAULT_USE_EXISTING_APPLICATION, useExistingApplication);
-		setUseExistingApplication(useExistingApplication);
-		return useExistingApplication;
-	}
-
-	public boolean getDefaultUseExistingApplication() {
-		Object useExistingApp = getProperty(PROP_DEFAULT_USE_EXISTING_APPLICATION);
-		if (useExistingApp != null) {
-			return (Boolean) useExistingApp;
-		}
-		return false;
 	}
 
 	@Override
@@ -527,7 +491,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	@Override
 	public Connection setConnection(Connection connection) {
 		setProperty(PROP_CONNECTION, connection);
-		resetWizardModel();
+		update(connection);
 		return connection;
 	}
 	
@@ -559,17 +523,18 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		return Status.OK_STATUS;
 	}
 	
-	public void resetWizardModel() {
-		setApplication(getDefaultApplication());
-		setUseExistingApplication(getDefaultUseExistingApplication());
-		setSelectedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
-		setNewProject(getProject() == null);
-		setCreateServerAdapter(true);
-		setSkipMavenBuild(false);
-		setRepositoryPath(IOpenShiftWizardModel.DEFAULT_REPOSITORY_PATH);
-		setRemoteName(IOpenShiftWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		setServerType(ServerCore.findServerType(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE));
-		setServerAdapter(null);
+	/**
+	 * Updates this wizard model for the given connection. All settings are
+	 * either used as is (if still valid for the given connection) or resetted.
+	 * 
+	 * @param connection
+	 */
+	public void update(Connection connection) {
+		IDomain domain = getDomain();
+		if (!connection.hasDomain()) {
+			domain = connection.getFirstDomain();
+			setDomain(domain);
+		}
 	}			
 
 	public void fireConnectionChanged() {

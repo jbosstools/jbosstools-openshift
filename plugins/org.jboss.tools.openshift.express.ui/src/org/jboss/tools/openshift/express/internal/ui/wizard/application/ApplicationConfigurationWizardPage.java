@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -44,10 +46,10 @@ import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -73,7 +75,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -85,6 +86,7 @@ import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNu
 import org.jboss.tools.openshift.express.internal.ui.databinding.MultiConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
+import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -124,15 +126,15 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Button checkAllButton;
 	private Button uncheckAllButton;
 
-	// private ModifyListener modifyListener;
-
 	ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("New or existing OpenShift Application", "", "New or existing OpenShift Application, wizard", wizard);
 		this.pageModel = new ApplicationConfigurationWizardPageModel(wizardModel);
+		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_CONNECTION, onConnectionChanged());
 	}
 
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
+		org.jboss.tools.common.ui.databinding.DataBindingUtils.observeAndPrintValidationState("ApplicationConfigurationWizardPage", dbc);
 		setWizardPageDescription(pageModel.isUseExistingApplication());
 
 		GridLayoutFactory.fillDefaults().applyTo(container);
@@ -155,43 +157,33 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		domainLabel.setText("Domain:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(domainLabel);
-		Combo domainCombo = new Combo(domainGroup, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(domainCombo);
+		ComboViewer domainViewer = new ComboViewer(domainGroup);
+		domainViewer.setContentProvider(new ObservableListContentProvider());
+		domainViewer.setLabelProvider(new AbstractLabelProvider() {
 
-		dbc.bindList(WidgetProperties.items().observe(domainCombo),
-				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAINS).observe(pageModel),
-				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy() {
-			/**
-			 * Needed to avoid buggy list update strategy in
-			 * ListBinding. The bug appears if the model list changes
-			 * its ordering and the strategy then tries to apply the
-			 * move in the target (widget). It does not apply the
-			 * conversion and ends up in a class cast exception when
-			 * updating the target (widget) items list.
-			 * 
-			 * @see https://issues.jboss.org/browse/JBIDE-11954/JBIDE-15813
-			 */
-			protected boolean useMoveAndReplace() {
-				return false;
+			@Override
+			public String getText(Object element) {
+				if (!(element instanceof IDomain)) {
+					return null;
+				}
+				return OpenShiftResourceUtils.toString((IDomain) element);			
 			}
-		}.setConverter(new DomainToStringConverter()));
+		});
+		domainViewer.setInput(
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAINS)
+						.observe(pageModel));
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(domainViewer.getControl());		
 
-		final ISWTObservableValue selectedDomainIndexObservable =
-				WidgetProperties.singleSelectionIndex().observe(domainCombo);
-		final IObservableValue selectedDomainModelObservable =
-				BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DOMAIN).observe(pageModel);
-		ValueBindingBuilder.bind(selectedDomainIndexObservable)
-				.converting(new DomainsIndexToDomain())
-				.to(selectedDomainModelObservable)
-				.converting(new DomainToDomainsIndex())
-				.in(dbc);
-
-		DataBindingUtils.addDisposableValueChangeListener(
-				onDomainChanged(dbc), selectedDomainModelObservable, domainCombo);
-
+		IObservableValue selectedDomainObservable = ViewerProperties.singlePostSelection().observe(domainViewer);
+		ValueBindingBuilder
+			.bind(selectedDomainObservable)
+			.notUpdating(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAIN).observe(pageModel))
+			.in(dbc);
+		
+		selectedDomainObservable.addValueChangeListener(onDomainChanged(dbc));
+		
+		// manage domain
 		Link manageDomainsLink = new Link(domainGroup, SWT.NONE);
 		manageDomainsLink
 				.setText("<a>Manage Domains</a>");
@@ -209,27 +201,22 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (!(value instanceof IDomain)) {
 					return;
 				}
+				
 				final IDomain domain = (IDomain) value;
-				AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob(NLS.bind("Loading applications for domain {0}...", domain.getId())) {
+				
+				try {
+					WizardUtils.runInWizard(new AbstractDelegatingMonitorJob(NLS.bind("Loading applications for domain {0}...", domain.getId())) {
 
-					@Override
-					protected IStatus doRun(IProgressMonitor monitor) {
-							pageModel.loadExistingApplications();
-							if (!pageModel.isUseExistingApplication()) {
-								return Status.OK_STATUS;
-							}
-
-							String existingApplicationName = pageModel.getExistingApplicationName();
-							if (!StringUtils.isEmpty(existingApplicationName)
-									&& !domain.hasApplicationByName(existingApplicationName)) {
+						@Override
+						protected IStatus doRun(IProgressMonitor monitor) {
+							pageModel.loadExistingApplications(domain);
+							pageModel.setDomain(domain);
+							if (pageModel.isUseExistingApplication()) {
 								pageModel.setExistingApplication(domain);
 							}
 							return Status.OK_STATUS;
-					}
-				};
-
-				try {
-					WizardUtils.runInWizard(job, getContainer(), dbc);
+						}
+					}, getContainer(), dbc);
 				} catch (InvocationTargetException e) {
 					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
 							"Could not load applications for domain {0}.",
@@ -279,10 +266,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		// observe the list of application, get notified once they have been
 		// loaded
 		IObservableValue existingApplicationsLoaded =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_RESOURCES_LOADED)
 						.observe(pageModel);
-		final ApplicationToSelectNameValidator existingAppValidator =
-				new ApplicationToSelectNameValidator(
+		final ExistingApplicationNameValidator existingAppValidator =
+				new ExistingApplicationNameValidator(
 						useExistingAppBtnSelection, existingAppNameTextObservable, existingApplicationsLoaded);
 		dbc.addValidationStatusProvider(existingAppValidator);
 		ControlDecorationSupport.create(
@@ -386,7 +373,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		final ISWTObservableValue useExistingAppBtnSelection = WidgetProperties.selection().observe(useExistingAppBtn);
 		IObservableValue existingApplicationsLoaded =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_APPLICATIONS_LOADED)
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_RESOURCES_LOADED)
 						.observe(pageModel);
 		final NewApplicationNameValidator newApplicationNameValidator =
 				new NewApplicationNameValidator(useExistingAppBtnSelection, existingApplicationsLoaded, applicationNameTextObservable);
@@ -406,7 +393,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.bindList(WidgetProperties.items().observe(newAppCartridgeCombo),
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_CARTRIDGES).observe(pageModel),
 				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy().setConverter(new CartridgeToStringConverter()));
+				new UpdateListStrategy().setConverter(new StandaloneCartridgeToStringConverter()));
 
 		final ISWTObservableValue selectedCartridgeIndexObservable =
 				WidgetProperties.singleSelectionIndex().observe(newAppCartridgeCombo);
@@ -486,7 +473,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		Composite tableContainer = new Composite(newAppEmbeddableCartridgesGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).hint(400, 250).applyTo(tableContainer);
-		this.viewer = createTable(tableContainer);
+		this.viewer = createEmbeddableCartridgesViewer(tableContainer);
+		viewer.setInput(
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_EMBEDDED_CARTRIDGES).observe(
+						pageModel));
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
 				BeanProperties.set(
@@ -717,7 +707,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}, newAppConfigurationGroup);
 	}
 
-	private CheckboxTableViewer createTable(Composite tableContainer) {
+	private CheckboxTableViewer createEmbeddableCartridgesViewer(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setLinesVisible(true);
@@ -737,7 +727,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		});
 
 		viewer.setComparer(new EqualityComparer());
-		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setContentProvider(new ObservableListContentProvider());
 		createTableColumn("Name", 1, new CellLabelProvider() {
 
 			@Override
@@ -788,19 +778,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 
-	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
-		getShell().getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (viewer != null) {
-					viewer.setInput(cartridges);
-				}
-			}
-		});
-	}
-
-	private static final class CartridgeToStringConverter extends Converter {
-		private CartridgeToStringConverter() {
+	private static final class StandaloneCartridgeToStringConverter extends Converter {
+		private StandaloneCartridgeToStringConverter() {
 			super(Object.class, String.class);
 		}
 
@@ -810,65 +789,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return null;
 			}
 			return OpenShiftResourceUtils.toString((IStandaloneCartridge) fromObject);
-		}
-	}
-
-	private static final class DomainToStringConverter extends Converter {
-		private DomainToStringConverter() {
-			super(Object.class, String.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof IDomain)) {
-				return null;
-			}
-			return OpenShiftResourceUtils.toString((IDomain) fromObject);
-		}
-	}
-
-	private final class DomainsIndexToDomain extends Converter {
-
-		public DomainsIndexToDomain() {
-			super(Integer.class, IDomain.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof Integer)) {
-				return null;
-			}
-
-			int index = ((Integer) fromObject).intValue();
-			List<IDomain> domains = pageModel.getDomains();
-			if (domains == null
-					|| index >= domains.size()
-					|| index == -1) {
-				return null;
-			}
-			return domains.get(index);
-		}
-	}
-
-	private final class DomainToDomainsIndex extends Converter {
-
-		public DomainToDomainsIndex() {
-			super(IDomain.class, Integer.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof IDomain)) {
-				return null;
-			}
-
-			IDomain domain = ((IDomain) fromObject);
-			List<IDomain> domains = pageModel.getDomains();
-			if (domains == null
-					|| domains.isEmpty()) {
-				return -1;
-			}
-			return domains.indexOf(domain);
 		}
 	}
 
@@ -1017,7 +937,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			// dbc.updateModels() will be called and old data could be
 			// restored
 			loadOpenshiftResources(dbc);
-			this.newAppNameText.setFocus();
+			newAppNameText.setFocus();
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to reset page fields", e);
 		}
@@ -1068,7 +988,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
 
-			if (pageModel.isExistingApplicationsLoaded()) {
+			if (pageModel.isResourcesLoaded()) {
 				return;
 			}
 			
@@ -1077,16 +997,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				@Override
 				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
-						monitor.setTaskName("Loading domains...");
-						pageModel.loadDomains();
-						monitor.setTaskName("Loading existing applications...");
-						pageModel.loadExistingApplications();
-						monitor.setTaskName("Loading application cartridges...");
-						pageModel.loadStandaloneCartridges();
-						monitor.setTaskName("Loading embeddable cartridges...");
-						setViewerInput(pageModel.loadEmbeddedCartridges());
-						monitor.setTaskName("Loading gear profiles...");
-						pageModel.loadGearProfiles();
+						pageModel.loadResources();
 						return Status.OK_STATUS;
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
@@ -1097,6 +1008,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				}
 			}, getContainer(), dbc);
 			
+			pageModel.refresh();
 			dbc.updateTargets();
 			enableApplicationWidgets(pageModel.isUseExistingApplication());
 			createExistingAppNameContentAssist(existingAppNameText, pageModel.getApplicationNames());
@@ -1113,13 +1025,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
-	class ApplicationToSelectNameValidator extends MultiValidator {
+	class ExistingApplicationNameValidator extends MultiValidator {
 
 		private final IObservableValue useExistingAppBtnbservable;
 		private final IObservableValue existingAppNameTextObservable;
 		private final IObservableValue existingApplicationsLoadedObservable;
 
-		public ApplicationToSelectNameValidator(IObservableValue useExistingAppBtnbservable,
+		public ExistingApplicationNameValidator(IObservableValue useExistingAppBtnbservable,
 				IObservableValue existingAppNameTextObservable,
 				IObservableValue existingApplicationsLoadedObservable) {
 			this.useExistingAppBtnbservable = useExistingAppBtnbservable;
@@ -1320,4 +1232,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	}
 
+	private PropertyChangeListener onConnectionChanged() {
+		return new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				pageModel.setResourcesLoaded(false);
+			}
+		};
+	}
+	
 }

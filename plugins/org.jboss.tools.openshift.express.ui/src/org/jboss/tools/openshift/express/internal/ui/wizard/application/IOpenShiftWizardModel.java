@@ -52,8 +52,6 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public static final String PROP_APPLICATION_SCALE = "applicationScale";
 	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
 	public static final String PROP_CONNECTION = "connection";
-	public static final String PROP_DEFAULT_APPLICATION = "default_application";
-	public static final String PROP_DEFAULT_USE_EXISTING_APPLICATION = "default_useExistingApplication";
 	public static final String PROP_DOMAIN = "domain";
 	public static final String PROP_DOMAINS = "domains";
 	public static final String PROP_INITIAL_GITURL = "initialGitUrl";

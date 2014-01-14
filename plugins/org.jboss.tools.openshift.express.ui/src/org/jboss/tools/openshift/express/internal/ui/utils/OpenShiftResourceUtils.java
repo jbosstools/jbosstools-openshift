@@ -35,14 +35,14 @@ public class OpenShiftResourceUtils {
 			builder.append(name);
 		} else {
 			builder
-			.append(cartridge.getDisplayName())
-			.append(" (").append(name).append(')');
+					.append(cartridge.getDisplayName())
+					.append(" (").append(name).append(')');
 		}
 		
 		return builder.toString();
 
 	}
-	
+
 	public static String toString(List<IDomain> domains) {
 		StringBuilder builder = new StringBuilder();
 		if (domains == null
@@ -68,6 +68,4 @@ public class OpenShiftResourceUtils {
 				
 		return domain.getId();
 	}
-
-	
 }
