@@ -134,7 +134,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		org.jboss.tools.common.ui.databinding.DataBindingUtils.observeAndPrintValidationState("ApplicationConfigurationWizardPage", dbc);
 		setWizardPageDescription(pageModel.isUseExistingApplication());
 
 		GridLayoutFactory.fillDefaults().applyTo(container);
