@@ -15,6 +15,7 @@ import java.util.List;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.IDomain;
+import com.openshift.client.IGearProfile;
 import com.openshift.client.cartridge.ICartridge;
 
 /**
@@ -67,5 +68,13 @@ public class OpenShiftResourceUtils {
 		}
 				
 		return domain.getId();
+	}
+
+	public static String toString(IGearProfile gear) {
+		if (gear == null) {
+			return null;
+		}
+		
+		return gear.getName();
 	}
 }

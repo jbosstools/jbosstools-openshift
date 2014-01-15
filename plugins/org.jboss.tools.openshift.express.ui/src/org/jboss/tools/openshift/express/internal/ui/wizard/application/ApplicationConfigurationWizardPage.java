@@ -13,11 +13,9 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateListStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -65,7 +63,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -385,64 +382,59 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		newAppTypeLabel.setText("Type:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(newAppTypeLabel);
-		Combo newAppCartridgeCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
+
+		ComboViewer newAppCartridgeViewer = new ComboViewer(newAppConfigurationGroup);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(newAppCartridgeCombo);
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(newAppCartridgeViewer.getControl());
+		newAppCartridgeViewer.setContentProvider(new ObservableListContentProvider());
+		newAppCartridgeViewer.setLabelProvider(new AbstractLabelProvider() {
 
-		dbc.bindList(WidgetProperties.items().observe(newAppCartridgeCombo),
-				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_CARTRIDGES).observe(pageModel),
-				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy().setConverter(new StandaloneCartridgeToStringConverter()));
-
-		final ISWTObservableValue selectedCartridgeIndexObservable =
-				WidgetProperties.singleSelectionIndex().observe(newAppCartridgeCombo);
-		final IObservableValue selectedCartridgeModelObservable =
-				BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
-		ValueBindingBuilder.bind(selectedCartridgeIndexObservable)
-				.converting(new CartridgesIndexToCartridge())
-				.to(selectedCartridgeModelObservable)
-				.converting(new CartridgeToCartridgesIndex())
+			@Override
+			public String getText(Object element) {
+				if (!(element instanceof IStandaloneCartridge)) {
+					return null;
+				}
+				return OpenShiftResourceUtils.toString((IStandaloneCartridge) element);			
+			}
+		});
+		newAppCartridgeViewer.setInput(
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_CARTRIDGES)
+						.observe(pageModel));
+		IObservableValue selectedCartridgeObservable = ViewerProperties.singlePostSelection().observe(newAppCartridgeViewer);
+		ValueBindingBuilder.bind(selectedCartridgeObservable )
+				.to(BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel))
 				.in(dbc);
-
+		
+		final NewApplicationTypeValidator newApplicationTypeValidator =
+				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeObservable);
+		dbc.addValidationStatusProvider(newApplicationTypeValidator);
+		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
+		
 		// gear profile
 		final Label gearProfileLabel = new Label(newAppConfigurationGroup, SWT.NONE);
 		gearProfileLabel.setText("Gear profile:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(gearProfileLabel);
-		Combo gearProfilesCombo = new Combo(newAppConfigurationGroup, SWT.BORDER | SWT.READ_ONLY);
+
+		ComboViewer gearViewer = new ComboViewer(newAppConfigurationGroup);
+		gearViewer.setContentProvider(new ObservableListContentProvider());
+		gearViewer.setLabelProvider(new AbstractLabelProvider() {
+
+			@Override
+			public String getText(Object element) {
+				if (!(element instanceof IGearProfile)) {
+					return null;
+				}
+				return OpenShiftResourceUtils.toString((IGearProfile) element);			
+			}
+		});
+		gearViewer.setInput(
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES)
+						.observe(pageModel));
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gearProfilesCombo);
-		dbc.bindList(WidgetProperties.items().observe(gearProfilesCombo),
-				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel),
-				new UpdateListStrategy(UpdateListStrategy.POLICY_NEVER),
-				new UpdateListStrategy() {
-
-					/**
-					 * Needed to avoid buggy list update strategy in
-					 * ListBinding. The bug appears if the model list changes
-					 * its ordering and the strategy then tries to apply the
-					 * move in the target (widget). It does not apply the
-					 * conversion and ends up in a class cast exception when
-					 * updating the target (widget) items list.
-					 * 
-					 * @see https://issues.jboss.org/browse/JBIDE-11954
-					 */
-					protected boolean useMoveAndReplace() {
-						return false;
-					}
-
-				}.setConverter(new GearProfileToStringConverter()));
-
-		final ISWTObservableValue selectedGearProfileComboObservable =
-				WidgetProperties.selection().observe(gearProfilesCombo);
-		final IObservableValue selectedGearProfileModelObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_GEAR_PROFILE).observe(pageModel);
-		ValueBindingBuilder.bind(selectedGearProfileComboObservable)
-				.converting(new StringToGearProfileConverter())
-				.to(selectedGearProfileModelObservable)
-				.converting(new GearProfileToStringConverter())
-				.in(dbc);
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gearViewer.getControl());
 
 		// scaling
 		Button enableScalingButton = new Button(newAppConfigurationGroup, SWT.CHECK);
@@ -455,12 +447,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.bind(enableScalingButtonSelection).converting(new BooleanToApplicationScaleConverter())
 				.to(enableScalingModelObservable).converting(new ApplicationScaleToBooleanConverter())
 				.in(dbc);
-
-		final NewApplicationTypeValidator newApplicationTypeValidator =
-				new NewApplicationTypeValidator(useExistingAppBtnSelection, selectedCartridgeIndexObservable);
-		dbc.addValidationStatusProvider(newApplicationTypeValidator);
-		ControlDecorationSupport.create(newApplicationTypeValidator, SWT.LEFT | SWT.TOP, null,
-				new RequiredControlDecorationUpdater());
 
 		// embeddable cartridges
 		Group newAppEmbeddableCartridgesGroup = new Group(newAppConfigurationGroup, SWT.NONE);
@@ -672,7 +658,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (newValue instanceof Boolean) {
 					Boolean useExisting = (Boolean) newValue;
 					if (!useExisting) {
-						pageModel.resetNewApplication();
+						pageModel.resetNewApplicationSettings();
 					} else {
 						IApplication existingApplication = pageModel.getExistingApplication(pageModel.getExistingApplicationName());
 						pageModel.setExistingApplication(existingApplication);
@@ -775,88 +761,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 
 		};
-	}
-
-	private static final class StandaloneCartridgeToStringConverter extends Converter {
-		private StandaloneCartridgeToStringConverter() {
-			super(Object.class, String.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof IStandaloneCartridge)) {
-				return null;
-			}
-			return OpenShiftResourceUtils.toString((IStandaloneCartridge) fromObject);
-		}
-	}
-
-	private final class CartridgesIndexToCartridge extends Converter {
-
-		public CartridgesIndexToCartridge() {
-			super(Integer.class, IStandaloneCartridge.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof Integer)) {
-				return null;
-			}
-
-			int index = ((Integer) fromObject).intValue();
-			List<IStandaloneCartridge> cartridges = pageModel.getCartridges();
-			if (index >= cartridges.size()
-					|| index == -1) {
-				return null;
-			}
-			return cartridges.get(index);
-		}
-	}
-
-	private final class CartridgeToCartridgesIndex extends Converter {
-
-		public CartridgeToCartridgesIndex() {
-			super(IStandaloneCartridge.class, Integer.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof IStandaloneCartridge)) {
-				return null;
-			}
-
-			IStandaloneCartridge cartridge = ((IStandaloneCartridge) fromObject);
-			List<IStandaloneCartridge> cartridges = pageModel.getCartridges();
-			return cartridges.indexOf(cartridge);
-		}
-	}
-
-	private static final class GearProfileToStringConverter extends Converter {
-		private GearProfileToStringConverter() {
-			super(Object.class, String.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (!(fromObject instanceof IGearProfile)) {
-				return null;
-			}
-			return ((IGearProfile) fromObject).getName();
-		}
-	}
-
-	private final class StringToGearProfileConverter extends Converter {
-		private StringToGearProfileConverter() {
-			super(String.class, IGearProfile.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			if (fromObject instanceof String) {
-				return pageModel.getGearProfileByName((String) fromObject);
-			}
-			return null;
-		}
 	}
 
 	private static final class ApplicationScaleToBooleanConverter extends Converter {
@@ -1153,12 +1057,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		@Override
 		protected IStatus validate() {
 			final boolean useExistingApp = (Boolean) useExistingAppBtnObservable.getValue();
-			final Integer selectedCartridgeIndex = (Integer) selectedApplicationTypeObservable.getValue();
+			final IStandaloneCartridge selectedCartridge = (IStandaloneCartridge) selectedApplicationTypeObservable.getValue();
 			if (useExistingApp) {
 				return ValidationStatus.ok();
 			}
-			if (selectedCartridgeIndex == null
-					|| selectedCartridgeIndex == -1) {
+			if (selectedCartridge == null) {
 				return ValidationStatus.cancel(getDescription());
 			}
 			return ValidationStatus.ok();
