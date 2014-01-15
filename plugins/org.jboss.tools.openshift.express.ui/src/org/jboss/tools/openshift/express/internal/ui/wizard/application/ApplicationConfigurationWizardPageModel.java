@@ -422,6 +422,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo
 	 */
 	protected void doSetExistingApplication(IApplication application) throws OpenShiftException {
 		if (application != null) {
+			setApplicationName(application.getName());
 			setSelectedCartridge(application.getCartridge());
 			setSelectedEmbeddableCartridges(application.getEmbeddedCartridges());
 			setSelectedGearProfile(application.getGearProfile());
