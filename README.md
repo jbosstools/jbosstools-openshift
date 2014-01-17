@@ -30,9 +30,8 @@ The general idea is to keep your 'master' branch in-sync with the
 
 ## Building OpenShift Tools
 
-To build _OpenShift Tools_ requires specific versions of Java and
-Maven. Also, there is some Maven setup. The [How to Build JBoss Tools with Maven 3](https://community.jboss.org/wiki/HowToBuildJBossToolsWithMaven3)
-document will guide you through that setup.
+To build _OpenShift Tools_ requires specific versions of Java (1.6+) and
++Maven (3.1+). See this [link](https://github.com/jbosstools/jbosstools-devdoc/blob/master/building/readme.md) for more information on how to setup, run and configure build.
 
 This command will run the build:
 
