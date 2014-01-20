@@ -42,6 +42,7 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 		this.wizardModel = wizardModel;
 		setNewProject(wizardModel.getProject() == null);
 		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
+		setCreateServerAdapter(true);
 	}
 
 	/**
