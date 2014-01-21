@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,10 +25,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
-import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
@@ -48,14 +47,9 @@ public class OpenShiftServerAdapterFactory {
 	OpenShiftServerAdapterFactory() {
 	}
 
-	public IServer create(IProject project, IOpenShiftWizardModel wizardModel, IProgressMonitor monitor) throws OpenShiftException {
-		return createAdapterAndModules(project, wizardModel.getServerType(), wizardModel.getRuntime(),  
-				wizardModel.getApplication(), wizardModel.getDomain(), wizardModel.getRemoteName(), monitor);
-	}
-
-	public IServer create(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, IDomain domain, IProgressMonitor monitor) throws OpenShiftException {
-		return createAdapterAndModules(project, serverType, runtime, application, domain, null, monitor);
+	public IServer create(IProject project, IApplication application, IDomain domain, IProgressMonitor monitor)
+			throws OpenShiftException {
+		return createAdapterAndModules(project, application, domain, null, monitor);
 	}
 
 	/**
@@ -66,14 +60,14 @@ public class OpenShiftServerAdapterFactory {
 	 * @return 
 	 * @throws OpenShiftException
 	 */
-	protected IServer createAdapterAndModules(IProject project, IServerType serverType, IRuntime runtime,
-			IApplication application, IDomain domain, String remoteName, IProgressMonitor monitor)
-			throws OpenShiftException {
+	protected IServer createAdapterAndModules(IProject project, IApplication application,
+			IDomain domain, String remoteName, IProgressMonitor monitor) throws OpenShiftException {
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
 		
 		IServer server = null;
 		try {
-			server = createAdapter(serverType, runtime, application, domain, project.getName(), remoteName);
+			IServerType serverType = ServerCore.findServerType(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE);
+			server = createAdapter(serverType, application, domain, project.getName(), remoteName);
 			server = addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
 			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
@@ -81,22 +75,18 @@ public class OpenShiftServerAdapterFactory {
 			IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 					"Cannot create openshift server adapter", ose);
 			OpenShiftUIActivator.getDefault().getLog().log(s);
-		} catch (SocketTimeoutException ste) {
-			IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-					"Cannot create openshift server adapter", ste);
-			OpenShiftUIActivator.getDefault().getLog().log(s);
 		}
 		return server;
 	}
 	
-	private IServer createAdapter(IServerType serverType, IRuntime rt,
-			IApplication application, IDomain domain, String deployProject, String remoteName) throws CoreException,
-			OpenShiftException, SocketTimeoutException {
-		Assert.isLegal(serverType != null);
-		Assert.isLegal(application != null);
+	private IServer createAdapter(IServerType serverType, IApplication application, IDomain domain,
+			String deployProject, String remoteName) throws CoreException,
+			OpenShiftException {
+		Assert.isLegal(serverType != null, "Missing server adapter type");
+		Assert.isLegal(application != null, "Missing application");
 
 		String serverName = OpenShiftServerUtils.getDefaultServerName(application);
-		IServer server = OpenShiftServerUtils.createServer(rt, serverType, serverName);
+		IServer server = OpenShiftServerUtils.createServer(serverType, serverName);
 		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
 				server, deployProject, remoteName, serverName, application, domain);
 		return server;

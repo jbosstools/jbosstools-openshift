@@ -37,7 +37,6 @@ import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
@@ -50,7 +49,6 @@ import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethodType;
 import org.jboss.ide.eclipse.as.core.util.DeploymentPreferenceLoader;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
-import org.jboss.ide.eclipse.as.core.util.RuntimeUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
@@ -432,26 +430,15 @@ public class OpenShiftServerUtils {
 		return url;
 	}
 
-	public static IServer createServerAndRuntime(String runtimeID, String serverID,
-			String location, String configuration) throws CoreException {
-		IRuntime runtime = RuntimeUtils.createRuntime(runtimeID, location, configuration);
-		return createServer(runtime, serverID);
+	public static IServer createServer(String serverID) throws CoreException {
+		return createServer(ServerCore.findServerType(serverID), serverID);
 	}
 
-	public static IServer createServer(IRuntime runtime, String serverID) throws CoreException {
-		return createServer2(runtime, ServerCore.findServerType(serverID), serverID);
-	}
-
-	public static IServer createServer(IRuntime runtime, IServerType serverType, String serverName)
-			throws CoreException {
-		return createServer2(runtime, serverType, serverName);
-	}
-
-	public static IServer createServer2(IRuntime currentRuntime, IServerType serverType, String serverName)
+	public static IServer createServer(IServerType serverType, String serverName)
 			throws CoreException {
 		IServerWorkingCopy serverWC = serverType.createServer(null, null,
 				new NullProgressMonitor());
-		serverWC.setRuntime(currentRuntime);
+		serverWC.setRuntime(null);
 		serverWC.setName(serverName);
 		serverWC.setServerConfiguration(null);
 		serverWC.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);

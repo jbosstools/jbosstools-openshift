@@ -208,11 +208,18 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	}
 	
 	private boolean createServerAdapter() {
-		if (!model.isCreateServerAdapter()) {
-			return true;
+		try {
+			if (!model.isCreateServerAdapter()) {
+				return true;
+			}
+			IServer server = model.createServerAdapter(new DelegatingProgressMonitor());
+			return server != null;
+		} catch (IllegalArgumentException e) {
+			ErrorDialog.openError(getShell(), "Error", NLS.bind("Could not create server adapter for new project {0}.",
+					model.getProjectName()),
+					OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
+			return false;
 		}
-		IServer server = model.createServerAdapter(new DelegatingProgressMonitor());
-		return server != null;
 	}
 
 	private boolean publishServerAdapter() {
