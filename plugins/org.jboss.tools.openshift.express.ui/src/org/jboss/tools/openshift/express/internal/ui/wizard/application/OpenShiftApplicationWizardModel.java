@@ -65,10 +65,10 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication) {
 		setProject(project);
+		setDomain(domain);
 		setApplication(application);
 		setUseExistingApplication(useExistingApplication);
 		setConnection(connection);
-		setDomain(domain);
 		setEnvironmentVariables(new LinkedHashMap<String, String>());
 	}
 

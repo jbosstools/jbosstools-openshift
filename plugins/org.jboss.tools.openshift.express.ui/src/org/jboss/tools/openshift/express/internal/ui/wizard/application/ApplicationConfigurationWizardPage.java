@@ -199,6 +199,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				}
 				
 				final IDomain domain = (IDomain) value;
+				if (pageModel.isCurrentDomain(domain)) {
+					return;
+				}
 				
 				try {
 					WizardUtils.runInWizard(new AbstractDelegatingMonitorJob(NLS.bind("Loading applications for domain {0}...", domain.getId())) {

@@ -499,6 +499,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo
 		return connection.hasApplication(applicationName, getDomain());
 	}
 
+	public boolean isCurrentDomain(IDomain domain) {
+		if (getDomain() == null) {
+			return domain == null;
+		} else {
+			return getDomain().equals(domain);
+		}
+	}
+	
 	@Override
 	public IDomain getDomain() throws OpenShiftException {
 		return wizardModel.getDomain();
@@ -549,7 +557,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo
 	
 	public void refresh() throws OpenShiftException {
 		IDomain domain = setFirstDomainIfNoSet(getDomain(), getConnection());
-		if (isUseExistingApplication()) {
+		if (isUseExistingApplication()
+				&& !isExistingApplication(getExistingApplicationName())) {
 			setExistingApplication(domain);
 		}
 	}
