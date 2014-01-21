@@ -30,9 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
@@ -197,7 +195,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 						"Could not create a server adapter for your application {0}. No project was found when importing",
 						getApplication().getName());
 			}
-			server = new OpenShiftServerAdapterFactory().create(project, this, monitor);
+			server = new OpenShiftServerAdapterFactory().create(project, getApplication(), getDomain(), monitor);
 			setServerAdapter(server);
 		}
 		return server;
@@ -356,21 +354,6 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	@Override
 	public String getMergeUri() {
 		return (String) getProperty(PROP_MERGE_URI);
-	}
-
-	@Override
-	public IRuntime getRuntime() {
-		return (IRuntime) getProperty(PROP_RUNTIME_DELEGATE);
-	}
-
-	@Override
-	public IServerType getServerType() {
-		return (IServerType) getProperty(PROP_SERVER_TYPE);
-	}
-
-	@Override
-	public IServerType setServerType(IServerType serverType) {
-		return (IServerType) setProperty(PROP_SERVER_TYPE, serverType);
 	}
 
 	@Override

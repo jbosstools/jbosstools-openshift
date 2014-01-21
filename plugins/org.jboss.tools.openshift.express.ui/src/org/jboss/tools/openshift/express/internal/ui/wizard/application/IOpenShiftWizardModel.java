@@ -24,9 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.IServerType;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
@@ -61,9 +59,7 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public static final String PROP_PROJECT_NAME = "projectName";
 	public static final String PROP_REMOTE_NAME = "remoteName";
 	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
-	public static final String PROP_RUNTIME_DELEGATE = "runtimeDelegate";
 	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
-	public static final String PROP_SERVER_TYPE = "serverType";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROP_ENVIRONMENT_VARIABLES = "environmentVariables";
@@ -203,12 +199,6 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public String setMergeUri(String mergeUri);
 
 	public String getMergeUri();
-
-	public IRuntime getRuntime();
-
-	public IServerType getServerType();
-
-	public IServerType setServerType(IServerType serverType);
 
 	public boolean isUseExistingApplication();
 
