@@ -291,8 +291,8 @@ public class Connection {
 			return false;
 		}
 		try {
-			didPromptForPassword = true;
 			prompter.promptAndAuthenticate(this);
+			didPromptForPassword = true;
 		} catch (Exception e) {
 			OpenShiftCoreActivator.pluginLog().logError("Failed to retrieve User's password", e);
 		}

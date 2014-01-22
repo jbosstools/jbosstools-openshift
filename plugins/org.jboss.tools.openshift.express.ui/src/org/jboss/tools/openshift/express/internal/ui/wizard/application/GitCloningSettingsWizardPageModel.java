@@ -19,6 +19,7 @@ import java.beans.PropertyChangeListener;
 import org.eclipse.core.resources.IProject;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.cartridge.ICartridge;
@@ -169,6 +170,15 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_HAS_REMOTEKEYS, this.hasRemoteKeys, this.hasRemoteKeys = hasRemoteKeys);
 	}
 
+	public Connection getConnection() {
+		return wizardModel.getConnection();
+	}
+	
+	public boolean isConnected() {
+		return getConnection() != null
+				&& getConnection().isConnected();
+	}
+	
 	public void reset() {
 		setRemoteName(wizardModel.getRemoteName());
 		setRepositoryPath(wizardModel.getRepositoryPath());
