@@ -473,8 +473,8 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 
 	@Override
 	public Connection setConnection(Connection connection) {
-		setProperty(PROP_CONNECTION, connection);
 		update(connection);
+		setProperty(PROP_CONNECTION, connection);
 		return connection;
 	}
 	
@@ -513,8 +513,12 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	 * @param connection
 	 */
 	public void update(Connection connection) {
-		IDomain domain = getDomain();
+		if (!connection.isConnected()) {
+			return;
+		}
+		
 		if (!connection.hasDomain()) {
+			IDomain domain = getDomain();
 			domain = connection.getFirstDomain();
 			setDomain(domain);
 		}

@@ -270,7 +270,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			@Override
 			public void doWidgetSelected(SelectionEvent e) {
 				WizardDialog manageSSHKeysWizard =
-						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(wizardModel.getConnection()));
+						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(pageModel.getConnection()));
 				if (manageSSHKeysWizard.open() == Dialog.OK) {
 					refreshHasRemoteKeys(dbc);
 				}
@@ -282,13 +282,15 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		enableWidgets(pageModel.isNewProject());
 		repoPathValidator.forceRevalidate();
 		setSSHLinkText();
-		refreshHasRemoteKeys(dbc);
+		if (pageModel.isConnected()) {
+			refreshHasRemoteKeys(dbc);
+		}
 	}
 
 	private void setSSHLinkText() {
-		if (wizardModel.hasConnection()) {
+		if (pageModel.isConnected()) {
 			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
-					+ wizardModel.getConnection().getUsername() 
+					+ pageModel.getConnection().getUsername() 
 					+ " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
 		} else {
 			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account"
@@ -299,10 +301,10 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 	private void refreshHasRemoteKeys(DataBindingContext dbc) {
 		try {
-			if (!wizardModel.hasConnection()) {
+			if (!pageModel.isConnected()) {
 				return;
 			}
-			final LoadKeysJob loadKeysJob = new LoadKeysJob(wizardModel.getConnection());
+			final LoadKeysJob loadKeysJob = new LoadKeysJob(pageModel.getConnection());
 			new JobChainBuilder(loadKeysJob).andRunWhenDone(new UIJob("") {
 
 				@Override
