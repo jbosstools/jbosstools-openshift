@@ -231,16 +231,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo
 			return;
 		}
 		setCartridges(connection.getStandaloneCartridges());
-		refreshSelectedCartridge();
 	}
 
 	public void setCartridges(List<IStandaloneCartridge> cartridges) {
 		Collections.sort(cartridges, new CartridgeNameComparator());
 		firePropertyChange(PROPERTY_CARTRIDGES, this.cartridges, this.cartridges = cartridges);
 		
-		final String lastSelectedCartridgeName = openShiftUserPreferencesProvider.getLastSelectedCartridgeName();
-		final IStandaloneCartridge selectedCartridge = getCartridgeByName(lastSelectedCartridgeName);
-		setSelectedCartridge(selectedCartridge);
+		IStandaloneCartridge cartridge = getSelectedCartridge();
+		if (cartridge == null) {
+			cartridge = getCartridgeByName(openShiftUserPreferencesProvider.getLastSelectedCartridgeName());
+		}
+		setSelectedCartridge(cartridge);
 	}
 
 	public List<IStandaloneCartridge> getCartridges() {
@@ -310,15 +311,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo
 		return matchingCartridge;
 	}
 	
-	/**
-	 * forces property change listeners to update their value
-	 */
-	protected void refreshSelectedCartridge() {
-		IStandaloneCartridge selectedCartridge = getSelectedCartridge();
-		setSelectedCartridge((IStandaloneCartridge) null);
-		setSelectedCartridge(selectedCartridge);
-	}
-
 	public void setSelectedCartridge(IStandaloneCartridge cartridge) {
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE
 				, wizardModel.getApplicationCartridge()
