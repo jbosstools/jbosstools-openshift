@@ -15,14 +15,25 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.ide.IDE.SharedImages;
+import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 /**
  * @author André Dietisheim
@@ -30,6 +41,8 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
 	private static final String RSE_INTERNAL_PROJECTS = "RemoteSystems";
+	StringPreferenceValue filterPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftUIActivator.PLUGIN_ID);
+	private boolean filterEnabled;
 	
 	public SelectExistingProjectDialog(String openShiftAppName, Shell shell) {
 		super(shell, new ProjectLabelProvider());
@@ -39,7 +52,15 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 				openShiftAppName));
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
+		this.filterEnabled = getFilterPreferences();
 		setElements(getProjects());
+	}
+
+	private boolean getFilterPreferences() {
+		if(StringUtils.isEmpty(filterPreferences.get())) {
+			return true;
+		}
+		return Boolean.valueOf(filterPreferences.get());
 	}
 
 	private Object[] getProjects() {
@@ -52,10 +73,42 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		return projects.toArray();
 	}
 
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		Composite dialogArea = (Composite) super.createDialogArea(parent);
+		Button filterCheckbox = new Button(dialogArea, SWT.CHECK);
+		filterCheckbox.setText("&filter acceptable projects");
+		filterCheckbox.setSelection(filterEnabled);
+		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(filterCheckbox);
+		filterCheckbox.addSelectionListener(onFilterChecked());
+		return dialogArea;
+	}
+
+	private SelectionListener onFilterChecked() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				super.widgetSelected(e);
+				if (e.widget instanceof Button) {
+					filterEnabled = ((Button) e.widget).getSelection();
+					filterPreferences.store(String.valueOf(filterEnabled));
+					setListElements(getProjects());
+				}
+			}
+			
+		};
+	}
+
 	private boolean isValid(IProject project) {
+		if (!filterEnabled) {
+			return true;
+		}
+		
 		if (!project.isAccessible()) {
 			return false;
 		}
+		
 		if(isInternalRSEProject(project.getName())) {
 			return false;
 		}
