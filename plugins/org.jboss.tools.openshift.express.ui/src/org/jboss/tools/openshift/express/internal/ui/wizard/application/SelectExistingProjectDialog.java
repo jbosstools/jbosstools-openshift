@@ -29,6 +29,8 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
  */
 public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
+	private static final String RSE_INTERNAL_PROJECTS = "RemoteSystems";
+	
 	public SelectExistingProjectDialog(String openShiftAppName, Shell shell) {
 		super(shell, new ProjectLabelProvider());
 		setTitle("Select Existing Project");
@@ -54,13 +56,29 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		if (!project.isAccessible()) {
 			return false;
 		}
-		if (EGitUtils.isShared(project)) {
-			if (!EGitUtils.isSharedWithGit(project)) {
-				return false;
-			}
+		if(isInternalRSEProject(project.getName())) {
+			return false;
+		}
+			
+		if(isNonGitShared(project)) {
+			return false;
 		}
 
 		return true;
+	}
+
+	private boolean isInternalRSEProject(String name) {
+		return name != null
+				&& name.startsWith(RSE_INTERNAL_PROJECTS);
+	}
+
+	protected boolean isNonGitShared(IProject project) {
+		if (EGitUtils.isShared(project)) {
+			if (!EGitUtils.isSharedWithGit(project)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static class ProjectLabelProvider extends LabelProvider {
