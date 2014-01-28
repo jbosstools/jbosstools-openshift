@@ -41,8 +41,8 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
 	private static final String RSE_INTERNAL_PROJECTS = "RemoteSystems";
-	StringPreferenceValue filterPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftUIActivator.PLUGIN_ID);
-	private boolean filterEnabled;
+	StringPreferenceValue showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftUIActivator.PLUGIN_ID);
+	private boolean showAll;
 	
 	public SelectExistingProjectDialog(String openShiftAppName, Shell shell) {
 		super(shell, new ProjectLabelProvider());
@@ -52,15 +52,16 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 				openShiftAppName));
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
-		this.filterEnabled = getFilterPreferences();
+		this.showAll = getShowAllPreferences();
 		setElements(getProjects());
 	}
 
-	private boolean getFilterPreferences() {
-		if(StringUtils.isEmpty(filterPreferences.get())) {
-			return true;
+	private boolean getShowAllPreferences() {
+		boolean showAll = false;
+		if(!StringUtils.isEmpty(showAllPreferences.get())) {
+			showAll = Boolean.valueOf(showAllPreferences.get());
 		}
-		return Boolean.valueOf(filterPreferences.get());
+		return showAll;
 	}
 
 	private Object[] getProjects() {
@@ -77,8 +78,8 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite dialogArea = (Composite) super.createDialogArea(parent);
 		Button filterCheckbox = new Button(dialogArea, SWT.CHECK);
-		filterCheckbox.setText("&filter acceptable projects");
-		filterCheckbox.setSelection(filterEnabled);
+		filterCheckbox.setText("&Show all projects");
+		filterCheckbox.setSelection(showAll);
 		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(filterCheckbox);
 		filterCheckbox.addSelectionListener(onFilterChecked());
 		return dialogArea;
@@ -91,8 +92,8 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				super.widgetSelected(e);
 				if (e.widget instanceof Button) {
-					filterEnabled = ((Button) e.widget).getSelection();
-					filterPreferences.store(String.valueOf(filterEnabled));
+					showAll = ((Button) e.widget).getSelection();
+					showAllPreferences.store(String.valueOf(showAll));
 					setListElements(getProjects());
 				}
 			}
@@ -101,7 +102,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 	}
 
 	private boolean isValid(IProject project) {
-		if (!filterEnabled) {
+		if (showAll) {
 			return true;
 		}
 		
