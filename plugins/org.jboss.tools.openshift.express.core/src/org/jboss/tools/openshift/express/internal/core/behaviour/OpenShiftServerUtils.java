@@ -45,11 +45,8 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
-import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethodType;
-import org.jboss.ide.eclipse.as.core.util.DeploymentPreferenceLoader;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
-import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
@@ -382,7 +379,7 @@ public class OpenShiftServerUtils {
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName, String host,
 			String deployProject, String deployFolder, String remote, String applicationName, String domainName) {
 		wc.setHost(trimHost(host));
-		wc.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
+		wc.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT_MODE_ID);
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, deployProject);
 		// wc.setAttribute(ATTRIBUTE_USERNAME, username);
 		wc.setAttribute(ATTRIBUTE_DOMAIN, domainName);
@@ -441,7 +438,7 @@ public class OpenShiftServerUtils {
 		serverWC.setRuntime(null);
 		serverWC.setName(serverName);
 		serverWC.setServerConfiguration(null);
-		serverWC.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServerBehaviourDelegate.OPENSHIFT_ID);
+		serverWC.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT_MODE_ID);
 		return serverWC.save(true, new NullProgressMonitor());
 	}
 
@@ -465,16 +462,9 @@ public class OpenShiftServerUtils {
 	 * @return true or false
 	 */
 	public static boolean isInOpenshiftBehaviourMode(IServer server) {
-		IDeployableServer ds = ServerConverter.getDeployableServer(server);
-		if (ds != null) {
-			IJBossServerPublishMethodType type = DeploymentPreferenceLoader.getCurrentDeploymentMethodType(server);
-			if (type != null) {
-				String id = type.getId();
-				if (OpenShiftServerBinaryBehaviourDelegate.OPENSHIFT_BINARY_ID.equals(id)
-						|| OpenShiftServerBehaviourDelegate.OPENSHIFT_ID.equals(id))
-					return true;
-			}
-		}
+		String mode = server.getAttribute(IDeployableServer.SERVER_MODE, (String)null);
+		if (OpenShiftServer.OPENSHIFT_MODE_ID.equals(mode))
+			return true;
 		return false;
 	}
 

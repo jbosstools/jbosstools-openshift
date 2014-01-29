@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.behaviour;
 
 import org.eclipse.wst.server.core.TaskModel;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IApplication;
@@ -36,7 +35,7 @@ public class BehaviorTaskModelUtil {
 	public static void put(IDomain domain, TaskModel taskModel) {
 		taskModel.putObject(TASK_WIZARD_ATTR_DOMAIN, domain);
 	}
-
+ 
 	public static IDomain getDomain(IServerModeUICallback callback) {
 		return (IDomain) callback.getAttribute(TASK_WIZARD_ATTR_DOMAIN);
 	}

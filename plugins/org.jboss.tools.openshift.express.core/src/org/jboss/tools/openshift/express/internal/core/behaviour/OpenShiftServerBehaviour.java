@@ -17,14 +17,14 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IModule;
-import org.jboss.ide.eclipse.as.core.server.internal.DelegatingServerBehavior;
-import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
+import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 /**
  * @author Rob Stryker
  */
-public class OpenShiftServerBehaviour extends DelegatingServerBehavior {
+public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 
 	private IAdaptable publishAdaptableInfo;
 
@@ -52,9 +52,48 @@ public class OpenShiftServerBehaviour extends DelegatingServerBehavior {
 		return publishAdaptableInfo;
 	}
 	
-	@Override
 	public boolean canRestartModule(IModule[] module){
+		if( module.length == 1 ) 
+			return true;
 		return false;
 	}
+	public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor) throws CoreException {
+		// Do no setup
+	}
 
+	@Override
+	public void stop(boolean force) {
+		// No stopping either
+	}
+	
+	
+	/*
+	 * Publishing code below
+	 */
+	private OpenShiftServerPublishMethod publishMethod;
+	private OpenShiftServerPublishMethod getPublishMethod() {
+		if( publishMethod == null ) {
+			publishMethod = new OpenShiftServerPublishMethod();
+		}
+		return publishMethod;
+	}
+	
+	@Override
+	protected void publishStart(IProgressMonitor monitor) throws CoreException {
+		getPublishMethod().publishStart(getServer(), monitor);
+	}
+
+	@Override
+	protected void publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
+		int state = getPublishMethod().publishModule(getServer(), kind, deltaKind, module, monitor);
+		setModulePublishState(module, state);
+	}
+
+	@Override
+	protected void publishFinish(IProgressMonitor monitor) throws CoreException {
+		getPublishMethod().publishFinish(getServer(), monitor);
+	}
+	
+	
+	
 }
