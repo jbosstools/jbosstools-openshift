@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegat
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.action.AbstractOpenShiftAction;
 import org.jboss.tools.openshift.express.internal.ui.job.RestartApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
@@ -33,7 +34,7 @@ public class RestartApplicationActionProvider extends AbstractServerViewerAction
 	private static class RestartApplicationAction extends AbstractOpenShiftAction {
 
 		public RestartApplicationAction() {
-			super(OpenShiftExpressUIMessages.RESTART_APPLICATION_ACTION, true);
+			super(OpenShiftExpressUIMessages.RESTART_APPLICATION_ACTION, OpenShiftImages.RESTART, true);
 		}
 
 		@Override

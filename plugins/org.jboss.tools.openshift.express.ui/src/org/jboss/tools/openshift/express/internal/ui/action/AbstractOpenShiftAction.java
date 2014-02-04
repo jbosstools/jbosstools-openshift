@@ -35,9 +35,13 @@ public abstract class AbstractOpenShiftAction extends Action implements ISelecti
 		super(text);
 	}
 	
-	public AbstractOpenShiftAction(String text, boolean enableForSingleElement) {
-		super(text);
+	public AbstractOpenShiftAction(String text, ImageDescriptor image, boolean enableForSingleElement) {
+		super(text, image);
 		this.enableForSingleElement = enableForSingleElement;
+	}
+
+	public AbstractOpenShiftAction(String text, boolean enableForSingleElement) {
+		this(text, null);
 	}
 
 	public AbstractOpenShiftAction(String text, ImageDescriptor image) {
