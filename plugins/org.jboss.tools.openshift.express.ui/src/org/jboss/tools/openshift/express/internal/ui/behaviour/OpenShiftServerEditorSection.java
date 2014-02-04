@@ -142,7 +142,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private String createConnectionLabel(ConnectionURL connectionUrl) {
 		String connectionLabel = "";
 		if (connectionUrl != null) {
-			Connection connection = new Connection(connectionUrl.getUsername(), connectionUrl.getHost(), null);
+			Connection connection = new Connection(connectionUrl.getUsername(), connectionUrl.getHost());
 			StringBuilder builder =
 					new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
 			if (connectionUrl.isDefaultHost()) {
