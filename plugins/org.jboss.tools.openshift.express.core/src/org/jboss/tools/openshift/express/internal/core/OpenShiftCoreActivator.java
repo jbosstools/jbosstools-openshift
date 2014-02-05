@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
-import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.osgi.framework.BundleContext;
 
 /**

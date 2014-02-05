@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
 import java.lang.reflect.InvocationTargetException;
@@ -15,61 +25,44 @@ import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.SSLCertificateCallback;
 import org.osgi.framework.BundleContext;
 
 /**
- * The activator class controls the plug-in life cycle
+ * @author Andre Dietisheim
+ * @author Rob Stryker
  */
 public class OpenShiftUIActivator extends AbstractUIPlugin {
 
-	// The plug-in ID
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
 
-	// The shared instance
 	private static OpenShiftUIActivator plugin;
 
 	private IPreferenceStore corePreferenceStore;
 
-	/**
-	 * The constructor
-	 */
 	public OpenShiftUIActivator() {
 		this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, OpenShiftCoreActivator.PLUGIN_ID);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
-	 * )
-	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		initCoreUIIntegration();
+	}
+
+	protected void initCoreUIIntegration() {
 		OpenshiftCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
 		OpenshiftCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
 		OpenshiftCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());
+		OpenshiftCoreUIIntegration.getDefault().setSSLCertificateAuthorization(new SSLCertificateCallback());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
-	 * )
-	 */
 	public void stop(BundleContext context) throws Exception {
 		ConnectionsModelSingleton.getInstance().save();
 		plugin = null;
 		super.stop(context);
 	}
 
-	/**
-	 * Returns the shared instance
-	 * 
-	 * @return the shared instance
-	 */
 	public static OpenShiftUIActivator getDefault() {
 		return plugin;
 	}

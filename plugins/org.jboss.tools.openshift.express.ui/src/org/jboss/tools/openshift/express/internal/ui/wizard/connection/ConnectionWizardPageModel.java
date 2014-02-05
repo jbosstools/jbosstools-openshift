@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
@@ -270,9 +271,9 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Connection createConnection() {
 		String host = this.host; 
 		if (isDefaultServer) {
-			return new Connection(username, password, isRememberPassword);
+			return new Connection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
 		} else {
-			return new Connection(username, password, host, isRememberPassword);
+			return new Connection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
 		}
 	}
 	

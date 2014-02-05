@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
+import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
@@ -28,6 +29,7 @@ import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPref
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IUser;
+import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
 /**
  * @author Rob Stryker
@@ -90,9 +92,12 @@ public class ConnectionsModel {
 	}
 
 	protected boolean addConnection(ConnectionURL connectionUrl) {
+		ICredentialsPrompter credentialsPrompter = OpenshiftCoreUIIntegration.getDefault().getCredentialPrompter();
+		ISSLCertificateCallback sslAuthorization = OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback();
+		
 		Connection connection =
 				new Connection(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost(), 
-						OpenshiftCoreUIIntegration.getDefault().getCredentialPrompter());
+						credentialsPrompter, sslAuthorization);
 		return addConnection(connectionUrl, connection);
 	}
 

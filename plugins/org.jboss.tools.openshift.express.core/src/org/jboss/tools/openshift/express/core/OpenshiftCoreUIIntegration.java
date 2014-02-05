@@ -15,6 +15,8 @@ import java.io.OutputStream;
 
 import org.eclipse.wst.server.core.IServer;
 
+import com.openshift.client.IHttpClient.ISSLCertificateCallback;
+
 /**
  * A class to aid in any tasks that may be relevant to a UI, 
  * for example, displaying a question, or any interactions
@@ -34,24 +36,28 @@ public class OpenshiftCoreUIIntegration {
 		return instance;
 	}
 	
-	/* An IConsoleUtility for interaction with a console */
 	private IConsoleUtility consoleUtil;
 	
-	/* An IQuestionHandler for presenting questions to a user */
 	private IQuestionHandler questionHandler;
 	
-	/* An ICredentialsPrompter for prompting for credentials */
-	private ICredentialsPrompter credentialPrompter = null;
+	private ICredentialsPrompter credentialPrompter;
 	
-
-	/* Get access to the credential prompter */
+	private ISSLCertificateCallback sslCertificateCallback;
+	
 	public ICredentialsPrompter getCredentialPrompter() {
 		return credentialPrompter;
 	}
 	
-	/* Set the credential prompter */
 	public void setCredentialPrompter(ICredentialsPrompter prompter) {
 		this.credentialPrompter = prompter;
+	}
+	
+	public ISSLCertificateCallback getSSLCertificateCallback() {
+		return sslCertificateCallback;
+	}
+	
+	public void setSSLCertificateAuthorization(ISSLCertificateCallback authorization) {
+		this.sslCertificateCallback = authorization;
 	}
 	
 	public void setConsoleUtility(IConsoleUtility util) {
@@ -70,8 +76,8 @@ public class OpenshiftCoreUIIntegration {
 		this.questionHandler = questionHandler;
 	}
 
-	/*
-	 * Force the console view for the given server to show
+	/**
+	 * Show the console view for the given server
 	 */
 	public static void displayConsoleView(final IServer server) {
 		IConsoleUtility util = getDefault().getConsoleUtility();
@@ -165,6 +171,4 @@ public class OpenshiftCoreUIIntegration {
 		IQuestionHandler handler = getDefault().getQuestionHandler();
 		return handler == null ? null : handler.openMultiReturnQuestion(type, data);
 	}
-
-	
 }

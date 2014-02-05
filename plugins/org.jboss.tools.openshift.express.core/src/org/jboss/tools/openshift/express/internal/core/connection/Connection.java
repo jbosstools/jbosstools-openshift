@@ -30,6 +30,7 @@ import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.ISSHPublicKey;
 import com.openshift.client.IUser;
@@ -57,43 +58,44 @@ public class Connection {
 	private boolean rememberPassword;
 	private boolean didPromptForPassword;
 	private boolean passwordLoaded;
-	private ICredentialsPrompter prompter;
+	private ICredentialsPrompter passwordPrompter;
+	private ISSLCertificateCallback sslCallback;
 
 	public Connection() {
-		this(null, null, null, null, false, null);
+		this(null, null, null, null, false, null, null);
 	}
 
 	protected Connection(String username) {
 		this.username = username;
 	}
 
-	public Connection(String username, String scheme, String host, ICredentialsPrompter prompter) {
-		this(username, null, scheme, host, false, null);
-		this.prompter = prompter;
+	public Connection(String username, String scheme, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
+		this(username, null, scheme, host, false, null, sslCallback);
+		this.passwordPrompter = prompter;
 	}
 
-	public Connection(String username, String host, ICredentialsPrompter prompter) {
-		this(username, null, host, false);
-		this.prompter = prompter;
+	public Connection(String username, String host) {
+		this(username, null, host, false, null);
 	}
 
-	public Connection(String username, String password, boolean rememberPassword) {
-		this(username, password, null, rememberPassword);
+	public Connection(String username, String password, boolean rememberPassword, ISSLCertificateCallback sslCallback) {
+		this(username, password, null, rememberPassword, sslCallback);
 	}
 
-	public Connection(String username, String password, String host, boolean rememberPassword) {
-		this(username, password, host, rememberPassword, null);
+	public Connection(String username, String password, String host, boolean rememberPassword, ISSLCertificateCallback sslCallback) {
+		this(username, password, host, rememberPassword, null, sslCallback);
 	}
 	
-	protected Connection(String username, String password, String host, boolean rememberPassword, IUser user) {
-		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, user);
+	protected Connection(String username, String password, String host, boolean rememberPassword, IUser user, ISSLCertificateCallback sslCallback) {
+		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, user, sslCallback);
 	}
 
-	protected Connection(String username, String password, String scheme, String host, boolean rememberPassword, IUser user) {
+	protected Connection(String username, String password, String scheme, String host, boolean rememberPassword, IUser user, ISSLCertificateCallback sslCallback) {
 		this.username = username;
 		this.password = password;
 		this.host = getHost(scheme, host);
 		this.rememberPassword = rememberPassword;
+		this.sslCallback = sslCallback;
 		setUser(user);
 	}
 
@@ -123,7 +125,6 @@ public class Connection {
 	public String setUsername(String username) {
 		this.username = username;
 		clearUser();
-		// TODO: replace default name by userinput
 		return username;
 	}
 
@@ -134,7 +135,6 @@ public class Connection {
 
 	public String setPassword(String password) {
 		this.password = password;
-		// setRememberPassword(!StringUtils.isEmpty(password));
 		this.passwordLoaded = true;
 		clearUser();
 		return password;
@@ -224,7 +224,7 @@ public class Connection {
 		} else {
 			setClientTimeout();
 			IUser user = new OpenShiftConnectionFactory()
-					.getConnection(USER_ID, username, password, getHost()).getUser();
+					.getConnection(USER_ID, username, password, getHost(), sslCallback).getUser();
 			setUser(user);
 			return true;
 		}
@@ -287,11 +287,11 @@ public class Connection {
 	}
 	
 	private boolean promptForCredentials() {
-		if (prompter == null) {
+		if (passwordPrompter == null) {
 			return false;
 		}
 		try {
-			prompter.promptAndAuthenticate(this);
+			passwordPrompter.promptAndAuthenticate(this);
 			didPromptForPassword = true;
 		} catch (Exception e) {
 			OpenShiftCoreActivator.pluginLog().logError("Failed to retrieve User's password", e);
