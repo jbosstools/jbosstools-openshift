@@ -553,7 +553,7 @@ public class OpenShiftServerWizardComposite {
 			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 			if (p == null || p.length == 0) {
 				error = NLS.bind(
-								"Your workspace does not have a project that was corresponds to application {0}. Please import it first.",
+								"Your workspace does not have a project that corresponds to the application {0}. Please import the application first.",
 								application.getName());
 			}
 		}
