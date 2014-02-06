@@ -94,6 +94,19 @@ public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 		getPublishMethod().publishFinish(getServer(), monitor);
 	}
 	
-	
+	@Override
+	public IStatus canStart(String launchMode) {
+		return Status.CANCEL_STATUS;
+	}
+
+	@Override
+	public IStatus canRestart(String mode) {
+		return Status.CANCEL_STATUS;
+	}
+
+	@Override
+	public IStatus canStop() {
+		return Status.CANCEL_STATUS;
+	}	
 	
 }
