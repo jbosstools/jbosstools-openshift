@@ -30,13 +30,12 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
-import org.jboss.ide.eclipse.as.core.server.IDeployableServerBehaviour;
-import org.jboss.ide.eclipse.as.core.server.IJBossServerPublishMethod;
-import org.jboss.ide.eclipse.as.core.server.IPublishCopyCallbackHandler;
+import org.jboss.ide.eclipse.as.core.server.IJBossServerPublisher;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.IQuestionHandler;
@@ -46,37 +45,35 @@ import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 /**
  * @author Rob Stryker
  */
-public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
+public class OpenShiftServerPublishMethod  {
 
-	@Override
-	public void publishStart(final IDeployableServerBehaviour behaviour, final IProgressMonitor monitor) throws CoreException {
-		String destProjName = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
+	public void publishStart(final IServer server, final IProgressMonitor monitor) throws CoreException {
+		String destProjName = OpenShiftServerUtils.getExpressDeployProject(server);
 		IProject magicProject = destProjName == null ? 
 				null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if (magicProject == null || !magicProject.isAccessible()) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					OpenShiftCoreActivator.PLUGIN_ID,
-					NLS.bind(OpenShiftServerMessages.publishFailMissingProject, behaviour.getServer().getName(), destProjName)));
+					NLS.bind(OpenShiftServerMessages.publishFailMissingProject, server.getName(), destProjName)));
 		}
 	}
 
-	@Override
-	public int publishFinish(IDeployableServerBehaviour behaviour, IProgressMonitor monitor) throws CoreException {
+	public int publishFinish(IServer server, IProgressMonitor monitor) throws CoreException {
 
-		String destProjName = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
+		String destProjName = OpenShiftServerUtils.getExpressDeployProject(server);
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
-		boolean allSubModulesPublished = areAllPublished(behaviour);
+		boolean allSubModulesPublished = areAllPublished(server);
 
 		if (destProj != null 
 				&& destProj.exists()) {
 		
-			String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
+			String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
 			IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 			
 			if (allSubModulesPublished
 					|| (destFolder != null && destFolder.isAccessible())) {
 				refreshProject(destProj, submon(monitor, 100));
-				commitAndPushProject(destProj, behaviour, submon(monitor, 100));
+				commitAndPushProject(destProj, server, submon(monitor, 100));
 			} // else ignore. (one or more modules not published AND magic
 				// folder doesn't exist
 				// The previous exception will be propagated.
@@ -85,18 +82,17 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;
 	}
 
-	protected boolean areAllPublished(IDeployableServerBehaviour behaviour) {
-		IModule[] modules = behaviour.getServer().getModules();
+	protected boolean areAllPublished(IServer server) {
+		IModule[] modules = server.getModules();
 		boolean allpublished = true;
 		for (int i = 0; i < modules.length; i++) {
-			if (behaviour.getServer().getModulePublishState(new IModule[] { modules[i] }) != IServer.PUBLISH_STATE_NONE)
+			if (server.getModulePublishState(new IModule[] { modules[i] }) != IServer.PUBLISH_STATE_NONE)
 				allpublished = false;
 		}
 		return allpublished;
 	}
 
-	@Override
-	public int publishModule(IDeployableServerBehaviour behaviour, int kind,
+	public int publishModule(IServer server, int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
 
@@ -104,7 +100,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 
 		// Magic Project
-		String destProjName = OpenShiftServerUtils.getExpressDeployProject(behaviour.getServer());
+		String destProjName = OpenShiftServerUtils.getExpressDeployProject(server);
 		if (isInDestProjectTree(destProjName, module))
 			return IServer.PUBLISH_STATE_NONE;
 
@@ -113,23 +109,21 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		if (destProj.equals(module[module.length - 1].getProject()))
 			return IServer.PUBLISH_STATE_NONE;
 
-		IContainer destFolder = getDestination(behaviour, destProj);
+		IContainer destFolder = getDestination(server, destProj);
 		IPath destPath = destFolder.getLocation();
 
 		if (module.length == 0)
 			return IServer.PUBLISH_STATE_NONE;
-		int modulePublishState = behaviour.getServer().getModulePublishState(module);
-		int publishType = behaviour.getPublishType(kind, deltaKind, modulePublishState);
+		int modulePublishState = server.getModulePublishState(module);
+		int publishType = getPublishType(kind, deltaKind, modulePublishState);
 
 		IModuleResourceDelta[] delta = new IModuleResourceDelta[] {};
 		if (deltaKind != ServerBehaviourDelegate.REMOVED)
-			delta = behaviour.getPublishedResourceDelta(module);
+			delta = ((Server)server).getPublishedResourceDelta(module);
 
 		try {
 			LocalZippedPublisherUtil util = new LocalZippedPublisherUtil();
-			IPath path = util.getOutputFilePath(behaviour.getServer(), module, destPath.toString()); // where
-																										// it's
-																										// deployed
+			IPath path = util.getOutputFilePath(server, module, destPath.toString()); // where it's deployed
 			IResource changedResource = destFolder.getFile(new Path(path.lastSegment()));
 			IResource[] resource = new IResource[] { changedResource };
 
@@ -137,7 +131,7 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				changedResource.delete(false, monitor); // uses resource api
 			} else {
 				monitor.beginTask("Moving module to " + destFolder.getName(), 100);
-				util.publishModule(behaviour.getServer(), destPath.toString(), module, publishType, delta,
+				util.publishModule(server, destPath.toString(), module, publishType, delta,
 						new SubProgressMonitor(monitor, 20));
 				// util used file api, so a folder refresh is required
 				destFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 20));
@@ -154,14 +148,14 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		return IServer.PUBLISH_STATE_NONE;
 	}
 
-	protected IContainer getDestination(IDeployableServerBehaviour behaviour, IProject destProj) throws CoreException {
-		String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(behaviour.getServer());
+	protected IContainer getDestination(IServer server, IProject destProj) throws CoreException {
+		String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
 		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
 					OpenShiftServerMessages.publishFailMissingFolder,
-					behaviour.getServer().getName(),
+					server.getName(),
 					createMissingPath(destProj, destinationFolder, destFolder))));
 		}
 		return destFolder;
@@ -193,11 +187,11 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 		return ret;
 	}
 
-	protected PushOperationResult commitAndPushProject(IProject p, IDeployableServerBehaviour behaviour,
+	protected PushOperationResult commitAndPushProject(IProject p, IServer server,
 			IProgressMonitor monitor) throws CoreException {
 
 		PushOperationResult result = null;
-		int changes = OpenShiftServerUtils.countCommitableChanges(p, behaviour.getServer(), monitor);
+		int changes = OpenShiftServerUtils.countCommitableChanges(p, server, monitor);
 		if (changes > 0) {
 			String[] data = new String[]{
 					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()),
@@ -214,26 +208,26 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 				else
 					EGitUtils.commit(p, msg, new SubProgressMonitor(monitor, 100));
 					
-				OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
-				result = push(p, behaviour.getServer(), monitor);
+				OpenshiftCoreUIIntegration.displayConsoleView(server);
+				result = push(p, server, monitor);
 			}
 		} else {
 			try {
 				String openShiftRemoteName =
-						OpenShiftServerUtils.getExpressRemoteName(behaviour.getServer());
+						OpenShiftServerUtils.getExpressRemoteName(server);
 				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
 					if (OpenshiftCoreUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, p.getName()),
 							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
-						result = push(p, behaviour.getServer(), monitor);
+						OpenshiftCoreUIIntegration.displayConsoleView(server);
+						result = push(p, server, monitor);
 					}
 				} else {
 					if (OpenshiftCoreUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.pushCommitsMsg, p.getName()),
 							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						OpenshiftCoreUIIntegration.displayConsoleView(behaviour.getServer());
-						result = push(p, behaviour.getServer(), monitor);
+						OpenshiftCoreUIIntegration.displayConsoleView(server);
+						result = push(p, server, monitor);
 					}
 				}
 			} catch (Exception e) {
@@ -305,15 +299,6 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 	}
 
 
-	public IPublishCopyCallbackHandler getCallbackHandler(IPath path,
-			IServer server) {
-		return null;
-	}
-
-	public IPublishCopyCallbackHandler getCallbackHandler(IPath deployPath, IPath tmpFolder, IServer server) {
-		return null;
-	}
-
 	public String getPublishDefaultRootFolder(IServer server) {
 		IDeployableServer s = ServerConverter.getDeployableServer(server);
 		return s.getDeployFolder();
@@ -336,5 +321,24 @@ public class OpenShiftServerPublishMethod implements IJBossServerPublishMethod {
 	public static IProgressMonitor submon(final IProgressMonitor parent,
 			final int ticks, final int style) {
 		return (parent == null ? new NullProgressMonitor() : new SubProgressMonitor(parent, ticks, style));
+	}
+	
+	
+	public int getPublishType(int kind, int deltaKind, int modulePublishState) {
+		if( deltaKind == ServerBehaviourDelegate.ADDED ) 
+			return IJBossServerPublisher.FULL_PUBLISH;
+		else if (deltaKind == ServerBehaviourDelegate.REMOVED) {
+			return IJBossServerPublisher.REMOVE_PUBLISH;
+		} else if (kind == IServer.PUBLISH_FULL 
+				|| modulePublishState == IServer.PUBLISH_STATE_FULL 
+				|| kind == IServer.PUBLISH_CLEAN ) {
+			return IJBossServerPublisher.FULL_PUBLISH;
+		} else if (kind == IServer.PUBLISH_INCREMENTAL 
+				|| modulePublishState == IServer.PUBLISH_STATE_INCREMENTAL 
+				|| kind == IServer.PUBLISH_AUTO) {
+			if( ServerBehaviourDelegate.CHANGED == deltaKind ) 
+				return IJBossServerPublisher.INCREMENTAL_PUBLISH;
+		} 
+		return IJBossServerPublisher.NO_PUBLISH;
 	}
 }
