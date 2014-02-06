@@ -78,6 +78,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 		StyledText logText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT).applyTo(logText);
+		logText.setEditable(false);
 		writeLogEntries(logEntries, logText);
 		logText.addListener(SWT.MouseDown, onLinkClicked(logText));
 		return container;
