@@ -68,7 +68,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 
 	public ApplicationPortForwardingWizardPage(final ApplicationPortForwardingWizardModel wizardModel,
 			final ApplicationPortForwardingWizard applicationPortForwardingWizard) {
-		super("Application port forward", null,
+		super("Application port forwarding", null,
 				"IApplicationPortForwardingingPage", applicationPortForwardingWizard);
 		this.wizardModel = wizardModel;
 		super.setDescription("Please configure port forwarding for the '" + wizardModel.getApplication().getName() + "' application");

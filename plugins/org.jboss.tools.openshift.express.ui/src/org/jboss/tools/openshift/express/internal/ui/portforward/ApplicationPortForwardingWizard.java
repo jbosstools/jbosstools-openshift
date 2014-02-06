@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.portforward;
 
-import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IApplication;
 
@@ -19,13 +19,10 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  *
  */
-public class ApplicationPortForwardingWizard extends Wizard {
-
-	private ApplicationPortForwardingWizardModel wizardModel;
+public class ApplicationPortForwardingWizard extends AbstractOpenShiftWizard<ApplicationPortForwardingWizardModel> {
 
 	public ApplicationPortForwardingWizard(IApplication application) {
-		this.wizardModel = new ApplicationPortForwardingWizardModel(application);
-		setNeedsProgressMonitor(true);
+		super("Application port forwarding", new ApplicationPortForwardingWizardModel(application));
 	}
 
 	@Override
@@ -35,7 +32,7 @@ public class ApplicationPortForwardingWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		addPage(new ApplicationPortForwardingWizardPage(wizardModel, this));
+		addPage(new ApplicationPortForwardingWizardPage(getModel(), this));
 	}
 
 }
