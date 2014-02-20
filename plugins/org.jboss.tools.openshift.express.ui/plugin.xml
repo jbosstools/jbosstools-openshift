@@ -235,57 +235,58 @@
            </action>
         </viewContribution>
    </extension>
+
+   <!-- OpenShift Explorer common navigator -->
    <extension point="org.eclipse.ui.navigator.viewer">
-      <viewer
-            viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-         <popupMenu
-               allowsPlatformContributions="true"
-               id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup">
-            <insertionPoint
-                  name="group.new"
-                  separator="true"/>
-            <insertionPoint
-                  name="group.edition"
-                  separator="true"/>
-            <insertionPoint
-                  name="group.showIn"
-                  separator="true"/>
-            <insertionPoint
-                  name="group.server"
-                  separator="true"/>
-            <insertionPoint
-                  name="additions"
-                  separator="true"/>
-            <insertionPoint
-                  name="group.properties"
-                  separator="true"/>
-         </popupMenu>
-         <options>
-            <property
-                  name="org.eclipse.ui.navigator.hideLinkWithEditorAction"
-                  value="true">
-            </property>
-         </options>
-      </viewer>
-      <viewerActionBinding viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-	       <includes>
-           	  <actionExtension
+       <viewer
+             viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+          <popupMenu
+                allowsPlatformContributions="true"
+                id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup">
+             <insertionPoint
+                   name="group.new"
+                   separator="true"/>
+             <insertionPoint
+                   name="group.edition"
+                   separator="true"/>
+             <insertionPoint
+                   name="group.showIn"
+                   separator="true"/>
+             <insertionPoint
+                   name="group.server"
+                   separator="true"/>
+             <insertionPoint
+                   name="additions"
+                   separator="true"/>
+             <insertionPoint
+                   name="group.properties"
+                   separator="true"/>
+          </popupMenu>
+          <options>
+             <property
+                   name="org.eclipse.ui.navigator.hideLinkWithEditorAction"
+                   value="true">
+             </property>
+          </options>
+       </viewer>
+       <viewerActionBinding
+                viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+	        <includes>
+                <actionExtension
 	                pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
-           	  <!-- actionExtension
-	                pattern="org.jboss.tools.openshift.express.internal.ui.portforward.applicationPortForwardActionProvider"/ -->
-           	  </includes>
-	    </viewerActionBinding>
-        <viewerContentBinding
-              viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+            </includes>
+	   </viewerActionBinding>
+       <viewerContentBinding
+               viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
            <includes>
-              <contentExtension
-                    isRoot="false"
-                    pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
-              </contentExtension>
-           </includes>
+               <contentExtension
+                   isRoot="false"
+                   pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
+               </contentExtension>
+          </includes>
       </viewerContentBinding>
-     </extension>
-     <extension 
+   </extension>
+   <extension 
          point="org.eclipse.ui.menus">
        <menuContribution
              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.new">
@@ -294,50 +295,50 @@
 	           label="%openshift.menu.expressConsoleView.new">
 			</menu>
 		</menuContribution>
-     </extension>
-     <extension
+   </extension>
+   <extension
            point="org.eclipse.ui.navigator.navigatorContent">
-        <navigatorContent
-              contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
-              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent"
-              labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider"
-              name="OpenShift Explorer Content">
+       <navigatorContent
+           contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
+           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent"
+           labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider"
+           name="OpenShift Explorer Content">
            <triggerPoints></triggerPoints>
-        </navigatorContent>
-        <actionProvider
+       </navigatorContent>
+       <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.OpenInWebBrowserActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.openInWebBrowserActionProvider">
            <enablement>
-             <with
+               <with
 					variable="selection">
-                <count
-					value="1">
-                </count>
-                <iterate
-					ifEmpty="false"
-					operator="and">
-					<instanceof
-						value="com.openshift.client.IApplication" />
-                </iterate>
-             </with>
+                   <count
+                       value="1">
+                   </count>
+                   <iterate
+					    ifEmpty="false"
+					    operator="and">
+					    <instanceof
+						    value="com.openshift.client.IApplication" />
+                   </iterate>
+               </with>
            </enablement>
-        </actionProvider>
-        <actionProvider
+       </actionProvider>
+       <actionProvider
               class="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.TailServerLogActionProvider"
               id="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.tailServerLogActionProvider">
            <enablement>
-             <with
+               <with
 					variable="selection">
-                <count
-					value="1">
-                </count>
-                <iterate
-					ifEmpty="false"
-					operator="and">
-					<instanceof
-						value="com.openshift.client.IApplication" />
-                </iterate>
-             </with>
+                   <count
+                       value="1">
+                   </count>
+                   <iterate
+					   ifEmpty="false"
+					   operator="and">
+					   <instanceof
+						   value="com.openshift.client.IApplication" />
+                   </iterate>
+               </with>
            </enablement>
         </actionProvider>
         <actionProvider
@@ -385,10 +386,6 @@
 					<or>
 						<instanceof
 							value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-							<!-- Not showing it for IApp since it has show details -->
-							<!-- <instanceof
-								value="com.openshift.client.IApplication">
-						</instanceof> -->
 						<instanceof
 							value="com.openshift.client.cartridge.IEmbeddedCartridge" />
 					</or>
@@ -407,6 +404,31 @@
               </or> 
            </enablement>
         </actionProvider>
+     </extension>
+     
+	<!-- Select Application Dialog common navigator -->
+    <extension point="org.eclipse.ui.navigator.viewer">
+        <viewer
+              viewerId="org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPage">
+        </viewer>
+        <viewerContentBinding
+               viewerId="org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPage">
+            <includes>
+                <contentExtension
+                    pattern="org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPageContent"
+                    isRoot="false">
+                </contentExtension>
+            </includes>
+        </viewerContentBinding>
+    </extension>
+    <extension point="org.eclipse.ui.navigator.navigatorContent">
+        <navigatorContent
+            id="org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPageContent"
+            name="Select Application Dialog Content"
+            contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
+            labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider">
+            <triggerPoints></triggerPoints>
+        </navigatorContent>
      </extension>
      
      <!-- when using the 'classic' properties view. -->

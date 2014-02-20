@@ -21,18 +21,22 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  */
 public interface IEmbedCartridgesWizardPageModel {
 
-	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
+	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE = "selectedEmbeddableCartridge";
+	public static final String PROPERTY_CHECKED_EMBEDDABLE_CARTRIDGES = "checkedEmbeddableCartridges";
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException;
+	public void setCheckedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) throws OpenShiftException;
 
-	public void selectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException;
+	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() throws OpenShiftException;
 
-	public void unselectEmbeddedCartridges(IEmbeddableCartridge cartridge) throws OpenShiftException;
+	public void checkEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
-	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) throws OpenShiftException;
+	public void uncheckEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException;
 	
-	public boolean isSelected(IEmbeddableCartridge cartridge) throws OpenShiftException;
-
+	public void setSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge);
+	
+	public IEmbeddableCartridge getSelectedEmbeddableCartridge();
+	
 	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
 	public IDomain getDomain() throws OpenShiftException;

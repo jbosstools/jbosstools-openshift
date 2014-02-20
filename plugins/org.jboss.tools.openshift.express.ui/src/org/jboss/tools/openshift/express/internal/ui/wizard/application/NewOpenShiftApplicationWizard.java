@@ -44,6 +44,6 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 * Constructor invoked via OpenShift Explorer context menu
 	 */
 	public NewOpenShiftApplicationWizard(Connection connection) {
-		super(connection, null, null, null, false, false, "New OpenShift Application");
+		super(connection, connection.getDefaultDomain(), null, null, false, false, "New OpenShift Application");
 	}
 }

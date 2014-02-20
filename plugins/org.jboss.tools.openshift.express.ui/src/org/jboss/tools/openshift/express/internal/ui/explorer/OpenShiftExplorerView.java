@@ -30,10 +30,10 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	@Override
-	protected CommonViewer createCommonViewer(Composite aParent) {
-		CommonViewer v = super.createCommonViewer(aParent);
+	protected CommonViewer createCommonViewer(Composite aparent) {
+		CommonViewer viewer = super.createCommonViewer(aparent);
 		ConnectionsModelSingleton.getInstance().addListener(this);
-		return v;
+		return viewer;
 	}
 
 	@Override

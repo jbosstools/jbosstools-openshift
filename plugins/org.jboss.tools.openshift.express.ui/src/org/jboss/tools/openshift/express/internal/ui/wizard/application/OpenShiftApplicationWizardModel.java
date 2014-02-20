@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,7 +32,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
@@ -41,6 +42,8 @@ import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoUnsharedProject;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -54,7 +57,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenShiftWizardModel {
+class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
@@ -217,76 +220,77 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	
 	@Override
 	public IDomain setDomain(IDomain domain) {
-		return (IDomain) setProperty(PROP_DOMAIN, domain);
+		return setProperty(PROP_DOMAIN, domain);
 	}
 
 	@Override
 	public IDomain getDomain() {
-		return (IDomain) getProperty(PROP_DOMAIN);
+		return getProperty(PROP_DOMAIN);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<IDomain> setDomains(List<IDomain> domains) {
-		return (List<IDomain>) setProperty(PROP_DOMAINS, domains);
+	public void ensureHasDomain() {
+		Assert.isNotNull(getConnection());
+		if (getDomain() == null) {
+			setDomain(getConnection().getDefaultDomain());
+		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
+	public List<IDomain> setDomains(List<IDomain> domains) {
+		return setProperty(PROP_DOMAINS, domains);
+	}
+
 	@Override
 	public List<IDomain> getDomains() {
-		return (List<IDomain>) getProperty(PROP_DOMAINS);
+		return getProperty(PROP_DOMAINS);
 	}
 
 	@Override
 	public IApplication getApplication() {
-		return (IApplication) getProperty(PROP_APPLICATION);
+		return getProperty(PROP_APPLICATION);
 	}
 
 	@Override
-	public void setApplication(IApplication application) {
+	public IApplication setApplication(IApplication application) {
 		setProperty(PROP_APPLICATION, application);
-		setApplicationCartridge(application);
 		setApplicationName(application);
-		setApplicationScale(application);
-		setApplicationGearProfile(application);
+		return application;
 	}
 
 	@Override
 	public String setRemoteName(String remoteName) {
-		setProperty(PROP_REMOTE_NAME, remoteName);
-		return remoteName;
+		return (String) setProperty(PROP_REMOTE_NAME, remoteName);
 	}
 
 	@Override
 	public String getRemoteName() {
-		return (String) getProperty(PROP_REMOTE_NAME);
+		return getProperty(PROP_REMOTE_NAME);
 	}
 
 	@Override
 	public String setRepositoryPath(String repositoryPath) {
-		return (String) setProperty(PROP_REPOSITORY_PATH, repositoryPath);
+		return setProperty(PROP_REPOSITORY_PATH, repositoryPath);
 	}
 
 	@Override
 	public String getRepositoryPath() {
-		return (String) getProperty(PROP_REPOSITORY_PATH);
+		return getProperty(PROP_REPOSITORY_PATH);
 	}
 
 	@Override
 	public boolean isNewProject() {
-		Boolean isNewProject = (Boolean) getProperty(PROP_NEW_PROJECT);
-		return isNewProject != null
-				&& isNewProject;
+		return getBooleanProperty(PROP_NEW_PROJECT);
 	}
 
 	@Override
 	public Boolean setNewProject(boolean newProject) {
-		return (Boolean) setProperty(PROP_NEW_PROJECT, newProject);
+		return setProperty(PROP_NEW_PROJECT, newProject);
 	}
 
 	@Override
 	public String setProjectName(String projectName) {
-		return (String) setProperty(PROP_PROJECT_NAME, projectName);
+		return setProperty(PROP_PROJECT_NAME, projectName);
 	}
 
 	@Override
@@ -315,7 +319,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 
 	@Override
 	public Boolean setCreateServerAdapter(Boolean createServerAdapter) {
-		return (Boolean) setProperty(PROP_CREATE_SERVER_ADAPTER, createServerAdapter);
+		return setProperty(PROP_CREATE_SERVER_ADAPTER, createServerAdapter);
 	}
 
 	@Override
@@ -325,7 +329,7 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 
 	@Override
 	public Boolean setSkipMavenBuild(Boolean skipMavenBuild) {
-		return (Boolean) setProperty(PROP_SKIP_MAVEN_BUILD, skipMavenBuild);
+		return setProperty(PROP_SKIP_MAVEN_BUILD, skipMavenBuild);
 	}
 
 	@Override
@@ -343,127 +347,154 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	
 	@Override
 	public String getProjectName() {
-		return (String) getProperty(PROP_PROJECT_NAME);
+		return getProperty(PROP_PROJECT_NAME);
 	}
 
 	@Override
 	public String setMergeUri(String mergeUri) {
-		return (String) setProperty(PROP_MERGE_URI, mergeUri);
+		return setProperty(PROP_MERGE_URI, mergeUri);
 	}
 
 	@Override
 	public String getMergeUri() {
-		return (String) getProperty(PROP_MERGE_URI);
+		return getProperty(PROP_MERGE_URI);
 	}
 
 	@Override
 	public boolean isUseExistingApplication() {
-		return (Boolean) getProperty(PROP_USE_EXISTING_APPLICATION);
+		return getBooleanProperty(PROP_USE_EXISTING_APPLICATION);
 	}
 
 	@Override
 	public boolean setUseExistingApplication(boolean useExistingApplication) {
-		Boolean isUseExistingApplication = (Boolean) setProperty(PROP_USE_EXISTING_APPLICATION, useExistingApplication);
-		return isUseExistingApplication != null && isUseExistingApplication;
-	}
-
-	protected void setUseExistingApplication(IApplication application) {
-		setUseExistingApplication(application != null);
+		return setProperty(PROP_USE_EXISTING_APPLICATION, useExistingApplication);
 	}
 
 	@Override
 	public ApplicationScale getApplicationScale() {
-		return (ApplicationScale) getProperty(PROP_APPLICATION_SCALE);
+		return getProperty(PROP_APPLICATION_SCALE);
 	}
 
 	@Override
 	public ApplicationScale setApplicationScale(final ApplicationScale scale) {
-		return (ApplicationScale) setProperty(PROP_APPLICATION_SCALE, scale);
+		return setProperty(PROP_APPLICATION_SCALE, scale);
 	}
 
 	protected void setApplicationScale(IApplication application) {
+		ApplicationScale scale = null;
 		if (application != null) {
-			setApplicationScale(application.getApplicationScale());
+			scale = application.getApplicationScale();
 		}
+		setApplicationScale(scale);
 	}
 
 	@Override
 	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
-		@SuppressWarnings("unchecked")
 		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
-				(Set<IEmbeddableCartridge>) getProperty(PROP_KEY_SELECTED_EMBEDDABLE_CARTRIDGES);
-		if (selectedEmbeddableCartridges == null) {
-			selectedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>();
-			setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
-		}
+				getProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptySet());
 		return selectedEmbeddableCartridges;
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override 
+	public boolean hasEmbeddableCartridge(IEmbeddableCartridge cartridge) {
+		return getSelectedEmbeddableCartridges().contains(cartridge);
+	}
+	
 	@Override
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-		return (Set<IEmbeddableCartridge>) setProperty(PROP_KEY_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
+		return setProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 	}
 
 	@Override
-	public IStandaloneCartridge setApplicationCartridge(IStandaloneCartridge cartridge) {
-		return (IStandaloneCartridge) setProperty(PROP_APPLICATION_CARTRIDGE, cartridge);
+	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
+		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
+		selectedEmbeddableCartridges .remove(cartridge);
+		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
+	}
+	
+	@Override
+	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
+		return getProperty(PROP_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptyList());
 	}
 
-	protected void setApplicationCartridge(IApplication application) {
-		if (application == null) {
-			return;
+	@Override
+	public List<IEmbeddableCartridge> setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges) {
+		return setProperty(PROP_EMBEDDABLE_CARTRIDGES, embeddableCartridges);
+	}
+
+	protected void setDomain(IApplication application) {
+		IDomain domain = null;
+		if (application != null) {
+			domain = application.getDomain();
+		} 
+		setDomain(domain);
+	}
+
+	@Override
+	public IStandaloneCartridge getStandaloneCartridge() {
+		IStandaloneCartridge cartridge = null;
+		IApplicationTemplate template = getSelectedApplicationTemplate();
+		if (template instanceof ICartridgeApplicationTemplate) {
+			cartridge = ((ICartridgeApplicationTemplate) template).getCartridge();
 		}
-		setApplicationCartridge(application.getCartridge());
+		return cartridge;
 	}
 
 	@Override
 	public IGearProfile getApplicationGearProfile() {
-		return (IGearProfile) getProperty(PROP_APPLICATION_GEAR_PROFILE);
+		return getProperty(PROP_APPLICATION_GEAR_PROFILE);
 	}
 
 	@Override
 	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile) {
-		return (IGearProfile) setProperty(PROP_APPLICATION_GEAR_PROFILE, gearProfile);
+		return setProperty(PROP_APPLICATION_GEAR_PROFILE, gearProfile);
 	}
 
 	protected void setApplicationGearProfile(IApplication application) {
+		IGearProfile profile = null;
 		if (application != null) {
-			setApplicationGearProfile(application.getGearProfile());
+			profile = application.getGearProfile();
 		}
+		setApplicationGearProfile(profile);
 	}
 
 	@Override
-	public IStandaloneCartridge getApplicationCartridge() {
-		return (IStandaloneCartridge) getProperty(PROP_APPLICATION_CARTRIDGE);
+	public List<IStandaloneCartridge> setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
+		return setProperty(PROP_STANDALONE_CARTRIDGES, cartridges);
 	}
 
+	@Override
+	public List<IStandaloneCartridge> getStandaloneCartridges() {
+		return getProperty(PROP_STANDALONE_CARTRIDGES);
+	}
+	
 	@Override
 	public String setApplicationName(String applicationName) {
 		return (String) setProperty(PROP_APPLICATION_NAME, applicationName);
 	}
 
 	protected void setApplicationName(IApplication application) {
-		if (application == null) {
-			return;
+		String applicationName = null;
+		if (application != null) {
+			applicationName = application.getName();
 		}
-		setApplicationName(application.getName());
+		setApplicationName(applicationName);
 	}
 
 	@Override
 	public String getApplicationName() {
-		return (String) getProperty(PROP_APPLICATION_NAME);
+		return getProperty(PROP_APPLICATION_NAME);
 	}
 
 	@Override
 	public String getInitialGitUrl() {
-		return (String) getProperty(PROP_INITIAL_GITURL);
+		return getProperty(PROP_INITIAL_GITURL);
 	}
 	
 	@Override
 	public String setInitialGitUrl(String initialGitUrl) {
-		return (String) setProperty(PROP_INITIAL_GITURL, initialGitUrl);
+		return setProperty(PROP_INITIAL_GITURL, initialGitUrl);
 	}
 
 	@Override
@@ -480,15 +511,15 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 	
 	@Override
 	public Connection getConnection() {
-		return (Connection) getProperty(PROP_CONNECTION);
+		return getProperty(PROP_CONNECTION);
 	}
 
 	protected IServer setServerAdapter(IServer server) {
-		return (IServer) setProperty(PROP_SERVER_ADAPTER, server);
+		return setProperty(PROP_SERVER_ADAPTER, server);
 	}
 
 	protected IServer getServerAdapter() {
-		return (IServer) getProperty(PROP_SERVER_ADAPTER);
+		return getProperty(PROP_SERVER_ADAPTER);
 	}
 	
 	protected boolean hasServerAdapter() {
@@ -536,33 +567,57 @@ class OpenShiftApplicationWizardModel extends ObservableUIPojo implements IOpenS
 		ConnectionsModelSingleton.getInstance().setRecent(getConnection());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, String> getEnvironmentVariables() {
-		return (Map<String, String>) getProperty(PROP_ENVIRONMENT_VARIABLES);
+	public IApplicationTemplate getSelectedApplicationTemplate() {
+		return getProperty(PROP_SELECTED_APPLICATION_TEMPLATE);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
+	public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template) {
+		setProperty(PROP_SELECTED_APPLICATION_TEMPLATE, template);
+		setUseExistingApplication(false);
+		return template;
+	}
+
+	@Override
+	public Map<String, String> getEnvironmentVariables() {
+		return getProperty(PROP_ENVIRONMENT_VARIABLES);
+	}
+
 	@Override
 	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables) {
 		return (Map<String, String>) setProperty(PROP_ENVIRONMENT_VARIABLES, environmentVariables);
 	}
 
-	private Object setProperty(String key, Object value) {
+
+	public boolean isValid(Connection connection) {
+		return connection != null
+				&& connection.isConnected();
+	}
+
+	private <V> V setProperty(String key, V value) {
 		Object oldVal = dataModel.get(key);
 		dataModel.put(key, value);
 		firePropertyChange(key, oldVal, value);
 		return value;
 	}
 
-	private Object getProperty(String key) {
-		return dataModel.get(key);
+	private <E> E getProperty(String key) {
+		return getProperty(key, null);
 	}
 
-	private Boolean getBooleanProperty(String name) {
+	private <V> V getProperty(String key, V defaultValue) {
+		@SuppressWarnings("unchecked")
+		V value = (V) dataModel.get(key);
+		if (value == null) {
+			return value = defaultValue;
+		}
+		return value;
+	}
+
+	private boolean getBooleanProperty(String name) {
 		Boolean binaryValue = (Boolean) getProperty(name);
 		return binaryValue != null 
 				&& binaryValue.booleanValue();
 	}
-	
 }

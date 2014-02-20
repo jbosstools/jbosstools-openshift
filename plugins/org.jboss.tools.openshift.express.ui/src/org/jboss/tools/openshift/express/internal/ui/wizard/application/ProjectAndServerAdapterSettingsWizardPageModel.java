@@ -10,10 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 
 /**
  * @author Andre Dietisheim
@@ -36,26 +34,20 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	/** whether we create a skip maven build marker */
 	public static final String PROPERTY_SKIP_MAVEN_BUILD = "skipMavenBuild";
 
-	private IOpenShiftWizardModel wizardModel;
+	private IOpenShiftApplicationWizardModel wizardModel;
 
-	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		setNewProject(wizardModel.getProject() == null);
-		wizardModel.addPropertyChangeListener(IOpenShiftWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
 		setCreateServerAdapter(true);
+		setupWizardModelListeners(wizardModel);
 	}
 
-	/**
-	 * Listener to propagate the application name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
-	 * @return
-	 */
-	private PropertyChangeListener onWizardApplicationNameChanged() {
-		return new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChange(PROPERTY_APPLICATION_NAME, evt.getOldValue(), evt.getNewValue());
-			}
-		};
+	private void setupWizardModelListeners(IOpenShiftApplicationWizardModel wizardModel) {
+		new PojoEventBridge()
+			.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
+			.forwardTo(PROPERTY_APPLICATION_NAME, this);
+		
 	}
 
 	public void setNewProject(boolean newProject) {

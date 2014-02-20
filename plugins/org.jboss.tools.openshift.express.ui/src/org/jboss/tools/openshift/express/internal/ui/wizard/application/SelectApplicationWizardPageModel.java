@@ -10,12 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -26,41 +25,33 @@ import com.openshift.client.OpenShiftException;
  * @author Xavier Coulon
  * 
  */
-public class ApplicationSelectionDialogModel extends ObservableUIPojo {
+public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 
+	public static final String PROPERTY_DOMAINS = "domains";
 	public static final String PROPERTY_SELECTED_APPLICATION = "selectedApplication";
 
 	private IApplication selectedApplication;
+	private OpenShiftApplicationWizardModel wizardModel;
 
-	private IOpenShiftWizardModel wizardModel;
-
-	public ApplicationSelectionDialogModel(IOpenShiftWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
+	public SelectApplicationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
 		this.selectedApplication = wizardModel.getApplication();
+		this.wizardModel = wizardModel;
+		new PojoEventBridge()
+			.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel).forwardTo(PROPERTY_DOMAINS, this);
 	}
 
 	public void refresh() {
-		IDomain domain = getDomain();
-		try {
-			if (domain == null) {
-				return;
-			}
-			domain.refresh();
-		} catch (OpenShiftException e) {
-			Logger.error(NLS.bind("Could not refresh domain {0}", domain.getId()), e);
-		}
+		refreshDomains();
+		this.selectedApplication = null;
 	}
 	
-	public List<IApplication> getApplications() {
-		try {
-			IDomain domain = getDomain();
-			if (domain != null) {
-				return domain.getApplications();
-			}
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to retrieve applications", e);
-		}
-		return Collections.emptyList();
+	private void refreshDomains() {
+		wizardModel.getConnection().refresh();
+		wizardModel.setDomains(loadDomains());
+	}
+
+	public List<IDomain> getDomains() throws OpenShiftException {
+		return wizardModel.getDomains();
 	}
 
 	public IApplication getSelectedApplication() {
@@ -72,7 +63,21 @@ public class ApplicationSelectionDialogModel extends ObservableUIPojo {
 				this.selectedApplication, this.selectedApplication = application);
 	}
 
-	protected IDomain getDomain() {
-		return wizardModel.getDomain();
+	public void loadOpenShiftResources() {
+		loadDomains();
+	}
+
+	protected List<IDomain> loadDomains() {
+		List<IDomain> domains = wizardModel.getConnection().getDomains();
+		wizardModel.setDomains(domains);
+		return domains;
+	}
+	
+	public Connection getConnection() {
+		return wizardModel.getConnection();
+	}
+
+	public void clearSelectedApplication() {
+		setSelectedApplication(null);
 	}
 }

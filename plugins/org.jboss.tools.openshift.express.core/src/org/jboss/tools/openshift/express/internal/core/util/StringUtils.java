@@ -134,4 +134,12 @@ public class StringUtils {
 		}
 		return string.trim();
 	}
+	
+	public static String toLowerCase(String string) {
+		if (isEmpty(string)) {
+			return string;
+		}
+		
+		return string.toLowerCase();
+	}
 }

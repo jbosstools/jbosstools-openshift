@@ -16,6 +16,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -31,6 +32,9 @@ public class UrlUtils {
 	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
 	public static final char CREDENTIALS_HOST_SEPARATOR = '@';
 	public static final char PORT_DELIMITER = ':';
+
+	private static final Pattern SIMPLE_URL_PATTERN =
+			Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
 
 	private UrlUtils() {
 		// inhibit instantiation
@@ -219,6 +223,11 @@ public class UrlUtils {
 		} catch (MalformedURLException e) {
 			return false;
 		}
+	}
+
+	public static boolean isValid(String url) {
+		// test via new URL(url) is far too slow, using a regex
+		return SIMPLE_URL_PATTERN.matcher(url).matches();
 	}
 
 }

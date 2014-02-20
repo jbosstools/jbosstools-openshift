@@ -20,6 +20,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -33,7 +34,17 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
 	protected enum Direction {
-		FORWARDS, BACKWARDS
+		FORWARDS {
+			public IWizardPage getFollowingPage(IWizardPage page) {
+				return page.getNextPage();
+			}
+		}, BACKWARDS {
+			public IWizardPage getFollowingPage(IWizardPage page) {
+				return page.getPreviousPage();
+			}
+		};
+		
+		public abstract IWizardPage getFollowingPage(IWizardPage currentPage);
 	}
 	
 	private DataBindingContext dbc;

@@ -104,7 +104,7 @@ public class EmbedCartridgeStrategy {
 		dependenciesByCartridge.put(requiringCartridge, dependency);
 	}
 	
-	public ApplicationRequirement getNonMetRequirement(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application) {
+	public ApplicationRequirement getMissingRequirement(IEmbeddableCartridge requestedCartridge, IApplicationProperties application) {
 		for (ApplicationRequirement requirement : applicationRequirements) {
 			if (requirement.isForCartridge(requestedCartridge)
 					&& !requirement.meetsRequirements(application)) {
@@ -252,9 +252,9 @@ public class EmbedCartridgeStrategy {
 			return cartridge.getName();
 		}
 		
-		protected abstract boolean meetsRequirements(IApplicationPropertiesProvider application);
+		protected abstract boolean meetsRequirements(IApplicationProperties application);
 
-		public abstract String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application);
+		public abstract String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationProperties application);
 	}
 	
 	private static class NonScalableApplicationRequirement extends ApplicationRequirement {
@@ -264,17 +264,19 @@ public class EmbedCartridgeStrategy {
 		}
 
 		@Override
-		protected boolean meetsRequirements(IApplicationPropertiesProvider application) {
-			return application.getApplicationScale() == ApplicationScale.NO_SCALE;
+		protected boolean meetsRequirements(IApplicationProperties application) {
+			ApplicationScale scale = application.getApplicationScale();
+			return scale == ApplicationScale.NO_SCALE
+					|| scale == null;
 		}
 
 		@Override
-		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application) {
+		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationProperties application) {
 			return NLS.bind(
 							"It is not recommended to add cartridge {0} to your application {1}."
 							+ " The cartridge cannot scale and requires a non-scalable application. "
 							+ "Your application is scalable.",
-					requestedCartridge.getName(), application.getName());
+					requestedCartridge.getName(), application.getApplicationName());
 		}
 	}
 
@@ -290,20 +292,20 @@ public class EmbedCartridgeStrategy {
 		}
 
 		@Override
-		protected boolean meetsRequirements(IApplicationPropertiesProvider application) {
-			IStandaloneCartridge applicationType = application.getCartridge();
-			return eapSelector.isMatching(applicationType)
-					|| asSelector.isMatching(applicationType);
+		protected boolean meetsRequirements(IApplicationProperties application) {
+			IStandaloneCartridge standaloneCartridge = application.getStandaloneCartridge();
+			return eapSelector.isMatching(standaloneCartridge)
+					|| asSelector.isMatching(standaloneCartridge);
 		}
 
 		@Override
-		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationPropertiesProvider application) {
+		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationProperties application) {
 			return NLS.bind("It is not recommended to add cartridge {0} to your application {1}."
 					+ " The cartridge requires a {3} or {4} application and your application is a {2}."
 							, new String[] { 
 									requestedCartridge.getName(), 
-									application.getName(),
-									application.getCartridge().getName(),
+									application.getApplicationName(),
+									application.getStandaloneCartridge().getName(),
 									eapSelector.getName(),
 									asSelector.getName()});
 		}
@@ -352,8 +354,8 @@ public class EmbedCartridgeStrategy {
 			removals.add(cartridge);
 		}
 
-		protected void addApplicationAddition(IStandaloneCartridge applicationType) {
-			applicationAdditions.add(applicationType);
+		protected void addApplicationAddition(IStandaloneCartridge standaloneCartridge) {
+			applicationAdditions.add(standaloneCartridge);
 		}
 
 		public List<IStandaloneCartridge> getApplicationAdditions() {
@@ -436,9 +438,12 @@ public class EmbedCartridgeStrategy {
 		}
 	}
 	
-	public interface IApplicationPropertiesProvider {
+	public interface IApplicationProperties {
+		
 		public ApplicationScale getApplicationScale();
-		public IStandaloneCartridge getCartridge();
-		public String getName();
+		
+		public IStandaloneCartridge getStandaloneCartridge();
+		
+		public String getApplicationName();
 	}
 }

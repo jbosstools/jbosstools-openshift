@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.domain;
 
+import java.util.List;
+
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
@@ -41,6 +43,10 @@ public class ManageDomainsWizard extends AbstractOpenShiftWizard<ManageDomainsWi
 		addPage(new ManageDomainsWizardPage(getWindowTitle(), description, getModel(), this));
 	}
 	
+	public List<IDomain> getDomains() {
+		return getModel().getDomains();
+	}
+
 	public IDomain getDomain() {
 		return getModel().getSelectedDomain();
 	}
