@@ -33,10 +33,14 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-import org.jboss.ide.eclipse.archives.webtools.modules.LocalZippedPublisherUtil;
+import org.jboss.ide.eclipse.as.core.modules.ResourceModuleResourceUtil;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
-import org.jboss.ide.eclipse.as.core.server.IJBossServerPublisher;
+import org.jboss.ide.eclipse.as.core.server.IModulePathFilter;
+import org.jboss.ide.eclipse.as.core.server.IModulePathFilterProvider;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
+import org.jboss.ide.eclipse.as.wtp.core.server.publish.LocalZippedModulePublishRunner;
+import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
+import org.jboss.tools.as.core.server.controllable.util.PublishControllerUtility;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.IQuestionHandler;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
@@ -122,17 +126,17 @@ public class OpenShiftServerPublishMethod  {
 			delta = ((Server)server).getPublishedResourceDelta(module);
 
 		try {
-			LocalZippedPublisherUtil util = new LocalZippedPublisherUtil();
-			IPath path = util.getOutputFilePath(server, module, destPath.toString()); // where it's deployed
-			IResource changedResource = destFolder.getFile(new Path(path.lastSegment()));
+			IPath outputFileFullPath = getModuleNestedDeployPath(module, destPath.toOSString(), server);
+			String outputFileName = outputFileFullPath.lastSegment();
+			IResource changedResource = destFolder.getFile(new Path(outputFileName));
 			IResource[] resource = new IResource[] { changedResource };
-
+			
 			if (deltaKind == ServerBehaviourDelegate.REMOVED) {
 				changedResource.delete(false, monitor); // uses resource api
 			} else {
+				LocalZippedModulePublishRunner runner = createZippedRunner(server, module[0], outputFileFullPath);
 				monitor.beginTask("Moving module to " + destFolder.getName(), 100);
-				util.publishModule(server, destPath.toString(), module, publishType, delta,
-						new SubProgressMonitor(monitor, 20));
+				runner.fullPublishModule(new SubProgressMonitor(monitor, 20));
 				// util used file api, so a folder refresh is required
 				destFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 20));
 				final AddToIndexOperation operation = new AddToIndexOperation(resource);
@@ -148,6 +152,22 @@ public class OpenShiftServerPublishMethod  {
 		return IServer.PUBLISH_STATE_NONE;
 	}
 
+	
+	public static IPath getModuleNestedDeployPath(IModule[] moduleTree, String rootFolder, IServer server) {
+		return new ModuleDeploymentPrefsUtil().getModuleNestedDeployPath(moduleTree, rootFolder, server);
+	}
+	
+	private LocalZippedModulePublishRunner createZippedRunner(IServer server, IModule m, IPath p) {
+		return new LocalZippedModulePublishRunner(server, m,p, getModulePathFilterProvider());
+	}
+
+	private IModulePathFilterProvider getModulePathFilterProvider() {
+		return new IModulePathFilterProvider() {
+			public IModulePathFilter getFilter(IServer server, IModule[] module) {
+				return ResourceModuleResourceUtil.findDefaultModuleFilter(module[module.length-1]);
+			}
+		};
+	}
 	protected IContainer getDestination(IServer server, IProject destProj) throws CoreException {
 		String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
 		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
@@ -326,19 +346,19 @@ public class OpenShiftServerPublishMethod  {
 	
 	public int getPublishType(int kind, int deltaKind, int modulePublishState) {
 		if( deltaKind == ServerBehaviourDelegate.ADDED ) 
-			return IJBossServerPublisher.FULL_PUBLISH;
+			return PublishControllerUtility.FULL_PUBLISH;
 		else if (deltaKind == ServerBehaviourDelegate.REMOVED) {
-			return IJBossServerPublisher.REMOVE_PUBLISH;
+			return PublishControllerUtility.REMOVE_PUBLISH;
 		} else if (kind == IServer.PUBLISH_FULL 
 				|| modulePublishState == IServer.PUBLISH_STATE_FULL 
 				|| kind == IServer.PUBLISH_CLEAN ) {
-			return IJBossServerPublisher.FULL_PUBLISH;
+			return PublishControllerUtility.FULL_PUBLISH;
 		} else if (kind == IServer.PUBLISH_INCREMENTAL 
 				|| modulePublishState == IServer.PUBLISH_STATE_INCREMENTAL 
 				|| kind == IServer.PUBLISH_AUTO) {
 			if( ServerBehaviourDelegate.CHANGED == deltaKind ) 
-				return IJBossServerPublisher.INCREMENTAL_PUBLISH;
+				return PublishControllerUtility.INCREMENTAL_PUBLISH;
 		} 
-		return IJBossServerPublisher.NO_PUBLISH;
+		return PublishControllerUtility.NO_PUBLISH;
 	}
 }
