@@ -214,8 +214,12 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges);
 
+	public void addSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges);
+
 	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge);
-	
+
+	public void removeSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges);
+
 	public List<IEmbeddableCartridge> getEmbeddableCartridges();
 
 	public List<IEmbeddableCartridge> setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges);

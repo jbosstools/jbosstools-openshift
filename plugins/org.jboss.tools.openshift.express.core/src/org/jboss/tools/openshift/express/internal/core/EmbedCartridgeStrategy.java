@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.core.util.EmbeddableCartridgeToStringConverter;
+import org.jboss.tools.openshift.express.internal.core.util.StandaloneCartridgeToStringConverter;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -370,6 +373,25 @@ public class EmbedCartridgeStrategy {
 			return hasApplicationAdditions()
 					|| hasRemovals()
 					|| hasAdditions();
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			if (hasApplicationAdditions()) {
+				builder.append(NLS.bind("- Create {0}",
+						StringUtils.toString(getApplicationAdditions(), new StandaloneCartridgeToStringConverter())));
+			}
+			if (hasRemovals()) {
+				builder.append(NLS.bind("\n- Remove {0}",
+						StringUtils.toString(getRemovals(), new EmbeddableCartridgeToStringConverter())));
+			
+			}
+			if (hasAdditions()) {
+				builder.append(NLS.bind("\n- Add {0}",
+						StringUtils.toString(getAdditions(), new EmbeddableCartridgeToStringConverter())));
+			}
+			return builder.toString();
 		}
 	}
 

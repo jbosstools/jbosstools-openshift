@@ -407,12 +407,26 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
+	public void addSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
+		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
+		selectedEmbeddableCartridges .addAll(cartridges);
+		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
+	}
+
+	@Override
 	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
 		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
 		selectedEmbeddableCartridges .remove(cartridge);
 		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
 	}
 	
+	@Override
+	public void removeSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
+		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
+		selectedEmbeddableCartridges .removeAll(cartridges);
+		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
+	}
+
 	@Override
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
 		return getProperty(PROP_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptyList());
