@@ -35,6 +35,7 @@ import org.eclipse.jface.databinding.viewers.ObservableSetContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -58,7 +59,11 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
+import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.util.EmbeddableCartridgeToStringConverter;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -71,7 +76,6 @@ import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvi
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftResourceUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -87,6 +91,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.environment.NewEnvir
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
+import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -545,7 +550,57 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (!(value instanceof IEmbeddableCartridge)) {
 					return;
 				}
-				pageModel.removeSelectedEmbeddableCartridge((IEmbeddableCartridge) value);
+				IEmbeddableCartridge cartridge = (IEmbeddableCartridge) value;
+				remove(cartridge);
+			}
+
+			private void remove(IEmbeddableCartridge cartridge) {
+				EmbedCartridgeStrategy embedCartridgeStrategy = createEmbedCartridgeStrategy(pageModel.getDomain());
+				EmbeddableCartridgeDiff additionalOperations =
+						embedCartridgeStrategy.remove(cartridge, pageModel.getSelectedEmbeddableCartridges());
+				if (additionalOperations.hasChanges()) {
+					executeAdditionalOperations(cartridge, additionalOperations);
+				}
+				wizardModel.removeSelectedEmbeddableCartridge(cartridge);
+			}
+
+			private EmbedCartridgeStrategy createEmbedCartridgeStrategy(IDomain domain) {
+				IOpenShiftConnection connection = domain.getUser().getConnection();
+				EmbedCartridgeStrategy embedCartridgeStrategy =
+						new EmbedCartridgeStrategy(
+								connection.getEmbeddableCartridges(),
+								connection.getStandaloneCartridges(), 
+								domain.getApplications());
+				return embedCartridgeStrategy;
+			}
+
+			protected void executeAdditionalOperations(IEmbeddableCartridge cartridge,
+					EmbeddableCartridgeDiff additionalOperations) {
+				int result = openAdditionalOperationsDialog("Remove Cartridges",
+						new StringBuilder()
+								.append(NLS.bind("If you want to remove {0}, it is suggested you:\n",
+										new EmbeddableCartridgeToStringConverter()
+												.toString(additionalOperations.getCartridge())))
+								.append(additionalOperations.toString())
+								.append("\n\nDo you want to Apply or Ignore these suggestions??")
+								.toString());
+				switch (result) {
+				case 1:
+					wizardModel.removeSelectedEmbeddableCartridges(additionalOperations.getRemovals());
+					wizardModel.addSelectedEmbeddableCartridges(additionalOperations.getAdditions());
+					break;
+				case 0:
+					break;
+				case 2:
+					// user has chosen to ignore additional requirements
+					break;
+				}
+			}
+			
+			public int openAdditionalOperationsDialog(String title, String message) {
+				MessageDialog dialog = new MessageDialog(getShell(),
+						title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, 0);
+				return dialog.open();
 			}
 		};
 	}

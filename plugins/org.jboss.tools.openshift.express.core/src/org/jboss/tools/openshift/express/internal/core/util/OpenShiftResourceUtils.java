@@ -8,14 +8,12 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.utils;
+package org.jboss.tools.openshift.express.internal.core.util;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
