@@ -23,6 +23,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -31,6 +32,7 @@ import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplateCategory;
@@ -78,8 +80,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 	private class Default extends Empty {
 
-		private Label nameLabel;
-		private Text descriptionLabel;
+		private StyledText nameText;
+		private Text descriptionText;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
@@ -87,17 +89,18 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			GridLayoutFactory.fillDefaults()
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
-			// name
-			this.nameLabel = new Label(container, SWT.None);
+			// nameText
+			this.nameText = new StyledText(container, SWT.None);
+			nameText.setEditable(false);
 			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
+					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
-			// description
-			this.descriptionLabel = new Text(container, SWT.MULTI | SWT.WRAP);
-			descriptionLabel.setEditable(false);
-			descriptionLabel.setBackground(container.getBackground());
+			// descriptionText
+			this.descriptionText = new Text(container, SWT.MULTI | SWT.WRAP);
+			descriptionText.setEditable(false);
+			descriptionText.setBackground(container.getBackground());
 			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionLabel);
+					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionText);
 			return container;
 		}
 
@@ -105,19 +108,21 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		public void onVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
 			Object value = applicationTemplateObservable.getValue();
 			if (!(value instanceof IApplicationTemplate)
-					|| DisposeUtils.isDisposed(nameLabel)) {
+					|| DisposeUtils.isDisposed(nameText)) {
 				return;
 			}
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
-			this.nameLabel.setText(applicationTemplate.getName());
-			this.descriptionLabel.setText(applicationTemplate.getDescription());
+			String templateName = applicationTemplate.getName();
+			this.nameText.setText(templateName);
+			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, descriptionText.getBackground()));
+			this.descriptionText.setText(applicationTemplate.getDescription());
 		}
 	}
 
 	private class DownloadableCartridge extends Default {
 
-		private Label nameLabel;
-		private Text descriptionLabel;
+		private StyledText nameText;
+		private Text descriptionText;
 		private Text urlText;
 		private Binding binding;
 
@@ -127,17 +132,18 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			GridLayoutFactory.fillDefaults()
 					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
 
-			// name
-			this.nameLabel = new Label(container, SWT.None);
+			// nameText
+			this.nameText = new StyledText(container, SWT.None);
+			nameText.setEditable(false);
 			GridDataFactory.fillDefaults()
-					.span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
+					.span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
-			// description
-			this.descriptionLabel = new Text(container, SWT.MULTI | SWT.WRAP);
-			descriptionLabel.setEditable(false);
-			descriptionLabel.setBackground(container.getBackground());
+			// descriptionText
+			this.descriptionText = new Text(container, SWT.MULTI | SWT.WRAP);
+			descriptionText.setEditable(false);
+			descriptionText.setBackground(container.getBackground());
 			GridDataFactory.fillDefaults()
-					.span(2, 1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionLabel);
+					.span(2, 1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionText);
 
 			// url
 			Label urlLabel = new Label(container, SWT.None);
@@ -155,12 +161,14 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		public void onVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
 			Object value = applicationTemplateObservable.getValue();
 			if (!(value instanceof IApplicationTemplate)
-					|| DisposeUtils.isDisposed(nameLabel)) {
+					|| DisposeUtils.isDisposed(nameText)) {
 				return;
 			}
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
-			this.nameLabel.setText(applicationTemplate.getName());
-			this.descriptionLabel.setText(applicationTemplate.getDescription());
+			String name = applicationTemplate.getName();
+			this.nameText.setText(name);
+			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, descriptionText.getBackground()));
+			this.descriptionText.setText(applicationTemplate.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
 			this.binding = ValueBindingBuilder

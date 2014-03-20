@@ -83,6 +83,7 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 
 			// nameLabel			
 			this.nameLabel = new StyledText(container, SWT.None);
+			nameLabel.setEditable(false);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
 
@@ -126,6 +127,7 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 
 			// name
 			this.name = new StyledText(container, SWT.None);
+			name.setEditable(false);
 			GridDataFactory.fillDefaults()
 					.span(2,1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
