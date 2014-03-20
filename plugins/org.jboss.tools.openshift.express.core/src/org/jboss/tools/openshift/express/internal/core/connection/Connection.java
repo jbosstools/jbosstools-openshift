@@ -299,11 +299,11 @@ public class Connection {
 		return hasUser();
 	}
 
-	public IApplication createApplication(final String applicationName, final IStandaloneCartridge applicationType,
+	public IApplication createApplication(final String applicationName, final IStandaloneCartridge standaloneCartridge,
 			final ApplicationScale scale, final IGearProfile gearProfile, final IDomain domain)
 			throws OpenShiftException {
 		if (connect()) {
-			return domain.createApplication(applicationName, applicationType, scale, gearProfile);
+			return domain.createApplication(applicationName, standaloneCartridge, scale, gearProfile);
 		}
 		return null;
 	}
@@ -350,11 +350,11 @@ public class Connection {
 		return getApplication(name, domain) != null;
 	}
 
-	public List<IApplication> getApplications(IDomain domain) throws OpenShiftException {
-		if (domain == null) {
-			return Collections.emptyList();
+	public IDomain getDefaultDomain() throws OpenShiftException {
+		if (connect()) {
+			return user.getDefaultDomain();
 		}
-		return domain.getApplications();
+		return null;
 	}
 
 	public IDomain getDomain(String id) throws OpenShiftException {
@@ -367,6 +367,9 @@ public class Connection {
 	}
 
 	public IDomain getFirstDomain() throws OpenShiftException {
+		if (!connect()) {
+			return null;
+		}
 		List<IDomain> domains = getDomains();
 		if (domains == null
 				|| domains.isEmpty()) {
@@ -376,12 +379,12 @@ public class Connection {
 	}
 	
 	public List<IDomain> getDomains() throws OpenShiftException {
-		if (connect()) {
-			List<IDomain> domains = user.getDomains();
-			isDomainLoaded = true;
-			return domains;
+		if (!connect()) {
+			return Collections.emptyList();
 		}
-		return Collections.emptyList();
+		List<IDomain> domains = user.getDomains();
+		isDomainLoaded = true;
+		return domains;
 	}
 
 	public void destroy(IDomain domain, boolean force) {

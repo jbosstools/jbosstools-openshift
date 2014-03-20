@@ -49,16 +49,6 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		this.viewer = (StructuredViewer) viewer;
 	}
 
-	public static class LoadingStub {
-		public LoadingStub() {
-		}
-	}
-
-	public static class NotConnectedUserStub {
-		public NotConnectedUserStub() {
-		}
-	}
-
 	// Keep track of what's loading and what's finished
 	private List<Object> loadedElements = new ArrayList<Object>();
 	private List<Object> loadingElements = new ArrayList<Object>();
@@ -77,8 +67,11 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		if (parentElement instanceof IWorkspaceRoot) {
 			return ConnectionsModelSingleton.getInstance().getConnections();
 		} else if (parentElement instanceof ConnectionsModel) {
-			Connection[] users = ((ConnectionsModel) parentElement).getConnections();
-			return users;
+			Connection[] connections = ((ConnectionsModel) parentElement).getConnections();
+			return connections;
+		} else if (parentElement instanceof Connection) {
+			List<IDomain> domains = ((Connection) parentElement).getDomains();
+			return domains.toArray(new IDomain[domains.size()]);
 		}
 		return new Object[0];
 	}
@@ -90,9 +83,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof Connection) {
-			Connection user = (Connection) parentElement;
-			if (!user.isConnected() 
-					&& !user.canPromptForPassword()) {
+			Connection connection = (Connection) parentElement;
+			if (!connection.isConnected() 
+					&& !connection.canPromptForPassword()) {
 				return new Object[] { new NotConnectedUserStub() };
 			}
 			return loadChildren(parentElement);
@@ -101,7 +94,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof IApplication) {
 			return loadChildren(parentElement);
 		}
-		return getChildrenForElement(parentElement);
+		return getChildrenFor(parentElement);
 	}
 
 	/**
@@ -121,10 +114,10 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		if (ose != null) {
 			return new Object[] { ose };
 		}
-		return getChildrenForElement(parentElement);
+		return getChildrenFor(parentElement);
 	}
 
-	private Object[] getChildrenForElement(Object parentElement) {
+	private Object[] getChildrenFor(Object parentElement) {
 		Object[] children = new Object[0];
 		try {
 			if (parentElement instanceof OpenShiftExplorerContentCategory) {
@@ -147,15 +140,15 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	}
 
 	private void launchLoadingJob(final Object element) {
-		Job job = new Job("Loading OpenShift information...") {
+		Job job = new Job("Loading OpenShift resources...") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask("Loading OpenShift information...", IProgressMonitor.UNKNOWN);
+				monitor.beginTask("Loading OpenShift resources...", IProgressMonitor.UNKNOWN);
 				monitor.worked(1);
 				// Get the actual children, with the delay
 				loadingElements.add(element);
-				getChildrenForElement(element); 
+				getChildrenFor(element); 
 				loadedElements.add(element);
 				loadingElements.remove(element);
 				refreshViewerObject(element);
@@ -185,6 +178,12 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		return element instanceof Connection
 				|| element instanceof IDomain
 				|| element instanceof IApplication;
+	}
+
+	public static class LoadingStub {
+	}
+
+	public static class NotConnectedUserStub {
 	}
 
 }

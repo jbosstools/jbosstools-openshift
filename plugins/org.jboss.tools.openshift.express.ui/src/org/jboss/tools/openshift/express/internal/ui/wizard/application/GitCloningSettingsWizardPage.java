@@ -71,7 +71,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWiz
 public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage implements IWizardPage {
 
 	private GitCloningSettingsWizardPageModel pageModel;
-	private IOpenShiftWizardModel wizardModel;
+	private IOpenShiftApplicationWizardModel wizardModel;
 	private Button useDefaultRemoteNameButton;
 	private Button useDefaultRepoPathButton;
 	private Text remoteNameText;
@@ -80,7 +80,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private Link sshLink;
 
 	public GitCloningSettingsWizardPage(OpenShiftApplicationWizard wizard,
-			IOpenShiftWizardModel wizardModel) {
+			IOpenShiftApplicationWizardModel wizardModel) {
 		super(
 				"Import an existing OpenShift application",
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
@@ -141,13 +141,13 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// 'Use default location' option.
 		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
-		final IObservableValue applicationNameModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
-		final IObservableValue newProjectModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel);
 		this.repoPathValidator =
-				new RepoPathValidationStatusProvider(repoPathObservable, applicationNameModelObservable,
-						newProjectModelObservable);
+				new RepoPathValidationStatusProvider(
+						repoPathObservable
+						, BeanProperties.value(
+								GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel)
+						, BeanProperties.value(
+								GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel));
 		dbc.addValidationStatusProvider(repoPathValidator);
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
@@ -188,7 +188,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
 		final IObservableValue projectNameModelObservable =
-				BeanProperties.value(IOpenShiftWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
+				BeanProperties.value(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
 
 		dbc.addValidationStatusProvider(
 				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));

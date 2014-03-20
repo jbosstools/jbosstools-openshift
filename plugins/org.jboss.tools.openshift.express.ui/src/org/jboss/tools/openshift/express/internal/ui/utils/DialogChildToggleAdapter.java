@@ -12,12 +12,20 @@ package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 /**
+ * An adapter that toggles the dialog height when showing/hiding a given child control.
+ * 
+ * 
  * @author Andre Dietisheim
  */
 public class DialogChildToggleAdapter {
@@ -26,33 +34,72 @@ public class DialogChildToggleAdapter {
 	private final Composite composite;
 	private final GridData gridData;
 	private final Shell shell;
+	private int invisibleChildShellHeight;
+	private boolean resizing;
 	
-	public DialogChildToggleAdapter(Composite composite, Shell shell, boolean visible) {
-		Assert.isTrue(composite != null && !composite.isDisposed());
-		this.composite = composite;
-		Object layoutData = composite.getLayoutData();
+	public DialogChildToggleAdapter(Composite child, boolean visible) {
+		Assert.isTrue(child != null && !child.isDisposed());
+		this.composite = child;
+		Object layoutData = child.getLayoutData();
 		Assert.isTrue(layoutData instanceof GridData, "only supports GridLayout");
 		this.gridData = (GridData) layoutData;
-		Assert.isTrue(shell != null	&& !shell.isDisposed());
-		this.shell = shell;
-		this.visible = visible;
-		composite.setVisible(visible);
 		gridData.exclude = !visible;
+		Assert.isTrue(child.getShell() != null	&& !child.getShell().isDisposed());
+		this.shell = child.getShell();
+		shell.addControlListener(onShellResized(shell));
+		this.invisibleChildShellHeight = computeInvisibleChildShellHeight(visible, child, shell);
+		this.visible = visible;
+		child.setVisible(visible);
 	}
 	
+	private ControlListener onShellResized(final Shell shell) {
+		final ControlListener listener = new ControlAdapter() {
+
+			@Override
+			public void controlResized(ControlEvent e) {
+				if (!resizing) {
+					DialogChildToggleAdapter.this.invisibleChildShellHeight = shell.getSize().y;
+				}
+			}
+
+		};
+		
+		shell.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				shell.removeControlListener(listener);
+			}
+		});
+		return listener;
+	}
+
+	private int computeInvisibleChildShellHeight(boolean visible, Composite child, Shell shell) {
+		Point size = shell.getSize();
+		if (visible) {
+			Point childSize = child.computeSize(child.getSize().x, SWT.DEFAULT);
+			size.y = size.y - childSize.y ;
+		} 
+		return size.y;
+	}
+
 	public void toggle() {
+		this.resizing = true;
 		this.visible = !visible;
 		composite.setVisible(visible);
 		gridData.exclude = !visible;
-		Point compositeSize = composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		Point shellSize = shell.getSize();
-		if (visible) {
-			shellSize.y = shellSize.y + compositeSize.y;
-		} else {
-			shellSize.y = shellSize.y - compositeSize.y;
-		}
-		shell.setSize(shellSize.x, shellSize.y);
+		int newShellHeight= computeShellHeight(shell.getSize());
+		shell.setSize(shell.getSize().x, newShellHeight);
 		shell.layout(true, true);
+		this.resizing = false;
+	}
+
+	protected int computeShellHeight(Point shellSize) {
+		if (visible) {
+			return shell.computeSize(shellSize.x, SWT.DEFAULT, true).y;
+		} else {
+			return new Point(shellSize.x, invisibleChildShellHeight).y;
+		}
 	}
 
 	public boolean isVisible() {

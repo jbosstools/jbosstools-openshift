@@ -26,6 +26,8 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -218,6 +220,22 @@ public class UIUtils {
 		} else {
 			runnable.run();
 		}
+	}
+	
+	public static Text createSearchText(Composite parent) {
+		final Text searchText = new Text(parent, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
+		searchText.setMessage("type filter text");
+		searchText.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				if (e.detail == SWT.CANCEL) {
+					searchText.setText("");
+				}
+			}
+		});
+		return searchText;
+
 	}
 	
 }

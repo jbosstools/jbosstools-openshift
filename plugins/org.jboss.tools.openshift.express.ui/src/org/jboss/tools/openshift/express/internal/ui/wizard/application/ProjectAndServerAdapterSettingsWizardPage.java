@@ -19,7 +19,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -40,7 +39,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
@@ -59,9 +57,8 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	private static final String PAGE_DESCRIPTION_PATTERN = "Configure your project and server adapter settings for application \"{0}\".";
 	
 	private ProjectAndServerAdapterSettingsWizardPageModel pageModel;
-	private Text existingProjectNameText = null;
 
-	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftWizardModel wizardModel) {
+	public ProjectAndServerAdapterSettingsWizardPage(IWizard wizard, IOpenShiftApplicationWizardModel wizardModel) {
 		super("Set up Project for new OpenShift Application",
 				NLS.bind(PAGE_DESCRIPTION_PATTERN, wizardModel.getApplicationName()),
 				"Project Configuration", wizard);
@@ -70,87 +67,103 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
-		createProjectGroup(container, dbc);
-		createServerAdapterGroup(container, dbc);
-//		createWorkingSetGroup(container, dbc);
+		GridLayoutFactory.fillDefaults()
+			.margins(10, 10)
+			.applyTo(container);
+
+		createProjectControls(container, dbc);
+		createServerAdapterControls(container, dbc);
 	}
 
-	private Composite createProjectGroup(Composite parent, DataBindingContext dbc) {
-		Composite projectGroup = new Composite(parent, SWT.NONE);
-		// projectGroup.setText("Project");
+	private Composite createProjectControls(Composite parent, DataBindingContext dbc) {
+		Composite projectComposite = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(projectGroup);
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(projectGroup);
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.applyTo(projectComposite);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(projectComposite);
 
 		// new project checkbox
-		Button newProjectRadioBtn = new Button(projectGroup, SWT.CHECK);
-		newProjectRadioBtn.setText("Create a new project");
-		newProjectRadioBtn
+		Button newProjectCheckbox = new Button(projectComposite, SWT.CHECK);
+		newProjectCheckbox.setText("Create a new project");
+		newProjectCheckbox
 				.setToolTipText("The OpenShift application code will be pulled into the newly created project or merged into the selected one.");
-		newProjectRadioBtn.setFocus();
+		newProjectCheckbox.setFocus();
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(newProjectRadioBtn);
+				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(newProjectCheckbox);
 		final IObservableValue newProjectObservable = BeanProperties.value(
 				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_IS_NEW_PROJECT).observe(pageModel);
-		final ISWTObservableValue newProjectRadioBtnSelection = 
-				WidgetProperties.selection().observe(newProjectRadioBtn);
-		dbc.bindValue(newProjectRadioBtnSelection, newProjectObservable);
+		ValueBindingBuilder
+			.bind(WidgetProperties.selection().observe(newProjectCheckbox))
+			.to(newProjectObservable)
+			.in(dbc);
 
 		// existing project
-		Label existingProjectLabel = new Label(projectGroup, SWT.NONE);
+		Label existingProjectLabel = new Label(projectComposite, SWT.NONE);
 		existingProjectLabel.setText("Use existing project:");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(false, false).indent(10, 0).applyTo(existingProjectLabel);
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(false, false)
+				.indent(10, 0)
+				.applyTo(existingProjectLabel);
 
-		existingProjectNameText = new Text(projectGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
+		final Text existingProjectNameText = new Text(projectComposite, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
 				.applyTo(existingProjectNameText);
-		final IObservableValue projectNameModelObservable = BeanProperties.value(
-				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_PROJECT_NAME).observe(pageModel);
-		final ISWTObservableValue existingProjectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(
-				existingProjectNameText);
-		ValueBindingBuilder.bind(existingProjectNameTextObservable).to(projectNameModelObservable).in(dbc);
+		IObservableValue projectNameModelObservable =
+				BeanProperties.value(
+						ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_PROJECT_NAME).observe(pageModel);
+		ValueBindingBuilder
+			.bind(WidgetProperties.text(SWT.Modify).observe(existingProjectNameText))
+			.to(projectNameModelObservable)
+			.in(dbc);
 		// disable the project name text when the model state is set to 'new project'
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingProjectNameText))
 				.notUpdating(newProjectObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an existing project' option.
-		newProjectRadioBtn.addSelectionListener(new SelectionAdapter() {
+		newProjectCheckbox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				existingProjectNameText.setFocus();
 				existingProjectNameText.selectAll();
 			}
 		});
-		// let's provide content assist on the existing project name
+		// project name content assist
 		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.LEFT);
-		FieldDecoration contentProposalFieldIndicator = FieldDecorationRegistry.getDefault().getFieldDecoration(
-				FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		FieldDecoration contentProposalFieldIndicator =
+				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
 		dec.setImage(contentProposalFieldIndicator.getImage());
 		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
 		dec.setShowOnlyOnFocus(true);
 
-		AutoCompleteField adapter = new AutoCompleteField(existingProjectNameText, new TextContentAdapter(),
-				new String[] {});
+		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllOpenedProjects());
 
-		adapter.setProposals(ProjectUtils.getAllOpenedProjects());
-
-		Button browseProjectsButton = new Button(projectGroup, SWT.NONE);
+		// browse projects
+		Button browseProjectsButton = new Button(projectComposite, SWT.NONE);
 		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).span(1, 1).grab(false, false)
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER)
+				.hint(100, SWT.DEFAULT)
+				.grab(false, false)
 				.applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects());
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseProjectsButton))
-				.notUpdating(newProjectObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(browseProjectsButton))
+				.notUpdating(newProjectObservable)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 
-		final IObservableValue applicationNameModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
+		final IObservableValue applicationNameModelObservable =
+				BeanProperties.value(
+						ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
 		final UseExistingOpenProjectValidator existingProjectValidator = 
 				new UseExistingOpenProjectValidator(applicationNameModelObservable, newProjectObservable, projectNameModelObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
-		return projectGroup;
+		return projectComposite;
 	}
 
 	/**
@@ -162,8 +175,8 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SelectExistingProjectDialog dialog = new SelectExistingProjectDialog(pageModel.getApplicationName(),
-						getShell());
+				SelectExistingProjectDialog dialog = 
+						new SelectExistingProjectDialog(pageModel.getApplicationName(), getShell());
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
 					if (selectedProject instanceof IProject) {
@@ -171,11 +184,10 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 					}
 				}
 			}
-
 		};
 	}
 
-	private void createServerAdapterGroup(Composite parent, DataBindingContext dbc) {
+	private void createServerAdapterControls(Composite parent, DataBindingContext dbc) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
@@ -209,11 +221,6 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 						.value(ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_SKIP_MAVEN_BUILD)
 						.observe(pageModel))
 				.in(dbc);
-	}
-
-	private WorkingSetGroup createWorkingSetGroup(Composite container, DataBindingContext dbc) {
-		return new WorkingSetGroup(container, null, new String[] { "org.eclipse.ui.resourceWorkingSetPage", //$NON-NLS-1$
-				"org.eclipse.jdt.ui.JavaWorkingSetPage" /* JavaWorkingSetUpdater.ID */});
 	}
 
 	/**
@@ -278,12 +285,13 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 				} else {
 					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
 					if (project.exists()) {
-						status = OpenShiftUIActivator.createErrorStatus(
-								NLS.bind("A project named {0} already exists in the workspace.", applicationName));
+						status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
+									"A project named {0} already exists in the workspace. Delete, rename or merge use it as existing project",
+									applicationName));
 					}
 				}
 			} else {
-				if (projectName == null || projectName.isEmpty()) {
+				if (StringUtils.isEmpty(projectName)) {
 					status = OpenShiftUIActivator.createErrorStatus("Select an open project in the workspace.");
 				} else {
 					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);

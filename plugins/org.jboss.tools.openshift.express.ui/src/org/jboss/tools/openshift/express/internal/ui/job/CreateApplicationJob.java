@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -36,6 +37,7 @@ import com.openshift.client.OpenShiftTimeoutException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.internal.client.utils.StringUtils;
 
 /**
  * @author Andre Dietisheim
@@ -64,11 +66,14 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		super(NLS.bind((embeddableCartridges == null ?
 				OpenShiftExpressUIMessages.CREATING_APPLICATION : OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
 				, name));
+		Assert.isLegal(!StringUtils.isEmpty(name));
 		this.name = name;
+		Assert.isLegal(cartridge != null);
 		this.cartridge = cartridge;
 		this.scale = scale;
 		this.gear = gear;
 		this.initialGitUrl = initialGitUrl;
+		Assert.isLegal(domain != null);
 		this.domain = domain;
 		this.environmentVariables = environmentVariables;
 		this.embeddableCartridges = embeddableCartridges;

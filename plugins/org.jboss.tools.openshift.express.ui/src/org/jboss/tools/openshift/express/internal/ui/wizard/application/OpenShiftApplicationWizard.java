@@ -125,6 +125,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		if (showCredentialsPage) {
 			addPage(new ConnectionWizardPage(this, model));
 		}
+		addPage(new ApplicationTemplateWizardPage(this, model));
 		addPage(new ApplicationConfigurationWizardPage(this, model));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));
 		addPage(new GitCloningSettingsWizardPage(this, model));
@@ -214,7 +215,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			}
 			IServer server = model.createServerAdapter(new DelegatingProgressMonitor());
 			return server != null;
-		} catch (IllegalArgumentException e) {
+		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", NLS.bind("Could not create server adapter for new project {0}.",
 					model.getProjectName()),
 					OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
@@ -257,7 +258,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		try {
 			CreateApplicationJob job = new CreateApplicationJob(
 					model.getApplicationName()
-					, model.getApplicationCartridge()
+					, model.getStandaloneCartridge()
 					, model.getApplicationScale()
 					, model.getApplicationGearProfile()
 					, model.getInitialGitUrl()

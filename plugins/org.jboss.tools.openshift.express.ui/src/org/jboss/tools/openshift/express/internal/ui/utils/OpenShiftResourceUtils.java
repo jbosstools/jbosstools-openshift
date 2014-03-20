@@ -10,10 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
+import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.cartridge.ICartridge;
@@ -23,25 +27,76 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class OpenShiftResourceUtils {
 
+	public static String toString(Object object) {
+		if (object instanceof IDomain) {
+			return toString((IDomain) object);
+		} else if (object instanceof ICartridge) {
+			return toString((ICartridge) object);
+		} else if (object instanceof IApplication) {
+			return toString((IApplication) object);
+		} else if (object instanceof IGearProfile) {
+			return toString((IGearProfile) object);
+		} else {
+			return null;
+		}
+	}
+
+	public static String toString(IApplication application) {
+		if (application == null) {
+			return null;
+		}
+
+		return application.getName();
+	}
+
+	public static List<String> toString(Collection<IApplication> applications) {
+		if (applications == null) {
+			return null;
+		}
+
+		List<String> names = new ArrayList<String>();
+		for (IApplication application : applications) {
+			names.add(application.getName());
+		}
+		return names;
+	}
+
 	public static String toString(ICartridge cartridge) {
 		if (cartridge == null) {
 			return null;
 		}
-		
-		String name = cartridge.getName();
-		String displayName = cartridge.getDisplayName();
-		
-		StringBuilder builder = new StringBuilder();
-		if (StringUtils.isEmpty(displayName)) {
-			builder.append(name);
-		} else {
-			builder
-					.append(cartridge.getDisplayName())
-					.append(" (").append(name).append(')');
-		}
-		
-		return builder.toString();
 
+		if (cartridge.isDownloadable()) {
+			return toDownloadableCartridgeLabel(cartridge.getName(), cartridge.getDisplayName(), cartridge.getUrl());
+		} else {
+			return toCatridgeLabel(cartridge.getName(), cartridge.getDisplayName());
+		}
+	}
+
+	protected static String toCatridgeLabel(String name, String displayName) {
+		StringBuilder builder = new StringBuilder();
+		if (!StringUtils.isEmpty(displayName)) {
+			builder.append(displayName)
+					.append(" (").append(name).append(')');
+		} else {
+			builder.append(name);
+		}
+		return builder.toString();
+	}
+
+	protected static String toDownloadableCartridgeLabel(String name, String displayName, URL url) {
+		StringBuilder builder = new StringBuilder();
+		if (!StringUtils.isEmpty(displayName)) {
+			builder.append(displayName);
+		} else {
+			builder.append(name);
+		}
+
+		if (url != null) {
+			String urlString = StringUtils.shorten(url.toString(), 80);
+			builder.append(" (").append(urlString).append(')');
+		}
+		return builder.toString();
 	}
 
 	public static String toString(List<IDomain> domains) {
@@ -66,7 +121,7 @@ public class OpenShiftResourceUtils {
 		if (domain == null) {
 			return null;
 		}
-				
+
 		return domain.getId();
 	}
 
@@ -74,7 +129,7 @@ public class OpenShiftResourceUtils {
 		if (gear == null) {
 			return null;
 		}
-		
+
 		return gear.getName();
 	}
 }

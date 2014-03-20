@@ -13,13 +13,13 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbedCartridgeWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbeddedCartridgesWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -38,7 +38,9 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 		}
 		try {
 			WizardUtils.openWizardDialog(
-					new EmbedCartridgeWizard(application), Display.getCurrent().getActiveShell());
+					new EmbeddedCartridgesWizard(application, 
+							ConnectionsModelSingleton.getInstance().getConnectionByResource(application)), 
+							HandlerUtil.getActiveShell(event));
 			return null;
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to edit cartridges", e);
@@ -46,15 +48,15 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 		}
 	}
 
-protected IApplication getApplication(ISelection selection) {
-	IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
-	if (application == null) {
-		IEmbeddedCartridge cartridge = UIUtils.getFirstElement(selection, IEmbeddedCartridge.class);
-		if (cartridge != null) {
-			application = cartridge.getApplication();
+	protected IApplication getApplication(ISelection selection) {
+		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
+		if (application == null) {
+			IEmbeddedCartridge cartridge = UIUtils.getFirstElement(selection, IEmbeddedCartridge.class);
+			if (cartridge != null) {
+				application = cartridge.getApplication();
+			}
 		}
+		return application;
 	}
-	return application;
-}
-	
+
 }

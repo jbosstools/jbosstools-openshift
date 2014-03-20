@@ -28,32 +28,32 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author André Dietisheim
  */
-public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservablePojo {
+public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel, IObservablePojo {
 
 	public static final String PROP_APPLICATION = "application";
 	public static final String PROP_APPLICATION_NAME = "applicationName";
-	public static final String PROP_APPLICATION_CARTRIDGE = "applicationCartridge";
+	public static final String PROP_STANDALONE_CARTRIDGE = "standaloneCartridge";
 	public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
 	public static final String PROP_APPLICATION_SCALE = "applicationScale";
 	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
 	public static final String PROP_CONNECTION = "connection";
 	public static final String PROP_DOMAIN = "domain";
 	public static final String PROP_DOMAINS = "domains";
+	public static final String PROP_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
 	public static final String PROP_INITIAL_GITURL = "initialGitUrl";
-	public static final String PROP_KEY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
 	public static final String PROP_MERGE_URI = "mergeUri";
 	public static final String PROP_NEW_PROJECT = "newProject";
 	public static final String PROP_PROJECT_NAME = "projectName";
@@ -61,6 +61,9 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
 	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
+	public static final String PROP_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+	public static final String PROP_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
+	public static final String PROP_STANDALONE_CARTRIDGES = "standaloneCartridges";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROP_ENVIRONMENT_VARIABLES = "environmentVariables";
 
@@ -152,6 +155,8 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public IDomain setDomain(IDomain domain);
 
+	public void ensureHasDomain();
+
 	public boolean hasDomain();
 
 	public IDomain getDomain();
@@ -162,11 +167,13 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 
 	public String getApplicationName();
 
-	public ICartridge setApplicationCartridge(IStandaloneCartridge cartridge);
+	public IStandaloneCartridge getStandaloneCartridge();
 
-	public IStandaloneCartridge getApplicationCartridge();
+	public List<IStandaloneCartridge> getStandaloneCartridges();
 
-	public void setApplication(IApplication application);
+	public List<IStandaloneCartridge> setStandaloneCartridges(List<IStandaloneCartridge> cartridges);
+	
+	public IApplication setApplication(IApplication application);
 
 	public String setRemoteName(String remoteName);
 
@@ -207,8 +214,16 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
 			Set<IEmbeddableCartridge> selectedEmbeddableCartridges);
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges();
+	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge);
+	
+	public List<IEmbeddableCartridge> getEmbeddableCartridges();
 
+	public List<IEmbeddableCartridge> setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges);
+
+	public boolean hasEmbeddableCartridge(IEmbeddableCartridge embeddableCartridge);
+
+	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges();
+	
 	public IGearProfile getApplicationGearProfile();
 
 	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
@@ -216,6 +231,10 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public ApplicationScale getApplicationScale();
 
 	public ApplicationScale setApplicationScale(ApplicationScale scale);
+
+	public IApplicationTemplate getSelectedApplicationTemplate();
+
+	public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template);
 
 	public String getInitialGitUrl();
 	
@@ -234,4 +253,5 @@ public interface IOpenShiftWizardModel extends IConnectionAwareModel, IObservabl
 	public Map<String, String> getEnvironmentVariables();
 	
 	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables);
+
 }
