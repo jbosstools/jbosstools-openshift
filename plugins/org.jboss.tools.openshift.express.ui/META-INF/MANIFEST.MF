@@ -49,7 +49,7 @@ Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,
  org.jboss.tools.openshift.express.core;bundle-version="2.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.jboss.tools.common.databinding,
+Import-Package: org.jboss.tools.common.databinding;version:="3.6.0",
  org.jboss.tools.common.ui,
  org.jboss.tools.common.ui.databinding,
  org.jboss.tools.common.ui.preferencevalue,
