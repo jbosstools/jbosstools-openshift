@@ -558,7 +558,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	 * @param connection
 	 */
 	public void update(Connection connection) {
-		if (!connection.isConnected()) {
+		if (!isValid(connection)) {
 			return;
 		}
 		
