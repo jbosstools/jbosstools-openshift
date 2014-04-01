@@ -88,9 +88,8 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 
 		private void update(List<EnvironmentVariableItem> toUpdate, IApplication application) {
 			for (EnvironmentVariableItem variable : toUpdate) {
-				IEnvironmentVariable environmentVariable = application.getEnvironmentVariable(variable.getName());
-				if (environmentVariable != null) {
-					environmentVariable.update(variable.getValue());
+				if (application.getEnvironmentVariable(variable.getName()) != null) {
+					application.updateEnvironmentVariable(variable.getName(), variable.getValue());
 				}
 			}
 		}
