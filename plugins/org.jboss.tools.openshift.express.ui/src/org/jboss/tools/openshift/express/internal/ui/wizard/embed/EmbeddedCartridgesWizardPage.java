@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -188,7 +189,12 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				pageModel.setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+				if(MessageDialog.openQuestion(getShell(), 
+						Messages.DESELECT_ALL_CARTRIDGES_TITLE,
+						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION
+					)) {
+					pageModel.setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+				}
 			}
 		};
 	}
