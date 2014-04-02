@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -101,6 +102,10 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  * @author Xavier Coulon
  */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
+	
+	public static final int RESULT_CANCEL = 0;
+	public static final int RESULT_APPLY = 1;
+	public static final int RESULT_IGNORE = 2;
 
 	private ApplicationConfigurationWizardPageModel pageModel;
 	private Text applicationNameText;
@@ -558,10 +563,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				EmbedCartridgeStrategy embedCartridgeStrategy = createEmbedCartridgeStrategy(pageModel.getDomain());
 				EmbeddableCartridgeDiff additionalOperations =
 						embedCartridgeStrategy.remove(cartridge, pageModel.getSelectedEmbeddableCartridges());
+				int result = RESULT_APPLY;
 				if (additionalOperations.hasChanges()) {
-					executeAdditionalOperations(cartridge, additionalOperations);
+					result = executeAdditionalOperations(cartridge, additionalOperations);
 				}
-				wizardModel.removeSelectedEmbeddableCartridge(cartridge);
+				if(result != RESULT_CANCEL){
+					wizardModel.removeSelectedEmbeddableCartridge(cartridge);
+				}
 			}
 
 			private EmbedCartridgeStrategy createEmbedCartridgeStrategy(IDomain domain) {
@@ -574,7 +582,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				return embedCartridgeStrategy;
 			}
 
-			protected void executeAdditionalOperations(IEmbeddableCartridge cartridge,
+			protected int executeAdditionalOperations(IEmbeddableCartridge cartridge,
 					EmbeddableCartridgeDiff additionalOperations) {
 				int result = openAdditionalOperationsDialog("Remove Cartridges",
 						new StringBuilder()
@@ -585,21 +593,22 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 								.append("\n\nDo you want to Apply or Ignore these suggestions??")
 								.toString());
 				switch (result) {
-				case 1:
+				case RESULT_APPLY:
 					wizardModel.removeSelectedEmbeddableCartridges(additionalOperations.getRemovals());
 					wizardModel.addSelectedEmbeddableCartridges(additionalOperations.getAdditions());
 					break;
-				case 0:
+				case RESULT_CANCEL:
 					break;
-				case 2:
+				case RESULT_IGNORE:
 					// user has chosen to ignore additional requirements
 					break;
 				}
+				return result;
 			}
 			
 			public int openAdditionalOperationsDialog(String title, String message) {
 				MessageDialog dialog = new MessageDialog(getShell(),
-						title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, 0);
+						title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, RESULT_APPLY);
 				return dialog.open();
 			}
 		};
