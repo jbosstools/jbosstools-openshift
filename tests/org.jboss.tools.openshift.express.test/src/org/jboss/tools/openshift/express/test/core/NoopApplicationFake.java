@@ -324,4 +324,9 @@ public class NoopApplicationFake implements IApplication {
 	public void removeEnvironmentVariable(IEnvironmentVariable arg0) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String getEnvironmentVariableValue(String name) {
+		throw new UnsupportedOperationException();
+	}
 }
