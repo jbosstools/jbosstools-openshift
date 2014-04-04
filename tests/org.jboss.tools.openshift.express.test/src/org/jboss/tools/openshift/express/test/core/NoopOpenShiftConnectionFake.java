@@ -15,8 +15,10 @@ import java.util.concurrent.ExecutorService;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftConnection;
+import com.openshift.client.IQuickstart;
 import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -72,6 +74,16 @@ public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 
 	@Override
 	public String getServer() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<ICartridge> getCartridges() throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IQuickstart> getQuickstarts() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 }

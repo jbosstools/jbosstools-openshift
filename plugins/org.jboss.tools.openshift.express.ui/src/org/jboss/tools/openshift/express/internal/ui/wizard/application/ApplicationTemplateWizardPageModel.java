@@ -220,6 +220,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
+		cartridges = new ArrayList<IStandaloneCartridge>(cartridges);
 		Collections.sort(cartridges, new CartridgeNameComparator());
 		wizardModel.setStandaloneCartridges(cartridges);
 		setApplicationTemplates(createApplicationTemplates(createCartridgeApplicationTemplates(cartridges)));

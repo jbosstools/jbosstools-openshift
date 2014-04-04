@@ -82,7 +82,7 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge) 
+	public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge)
 			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
@@ -93,7 +93,7 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public boolean hasEmbeddedCartridge(IEmbeddableCartridge cartridge) 
+	public boolean hasEmbeddedCartridge(IEmbeddableCartridge cartridge)
 			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
@@ -104,7 +104,7 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public IEmbeddedCartridge getEmbeddedCartridge(String cartridgeName) 
+	public IEmbeddedCartridge getEmbeddedCartridge(String cartridgeName)
 			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
@@ -296,6 +296,11 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
+	public IEnvironmentVariable updateEnvironmentVariable(String arg0, String arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Map<String, IEnvironmentVariable> getEnvironmentVariables() throws OpenShiftSSHOperationException {
 		throw new UnsupportedOperationException();
 	}
@@ -317,6 +322,11 @@ public class NoopApplicationFake implements IApplication {
 
 	@Override
 	public void removeEnvironmentVariable(IEnvironmentVariable arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getEnvironmentVariableValue(String name) {
 		throw new UnsupportedOperationException();
 	}
 }
