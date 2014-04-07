@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -20,8 +21,6 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
@@ -31,7 +30,7 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.ApplicationRequirement;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationProperties;
-import org.jboss.tools.openshift.express.internal.core.util.EmbeddableCartridgeToStringConverter;
+import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
@@ -48,7 +47,7 @@ import com.openshift.client.IGearProfile;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.OpenShiftEndpointException;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 import com.openshift.client.cartridge.query.LatestVersionOf;
 
@@ -62,43 +61,44 @@ import com.openshift.client.cartridge.query.LatestVersionOf;
  * 
  * @author Andre Dietisheim
  */
-public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
+public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCartridgeStrategy {
 
+	private static final int RESULT_IGNORE = 2;
+	private static final int RESULT_CANCEL = 0;
+	private static final int RESULT_APPLY = 1;
 	private static final int APP_CREATE_TIMEOUT = 5 * 60 * 1000;
 	private static final int APP_WAIT_TIMEOUT = 5 * 60 * 1000;
 
-	private IEmbedCartridgesWizardPageModel model;
-	private IWizardPage wizardPage;
-	private IApplicationProperties applicationProperties;
+	private EmbedCartridgeStrategy strategy;
 
-	public EmbedCartridgeStrategyAdapter(IEmbedCartridgesWizardPageModel pageModel, IWizardPage wizardPage, IApplicationProperties provider) {
-		this.model = pageModel;
-		this.applicationProperties = provider;
-		this.wizardPage = wizardPage;
+	public FullfillRequirementsCheckStrategy(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+		super(pageModel, wizardPage);
+		this.strategy = createEmbedCartridgeStrategy(pageModel.getDomain());
 	}
 
-	@Override
-	public void checkStateChanged(CheckStateChangedEvent event) {
-		IEmbeddableCartridge cartridge = (IEmbeddableCartridge) event.getElement();
-		if(event.getChecked()) {
-			add(cartridge);
-		} else {
-			remove(cartridge);
-		}
+	private EmbedCartridgeStrategy createEmbedCartridgeStrategy(IDomain domain) {
+		IOpenShiftConnection connection = domain.getUser().getConnection();
+		EmbedCartridgeStrategy embedCartridgeStrategy =
+				new EmbedCartridgeStrategy(
+						new ArrayList<ICartridge>(connection.getEmbeddableCartridges()),
+						new ArrayList<ICartridge>(connection.getStandaloneCartridges()), 
+						domain.getApplications());
+		return embedCartridgeStrategy;
 	}
 	
-	private void add(IEmbeddableCartridge cartridge) {
+	@Override
+	protected void add(ICartridge cartridge, CheckStateChangedEvent event) {
 		try {
-			EmbedCartridgeStrategy embedCartridgeStrategy = createEmbedCartridgeStrategy(model.getDomain());
+			getPageModel().checkEmbeddedCartridge(cartridge);
 			ApplicationRequirement missingRequirement = 
-					embedCartridgeStrategy.getMissingRequirement(cartridge, applicationProperties);
+					strategy.getMissingRequirement(cartridge, getPageModel());
 			if (missingRequirement != null) {
-				if (!shouldAddToInappropriateApplication(missingRequirement, cartridge, applicationProperties)) {
+				if (!shouldAddToInappropriateApplication(missingRequirement, cartridge, getPageModel())) {
 					return;
 				}
 			}
 			EmbeddableCartridgeDiff additionalOperations = 
-					embedCartridgeStrategy.add(cartridge, model.getCheckedEmbeddableCartridges());
+					strategy.add(cartridge, getPageModel().getCheckedCartridges());
 			if (additionalOperations.hasChanges()) {
 				executeAdditionalOperations(true, cartridge, additionalOperations);
 			}
@@ -107,14 +107,15 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 	
-	private void remove(IEmbeddableCartridge cartridge) {
+	@Override
+	protected void remove(ICartridge cartridge, CheckStateChangedEvent event) {
 		try {
-			EmbedCartridgeStrategy embedCartridgeStrategy = createEmbedCartridgeStrategy(model.getDomain());
+			getPageModel().uncheckEmbeddedCartridge(cartridge);
 			EmbeddableCartridgeDiff additionalOperations = 
-					embedCartridgeStrategy.remove(cartridge, model.getCheckedEmbeddableCartridges());
+					strategy.remove(cartridge, getPageModel().getCheckedCartridges());
 			if (additionalOperations.hasChanges()) {
 				executeAdditionalOperations(false, cartridge, additionalOperations);
-			} else if (model.isEmbedded(cartridge)) {
+			} else if (getPageModel().isEmbedded(cartridge)) {
 				executeRemove(cartridge);
 			}
 		} catch (OpenShiftException e) {
@@ -122,7 +123,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 
-	private boolean shouldAddToInappropriateApplication(ApplicationRequirement requirement, IEmbeddableCartridge cartridge,
+	private boolean shouldAddToInappropriateApplication(ApplicationRequirement requirement, ICartridge cartridge,
 			IApplicationProperties applicationProperties) throws OpenShiftException {
 		String title = NLS.bind("Inappropriate application {0}", applicationProperties.getApplicationName());
 		String message = requirement.getMessage(cartridge, applicationProperties)
@@ -132,14 +133,14 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		switch (openQuestionDialog(title, message)) {
 			default:
 			case 0:
-				model.uncheckEmbeddedCartridge(cartridge);
+				getPageModel().uncheckEmbeddedCartridge(cartridge);
 				return false;
 			case 1:
 				return true;
 		}
 	}
 
-	private void executeRemove(IEmbeddableCartridge cartridge) {
+	private void executeRemove(ICartridge cartridge) {
 		if(!MessageDialog.openQuestion(getShell(), 
 				NLS.bind("Remove cartridge {0}", cartridge.getName()), 
 						NLS.bind(
@@ -147,40 +148,30 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 										+ "Removing a cartridge is not reversible and can cause you to loose the data you have stored in it."
 										+ "\nAre you sure?", cartridge.getName()))) {
 			// revert removal
-			model.checkEmbeddedCartridge(cartridge);
+			getPageModel().checkEmbeddedCartridge(cartridge);
 		}
 	}
 
-	private void executeAdditionalOperations(boolean add, IEmbeddableCartridge cartridge, 
+	private void executeAdditionalOperations(boolean add, ICartridge cartridge, 
 			EmbeddableCartridgeDiff additionalOperations) {
 		int result = openAdditionalOperationsDialog(
 				NLS.bind("{0} Cartridges", add ? "Add" : "Remove"),
 				createEmbeddingOperationMessage(add, additionalOperations));
 		switch (result) {
-		case 1:
+		case RESULT_APPLY:
 			executeAdditionalOperations(cartridge, additionalOperations);
 			break;
-		case 0:
+		case RESULT_CANCEL:
 			undoAdditionOrRemoval(add, cartridge);
 			break;
-		case 2:
+		case RESULT_IGNORE:
 			// user has chosen to ignore additional requirements
 		}
 	}
 
-	private EmbedCartridgeStrategy createEmbedCartridgeStrategy(IDomain domain) {
-		IOpenShiftConnection connection = domain.getUser().getConnection();
-		EmbedCartridgeStrategy embedCartridgeStrategy =
-				new EmbedCartridgeStrategy(
-						connection.getEmbeddableCartridges(),
-						connection.getStandaloneCartridges(), 
-						domain.getApplications());
-		return embedCartridgeStrategy;
-	}
-
 	public int openAdditionalOperationsDialog(String title, String message) {
 		MessageDialog dialog = new MessageDialog(getShell(),
-				title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, 0);
+				title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, RESULT_APPLY);
 		return dialog.open();
 	}
 	
@@ -188,7 +179,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		StringBuilder builder = new StringBuilder();
 		builder.append(NLS.bind("If you want to {0} {1}, it is suggested you:", 
 				adding ? "add" : "remove",
-				new EmbeddableCartridgeToStringConverter().toString(diff.getCartridge())));
+				new CartridgeToStringConverter().toString(diff.getCartridge())));
 		builder.append(diff.toString());
 		if (diff.hasRemovals()) {
 			builder.append("\n\nRemoving cartridges is not reversible and may cause you to loose the data you have stored in it.");
@@ -197,37 +188,37 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		return builder.toString();
 	}
 
-	private void executeAdditionalOperations(IEmbeddableCartridge cartridge, EmbeddableCartridgeDiff diff) {
-		if (createApplications(diff.getApplicationAdditions(), model.getDomain())) {
+	private void executeAdditionalOperations(ICartridge cartridge, EmbeddableCartridgeDiff diff) {
+		if (createApplications(diff.getApplicationAdditions(), getPageModel().getDomain())) {
 			uncheckEmbeddableCartridges(diff.getRemovals());
 			checkEmbeddableCartridges(diff.getAdditions());
 		} else {
-			model.uncheckEmbeddedCartridge(cartridge);
+			getPageModel().uncheckEmbeddedCartridge(cartridge);
 		}
 	}
 
-	private void undoAdditionOrRemoval(boolean add, IEmbeddableCartridge cartridge) throws OpenShiftException {
+	private void undoAdditionOrRemoval(boolean add, ICartridge cartridge) throws OpenShiftException {
 		if (add) {
-			model.uncheckEmbeddedCartridge(cartridge);
+			getPageModel().uncheckEmbeddedCartridge(cartridge);
 		} else {
-			model.checkEmbeddedCartridge(cartridge);
+			getPageModel().checkEmbeddedCartridge(cartridge);
 		}
 	}
 
-	private void uncheckEmbeddableCartridges(List<IEmbeddableCartridge> removals) throws OpenShiftException {
-		for (IEmbeddableCartridge embeddableCartridge : removals) {
-			model.uncheckEmbeddedCartridge(embeddableCartridge);
+	private void uncheckEmbeddableCartridges(List<ICartridge> removals) throws OpenShiftException {
+		for (ICartridge embeddableCartridge : removals) {
+			getPageModel().uncheckEmbeddedCartridge(embeddableCartridge);
 		}
 	}
 
-	private void checkEmbeddableCartridges(List<IEmbeddableCartridge> additions) throws OpenShiftException {
-		for (IEmbeddableCartridge embeddableCartridge : additions) {
-			model.checkEmbeddedCartridge(embeddableCartridge);
+	private void checkEmbeddableCartridges(List<ICartridge> additions) throws OpenShiftException {
+		for (ICartridge embeddableCartridge : additions) {
+			getPageModel().checkEmbeddedCartridge(embeddableCartridge);
 		}
 	}
 
-	private boolean createApplications(List<IStandaloneCartridge> applicationAdditions, IDomain domain) {
-		for (IStandaloneCartridge cartridge : applicationAdditions) {
+	private boolean createApplications(List<ICartridge> applicationAdditions, IDomain domain) {
+		for (ICartridge cartridge : applicationAdditions) {
 			if (!LatestVersionOf.jenkins().matches(cartridge)) {
 				throw new UnsupportedOperationException("only jenkins applications may currently be created.");
 			}
@@ -244,8 +235,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			return false;
 		}
 		try {
-			IGearProfile gear = null;
-			gear = getFirstAvailableGearProfile(domain);
+			IGearProfile gear = getFirstAvailableGearProfile(domain);
 			if (gear == null) {
 				IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not find any available gear profiles.");
 				new ErrorDialog(getShell(), "Error", "Could create jenkins application.", status, -1).open();
@@ -255,7 +245,7 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 			IStandaloneCartridge jenkinsCartridge = LatestVersionOf.jenkins().get(domain.getUser());
 			CreateApplicationJob createJob =
 					new CreateApplicationJob(
-							name, jenkinsCartridge , ApplicationScale.NO_SCALE, gear, domain);
+							name, ApplicationScale.NO_SCALE, gear, jenkinsCartridge, domain);
 			WizardUtils.runInWizard(
 					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
 			IStatus result = createJob.getResult();
@@ -320,34 +310,17 @@ public class EmbedCartridgeStrategyAdapter implements ICheckStateListener {
 		}
 	}
 	
-	private int openQuestionDialog(String title, String message) {
-		return new MessageDialog(getShell(),
-				title, 
-				null,
-				message,
-				MessageDialog.QUESTION, 
-				new String[] { "No", "Yes" }, 0).open();
-	}
-
 	private void openLogDialog(final IApplication application, final boolean isTimeouted) {
 		final LogEntry[] entries = LogEntryFactory.create(application, isTimeouted);
 		if (entries.length == 0) {
 			return;
 		}
-		wizardPage.getControl().getDisplay().syncExec(new Runnable() {
+		getShell().getDisplay().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
 				new CreationLogDialog(getShell(), entries).open();
 			}
 		});
-	}
-
-	private Shell getShell() {
-		return wizardPage.getControl().getShell();
-	}
-
-	private IWizardContainer getContainer() {
-		return wizardPage.getWizard().getContainer();
 	}
 }

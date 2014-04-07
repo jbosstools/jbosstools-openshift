@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.job.DeleteApplicationsJob;
-import org.jboss.tools.openshift.express.internal.ui.job.RefreshConnectionsModelJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IUser;
@@ -49,7 +49,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 			List<IUser> users = getUsers(appsToDelete);
 
 			new JobChainBuilder(new DeleteApplicationsJob(appsToDelete))
-					.andRunWhenDone(new RefreshConnectionsModelJob(users))
+					.andRunWhenDone(new FireConnectionsChangedJob(users))
 					.build()
 					.schedule();
 		}

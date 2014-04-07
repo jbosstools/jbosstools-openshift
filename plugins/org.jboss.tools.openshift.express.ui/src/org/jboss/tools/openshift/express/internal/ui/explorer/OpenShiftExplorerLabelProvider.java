@@ -18,7 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
@@ -127,7 +127,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	private StyledString createStyledString(IApplication application) {
 		String appName = application.getName();
-		String appType = StringUtils.null2emptyString(OpenShiftResourceUtils.toString(application.getCartridge()));
+		String appType = StringUtils.null2emptyString(OpenShiftResourceLabelUtils.toString(application.getCartridge()));
 		StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
 		StyledString styledString = new StyledString(sb.toString());
 		styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);

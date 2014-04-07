@@ -52,4 +52,12 @@ public class OpenShiftImages {
 	public static final ImageDescriptor SERVER_NEW = repo.create("server_new.png"); //$NON-NLS-1$ 
 	public static final Image SERVER_NEW_IMG = repo.getImage("server_new.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor RESTART = repo.create("arrow_rotate_clockwise_red.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor OPENSHIFT_MAINTAINED = repo.create("openshift-maintained.png"); //$NON-NLS-1$ 
+	public static final Image OPENSHIFT_MAINTAINED_IMG = repo.getImage("openshift-maintained.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor NOT_OPENSHIFT_MAINTAINED = repo.create("not-openshift-maintained.png"); //$NON-NLS-1$ 
+	public static final Image NOT_OPENSHIFT_MAINTAINED_IMG = repo.getImage("not-openshift-maintained.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor SECURITY_UPDATES = repo.create("security-updates.png"); //$NON-NLS-1$ 
+	public static final Image SECURITY_UPDATES_IMG = repo.getImage("security-updates.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor NO_SECURITY_UPDATES = repo.create("no-security-updates.png"); //$NON-NLS-1$ 
+	public static final Image NO_SECURITY_UPDATES_IMG = repo.getImage("no-security-updates.png"); //$NON-NLS-1$ 
 }

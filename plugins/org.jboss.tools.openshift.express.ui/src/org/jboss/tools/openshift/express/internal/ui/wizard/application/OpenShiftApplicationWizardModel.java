@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,20 +39,23 @@ import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdapt
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
+import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.internal.client.AlternativeCartridges;
 
 /**
  * @author Andre Dietisheim
@@ -229,9 +233,9 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 	
 	@Override
-	public void ensureHasDomain() {
+	public void setDefaultDomainIfRequired() {
 		Assert.isNotNull(getConnection());
-		if (getDomain() == null) {
+		if (!hasDomain()) {
 			setDomain(getConnection().getDefaultDomain());
 		}
 	}
@@ -389,52 +393,55 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
-				getProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptySet());
+	public IStandaloneCartridge getStandaloneCartridge() {
+		IApplicationTemplate template = getSelectedApplicationTemplate();
+		if (!(template instanceof ICartridgeApplicationTemplate)) {
+			return null;
+		}
+		return ((ICartridgeApplicationTemplate) template).getCartridge();
+	}
+
+	@Override
+	public Set<ICartridge> getCartridges() {
+		Set<ICartridge> selectedEmbeddableCartridges =
+				getProperty(PROP_CARTRIDGES, Collections.<ICartridge> emptySet());
 		return selectedEmbeddableCartridges;
 	}
+	
+	@Override
+	public Set<ICartridge> setCartridges(Set<ICartridge> cartridges) {
+		return setProperty(PROP_CARTRIDGES, cartridges);
+	}
 
-	@Override 
-	public boolean hasEmbeddableCartridge(IEmbeddableCartridge cartridge) {
-		return getSelectedEmbeddableCartridges().contains(cartridge);
+	@Override
+	public void addCartridges(List<ICartridge> addedCartridges) {
+		Set<ICartridge> cartridges = getCartridges();
+		cartridges .addAll(addedCartridges);
+		firePropertyChange(PROP_CARTRIDGES, null, cartridges);
+	}
+
+	@Override
+	public void removeCartridge(ICartridge removedCartridge) {
+		Set<ICartridge> cartridges = getCartridges();
+		cartridges.remove(removedCartridge);
+		firePropertyChange(PROP_CARTRIDGES, null, cartridges);
 	}
 	
 	@Override
-	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
-			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
-		return setProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
+	public void removeCartridges(List<ICartridge> removedCartridges) {
+		Set<ICartridge> cartridges = getCartridges();
+		cartridges .removeAll(removedCartridges);
+		firePropertyChange(PROP_CARTRIDGES, null, cartridges);
 	}
 
 	@Override
-	public void addSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
-		selectedEmbeddableCartridges .addAll(cartridges);
-		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
+	public List<ICartridge> getAllEmbeddableCartridges() {
+		return getProperty(PROP_ALL_EMBEDDABLE_CARTRIDGES, Collections.<ICartridge> emptyList());
 	}
 
 	@Override
-	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
-		selectedEmbeddableCartridges .remove(cartridge);
-		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
-	}
-	
-	@Override
-	public void removeSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
-		selectedEmbeddableCartridges .removeAll(cartridges);
-		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
-	}
-
-	@Override
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
-		return getProperty(PROP_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptyList());
-	}
-
-	@Override
-	public List<IEmbeddableCartridge> setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges) {
-		return setProperty(PROP_EMBEDDABLE_CARTRIDGES, embeddableCartridges);
+	public List<ICartridge> setAllEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
+		return setProperty(PROP_ALL_EMBEDDABLE_CARTRIDGES, embeddableCartridges);
 	}
 
 	protected void setDomain(IApplication application) {
@@ -443,16 +450,6 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 			domain = application.getDomain();
 		} 
 		setDomain(domain);
-	}
-
-	@Override
-	public IStandaloneCartridge getStandaloneCartridge() {
-		IStandaloneCartridge cartridge = null;
-		IApplicationTemplate template = getSelectedApplicationTemplate();
-		if (template instanceof ICartridgeApplicationTemplate) {
-			cartridge = ((ICartridgeApplicationTemplate) template).getCartridge();
-		}
-		return cartridge;
 	}
 
 	@Override
@@ -474,13 +471,13 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public List<IStandaloneCartridge> setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
-		return setProperty(PROP_STANDALONE_CARTRIDGES, cartridges);
+	public List<IStandaloneCartridge> setAllStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
+		return setProperty(PROP_ALL_STANDALONE_CARTRIDGES, cartridges);
 	}
 
 	@Override
-	public List<IStandaloneCartridge> getStandaloneCartridges() {
-		return getProperty(PROP_STANDALONE_CARTRIDGES);
+	public List<IStandaloneCartridge> getAllStandaloneCartridges() {
+		return getProperty(PROP_ALL_STANDALONE_CARTRIDGES);
 	}
 	
 	@Override
@@ -503,12 +500,41 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 
 	@Override
 	public String getInitialGitUrl() {
-		return getProperty(PROP_INITIAL_GITURL);
+		return getProperty(PROP_INITIAL_GIT_URL);
 	}
 	
 	@Override
 	public String setInitialGitUrl(String initialGitUrl) {
-		return setProperty(PROP_INITIAL_GITURL, initialGitUrl);
+		return setProperty(PROP_INITIAL_GIT_URL, initialGitUrl);
+	}
+
+	protected void setInitialGitUrl(IApplicationTemplate template) {
+		String initialGitUrl = null;
+		if (template instanceof IQuickstartApplicationTemplate) {
+			initialGitUrl = ((IQuickstartApplicationTemplate) template).getInitialGitUrl();
+		}
+		setInitialGitUrl(initialGitUrl);
+	}
+
+	@Override
+	public boolean isUseInitialGitUrl() {
+		return getProperty(PROP_USE_INITIAL_GIT_URL, false);
+
+	}
+
+	@Override
+	public boolean setUseInitialGitUrl(boolean useInitialGitUrl) {
+		setProperty(PROP_USE_INITIAL_GIT_URL, useInitialGitUrl);
+		return useInitialGitUrl;
+	}
+
+	public boolean setUseInitialGitUrl(IApplicationTemplate template) {
+		boolean useInitialGitUrl = false;
+		if (template instanceof IQuickstartApplicationTemplate) {
+			IQuickstartApplicationTemplate quickstart = (IQuickstartApplicationTemplate) template;
+			useInitialGitUrl = !StringUtils.isEmpty(quickstart.getInitialGitUrl());
+		}
+		return setUseInitialGitUrl(useInitialGitUrl);
 	}
 
 	@Override
@@ -569,10 +595,6 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		}
 	}			
 
-	public void fireConnectionChanged() {
-		ConnectionsModelSingleton.getInstance().fireConnectionChanged(getConnection());
-	}
-
 	public void updateRecentConnection() {
 		if (getConnection() == null) {
 			return;
@@ -590,7 +612,29 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template) {
 		setProperty(PROP_SELECTED_APPLICATION_TEMPLATE, template);
 		setUseExistingApplication(false);
+		setUseInitialGitUrl(template);
+		setInitialGitUrl(template);
+		setSelectedCartridges(template);
 		return template;
+	}
+
+	private void setSelectedCartridges(IApplicationTemplate template) {
+		if (template instanceof IQuickstartApplicationTemplate) {
+			setCartridges(getFirstAlternatives((IQuickstartApplicationTemplate) template));
+		} else {
+			setCartridges(new HashSet<ICartridge>());
+		}
+	}
+
+	protected HashSet<ICartridge> getFirstAlternatives(IQuickstartApplicationTemplate quickstart) {
+		HashSet<ICartridge> addedEmbeddableCartridges = new HashSet<ICartridge>();
+		for (AlternativeCartridges alternatives : quickstart.getSuitableCartridges()) {
+			ICartridge firstAlternative = CollectionUtils.getFirstElement(alternatives.get());
+			if (firstAlternative != null) {
+				addedEmbeddableCartridges.add(firstAlternative);
+			}
+		}
+		return addedEmbeddableCartridges;
 	}
 
 	@Override
