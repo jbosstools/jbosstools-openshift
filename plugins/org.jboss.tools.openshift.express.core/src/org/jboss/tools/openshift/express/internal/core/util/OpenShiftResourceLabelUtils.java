@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
+
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
@@ -23,7 +25,7 @@ import com.openshift.client.cartridge.ICartridge;
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftResourceUtils {
+public class OpenShiftResourceLabelUtils {
 
 	public static String toString(Object object) {
 		if (object instanceof IDomain) {
@@ -63,38 +65,65 @@ public class OpenShiftResourceUtils {
 		if (cartridge == null) {
 			return null;
 		}
-
-		if (cartridge.isDownloadable()) {
+		
+		if (cartridge instanceof CodeAnythingCartridge) {
+			return toCodeAnythingLabel(cartridge.getName(), cartridge.getDisplayName(), cartridge.getUrl());
+		} else if (cartridge.isDownloadable()) {
 			return toDownloadableCartridgeLabel(cartridge.getName(), cartridge.getDisplayName(), cartridge.getUrl());
 		} else {
 			return toCatridgeLabel(cartridge.getName(), cartridge.getDisplayName());
 		}
 	}
 
-	protected static String toCatridgeLabel(String name, String displayName) {
+	private static String toCatridgeLabel(String name, String displayName) {
 		StringBuilder builder = new StringBuilder();
 		if (!StringUtils.isEmpty(displayName)) {
-			builder.append(displayName)
-					.append(" (").append(name).append(')');
+			builder.append(displayName).append(" (").append(name).append(')');
 		} else {
 			builder.append(name);
 		}
 		return builder.toString();
 	}
 
-	protected static String toDownloadableCartridgeLabel(String name, String displayName, URL url) {
+	private static String toCodeAnythingLabel(String name, String displayName, URL url) {
 		StringBuilder builder = new StringBuilder();
-		if (!StringUtils.isEmpty(displayName)) {
-			builder.append(displayName);
-		} else {
-			builder.append(name);
-		}
-
 		if (url != null) {
-			String urlString = StringUtils.shorten(url.toString(), 80);
-			builder.append(" (").append(urlString).append(')');
+			builder.append(StringUtils.shorten(url.toString(), 50));
+		} else {
+			builder.append(displayName);
+		}
+		
+		return builder.append(" (Downloadable Cartridge)").toString();
+	}
+
+	private static String toDownloadableCartridgeLabel(String name, String displayName, URL url) {
+		String cartridgeName = getCartridgeName(name, displayName);
+		if (cartridgeName == null) {
+			if (url != null) {
+				cartridgeName = StringUtils.shorten(url.toString(), 50);
+			}
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		if (cartridgeName != null) {
+			builder.append(cartridgeName);
+			builder.append(" (");
+		}
+		builder.append("Downloadable Cartridge");
+		if (cartridgeName != null) {
+			builder.append(')');
 		}
 		return builder.toString();
+	}
+
+	private static String getCartridgeName(String name, String displayName) {
+		String cartridgeName = null;
+		if (!StringUtils.isEmpty(displayName)) {
+			cartridgeName = displayName;
+		} else if (!StringUtils.isEmpty(name)){
+			cartridgeName = name;
+		}
+		return cartridgeName;
 	}
 
 	public static String toString(List<IDomain> domains) {

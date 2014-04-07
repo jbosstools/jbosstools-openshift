@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -33,12 +30,12 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	}
 	
 	@Override
-	public boolean isDownloadable() {
-		return cartridge.isDownloadable();
+	public boolean canAddRemoveCartridges() {
+		return true;
 	}
-	
+
 	@Override
-	public List<IApplicationTemplate> getChildren() {
-		return Collections.emptyList();
+	public boolean isCodeAnything() {
+		return cartridge.isDownloadable();
 	}
 }

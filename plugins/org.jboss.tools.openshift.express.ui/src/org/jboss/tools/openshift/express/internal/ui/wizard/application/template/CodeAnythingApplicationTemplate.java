@@ -18,15 +18,15 @@ import com.openshift.client.cartridge.ICartridge;
 /**
  * @author Andre Dietisheim
  */
-public class DownloadableCartridgeApplicationTemplate
-		extends CartridgeApplicationTemplate implements IDownloadableCartridgeApplicationTemplate {
+public class CodeAnythingApplicationTemplate
+		extends CartridgeApplicationTemplate implements ICodeAnythingApplicationTemplate {
 
-	public DownloadableCartridgeApplicationTemplate() {
+	public CodeAnythingApplicationTemplate() {
 		super(new CodeAnythingCartridge());
 	}
 
 	@Override
-	public boolean isDownloadable() {
+	public boolean isCodeAnything() {
 		return true;
 	}
 
@@ -44,7 +44,7 @@ public class DownloadableCartridgeApplicationTemplate
 		firePropertyChange(PROPERTY_NAME, oldName, getName());
 	}
 	
-	@Override()
+	@Override
 	public String getName() {
 		StringBuilder builder = new StringBuilder(super.getName());
 		String cartridgeUrl = getCartridgeUrl((CodeAnythingCartridge) getCartridge());

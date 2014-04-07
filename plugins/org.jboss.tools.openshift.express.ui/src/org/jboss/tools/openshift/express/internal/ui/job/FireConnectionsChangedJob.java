@@ -25,22 +25,22 @@ import com.openshift.client.IUser;
 /**
  * @author Andre Dietisheim
  */
-public class RefreshConnectionsModelJob extends AbstractDelegatingMonitorJob {
+public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 
 	private List<Connection> connections = new ArrayList<Connection>();
 
-	public RefreshConnectionsModelJob(IUser user) {
+	public FireConnectionsChangedJob(IUser user) {
 		super(NLS.bind("Refreshing connection {0}", user.getRhlogin()));
 		Connection connection = getConnection(user);
 		add(connection);
 	}
 
-	public RefreshConnectionsModelJob(List<IUser> users) {
+	public FireConnectionsChangedJob(List<IUser> users) {
 		super(NLS.bind("Refreshing {0} connections", users.size()));
 		add(getConnections(users));
 	}
 
-	public RefreshConnectionsModelJob(Connection connection) {
+	public FireConnectionsChangedJob(Connection connection) {
 		super(NLS.bind("Refreshing connection {0}", connection.getUsername()));
 		add(connection);
 	}

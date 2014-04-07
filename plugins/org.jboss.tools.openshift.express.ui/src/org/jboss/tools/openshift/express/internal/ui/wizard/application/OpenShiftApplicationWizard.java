@@ -40,11 +40,15 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
+import org.jboss.tools.openshift.express.internal.ui.job.RefreshConnectionJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
@@ -133,32 +137,35 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	@Override
 	public boolean performFinish() {
-		if (!model.isUseExistingApplication()) {
+			if (!model.isUseExistingApplication()) {
 
-			IStatus status = createApplication();
-			if (!handleOpenShiftError("creating the application", status)) {
+				IStatus status = createApplication();
+				if (!handleOpenShiftError(
+						NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())), status)) {
+					return false;
+				}
+
+				status = waitForApplication(model.getApplication());
+				if (!handleOpenShiftError(
+						NLS.bind("wait for application {0} to become reachable", StringUtils.null2emptyString(model.getApplicationName())),
+						status)) {
+					return false;
+				}
+
+				new FireConnectionsChangedJob(model.getConnection()).schedule();
+			}
+
+			if (!importProject()) {
 				return false;
 			}
 
-			status = waitForApplication(model.getApplication());
-			if (!handleOpenShiftError("waiting to become reachable", status)) {
+			model.updateRecentConnection();
+
+			if (!createServerAdapter()) {
 				return false;
 			}
 
-			model.fireConnectionChanged();
-		}
-
-		if(!importProject()) {
-			return false;
-		}
-
-		model.updateRecentConnection();
-
-		if (!createServerAdapter()) {
-			return false;
-		}
-
-		return publishServerAdapter();
+			return publishServerAdapter();
 	}
 
 	private boolean handleOpenShiftError(String operation, IStatus status) {
@@ -169,8 +176,13 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		}
 
 		if (!JobUtils.isOk(status)) {
-			safeRefreshUser();
-			model.fireConnectionChanged();
+			// dont open error-dialog, the jobs will do if they fail
+			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
+			if (model.getConnection() != null) {
+				new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
+					.andRunWhenDone(new FireConnectionsChangedJob(model.getConnection()))
+					.schedule();
+			}
 			return false;
 		}
 		return true;
@@ -258,12 +270,11 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		try {
 			CreateApplicationJob job = new CreateApplicationJob(
 					model.getApplicationName()
-					, model.getStandaloneCartridge()
 					, model.getApplicationScale()
 					, model.getApplicationGearProfile()
 					, model.getInitialGitUrl()
 					, model.getEnvironmentVariables()
-					, model.getSelectedEmbeddableCartridges()
+					, model.getCartridges()
 					, model.getDomain());
 			IStatus status = WizardUtils.runInWizard(
 					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
@@ -277,6 +288,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(
 					NLS.bind("Could not create application {0}", model.getApplicationName()), e);
+
 		}
 	}
 
@@ -308,14 +320,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 				new CreationLogDialog(getShell(), logEntries).open();
 			}
 		});
-	}
-
-	private void safeRefreshUser() {
-		try {
-			model.getConnection().refresh();
-		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(e);
-		}
 	}
 
 	OpenShiftApplicationWizardModel getModel() {
