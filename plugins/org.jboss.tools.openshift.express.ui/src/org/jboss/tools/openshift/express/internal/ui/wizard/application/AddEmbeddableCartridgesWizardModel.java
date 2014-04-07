@@ -46,20 +46,9 @@ public class AddEmbeddableCartridgesWizardModel extends ObservablePojo implement
 	@Override
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
 		List<IEmbeddableCartridge> cartridges = new ArrayList<IEmbeddableCartridge>(wizardModel.getEmbeddableCartridges());
-		return removeSelectedCartridges(
-				addCodeAnything(
-						cartridges));
-	}
-
-	private List<IEmbeddableCartridge> addCodeAnything(List<IEmbeddableCartridge> embeddableCartridges) {
-		embeddableCartridges.add(new CodeAnythingCartridge());
-		return embeddableCartridges;
-	}
-
-	private List<IEmbeddableCartridge> removeSelectedCartridges(List<IEmbeddableCartridge> cartridges) {
-		List<IEmbeddableCartridge> allCartridges = new ArrayList<IEmbeddableCartridge>(cartridges);
-		allCartridges.removeAll(wizardModel.getSelectedEmbeddableCartridges());
-		return allCartridges;
+		cartridges.add(new CodeAnythingCartridge());
+		cartridges.removeAll(wizardModel.getSelectedEmbeddableCartridges());
+		return cartridges;
 	}
 	
 	@SuppressWarnings("unchecked")

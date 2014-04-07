@@ -10,27 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.client.IQuickstart;
 
 /**
  * @author Andre Dietisheim
  */
-public class CartridgeApplicationTemplate extends AbstractApplicationTemplate implements ICartridgeApplicationTemplate {
+public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 
-	private IStandaloneCartridge cartridge;
+	public IQuickstart getQuickstart();
 
-	public CartridgeApplicationTemplate(IStandaloneCartridge cartridge) {
-		super(cartridge.getDisplayName(), cartridge.getDescription());
-		this.cartridge = cartridge;
-	}
-
-	@Override
-	public IStandaloneCartridge getCartridge() {
-		return cartridge;
-	}
+	public String getLanguage();
 	
-	@Override
-	public boolean isDownloadable() {
-		return cartridge.isDownloadable();
-	}
+	public String getWebsite();
 }

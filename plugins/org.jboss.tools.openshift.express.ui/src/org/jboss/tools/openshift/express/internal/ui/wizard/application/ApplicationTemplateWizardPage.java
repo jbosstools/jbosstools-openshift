@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -80,10 +81,12 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IQuickstart;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IStandaloneCartridge;
@@ -550,6 +553,8 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 			StyledString text = new StyledString();
 			if (element instanceof ICartridgeApplicationTemplate) {
 				createCartridgeTemplatelabel(text, (ICartridgeApplicationTemplate) element);
+			} else if (element instanceof IQuickstartApplicationTemplate) {
+					createQuickstartTemplatelabel(text, (IQuickstartApplicationTemplate) element);
 			} else {
 				createApplicationTemplateLabel(text, (IApplicationTemplate) element);
 			}
@@ -566,6 +571,25 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 					&& !StringUtils.isEmpty(cartridge.getName())) {
 				text.append(" ", StyledString.DECORATIONS_STYLER);
 				text.append(cartridge.getName(), StyledString.DECORATIONS_STYLER);
+			}
+		}
+
+		private void createQuickstartTemplatelabel(StyledString text, IQuickstartApplicationTemplate quickstartTemplate) {
+			createApplicationTemplateLabel(text, quickstartTemplate);
+			IQuickstart quickstart = quickstartTemplate.getQuickstart();
+			if (quickstart != null
+					&& !StringUtils.isEmpty(quickstart.getName())) {
+				text.append(" ", StyledString.DECORATIONS_STYLER);
+				appendTags(quickstart.getTags(), text);
+			}
+		}
+
+		private void appendTags(List<String> tags, StyledString text) {
+			if (tags == null) {
+				return;
+			}
+			for (String tag : tags) {
+				text.append(" " + tag, StyledString.DECORATIONS_STYLER);
 			}
 		}
 

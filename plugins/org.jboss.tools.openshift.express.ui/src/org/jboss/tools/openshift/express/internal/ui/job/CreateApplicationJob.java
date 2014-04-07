@@ -63,8 +63,10 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
 	public CreateApplicationJob(final String name, final IStandaloneCartridge cartridge, final ApplicationScale scale,
 			final IGearProfile gear, String initialGitUrl, Map<String, String> environmentVariables, Collection<IEmbeddableCartridge> embeddableCartridges, IDomain domain) {
-		super(NLS.bind((embeddableCartridges == null ?
-				OpenShiftExpressUIMessages.CREATING_APPLICATION : OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
+		super(NLS.bind(
+				(embeddableCartridges == null ?
+						OpenShiftExpressUIMessages.CREATING_APPLICATION
+						: OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
 				, name));
 		Assert.isLegal(!StringUtils.isEmpty(name));
 		this.name = name;

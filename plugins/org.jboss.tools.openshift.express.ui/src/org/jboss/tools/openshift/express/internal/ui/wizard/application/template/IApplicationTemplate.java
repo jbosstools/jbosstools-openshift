@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import java.util.List;
-
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -28,13 +25,6 @@ public interface IApplicationTemplate {
 
 	public String getDescription();
 
-	public void clearChildren();
-
-	public List<IApplicationTemplate> getChildren();
-
-	public IApplicationTemplate addChild(IApplicationTemplate child);
-
-	public IApplicationTemplate addChildren(List<IStandaloneCartridge> cartridges);
-
 	public boolean isMatching(String expression);
+
 }

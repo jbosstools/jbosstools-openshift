@@ -10,14 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -26,12 +20,10 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 
 	private String name;
 	private String description; 
-	private List<IApplicationTemplate> children;
 
 	protected AbstractApplicationTemplate(String name, String description, IApplicationTemplate... children) {
 		this.name = name;
 		this.description = description;
-		this.children = new ArrayList<IApplicationTemplate>(Arrays.asList(children));
 	}
 
 	@Override
@@ -47,32 +39,6 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 	@Override
 	public String getDescription() {
 		return description;
-	}
-
-	@Override
-	public List<IApplicationTemplate> getChildren() {
-		return children;
-	}
-
-	@Override
-	public void clearChildren() {
-		children.clear();
-		firePropertyChange(PROPERTY_CHILDREN, null, children);
-	}
-
-	@Override
-	public IApplicationTemplate addChild(IApplicationTemplate child) {
-		children.add((IApplicationTemplate) child);
-		fireIndexedPropertyChange(PROPERTY_CHILDREN, children.size() - 1, null, child);
-		return this;
-	}
-
-	@Override
-	public IApplicationTemplate addChildren(List<IStandaloneCartridge> cartridges) {
-		for (IStandaloneCartridge cartridge : cartridges) {
-			addChild(new CartridgeApplicationTemplate(cartridge));
-		}
-		return this;
 	}
 	
 	@Override
