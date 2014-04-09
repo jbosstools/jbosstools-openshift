@@ -86,7 +86,7 @@ public class NoopApplicationFake implements IApplication {
 	public IEmbeddedCartridge addEmbeddableCartridge(ICartridge cartridge) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public List<IEmbeddedCartridge> addEmbeddableCartridges(ICartridge... cartridges) throws OpenShiftException {
 		throw new UnsupportedOperationException();

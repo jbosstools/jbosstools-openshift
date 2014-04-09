@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,7 @@ import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -32,13 +33,13 @@ public class ApplicationWizardModel extends ObservablePojo implements IEmbeddedC
 
 	private IApplication application;
 	private Connection connection;
-	private Set<IEmbeddableCartridge> checkedEmbeddableCartridges;
+	private Set<ICartridge> checkedEmbeddableCartridges;
 
 	public ApplicationWizardModel(IApplication application, Connection connection) {
 		Assert.isLegal(application != null, "No application provided");
 		this.application = application;
 		this.connection = connection;
-		this.checkedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>(getEmbeddedCartridges());
+		this.checkedEmbeddableCartridges = new HashSet<ICartridge>(getEmbeddedCartridges());
 	}
 
 	@Override
@@ -47,28 +48,28 @@ public class ApplicationWizardModel extends ObservablePojo implements IEmbeddedC
 	}
 
 	@Override
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
-		return connection.getEmbeddableCartridges();
+	public List<ICartridge> getEmbeddableCartridges() {
+		return new ArrayList<ICartridge>(connection.getEmbeddableCartridges());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <C extends IEmbeddableCartridge> List<C> getEmbeddedCartridges() {
+	public <C extends ICartridge> List<C> getEmbeddedCartridges() {
 		return (List<C>) application.getEmbeddedCartridges();
 	}
 
 	@Override
-	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		return application.hasEmbeddedCartridge(cartridge);
+	public boolean isEmbedded(ICartridge cartridge) throws OpenShiftException {
+		return application.hasEmbeddedCartridge(cartridge.getName());
 	}
 	
 	@Override
-	public Set<IEmbeddableCartridge> setCheckedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges) {
+	public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) {
 		return checkedEmbeddableCartridges = cartridges;
 	}
 
 	@Override
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() {
+	public Set<ICartridge> getCheckedEmbeddableCartridges() {
 		return checkedEmbeddableCartridges;
 	}
 

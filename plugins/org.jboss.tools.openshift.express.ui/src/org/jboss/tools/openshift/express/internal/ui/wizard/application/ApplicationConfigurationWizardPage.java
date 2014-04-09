@@ -20,6 +20,7 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -42,6 +43,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -63,7 +65,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.EmbeddableCartridgeToStringConverter;
+import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
@@ -86,6 +88,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.QuickstartApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.environment.NewEnvironmentVariablesWizard;
 
@@ -95,6 +98,7 @@ import com.openshift.client.IGearProfile;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 
 /**
@@ -326,13 +330,21 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.align(SWT.FILL, SWT.FILL).hint(400, SWT.DEFAULT).grab(true, true).span(1,2).applyTo(tableContainer);
 		TableViewer embeddableCartridgesTableViewer = createEmbeddableCartridgesViewer(tableContainer, dbc);
 
+		CanAddRemoveEmbeddables canAddRemoveEmbeddables = new CanAddRemoveEmbeddables(embeddableCartridgesTableViewer);
+		
 		// add
 		Button addButton = new Button(embeddableCartridgesGroup, SWT.PUSH);
 		addButton.setText("&Add...");
 		GridDataFactory.fillDefaults()
 				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(addButton);
 		addButton.addSelectionListener(onAdd());
-
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(addButton))
+				.notUpdatingParticipant()
+				.to(canAddRemoveEmbeddables)
+				.converting(new IsNotNull2BooleanConverter())
+				.in(dbc);
+		
 		// delete
 		Button removeButton = new Button(embeddableCartridgesGroup, SWT.PUSH);
 		removeButton.setText("&Remove");
@@ -340,12 +352,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(removeButton);
 		IObservableValue selectedEmbeddableCartridge = ViewerProperties.singleSelection().observe(embeddableCartridgesTableViewer);
 		removeButton.addSelectionListener(onRemove(selectedEmbeddableCartridge));
+//		ValueBindingBuilder
+//				.bind(WidgetProperties.enabled().observe(removeButton))
+//				.notUpdatingParticipant()
+//				.to(selectedEmbeddableCartridge)
+//				.converting(new IsNotNull2BooleanConverter())
+//				.in(dbc);
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
+				.bind(WidgetProperties.enabled().observe(addButton))
 				.notUpdatingParticipant()
-				.to(selectedEmbeddableCartridge)
+				.to(canAddRemoveEmbeddables)
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
+
 		
 		// advanced configurations
 		createAdvancedGroup(parent, dbc);
@@ -576,8 +595,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				IOpenShiftConnection connection = domain.getUser().getConnection();
 				EmbedCartridgeStrategy embedCartridgeStrategy =
 						new EmbedCartridgeStrategy(
-								connection.getEmbeddableCartridges(),
-								connection.getStandaloneCartridges(), 
+								new ArrayList<ICartridge>(connection.getEmbeddableCartridges()),
+								new ArrayList<ICartridge>(connection.getStandaloneCartridges()), 
 								domain.getApplications());
 				return embedCartridgeStrategy;
 			}
@@ -587,7 +606,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				int result = openAdditionalOperationsDialog("Remove Cartridges",
 						new StringBuilder()
 								.append(NLS.bind("If you want to remove {0}, it is suggested you:\n",
-										new EmbeddableCartridgeToStringConverter()
+										new CartridgeToStringConverter()
 												.toString(additionalOperations.getCartridge())))
 								.append(additionalOperations.toString())
 								.append("\n\nDo you want to Apply or Ignore these suggestions??")
@@ -781,6 +800,26 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		}
 	}
 
+	private class CanAddRemoveEmbeddables extends ComputedValue {
+
+		private Viewer viewer;
+
+		CanAddRemoveEmbeddables(Viewer viewer) {
+			this.viewer = viewer;
+		}
+
+		@Override
+		protected Object calculate() {
+			return isQuickstart()
+					&& !viewer.getSelection().isEmpty();
+		}
+		
+		private boolean isQuickstart() {
+			return pageModel.getSelectedApplicationTemplate() instanceof QuickstartApplicationTemplate;
+		}
+		
+	}
+	
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(

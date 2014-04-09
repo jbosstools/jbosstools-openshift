@@ -27,6 +27,7 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -172,7 +173,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		setResourcesLoaded(false);
 
 		loadGearProfiles(getDomain());
-		setEmbeddableCartridges(getConnection().getEmbeddableCartridges());
+		setEmbeddableCartridges(new ArrayList<ICartridge>(getConnection().getEmbeddableCartridges()));
 
 		setResourcesLoaded(true);
 	}
@@ -239,19 +240,19 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getApplication();
 	}
 
-	public void setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges) {
+	public void setEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
 		wizardModel.setEmbeddableCartridges(embeddableCartridges);
 	}
 
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
+	public List<ICartridge> getEmbeddableCartridges() {
 		return wizardModel.getEmbeddableCartridges();
 	}
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
+	public Set<ICartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
-	public void setSelectedEmbeddableCartridges(Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
+	public void setSelectedEmbeddableCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
 		wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
 	}
 

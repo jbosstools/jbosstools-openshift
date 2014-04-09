@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
@@ -55,7 +55,7 @@ public class EmbeddedCartridgesWizard extends Wizard {
 		try {
 			EmbedCartridgesJob job = 
 					new EmbedCartridgesJob(
-							new ArrayList<IEmbeddableCartridge>(wizardModel.getCheckedEmbeddableCartridges()),
+							new ArrayList<ICartridge>(wizardModel.getCheckedEmbeddableCartridges()),
 							wizardModel.getApplication());
 			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
 			if (!result.isOK()) {

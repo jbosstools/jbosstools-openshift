@@ -35,7 +35,7 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -211,22 +211,21 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 
 	public boolean setUseExistingApplication(boolean useExistingApplication);
 
-	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
-			Set<IEmbeddableCartridge> selectedEmbeddableCartridges);
+	public Set<ICartridge> setSelectedEmbeddableCartridges(Set<ICartridge> selectedEmbeddableCartridges);
 
-	public void addSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges);
+	public void addSelectedEmbeddableCartridges(List<ICartridge> cartridges);
 
-	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge);
+	public void removeSelectedEmbeddableCartridge(ICartridge cartridge);
 
-	public void removeSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges);
+	public void removeSelectedEmbeddableCartridges(List<ICartridge> cartridges);
 
-	public List<IEmbeddableCartridge> getEmbeddableCartridges();
+	public List<ICartridge> getEmbeddableCartridges();
 
-	public List<IEmbeddableCartridge> setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges);
+	public List<ICartridge> setEmbeddableCartridges(List<ICartridge> embeddableCartridges);
 
-	public boolean hasEmbeddableCartridge(IEmbeddableCartridge embeddableCartridge);
+	public boolean hasEmbeddableCartridge(ICartridge embeddableCartridge);
 
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges();
+	public Set<ICartridge> getSelectedEmbeddableCartridges();
 	
 	public IGearProfile getApplicationGearProfile();
 

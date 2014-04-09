@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.embed.IEmbeddedCartr
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -31,11 +31,11 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 public class AddEmbeddableCartridgesWizardModel extends ObservablePojo implements IEmbeddedCartridgesModel {
 
 	private IOpenShiftApplicationWizardModel wizardModel;
-	private Set<IEmbeddableCartridge> checkedEmbeddableCartridges;
+	private Set<ICartridge> checkedEmbeddableCartridges;
 
 	public AddEmbeddableCartridgesWizardModel(IOpenShiftApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
-		this.checkedEmbeddableCartridges = new HashSet<IEmbeddableCartridge>(getEmbeddedCartridges());
+		this.checkedEmbeddableCartridges = new HashSet<ICartridge>(getEmbeddedCartridges());
 	}
 
 	@Override
@@ -44,8 +44,8 @@ public class AddEmbeddableCartridgesWizardModel extends ObservablePojo implement
 	}
 
 	@Override
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
-		List<IEmbeddableCartridge> cartridges = new ArrayList<IEmbeddableCartridge>(wizardModel.getEmbeddableCartridges());
+	public List<ICartridge> getEmbeddableCartridges() {
+		List<ICartridge> cartridges = new ArrayList<ICartridge>(wizardModel.getEmbeddableCartridges());
 		cartridges.add(new CodeAnythingCartridge());
 		cartridges.removeAll(wizardModel.getSelectedEmbeddableCartridges());
 		return cartridges;
@@ -53,22 +53,22 @@ public class AddEmbeddableCartridgesWizardModel extends ObservablePojo implement
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <C extends IEmbeddableCartridge> List<C> getEmbeddedCartridges() {
-		return (List<C>) new ArrayList<IEmbeddableCartridge>(wizardModel.getSelectedEmbeddableCartridges());
+	public <C extends ICartridge> List<C> getEmbeddedCartridges() {
+		return (List<C>) new ArrayList<ICartridge>(wizardModel.getSelectedEmbeddableCartridges());
 	}
 
 	@Override
-	public boolean isEmbedded(IEmbeddableCartridge cartridge) {
+	public boolean isEmbedded(ICartridge cartridge) {
 		return wizardModel.hasEmbeddableCartridge(cartridge);
 	}
 	
 	@Override
-	public Set<IEmbeddableCartridge> setCheckedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges) {
+	public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) {
 		return checkedEmbeddableCartridges = cartridges;
 	}
 
 	@Override
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() {
+	public Set<ICartridge> getCheckedEmbeddableCartridges() {
 		return checkedEmbeddableCartridges;
 	}
 

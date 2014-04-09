@@ -15,7 +15,7 @@ import java.util.Set;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbeddedCartridgesWizardPage;
 
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author André Dietisheim
@@ -38,7 +38,7 @@ public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<AddEm
 		addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(getModel(), this));
 	}
 
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() {
+	public Set<ICartridge> getCheckedEmbeddableCartridges() {
 		return embeddedCartridgesWizardPage.getCheckedEmbeddableCartridges();
 	}
 }

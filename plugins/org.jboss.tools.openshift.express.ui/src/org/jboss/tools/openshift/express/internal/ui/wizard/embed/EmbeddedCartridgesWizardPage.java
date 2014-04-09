@@ -50,6 +50,7 @@ import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeV
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 
 /**
@@ -68,8 +69,8 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		this.pageModel = new EmbeddedCartridgesWizardPageModel(wizardModel);
 	}
 
-	public void setCheckedEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges) {
-		pageModel.setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(embeddableCartridges));
+	public void setCheckedEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
+		pageModel.setCheckedEmbeddableCartridges(new HashSet<ICartridge>(embeddableCartridges));
 	}
 
 	@Override
@@ -161,10 +162,10 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void clearViewer() {
-		setViewerInput(new ArrayList<IEmbeddableCartridge>());
+		setViewerInput(new ArrayList<ICartridge>());
 	}
 
-	private void setViewerCheckedElements(final Collection<IEmbeddableCartridge> cartridges) {
+	private void setViewerCheckedElements(final Collection<ICartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
@@ -174,7 +175,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		});
 	}
 
-	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
+	private void setViewerInput(final Collection<ICartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
@@ -193,13 +194,13 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 						Messages.DESELECT_ALL_CARTRIDGES_TITLE,
 						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION
 					)) {
-					pageModel.setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+					pageModel.setCheckedEmbeddableCartridges(new HashSet<ICartridge>());
 				}
 			}
 		};
 	}
 
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() {
+	public Set<ICartridge> getCheckedEmbeddableCartridges() {
 		return pageModel.getCheckedEmbeddableCartridges();
 	}
 

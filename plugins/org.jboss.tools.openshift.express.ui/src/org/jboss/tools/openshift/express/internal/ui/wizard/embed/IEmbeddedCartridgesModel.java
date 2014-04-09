@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
@@ -27,15 +27,15 @@ public interface IEmbeddedCartridgesModel extends IApplicationProperties {
 
 	public IDomain getDomain() throws OpenShiftException;
 
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException;
+	public List<ICartridge> getEmbeddableCartridges() throws OpenShiftException;
 
-	public <C extends IEmbeddableCartridge> List<C> getEmbeddedCartridges() throws OpenShiftException;
+	public <C extends ICartridge> List<C> getEmbeddedCartridges() throws OpenShiftException;
 
-	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException;
+	public boolean isEmbedded(ICartridge cartridge) throws OpenShiftException;
 
-	public Set<IEmbeddableCartridge> setCheckedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges);
+	public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges);
 
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges();
+	public Set<ICartridge> getCheckedEmbeddableCartridges();
 	
 	public void refresh() throws OpenShiftException;
 	

@@ -50,7 +50,7 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -389,51 +389,50 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public Set<IEmbeddableCartridge> getSelectedEmbeddableCartridges() {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges =
-				getProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptySet());
+	public Set<ICartridge> getSelectedEmbeddableCartridges() {
+		Set<ICartridge> selectedEmbeddableCartridges =
+				getProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, Collections.<ICartridge> emptySet());
 		return selectedEmbeddableCartridges;
 	}
 
 	@Override 
-	public boolean hasEmbeddableCartridge(IEmbeddableCartridge cartridge) {
+	public boolean hasEmbeddableCartridge(ICartridge cartridge) {
 		return getSelectedEmbeddableCartridges().contains(cartridge);
 	}
 	
 	@Override
-	public Set<IEmbeddableCartridge> setSelectedEmbeddableCartridges(
-			Set<IEmbeddableCartridge> selectedEmbeddableCartridges) {
+	public Set<ICartridge> setSelectedEmbeddableCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
 		return setProperty(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, selectedEmbeddableCartridges);
 	}
 
 	@Override
-	public void addSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
+	public void addSelectedEmbeddableCartridges(List<ICartridge> cartridges) {
+		Set<ICartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
 		selectedEmbeddableCartridges .addAll(cartridges);
 		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
 	}
 
 	@Override
-	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
+	public void removeSelectedEmbeddableCartridge(ICartridge cartridge) {
+		Set<ICartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
 		selectedEmbeddableCartridges .remove(cartridge);
 		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
 	}
 	
 	@Override
-	public void removeSelectedEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
-		Set<IEmbeddableCartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
+	public void removeSelectedEmbeddableCartridges(List<ICartridge> cartridges) {
+		Set<ICartridge> selectedEmbeddableCartridges = getSelectedEmbeddableCartridges();
 		selectedEmbeddableCartridges .removeAll(cartridges);
 		firePropertyChange(PROP_SELECTED_EMBEDDABLE_CARTRIDGES, null, selectedEmbeddableCartridges);
 	}
 
 	@Override
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() {
-		return getProperty(PROP_EMBEDDABLE_CARTRIDGES, Collections.<IEmbeddableCartridge> emptyList());
+	public List<ICartridge> getEmbeddableCartridges() {
+		return getProperty(PROP_EMBEDDABLE_CARTRIDGES, Collections.<ICartridge> emptyList());
 	}
 
 	@Override
-	public List<IEmbeddableCartridge> setEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges) {
+	public List<ICartridge> setEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
 		return setProperty(PROP_EMBEDDABLE_CARTRIDGES, embeddableCartridges);
 	}
 
