@@ -23,16 +23,18 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
@@ -249,9 +251,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 	private class QuickstartView extends Empty {
 
 		private Link nameLink;
-		private Label openshiftMaintainedIcon;
-		private Label securityUpdatesIcon;
-		private Label tagsLabel;
+		private CLabel openshiftMaintainedLabel;
+		private CLabel securityUpdatesLabel;
 		private Text summaryText;
 
 		@Override
@@ -266,24 +267,19 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					.align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
 
 			// icons
-			this.openshiftMaintainedIcon = new Label(container, SWT.None);
+			this.openshiftMaintainedLabel = new CLabel(container, SWT.None);
 			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedIcon);
-			this.securityUpdatesIcon = new Label(container, SWT.None);
+					.align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedLabel);
+			this.securityUpdatesLabel = new CLabel(container, SWT.None);
 			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).applyTo(securityUpdatesIcon);
-			
-			// tags
-			this.tagsLabel = new Label(container, SWT.NONE);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(tagsLabel);
+					.align(SWT.FILL, SWT.FILL).applyTo(securityUpdatesLabel);
 			
 			// summaryText
 			this.summaryText = new Text(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 			summaryText.setEditable(false);
 			summaryText.setBackground(container.getBackground());
 			GridDataFactory.fillDefaults()
-					.span(4,1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(summaryText);
+					.span(3,1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(summaryText);
 			return container;
 		}
 
@@ -297,52 +293,48 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			IQuickstartApplicationTemplate template = (IQuickstartApplicationTemplate) value;
 			this.nameLink.setText(new StringBuilder()
 					.append("<a>").append(template.getName()).append("</a>").toString());
-			nameLink.addSelectionListener(onLinkClicked(template.getWebsite()));
+			nameLink.addSelectionListener(onLinkClicked(template.getHref()));
 			updateOpenShiftMaintainedIcon(template);
 			updateSecurityUpdatesIcon(template);
-			tagsLabel.setText(getTags(template));
 			this.summaryText.setText(template.getDescription());
 		}
 
 		private void updateOpenShiftMaintainedIcon(IQuickstartApplicationTemplate template) {
-			if ("openshift".equals(template.getQuickstart().getProvider())) {
-				openshiftMaintainedIcon.setImage(OpenShiftImages.OPENSHIFT_MAINTAINED_IMG);
-				openshiftMaintainedIcon.setToolTipText("OpenShift maintained");
+			if (template.isOpenShiftMaintained()) {
+				setImageAndText(openshiftMaintainedLabel,
+						"OpenShift maintained",
+						OpenShiftImages.OPENSHIFT_MAINTAINED_IMG);
 			} else {
-				openshiftMaintainedIcon.setImage(OpenShiftImages.NOT_OPENSHIFT_MAINTAINED_IMG);
-				openshiftMaintainedIcon.setToolTipText("Community created");
+				setImageAndText(openshiftMaintainedLabel,
+						"Community created",
+						OpenShiftImages.NOT_OPENSHIFT_MAINTAINED_IMG);
 			}
 		}
 		
 		private void updateSecurityUpdatesIcon(IQuickstartApplicationTemplate template) {
-			if (StringUtils.isEmpty(template.getQuickstart().getInitialGitUrl())) {
-				securityUpdatesIcon.setImage(OpenShiftImages.SECURITY_UPDATES_IMG);
-				securityUpdatesIcon.setToolTipText("Receives automatic security updates");
+			if (template.isAutomaticSecurityUpdates()) {
+				setImageAndText(securityUpdatesLabel, 
+						"automatic security updates",
+						OpenShiftImages.SECURITY_UPDATES_IMG);
 			} else {
-				securityUpdatesIcon.setImage(OpenShiftImages.NO_SECURITY_UPDATES_IMG);
-				securityUpdatesIcon.setToolTipText("Does not receive automatic security updates");
+				setImageAndText(securityUpdatesLabel,
+						"no automatic security updates",
+						OpenShiftImages.NO_SECURITY_UPDATES_IMG);
 			}
 		}
 
-		private String getTags(IQuickstartApplicationTemplate template) {
-			StringBuilder builder = new StringBuilder();
-			if (template.getQuickstart().getTags() != null) {
-				for(String tag : template.getQuickstart().getTags()) {
-					if (builder.length() > 0) {
-						builder.append(", ");
-					}
-					builder.append(tag);
-				}
-			}
-			return builder.toString();
+		private void setImageAndText(CLabel label, String text, Image image) {
+			label.setText(text);
+			label.setImage(image);
+			label.setToolTipText(text);
 		}
-
+		
 		private SelectionListener onLinkClicked(final String url) {
 			return new SelectionAdapter() {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					BrowserUtil.checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+					new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				}
 
 			};

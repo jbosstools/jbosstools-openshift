@@ -21,5 +21,10 @@ public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 
 	public String getLanguage();
 	
-	public String getWebsite();
+	public String getHref();
+	
+	public boolean isOpenShiftMaintained();
+	
+	public boolean isAutomaticSecurityUpdates();
+
 }

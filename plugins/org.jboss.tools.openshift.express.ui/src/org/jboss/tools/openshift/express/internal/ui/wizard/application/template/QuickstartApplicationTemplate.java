@@ -37,10 +37,20 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	}
 	
 	@Override
-	public String getWebsite() {
-		return quickstart.getWebsite();
+	public String getHref() {
+		return quickstart.getHref();
+	}
+
+	@Override
+	public boolean isOpenShiftMaintained() {
+		return "openshift".equals(StringUtils.toLowerCase(quickstart.getProvider()));
 	}
 	
+	@Override
+	public boolean isAutomaticSecurityUpdates() {
+		return StringUtils.isEmpty(quickstart.getInitialGitUrl());
+	}
+
 	@Override
 	public boolean isMatching(String expression) {
 		boolean matching = super.isMatching(expression);
@@ -59,4 +69,10 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean isQuickstart() {
+		return true;
+	}
+
 }

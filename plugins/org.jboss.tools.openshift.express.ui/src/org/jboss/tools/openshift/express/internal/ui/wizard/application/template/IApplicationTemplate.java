@@ -27,4 +27,7 @@ public interface IApplicationTemplate {
 
 	public boolean isMatching(String expression);
 
+	public boolean isTemplate();
+	
+	public boolean isQuickstart();
 }

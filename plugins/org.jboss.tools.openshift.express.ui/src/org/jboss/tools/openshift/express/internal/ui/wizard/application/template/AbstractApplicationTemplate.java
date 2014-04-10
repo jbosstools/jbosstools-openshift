@@ -60,6 +60,15 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 		
 		return toMatch.indexOf(expression) >= 0;
 	}
-	
+
+	@Override
+	public boolean isQuickstart() {
+		return false;
+	}
+
+	@Override
+	public boolean isTemplate() {
+		return true;
+	}
 
 }

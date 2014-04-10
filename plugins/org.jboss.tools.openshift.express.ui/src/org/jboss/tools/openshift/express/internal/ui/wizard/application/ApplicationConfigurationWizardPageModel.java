@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,10 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
+	public static final String PROPERTY_ADDED_EMBEDDABLE_CARTRIDGES = "addedEmbeddableCartridges";
 	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_APPLICATION_SCALE = "scale";
+	public static final String PROPERTY_CAN_ADDREMOVE_EMBEDDABLE_CARTRIDGES = "canAddRemoveEmbeddableCartridges";
 	public static final String PROPERTY_DEFAULT_SOURCECODE = "defaultSourcecode";
 	public static final String PROPERTY_DOMAIN = "domain";
 	public static final String PROPERTY_DOMAINS = "domains";
@@ -53,7 +56,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
 	public static final String PROPERTY_SELECTED_STANDALONE_CARTRIDGE = "selectedStandaloneCartridge";
 	public static final String PROPERTY_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
-	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES = "selectedEmbeddableCartridges";
+	public static final String PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE = "selectedEmbeddableCartridge";
 	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
 
@@ -64,6 +67,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	private String existingApplicationName;
 	private boolean resourcesLoaded = false;
 	private boolean defaultSourcecode = true;
+	private ICartridge selectedEmbeddableCartridge;
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 
 	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
@@ -82,14 +86,20 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
 				.forwardTo(PROPERTY_APPLICATION_NAME, this);
 		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel)
-				.forwardTo(PROPERTY_SELECTED_APPLICATION_TEMPLATE, this);
+				.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_EMBEDDABLE_CARTRIDGES, wizardModel)
+				.forwardTo(PROPERTY_ADDED_EMBEDDABLE_CARTRIDGES, this);
 		new PojoEventBridge()
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
 				.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_EMBEDDABLE_CARTRIDGES, wizardModel)
-				.forwardTo(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGES, this);
+		new PojoEventBridge() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
+				fireCanAddRemoveEmbeddableCartridges();
+			}
+		}
+		.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
 	}
 
 	public Connection getConnection() {
@@ -173,7 +183,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		setResourcesLoaded(false);
 
 		loadGearProfiles(getDomain());
-		setEmbeddableCartridges(new ArrayList<ICartridge>(getConnection().getEmbeddableCartridges()));
+		setEmbeddableCartridges(new ArrayList<ICartridge>(connection.getEmbeddableCartridges()));
 
 		setResourcesLoaded(true);
 	}
@@ -248,26 +258,44 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		return wizardModel.getEmbeddableCartridges();
 	}
 
-	public Set<ICartridge> getSelectedEmbeddableCartridges() throws OpenShiftException {
+	public Set<ICartridge> getAddedEmbeddableCartridges() throws OpenShiftException {
 		return wizardModel.getSelectedEmbeddableCartridges();
 	}
 
-	public void setSelectedEmbeddableCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
+	public void setAddedEmbeddableCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
 		wizardModel.setSelectedEmbeddableCartridges(selectedEmbeddableCartridges);
+	}
+
+	public ICartridge getSelectedEmbeddableCartridge() throws OpenShiftException {
+		return selectedEmbeddableCartridge;
+	}
+
+	public void setSelectedEmbeddableCartridge(ICartridge selectedEmbeddableCartridge) {
+		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE,
+				this.selectedEmbeddableCartridge, this.selectedEmbeddableCartridge = selectedEmbeddableCartridge);
 	}
 
 	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
 		wizardModel.removeSelectedEmbeddableCartridge(cartridge);
 	}
 
+	protected void fireCanAddRemoveEmbeddableCartridges() {
+		firePropertyChange(PROPERTY_CAN_ADDREMOVE_EMBEDDABLE_CARTRIDGES, 
+				!isCanAddRemoveEmbeddableCartridges(), isCanAddRemoveEmbeddableCartridges());
+	}
+
+	public boolean isCanAddRemoveEmbeddableCartridges() {
+		return getSelectedApplicationTemplate() != null
+				&& !getSelectedApplicationTemplate().isQuickstart();
+	}
+	
 	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		return getSelectedEmbeddableCartridges().contains(cartridge);
+		return getAddedEmbeddableCartridges().contains(cartridge);
 	}
 
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
 		Connection connection = getConnection();
-		if (connection == null
-				|| !connection.isConnected()) {
+		if (wizardModel.isValid(connection)) {
 			return false;
 		}
 		return connection.hasApplication(applicationName, getDomain());
