@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import com.openshift.client.cartridge.IStandaloneCartridge;
+
 
 /**
  * @author Andre Dietisheim
@@ -24,10 +26,11 @@ public interface IApplicationTemplate {
 	public void setName(String name);
 
 	public String getDescription();
-
+	
 	public boolean isMatching(String expression);
 
 	public boolean isTemplate();
 	
-	public boolean isQuickstart();
+	public boolean canAddRemoveCartridges();
+	
 }

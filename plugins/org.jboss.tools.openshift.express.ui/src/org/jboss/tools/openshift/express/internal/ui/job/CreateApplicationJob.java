@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.job;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,54 +46,49 @@ import com.openshift.internal.client.utils.StringUtils;
 public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
 	private String name;
-	private ICartridge standaloneCartridge;
 	private ApplicationScale scale;
 	private IGearProfile gear;
 	private IApplication application;
 	private IDomain domain;
 	private String initialGitUrl;
 	private Map<String, String> environmentVariables;
-	private Collection<ICartridge> embeddableCartridges;
+	private Collection<ICartridge> cartridges;
 	
-	public CreateApplicationJob(final String name, final ICartridge cartridge, final ApplicationScale scale,
-			final IGearProfile gear, IDomain domain) {
-		this(name, cartridge, scale, gear, null, new LinkedHashMap<String, String>(), null, domain);
+	public CreateApplicationJob(final String name,final ApplicationScale scale, final IGearProfile gear, ICartridge cartridge, IDomain domain) {
+		this(name, scale, gear, null, new LinkedHashMap<String, String>(), Collections.<ICartridge>singletonList(cartridge), domain);
 	}
 
-	public CreateApplicationJob(final String name, final ICartridge cartridge, final ApplicationScale scale,
-			final IGearProfile gear, String initialGitUrl, Map<String, String> environmentVariables, Collection<ICartridge> embeddableCartridges, IDomain domain) {
+	public CreateApplicationJob(final String name, final ApplicationScale scale,
+			final IGearProfile gear, String initialGitUrl, Map<String, String> environmentVariables, Collection<ICartridge> cartridges, IDomain domain) {
 		super(NLS.bind(
-				(embeddableCartridges == null ?
+				(cartridges == null ?
 						OpenShiftExpressUIMessages.CREATING_APPLICATION
 						: OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
 				, name));
-		Assert.isLegal(!StringUtils.isEmpty(name));
+		Assert.isLegal(!StringUtils.isEmpty(name), "No application name provided.");
 		this.name = name;
-		Assert.isLegal(cartridge != null);
-		this.standaloneCartridge = cartridge;
 		this.scale = scale;
 		this.gear = gear;
 		this.initialGitUrl = initialGitUrl;
-		Assert.isLegal(domain != null);
+		Assert.isLegal(domain != null, "No domain provided.");
 		this.domain = domain;
 		this.environmentVariables = environmentVariables;
-		this.embeddableCartridges = embeddableCartridges;
+		Assert.isLegal(cartridges != null 
+				&& cartridges.size() >= 1, "No application type provided.");
+		this.cartridges = cartridges;
 	}
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			try {
-				List<ICartridge> allCartridges = new ArrayList<ICartridge>(embeddableCartridges);
-				allCartridges.add(standaloneCartridge);
 				this.application = new ApplicationBuilder(domain)
-					.setStandaloneCartridge(standaloneCartridge)
 					.setName(name)
+					.setCartridges(cartridges)
 					.setGearProfile(gear)
 					.setApplicationScale(scale)
 					.setEnvironmentVariables(environmentVariables)
 					.setInitialGitUrl(initialGitUrl)
-					.setEmbeddableCartridges(embeddableCartridges)
 					.build();
 				return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {
@@ -126,12 +121,11 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 				if (application == null) {
 					// app is not created yet, try again
 					application = new ApplicationBuilder(domain)
-						.setStandaloneCartridge(standaloneCartridge)
 						.setName(name)
+						.setCartridges(cartridges)
 						.setGearProfile(gear)
 						.setInitialGitUrl(initialGitUrl)
 						.setEnvironmentVariables(environmentVariables)
-						.setEmbeddableCartridges(embeddableCartridges)
 						.build();
 				}
 			} catch (OpenShiftTimeoutException ex) {

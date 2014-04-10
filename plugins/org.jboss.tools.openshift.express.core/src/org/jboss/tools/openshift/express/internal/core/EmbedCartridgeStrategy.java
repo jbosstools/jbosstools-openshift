@@ -107,7 +107,7 @@ public class EmbedCartridgeStrategy {
 		dependenciesByCartridge.put(requiringCartridge, dependency);
 	}
 	
-	public ApplicationRequirement getMissingRequirement(IEmbeddableCartridge requestedCartridge, IApplicationProperties application) {
+	public ApplicationRequirement getMissingRequirement(ICartridge requestedCartridge, IApplicationProperties application) {
 		for (ApplicationRequirement requirement : applicationRequirements) {
 			if (requirement.isForCartridge(requestedCartridge)
 					&& !requirement.meetsRequirements(application)) {
@@ -248,7 +248,7 @@ public class EmbedCartridgeStrategy {
 			this.cartridge = cartridgeSelector;
 		}
 
-		public boolean isForCartridge(IEmbeddableCartridge requestedCartridge) {
+		public boolean isForCartridge(ICartridge requestedCartridge) {
 			return cartridge.matches(requestedCartridge);
 		}
 		
@@ -258,7 +258,7 @@ public class EmbedCartridgeStrategy {
 		
 		protected abstract boolean meetsRequirements(IApplicationProperties application);
 
-		public abstract String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationProperties application);
+		public abstract String getMessage(ICartridge requestedCartridge, IApplicationProperties application);
 	}
 	
 	private static class NonScalableApplicationRequirement extends ApplicationRequirement {
@@ -275,7 +275,7 @@ public class EmbedCartridgeStrategy {
 		}
 
 		@Override
-		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationProperties application) {
+		public String getMessage(ICartridge requestedCartridge, IApplicationProperties application) {
 			return NLS.bind(
 							"It is not recommended to add cartridge {0} to your application {1}."
 							+ " The cartridge cannot scale and requires a non-scalable application. "
@@ -303,13 +303,14 @@ public class EmbedCartridgeStrategy {
 		}
 
 		@Override
-		public String getMessage(IEmbeddableCartridge requestedCartridge, IApplicationProperties application) {
+		public String getMessage(ICartridge requestedCartridge, IApplicationProperties application) {
+			IStandaloneCartridge standaloneCartridge = application.getStandaloneCartridge();
 			return NLS.bind("It is not recommended to add cartridge {0} to your application {1}."
 					+ " The cartridge requires a {3} or {4} application and your application is a {2}."
 							, new String[] { 
 									requestedCartridge.getName(), 
 									application.getApplicationName(),
-									application.getStandaloneCartridge().getName(),
+									standaloneCartridge == null? "'unknwon'" : standaloneCartridge.getName(),
 									eapSelector.getName(),
 									asSelector.getName()});
 		}
@@ -461,6 +462,9 @@ public class EmbedCartridgeStrategy {
 		}
 	}
 	
+	/**
+	 * Provides properties for a (new or existing)  application
+	 */
 	public interface IApplicationProperties {
 		
 		public ApplicationScale getApplicationScale();

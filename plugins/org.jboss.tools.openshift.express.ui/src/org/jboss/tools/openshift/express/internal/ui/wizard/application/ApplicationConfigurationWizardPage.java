@@ -65,7 +65,7 @@ import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -87,6 +87,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWiz
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.environment.NewEnvironmentVariablesWizard;
 
@@ -97,7 +98,6 @@ import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.ICartridge;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -112,6 +112,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private ApplicationConfigurationWizardPageModel pageModel;
 	private Text applicationNameText;
 	private OpenShiftApplicationWizardModel wizardModel;
+	private Button advancedButton;
+	private DialogChildToggleAdapter advancedSectionVisibilityAdapter;
+	private Text sourceUrlText;
+	private Label sourceUrlLabel;
 
 	ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("New or existing OpenShift Application", "", "New or existing OpenShift Application, wizard", wizard);
@@ -154,7 +158,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public String getText(Object element) {
-				return OpenShiftResourceUtils.toString((IDomain) element);			
+				return OpenShiftResourceLabelUtils.toString((IDomain) element);			
 			}
 		});
 		domainViewer.setInput(
@@ -276,7 +280,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 								if (!(fromObject instanceof String)) {
 									return fromObject;
 								}
-								return StringUtils.shorten((String) fromObject, 80) ;
+								return StringUtils.shorten((String) fromObject, 50) ;
 							}
 							
 						})
@@ -296,7 +300,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public String getText(Object element) {
-				return OpenShiftResourceUtils.toString((IGearProfile) element);			
+				return OpenShiftResourceLabelUtils.toString((IGearProfile) element);			
 			}
 		});
 		gearViewer.setInput(
@@ -318,7 +322,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		// embeddable cartridges
 		Group embeddableCartridgesGroup = new Group(parent, SWT.NONE);
-		embeddableCartridgesGroup.setText("Embedded Cartridges");
+		embeddableCartridgesGroup.setText(getCartridgesListLabel(pageModel.getSelectedApplicationTemplate()));
+		BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_APPLICATION_TEMPLATE)
+				.observe(pageModel)
+				.addValueChangeListener(onApplicationTemplateChanged(embeddableCartridgesGroup));
 		GridDataFactory.fillDefaults()
 				.grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1).applyTo(embeddableCartridgesGroup);
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(embeddableCartridgesGroup);
@@ -329,10 +337,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		TableViewer embeddableCartridgesTableViewer = createEmbeddableCartridgesViewer(tableContainer, dbc);
 		embeddableCartridgesTableViewer.setInput(
 				BeanProperties.set(
-						ApplicationConfigurationWizardPageModel.PROPERTY_ADDED_EMBEDDABLE_CARTRIDGES).observe(pageModel));
+						ApplicationConfigurationWizardPageModel.PROPERTY_EMBEDDED_CARTRIDGES).observe(pageModel));
 		ValueBindingBuilder
 			.bind(ViewerProperties.singlePostSelection().observe(embeddableCartridgesTableViewer))
-			.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE).observe(pageModel))
+			.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel))
 			.in(dbc);
 		
 		Composite buttonsComposite = createAddRemoveEditButtons(embeddableCartridgesGroup, dbc);
@@ -343,6 +351,40 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		createAdvancedGroup(parent, dbc);
 	}
 
+	private IValueChangeListener onApplicationTemplateChanged(final Group cartridgesGroup) {
+		return new IValueChangeListener() {
+			
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				if (event.diff.getNewValue() instanceof IApplicationTemplate) {
+					IApplicationTemplate template = (IApplicationTemplate) event.diff.getNewValue();
+					cartridgesGroup.setText(getCartridgesListLabel(template));
+					if (template instanceof IQuickstartApplicationTemplate) {
+						IQuickstartApplicationTemplate quickstart = (IQuickstartApplicationTemplate) template;
+						showAdvancedSection(!StringUtils.isEmpty(quickstart.getInitialGitUrl()));
+					} else {
+						showAdvancedSection(false);
+					}
+				}
+			}
+		};
+	}
+
+	private String getCartridgesListLabel(IApplicationTemplate template) {
+		if (template instanceof IQuickstartApplicationTemplate) {
+			return "All Cartridges";
+		} else {
+			return "Embedded Cartridges";
+		}
+	}
+	
+	/**
+	 * Creates a stack layout with 2 different panels:
+	 * <ul>
+	 * <li>edit buttons</li>
+	 * <li>add- and remove buttons</li>
+	 * </ul>
+	 */
 	private Composite createAddRemoveEditButtons(Group parent, DataBindingContext dbc) {
 		Composite buttonsContainer = new Composite(parent, SWT.None);
 		StackLayout stackLayout = new StackLayout();
@@ -365,7 +407,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		removeButton.addSelectionListener(onRemove());
 		IObservableValue selectedEmbeddableCartridge =
 				BeanProperties
-						.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE)
+						.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE)
 						.observe(pageModel);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(removeButton))
@@ -391,15 +433,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.in(dbc);
 
 		stackLayout.topControl = getEmbeddableCartridgesButtons(
-				pageModel.isCanAddRemoveEmbeddableCartridges(), addRemoveButtons, editButtons);
+				pageModel.isCanAddRemoveCartridges(), addRemoveButtons, editButtons);
 
-		BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_CAN_ADDREMOVE_EMBEDDABLE_CARTRIDGES)
+		BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_CAN_ADDREMOVE_CARTRIDGES)
 				.observe(pageModel)
 				.addValueChangeListener(onCanAddRemoveChanged(addRemoveButtons, editButtons, buttonsContainer, stackLayout));
 		
 		return buttonsContainer;
 	}
 
+	/**
+	 * listens to changes in
+	 * {@link ApplicationConfigurationWizardPageModel#PROPERTY_CAN_ADDREMOVE_CARTRIDGES}
+	 * and shows the edit- or the add- & remove-buttons.
+	 */
 	private IValueChangeListener onCanAddRemoveChanged(
 			final Composite addRemoveButtons, final Composite editButtons, final Composite parent, final StackLayout stackLayout) {
 		return new IValueChangeListener() {
@@ -429,7 +476,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	
 	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
 		// advanced button
-		Button advancedButton = new Button(parent, SWT.NONE);
+		this.advancedButton = new Button(parent, SWT.NONE);
 		advancedButton.setText(getAdvancedButtonLabel(false));
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(advancedButton);
@@ -457,31 +504,31 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
 		ValueBindingBuilder
 				.bind(defaultSourceCodeObservable)
+				.converting(new InvertingBooleanConverter())
 				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
+						ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 
 		// source code text
-		Label sourceCodeUrlLabel = new Label(sourceGroup, SWT.NONE);
-		sourceCodeUrlLabel.setText("Source code:");
+		this.sourceUrlLabel = new Label(sourceGroup, SWT.NONE);
+		sourceUrlLabel.setText("Source code:");
 		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceCodeUrlLabel);
+				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceUrlLabel);
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(sourceCodeUrlLabel))
+				.bind(WidgetProperties.enabled().observe(sourceUrlLabel))
 				.notUpdatingParticipant()
 				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
-				.converting(new InvertingBooleanConverter())
+						ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
-		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
+		this.sourceUrlText = new Text(sourceGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(sourceUrlText))
 				.notUpdatingParticipant()
 				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_DEFAULT_SOURCECODE).observe(pageModel))
-				.converting(new InvertingBooleanConverter())
+						ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
 		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
 		ValueBindingBuilder
@@ -497,9 +544,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		ControlDecorationSupport.create(
 				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		DialogChildToggleAdapter toggleAdapter = new DialogChildToggleAdapter(advancedComposite, false);
+		this.advancedSectionVisibilityAdapter = new DialogChildToggleAdapter(advancedComposite, false);
 		advancedButton.addSelectionListener(
-				onAdvancedClicked(advancedButton, toggleAdapter, sourceUrlText, sourceCodeUrlLabel));
+				onAdvancedClicked());
 
 		// explanation
 		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
@@ -553,13 +600,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.sorter(new EmbeddableCartridgeViewerSorter())
 				.comparer(new EqualityComparer())
 				.contentProvider(new ObservableSetContentProvider())
-				.<IEmbeddableCartridge> column("Name")
+				.<ICartridge> column("Name")
 					.weight(1)
-					.labelProvider(new IColumnLabelProvider<IEmbeddableCartridge>() {
+					.labelProvider(new IColumnLabelProvider<ICartridge>() {
 	
 						@Override
-						public String getValue(IEmbeddableCartridge cartridge) {
-							return OpenShiftResourceUtils.toString(cartridge);
+						public String getValue(ICartridge cartridge) {
+							return OpenShiftResourceLabelUtils.toString(cartridge);
 						}
 					}).buildColumn()
 				.buildViewer();
@@ -574,7 +621,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				AddEmbeddableCartridgesWizard cartridgesWizard = new AddEmbeddableCartridgesWizard(wizardModel);
 				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open()
 						== IDialogConstants.OK_ID) {
-					pageModel.setAddedEmbeddableCartridges(cartridgesWizard.getCheckedEmbeddableCartridges());
+					pageModel.setEmbeddedCartridges(cartridgesWizard.getCheckedCartridges());
 				};
 			}
 
@@ -586,19 +633,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				remove(pageModel.getSelectedEmbeddableCartridge());
+				remove(pageModel.getSelectedCartridge());
 			}
 
 			private void remove(ICartridge cartridge) {
 				EmbedCartridgeStrategy embedCartridgeStrategy = createEmbedCartridgeStrategy(pageModel.getDomain());
 				EmbeddableCartridgeDiff additionalOperations =
-						embedCartridgeStrategy.remove(cartridge, pageModel.getAddedEmbeddableCartridges());
+						embedCartridgeStrategy.remove(cartridge, pageModel.getEmbeddedCartridges());
 				int result = RESULT_APPLY;
 				if (additionalOperations.hasChanges()) {
 					result = executeAdditionalOperations(cartridge, additionalOperations);
 				}
 				if(result != RESULT_CANCEL){
-					wizardModel.removeSelectedEmbeddableCartridge(cartridge);
+					wizardModel.removeCartridge(cartridge);
 				}
 			}
 
@@ -624,13 +671,12 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 								.toString());
 				switch (result) {
 				case RESULT_APPLY:
-					wizardModel.removeSelectedEmbeddableCartridges(additionalOperations.getRemovals());
-					wizardModel.addSelectedEmbeddableCartridges(additionalOperations.getAdditions());
+					wizardModel.removeCartridges(additionalOperations.getRemovals());
+					wizardModel.addCartridges(additionalOperations.getAdditions());
 					break;
 				case RESULT_CANCEL:
 					break;
 				case RESULT_IGNORE:
-					// user has chosen to ignore additional requirements
 					break;
 				}
 				return result;
@@ -649,23 +695,52 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				ICartridge selectedCartridge = pageModel.getSelectedCartridge();
+				if (selectedCartridge == null) {
+					return;
+				}
+				IApplicationTemplate selectedTemplate = pageModel.getSelectedApplicationTemplate();
+				if (selectedTemplate == null
+						|| selectedTemplate.canAddRemoveCartridges()) {
+					return;
+				}
+				IQuickstartApplicationTemplate selectedQuickstart = (IQuickstartApplicationTemplate) selectedTemplate;
+				EditAlternativeCartridgesWizard cartridgesWizard =
+						new EditAlternativeCartridgesWizard(
+								selectedCartridge, selectedQuickstart.getAlternativesFor(selectedCartridge),
+								wizardModel);
+				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open()
+						== IDialogConstants.OK_ID) {
+					ICartridge checkedCartridge = cartridgesWizard.getCheckedCartridge();
+					replaceSelectedCartridge(selectedCartridge, checkedCartridge);
+				};
+
 			}
 
+			protected void replaceSelectedCartridge(ICartridge selectedCartridge, ICartridge checkedCartridge) {
+				if (!selectedCartridge.equals(checkedCartridge)) {
+					pageModel.removeEmbeddedCartridges(selectedCartridge);
+					pageModel.addEmbeddedCartridges(checkedCartridge);
+				}
+			}
 		};
 	}
 
-	private SelectionListener onAdvancedClicked(final Button toggleButton, final DialogChildToggleAdapter adapter,
-			final Text sourceUrlText, final Label sourceCodeUrlLabel) {
+	private SelectionListener onAdvancedClicked() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				adapter.toggle();
-				sourceUrlText.setEnabled(!pageModel.isDefaultSourcecode());
-				sourceCodeUrlLabel.setEnabled(!pageModel.isDefaultSourcecode());
-				toggleButton.setText(getAdvancedButtonLabel(adapter.isVisible()));
+				showAdvancedSection(!advancedSectionVisibilityAdapter.isVisible());
 			}
 		};
+	}
+
+	protected void showAdvancedSection(boolean visible) {
+		advancedSectionVisibilityAdapter.setVisible(visible);
+		advancedButton.setText(getAdvancedButtonLabel(visible));
+		sourceUrlText.setEnabled(pageModel.isUseInitialGitUrl());
+		sourceUrlLabel.setEnabled(pageModel.isUseInitialGitUrl());
 	}
 
 	protected String getAdvancedButtonLabel(boolean visible) {

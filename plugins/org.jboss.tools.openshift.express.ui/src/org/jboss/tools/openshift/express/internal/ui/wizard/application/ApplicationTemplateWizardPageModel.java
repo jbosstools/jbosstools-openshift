@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferen
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.CartridgeApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.DownloadableCartridgeApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.CodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.QuickstartApplicationTemplate;
@@ -127,7 +127,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 
 		applicationTemplates.add(basicCartridgesCathegory);
 		applicationTemplates.add(quickstartsCathegory);
-		applicationTemplates.add(new DownloadableCartridgeApplicationTemplate());
+		applicationTemplates.add(new CodeAnythingApplicationTemplate());
 
 		return applicationTemplates;
 	}
@@ -232,7 +232,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	protected void setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
 		cartridges = new ArrayList<IStandaloneCartridge>(cartridges);
 		Collections.sort(cartridges, new CartridgeNameComparator());
-		wizardModel.setStandaloneCartridges(cartridges);
+		wizardModel.setAllStandaloneCartridges(cartridges);
 		basicCartridgesCathegory.clearChildren();
 		basicCartridgesCathegory.addChildren(createCartridgeApplicationTemplates(cartridges));
 	}
@@ -253,7 +253,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected List<IStandaloneCartridge> getStandaloneCartridges() {
-		return wizardModel.getStandaloneCartridges();
+		return wizardModel.getAllStandaloneCartridges();
 	}
 
 	protected void setDomains(List<IDomain> domains) {
@@ -262,7 +262,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void ensureHasDomain() {
-		wizardModel.ensureHasDomain();
+		wizardModel.setDefaultDomainIfRequired();
 	}
 
 	public IApplicationTemplate getSelectedApplicationTemplate() {

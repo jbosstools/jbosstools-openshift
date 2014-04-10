@@ -46,7 +46,7 @@ import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IDownloadableCartridgeApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 
 /**
@@ -55,7 +55,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 	private final IDetailView defaultView = new DefaultView();
-	private final IDetailView downloadableCartridgeView = new DownloadableCartridgeView();
+	private final IDetailView downloadableCartridgeView = new CodeAnthingCartridgeView();
 	private final IDetailView quickstartView = new QuickstartView();
 
 	private IObservableValue disabled;
@@ -79,7 +79,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 		
 		IApplicationTemplate template = (IApplicationTemplate) value;
-		if (template instanceof IDownloadableCartridgeApplicationTemplate) {
+		if (template instanceof ICodeAnythingApplicationTemplate) {
 			return downloadableCartridgeView;
 		} else if (template instanceof ICartridgeApplicationTemplate) {
 			return defaultView;
@@ -92,7 +92,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 	}
 
-	private class DefaultView extends Empty {
+	private class DefaultView extends EmptyView {
 
 		private StyledText nameText;
 		private Text descriptionText;
@@ -133,7 +133,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 	}
 
-	private class DownloadableCartridgeView extends DefaultView {
+	private class CodeAnthingCartridgeView extends DefaultView {
 
 		private StyledText nameText;
 		private Text descriptionText;
@@ -187,13 +187,13 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
 			this.binding = ValueBindingBuilder
 					.bind(urlTextObservable)
-					.to(BeanProperties.value(IDownloadableCartridgeApplicationTemplate.PROPERTY_CARTRIDGE_URL, String.class)
+					.to(BeanProperties.value(ICodeAnythingApplicationTemplate.PROPERTY_CARTRIDGE_URL, String.class)
 							.observeDetail(applicationTemplateObservable))
 					.in(dbc);
-			DownloadableCartridgeUrlValidator downloadableCartridgeUrlValidator =
-					new DownloadableCartridgeUrlValidator(urlTextObservable, applicationTemplateObservable, disabled);
-			dbc.addValidationStatusProvider(downloadableCartridgeUrlValidator);
-			ControlDecorationSupport.create(downloadableCartridgeUrlValidator,
+			CodeAnythingCartridgeUrlValidator codeAnythingCartridgeUrlValidator =
+					new CodeAnythingCartridgeUrlValidator(urlTextObservable, applicationTemplateObservable, disabled);
+			dbc.addValidationStatusProvider(codeAnythingCartridgeUrlValidator);
+			ControlDecorationSupport.create(codeAnythingCartridgeUrlValidator,
 					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		}
 
@@ -207,13 +207,13 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 
 
-		class DownloadableCartridgeUrlValidator extends MultiValidator {
+		class CodeAnythingCartridgeUrlValidator extends MultiValidator {
 
 			private IObservableValue url;
 			private IObservableValue disabled;
 			private IObservableValue applicationTemplate;
 
-			private DownloadableCartridgeUrlValidator(IObservableValue url, IObservableValue template, IObservableValue disabled) {
+			private CodeAnythingCartridgeUrlValidator(IObservableValue url, IObservableValue template, IObservableValue disabled) {
 				this.url = url;
 				this.applicationTemplate = template;
 				this.disabled = disabled;
@@ -230,7 +230,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 				}
 				
 				if (applicationTemplate == null
-						|| !(applicationTemplate instanceof IDownloadableCartridgeApplicationTemplate)) {
+						|| !(applicationTemplate instanceof ICodeAnythingApplicationTemplate)) {
 					return ValidationStatus.ok();
 				}
 				
@@ -248,7 +248,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 	
 	}
 	
-	private class QuickstartView extends Empty {
+	private class QuickstartView extends EmptyView {
 
 		private Link nameLink;
 		private CLabel openshiftMaintainedLabel;

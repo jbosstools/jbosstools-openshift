@@ -72,8 +72,12 @@ public class ApplicationTemplateCategory extends AbstractApplicationTemplate imp
 	}
 
 	@Override
-	public boolean isTemplate() {
+	public boolean canAddRemoveCartridges() {
 		return false;
 	}
 
+	@Override
+	public boolean isTemplate() {
+		return false;
+	}
 }

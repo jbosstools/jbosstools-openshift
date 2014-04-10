@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Control;
  */
 public abstract class AbstractDetailViews {
 
-	protected final IDetailView emptyView = new Empty();
+	protected final IDetailView emptyView = new EmptyView();
 	
 	private Composite parent;
 	private IDetailView currentView = emptyView;
@@ -78,7 +78,7 @@ public abstract class AbstractDetailViews {
 		parent.layout(true, true);
 	}
 
-	protected class Empty extends BaseDetailsView {
+	protected class EmptyView extends BaseDetailsView {
 
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.NONE));

@@ -62,11 +62,6 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 	}
 
 	@Override
-	public boolean isQuickstart() {
-		return false;
-	}
-
-	@Override
 	public boolean isTemplate() {
 		return true;
 	}

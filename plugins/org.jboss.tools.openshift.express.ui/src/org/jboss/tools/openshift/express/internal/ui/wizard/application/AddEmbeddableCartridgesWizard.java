@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.util.ArrayList;
 import java.util.Set;
 
+import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
+import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbeddedCartridgesWizardModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbeddedCartridgesWizardPage;
 
 import com.openshift.client.cartridge.ICartridge;
@@ -20,12 +24,25 @@ import com.openshift.client.cartridge.ICartridge;
 /**
  * @author André Dietisheim
  */
-public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<AddEmbeddableCartridgesWizardModel> {
+public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<EmbeddedCartridgesWizardModel> {
 
 	private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
 
 	public AddEmbeddableCartridgesWizard(IOpenShiftApplicationWizardModel wizardModel) {
-		super("Add Embedded Cartridges", new AddEmbeddableCartridgesWizardModel(wizardModel));
+		super("Add Embedded Cartridges", 
+				new EmbeddedCartridgesWizardModel(
+						wizardModel.getCartridges()
+						, CollectionUtils.add(
+								// add code anything
+								new CodeAnythingCartridge(),
+								// remove embedded cartridges
+								CollectionUtils.removeAll(
+										wizardModel.getCartridges(),
+										new ArrayList<ICartridge>(wizardModel.getAllEmbeddableCartridges())))
+						, new NewApplicationProperties(wizardModel)
+						, wizardModel.getDomain()
+						, wizardModel.getConnection()
+				));
 	}
 
 	@Override
@@ -38,7 +55,7 @@ public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<AddEm
 		addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(getModel(), this));
 	}
 
-	public Set<ICartridge> getCheckedEmbeddableCartridges() {
-		return embeddedCartridgesWizardPage.getCheckedEmbeddableCartridges();
+	public Set<ICartridge> getCheckedCartridges() {
+		return embeddedCartridgesWizardPage.getCheckedCartridges();
 	}
 }

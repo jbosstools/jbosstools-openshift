@@ -14,7 +14,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.templat
 /**
  * @author Andre Dietisheim
  */
-public interface IDownloadableCartridgeApplicationTemplate extends ICartridgeApplicationTemplate {
+public interface ICodeAnythingApplicationTemplate extends ICartridgeApplicationTemplate {
 
 	public static final String PROPERTY_CARTRIDGE_URL = "url";
 

@@ -30,7 +30,12 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	}
 	
 	@Override
-	public boolean isDownloadable() {
+	public boolean canAddRemoveCartridges() {
+		return true;
+	}
+
+	@Override
+	public boolean isCodeAnything() {
 		return cartridge.isDownloadable();
 	}
 }

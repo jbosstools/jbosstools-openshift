@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -18,6 +19,25 @@ import java.util.List;
  */
 public class CollectionUtils {
 
+	public static <T> List<T> add(T cartridge, List<T> cartridges) {
+		cartridges.add(cartridge);
+		return cartridges;
+	}
+	
+	public static <T> List<T> removeAll(Collection<T> toRemove, List<T> cartridges) {
+		cartridges.removeAll(toRemove);
+		return cartridges;
+	}
+
+	public static <T> T getFirstElement(Collection<T> collection) {
+		if (collection == null
+				|| collection.isEmpty()) {
+			return null;
+		}
+		
+		return collection.iterator().next();
+	}
+	
 	public static <E> List<E> toList(E[] elements) {
 		List<E> list = new ArrayList<E>(elements.length);
 		for (E element : elements) {

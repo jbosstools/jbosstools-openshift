@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.List;
+
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.IQuickstart;
+import com.openshift.client.cartridge.ICartridge;
+import com.openshift.internal.client.AlternativeCartridges;
 
 /**
  * @author Andre Dietisheim
@@ -41,6 +45,29 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 		return quickstart.getHref();
 	}
 
+	@Override
+	public String getInitialGitUrl() {
+		return quickstart.getInitialGitUrl();
+	}
+
+	@Override
+	public List<AlternativeCartridges> getSuitableCartridges() {
+		return quickstart.getSuitableCartridges();
+	}
+
+	@Override
+	public List<ICartridge> getAlternativesFor(ICartridge cartridge) {
+		return quickstart.getAlternativesFor(cartridge);
+	}
+
+	@Override
+	public String getName() {
+		return new StringBuilder()
+			.append(super.getName())
+			.append(" (Quickstart)")
+			.toString();
+	}
+	
 	@Override
 	public boolean isOpenShiftMaintained() {
 		return "openshift".equals(StringUtils.toLowerCase(quickstart.getProvider()));
@@ -71,8 +98,8 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	}
 	
 	@Override
-	public boolean isQuickstart() {
-		return true;
+	public boolean canAddRemoveCartridges() {
+		return false;
 	}
 
 }
