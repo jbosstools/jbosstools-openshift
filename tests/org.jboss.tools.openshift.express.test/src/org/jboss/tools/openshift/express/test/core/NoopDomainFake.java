@@ -20,6 +20,7 @@ import com.openshift.client.IGearProfile;
 import com.openshift.client.IUser;
 import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -163,8 +164,14 @@ public class NoopDomainFake implements IDomain {
 	}
 
 	@Override
+	public IApplication createApplication(String name, ApplicationScale scale, IGearProfile gearProfile,
+			String initialGitUrl, int timeout, Map<String, String> environmentVariable, ICartridge... cartridges)
+			throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public boolean canCreateApplicationWithEnvironmentVariables() {
 		throw new UnsupportedOperationException();
 	}
-	
 }

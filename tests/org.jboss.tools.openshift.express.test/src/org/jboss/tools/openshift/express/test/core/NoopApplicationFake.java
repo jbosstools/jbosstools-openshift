@@ -27,6 +27,7 @@ import com.openshift.client.IGearProfile;
 import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
@@ -82,11 +83,15 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge)
-			throws OpenShiftException {
+	public IEmbeddedCartridge addEmbeddableCartridge(ICartridge cartridge) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public List<IEmbeddedCartridge> addEmbeddableCartridges(ICartridge... cartridges) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+	
 	@Override
 	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
 		throw new UnsupportedOperationException();
