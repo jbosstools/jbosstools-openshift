@@ -309,8 +309,15 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					pageModel.setHasRemoteKeys(loadKeysJob.getKeys().size() > 0);
-					return Status.OK_STATUS;
+					IStatus status = loadKeysJob.getResult(); 
+					if(status.equals(Status.OK_STATUS)){
+						pageModel.setHasRemoteKeys(loadKeysJob.getKeys().size() > 0);
+						setErrorMessage(null);
+						return Status.OK_STATUS;
+					}else{
+						setErrorMessage(status.getMessage());
+						return status;
+					}
 				}
 			});
 			WizardUtils.runInWizard(loadKeysJob, getContainer(), dbc);
