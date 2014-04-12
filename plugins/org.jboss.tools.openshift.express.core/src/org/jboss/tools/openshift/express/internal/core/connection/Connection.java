@@ -436,7 +436,7 @@ public class Connection {
 		return hasUser();
 	}
 
-	public List<IOpenShiftSSHKey> getSSHKeys() {
+	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException{
 		if (connect()) {
 			return user.getSSHKeys();
 		}
@@ -458,7 +458,7 @@ public class Connection {
 		return null;
 	}
 
-	public boolean hasSSHKeyName(String name) {
+	public boolean hasSSHKeyName(String name) throws OpenShiftException {
 		if (connect()) {
 			return user.hasSSHKeyName(name);
 		}

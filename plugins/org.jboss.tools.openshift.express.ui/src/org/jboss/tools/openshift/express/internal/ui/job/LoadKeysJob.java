@@ -18,8 +18,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IOpenShiftSSHKey;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author Andre Dietisheim
@@ -36,10 +39,14 @@ public class LoadKeysJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		this.keys = user.getSSHKeys();
-		return Status.OK_STATUS;
+		try{
+			this.keys = user.getSSHKeys();
+			return Status.OK_STATUS; 
+		}catch(OpenShiftException ex){
+			return OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, ex);
+		}
 	}
-
+	
 	public List<IOpenShiftSSHKey> getKeys() {
 		return keys;
 	}

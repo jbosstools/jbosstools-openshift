@@ -16,6 +16,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IOpenShiftSSHKey;
+import com.openshift.client.OpenShiftException;
 
 /**
  * @author André Dietisheim
@@ -32,7 +33,7 @@ public class SSHKeysWizardPageModel extends ObservableUIPojo {
 		this.connection = connection;
 	}
 
-	public List<IOpenShiftSSHKey> getSSHKeys() {
+	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException {
 		List<IOpenShiftSSHKey> keys = connection.getSSHKeys();
 		fireHasSSHKey();
 		return keys;
@@ -54,7 +55,7 @@ public class SSHKeysWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_HAS_KEY, null, getHasSSHKey());
 	}
 	
-	public void removeKey() {
+	public void removeKey() throws OpenShiftException{
 		if (selectedKey == null) {
 			return;
 		}
@@ -63,7 +64,7 @@ public class SSHKeysWizardPageModel extends ObservableUIPojo {
 		restoreSelectedSSHKey();
 	}
 
-	public void refresh() {
+	public void refresh()  throws OpenShiftException {
 		connection.refresh();
 		restoreSelectedSSHKey();
 	}
