@@ -23,7 +23,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.express.internal.ui.job.RefreshConnectionsModelJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
@@ -80,7 +80,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 		Connection connection = getConnection(element);
 		if (connection != null) {
 			new JobChainBuilder(job)
-			.andRunWhenSuccessfull(new RefreshConnectionsModelJob(connection)).schedule();;
+			.andRunWhenSuccessfull(new FireConnectionsChangedJob(connection)).schedule();;
 		} else {
 			job.schedule();
 		}

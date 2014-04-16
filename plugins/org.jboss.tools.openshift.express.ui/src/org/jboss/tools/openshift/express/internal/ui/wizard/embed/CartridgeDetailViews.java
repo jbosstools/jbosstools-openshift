@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
@@ -37,40 +37,49 @@ import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
  */
-public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
+public class CartridgeDetailViews extends AbstractDetailViews {
 
-	public EmbeddableCartridgeDetailViews(IObservableValue detailViewModel, Composite parent, DataBindingContext dbc) {
+	private IObservableValue canModifyCartridges;
+
+	public CartridgeDetailViews(IObservableValue detailViewModel, IObservableValue canModifyCartridges, 	
+			Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, parent, dbc);
+		this.canModifyCartridges = canModifyCartridges;
 	}
 
 	private final IDetailView cartridgeView = new CartridgeDetailsView();
-	private final IDetailView downloadableCartridgeView = new DownloadableCartridge();
+	private final IDetailView downloadableCartridgeView = new DownloadableCartridgeView();
+	private final IDetailView codeAnythingCartridgeView = new CodeAnythingDetailsView();
 
 	@Override
 	public void createViewControls(Composite parent, DataBindingContext dbc) {
-		downloadableCartridgeView.createControls(parent, dbc);
 		cartridgeView.createControls(parent, dbc);
+		downloadableCartridgeView.createControls(parent, dbc);
+		codeAnythingCartridgeView.createControls(parent, dbc);
 	}
 
 	protected IDetailView getView(IObservableValue selectedCartridgeObservable) {
 		Object value = selectedCartridgeObservable.getValue();
-		if (!(value instanceof IEmbeddableCartridge)) {
+		if (!(value instanceof ICartridge)) {
 			return emptyView;
 		}
 		
-		IEmbeddableCartridge cartridge = (IEmbeddableCartridge) value;
-		if (cartridge.isDownloadable()) {
+		ICartridge cartridge = (ICartridge) value;
+		if (cartridge instanceof CodeAnythingCartridge) {
+			return codeAnythingCartridgeView;
+		} else if (cartridge.isDownloadable()) {
 			return downloadableCartridgeView;
 		} else {
 			return cartridgeView;
 		}
 	}
-	private class CartridgeDetailsView extends Empty {
+	
+	private class CartridgeDetailsView extends EmptyView {
 
 		private StyledText nameLabel;
 		private Text description;
@@ -99,12 +108,12 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 		@Override
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
 			Object value = selectedCartridgeObservable.getValue();
-			if (!(value instanceof IEmbeddableCartridge)
+			if (!(value instanceof ICartridge)
 					|| DisposeUtils.isDisposed(nameLabel)) {
 				return;
 			}
-			IEmbeddableCartridge embeddableCartridge = (IEmbeddableCartridge) value;
-			String name = OpenShiftResourceUtils.toString(embeddableCartridge);
+			ICartridge embeddableCartridge = (ICartridge) value;
+			String name = OpenShiftResourceLabelUtils.toString(embeddableCartridge);
 			this.nameLabel.setText(name);
 			this.nameLabel.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, description.getBackground()));
 
@@ -112,13 +121,57 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 		}
 	}
 
-	private class DownloadableCartridge extends CartridgeDetailsView {
+	private class DownloadableCartridgeView extends CartridgeDetailsView {
+
+		private StyledText name;
+		private Text url;
+
+		@Override
+		public Composite createControls(Composite parent, DataBindingContext dbc) {
+			Composite container = setControl(new Composite(parent, SWT.None));
+			GridLayoutFactory.fillDefaults()
+					.margins(10, 10).spacing(10, 10).applyTo(container);
+
+			// name
+			this.name = new StyledText(container, SWT.None);
+			name.setEditable(false);
+			GridDataFactory.fillDefaults()
+					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
+
+			// url
+			this.url = new Text(container, SWT.WRAP);
+			url.setEditable(false);
+			GridDataFactory.fillDefaults()
+					.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(url);
+
+			return container;
+		}
+
+		@Override
+		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
+			Object value = selectedCartridgeObservable.getValue();
+			if (!(value instanceof ICartridge)
+					|| DisposeUtils.isDisposed(name)) {
+				return;
+			}
+			
+			ICartridge cartridge = (ICartridge) value;
+			String cartridgeLabel = OpenShiftResourceLabelUtils.toString(cartridge);
+			this.name.setText(cartridgeLabel);
+			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(cartridgeLabel, url.getBackground()));
+			if (cartridge.getUrl() != null) {
+				this.url.setText(cartridge.getUrl().toString());
+			}
+		}
+	}
+
+	private class CodeAnythingDetailsView extends CartridgeDetailsView {
 
 		private StyledText name;
 		private Text description;
 		private Text urlText;
 		private Binding binding;
-
+		
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
@@ -147,6 +200,11 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(urlText);
 
+			ValueBindingBuilder
+					.bind(WidgetProperties.enabled().observe(urlText))
+					.notUpdatingParticipant()
+					.to(canModifyCartridges);
+
 			return container;
 		}
 
@@ -157,11 +215,11 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 					|| DisposeUtils.isDisposed(name)) {
 				return;
 			}
-			CodeAnythingCartridge codeAnythingCartridge = (CodeAnythingCartridge) value;
-			String name = codeAnythingCartridge.getDisplayName();
+			CodeAnythingCartridge cartridge = (CodeAnythingCartridge) value;
+			String name = cartridge.getDisplayName();
 			this.name.setText(name);
 			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, description.getBackground()));
-			this.description.setText(codeAnythingCartridge.getDescription());
+			this.description.setText(cartridge.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(100, urlText);
 			this.binding = ValueBindingBuilder
@@ -169,14 +227,13 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 					.to(BeanProperties.value(CodeAnythingCartridge.PROPERTY_URL_STRING, String.class)
 							.observeDetail(selectedCartridgeObservable))
 					.in(dbc);
-			DownloadableCartridgeUrlValidator downloadableCartridgeUrlValidator =
-					new DownloadableCartridgeUrlValidator(urlTextObservable, selectedCartridgeObservable);
-			dbc.addValidationStatusProvider(downloadableCartridgeUrlValidator);
-			ControlDecorationSupport.create(downloadableCartridgeUrlValidator,
+			CodeAnythingUrlValidator codeAnythingUrlValidator =
+					new CodeAnythingUrlValidator(urlTextObservable, selectedCartridgeObservable);
+			dbc.addValidationStatusProvider(codeAnythingUrlValidator);
+			ControlDecorationSupport.create(codeAnythingUrlValidator,
 					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		}
 
-		
 		@Override
 		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
 			if (DisposeUtils.isDisposed(binding)) {
@@ -185,13 +242,12 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 			binding.dispose();
 		}
 
-
-		class DownloadableCartridgeUrlValidator extends MultiValidator {
+		class CodeAnythingUrlValidator extends MultiValidator {
 
 			private IObservableValue url;
 			private IObservableValue selectedCartridge;
 
-			private DownloadableCartridgeUrlValidator(IObservableValue url, IObservableValue applicationTemplate) {
+			private CodeAnythingUrlValidator(IObservableValue url, IObservableValue applicationTemplate) {
 				this.url = url;
 				this.selectedCartridge = applicationTemplate;
 			}
@@ -199,11 +255,9 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 			@Override
 			protected IStatus validate() {
 				String url = (String) this.url.getValue();
-				IEmbeddableCartridge embeddableCartridge = (IEmbeddableCartridge) this.selectedCartridge.getValue();
+				ICartridge cartridge = (ICartridge) this.selectedCartridge.getValue();
 				
-				if (embeddableCartridge == null
-						|| !(embeddableCartridge instanceof IEmbeddableCartridge)
-						|| !((IEmbeddableCartridge) embeddableCartridge).isDownloadable()) {
+				if (!(cartridge instanceof CodeAnythingCartridge)) {
 					return ValidationStatus.ok();
 				}
 				
@@ -218,6 +272,5 @@ public class EmbeddableCartridgeDetailViews extends AbstractDetailViews {
 			}
 			
 		}
-	
 	}
 }

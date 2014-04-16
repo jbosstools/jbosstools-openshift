@@ -32,11 +32,13 @@ import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.IOpenShiftSSHKey;
+import com.openshift.client.IQuickstart;
 import com.openshift.client.ISSHPublicKey;
 import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftConnectionFactory;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -330,6 +332,28 @@ public class Connection {
 		}
 		return null;
 	}
+	
+	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
+		if (connect()) {
+			return user.getConnection().getEmbeddableCartridges();
+		}
+		return null;
+	}
+
+	public List<ICartridge> getCartridges() throws OpenShiftException {
+		if (connect()) {
+			return user.getConnection().getCartridges();
+		}
+		return null;
+	}
+	
+	public List<IQuickstart> getQuickstarts() throws OpenShiftException {
+		if (connect()) {
+			return user.getConnection().getQuickstarts();
+		}
+		return null;
+	}
+
 
 	public void load() {
 		getDomains();
@@ -397,13 +421,6 @@ public class Connection {
 		return isDomainLoaded;
 	}
 
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
-		if (connect()) {
-			return user.getConnection().getEmbeddableCartridges();
-		}
-		return null;
-	}
-	
 	public boolean hasApplicationOfType(IStandaloneCartridge type) throws OpenShiftException {
 		if (hasDomain()) {
 			return user.getDefaultDomain().hasApplicationByCartridge(type);

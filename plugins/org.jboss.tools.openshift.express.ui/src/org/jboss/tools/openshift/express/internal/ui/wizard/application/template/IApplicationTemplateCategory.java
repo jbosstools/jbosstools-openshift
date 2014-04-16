@@ -10,8 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.List;
+
 /**
  * @author Andre Dietisheim
  */
 public interface IApplicationTemplateCategory extends IApplicationTemplate {
+
+	public void clearChildren();
+
+	public List<IApplicationTemplate> getChildren();
+
+	public IApplicationTemplate addChild(IApplicationTemplate child);
+
+	public IApplicationTemplate addChildren(List<IApplicationTemplate> cartridges);
+
 }
