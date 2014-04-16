@@ -8,22 +8,17 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.util;
+package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils.ToStringConverter;
-
-import com.openshift.client.cartridge.IEmbeddableCartridge;
 
 /**
  * @author Andre Dietisheim
  */
-public class EmbeddableCartridgeToStringConverter implements ToStringConverter<IEmbeddableCartridge> {
+public interface ICodeAnythingApplicationTemplate extends ICartridgeApplicationTemplate {
 
-		@Override
-		public String toString(IEmbeddableCartridge cartridge) {
-			if (cartridge == null) {
-				return null;
-			}
-			return cartridge.getName();
-		}
-	}
+	public static final String PROPERTY_CARTRIDGE_URL = "url";
+
+	public String getUrl();
+
+	public void setUrl(String url);
+}

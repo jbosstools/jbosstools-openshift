@@ -23,13 +23,22 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
@@ -37,15 +46,17 @@ import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IDownloadableCartridgeApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 
 /**
  * @author Andre Dietisheim
  */
 public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
-	private final IDetailView defaultView = new Default();
-	private final IDetailView downloadableCartridgeView = new DownloadableCartridge();
+	private final IDetailView defaultView = new DefaultView();
+	private final IDetailView downloadableCartridgeView = new CodeAnthingCartridgeView();
+	private final IDetailView quickstartView = new QuickstartView();
 
 	private IObservableValue disabled;
 
@@ -56,6 +67,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 	protected void createViewControls(Composite parent, DataBindingContext dbc) {
 		downloadableCartridgeView.createControls(parent, dbc);
+		quickstartView.createControls(parent, dbc);
 		defaultView.createControls(parent, dbc);
 		emptyView.createControls(parent, dbc);
 	}
@@ -67,10 +79,12 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 		
 		IApplicationTemplate template = (IApplicationTemplate) value;
-		if (template instanceof IDownloadableCartridgeApplicationTemplate) {
+		if (template instanceof ICodeAnythingApplicationTemplate) {
 			return downloadableCartridgeView;
 		} else if (template instanceof ICartridgeApplicationTemplate) {
 			return defaultView;
+		} else if (template instanceof IQuickstartApplicationTemplate) {
+			return quickstartView;
 		} else if (template instanceof IApplicationTemplateCategory) {
 			return defaultView;
 		} else {
@@ -78,7 +92,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 	}
 
-	private class Default extends Empty {
+	private class DefaultView extends EmptyView {
 
 		private StyledText nameText;
 		private Text descriptionText;
@@ -89,13 +103,13 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			GridLayoutFactory.fillDefaults()
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
-			// nameText
+			// nameLink
 			this.nameText = new StyledText(container, SWT.None);
 			nameText.setEditable(false);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
-			// descriptionText
+			// summaryText
 			this.descriptionText = new Text(container, SWT.MULTI | SWT.WRAP);
 			descriptionText.setEditable(false);
 			descriptionText.setBackground(container.getBackground());
@@ -119,7 +133,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 	}
 
-	private class DownloadableCartridge extends Default {
+	private class CodeAnthingCartridgeView extends DefaultView {
 
 		private StyledText nameText;
 		private Text descriptionText;
@@ -132,13 +146,13 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			GridLayoutFactory.fillDefaults()
 					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
 
-			// nameText
+			// nameLink
 			this.nameText = new StyledText(container, SWT.None);
 			nameText.setEditable(false);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
-			// descriptionText
+			// summaryText
 			this.descriptionText = new Text(container, SWT.MULTI | SWT.WRAP);
 			descriptionText.setEditable(false);
 			descriptionText.setBackground(container.getBackground());
@@ -173,13 +187,13 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
 			this.binding = ValueBindingBuilder
 					.bind(urlTextObservable)
-					.to(BeanProperties.value(IDownloadableCartridgeApplicationTemplate.PROPERTY_CARTRIDGE_URL, String.class)
+					.to(BeanProperties.value(ICodeAnythingApplicationTemplate.PROPERTY_CARTRIDGE_URL, String.class)
 							.observeDetail(applicationTemplateObservable))
 					.in(dbc);
-			DownloadableCartridgeUrlValidator downloadableCartridgeUrlValidator =
-					new DownloadableCartridgeUrlValidator(urlTextObservable, applicationTemplateObservable, disabled);
-			dbc.addValidationStatusProvider(downloadableCartridgeUrlValidator);
-			ControlDecorationSupport.create(downloadableCartridgeUrlValidator,
+			CodeAnythingCartridgeUrlValidator codeAnythingCartridgeUrlValidator =
+					new CodeAnythingCartridgeUrlValidator(urlTextObservable, applicationTemplateObservable, disabled);
+			dbc.addValidationStatusProvider(codeAnythingCartridgeUrlValidator);
+			ControlDecorationSupport.create(codeAnythingCartridgeUrlValidator,
 					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		}
 
@@ -193,15 +207,15 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 
 
-		class DownloadableCartridgeUrlValidator extends MultiValidator {
+		class CodeAnythingCartridgeUrlValidator extends MultiValidator {
 
 			private IObservableValue url;
 			private IObservableValue disabled;
 			private IObservableValue applicationTemplate;
 
-			private DownloadableCartridgeUrlValidator(IObservableValue url, IObservableValue applicationTemplate, IObservableValue disabled) {
+			private CodeAnythingCartridgeUrlValidator(IObservableValue url, IObservableValue template, IObservableValue disabled) {
 				this.url = url;
-				this.applicationTemplate = applicationTemplate;
+				this.applicationTemplate = template;
 				this.disabled = disabled;
 			}
 
@@ -216,7 +230,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 				}
 				
 				if (applicationTemplate == null
-						|| !(applicationTemplate instanceof IDownloadableCartridgeApplicationTemplate)) {
+						|| !(applicationTemplate instanceof ICodeAnythingApplicationTemplate)) {
 					return ValidationStatus.ok();
 				}
 				
@@ -233,4 +247,98 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 	
 	}
+	
+	private class QuickstartView extends EmptyView {
+
+		private Link nameLink;
+		private CLabel openshiftMaintainedLabel;
+		private CLabel securityUpdatesLabel;
+		private Text summaryText;
+
+		@Override
+		public Composite createControls(Composite parent, DataBindingContext dbc) {
+			Composite container = setControl(super.createControls(parent, dbc));
+			GridLayoutFactory.fillDefaults()
+					.numColumns(4).margins(10, 10).spacing(10, 10).applyTo(container);
+
+			// nameLink
+			this.nameLink = new Link(container, SWT.None);
+			GridDataFactory.fillDefaults()
+					.align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
+
+			// icons
+			this.openshiftMaintainedLabel = new CLabel(container, SWT.None);
+			GridDataFactory.fillDefaults()
+					.align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedLabel);
+			this.securityUpdatesLabel = new CLabel(container, SWT.None);
+			GridDataFactory.fillDefaults()
+					.align(SWT.FILL, SWT.FILL).applyTo(securityUpdatesLabel);
+			
+			// summaryText
+			this.summaryText = new Text(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+			summaryText.setEditable(false);
+			summaryText.setBackground(container.getBackground());
+			GridDataFactory.fillDefaults()
+					.span(3,1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(summaryText);
+			return container;
+		}
+
+		@Override
+		public void onVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
+			Object value = applicationTemplateObservable.getValue();
+			if (!(value instanceof IQuickstartApplicationTemplate)
+					|| DisposeUtils.isDisposed(nameLink)) {
+				return;
+			}
+			IQuickstartApplicationTemplate template = (IQuickstartApplicationTemplate) value;
+			this.nameLink.setText(new StringBuilder()
+					.append("<a>").append(template.getName()).append("</a>").toString());
+			nameLink.addSelectionListener(onLinkClicked(template.getHref()));
+			updateOpenShiftMaintainedIcon(template);
+			updateSecurityUpdatesIcon(template);
+			this.summaryText.setText(template.getDescription());
+		}
+
+		private void updateOpenShiftMaintainedIcon(IQuickstartApplicationTemplate template) {
+			if (template.isOpenShiftMaintained()) {
+				setImageAndText(openshiftMaintainedLabel,
+						"OpenShift maintained",
+						OpenShiftImages.OPENSHIFT_MAINTAINED_IMG);
+			} else {
+				setImageAndText(openshiftMaintainedLabel,
+						"Community created",
+						OpenShiftImages.NOT_OPENSHIFT_MAINTAINED_IMG);
+			}
+		}
+		
+		private void updateSecurityUpdatesIcon(IQuickstartApplicationTemplate template) {
+			if (template.isAutomaticSecurityUpdates()) {
+				setImageAndText(securityUpdatesLabel, 
+						"automatic security updates",
+						OpenShiftImages.SECURITY_UPDATES_IMG);
+			} else {
+				setImageAndText(securityUpdatesLabel,
+						"no automatic security updates",
+						OpenShiftImages.NO_SECURITY_UPDATES_IMG);
+			}
+		}
+
+		private void setImageAndText(CLabel label, String text, Image image) {
+			label.setText(text);
+			label.setImage(image);
+			label.setToolTipText(text);
+		}
+		
+		private SelectionListener onLinkClicked(final String url) {
+			return new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				}
+
+			};
+		}
+	}
+
 }

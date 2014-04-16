@@ -18,17 +18,22 @@ import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.CartridgeNameComparator;
+import org.jboss.tools.openshift.express.internal.core.QuickstartNameComparator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.CartridgeApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.DownloadableCartridgeApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.CodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplateCategory;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.QuickstartApplicationTemplate;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
+import com.openshift.client.IQuickstart;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
@@ -53,7 +58,14 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	private String existingApplicationName;
 	private List<IApplication> existingApplications = new ArrayList<IApplication>();
 	private boolean resourcesLoaded = false;
-	private List<IApplicationTemplate> applicationTemplates = new ArrayList<IApplicationTemplate>();
+	private List<IApplicationTemplate> applicationTemplates;
+	private IApplicationTemplateCategory basicCartridgesCathegory = 
+			new ApplicationTemplateCategory("Basic Cartridges", 
+					"Web programming cartridges provided by OpenShift");
+	private IApplicationTemplateCategory quickstartsCathegory = 
+			new ApplicationTemplateCategory("Quickstarts", 
+					"A quick way to try out a new technology with code and libraries preconfigured. "
+					+ "You are responsible for updating core libraries for security updates");
 	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 
 	protected ApplicationTemplateWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
@@ -110,28 +122,25 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 		return applicationTemplates;
 	}
 
-	protected List<IApplicationTemplate> createApplicationTemplates(
-			List<CartridgeApplicationTemplate> standaloneCartridges) {
+	protected List<IApplicationTemplate> createApplicationTemplates(List<IApplicationTemplate> standaloneCartridges) {
 		List<IApplicationTemplate> applicationTemplates = new ArrayList<IApplicationTemplate>();
-		applicationTemplates.addAll(standaloneCartridges);
-		applicationTemplates
-				.add(new DownloadableCartridgeApplicationTemplate());
+
+		applicationTemplates.add(basicCartridgesCathegory);
+		applicationTemplates.add(quickstartsCathegory);
+		applicationTemplates.add(new CodeAnythingApplicationTemplate());
 
 		return applicationTemplates;
 	}
 
-	private List<CartridgeApplicationTemplate> createCartridgeApplicationTemplates(List<IStandaloneCartridge> cartridges) {
-		List<CartridgeApplicationTemplate> cartridgeApplicationTemplates = new ArrayList<CartridgeApplicationTemplate>();
-		for (IStandaloneCartridge cartridge : cartridges) {
-			cartridgeApplicationTemplates.add(new CartridgeApplicationTemplate(cartridge));
+	private List<IApplicationTemplate> createCartridgeApplicationTemplates(List<IStandaloneCartridge> cartridges) {
+		List<IApplicationTemplate> cartridgeApplicationTemplates = new ArrayList<IApplicationTemplate>();
+		if (cartridges != null) {
+			for (IStandaloneCartridge cartridge : cartridges) {
+				cartridgeApplicationTemplates.add(new CartridgeApplicationTemplate(cartridge));
+			}
 		}
 		return cartridgeApplicationTemplates;
 
-	}
-
-	private List<IApplicationTemplate> setApplicationTemplates(List<IApplicationTemplate> applicationTemplates) {
-		firePropertyChange(PROPERTY_APPLICATION_TEMPLATES, null, this.applicationTemplates = applicationTemplates);
-		return applicationTemplates;
 	}
 
 	public boolean isUseExistingApplication() {
@@ -214,6 +223,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 
 		ensureHasDomain();
 		setDomains(connection.getDomains());
+		setQuickstarts(connection.getQuickstarts());
 		setStandaloneCartridges(connection.getStandaloneCartridges());
 
 		setResourcesLoaded(true);
@@ -222,12 +232,28 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	protected void setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
 		cartridges = new ArrayList<IStandaloneCartridge>(cartridges);
 		Collections.sort(cartridges, new CartridgeNameComparator());
-		wizardModel.setStandaloneCartridges(cartridges);
-		setApplicationTemplates(createApplicationTemplates(createCartridgeApplicationTemplates(cartridges)));
+		wizardModel.setAllStandaloneCartridges(cartridges);
+		basicCartridgesCathegory.clearChildren();
+		basicCartridgesCathegory.addChildren(createCartridgeApplicationTemplates(cartridges));
+	}
+
+	protected void setQuickstarts(List<IQuickstart> quickstarts) {
+		quickstarts = new ArrayList<IQuickstart>(quickstarts);
+		Collections.sort(quickstarts, new QuickstartNameComparator());
+		quickstartsCathegory.clearChildren();
+		quickstartsCathegory.addChildren(createQuickstartApplicationTemplates(quickstarts));
+	}
+
+	protected List<IApplicationTemplate> createQuickstartApplicationTemplates(List<IQuickstart> quickstarts) {
+		List<IApplicationTemplate> templates = new ArrayList<IApplicationTemplate>();
+		for (IQuickstart quickstart : quickstarts) {
+			templates.add(new QuickstartApplicationTemplate(quickstart));
+		}
+		return templates;
 	}
 
 	protected List<IStandaloneCartridge> getStandaloneCartridges() {
-		return wizardModel.getStandaloneCartridges();
+		return wizardModel.getAllStandaloneCartridges();
 	}
 
 	protected void setDomains(List<IDomain> domains) {
@@ -236,7 +262,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void ensureHasDomain() {
-		wizardModel.ensureHasDomain();
+		wizardModel.setDefaultDomainIfRequired();
 	}
 
 	public IApplicationTemplate getSelectedApplicationTemplate() {

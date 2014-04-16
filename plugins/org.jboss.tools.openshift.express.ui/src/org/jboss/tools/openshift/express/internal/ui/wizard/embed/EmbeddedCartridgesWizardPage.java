@@ -29,7 +29,9 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -41,7 +43,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
@@ -49,8 +51,9 @@ import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IC
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationConfigurationWizardPageModel;
 
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author André Dietisheim
@@ -60,16 +63,20 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 	private EmbeddedCartridgesWizardPageModel pageModel;
 	private CheckboxTableViewer viewer;
 
-	public EmbeddedCartridgesWizardPage(IEmbeddedCartridgesModel wizardModel, IWizard wizard) {
-		super("Embed Cartridges", 
+	public EmbeddedCartridgesWizardPage(EmbeddedCartridgesWizardModel wizardModel, IWizard wizard) {
+		this("Embed Cartridges", 
 				NLS.bind("Please select the cartridges to embed into your application {0}",
 						StringUtils.null2emptyString(wizardModel.getApplicationName())),
-				"EmbedCartridgePage", wizard);
+				wizardModel, wizard);
+	}
+
+	protected EmbeddedCartridgesWizardPage(String title, String description, EmbeddedCartridgesWizardModel wizardModel, IWizard wizard) {
+		super(title, description,  "EmbedCartridgePage", wizard);
 		this.pageModel = new EmbeddedCartridgesWizardPageModel(wizardModel);
 	}
 
-	public void setCheckedEmbeddableCartridges(List<IEmbeddableCartridge> embeddableCartridges) {
-		pageModel.setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(embeddableCartridges));
+	public void setCheckedEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
+		pageModel.setCheckedEmbeddableCartridges(new HashSet<ICartridge>(embeddableCartridges));
 	}
 
 	@Override
@@ -82,36 +89,49 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 400).applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
 		dbc.bindSet(
-				ViewerProperties.checkedElements(IEmbeddableCartridge.class).observe(viewer),
+				ViewerProperties.checkedElements(ICartridge.class).observe(viewer),
 				BeanProperties.set(
-						EmbeddedCartridgesWizardPageModel.PROPERTY_CHECKED_EMBEDDABLE_CARTRIDGES)
+						EmbeddedCartridgesWizardPageModel.PROPERTY_CHECKED_CARTRIDGES)
 						.observe(pageModel));
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
-		viewer.addCheckStateListener(
-				new EmbedCartridgeStrategyAdapter(pageModel, this, pageModel.getApplicationProperties()));
+		viewer.addCheckStateListener(onCartridgeChecked(pageModel, this));
 
 		IObservableValue selectedCartridgeObservable =
-				BeanProperties.value(IEmbedCartridgesWizardPageModel.PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE).observe(
-						pageModel);
+				BeanProperties.value(EmbeddedCartridgesWizardPageModel.PROPERTY_SELECTED_CARTRIDGE)
+						.observe(pageModel);
 		ValueBindingBuilder
 			.bind(ViewerProperties.singlePostSelection().observe(viewer))
 			.to(selectedCartridgeObservable)
 			.in(dbc);
 		
-		// uncheck all 
-		Button uncheckAllButton = new Button(parent, SWT.PUSH);
-		uncheckAllButton.setText("&Deselect All");
-		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(uncheckAllButton);
-		uncheckAllButton.addSelectionListener(onDeselectAll());
+		createButtons(parent, dbc);
 
 		// selected cartridge details
 		Group cartridgeDetailsGroup = new Group(parent, SWT.NONE);
 		cartridgeDetailsGroup.setText(" Selected Cartridge: ");
 		GridDataFactory.fillDefaults()
 				.span(2,1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 140).applyTo(cartridgeDetailsGroup);
-		new EmbeddableCartridgeDetailViews(selectedCartridgeObservable, cartridgeDetailsGroup, dbc).createControls();
+		new CartridgeDetailViews(
+				selectedCartridgeObservable,
+				BeanProperties
+						.value(ApplicationConfigurationWizardPageModel.PROPERTY_CAN_ADDREMOVE_CARTRIDGES)
+						.observe(pageModel),
+				cartridgeDetailsGroup, dbc)
+				.createControls();
+	}
+
+	protected void createButtons(Composite parent, DataBindingContext dbc) {
+		// uncheck all 
+		Button deselectAllButton = new Button(parent, SWT.PUSH);
+		deselectAllButton.setText("&Deselect All");
+		GridDataFactory.fillDefaults()
+				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(deselectAllButton);
+		deselectAllButton.addSelectionListener(onDeselectAll());
+	}
+
+	protected ICheckStateListener onCartridgeChecked(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+		return new FullfillRequirementsCheckStrategy(pageModel, wizardPage);
 	}
 
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
@@ -123,13 +143,13 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 				.sorter(new EmbeddableCartridgeViewerSorter())
 				.comparer(new EqualityComparer())
 				.contentProvider(new ArrayContentProvider())
-				.<IEmbeddableCartridge> column("Embeddable Cartridge")
+				.<ICartridge> column("Embeddable Cartridge")
 				.weight(1)
-				.labelProvider(new IColumnLabelProvider<IEmbeddableCartridge>() {
+				.labelProvider(new IColumnLabelProvider<ICartridge>() {
 
 					@Override
-					public String getValue(IEmbeddableCartridge cartridge) {
-						return OpenShiftResourceUtils.toString(cartridge);
+					public String getValue(ICartridge cartridge) {
+						return OpenShiftResourceLabelUtils.toString(cartridge);
 					}
 				})
 				.buildColumn()
@@ -145,8 +165,8 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						setViewerInput(pageModel.loadEmbeddableCartridges());
-						setViewerCheckedElements(pageModel.getCheckedEmbeddableCartridges());
+						setViewerInput(new ArrayList<ICartridge>(pageModel.loadEmbeddableCartridges()));
+						setViewerCheckedElements(new ArrayList<ICartridge>(pageModel.getCheckedCartridges()));
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						clearViewer();
@@ -161,10 +181,10 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void clearViewer() {
-		setViewerInput(new ArrayList<IEmbeddableCartridge>());
+		setViewerInput(new ArrayList<ICartridge>());
 	}
 
-	private void setViewerCheckedElements(final Collection<IEmbeddableCartridge> cartridges) {
+	private void setViewerCheckedElements(final Collection<ICartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
@@ -174,7 +194,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		});
 	}
 
-	private void setViewerInput(final Collection<IEmbeddableCartridge> cartridges) {
+	private void setViewerInput(final Collection<ICartridge> cartridges) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
@@ -193,14 +213,13 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 						Messages.DESELECT_ALL_CARTRIDGES_TITLE,
 						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION
 					)) {
-					pageModel.setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>());
+					pageModel.setCheckedEmbeddableCartridges(new HashSet<ICartridge>());
 				}
 			}
 		};
 	}
 
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() {
-		return pageModel.getCheckedEmbeddableCartridges();
+	public Set<ICartridge> getCheckedCartridges() {
+		return pageModel.getCheckedCartridges();
 	}
-
 }
