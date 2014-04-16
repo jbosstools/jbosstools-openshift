@@ -83,7 +83,14 @@ public class DialogChildToggleAdapter {
 		return size.y;
 	}
 
-	public void toggle() {
+	public void setVisible(boolean visible) {
+		if (this.visible == visible) {
+			return;
+		}
+		toggle();
+	}
+	
+	public boolean toggle() {
 		this.resizing = true;
 		this.visible = !visible;
 		composite.setVisible(visible);
@@ -92,6 +99,7 @@ public class DialogChildToggleAdapter {
 		shell.setSize(shell.getSize().x, newShellHeight);
 		shell.layout(true, true);
 		this.resizing = false;
+		return visible;
 	}
 
 	protected int computeShellHeight(Point shellSize) {

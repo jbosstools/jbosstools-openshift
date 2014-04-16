@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.job.RefreshConnectionsModelJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
@@ -39,7 +39,7 @@ public class ManageDomainsHandler extends AbstractHandler {
 		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), 
 				new ManageDomainsWizard("Domains", 
 						NLS.bind("Manage your domains for connection {0}", connection.getId()), connection)).open();
-		new RefreshConnectionsModelJob(connection).schedule();
+		new FireConnectionsChangedJob(connection).schedule();
 		return Status.OK_STATUS;
 	}
 }

@@ -19,65 +19,73 @@ import java.util.Set;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationProperties;
 
+import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author André Dietisheim
  */
-public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implements IEmbedCartridgesWizardPageModel {
+public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implements IApplicationProperties {
 
-	private IEmbeddedCartridgesModel wizardModel;
-	private List<IEmbeddableCartridge> embeddedCartridges = new ArrayList<IEmbeddableCartridge>();
-	private IEmbeddableCartridge selectedEmbeddableCartridge ;
+	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
+	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
+	public static final String PROPERTY_CHECKED_CARTRIDGES = "checkedCartridges";
 
-	public EmbeddedCartridgesWizardPageModel(IEmbeddedCartridgesModel wizardModel) {
-		this.wizardModel = wizardModel;
+	private EmbeddedCartridgesWizardModel applicationCartridges;
+	private List<ICartridge> embeddableCartridges = new ArrayList<ICartridge>();
+	private ICartridge selectedCartridge ;
+
+	public EmbeddedCartridgesWizardPageModel(EmbeddedCartridgesWizardModel applicationCartridges) {
+		this.applicationCartridges = applicationCartridges;
 	}
 	
-	public List<IEmbeddableCartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
-		List<IEmbeddableCartridge> cartridges = wizardModel.getEmbeddableCartridges();
+	public List<ICartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
+		List<ICartridge> cartridges = applicationCartridges.getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		return cartridges;
 	}
 
-	public void setEmbeddableCartridges(List<IEmbeddableCartridge> cartridges) {
+	public void setEmbeddableCartridges(List<ICartridge> cartridges) {
 		firePropertyChange(
-				PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddedCartridges, this.embeddedCartridges = cartridges);
+				PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges, this.embeddableCartridges = cartridges);
 	}
 
-	public List<IEmbeddableCartridge> getEmbeddedCartridges() {
-		return embeddedCartridges;
+	public List<ICartridge> getEmbeddableCartridges() {
+		return embeddableCartridges;
 	}
 
-	@Override
-	public Set<IEmbeddableCartridge> getCheckedEmbeddableCartridges() throws OpenShiftException {
-		return wizardModel.getCheckedEmbeddableCartridges();
+	/**
+	 * Returns the embeddable cartridges that are checked in the checkbox table.
+	 * These are the cartridges that will get added once the wizard is finished.
+	 * 
+	 * @return the checked cartridges.
+	 * @throws OpenShiftException
+	 */
+	public Set<ICartridge> getCheckedCartridges() throws OpenShiftException {
+		return applicationCartridges.getCheckedEmbeddableCartridges();
 	}
 
-	protected void setCheckedEmbeddableCartridges(List<? extends IEmbeddableCartridge> cartridges) throws OpenShiftException {
-		setCheckedEmbeddableCartridges(new HashSet<IEmbeddableCartridge>(cartridges));
+	protected void setCheckedCartridges(List<? extends ICartridge> cartridges) throws OpenShiftException {
+		setCheckedEmbeddableCartridges(new HashSet<ICartridge>(cartridges));
 	}
 	
-	@Override
-	public void setCheckedEmbeddableCartridges(Set<IEmbeddableCartridge> cartridges) throws OpenShiftException {
-		firePropertyChange(PROPERTY_CHECKED_EMBEDDABLE_CARTRIDGES, null, wizardModel.setCheckedEmbeddableCartridges(cartridges));
+	public void setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) throws OpenShiftException {
+		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, applicationCartridges.setCheckedEmbeddableCartridges(cartridges));
 	}
 	
-	@Override
-	public void setSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
-		firePropertyChange(PROPERTY_SELECTED_EMBEDDABLE_CARTRIDGE, selectedEmbeddableCartridge, this.selectedEmbeddableCartridge = cartridge);
+	public void setSelectedCartridge(ICartridge cartridge) {
+		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, selectedCartridge, this.selectedCartridge = cartridge);
 	}
 	
-	@Override
-	public IEmbeddableCartridge getSelectedEmbeddableCartridge() {
-		return selectedEmbeddableCartridge;
+	public ICartridge getSelectedCartridge() {
+		return selectedCartridge;
 	}
 
-	public boolean isEmbedded(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		return wizardModel.isEmbedded(cartridge);
+	public boolean isEmbedded(ICartridge cartridge) throws OpenShiftException {
+		return applicationCartridges.isEmbedded(cartridge);
 	}
 
 	public boolean hasApplication(IStandaloneCartridge cartridge) throws OpenShiftException {
@@ -88,31 +96,38 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 		return domain.hasApplicationByCartridge(cartridge);
 	}
 
-	@Override
-	public void checkEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		getCheckedEmbeddableCartridges().add(cartridge);
-		firePropertyChange(PROPERTY_CHECKED_EMBEDDABLE_CARTRIDGES, null, getCheckedEmbeddableCartridges());
+	public void checkEmbeddedCartridge(ICartridge cartridge) throws OpenShiftException {
+		getCheckedCartridges().add(cartridge);
+		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, getCheckedCartridges());
 	}
 
-	@Override
-	public void uncheckEmbeddedCartridge(IEmbeddableCartridge cartridge) 
-			throws OpenShiftException {
-		getCheckedEmbeddableCartridges().remove(cartridge);
-		firePropertyChange(PROPERTY_CHECKED_EMBEDDABLE_CARTRIDGES, null, getCheckedEmbeddableCartridges());
+	public void uncheckEmbeddedCartridge(ICartridge cartridge) throws OpenShiftException {
+		getCheckedCartridges().remove(cartridge);
+		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, getCheckedCartridges());
 	}
 
-	public Set<IEmbeddableCartridge> refreshSelectedEmbeddedCartridges() throws OpenShiftException {
-		wizardModel.refresh();
-		setCheckedEmbeddableCartridges(wizardModel.getEmbeddedCartridges());
-		return getCheckedEmbeddableCartridges();
+	public Set<ICartridge> refreshSelectedEmbeddedCartridges() throws OpenShiftException {
+		applicationCartridges.refresh();
+		setCheckedCartridges(applicationCartridges.getEmbeddedCartridges());
+		return getCheckedCartridges();
 	}
 
-	public IApplicationProperties getApplicationProperties() {
-		return wizardModel;
-	}
-
-	@Override
 	public IDomain getDomain() throws OpenShiftException {
-		return wizardModel.getDomain();
+		return applicationCartridges.getDomain();
+	}
+
+	@Override
+	public ApplicationScale getApplicationScale() {
+		return applicationCartridges.getApplicationScale();
+	}
+
+	@Override
+	public IStandaloneCartridge getStandaloneCartridge() {
+		return applicationCartridges.getStandaloneCartridge();
+	}
+
+	@Override
+	public String getApplicationName() {
+		return applicationCartridges.getApplicationName();
 	}
 }

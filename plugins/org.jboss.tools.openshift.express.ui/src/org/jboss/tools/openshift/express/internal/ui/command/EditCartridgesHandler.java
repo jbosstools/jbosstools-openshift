@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsMod
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbeddedCartridgesWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EditEmbeddedCartridgesWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -38,7 +38,7 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 		}
 		try {
 			WizardUtils.openWizardDialog(
-					new EmbeddedCartridgesWizard(application, 
+					new EditEmbeddedCartridgesWizard(application, 
 							ConnectionsModelSingleton.getInstance().getConnectionByResource(application)), 
 							HandlerUtil.getActiveShell(event));
 			return null;

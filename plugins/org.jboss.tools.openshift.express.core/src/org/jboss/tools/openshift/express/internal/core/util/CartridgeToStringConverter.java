@@ -12,15 +12,15 @@ package org.jboss.tools.openshift.express.internal.core.util;
 
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils.ToStringConverter;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
  */
-public class StandaloneCartridgeToStringConverter implements ToStringConverter<IStandaloneCartridge> {
+public class CartridgeToStringConverter implements ToStringConverter<ICartridge> {
 
 		@Override
-		public String toString(IStandaloneCartridge cartridge) {
+		public String toString(ICartridge cartridge) {
 			if (cartridge == null) {
 				return null;
 			}

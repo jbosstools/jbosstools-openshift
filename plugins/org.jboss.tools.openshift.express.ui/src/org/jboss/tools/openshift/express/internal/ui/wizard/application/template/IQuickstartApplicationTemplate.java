@@ -10,15 +10,31 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.List;
+
+import com.openshift.client.IQuickstart;
+import com.openshift.client.cartridge.ICartridge;
+import com.openshift.internal.client.AlternativeCartridges;
 
 /**
  * @author Andre Dietisheim
  */
-public interface IDownloadableCartridgeApplicationTemplate extends ICartridgeApplicationTemplate {
+public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 
-	public static final String PROPERTY_CARTRIDGE_URL = "url";
+	public IQuickstart getQuickstart();
 
-	public String getUrl();
+	public String getLanguage();
+	
+	public String getHref();
+	
+	public String getInitialGitUrl();
+	
+	public List<AlternativeCartridges> getSuitableCartridges();
+	
+	public List<ICartridge> getAlternativesFor(ICartridge cartridge);
+	
+	public boolean isOpenShiftMaintained();
+	
+	public boolean isAutomaticSecurityUpdates();
 
-	public void setUrl(String url);
 }

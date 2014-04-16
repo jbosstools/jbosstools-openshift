@@ -24,20 +24,21 @@ import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUI
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IEmbeddableCartridge;
+import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
-import com.openshift.client.cartridge.query.LatestVersionOf;
+import com.openshift.client.cartridge.query.CartridgeNameQuery;
+import com.openshift.client.cartridge.query.ICartridgeQuery;
 
 /**
  * @author Andre Dietisheim
  */
 public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 
-	private List<IEmbeddableCartridge> selectedCartridges;
+	private List<ICartridge> selectedCartridges;
 	private IApplication application;
 	private List<IEmbeddedCartridge> addedCartridges;
 
-	public EmbedCartridgesJob(List<IEmbeddableCartridge> selectedCartridges, IApplication application) {
+	public EmbedCartridgesJob(List<ICartridge> selectedCartridges, IApplication application) {
 		super(NLS.bind(OpenShiftExpressUIMessages.ADDING_REMOVING_CARTRIDGES, application.getName()));
 		this.selectedCartridges = selectedCartridges;
 		this.application = application;
@@ -67,37 +68,38 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		return addedCartridges;
 	}
 
-	private void removeEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToRemove,
+	private void removeEmbeddedCartridges(List<ICartridge> cartridgesToRemove,
 			final IApplication application, IProgressMonitor monitor) throws OpenShiftException {
 		if (cartridgesToRemove.isEmpty()) {
 			return;
 		}
 		Collections.sort(cartridgesToRemove, new CartridgeAddRemovePriorityComparator());
-		for (IEmbeddableCartridge cartridgeToRemove : cartridgesToRemove) {
+		for (ICartridge cartridgeToRemove : cartridgesToRemove) {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			final IEmbeddedCartridge embeddedCartridge = application.getEmbeddedCartridge(cartridgeToRemove);
+			final IEmbeddedCartridge embeddedCartridge = application.getEmbeddedCartridge(cartridgeToRemove.getName());
 			if (embeddedCartridge != null) {
 				embeddedCartridge.destroy();
 			}
 		}
 	}
 
-	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<IEmbeddableCartridge> cartridgesToAdd,
+	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<ICartridge> cartridgesToAdd,
 			final IApplication application, IProgressMonitor monitor) throws OpenShiftException {
 		if (cartridgesToAdd.isEmpty()
 				|| monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
 		Collections.sort(cartridgesToAdd, new CartridgeAddRemovePriorityComparator());
-		return application.addEmbeddableCartridges(cartridgesToAdd);
+		return application.addEmbeddableCartridges(
+				(ICartridge[]) cartridgesToAdd.toArray(new ICartridge[cartridgesToAdd.size()]));
 	}
 
-	private List<IEmbeddableCartridge> getAddedCartridges(List<IEmbeddableCartridge> selectedCartridges,
+	private List<ICartridge> getAddedCartridges(List<ICartridge> selectedCartridges,
 			List<IEmbeddedCartridge> embeddedCartridges) {
-		List<IEmbeddableCartridge> cartridgesToAdd = new ArrayList<IEmbeddableCartridge>();
-		for (IEmbeddableCartridge cartridge : selectedCartridges) {
+		List<ICartridge> cartridgesToAdd = new ArrayList<ICartridge>();
+		for (ICartridge cartridge : selectedCartridges) {
 			if (!embeddedCartridges.contains(cartridge)) {
 				cartridgesToAdd.add(cartridge);
 			}
@@ -105,10 +107,10 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		return cartridgesToAdd;
 	}
 
-	private List<IEmbeddableCartridge> getRemovedCartridges(List<IEmbeddableCartridge> selectedCartridges,
+	private List<ICartridge> getRemovedCartridges(List<ICartridge> selectedCartridges,
 			List<IEmbeddedCartridge> embeddedCartridges) {
-		List<IEmbeddableCartridge> cartridgesToRemove = new ArrayList<IEmbeddableCartridge>();
-		for (IEmbeddableCartridge cartridge : embeddedCartridges) {
+		List<ICartridge> cartridgesToRemove = new ArrayList<ICartridge>();
+		for (ICartridge cartridge : embeddedCartridges) {
 			if (!selectedCartridges.contains(cartridge)) {
 				cartridgesToRemove.add(cartridge);
 			}
@@ -116,22 +118,26 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		return cartridgesToRemove;
 	}
 
-	private class CartridgeAddRemovePriorityComparator implements Comparator<IEmbeddableCartridge> {
+	private static class CartridgeAddRemovePriorityComparator implements Comparator<ICartridge> {
 
+		private static final ICartridgeQuery mySqlMatcher = new CartridgeNameQuery(IEmbeddedCartridge.NAME_MYSQL);
+		private static final ICartridgeQuery postgresqlMatcher = new CartridgeNameQuery(IEmbeddedCartridge.NAME_POSTGRESQL);
+		private static final ICartridgeQuery mongodbMatcher = new CartridgeNameQuery(IEmbeddedCartridge.NAME_MONGODB);
+		
 		@Override
-		public int compare(IEmbeddableCartridge thisCartridge, IEmbeddableCartridge thatCartridge) {
+		public int compare(ICartridge thisCartridge, ICartridge thatCartridge) {
 			// mysql has to be added/removed before phpmyadmin
-			if (thisCartridge.equals(LatestVersionOf.mySQL().matches(thisCartridge))) {
+			if (mySqlMatcher.matches(thisCartridge)) {
 				return -1;
-			} else if (LatestVersionOf.mySQL().matches(thatCartridge)) {
+			} else if (mySqlMatcher.matches(thatCartridge)) {
 				return 1;
-			} else if (LatestVersionOf.postgreSQL().matches(thisCartridge)) {
+			} else if (postgresqlMatcher.matches(thisCartridge)) {
 				return -1;
-			} else if (LatestVersionOf.postgreSQL().matches(thatCartridge)) {
+			} else if (postgresqlMatcher.matches(thatCartridge)) {
 				return 1;
-			} else if (LatestVersionOf.mongoDB().matches(thisCartridge)) {
+			} else if (mongodbMatcher.matches(thisCartridge)) {
 				return -1;
-			} else if (LatestVersionOf.mongoDB().matches(thatCartridge)) {
+			} else if (mongodbMatcher.matches(thatCartridge)) {
 				return 1;
 			}
 			return 0;

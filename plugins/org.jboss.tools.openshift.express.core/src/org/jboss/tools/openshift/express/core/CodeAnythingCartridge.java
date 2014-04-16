@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.core;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 import com.openshift.client.cartridge.StandaloneCartridge;
 import com.openshift.internal.client.cartridge.BaseCartridge;
@@ -25,7 +24,7 @@ import com.openshift.internal.client.cartridge.BaseCartridge;
  * 
  * @see StandaloneCartridge
  */
-public class CodeAnythingCartridge extends BaseCartridge implements IEmbeddableCartridge, IStandaloneCartridge {
+public class CodeAnythingCartridge extends BaseCartridge implements IStandaloneCartridge {
 
 	public static final String PROPERTY_URL_STRING = "urlString";
 	
