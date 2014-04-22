@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2012 Red Hat, Inc. 
+ * Copyright (c) 2014 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -19,12 +19,38 @@ import java.util.List;
  */
 public class CollectionUtils {
 
-	public static <T> List<T> add(T cartridge, List<T> cartridges) {
-		cartridges.add(cartridge);
-		return cartridges;
+	/**
+	 * Adds the given element to the given collection.
+	 * 
+	 * @param element the element to add
+	 * @param collection the collection to add to
+	 * @return
+	 */
+	public static <C extends Collection<E>, E> C addTo(E element, C collection) {
+		collection.add(element);
+		return collection;
 	}
 	
-	public static <T> List<T> removeAll(Collection<T> toRemove, List<T> cartridges) {
+	/**
+	 * Adds all elements withing the given collection to the given other collection
+	 * 
+	 * @param toAdd all elements that should get add
+	 * @param collection
+	 * @return
+	 */
+	public static <C extends Collection<E>, E> C addAllTo(C toAdd, C collection) {
+		collection.addAll(toAdd);
+		return collection;
+	}
+
+	/**
+	 * Removes all given elements from the given other collection.
+	 * 
+	 * @param toRemove
+	 * @param cartridges
+	 * @return
+	 */
+	public static <C extends Collection<E>, E> C removeAll(C toRemove, C cartridges) {
 		cartridges.removeAll(toRemove);
 		return cartridges;
 	}

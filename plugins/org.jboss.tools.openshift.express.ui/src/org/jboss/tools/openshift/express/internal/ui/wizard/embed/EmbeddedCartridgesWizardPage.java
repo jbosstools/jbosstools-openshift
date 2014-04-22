@@ -76,7 +76,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	public void setCheckedEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
-		pageModel.setCheckedEmbeddableCartridges(new HashSet<ICartridge>(embeddableCartridges));
+		pageModel.setCheckedCartridges(new HashSet<ICartridge>(embeddableCartridges));
 	}
 
 	@Override
@@ -213,7 +213,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 						Messages.DESELECT_ALL_CARTRIDGES_TITLE,
 						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION
 					)) {
-					pageModel.setCheckedEmbeddableCartridges(new HashSet<ICartridge>());
+					pageModel.setCheckedCartridges(new HashSet<ICartridge>());
 				}
 			}
 		};

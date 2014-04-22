@@ -64,15 +64,15 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	 * @return the checked cartridges.
 	 * @throws OpenShiftException
 	 */
-	public Set<ICartridge> getCheckedCartridges() throws OpenShiftException {
+	public Set<ICartridge> getCheckedCartridges() {
 		return applicationCartridges.getCheckedEmbeddableCartridges();
 	}
 
-	protected void setCheckedCartridges(List<? extends ICartridge> cartridges) throws OpenShiftException {
-		setCheckedEmbeddableCartridges(new HashSet<ICartridge>(cartridges));
+	protected void setCheckedCartridges(List<? extends ICartridge> cartridges) {
+		setCheckedCartridges(new HashSet<ICartridge>(cartridges));
 	}
 	
-	public void setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) throws OpenShiftException {
+	public void setCheckedCartridges(Set<ICartridge> cartridges) throws OpenShiftException {
 		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, applicationCartridges.setCheckedEmbeddableCartridges(cartridges));
 	}
 	
