@@ -84,7 +84,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 	@Override
 	public boolean allowHostname(String hostname, SSLSession sslSession) {
-		return false;
+		return true;
 	}
 	
 	private class SSLCertificateDialog extends TitleAreaDialog {
