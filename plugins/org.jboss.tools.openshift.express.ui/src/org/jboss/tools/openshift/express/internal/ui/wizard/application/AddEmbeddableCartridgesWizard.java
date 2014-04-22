@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
@@ -32,11 +33,11 @@ public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<Embed
 		super("Add Embedded Cartridges", 
 				new EmbeddedCartridgesWizardModel(
 						wizardModel.getCartridges()
-						, CollectionUtils.add(
+						, CollectionUtils.addTo(
 								// add code anything
-								new CodeAnythingCartridge(),
+								(ICartridge) new CodeAnythingCartridge(),
 								// remove embedded cartridges
-								CollectionUtils.removeAll(
+								(List<ICartridge>) CollectionUtils.removeAll(
 										wizardModel.getCartridges(),
 										new ArrayList<ICartridge>(wizardModel.getAllEmbeddableCartridges())))
 						, new NewApplicationProperties(wizardModel)

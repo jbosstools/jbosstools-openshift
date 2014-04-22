@@ -53,9 +53,14 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 		
 		this.wizardModel = new EmbeddedCartridgesWizardModel(
 				new HashSet<ICartridge>(application.getEmbeddedCartridges())
-				// add code anything cartridge
-				, CollectionUtils.add(new CodeAnythingCartridge(), 
-						new ArrayList<ICartridge>(connection.getEmbeddableCartridges())) 
+				, CollectionUtils.addTo(
+						// add code anything cartridge
+						(ICartridge) new CodeAnythingCartridge(),
+						new ArrayList<ICartridge>(
+								CollectionUtils.addAllTo(
+										// add downloadable cartridges embedded to application
+										new ArrayList<ICartridge>(application.getEmbeddedCartridges()),
+										new HashSet<ICartridge>(connection.getEmbeddableCartridges()))))
 				, new ExistingApplicationProperties(application)
 				, application.getDomain()
 				, connection);
