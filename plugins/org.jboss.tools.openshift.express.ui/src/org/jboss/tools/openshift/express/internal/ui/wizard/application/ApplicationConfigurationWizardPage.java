@@ -334,7 +334,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		Composite tableContainer = new Composite(embeddableCartridgesGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).hint(400, SWT.DEFAULT).grab(true, true).span(1,2).applyTo(tableContainer);
-		TableViewer embeddableCartridgesTableViewer = createEmbeddableCartridgesViewer(tableContainer, dbc);
+		TableViewer embeddableCartridgesTableViewer = createEmbeddableCartridgesViewer(tableContainer);
 		embeddableCartridgesTableViewer.setInput(
 				BeanProperties.set(
 						ApplicationConfigurationWizardPageModel.PROPERTY_EMBEDDED_CARTRIDGES).observe(pageModel));
@@ -593,7 +593,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		};
 	}
 	
-	private TableViewer createEmbeddableCartridgesViewer(Composite tableContainer, DataBindingContext dbc) {
+	private TableViewer createEmbeddableCartridgesViewer(Composite tableContainer) {
 		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		TableViewer viewer = new TableViewerBuilder(table, tableContainer)

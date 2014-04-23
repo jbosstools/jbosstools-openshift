@@ -35,9 +35,8 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 		return availableCartridges;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <C extends ICartridge> List<C> getEmbeddedCartridges() {
-		return (List<C>) embeddedCartridges;
+	public Set<ICartridge> getEmbeddedCartridges() {
+		return embeddedCartridges;
 	}
 
 	public boolean isEmbedded(ICartridge cartridge) {
