@@ -19,9 +19,7 @@ import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
 
 /**
@@ -29,24 +27,21 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.connection.Connectio
  */
 public class ConnectionWizardActionDelegate implements IViewActionDelegate {
 
-	private Connection selectedConnection;
-
 	@Override
 	public void run(IAction action) {
 		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		final IWizard connectToOpenShiftWizard = new ConnectionWizard(selectedConnection);
+		final IWizard connectToOpenShiftWizard = new ConnectionWizard(null);
 		int returnCode = WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
 		if (returnCode == Window.CANCEL) {
 			return;
 		}
 		Logger.debug("OpenShift Auth succeeded.");
 	}
-
+	
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
-		this.selectedConnection = UIUtils.getFirstElement(selection, Connection.class);
 	}
-	
+
 	@Override
 	public void init(IViewPart view) {
 	}
