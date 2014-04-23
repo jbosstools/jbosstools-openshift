@@ -47,7 +47,7 @@ public class DialogChildToggleAdapter {
 		Assert.isTrue(child.getShell() != null	&& !child.getShell().isDisposed());
 		this.shell = child.getShell();
 		shell.addControlListener(onShellResized(shell));
-		this.invisibleChildShellHeight = computeInvisibleChildShellHeight(visible, child, shell);
+		this.invisibleChildShellHeight = computeChildHeight(visible, child, shell);
 		this.visible = visible;
 		child.setVisible(visible);
 	}
@@ -74,7 +74,7 @@ public class DialogChildToggleAdapter {
 		return listener;
 	}
 
-	private int computeInvisibleChildShellHeight(boolean visible, Composite child, Shell shell) {
+	private int computeChildHeight(boolean visible, Composite child, Shell shell) {
 		Point size = shell.getSize();
 		if (visible) {
 			Point childSize = child.computeSize(child.getSize().x, SWT.DEFAULT);

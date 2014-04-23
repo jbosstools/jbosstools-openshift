@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,10 +41,14 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 		this.applicationCartridges = applicationCartridges;
 	}
 	
-	public List<ICartridge> loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
+	public void loadOpenShiftResources() throws OpenShiftException, SocketTimeoutException {
+		loadEmbeddableCartridges();
+	}
+	
+	private void loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
 		List<ICartridge> cartridges = applicationCartridges.getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
-		return cartridges;
+		setCheckedCartridges(applicationCartridges.getEmbeddedCartridges());
 	}
 
 	public void setEmbeddableCartridges(List<ICartridge> cartridges) {
@@ -68,10 +71,6 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 		return applicationCartridges.getCheckedEmbeddableCartridges();
 	}
 
-	protected void setCheckedCartridges(List<? extends ICartridge> cartridges) {
-		setCheckedCartridges(new HashSet<ICartridge>(cartridges));
-	}
-	
 	public void setCheckedCartridges(Set<ICartridge> cartridges) throws OpenShiftException {
 		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, applicationCartridges.setCheckedEmbeddableCartridges(cartridges));
 	}

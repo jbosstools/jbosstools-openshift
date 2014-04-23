@@ -10,10 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -22,12 +19,11 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.IWizard;
@@ -46,6 +42,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
@@ -61,7 +58,6 @@ import com.openshift.client.cartridge.ICartridge;
 public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 
 	private EmbeddedCartridgesWizardPageModel pageModel;
-	private CheckboxTableViewer viewer;
 
 	public EmbeddedCartridgesWizardPage(EmbeddedCartridgesWizardModel wizardModel, IWizard wizard) {
 		this("Embed Cartridges", 
@@ -75,8 +71,8 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		this.pageModel = new EmbeddedCartridgesWizardPageModel(wizardModel);
 	}
 
-	public void setCheckedEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
-		pageModel.setCheckedCartridges(new HashSet<ICartridge>(embeddableCartridges));
+	public void setCheckedEmbeddableCartridges(Set<ICartridge> embeddableCartridges) {
+		pageModel.setCheckedCartridges(embeddableCartridges);
 	}
 
 	@Override
@@ -87,7 +83,11 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		Composite tableContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 400).applyTo(tableContainer);
-		this.viewer = createTable(tableContainer);
+		CheckboxTableViewer viewer = createCartridgesTableViewer(tableContainer);
+		
+		viewer.setInput(
+				BeanProperties.list(EmbeddedCartridgesWizardPageModel.PROPERTY_EMBEDDABLE_CARTRIDGES)
+						.observe(pageModel));
 		dbc.bindSet(
 				ViewerProperties.checkedElements(ICartridge.class).observe(viewer),
 				BeanProperties.set(
@@ -134,7 +134,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		return new FullfillRequirementsCheckStrategy(pageModel, wizardPage);
 	}
 
-	protected CheckboxTableViewer createTable(Composite tableContainer) {
+	protected CheckboxTableViewer createCartridgesTableViewer(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setLinesVisible(true);
@@ -142,9 +142,8 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		new TableViewerBuilder(tableViewer, tableContainer)
 				.sorter(new EmbeddableCartridgeViewerSorter())
 				.comparer(new EqualityComparer())
-				.contentProvider(new ArrayContentProvider())
+				.contentProvider(new ObservableListContentProvider())
 				.<ICartridge> column("Embeddable Cartridge")
-				.weight(1)
 				.labelProvider(new IColumnLabelProvider<ICartridge>() {
 
 					@Override
@@ -152,6 +151,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 						return OpenShiftResourceLabelUtils.toString(cartridge);
 					}
 				})
+				.weight(1)
 				.buildColumn()
 				.buildViewer();
 		return tableViewer;
@@ -160,48 +160,22 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
-			WizardUtils.runInWizard(new Job("Loading embeddable cartridges...") {
+			AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob("Loading embeddable cartridges...") {
 
 				@Override
-				protected IStatus run(IProgressMonitor monitor) {
+				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
-						setViewerInput(new ArrayList<ICartridge>(pageModel.loadEmbeddableCartridges()));
-						setViewerCheckedElements(new ArrayList<ICartridge>(pageModel.getCheckedCartridges()));
+						pageModel.loadOpenShiftResources();
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						clearViewer();
 						return OpenShiftUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
 					}
 				}
-
-			}, getContainer(), getDataBindingContext());
+			};
+			WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), getDataBindingContext());
 		} catch (Exception e) {
 			// ignore
 		}
-	}
-
-	private void clearViewer() {
-		setViewerInput(new ArrayList<ICartridge>());
-	}
-
-	private void setViewerCheckedElements(final Collection<ICartridge> cartridges) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.setCheckedElements(cartridges.toArray());
-			}
-		});
-	}
-
-	private void setViewerInput(final Collection<ICartridge> cartridges) {
-		getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.setInput(cartridges);
-			}
-		});
 	}
 
 	private SelectionListener onDeselectAll() {
