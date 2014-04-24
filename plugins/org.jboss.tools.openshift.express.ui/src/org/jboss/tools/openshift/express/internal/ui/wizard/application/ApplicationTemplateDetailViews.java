@@ -44,7 +44,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
@@ -72,24 +71,9 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		emptyView.createControls(parent, dbc);
 	}
 
-	protected IDetailView getView(IObservableValue applicationTemplateObservable) {
-		Object value = applicationTemplateObservable.getValue();
-		if (!(value instanceof IApplicationTemplate)) {
-			return emptyView;
-		}
-		
-		IApplicationTemplate template = (IApplicationTemplate) value;
-		if (template instanceof ICodeAnythingApplicationTemplate) {
-			return downloadableCartridgeView;
-		} else if (template instanceof ICartridgeApplicationTemplate) {
-			return defaultView;
-		} else if (template instanceof IQuickstartApplicationTemplate) {
-			return quickstartView;
-		} else if (template instanceof IApplicationTemplateCategory) {
-			return defaultView;
-		} else {
-			return emptyView;
-		}
+	@Override
+	protected IDetailView[] getDetailViews() {
+		return new IDetailView[] { quickstartView, downloadableCartridgeView, defaultView };
 	}
 
 	private class DefaultView extends EmptyView {
@@ -130,6 +114,11 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			this.nameText.setText(templateName);
 			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, descriptionText.getBackground()));
 			this.descriptionText.setText(applicationTemplate.getDescription());
+		}
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof ICartridgeApplicationTemplate;
 		}
 	}
 
@@ -243,9 +232,13 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 				}
 				return ValidationStatus.ok();
 			}
-			
 		}
-	
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof ICodeAnythingApplicationTemplate;
+		}
+
 	}
 	
 	private class QuickstartView extends EmptyView {
@@ -339,6 +332,10 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 			};
 		}
-	}
 
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof IQuickstartApplicationTemplate;
+		}
+	}
 }

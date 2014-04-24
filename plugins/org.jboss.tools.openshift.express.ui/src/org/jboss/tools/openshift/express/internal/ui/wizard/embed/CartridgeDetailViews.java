@@ -57,26 +57,8 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 	private final IDetailView codeAnythingCartridgeView = new CodeAnythingDetailsView();
 
 	@Override
-	public void createViewControls(Composite parent, DataBindingContext dbc) {
-		cartridgeView.createControls(parent, dbc);
-		downloadableCartridgeView.createControls(parent, dbc);
-		codeAnythingCartridgeView.createControls(parent, dbc);
-	}
-
-	protected IDetailView getView(IObservableValue selectedCartridgeObservable) {
-		Object value = selectedCartridgeObservable.getValue();
-		if (!(value instanceof ICartridge)) {
-			return emptyView;
-		}
-		
-		ICartridge cartridge = (ICartridge) value;
-		if (cartridge instanceof CodeAnythingCartridge) {
-			return codeAnythingCartridgeView;
-		} else if (cartridge.isDownloadable()) {
-			return downloadableCartridgeView;
-		} else {
-			return cartridgeView;
-		}
+	protected IDetailView[] getDetailViews() {
+		return new IDetailView[] { codeAnythingCartridgeView, downloadableCartridgeView, cartridgeView };
 	}
 	
 	private class CartridgeDetailsView extends EmptyView {
@@ -119,6 +101,12 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 
 			this.description.setText(embeddableCartridge.getDescription());
 		}
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof ICartridge;
+		}
+		
 	}
 
 	private class DownloadableCartridgeView extends CartridgeDetailsView {
@@ -162,6 +150,12 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			if (cartridge.getUrl() != null) {
 				this.url.setText(cartridge.getUrl().toString());
 			}
+		}
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof ICartridge
+					&& ((ICartridge) object).isDownloadable();
 		}
 	}
 
@@ -233,15 +227,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			ControlDecorationSupport.create(codeAnythingUrlValidator,
 					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		}
-
-		@Override
-		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
-			if (DisposeUtils.isDisposed(binding)) {
-				return;
-			}
-			binding.dispose();
-		}
-
+		
 		class CodeAnythingUrlValidator extends MultiValidator {
 
 			private IObservableValue url;
@@ -272,5 +258,19 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			}
 			
 		}
+
+		@Override
+		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
+			if (DisposeUtils.isDisposed(binding)) {
+				return;
+			}
+			binding.dispose();
+		}
+		
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof CodeAnythingCartridge;
+		}
+
 	}
 }
