@@ -50,6 +50,8 @@ public abstract class AbstractDetailViews {
 		showView(null, currentView, dbc);
 	}
 
+	protected abstract IDetailView[] getDetailViews();
+	
 	private IValueChangeListener onDetailViewModelChanged() {
 		return new IValueChangeListener() {
 
@@ -86,6 +88,10 @@ public abstract class AbstractDetailViews {
 					.margins(6, 6).spacing(6, 6).applyTo(container);
 			return container;
 		}
+		
+		public boolean isViewFor(Object object) {
+			return true;
+		}
 	}
 
 	private abstract class BaseDetailsView implements IDetailView {
@@ -109,12 +115,35 @@ public abstract class AbstractDetailViews {
 			this.control = composite;
 			return composite;
 		}
+
+		@Override
+		public abstract boolean isViewFor(Object object);
 	}
 	
-	protected abstract void createViewControls(Composite parent, DataBindingContext dbc);
+	protected void createViewControls(Composite parent, DataBindingContext dbc) {
+		for (IDetailView detailView : getDetailViews()) {
+			detailView.createControls(parent, dbc);
+		}
+	};
 
-	protected abstract IDetailView getView(IObservableValue selectedCartridgeObservable);
+	protected IDetailView getView(IObservableValue selectedCartridgeObservable) {
+		return getViewFor(selectedCartridgeObservable, getDetailViews());
+	};
 
+	protected IDetailView getViewFor(IObservableValue selectedCartridgeObservable, IDetailView... detailViews) {
+		Object value = selectedCartridgeObservable.getValue();
+		IDetailView view = emptyView;
+
+		for(IDetailView detailView : detailViews) {
+			if (detailView.isViewFor(value)) {
+				view = detailView;
+				break;
+			}
+		}
+		
+		return view;
+	}
+	
 	public interface IDetailView {
 
 		public Composite createControls(Composite parent, DataBindingContext dbc);
@@ -124,6 +153,8 @@ public abstract class AbstractDetailViews {
 		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
 
 		public Control getControl();
+		
+		public boolean isViewFor(Object object);
 
 	}
 }
