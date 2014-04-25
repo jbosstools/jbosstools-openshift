@@ -332,6 +332,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				applicationTemplatesViewer.refresh();
+				applicationTemplatesViewer.expandAll();
 			}
 		};
 	}
