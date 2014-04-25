@@ -140,7 +140,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 
 		// existing app explanatory label
 		Label existingAppLabel = new Label(parent, SWT.None);
-		existingAppLabel.setText("We'll import your existing application to a workspace project.");
+		existingAppLabel.setText("We will clone and import your existing application to a workspace project.");
 		existingAppLabel.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND));
 		GridDataFactory.fillDefaults()
 				.span(2, 1)
