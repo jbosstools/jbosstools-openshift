@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
@@ -37,5 +39,19 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	@Override
 	public boolean isCodeAnything() {
 		return cartridge.isDownloadable();
+	}
+	
+	@Override
+	public boolean isMatching(String expression) {
+		if (super.isMatching(expression)) {
+			return true;
+		}
+
+		if (cartridge == null) {
+			return false;
+		}
+
+		return isMatching(
+				StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
 	}
 }

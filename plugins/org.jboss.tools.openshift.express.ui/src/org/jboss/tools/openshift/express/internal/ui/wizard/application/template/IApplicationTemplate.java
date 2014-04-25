@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 
 /**
