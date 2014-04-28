@@ -556,7 +556,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 			if (element instanceof ICartridgeApplicationTemplate) {
 				createCartridgeTemplatelabel(text, (ICartridgeApplicationTemplate) element);
 			} else if (element instanceof IQuickstartApplicationTemplate) {
-					createQuickstartTemplatelabel(text, (IQuickstartApplicationTemplate) element);
+				createQuickstartTemplatelabel(text, (IQuickstartApplicationTemplate) element);
 			} else {
 				createApplicationTemplateLabel(text, (IApplicationTemplate) element);
 			}
@@ -578,20 +578,9 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 
 		private void createQuickstartTemplatelabel(StyledString text, IQuickstartApplicationTemplate quickstartTemplate) {
 			createApplicationTemplateLabel(text, quickstartTemplate);
-			IQuickstart quickstart = quickstartTemplate.getQuickstart();
-			if (quickstart != null
-					&& !StringUtils.isEmpty(quickstart.getName())) {
+			if (!StringUtils.isEmpty(quickstartTemplate.getName())) {
 				text.append(" ", StyledString.DECORATIONS_STYLER);
-				appendTags(quickstart.getTags(), text);
-			}
-		}
-
-		private void appendTags(List<String> tags, StyledString text) {
-			if (tags == null) {
-				return;
-			}
-			for (String tag : tags) {
-				text.append(" " + tag, StyledString.DECORATIONS_STYLER);
+				text.append(quickstartTemplate.getTagsString(), StyledString.DECORATIONS_STYLER);
 			}
 		}
 
