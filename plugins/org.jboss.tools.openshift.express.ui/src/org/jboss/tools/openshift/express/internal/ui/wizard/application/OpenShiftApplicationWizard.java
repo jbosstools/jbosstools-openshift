@@ -288,7 +288,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(
 					NLS.bind("Could not create application {0}", model.getApplicationName()), e);
-
 		}
 	}
 
