@@ -621,6 +621,8 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	private void setSelectedCartridges(IApplicationTemplate template) {
 		if (template instanceof IQuickstartApplicationTemplate) {
 			setCartridges(getFirstAlternatives((IQuickstartApplicationTemplate) template));
+		} else if (template instanceof ICartridgeApplicationTemplate) {
+			setCartridges(Collections.<ICartridge> singleton(((ICartridgeApplicationTemplate) template).getCartridge()));
 		} else {
 			setCartridges(new HashSet<ICartridge>());
 		}

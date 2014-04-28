@@ -65,22 +65,22 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 						OpenShiftExpressUIMessages.CREATING_APPLICATION
 						: OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
 				, name));
-		Assert.isLegal(!StringUtils.isEmpty(name), "No application name provided.");
 		this.name = name;
 		this.scale = scale;
 		this.gear = gear;
 		this.initialGitUrl = initialGitUrl;
-		Assert.isLegal(domain != null, "No domain provided.");
 		this.domain = domain;
 		this.environmentVariables = environmentVariables;
-		Assert.isLegal(cartridges != null 
-				&& cartridges.size() >= 1, "No application type provided.");
 		this.cartridges = cartridges;
 	}
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
+			Assert.isLegal(!StringUtils.isEmpty(name), "No application name provided.");
+			Assert.isLegal(domain != null, "No domain provided.");
+			Assert.isLegal(cartridges != null 
+					&& cartridges.size() >= 1, "No application type provided.");
 			try {
 				this.application = new ApplicationBuilder(domain)
 					.setName(name)
@@ -103,7 +103,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		} catch (Exception e) {
 			safeRefreshDomain();
 			return OpenShiftUIActivator.createErrorStatus(
-					OpenShiftExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, name);
+					OpenShiftExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, StringUtils.nullToEmptyString(name));
 		}
 	}
 
