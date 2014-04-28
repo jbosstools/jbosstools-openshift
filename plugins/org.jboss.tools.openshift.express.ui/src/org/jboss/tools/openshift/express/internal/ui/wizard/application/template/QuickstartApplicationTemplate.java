@@ -10,8 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.IQuickstart;
@@ -24,10 +27,12 @@ import com.openshift.internal.client.AlternativeCartridges;
 public class QuickstartApplicationTemplate extends AbstractApplicationTemplate implements IQuickstartApplicationTemplate {
 
 	private IQuickstart quickstart;
+	private Set<ICartridge> cartridges;
 
 	public QuickstartApplicationTemplate(IQuickstart quickstart) {
 		super(quickstart.getName(), quickstart.getSummary());
 		this.quickstart = quickstart;
+		this.cartridges = getFirstAlternatives(quickstart.getSuitableCartridges());
 	}
 
 	@Override
@@ -51,15 +56,31 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	}
 
 	@Override
-	public List<AlternativeCartridges> getSuitableCartridges() {
-		return quickstart.getSuitableCartridges();
-	}
-
-	@Override
 	public List<ICartridge> getAlternativesFor(ICartridge cartridge) {
 		return quickstart.getAlternativesFor(cartridge);
 	}
 
+	@Override
+	public Set<ICartridge> getAllCartridges() {
+		return cartridges;
+	}
+
+	protected HashSet<ICartridge> getFirstAlternatives(List<AlternativeCartridges> allAlternatives) {
+		HashSet<ICartridge> cartridges = new HashSet<ICartridge>();
+		for (AlternativeCartridges alternatives : allAlternatives) {
+			ICartridge firstAlternative = CollectionUtils.getFirstElement(alternatives.get());
+			if (firstAlternative != null) {
+				cartridges.add(firstAlternative);
+			}
+		}
+		return cartridges;
+	}
+
+	@Override
+	public Set<ICartridge> getEmbeddedCartridges() {
+		return getAllCartridges();
+	}
+	
 	@Override
 	public String getName() {
 		return new StringBuilder()

@@ -10,8 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
@@ -42,6 +47,21 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 	}
 	
 	@Override
+	public Set<ICartridge> getAllCartridges() {
+		return Collections.emptySet();
+	}
+
+	@Override
+	public Set<ICartridge> getEmbeddedCartridges() {
+		return Collections.emptySet();
+	}
+
+	@Override
+	public String getInitialGitUrl() {
+		return null;
+	}
+
+	@Override
 	public boolean isMatching(String expression) {
 		if (StringUtils.isEmpty(expression)) {
 			return true;
@@ -62,7 +82,7 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 	}
 
 	@Override
-	public boolean isTemplate() {
+	public boolean canCreateApplication() {
 		return true;
 	}
 

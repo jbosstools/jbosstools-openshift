@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.Set;
+
+import com.openshift.client.cartridge.ICartridge;
+
 
 
 /**
@@ -26,10 +30,39 @@ public interface IApplicationTemplate {
 
 	public String getDescription();
 	
+	/**
+	 * Returns <code>true</code> if this template matches the given expression.
+	 * 
+	 * @param expression
+	 * @return
+	 */
 	public boolean isMatching(String expression);
 
-	public boolean isTemplate();
+	/**
+	 * Returns <code>true</code> if this template is a valid template to start
+	 * an application from.
+	 * 
+	 * @return
+	 */
+	public boolean canCreateApplication();
 	
+	/**
+	 * Returns <code>true</code> if one can add/remove cartridges from this
+	 * template.
+	 * 
+	 * @return
+	 */
 	public boolean canAddRemoveCartridges();
 	
+	/**
+	 * Returns all (embedded and standalone) cartridges for this template.
+	 * 
+	 * @return
+	 */
+	public Set<ICartridge> getAllCartridges();
+	
+	public Set<ICartridge> getEmbeddedCartridges();
+
+	public String getInitialGitUrl();
+
 }

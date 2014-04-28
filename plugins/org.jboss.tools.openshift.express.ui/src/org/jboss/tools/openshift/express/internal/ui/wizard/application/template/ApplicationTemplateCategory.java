@@ -77,7 +77,7 @@ public class ApplicationTemplateCategory extends AbstractApplicationTemplate imp
 	}
 
 	@Override
-	public boolean isTemplate() {
+	public boolean canCreateApplication() {
 		return false;
 	}
 }

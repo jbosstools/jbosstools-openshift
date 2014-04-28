@@ -94,15 +94,13 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 		}
 
 		private void uncheckAllBut(ICartridge cartridge) {
-			for (ICartridge cartridgesToEmbed : getPageModel().getCheckedCartridges()) {
-				getPageModel().uncheckEmbeddedCartridge(cartridgesToEmbed);
-			}
+			getPageModel().uncheckAll();
 			getPageModel().checkEmbeddedCartridge(cartridge);
 		}
 		
 		@Override
 		protected void remove(ICartridge cartridge, CheckStateChangedEvent event) {			
-			// undo visual change
+			// undo visual change only
 			event.getCheckable().setChecked(cartridge, true);
 		}
 	}

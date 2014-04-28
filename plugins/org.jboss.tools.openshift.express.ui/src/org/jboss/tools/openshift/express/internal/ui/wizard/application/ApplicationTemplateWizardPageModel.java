@@ -232,7 +232,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	protected void setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
 		cartridges = new ArrayList<IStandaloneCartridge>(cartridges);
 		Collections.sort(cartridges, new CartridgeNameComparator());
-		wizardModel.setAllStandaloneCartridges(cartridges);
+		wizardModel.setAvailableStandaloneCartridges(cartridges);
 		basicCartridgesCathegory.clearChildren();
 		basicCartridgesCathegory.addChildren(createCartridgeApplicationTemplates(cartridges));
 	}
@@ -253,7 +253,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected List<IStandaloneCartridge> getStandaloneCartridges() {
-		return wizardModel.getAllStandaloneCartridges();
+		return wizardModel.getAvailableStandaloneCartridges();
 	}
 
 	protected void setDomains(List<IDomain> domains) {

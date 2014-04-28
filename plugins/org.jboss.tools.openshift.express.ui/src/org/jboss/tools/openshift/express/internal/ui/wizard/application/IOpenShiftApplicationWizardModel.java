@@ -48,14 +48,16 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 
 	public static final String PROP_APPLICATION = "application";
 	public static final String PROP_APPLICATION_NAME = "applicationName";
-	public static final String PROP_CARTRIDGES = "cartridges";
 	public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
 	public static final String PROP_APPLICATION_SCALE = "applicationScale";
+	public static final String PROP_AVAILABLE_EMBEDDABLE_CARTRIDGES = "allEmbeddableCartridges";
+	public static final String PROP_AVAILABLE_STANDALONE_CARTRIDGES = "allStandaloneCartridges";
+	public static final String PROP_CARTRIDGES = "cartridges";
 	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
 	public static final String PROP_CONNECTION = "connection";
 	public static final String PROP_DOMAIN = "domain";
 	public static final String PROP_DOMAINS = "domains";
-	public static final String PROP_ALL_EMBEDDABLE_CARTRIDGES = "allEmbeddableCartridges";
+	public static final String PROP_EMBEDDED_CARTRIDGES = "embeddedCartridges";
 	public static final String PROP_ENVIRONMENT_VARIABLES = "environmentVariables";
 	public static final String PROP_INITIAL_GIT_URL = "initialGitUrl";
 	public static final String PROP_MERGE_URI = "mergeUri";
@@ -66,7 +68,6 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
 	public static final String PROP_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
-	public static final String PROP_ALL_STANDALONE_CARTRIDGES = "allStandaloneCartridges";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROP_USE_INITIAL_GIT_URL = "useInitialGitUrl";
 	
@@ -205,14 +206,14 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 */
 	public String getApplicationName();
 
-	public List<IStandaloneCartridge> setAllStandaloneCartridges(List<IStandaloneCartridge> cartridges);
+	public List<IStandaloneCartridge> setAvailableStandaloneCartridges(List<IStandaloneCartridge> cartridges);
 
 	/**
 	 * Returns all standalone cartridges that are available in OpenShift
 	 * 
 	 * @return all available standalone cartridges
 	 */
-	public List<IStandaloneCartridge> getAllStandaloneCartridges();
+	public List<IStandaloneCartridge> getAvailableStandaloneCartridges();
 
 	public String setRemoteName(String remoteName);
 
@@ -335,29 +336,29 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 * Adds the given cartridges to the cartridges that shall be used for the new application
 	 * @param cartridges
 	 */
-	public void addCartridges(List<ICartridge> cartridges);
+	public void addEmbeddedCartridges(List<ICartridge> cartridges);
 
 	/**
 	 * Removes the given cartridge from the cartridges that shall be used for the new application
 	 * @param cartridge
 	 */
-	public void removeCartridge(ICartridge cartridge);
+	public void removeEmbeddedCartridge(ICartridge cartridge);
 
 	/**
 	 * Removes the given cartridges from the list of cartridges for the new application
 	 *  
 	 * @param cartridges
 	 */
-	public void removeCartridges(List<ICartridge> cartridges);
+	public void removeEmbeddedCartridges(List<ICartridge> cartridges);
 
 	/**
 	 * Returns all embeddable cartridges that available in OpenShift
 	 * 
 	 * @return all available embeddable cartridges
 	 */
-	public List<ICartridge> getAllEmbeddableCartridges();
+	public List<ICartridge> getAvailableEmbeddableCartridges();
 
-	public List<ICartridge> setAllEmbeddableCartridges(List<ICartridge> embeddableCartridges);
+	public List<ICartridge> setAvailableEmbeddableCartridges(List<ICartridge> embeddableCartridges);
 
 	/**
 	 * Returns all the (standalone- and embedded-) cartridges that are set to be
@@ -369,8 +370,10 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 *      ApplicationScale, IGearProfile, String, int, Map,
 	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
 	 */
-	public Set<ICartridge> getCartridges();
+	public Set<ICartridge> getEmbeddedCartridges();
 	
+	public Set<ICartridge> setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges);
+
 	/**
 	 * Returns the standalone cartridge used to create the new application.
 	 * <p>
@@ -388,8 +391,21 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 * @see IQuickstartApplicationTemplate
 	 */
 	public IStandaloneCartridge getStandaloneCartridge();
-	
-	public Set<ICartridge> setCartridges(Set<ICartridge> selectedEmbeddableCartridges);
+
+	/**
+	 * Returns all (standalone and embedded) cartridges.
+	 * 
+	 * @return
+	 */
+	public Set<ICartridge> getCartridges();
+
+	/**
+	 * Sets all (embedded and standalone) cartridges.
+	 * 
+	 * @param cartridges
+	 * @return
+	 */
+	public Set<ICartridge> setCartridges(Set<ICartridge> cartridges);
 
 	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
 
@@ -490,5 +506,4 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public Map<String, String> getEnvironmentVariables();
 	
 	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables);
-
 }

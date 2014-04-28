@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -187,7 +186,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 						Messages.DESELECT_ALL_CARTRIDGES_TITLE,
 						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION
 					)) {
-					pageModel.setCheckedCartridges(new HashSet<ICartridge>());
+					pageModel.uncheckAll();
 				}
 			}
 		};

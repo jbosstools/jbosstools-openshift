@@ -32,14 +32,14 @@ public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<Embed
 	public AddEmbeddableCartridgesWizard(IOpenShiftApplicationWizardModel wizardModel) {
 		super("Add Embedded Cartridges", 
 				new EmbeddedCartridgesWizardModel(
-						wizardModel.getCartridges()
+						wizardModel.getEmbeddedCartridges()
 						, CollectionUtils.addTo(
 								// add code anything
 								(ICartridge) new CodeAnythingCartridge(),
 								// remove embedded cartridges
 								(List<ICartridge>) CollectionUtils.removeAll(
-										wizardModel.getCartridges(),
-										new ArrayList<ICartridge>(wizardModel.getAllEmbeddableCartridges())))
+										wizardModel.getEmbeddedCartridges(),
+										new ArrayList<ICartridge>(wizardModel.getAvailableEmbeddableCartridges())))
 						, new NewApplicationProperties(wizardModel)
 						, wizardModel.getDomain()
 						, wizardModel.getConnection()
