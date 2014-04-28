@@ -85,13 +85,13 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
 				.forwardTo(PROPERTY_APPLICATION_NAME, this);
 		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_CARTRIDGES, wizardModel)
+				.listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
 				.forwardTo(PROPERTY_EMBEDDED_CARTRIDGES, this);
 		new PojoEventBridge()
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
 				.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
 		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_CARTRIDGES, wizardModel)
+				.listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
 				.forwardTo(PROPERTY_EMBEDDABLE_CARTRIDGES, this);
 		new PojoEventBridge() {
 
@@ -255,27 +255,27 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
-		wizardModel.setAllEmbeddableCartridges(embeddableCartridges);
+		wizardModel.setAvailableEmbeddableCartridges(embeddableCartridges);
 	}
 
 	public List<ICartridge> getEmbeddableCartridges() {
-		return wizardModel.getAllEmbeddableCartridges();
+		return wizardModel.getAvailableEmbeddableCartridges();
 	}
 
 	public void setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
-		wizardModel.setCartridges(selectedEmbeddableCartridges);
+		wizardModel.setEmbeddedCartridges(selectedEmbeddableCartridges);
 	}
 
 	public Set<ICartridge> getEmbeddedCartridges() throws OpenShiftException {
-		return wizardModel.getCartridges();
+		return wizardModel.getEmbeddedCartridges();
 	}
 
 	public void addEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
-		wizardModel.addCartridges(Collections.<ICartridge> singletonList(cartridge));
+		wizardModel.addEmbeddedCartridges(Collections.<ICartridge> singletonList(cartridge));
 	}
 
 	public void removeEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
-		wizardModel.removeCartridges(Collections.<ICartridge> singletonList(cartridge));
+		wizardModel.removeEmbeddedCartridges(Collections.<ICartridge> singletonList(cartridge));
 	}
 
 	public ICartridge getSelectedCartridge() throws OpenShiftException {
@@ -288,7 +288,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
-		wizardModel.removeCartridge(cartridge);
+		wizardModel.removeEmbeddedCartridge(cartridge);
 	}
 
 	protected void fireCanAddRemoveCartridges() {

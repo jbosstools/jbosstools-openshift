@@ -645,7 +645,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					result = executeAdditionalOperations(cartridge, additionalOperations);
 				}
 				if(result != RESULT_CANCEL){
-					wizardModel.removeCartridge(cartridge);
+					wizardModel.removeEmbeddedCartridge(cartridge);
 				}
 			}
 
@@ -671,8 +671,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 								.toString());
 				switch (result) {
 				case RESULT_APPLY:
-					wizardModel.removeCartridges(additionalOperations.getRemovals());
-					wizardModel.addCartridges(additionalOperations.getAdditions());
+					wizardModel.removeEmbeddedCartridges(additionalOperations.getRemovals());
+					wizardModel.addEmbeddedCartridges(additionalOperations.getAdditions());
 					break;
 				case RESULT_CANCEL:
 					break;

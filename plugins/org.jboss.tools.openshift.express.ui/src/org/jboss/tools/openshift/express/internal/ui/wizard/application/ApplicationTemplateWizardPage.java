@@ -535,7 +535,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 			}
 
 			if (selectedApplicationTemplate == null
-					|| !selectedApplicationTemplate.isTemplate()) {
+					|| !selectedApplicationTemplate.canCreateApplication()) {
 				return ValidationStatus.cancel("Please select an existing cartridge, a quickstart or provide your own framework.");
 			}
 

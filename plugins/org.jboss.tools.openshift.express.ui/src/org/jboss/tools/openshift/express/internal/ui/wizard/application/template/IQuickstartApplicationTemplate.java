@@ -14,7 +14,6 @@ import java.util.List;
 
 import com.openshift.client.IQuickstart;
 import com.openshift.client.cartridge.ICartridge;
-import com.openshift.internal.client.AlternativeCartridges;
 
 /**
  * @author Andre Dietisheim
@@ -28,8 +27,6 @@ public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 	public String getHref();
 	
 	public String getInitialGitUrl();
-	
-	public List<AlternativeCartridges> getSuitableCartridges();
 	
 	public List<ICartridge> getAlternativesFor(ICartridge cartridge);
 	

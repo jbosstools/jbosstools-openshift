@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -75,6 +76,10 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, applicationCartridges.setCheckedEmbeddableCartridges(cartridges));
 	}
 	
+	public void uncheckAll() throws OpenShiftException {
+		setCheckedCartridges(new HashSet<ICartridge>());
+	}
+
 	public void setSelectedCartridge(ICartridge cartridge) {
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, selectedCartridge, this.selectedCartridge = cartridge);
 	}
