@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +89,21 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 			.append(" (Quickstart)")
 			.toString();
 	}
+
+	@Override
+	public List<String> getTags() {
+		if (quickstart == null) {
+			return Collections.emptyList();
+		}
+		
+		return quickstart.getTags();
+	}
 	
+	@Override
+	public String getTagsString() {
+		return StringUtils.toString(getTags());
+	}
+
 	@Override
 	public boolean isOpenShiftMaintained() {
 		return "openshift".equals(StringUtils.toLowerCase(quickstart.getProvider()));

@@ -34,4 +34,8 @@ public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 	
 	public boolean isAutomaticSecurityUpdates();
 
+	public List<String> getTags();
+
+	public String getTagsString();
+
 }

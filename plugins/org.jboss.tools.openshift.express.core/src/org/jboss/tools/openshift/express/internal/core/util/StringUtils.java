@@ -55,7 +55,6 @@ public class StringUtils {
 	public static <T> String toString(List<T> elements, ToStringConverter<T> converter) {
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < elements.size(); i++) {
-			converter.toString(elements.get(i));
 			builder.append(converter.toString(elements.get(i)));
 			if (i + 1 < elements.size()) {
 				builder.append(", ");
