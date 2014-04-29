@@ -297,14 +297,14 @@ public class EmbedCartridgeStrategy {
 
 		@Override
 		protected boolean meetsRequirements(IApplicationProperties application) {
-			IStandaloneCartridge standaloneCartridge = application.getStandaloneCartridge();
+			ICartridge standaloneCartridge = application.getStandaloneCartridge();
 			return eapSelector.isMatching(standaloneCartridge)
 					|| asSelector.isMatching(standaloneCartridge);
 		}
 
 		@Override
 		public String getMessage(ICartridge requestedCartridge, IApplicationProperties application) {
-			IStandaloneCartridge standaloneCartridge = application.getStandaloneCartridge();
+			ICartridge standaloneCartridge = application.getStandaloneCartridge();
 			return NLS.bind("It is not recommended to add cartridge {0} to your application {1}."
 					+ " The cartridge requires a {3} or {4} application and your application is a {2}."
 							, new String[] { 
@@ -469,7 +469,7 @@ public class EmbedCartridgeStrategy {
 		
 		public ApplicationScale getApplicationScale();
 		
-		public IStandaloneCartridge getStandaloneCartridge();
+		public ICartridge getStandaloneCartridge();
 		
 		public String getApplicationName();
 	}

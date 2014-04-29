@@ -52,7 +52,6 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public static final String PROP_APPLICATION_SCALE = "applicationScale";
 	public static final String PROP_AVAILABLE_EMBEDDABLE_CARTRIDGES = "allEmbeddableCartridges";
 	public static final String PROP_AVAILABLE_STANDALONE_CARTRIDGES = "allStandaloneCartridges";
-	public static final String PROP_CARTRIDGES = "cartridges";
 	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
 	public static final String PROP_CONNECTION = "connection";
 	public static final String PROP_DOMAIN = "domain";
@@ -390,7 +389,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 * @see ICartridgeApplicationTemplate
 	 * @see IQuickstartApplicationTemplate
 	 */
-	public IStandaloneCartridge getStandaloneCartridge();
+	public ICartridge getStandaloneCartridge();
 
 	/**
 	 * Returns all (standalone and embedded) cartridges.
@@ -398,14 +397,6 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 * @return
 	 */
 	public Set<ICartridge> getCartridges();
-
-	/**
-	 * Sets all (embedded and standalone) cartridges.
-	 * 
-	 * @param cartridges
-	 * @return
-	 */
-	public Set<ICartridge> setCartridges(Set<ICartridge> cartridges);
 
 	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
 

@@ -32,13 +32,13 @@ public class CodeAnythingApplicationTemplate
 
 	@Override
 	public String getUrl() {
-		return getCartridgeUrl((CodeAnythingCartridge) getCartridge());
+		return getCartridgeUrl((CodeAnythingCartridge) getStandaloneCartridge());
 	}
 	
 	@Override
 	public void setUrl(String url) {
 		String oldUrl = getUrl();
-		((CodeAnythingCartridge) getCartridge()).setUrlString(url);
+		((CodeAnythingCartridge) getStandaloneCartridge()).setUrlString(url);
 		firePropertyChange(PROPERTY_CARTRIDGE_URL, oldUrl, url);
 		String oldName = getName();
 		firePropertyChange(PROPERTY_NAME, oldName, getName());
@@ -47,7 +47,7 @@ public class CodeAnythingApplicationTemplate
 	@Override
 	public String getName() {
 		StringBuilder builder = new StringBuilder(super.getName());
-		String cartridgeUrl = getCartridgeUrl((CodeAnythingCartridge) getCartridge());
+		String cartridgeUrl = getCartridgeUrl((CodeAnythingCartridge) getStandaloneCartridge());
 		if (!StringUtils.isEmpty(cartridgeUrl)) {
 			builder.append(" (").append(cartridgeUrl).append(')');
 		}
@@ -67,7 +67,7 @@ public class CodeAnythingApplicationTemplate
 		if (super.isMatching(expression)) {
 			return true;
 		}
-		ICartridge cartridge = getCartridge();
+		ICartridge cartridge = getStandaloneCartridge();
 		if (cartridge == null) {
 			return false;
 		}

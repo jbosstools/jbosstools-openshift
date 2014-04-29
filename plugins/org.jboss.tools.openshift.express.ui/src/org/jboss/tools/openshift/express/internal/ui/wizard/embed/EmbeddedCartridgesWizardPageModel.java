@@ -126,7 +126,7 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	}
 
 	@Override
-	public IStandaloneCartridge getStandaloneCartridge() {
+	public ICartridge getStandaloneCartridge() {
 		return applicationCartridges.getStandaloneCartridge();
 	}
 

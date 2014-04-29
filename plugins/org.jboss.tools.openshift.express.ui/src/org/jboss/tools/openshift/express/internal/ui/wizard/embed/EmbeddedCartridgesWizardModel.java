@@ -11,7 +11,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;
 import com.openshift.client.cartridge.ICartridge;
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 
@@ -58,7 +57,7 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 		return applicationProperties.getApplicationScale();
 	}
 
-	public IStandaloneCartridge getStandaloneCartridge() {
+	public ICartridge getStandaloneCartridge() {
 		return applicationProperties.getStandaloneCartridge();
 	}
 

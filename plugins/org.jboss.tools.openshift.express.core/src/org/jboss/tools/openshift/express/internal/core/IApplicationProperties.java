@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core;
 
 import com.openshift.client.ApplicationScale;
-import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * Provides properties for a (new or existing)  application
@@ -22,7 +22,7 @@ public interface IApplicationProperties {
 	
 	public ApplicationScale getApplicationScale();
 	
-	public IStandaloneCartridge getStandaloneCartridge();
+	public ICartridge getStandaloneCartridge();
 	
 	public String getApplicationName();
 	
