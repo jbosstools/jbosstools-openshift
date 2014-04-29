@@ -3,7 +3,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import org.jboss.tools.openshift.express.internal.core.IApplicationProperties;
 
 import com.openshift.client.ApplicationScale;
-import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * Provides the properties for a new application that's not created yet
@@ -24,7 +24,7 @@ public class NewApplicationProperties implements IApplicationProperties {
 	}
 
 	@Override
-	public IStandaloneCartridge getStandaloneCartridge() {
+	public ICartridge getStandaloneCartridge() {
 		return wizardModel.getStandaloneCartridge();
 	}
 

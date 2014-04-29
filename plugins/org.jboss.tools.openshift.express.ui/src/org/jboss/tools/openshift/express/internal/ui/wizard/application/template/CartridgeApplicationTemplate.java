@@ -31,7 +31,7 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	}
 
 	@Override
-	public IStandaloneCartridge getCartridge() {
+	public ICartridge getStandaloneCartridge() {
 		return cartridge;
 	}
 	
@@ -43,6 +43,11 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	@Override
 	public boolean canAddRemoveCartridges() {
 		return true;
+	}
+
+	@Override
+	public String getInitialGitUrl() {
+		return null;
 	}
 
 	@Override
@@ -62,10 +67,5 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 
 		return isMatching(
 				StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
-	}
-
-	@Override
-	public String getInitialGitUrl() {
-		return null;
 	}
 }

@@ -89,7 +89,7 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IQuickstart;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
@@ -568,7 +568,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 
 		private void createCartridgeTemplatelabel(StyledString text, ICartridgeApplicationTemplate cartridgeTemplate) {
 			createApplicationTemplateLabel(text, cartridgeTemplate);
-			IStandaloneCartridge cartridge = cartridgeTemplate.getCartridge();
+			ICartridge cartridge = cartridgeTemplate.getStandaloneCartridge();
 			if (cartridge != null
 					&& !StringUtils.isEmpty(cartridge.getName())) {
 				text.append(" ", StyledString.DECORATIONS_STYLER);

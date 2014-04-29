@@ -63,6 +63,8 @@ public interface IApplicationTemplate {
 	
 	public Set<ICartridge> getEmbeddedCartridges();
 
+	public ICartridge getStandaloneCartridge();
+
 	public String getInitialGitUrl();
 
 }

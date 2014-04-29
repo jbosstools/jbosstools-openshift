@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.importop
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoUnsharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -389,24 +389,21 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public IStandaloneCartridge getStandaloneCartridge() {
+	public ICartridge getStandaloneCartridge() {
 		IApplicationTemplate template = getSelectedApplicationTemplate();
-		if (!(template instanceof ICartridgeApplicationTemplate)) {
+		if (template == null) {
 			return null;
 		}
-		return ((ICartridgeApplicationTemplate) template).getCartridge();
+		return template.getStandaloneCartridge();
 	}
 
 	@Override
 	public Set<ICartridge> getCartridges() {
-		Set<ICartridge> applicationCartridges =
-				getProperty(PROP_CARTRIDGES, Collections.<ICartridge> emptySet());
-		return applicationCartridges;
-	}
-
-	@Override
-	public Set<ICartridge> setCartridges(Set<ICartridge> cartridges) {
-		return setProperty(PROP_CARTRIDGES, cartridges);
+		Set<ICartridge> allCartridges = new HashSet<ICartridge>(getEmbeddedCartridges());
+		if (getStandaloneCartridge() != null) {
+			allCartridges.add(getStandaloneCartridge());
+		}
+		return allCartridges;
 	}
 
 	@Override
@@ -420,7 +417,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	public Set<ICartridge> setEmbeddedCartridges(Set<ICartridge> cartridges) {
 		return setProperty(PROP_EMBEDDED_CARTRIDGES, cartridges);
 	}
-
+	
 	@Override
 	public void addEmbeddedCartridges(List<ICartridge> addedCartridges) {
 		Set<ICartridge> cartridges = getEmbeddedCartridges();
@@ -606,7 +603,6 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		setUseInitialGitUrl(!StringUtils.isEmpty(template.getInitialGitUrl()));
 		setInitialGitUrl(template.getInitialGitUrl());
 		setEmbeddedCartridges(template.getEmbeddedCartridges());
-		setCartridges(template.getAllCartridges());
 		return template;
 	}
 

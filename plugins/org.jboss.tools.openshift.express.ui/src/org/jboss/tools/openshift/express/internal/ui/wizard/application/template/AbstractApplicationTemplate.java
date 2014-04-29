@@ -57,6 +57,11 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 	}
 
 	@Override
+	public ICartridge getStandaloneCartridge() {
+		return null;
+	}
+
+	@Override
 	public String getInitialGitUrl() {
 		return null;
 	}

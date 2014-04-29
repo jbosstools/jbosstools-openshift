@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -18,8 +17,6 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 public interface ICartridgeApplicationTemplate extends IApplicationTemplate {
 
 	public static final String PROPERTY_CARTRIDGE = "cartridge";
-
-	public IStandaloneCartridge getCartridge();
 
 	public boolean isCodeAnything();
 }

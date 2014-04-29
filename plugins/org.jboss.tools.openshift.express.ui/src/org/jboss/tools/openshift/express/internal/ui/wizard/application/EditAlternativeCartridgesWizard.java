@@ -57,10 +57,10 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 
 	public ICartridge getCheckedCartridge() {
 		Iterator<ICartridge> it = editAlternativeCartridgesWizardPage.getCheckedCartridges().iterator();
-		if (it.hasNext()) {
-			return it.next();
+		if (!it.hasNext()) {
+			return null;
 		}
-		return null;
+		return it.next();
 	}
 	
 	protected static class EditAlternativeCartridgesWizardPage extends EmbeddedCartridgesWizardPage {
