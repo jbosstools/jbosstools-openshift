@@ -180,7 +180,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
 			if (model.getConnection() != null) {
 				new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
-					.andRunWhenDone(new FireConnectionsChangedJob(model.getConnection()))
+					.runWhenDone(new FireConnectionsChangedJob(model.getConnection()))
 					.schedule();
 			}
 			return false;

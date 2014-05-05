@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.action;
+package org.jboss.tools.openshift.express.internal.ui.command;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -19,6 +19,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,18 +33,17 @@ import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.views.IViewDescriptor;
-import org.eclipse.ui.views.IViewRegistry;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
@@ -49,7 +51,7 @@ import org.jboss.tools.openshift.express.internal.ui.console.GearGroupsUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
 import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
@@ -57,16 +59,16 @@ import com.jcraft.jsch.JSch;
 import com.openshift.client.IApplication;
 import com.openshift.client.IGear;
 import com.openshift.client.IGearGroup;
-import com.openshift.client.OpenShiftException;
 import com.openshift.client.utils.Base64Coder;
 
 /**
  * The action associated with the "Show In>Remote Console" menu item.
  * 
  * @author Xavier Coulon
+ * @author Andre Dietisheim
  * 
  */
-public class TailServerLogAction extends AbstractOpenShiftAction implements IConsoleListener {
+public class TailFilesHandler extends AbstractHandler implements IConsoleListener {
 
 	/**
 	 * The message consoles associated with the 'tail' workers that write the
@@ -74,75 +76,77 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 	 */
 	private Map<String, TailServerLogWorker> consoleWorkers = new HashMap<String, TailServerLogWorker>();
 
-	public TailServerLogAction() {
-		super(OpenShiftExpressUIMessages.TAIL_SERVER_LOG_ACTION, true);
-		IViewRegistry reg = PlatformUI.getWorkbench().getViewRegistry();
-		IViewDescriptor desc = reg.find(IConsoleConstants.ID_CONSOLE_VIEW);
-		setImageDescriptor(desc.getImageDescriptor());
+	public TailFilesHandler() {
 		ConsoleUtils.registerConsoleListener(this);
 	}
 
-	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no
-	 * Console/Worker existed, a new one is created, otherwise, it is displayed.
-	 * {@inheritDoc}
-	 */
 	@Override
-	public void run() {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			try {
-				final Object selectedItem = UIUtils.getFirstElement(getSelection(), Object.class);
-				if (selectedItem instanceof IServer) {
-					run((IServer) selectedItem);
-				} else if (selectedItem instanceof IServerModule) {
-					run(((IServerModule) selectedItem).getServer());
-				} else if (selectedItem instanceof IApplication) {
-					run((IApplication) selectedItem);
-				}
-			} catch (Exception e) {
-				Logger.error("Failed to open Remote Console", e);
+			Shell shell = HandlerUtil.getActiveShell(event);
+			final Object selectedItem = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event));
+			if (selectedItem instanceof IServer) {
+				return execute((IServer) selectedItem, shell);
+			} else if (selectedItem instanceof IServerModule) {
+				return execute(((IServerModule) selectedItem).getServer(), shell);
+			} else if (selectedItem instanceof IApplication) {
+				return execute((IApplication) selectedItem, shell);
 			}
+			return Status.OK_STATUS;
 		} catch (Exception e) {
-			Logger.error("Failed to open Remote Console", e);
+			return OpenShiftUIActivator.createErrorStatus("Could not open OpenShift console", e);
 		}
 	}
 
-	private void run(final IApplication app) throws OpenShiftException, MalformedURLException {
-		final TailFilesWizard wizard = new TailFilesWizard(app);
-		if (WizardUtils.openWizardDialog(
-				wizard, Display.getCurrent().getActiveShell()) == Window.OK) {
-			final String host = new URL(app.getApplicationUrl()).getHost();
-			for(IGearGroup gearGroup : wizard.getSelectedGearGroups()) {
-				final Collection<IGear> gears = gearGroup.getGears();
-				final String cartridgeNames = GearGroupsUtils.getCartridgeDisplayNames(gearGroup);
-				for(IGear gear : gears) {
-					final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(host, gear.getId(), cartridgeNames));
-					ConsoleUtils.displayConsoleView(console);
-					if (!this.consoleWorkers.containsKey(console.getName())) {
-						launchTailServerJob(gear.getSshUrl(), wizard.getFilePattern(), console);
+	private IStatus execute(final IApplication application, Shell shell) {
+		final TailFilesWizard wizard = new TailFilesWizard(application);
+		if (WizardUtils.openWizardDialog(wizard, shell) == Window.OK) {
+			try {
+				final String host = new URL(application.getApplicationUrl()).getHost();
+				for(IGearGroup gearGroup : wizard.getSelectedGearGroups()) {
+					final Collection<IGear> gears = gearGroup.getGears();
+					final String cartridgeNames = GearGroupsUtils.getCartridgeDisplayNames(gearGroup);
+					for(IGear gear : gears) {
+						final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(host, gear.getId(), cartridgeNames));
+						ConsoleUtils.displayConsoleView(console);
+						if (!this.consoleWorkers.containsKey(console.getName())) {
+							launchTailServerJob(gear.getSshUrl(), wizard.getFilePattern(), console);
+						}
 					}
 				}
+			} catch (MalformedURLException e) {
+				return OpenShiftUIActivator.createErrorStatus(
+						NLS.bind("Could tail files for application {0}", application.getName()), e);
 			}
 		}
+		return Status.OK_STATUS;
 	}
 
 	private static String createConsoleId(final String host, final String gearId, final String cartridgeNames) {
 		return host + " [" + cartridgeNames + " on gear #" + gearId + "]" ;
 	}
 
-	private void run(final IServer server) throws OpenShiftException, MalformedURLException {
-		if (OpenShiftServerUtils.isOpenShiftRuntime(server)
-				|| OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
-			final IApplication app = OpenShiftServerUtils.getApplication(server);
-			if (app == null) {
-				OpenShiftUIActivator.log(
-						OpenShiftUIActivator
-								.createErrorStatus("Failed to retrieve Application from the selected Server.\n" +
-										"Please verify that the associated OpenShift Application still exists."));
-				return;
-			}
-			run(app);
+	private IStatus execute(final IServer server, final Shell shell) throws MalformedURLException {
+		if (!OpenShiftServerUtils.isOpenShiftRuntime(server)
+				|| !OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
+			return OpenShiftUIActivator.createErrorStatus(
+					NLS.bind("Server {0} is not an OpenShift Server", server.getName()));
 		}
+		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
+		new JobChainBuilder(applicationJob)
+			.runWhenSuccessfullyDone(new UIJob("Tail files") {
+				
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					IApplication application = applicationJob.getApplication();
+					if (application == null) {
+						return OpenShiftUIActivator.createErrorStatus(
+								NLS.bind("Could not retrieve application for server {0}", server.getName()));
+					}
+					return execute(application, shell);
+				}
+			}).schedule();
+		return Status.OK_STATUS;
 	}
 
 	private void launchTailServerJob(final String sshUrl, final String filePattern, final MessageConsole console) {
@@ -257,5 +261,4 @@ public class TailServerLogAction extends AbstractOpenShiftAction implements ICon
 			return builder.toString();
 		}
 	}
-
 }

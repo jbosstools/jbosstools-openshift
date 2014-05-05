@@ -85,7 +85,8 @@
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
     </extension>
-	<!-- Connection adapter factory -->
+    
+	<!-- Connection Adapter factory -->
     <extension
            point="org.eclipse.core.runtime.adapters">
         <factory

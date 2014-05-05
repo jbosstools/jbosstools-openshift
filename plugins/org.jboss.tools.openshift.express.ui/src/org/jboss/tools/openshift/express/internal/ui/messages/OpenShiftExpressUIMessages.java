@@ -40,10 +40,6 @@ public class OpenShiftExpressUIMessages extends NLS {
 	public static String CREATE_SERVER_ADAPTER_ACTION;
 	public static String EDIT_CARTRIDGES_ACTION;
 	public static String MAKE_SNAPSHOT_ACTION;
-	public static String SHOW_PROPERTIES_VIEW_ACTION;
-	public static String SHOW_ENVIRONMENT_ACTION;
-	public static String SHOW_DETAILS_ACTION;
-	public static String REFRESH_VIEWER_ACTION;
 	public static String REFRESH_USER_ACTION;
 	public static String DELETE_CONNECTION_ACTION;
 	public static String RESTART_APPLICATION_ACTION;

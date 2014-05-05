@@ -44,7 +44,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
@@ -149,7 +148,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 					try {
 						IStatus status = WizardUtils.runInWizard(
 								new JobChainBuilder(
-										new RemoveKeyJob()).andRunWhenDone(new RefreshViewerJob()).build()
+										new RemoveKeyJob()).runWhenDone(new RefreshViewerJob()).build()
 								, getContainer(), getDatabindingContext() );
 						if(status.equals(Status.ERROR)){
 							setErrorMessage(status.getMessage());
@@ -252,7 +251,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
 			Job loadKeysJob = new LoadKeysJob(pageModel.getConnection());
-			new JobChainBuilder(loadKeysJob).andRunWhenDone(new RefreshViewerJob());
+			new JobChainBuilder(loadKeysJob).runWhenDone(new RefreshViewerJob());
 			WizardUtils.runInWizard(loadKeysJob, getContainer());
 		} catch (Exception e) {
 			setErrorMessage(e.getMessage());
@@ -268,7 +267,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					Job refreshKeysJob = new RefreshKeysJob();
-					new JobChainBuilder(refreshKeysJob).andRunWhenDone(new RefreshViewerJob());
+					new JobChainBuilder(refreshKeysJob).runWhenDone(new RefreshViewerJob());
 					IStatus status = WizardUtils.runInWizard(refreshKeysJob, getContainer(), getDatabindingContext());
 					if(status.equals(Status.ERROR)){
 						setErrorMessage(status.getMessage());

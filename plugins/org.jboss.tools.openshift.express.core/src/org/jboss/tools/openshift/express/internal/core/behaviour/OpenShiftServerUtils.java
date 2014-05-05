@@ -138,11 +138,11 @@ public class OpenShiftServerUtils {
 	 * @throws OpenShiftException
 	 */
 	public static IApplication getApplication(IServerAttributes server) {
-		final String appName = getExpressApplicationName(server);
+		final String appName = getApplicationName(server);
 		if (StringUtils.isEmpty(appName)) {
 			return null;
 		}
-		final ConnectionURL connectionUrl = getExpressConnectionUrl(server);
+		final ConnectionURL connectionUrl = getConnectionUrl(server);
 		if (connectionUrl == null) {
 			return null;
 		}
@@ -152,7 +152,7 @@ public class OpenShiftServerUtils {
 				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
 				return null;
 			}
-			IDomain domain = connection.getDomain(getExpressDomainName(server));
+			IDomain domain = connection.getDomain(getDomainName(server));
 			return connection.getApplication(appName, domain);
 		} catch (OpenShiftException e) {
 			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
@@ -161,37 +161,37 @@ public class OpenShiftServerUtils {
 	}
 
 	/* Settings stored only in the project */
-	public static String getExpressApplicationName(IServerAttributes attributes) {
+	public static String getApplicationName(IServerAttributes attributes) {
 		return getProjectAttribute(
-				getExpressDeployProject2(attributes), 
+				getDeployProject(attributes), 
 				SETTING_APPLICATION_NAME,	
 				attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String) null));
 	}
 
-	public static String getExpressApplicationId(IServerAttributes attributes) {
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_APPLICATION_ID,
+	public static String getApplicationId(IServerAttributes attributes) {
+		return getProjectAttribute(getDeployProject(attributes), SETTING_APPLICATION_ID,
 				attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String) null));
 	}
 
-	public static String getExpressDomainName(IServerAttributes attributes) {
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DOMAIN_ID,
+	public static String getDomainName(IServerAttributes attributes) {
+		return getProjectAttribute(getDeployProject(attributes), SETTING_DOMAIN_ID,
 				attributes.getAttribute(ATTRIBUTE_DOMAIN, (String) null));
 	}
 
-	private static String getExpressUsername(IServerAttributes attributes) {
-		return getProjectAttribute(getExpressDeployProject2(attributes), SETTING_USERNAME,
+	private static String getUsername(IServerAttributes attributes) {
+		return getProjectAttribute(getDeployProject(attributes), SETTING_USERNAME,
 				attributes.getAttribute(ATTRIBUTE_USERNAME, (String) null));
 	}
 
-	public static ConnectionURL getExpressConnectionUrl(IServerAttributes attributes) {
+	public static ConnectionURL getConnectionUrl(IServerAttributes attributes) {
 		try {
 			String connectionUrlString = getProjectAttribute(
-					getExpressDeployProject2(attributes), SETTING_CONNECTIONURL, null);
+					getDeployProject(attributes), SETTING_CONNECTIONURL, null);
 			if (!StringUtils.isEmpty(connectionUrlString)) {
 				return ConnectionURL.forURL(connectionUrlString);
 			}
 			
-			String username = getExpressUsername(attributes);
+			String username = getUsername(attributes);
 			if (!StringUtils.isEmpty(username)) {
 				return ConnectionURL.forUsername(username);
 			}
@@ -204,22 +204,22 @@ public class OpenShiftServerUtils {
 		return null;
 	}
 		
-	public static String getExpressDeployFolder(IServerAttributes attributes) {
-		return getExpressDeployFolder(attributes, getApplication(attributes));
+	public static String getDeployFolder(IServerAttributes attributes) {
+		return getDeployFolder(attributes, getApplication(attributes));
 	}
 
-	public static String getExpressDeployFolder(IServerAttributes attributes, IApplication application) {
-		return getExpressDeployFolder(attributes, getDefaultDeployFolder(application));
+	public static String getDeployFolder(IServerAttributes attributes, IApplication application) {
+		return getDeployFolder(attributes, getDefaultDeployFolder(application));
 	}
 		
 	/* Settings stored in the project, maybe over-ridden in the server */
-	private static String getExpressDeployFolder(IServerAttributes attributes, String defaultDeployFolder) {
+	private static String getDeployFolder(IServerAttributes attributes, String defaultDeployFolder) {
 		if (getOverridesProject(attributes)) {
 			return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, defaultDeployFolder);
 		}
 		
 		return getProjectAttribute(
-				getExpressDeployProject2(attributes), SETTING_DEPLOY_FOLDER_NAME, defaultDeployFolder);
+				getDeployProject(attributes), SETTING_DEPLOY_FOLDER_NAME, defaultDeployFolder);
 	}
 
 	public static String getDefaultDeployFolder(IServerAttributes server) {
@@ -245,18 +245,18 @@ public class OpenShiftServerUtils {
 
 	}
 	
-	public static String getExpressRemoteName(IServerAttributes attributes) {
+	public static String getRemoteName(IServerAttributes attributes) {
 		if (getOverridesProject(attributes))
 			return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, ATTRIBUTE_REMOTE_NAME_DEFAULT);
-		return getProjectAttribute(getExpressDeployProject2(attributes), 
+		return getProjectAttribute(getDeployProject(attributes), 
 				SETTING_REMOTE_NAME, ATTRIBUTE_REMOTE_NAME_DEFAULT);
 	}
 
-	public static String getExpressDeployFolder(IServerAttributes attributes, int fromWhere) {
+	public static String getDeployFolder(IServerAttributes attributes, int fromWhere) {
 		String fromServer = attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, (String) null);
 		if (fromWhere == SETTING_FROM_SERVER)
 			return fromServer;
-		String fromProject = getProjectAttribute(getExpressDeployProject2(attributes), SETTING_DEPLOY_FOLDER_NAME, null);
+		String fromProject = getProjectAttribute(getDeployProject(attributes), SETTING_DEPLOY_FOLDER_NAME, null);
 		if (fromWhere == SETTING_FROM_PROJECT)
 			return fromProject;
 		if (getOverridesProject(attributes))
@@ -264,11 +264,11 @@ public class OpenShiftServerUtils {
 		return fromProject == null ? ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT : fromProject;
 	}
 
-	public static String getExpressRemoteName(IServerAttributes attributes, int fromWhere) {
+	public static String getRemoteName(IServerAttributes attributes, int fromWhere) {
 		String fromServer = attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, (String) null);
 		if (fromWhere == SETTING_FROM_SERVER)
 			return fromServer;
-		String fromProject = getProjectAttribute(getExpressDeployProject2(attributes), SETTING_REMOTE_NAME, null);
+		String fromProject = getProjectAttribute(getDeployProject(attributes), SETTING_REMOTE_NAME, null);
 		if (fromWhere == SETTING_FROM_PROJECT)
 			return fromProject;
 		if (getOverridesProject(attributes))
@@ -277,14 +277,17 @@ public class OpenShiftServerUtils {
 	}
 
 	/* Settings stored only in the server */
-	public static String getExpressDeployProject(IServerAttributes attributes) {
+	public static String getDeployProjectName(IServerAttributes attributes) {
 		return attributes.getAttribute(ATTRIBUTE_DEPLOY_PROJECT,
 				attributes.getAttribute(ATTRIBUTE_DEPLOY_PROJECT_LEGACY, (String) null));
 	}
 
-	private static IProject getExpressDeployProject2(IServerAttributes attributes) {
-		String name = getExpressDeployProject(attributes);
-		return name == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+	public static IProject getDeployProject(IServerAttributes attributes) {
+		String name = getDeployProjectName(attributes);
+		if (StringUtils.isEmpty(name)) {
+			return null;
+		}
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 	}
 
 	public static boolean getIgnoresContextRoot(IServerAttributes server) {
@@ -600,13 +603,13 @@ public class OpenShiftServerUtils {
 		return node.get(OpenShiftServerUtils.SETTING_USERNAME, null) != null;
 	}
 
-	public static IServer setExpressDeployProject(IServer server, String val) throws CoreException {
+	public static IServer setDeployProject(IServer server, String val) throws CoreException {
 		IServerWorkingCopy wc = server.createWorkingCopy();
 		wc.setAttribute(ATTRIBUTE_DEPLOY_PROJECT, val);
 		return wc.save(false, new NullProgressMonitor());
 	}
 
-	public static IServer setExpressRemoteName(IServer server, String val) throws CoreException {
+	public static IServer setRemoteName(IServer server, String val) throws CoreException {
 		IServerWorkingCopy wc = server.createWorkingCopy();
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, val);
 		return wc.save(false, new NullProgressMonitor());

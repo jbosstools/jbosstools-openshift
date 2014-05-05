@@ -158,7 +158,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public String getText(Object element) {
-				return OpenShiftResourceLabelUtils.toString((IDomain) element);			
+				if (!(element instanceof IDomain)) {
+					return null;
+				}
+				return ((IDomain) element).getId();
 			}
 		});
 		domainViewer.setInput(

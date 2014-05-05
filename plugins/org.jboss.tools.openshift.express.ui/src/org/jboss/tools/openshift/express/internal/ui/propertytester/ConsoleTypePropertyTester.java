@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.console;
+package org.jboss.tools.openshift.express.internal.ui.propertytester;
 
 import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.CONSOLE_TYPE_KEY;
 import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.CONSOLE_TYPE_VALUE;

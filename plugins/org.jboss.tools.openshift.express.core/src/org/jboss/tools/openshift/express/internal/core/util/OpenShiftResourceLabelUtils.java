@@ -149,7 +149,11 @@ public class OpenShiftResourceLabelUtils {
 			return null;
 		}
 
-		return domain.getId();
+		return new StringBuilder(
+				domain.getId())
+				.append('.')
+				.append(domain.getSuffix())
+				.toString();
 	}
 
 	public static String toString(IGearProfile gear) {

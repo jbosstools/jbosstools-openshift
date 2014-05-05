@@ -17,6 +17,9 @@ import java.util.List;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -24,9 +27,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.DeleteApplicationsJob;
 import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
+import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IUser;
@@ -39,21 +47,30 @@ public class DeleteApplicationHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		Shell shell = HandlerUtil.getActiveShell(event);
 		final List<IApplication> appsToDelete = getApplicationsToDelete(HandlerUtil.getCurrentSelection(event));
-		if (appsToDelete == null
-				|| appsToDelete.size() == 0) {
-			return null;
+		if (appsToDelete != null
+				&& !appsToDelete.isEmpty()) {
+			return deleteApplications(appsToDelete, shell);
+		} else {
+			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
+			if (server == null) {
+				return OpenShiftUIActivator.createCancelStatus("Could not find the server to delete");
+			}
+			return deleteApplicationAndServer(server, shell);
 		}
+	}
 
-		if (promptForConfirmation(appsToDelete, HandlerUtil.getActiveShell(event))) {
+	private IStatus deleteApplications(final List<IApplication> appsToDelete, Shell shell) {
+		if (promptForDeleteConfirmation(appsToDelete, shell)) {
 			List<IUser> users = getUsers(appsToDelete);
-
 			new JobChainBuilder(new DeleteApplicationsJob(appsToDelete))
-					.andRunWhenDone(new FireConnectionsChangedJob(users))
-					.build()
+					.runWhenDone(new FireConnectionsChangedJob(users))
 					.schedule();
+			return Status.OK_STATUS;
+		} else {
+			return OpenShiftUIActivator.createCancelStatus("Cancelled application removal.");
 		}
-		return Status.OK_STATUS;
 	}
 
 	private List<IUser> getUsers(List<IApplication> applications) {
@@ -69,22 +86,55 @@ public class DeleteApplicationHandler extends AbstractHandler {
 		return users;
 	}
 
-	private boolean promptForConfirmation(final List<IApplication> appsToDelete, Shell shell) {
+	private boolean promptForDeleteConfirmation(final List<IApplication> appsToDelete, Shell shell) {
 		if (appsToDelete.size() == 1) {
 			return MessageDialog.openConfirm(shell,
-					"Application deletion",
+					"Application removal",
 					NLS.bind(
 							"You are about to destroy the \"{0}\" application.\n"
 									+ "This is NOT reversible, all remote data for this application will be removed.",
 							appsToDelete.get(0).getName()));
 		} else if (appsToDelete.size() > 1) {
 			return MessageDialog.openConfirm(shell,
-					"Application deletion",
+					"Application removal",
 					NLS.bind("You are about to destroy {0} applications.\n"
 							+ "This is NOT reversible, all remote data for those applications will be removed.",
 							appsToDelete.size()));
 		}
 		return false;
+	}
+
+	private IStatus deleteApplicationAndServer(final IServer server, Shell shell) {
+		if (MessageDialog
+				.openConfirm(
+						shell,
+						"Application and Server removal",
+						NLS.bind(
+								"You are about to remove the application and the server \"{0}\".\n"
+										+ "This is NOT reversible, all remote data for this application and the local server adapter will be removed.",
+								server.getName()))) {
+			LoadApplicationJob applicationJob = new LoadApplicationJob(server);
+			new JobChainBuilder(applicationJob)
+					.runWhenSuccessfullyDone(
+							new DeleteApplicationsJob(applicationJob))
+					.runWhenSuccessfullyDone(new FireConnectionsChangedJob(applicationJob))
+					.runWhenSuccessfullyDone(new AbstractDelegatingMonitorJob(NLS.bind("Delete Server Adapter {0}", server.getName())) {
+						
+						@Override
+						protected IStatus doRun(IProgressMonitor monitor) {
+							try {
+								server.delete();
+								return Status.OK_STATUS;
+							} catch (CoreException e) {
+								return e.getStatus();
+							}
+						}
+					})
+					.schedule();
+		}
+		;
+		return Status.OK_STATUS;
+
 	}
 
 	private List<IApplication> getApplicationsToDelete(ISelection selection) {
@@ -95,14 +145,10 @@ public class DeleteApplicationHandler extends AbstractHandler {
 		for (@SuppressWarnings("unchecked")
 		Iterator<Object> iterator = ((IStructuredSelection) selection).iterator(); iterator.hasNext();) {
 			final Object element = iterator.next();
-			if (isApplication(element)) {
+			if (element instanceof IApplication) {
 				appsToDelete.add((IApplication) element);
 			}
 		}
 		return appsToDelete;
-	}
-
-	private boolean isApplication(Object selection) {
-		return selection instanceof IApplication;
 	}
 }

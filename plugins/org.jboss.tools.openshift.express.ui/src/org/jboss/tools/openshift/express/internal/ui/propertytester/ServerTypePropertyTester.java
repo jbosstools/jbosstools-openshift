@@ -8,28 +8,39 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.console;
+package org.jboss.tools.openshift.express.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 
 /**
- * Property tester used to compare the given Server's serverTypeId with a given value. 
- * This property tester is configured in the plugin.xml file and used to display extra menus item only when the server is on OpenShift one.
+ * Property tester for properties that are related to the OpenShift server
+ * adapter
  * 
  * @author Xavier Coulon
+ * @author Andre Dietisheim
  *
  */
 public class ServerTypePropertyTester extends PropertyTester {
 
+	private final static String PROPERTY_IS_OPENSHIFT_SERVER = "isOpenShiftServer";
+
 	@Override
 	public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
-		if(receiver instanceof IServer) {
-			return OpenShiftServerUtils.isOpenShiftRuntime((IServer) receiver);
+		if (PROPERTY_IS_OPENSHIFT_SERVER.equals(property)) {
+			return isOpenShiftServer(receiver, args, expectedValue);
 		}
-		
 		return false;
 	}
 
+	private boolean isOpenShiftServer(Object receiver, Object[] args, Object expectedValue) {
+		if (!(receiver instanceof IServer)
+				|| !(expectedValue instanceof Boolean)) {
+			return false;
+		}
+
+		return ((Boolean) expectedValue).equals(
+				OpenShiftServerUtils.isOpenShiftRuntime((IServer) receiver));
+	}
 }

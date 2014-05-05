@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -24,23 +25,25 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  *
  */
-public class RetrieveApplicationJob extends Job {
+public class LoadApplicationJob extends Job {
 
 	private IApplication application = null;
-	
+
 	private final IServer server;
-	
-	public RetrieveApplicationJob(final IServer server) {
-		super("Identifying OpenShift Application from selected Server...");
+
+	public LoadApplicationJob(final IServer server) {
+		super(NLS.bind("Identifying OpenShift Application for server {0}...", server.getName()));
 		this.server = server;
 	}
-	
+
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		this.application = OpenShiftServerUtils.getApplication(server);
-		if(application == null) {
-			return OpenShiftUIActivator.createErrorStatus("Failed to retrieve Application from the selected Server.\n" +
-					"Please verify that the associated OpenShift Application still exists.");
+		if (application == null) {
+			return OpenShiftUIActivator.createErrorStatus(
+					NLS.bind("Failed to retrieve Application from server {0}.\n" +
+							"Please verify that the associated OpenShift application and workspace project still exist.", 
+							server.getName()));
 		}
 		return Status.OK_STATUS;
 	}

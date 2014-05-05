@@ -66,7 +66,7 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 	}
 
 	public URL getModuleRootURL(IModule module) {
-		String appProjString = OpenShiftServerUtils.getExpressDeployProject(getServer());
+		String appProjString = OpenShiftServerUtils.getDeployProjectName(getServer());
 		IProject appProj = appProjString == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
 		IProject p =module.getProject();
 		boolean shouldIgnore = OpenShiftServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		

@@ -25,14 +25,14 @@ public class JobChainBuilder {
 		this.job = job;
 	}
 
-	public JobConstraint andRunWhenSuccessfull(Job constrainedJob) {
+	public JobConstraint runWhenSuccessfullyDone(Job constrainedJob) {
 		return new JobConstraint(job).runWhenSuccessfullyDone(constrainedJob);
 	}
 
-	public JobConstraint andRunWhenDone(Job constrainedJob) {
+	public JobConstraint runWhenDone(Job constrainedJob) {
 		return new JobConstraint(job).runWhenDone(constrainedJob);
 	}
-	
+		
 	public class JobConstraint {
 		private Job job;
 

@@ -31,7 +31,7 @@ import com.openshift.client.OpenShiftSSHOperationException;
 /**
  * @author Xavier Coulon
  */
-public class ApplicationPortForwardingWizardModel extends ObservablePojo {
+public class PortForwardingWizardModel extends ObservablePojo {
 
 	public static final String PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS = "useDefaultLocalIpAddress";
 
@@ -47,7 +47,7 @@ public class ApplicationPortForwardingWizardModel extends ObservablePojo {
 
 	private final IApplication application;
 
-	public ApplicationPortForwardingWizardModel(final IApplication application) {
+	public PortForwardingWizardModel(final IApplication application) {
 		this.application = application;
 	}
 

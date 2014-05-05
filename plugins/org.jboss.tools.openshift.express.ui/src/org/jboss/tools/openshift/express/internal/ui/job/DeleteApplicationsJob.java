@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.job;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +28,12 @@ import com.openshift.client.OpenShiftException;
 public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 
 	private List<IApplication> applications;
+	private LoadApplicationJob job;
+
+	public DeleteApplicationsJob(LoadApplicationJob job) {
+		super("Deleting OpenShift Application(s)..."); 
+		this.job = job;
+	}
 
 	public DeleteApplicationsJob(final List<IApplication> applications) {
 		super("Deleting OpenShift Application(s)..."); 
@@ -35,9 +42,13 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 	
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
+		List<IApplication> applications = getApplications();
 		int totalWork = applications.size();
 		monitor.beginTask("Deleting OpenShift Application(s)...", totalWork);
 		for (final IApplication application : applications) {
+			if (application == null) {
+				continue;
+			}
 			final String appName = application.getName();
 			try {
 				if (monitor.isCanceled()) {
@@ -54,5 +65,13 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 			}
 		}
 		return Status.OK_STATUS;
+	}
+
+	private List<IApplication> getApplications() {
+		if (applications != null) {
+			return applications;
+		} else {
+			return Collections.singletonList(job.getApplication());
+		}
 	}
 }
