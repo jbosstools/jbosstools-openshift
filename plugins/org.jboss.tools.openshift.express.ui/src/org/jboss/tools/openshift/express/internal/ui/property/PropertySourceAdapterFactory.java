@@ -15,6 +15,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IDomain;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 /**
@@ -25,14 +26,15 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-		if(adapterType == IPropertySource.class) {
-			if(adaptableObject instanceof Connection) {
-				return new ConnectionPropertySource((Connection)adaptableObject);
-			}
-			if(adaptableObject instanceof IApplication) {
-				return new ApplicationPropertySource((IApplication)adaptableObject);
-			}if(adaptableObject instanceof IEmbeddedCartridge) {
-				return new EmbeddedCartridgePropertySource((IEmbeddedCartridge)adaptableObject);
+		if (adapterType == IPropertySource.class) {
+			if (adaptableObject instanceof Connection) {
+				return new ConnectionPropertySource((Connection) adaptableObject);
+			} else if (adaptableObject instanceof IDomain) {
+				return new DomainPropertySource((IDomain) adaptableObject);
+			} else if (adaptableObject instanceof IApplication) {
+				return new ApplicationPropertySource((IApplication) adaptableObject);
+			} else if (adaptableObject instanceof IEmbeddedCartridge) {
+				return new EmbeddedCartridgePropertySource((IEmbeddedCartridge) adaptableObject);
 			}
 		}
 		return null;

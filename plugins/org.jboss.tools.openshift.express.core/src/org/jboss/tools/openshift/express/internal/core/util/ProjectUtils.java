@@ -21,6 +21,15 @@ import org.eclipse.core.resources.ResourcesPlugin;
  */
 public class ProjectUtils {
 
+	public static boolean exists(IProject project) {
+		return project != null
+				&& project.exists();
+	}
+
+	public static boolean exists(String name) {
+		return exists(ResourcesPlugin.getWorkspace().getRoot().getProject(name));
+	}
+
 	public static boolean isAccessible(IProject project) {
 		return project != null
 				&& project.isAccessible();

@@ -19,10 +19,10 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  *
  */
-public class ApplicationPortForwardingWizard extends AbstractOpenShiftWizard<ApplicationPortForwardingWizardModel> {
+public class PortForwardingWizard extends AbstractOpenShiftWizard<PortForwardingWizardModel> {
 
-	public ApplicationPortForwardingWizard(IApplication application) {
-		super("Application port forwarding", new ApplicationPortForwardingWizardModel(application));
+	public PortForwardingWizard(IApplication application) {
+		super("Application port forwarding", new PortForwardingWizardModel(application));
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class ApplicationPortForwardingWizard extends AbstractOpenShiftWizard<App
 
 	@Override
 	public void addPages() {
-		addPage(new ApplicationPortForwardingWizardPage(getModel(), this));
+		addPage(new PortForwardingWizardPage(getModel(), this));
 	}
 
 }

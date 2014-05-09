@@ -52,7 +52,7 @@ import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 public class OpenShiftServerPublishMethod  {
 
 	public void publishStart(final IServer server, final IProgressMonitor monitor) throws CoreException {
-		String destProjName = OpenShiftServerUtils.getExpressDeployProject(server);
+		String destProjName = OpenShiftServerUtils.getDeployProjectName(server);
 		IProject magicProject = destProjName == null ? 
 				null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if (magicProject == null || !magicProject.isAccessible()) {
@@ -64,14 +64,14 @@ public class OpenShiftServerPublishMethod  {
 
 	public int publishFinish(IServer server, IProgressMonitor monitor) throws CoreException {
 
-		String destProjName = OpenShiftServerUtils.getExpressDeployProject(server);
+		String destProjName = OpenShiftServerUtils.getDeployProjectName(server);
 		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		boolean allSubModulesPublished = areAllPublished(server);
 
 		if (destProj != null 
 				&& destProj.exists()) {
 		
-			String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
+			String destinationFolder = OpenShiftServerUtils.getDeployFolder(server);
 			IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 			
 			if (allSubModulesPublished
@@ -104,7 +104,7 @@ public class OpenShiftServerPublishMethod  {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 
 		// Magic Project
-		String destProjName = OpenShiftServerUtils.getExpressDeployProject(server);
+		String destProjName = OpenShiftServerUtils.getDeployProjectName(server);
 		if (isInDestProjectTree(destProjName, module))
 			return IServer.PUBLISH_STATE_NONE;
 
@@ -169,7 +169,7 @@ public class OpenShiftServerPublishMethod  {
 		};
 	}
 	protected IContainer getDestination(IServer server, IProject destProj) throws CoreException {
-		String destinationFolder = OpenShiftServerUtils.getExpressDeployFolder(server);
+		String destinationFolder = OpenShiftServerUtils.getDeployFolder(server);
 		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
@@ -234,7 +234,7 @@ public class OpenShiftServerPublishMethod  {
 		} else {
 			try {
 				String openShiftRemoteName =
-						OpenShiftServerUtils.getExpressRemoteName(server);
+						OpenShiftServerUtils.getRemoteName(server);
 				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
 					if (OpenshiftCoreUIIntegration.requestApproval(
 							NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, p.getName()),
@@ -259,7 +259,7 @@ public class OpenShiftServerPublishMethod  {
 	}
 	
 	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
-		String remoteName = OpenShiftServerUtils.getExpressRemoteName(server.createWorkingCopy());
+		String remoteName = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
 		Repository repository = EGitUtils.getRepository(project);
 		try {
 			monitor.beginTask("Publishing " + project.getName(), 200);

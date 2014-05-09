@@ -28,17 +28,26 @@ import com.openshift.client.OpenShiftTimeoutException;
 public class RestartApplicationJob extends AbstractDelegatingMonitorJob {
 
 	private IApplication application;
+	private LoadApplicationJob applicationJob;
 
 	public RestartApplicationJob(IApplication application) {
 		super(NLS.bind(OpenShiftExpressUIMessages.RESTARTING_APPLICATION, application.getName()));
 		this.application = application;
 	}
 
+	public RestartApplicationJob(LoadApplicationJob applicationJob) {
+		super(NLS.bind(OpenShiftExpressUIMessages.RESTARTING_APPLICATION, ""));
+		this.applicationJob = applicationJob;
+	}
+
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
-		Logger.debug(OpenShiftExpressUIMessages.WAITING_FOR_REACHABLE);
+		Logger.debug(OpenShiftExpressUIMessages.RESTARTING_APPLICATION);
 		try {
-			application.restart();
+			IApplication application = getApplication();
+			if (application != null) {
+				getApplication().restart();
+			}
 		} catch(OpenShiftTimeoutException e) {
 			// intentionally swallow
 		} catch (OpenShiftException e) {
@@ -46,5 +55,13 @@ public class RestartApplicationJob extends AbstractDelegatingMonitorJob {
 					"Could not restart application \"{0}\"", application.getName()), e);
 		}
 		return Status.OK_STATUS;
+	}
+	
+	private IApplication getApplication() {
+		if (application != null) {
+			return application;
+		} else {
+			return applicationJob.getApplication();
+		}
 	}
 }

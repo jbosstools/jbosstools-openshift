@@ -8,29 +8,32 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.action;
+package org.jboss.tools.openshift.express.internal.ui.command;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 /**
  * @author Xavier Coulon
+ * @author Andre Dietisheim
  */
-public class ShowPropertiesAction extends AbstractOpenShiftAction {
+public class ShowPropertiesHandler extends AbstractHandler {
 
-	public ShowPropertiesAction() {
-		super(OpenShiftExpressUIMessages.SHOW_PROPERTIES_VIEW_ACTION, true);
-	}
+	private static final String PROPERTIES_VIEW_ID = "org.eclipse.ui.views.PropertySheet";
 
 	@Override
-	public void run() {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.eclipse.ui.views.PropertySheet");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(PROPERTIES_VIEW_ID);
 		} catch (PartInitException e) {
 			Logger.error("Failed to show properties view", e);
-		} 
+		}
+		return Status.OK_STATUS;
 	}
 
 }

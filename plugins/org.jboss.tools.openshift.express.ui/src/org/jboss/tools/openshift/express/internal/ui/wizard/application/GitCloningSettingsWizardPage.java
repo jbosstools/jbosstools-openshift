@@ -305,7 +305,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				return;
 			}
 			final LoadKeysJob loadKeysJob = new LoadKeysJob(pageModel.getConnection());
-			new JobChainBuilder(loadKeysJob).andRunWhenDone(new UIJob("") {
+			new JobChainBuilder(loadKeysJob).runWhenDone(new UIJob("") {
 
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {

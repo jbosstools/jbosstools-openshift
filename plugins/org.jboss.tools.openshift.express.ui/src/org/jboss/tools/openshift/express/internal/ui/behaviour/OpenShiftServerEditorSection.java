@@ -104,23 +104,23 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	protected void initWidgets() {
 		// Set the widgets
 		deployProjectCombo.setEnabled(true);
-		ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
+		ConnectionURL connectionUrl = OpenShiftServerUtils.getConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
-		String domainName = OpenShiftServerUtils.getExpressDomainName(server);
+		String domainName = OpenShiftServerUtils.getDomainName(server);
 		domainNameText.setText(StringUtils.null2emptyString(domainName));
-		String appName = OpenShiftServerUtils.getExpressApplicationName(server);
+		String appName = OpenShiftServerUtils.getApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
 		connectionText.setEnabled(false);
 		domainNameText.setEnabled(false);
 		appNameText.setEnabled(false);
 
-		deployFolderText.setText(StringUtils.null2emptyString(OpenShiftServerUtils.getExpressDeployFolder(server)));
-		String remote = OpenShiftServerUtils.getExpressRemoteName(server);
+		deployFolderText.setText(StringUtils.null2emptyString(OpenShiftServerUtils.getDeployFolder(server)));
+		String remote = OpenShiftServerUtils.getRemoteName(server);
 		remoteText.setText(StringUtils.null2emptyString(remote));
 
 		deployProjectCombo.setItems(getSuitableProjects());
 		int index = getProjectIndex(
-				OpenShiftServerUtils.getExpressDeployProject(server), Arrays.asList(deployProjectCombo.getItems()));
+				OpenShiftServerUtils.getDeployProjectName(server), Arrays.asList(deployProjectCombo.getItems()));
 		if (index > -1) {
 			deployProjectCombo.select(index);
 		}
@@ -278,7 +278,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private IFolder chooseFolder() {
-		String depProject = OpenShiftServerUtils.getExpressDeployProject(server);
+		String depProject = OpenShiftServerUtils.getDeployProjectName(server);
 
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(depProject);
 
@@ -291,7 +291,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
 		IResource res = p.findMember(new Path(
-				StringUtils.null2emptyString(OpenShiftServerUtils.getExpressDeployFolder(server))));
+				StringUtils.null2emptyString(OpenShiftServerUtils.getDeployFolder(server))));
 		if (res != null)
 			dialog.setInitialSelection(res);
 
@@ -342,18 +342,18 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private void updateWidgetsFromWorkingCopy() {
-		ConnectionURL connectionUrl = OpenShiftServerUtils.getExpressConnectionUrl(server);
+		ConnectionURL connectionUrl = OpenShiftServerUtils.getConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
-		String appName = OpenShiftServerUtils.getExpressApplicationName(server);
+		String appName = OpenShiftServerUtils.getApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
-		String domainName = OpenShiftServerUtils.getExpressDomainName(server);
+		String domainName = OpenShiftServerUtils.getDomainName(server);
 		domainNameText.setText(StringUtils.null2emptyString(domainName));
 
 		browseDestButton.setEnabled(overrideProjectSettings.getSelection());
 		deployFolderText.setEnabled(overrideProjectSettings.getSelection());
 		remoteText.setEnabled(overrideProjectSettings.getSelection());
-		String remote = OpenShiftServerUtils.getExpressRemoteName(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
-		String depFolder = OpenShiftServerUtils.getExpressDeployFolder(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
+		String remote = OpenShiftServerUtils.getRemoteName(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
+		String depFolder = OpenShiftServerUtils.getDeployFolder(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
 
 		remoteText.removeModifyListener(remoteModifyListener);
 		deployFolderText.removeModifyListener(deployDestinationModifyListener);

@@ -365,10 +365,6 @@ public class Connection {
 		}
 		return domain.getApplicationByName(name);
 	}
-
-	public boolean hasDomain(IDomain domain) {
-		return user.hasDomain();
-	}
 	
 	public boolean hasApplication(String name, IDomain domain) throws OpenShiftException {
 		return getApplication(name, domain) != null;
@@ -509,7 +505,7 @@ public class Connection {
 					store.remove();
 				}
 			} catch (SecurePasswordStoreException e) {
-				OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
+				//OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 		}
 	}

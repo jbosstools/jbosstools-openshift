@@ -20,7 +20,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
+import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.environment.EditEnvironmentVariablesWizard;
@@ -36,16 +36,15 @@ public class EditEnvironmentVariablesHandler extends AbstractDomainHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		Shell shell = HandlerUtil.getActiveShell(event);
 		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
 		if (application != null) {
-			return openEnvironmentVariablesWizard(application, shell);
+			return openEnvironmentVariablesWizard(application, HandlerUtil.getActiveShell(event));
 		} else {
 			IServer server = UIUtils.getFirstElement(selection, IServer.class);
 			if (server == null) {
 				return null;
 			}
-			return openEnvironmentVariablesWizard(server, shell);
+			return openEnvironmentVariablesWizard(server, HandlerUtil.getActiveShell(event));
 		}
 	}
 
@@ -61,7 +60,7 @@ public class EditEnvironmentVariablesHandler extends AbstractDomainHandler {
 	}
 
 	private Object openEnvironmentVariablesWizard(IServer server, final Shell shell) {
-		final RetrieveApplicationJob job = new RetrieveApplicationJob(server);
+		final LoadApplicationJob job = new LoadApplicationJob(server);
 		job.addJobChangeListener(new JobChangeAdapter() {
 
 			@Override

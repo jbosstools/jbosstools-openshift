@@ -115,8 +115,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	private StyledString createStyledString(IDomain domain) {
 		String id = domain.getId();
-		String fullName = 
-				new StringBuilder(id).append('.').append(domain.getSuffix()).toString(); 
+		String fullName = OpenShiftResourceLabelUtils.toString(domain); 
 		String label = 
 				new StringBuilder(id).append(' ').append(fullName).toString();
 

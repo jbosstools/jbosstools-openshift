@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -54,29 +55,20 @@ import com.openshift.client.OpenShiftSSHOperationException;
 /**
  * @author Xavier Coulon
  */
-public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizardPage {
+public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 
-	private final ApplicationPortForwardingWizardModel wizardModel;
-
+	private final PortForwardingWizardModel wizardModel;
 	private TableViewer viewer;
-
 	private Button refreshButton;
-
 	private Button startButton;
-
 	private Button stopButton;
 
-	public ApplicationPortForwardingWizardPage(final ApplicationPortForwardingWizardModel wizardModel,
-			final ApplicationPortForwardingWizard applicationPortForwardingWizard) {
+	public PortForwardingWizardPage(final PortForwardingWizardModel wizardModel,
+			final PortForwardingWizard portForwardingWizard) {
 		super("Application port forwarding", null,
-				"IApplicationPortForwardingingPage", applicationPortForwardingWizard);
+				"IApplicationPortForwardingingPage", portForwardingWizard);
 		this.wizardModel = wizardModel;
-		super.setDescription("Please configure port forwarding for the '" + wizardModel.getApplication().getName() + "' application");
-	}
-
-	@Override
-	public boolean isPageComplete() {
-		return true;
+		setDescription(NLS.bind("Please configure port forwarding for the {0} application", wizardModel.getApplication().getName()));
 	}
 
 	@Override
@@ -113,14 +105,14 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
 				.applyTo(useLocalIpAddressButton);
 		final IObservableValue useLocalIpAddressObservable = BeanProperties.value(
-				ApplicationPortForwardingWizardModel.PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS).observe(wizardModel);
+				PortForwardingWizardModel.PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS).observe(wizardModel);
 		final IObservableValue useLocalIpAddressButtonSelection = WidgetProperties.selection().observe(
 				useLocalIpAddressButton);
 		dbc.bindValue(useLocalIpAddressButtonSelection, useLocalIpAddressObservable);
 		useLocalIpAddressObservable.addValueChangeListener(new IValueChangeListener() {
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				refreshViewerInput();
+				refreshViewerInput(wizardModel.getForwardablePorts());
 			}
 		});
 
@@ -130,22 +122,22 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
 				.applyTo(findFreesPortButton);
 		final IObservableValue findFreePortsButtonObservable = BeanProperties.value(
-				ApplicationPortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
+				PortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
 		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(findFreesPortButton);
 		dbc.bindValue(findFreePortsButtonSelection, findFreePortsButtonObservable);
 		findFreePortsButtonObservable.addValueChangeListener(new IValueChangeListener() {
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				refreshViewerInput();
+				refreshViewerInput(wizardModel.getForwardablePorts());
 			}
 		});
 
 		// enabling/disabling controls
 		IObservableValue portForwardingStartedObservable = BeanProperties.value(
-				ApplicationPortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
+				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
 		
 		IObservableValue forwardablePortsExistObservable = BeanProperties.value(
-				ApplicationPortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
+				PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
 		
 		
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
@@ -171,15 +163,6 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 
 	}
 
-	/*
-	 * private ISelectionChangedListener onTableSelectionChanged() { return new ISelectionChangedListener() {
-	 * @Override public void selectionChanged(SelectionChangedEvent event) { final IStructuredSelection selection =
-	 * (IStructuredSelection) event.getSelection(); IApplicationPortForwarding portForward =
-	 * (IApplicationPortForwarding) selection.getFirstElement(); if (portForward.isStarted()) {
-	 * enableButton.setEnabled(false); disableButton.setEnabled(true); } else { enableButton.setEnabled(true);
-	 * disableButton.setEnabled(false); } } }; }
-	 */
-
 	private SelectionListener onRefreshPorts() {
 		return new SelectionAdapter() {
 			@Override
@@ -193,7 +176,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 									return Status.CANCEL_STATUS;
 								}
 								wizardModel.refreshForwardablePorts();
-								refreshViewerInput();
+								refreshViewerInput(wizardModel.getForwardablePorts());
 							} catch (OpenShiftSSHOperationException e) {
 								Logger.error("Failed to refresh list of ports", e);
 							}
@@ -221,7 +204,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 								}
 
 								wizardModel.startPortForwarding();
-								refreshViewerInput();
+								refreshViewerInput(wizardModel.getForwardablePorts());
 							} catch (OpenShiftSSHOperationException e) {
 								return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding.", e);
 							}
@@ -265,7 +248,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 								}
 
 								wizardModel.stopPortForwarding();
-								refreshViewerInput();
+								refreshViewerInput(wizardModel.getForwardablePorts());
 							} catch (OpenShiftSSHOperationException e) {
 								return OpenShiftUIActivator.createErrorStatus("Failed to stop port-forwarding.", e);
 							}
@@ -344,7 +327,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		}, viewer, tableLayout);
 
 		IObservableValue forwardablePortsModelObservable =
-				BeanProperties.value(ApplicationPortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS)
+				BeanProperties.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS)
 						.observe(wizardModel);
 		
 		final ForwardablePortListValidator validator =
@@ -373,7 +356,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 					monitor.worked(1);
 					monitor.beginTask("Retrieving ports...", 1);
 					wizardModel.loadForwardablePorts();
-					refreshViewerInput();
+					refreshViewerInput(wizardModel.getForwardablePorts());
 					monitor.worked(1);
 					return Status.OK_STATUS;
 				} catch (OpenShiftSSHOperationException e) {
@@ -390,7 +373,7 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 		}
 	}
 
-	private void refreshViewerInput() {
+	private void refreshViewerInput(List<IApplicationPortForwarding> ports) {
 		getShell().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -421,6 +404,12 @@ public class ApplicationPortForwardingWizardPage extends AbstractOpenShiftWizard
 			return Status.OK_STATUS;
 		}
 		
+	}
+
+	@Override
+	public boolean isPageComplete() {
+		// enable OK button even when binding validation errors exist 
+		return true;
 	}
 
 }

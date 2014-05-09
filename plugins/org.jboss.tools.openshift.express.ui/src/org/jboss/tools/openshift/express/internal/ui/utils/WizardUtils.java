@@ -36,10 +36,21 @@ public class WizardUtils {
 		}
 	}
 	
+	public static boolean openWizard(int width, int height, IWizard wizard, Shell shell) {
+		WizardDialog dialog = createWizardDialog(wizard, shell);
+		dialog.setMinimumPageSize(width, height);
+		return dialog.open() == Dialog.OK;
+	}
+
 	public static boolean openWizard(IWizard wizard, Shell shell) {
+		WizardDialog dialog = createWizardDialog(wizard, shell);
+		return dialog.open() == Dialog.OK;
+	}
+
+	private static WizardDialog createWizardDialog(IWizard wizard, Shell shell) {
 		WizardDialog dialog = new WizardDialog(shell, wizard);
 		dialog.create();
-		return dialog.open() == Dialog.OK;
+		return dialog;
 	}
 
 	public static boolean openWizard(IWorkbenchWizard wizard, Shell shell) {
@@ -53,9 +64,8 @@ public class WizardUtils {
 	}
 
 	public static boolean openWizard(IWorkbenchWizard wizard, Shell shell, IStructuredSelection selection) {
-		WizardDialog dialog = new WizardDialog(shell, wizard);
-		dialog.create();
+		WizardDialog wizardDialog = createWizardDialog(wizard, shell);
 		wizard.init(PlatformUI.getWorkbench(), selection);
-		return dialog.open() == Dialog.OK;
+		return wizardDialog.open() == Dialog.OK;
 	}
 }

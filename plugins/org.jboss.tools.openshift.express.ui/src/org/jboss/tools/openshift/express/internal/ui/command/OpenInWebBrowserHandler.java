@@ -8,40 +8,36 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.action;
+package org.jboss.tools.openshift.express.internal.ui.command;
 
-import org.jboss.tools.common.ui.BrowserUtil;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
 /**
  * @author Xavier Coulon
+ * @author Andre Dietisheim
  */
-public class OpenInWebBrowserAction extends AbstractOpenShiftAction {
+public class OpenInWebBrowserHandler extends AbstractHandler{
 
-	public OpenInWebBrowserAction() {
-		super(OpenShiftExpressUIMessages.SHOW_IN_BROWSER_ACTION, true);
-		setImageDescriptor(OpenShiftImages.OPEN_BROWSER);
-	}
-
-	/**
-	 * Operation called when the user clicks on 'Show In>Remote Console'. If no Console/Worker existed, a new one is
-	 * created, otherwise, it is displayed. {@inheritDoc}
-	 */
 	@Override
-	public void run() {
-		final IApplication application = UIUtils.getFirstElement(getSelection(), IApplication.class);
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		final IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
 		if (application == null) {
-			return;
+			return OpenShiftUIActivator.createCancelStatus("Could not find application to show in a browser.");
 		}
 		final String appName = application.getName();
 		final String appUrl = application.getApplicationUrl();
-		BrowserUtil.checkedCreateInternalBrowser(appUrl, appName,
+		new BrowserUtility().checkedCreateInternalBrowser(appUrl, appName,
 				OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+		return Status.OK_STATUS;
 	}
 
 }

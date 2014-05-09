@@ -173,8 +173,7 @@ public class UIUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
-		if (selection instanceof IStructuredSelection) {
-			Object firstSelectedElement = ((IStructuredSelection) selection).getFirstElement();
+			Object firstSelectedElement = getFirstElement(selection);
 			if (firstSelectedElement == null) {
 				return null;
 			} 
@@ -186,10 +185,15 @@ public class UIUtils {
 			} else {
 				return (E) Platform.getAdapterManager().getAdapter(firstSelectedElement, clazz);
 			}
-		}
-		return null;
 	}
 	
+	public static Object getFirstElement(ISelection selection) {
+		if (!(selection instanceof IStructuredSelection)) {
+			return null;
+		}
+		return ((IStructuredSelection) selection).getFirstElement();
+	}
+
 	public static boolean areNumOfElementsSelected(int numOf, ISelection selection) {
 		if (!(selection instanceof IStructuredSelection)) {
 			return false;

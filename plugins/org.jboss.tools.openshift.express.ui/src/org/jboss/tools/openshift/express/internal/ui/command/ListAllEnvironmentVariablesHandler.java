@@ -27,8 +27,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
-import org.jboss.tools.openshift.express.internal.ui.job.RetrieveApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.job.VerifySSHSessionJob;
+import org.jboss.tools.openshift.express.internal.ui.job.CreateSSHSessionJob;
+import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
@@ -37,7 +37,7 @@ import com.openshift.client.IApplication;
 /**
  * @author Xavier Coulon
  */
-public class ShowEnvironmentHandler extends AbstractHandler {
+public class ListAllEnvironmentVariablesHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -63,7 +63,7 @@ public class ShowEnvironmentHandler extends AbstractHandler {
 	 * @param server
 	 */
 	private void showEnvironmentPropertiesFor(final IServer server) {
-		final RetrieveApplicationJob job = new RetrieveApplicationJob(server);
+		final LoadApplicationJob job = new LoadApplicationJob(server);
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
@@ -78,7 +78,7 @@ public class ShowEnvironmentHandler extends AbstractHandler {
 	}
 
 	private void showEnvironmentPropertiesFor(final IApplication application) {
-		final VerifySSHSessionJob job = new VerifySSHSessionJob(application);
+		final CreateSSHSessionJob job = new CreateSSHSessionJob(application);
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
