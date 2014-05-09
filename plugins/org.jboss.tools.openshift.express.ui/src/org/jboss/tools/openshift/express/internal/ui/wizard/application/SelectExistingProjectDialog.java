@@ -32,6 +32,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.ide.IDE.SharedImages;
 import org.jboss.tools.common.ui.preferencevalue.StringPreferenceValue;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
@@ -40,7 +41,6 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
  */
 public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 
-	private static final String RSE_INTERNAL_PROJECTS = "RemoteSystems";
 	StringPreferenceValue showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftUIActivator.PLUGIN_ID);
 	private boolean showAll;
 	
@@ -110,7 +110,7 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 			return false;
 		}
 		
-		if(isInternalRSEProject(project.getName())) {
+		if(ProjectUtils.isInternalRSE(project.getName())) {
 			return false;
 		}
 			
@@ -119,11 +119,6 @@ public class SelectExistingProjectDialog extends ElementListSelectionDialog {
 		}
 
 		return true;
-	}
-
-	private boolean isInternalRSEProject(String name) {
-		return name != null
-				&& name.startsWith(RSE_INTERNAL_PROJECTS);
 	}
 
 	protected boolean isNonGitShared(IProject project) {

@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -31,11 +33,18 @@ public class NewApplicationHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IDomain domain = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IDomain.class);
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		Shell shell = HandlerUtil.getActiveShell(event);
 		if (domain != null) {
-			open(new NewOpenShiftApplicationWizard(domain), HandlerUtil.getActiveShell(event));
+			open(new NewOpenShiftApplicationWizard(domain), shell);
 		} else {
-			Connection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), Connection.class);
-			open(new NewOpenShiftApplicationWizard(connection), HandlerUtil.getActiveShell(event));
+			Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+			if (connection != null) {
+				open(new NewOpenShiftApplicationWizard(connection), shell);
+			} else {
+				IProject project = UIUtils.getFirstElement(selection, IProject.class);
+				open(new NewOpenShiftApplicationWizard(project), shell);
+			}
 		}
 
 		return null;

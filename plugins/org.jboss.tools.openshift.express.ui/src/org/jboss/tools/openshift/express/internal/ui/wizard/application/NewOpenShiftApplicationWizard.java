@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import org.eclipse.core.resources.IProject;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 
@@ -30,6 +31,14 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	public NewOpenShiftApplicationWizard() {
 		super(ConnectionsModelSingleton.getInstance().getRecentConnection(),
 				null, null, null, false, true, "New OpenShift Application");
+	}
+
+	/**
+	 * Constructor invoked via PackageExplorer Configure->New OpenShift Application
+	 */
+	public NewOpenShiftApplicationWizard(IProject project) {
+		super(ConnectionsModelSingleton.getInstance().getRecentConnection(),
+				null, null, project, false, true, "New OpenShift Application");
 	}
 
 	/**
