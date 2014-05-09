@@ -35,10 +35,11 @@ public class OpenShiftProjectPropertyTester extends PropertyTester {
 	}
 
 	private boolean isOpenShiftProject(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IProject)) {
+		if (!(receiver instanceof IProject)
+				|| !(expectedValue instanceof Boolean)) {
 			return false;
 		}
-
-		return OpenShiftProjectUtils.isOpenShiftProject((IProject) receiver);
+		return ((Boolean) expectedValue).equals(
+				OpenShiftProjectUtils.isOpenShiftProject((IProject) receiver));
 	}
 }

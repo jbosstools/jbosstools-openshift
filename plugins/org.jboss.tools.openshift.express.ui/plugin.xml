@@ -1516,6 +1516,59 @@
 		</menuContribution>
 	</extension>
 
+	<!-- configure OpenShift application -->
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			id="org.jboss.tools.openshift.express.ui.command.configureMarkers"
+			name="%openshift.command.configureMarkers">
+		</command>
+	</extension>
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler
+			class="org.jboss.tools.openshift.express.internal.ui.command.ConfigureMarkersHandler"
+			commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers">
+		</handler>
+	</extension>
+	<!-- project explorer: configure OpenShift application -->
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+    		locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.newapplication"
+				icon="icons/openshift-new.png"
+				label="%openshift.menu.configureNewOpenShiftApplication"
+				id="org.jboss.tools.openshift.express.ui.command.newapplication"
+				mnemonic="A">
+				<visibleWhen 
+					checkEnabled="false">
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false">
+								<adapt
+            						type="org.eclipse.core.resources.IProject">
+									<and>
+			 							<test
+			 								forcePluginActivation="true"
+				    	       				property="org.jboss.tools.openshift.express.isOpenShiftProject" value="false"/>			 							
+				    	       			<test
+			 								forcePluginActivation="true"
+				    	       				property="org.jboss.tools.openshift.express.ifSharedIsEGit" value="true"/>
+				    	       			<test
+			 								forcePluginActivation="true"
+				    	       				property="org.jboss.tools.openshift.express.isInternalRSE" value="false"/>
+				    	       		</and>
+								</adapt>
+			           		</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+  
     <!-- adapters -->
      <extension
            point="org.eclipse.core.runtime.adapters">
@@ -1581,6 +1634,13 @@
 			id="org.jboss.tools.openshift.express.ui.openshiftProjectPropertyTester"
 			namespace="org.jboss.tools.openshift.express"
 			properties="isOpenShiftProject"
+			type="org.eclipse.core.resources.IProject">
+		</propertyTester>
+		<propertyTester
+			class="org.jboss.tools.openshift.express.internal.ui.propertytester.ProjectPropertyTester"
+			id="org.jboss.tools.openshift.express.ui.projectPropertyTester"
+			namespace="org.jboss.tools.openshift.express"
+			properties="ifSharedIsEGit,isInternalRSE"
 			type="org.eclipse.core.resources.IProject">
 		</propertyTester>
 	</extension>
