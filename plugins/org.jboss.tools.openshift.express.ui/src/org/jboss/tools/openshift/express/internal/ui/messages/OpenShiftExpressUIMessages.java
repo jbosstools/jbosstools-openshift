@@ -37,7 +37,6 @@ public class OpenShiftExpressUIMessages extends NLS {
 	public static String DELETE_APPLICATION_ACTION;
 	public static String CREATE_APPLICATION_ACTION;
 	public static String IMPORT_APPLICATION_ACTION;
-	public static String CREATE_SERVER_ADAPTER_ACTION;
 	public static String EDIT_CARTRIDGES_ACTION;
 	public static String MAKE_SNAPSHOT_ACTION;
 	public static String REFRESH_USER_ACTION;
