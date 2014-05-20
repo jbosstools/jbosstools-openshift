@@ -80,4 +80,9 @@ public class ApplicationTemplateCategory extends AbstractApplicationTemplate imp
 	public boolean canCreateApplication() {
 		return false;
 	}
+
+	@Override
+	public boolean isInitialGitUrlEditable() {
+		return true;
+	}
 }
