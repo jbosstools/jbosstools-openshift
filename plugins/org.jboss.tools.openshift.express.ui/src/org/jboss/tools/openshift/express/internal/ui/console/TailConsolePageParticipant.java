@@ -10,12 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.console;
 
+import org.eclipse.debug.internal.ui.DebugPluginImages;
+import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.console.actions.CloseConsoleAction;
 import org.eclipse.ui.part.IPageBookViewPage;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
 /**
  * Console helper that allows contributing actions to the console view when the
@@ -32,6 +35,8 @@ public class TailConsolePageParticipant implements IConsolePageParticipant {
 
 	public void init(IPageBookViewPage page, IConsole console) {
 		this.closeConsoleAction = new CloseConsoleAction(console);
+		this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_LCL_TERMINATE));
+		this.closeConsoleAction.setToolTipText(OpenshiftUIMessages.TerminateConsole);
 		IActionBars bars = page.getSite().getActionBars();
 		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction);
 	}
