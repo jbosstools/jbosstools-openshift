@@ -37,5 +37,8 @@ public class OpenshiftUIMessages extends NLS {
 	public static String PublishDialogDefaultGitCommitMsg;
 	public static String ClientReadTimeout;
 	public static String TerminateConsole;
-
+	public static String DomainName;
+	public static String EnterDomainName;
+	public static String DomainNameMayHaveLettersAndDigits;
+	public static String DomainNameMaximumLength;
 }

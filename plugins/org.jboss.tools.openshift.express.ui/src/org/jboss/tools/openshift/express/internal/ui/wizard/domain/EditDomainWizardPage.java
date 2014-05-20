@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
@@ -51,7 +52,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(parent);
 
 		Label namespaceLabel = new Label(parent, SWT.NONE);
-		namespaceLabel.setText("&Domain name");
+		namespaceLabel.setText(OpenshiftUIMessages.DomainName);
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
 		Text namespaceText = new Text(parent, SWT.BORDER);
@@ -92,15 +93,15 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						"Enter a domain name with letters and digits only. Maximum length is 16 characters.");
+						OpenshiftUIMessages.EnterDomainName);
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
-						"The domain name may only contain letters and digits.");
+						OpenshiftUIMessages.DomainNameMayHaveLettersAndDigits);
 			}
 			if (domainName.length() > 16) {
 				return ValidationStatus.error(
-						"The domain name maximum length is 16 characters.");
+						OpenshiftUIMessages.DomainNameMaximumLength);
 			}
 			return ValidationStatus.ok();
 		}
