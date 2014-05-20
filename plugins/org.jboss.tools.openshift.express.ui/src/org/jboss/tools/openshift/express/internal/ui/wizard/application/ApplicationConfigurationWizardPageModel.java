@@ -352,6 +352,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public boolean isUseInitialGitUrl() {
 		return wizardModel.isUseInitialGitUrl();
 	}
+	
+	public void setUseInitialGitUrl(boolean useInitialGitUrl) {
+		setDefaultSourcecode(useInitialGitUrl);
+	}
 
 	public void setDefaultSourcecode(boolean useInitialGitUrl) {
 		resetInitialGitUrl();
