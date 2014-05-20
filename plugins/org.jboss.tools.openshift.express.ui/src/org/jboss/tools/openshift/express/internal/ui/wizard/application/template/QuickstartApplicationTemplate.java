@@ -138,4 +138,9 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 		return false;
 	}
 
+	@Override
+	public boolean isInitialGitUrlEditable() {
+		return false;
+	}
+
 }

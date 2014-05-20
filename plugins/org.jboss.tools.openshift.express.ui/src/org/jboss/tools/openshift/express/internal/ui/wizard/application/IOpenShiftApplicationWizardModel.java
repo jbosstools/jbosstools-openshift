@@ -67,6 +67,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
 	public static final String PROP_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
+	public static final String PROPERTY_IS_SOURCE_CODE_EDITABLE = "isSourceCodeEditable";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROP_USE_INITIAL_GIT_URL = "useInitialGitUrl";
 	
