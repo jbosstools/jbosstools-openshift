@@ -68,4 +68,9 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 		return isMatching(
 				StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
 	}
+
+	@Override
+	public boolean isInitialGitUrlEditable() {
+		return true;
+	}
 }
