@@ -23,7 +23,6 @@ import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -59,8 +58,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROPERTY_USE_INITIAL_GITURL = "useInitialGitUrl";
-	public static final String PROPERTY_IS_SOURCE_CODE_EDITABLE = "isSourceCodeEditable";
-
+	public static final String PROPERTY_INITIAL_GITURL_EDITABLE = "initialGitUrlEditable";
+	public static final String PROPERTY_EXISTING_INITIAL_GITURL_EDITABLE = "existingInitialGitUrlEditable";
+	
 	private final OpenShiftApplicationWizardModel wizardModel;
 
 	private List<IApplication> existingApplications = new ArrayList<IApplication>();
@@ -100,20 +100,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			public void propertyChange(PropertyChangeEvent event) {
 				firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
 				fireCanAddRemoveCartridges();
+				fireInitialGitUrlEditable();
+				fireExistingInitialGitUrlEditable();
 			}
 		}
 		.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
-		
-		new PojoEventBridge() {
-
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				firePropertyChange(PROPERTY_IS_SOURCE_CODE_EDITABLE, event.getOldValue(), event.getNewValue());
-				fireIsSourceCodeEditable();
-			}
-		}
-		.listenTo(IOpenShiftApplicationWizardModel.PROPERTY_IS_SOURCE_CODE_EDITABLE, wizardModel);
-		
 		new PojoEventBridge()
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel)
 				.forwardTo(PROPERTY_USE_INITIAL_GITURL, this);
@@ -307,12 +298,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_CAN_ADDREMOVE_CARTRIDGES, 
 				!isCanAddRemoveCartridges(), isCanAddRemoveCartridges());
 	}
-	
-	protected void fireIsSourceCodeEditable(){
-		firePropertyChange(PROPERTY_IS_SOURCE_CODE_EDITABLE, 
-				!isSourceCodeEditable(), isSourceCodeEditable());
-		
-	}
 
 	/**
 	 * Returns <code>true</code> if the user may modify the cartridges. This is
@@ -323,22 +308,53 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @return
 	 * 
 	 * @see #getSelectedApplicationTemplate()
-	 * @see IQuickstartApplicationTemplate
+	 * @see IApplicationTemplate#canAddRemoveCartridges()
 	 */
 	public boolean isCanAddRemoveCartridges() {
 		return getSelectedApplicationTemplate() != null
 				&& getSelectedApplicationTemplate().canAddRemoveCartridges();
 	}
 
-	public boolean isSourceCodeEditable() {
+	protected void fireInitialGitUrlEditable() {
+		firePropertyChange(PROPERTY_INITIAL_GITURL_EDITABLE,
+				null, isInitialGitUrlEditable());
+	}
+
+	/**
+	 * Returns <code>true</code> if initial git url is editable. This is not the
+	 * case for quickstarts. For quickstarts the user may not change the initial
+	 * git url.
+	 * 
+	 * @return true if the git url may be edited
+	 * 
+	 * @see IApplicationTemplate#isInitialGitUrlEditable()
+	 * @see #getSelectedApplicationTemplate()
+	 */
+	public boolean isInitialGitUrlEditable() {
 		return getSelectedApplicationTemplate() != null
 				&& getSelectedApplicationTemplate().isInitialGitUrlEditable();
 	}
-		
-	public boolean hasInitialGitUrl() {
-		return !StringUtils.isEmpty(getInitialGitUrl());
+	
+	protected void fireExistingInitialGitUrlEditable() {
+		firePropertyChange(PROPERTY_EXISTING_INITIAL_GITURL_EDITABLE,
+				null, isInitialGitUrlEditable());
 	}
-
+	
+	/**
+	 * Returns <code>true</code> if initial git url exists and is editable. This
+	 * is true if the model is set to use initial git url (#isUseInitialGitUrl)
+	 * and the git url is editable (#isInitialGitUrlEditable).
+	 * 
+	 * @return true if the git url is editable and the user set this model to have an initial git url
+	 * 
+	 * @see #setUseInitialGitUrl(boolean)
+	 * @see #isInitialGitUrlEditable()
+	 */
+	public boolean isExistingInitialGitUrlEditable() {
+		return isUseInitialGitUrl()
+				&& isInitialGitUrlEditable();
+	}
+	
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
 		Connection connection = getConnection();
 		if (wizardModel.isValid(connection)) {
@@ -375,14 +391,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public boolean isUseInitialGitUrl() {
 		return wizardModel.isUseInitialGitUrl();
 	}
-	
-	public void setUseInitialGitUrl(boolean useInitialGitUrl) {
-		setDefaultSourcecode(useInitialGitUrl);
-	}
 
-	public void setDefaultSourcecode(boolean useInitialGitUrl) {
-		resetInitialGitUrl();
+	/**
+	 * if <code>true</code> is given this model is set to use an initial git
+	 * url. An initial git url wont get used if <code>false</code> is given.
+	 * 
+	 * @param useInitialGitUrl
+	 */
+	public void setUseInitialGitUrl(boolean useInitialGitUrl) {
+		// resetInitialGitUrl();
 		wizardModel.setUseInitialGitUrl(useInitialGitUrl);
+		fireExistingInitialGitUrlEditable();
 	}
 
 	public String getInitialGitUrl() {
@@ -414,6 +433,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED, null, isEnvironmentVariablesSupported());
 	}
 
+	/**
+	 * Returns <code>true</code> if the domain used in this model supports
+	 * environment variables.
+	 * 
+	 * @return true if environment variables are supported.
+	 * 
+	 * @see IDomain#canCreateApplicationWithEnvironmentVariables()
+	 */
 	public boolean isEnvironmentVariablesSupported() {
 		return getDomain() != null
 				&& getDomain().canCreateApplicationWithEnvironmentVariables();

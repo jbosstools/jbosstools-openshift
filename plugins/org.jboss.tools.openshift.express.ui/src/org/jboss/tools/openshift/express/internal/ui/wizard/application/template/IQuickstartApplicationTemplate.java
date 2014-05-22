@@ -26,8 +26,6 @@ public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 	
 	public String getHref();
 	
-	public String getInitialGitUrl();
-	
 	public List<ICartridge> getAlternativesFor(ICartridge cartridge);
 	
 	public boolean isOpenShiftMaintained();
