@@ -114,8 +114,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private OpenShiftApplicationWizardModel wizardModel;
 	private Button advancedButton;
 	private DialogChildToggleAdapter advancedSectionVisibilityAdapter;
-	private Text sourceUrlText;
-	private Label sourceUrlLabel;
 
 	ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("New or existing OpenShift Application", "", "New or existing OpenShift Application, wizard", wizard);
@@ -130,6 +128,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				new PropertyChangeListener() {
 
 					public void propertyChange(PropertyChangeEvent event) {
+						// TODO: move to model
 						pageModel.setResourcesLoaded(false);
 					}
 				});
@@ -505,33 +504,43 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
 		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
+		IObservableValue useInitialGitUrlModelObservable = BeanProperties.value(
+				ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel);
 		ValueBindingBuilder
 				.bind(defaultSourceCodeObservable)
 				.converting(new InvertingBooleanConverter())
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel))
+				.to(useInitialGitUrlModelObservable)
 				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+		IObservableValue initialGitUrlEditable =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_EDITABLE).observe(
+						pageModel);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(useDefaultSourceButton))
+				.notUpdatingParticipant()
+				.to(initialGitUrlEditable)
 				.in(dbc);
 
 		// source code text
-		this.sourceUrlLabel = new Label(sourceGroup, SWT.NONE);
+		Label sourceUrlLabel = new Label(sourceGroup, SWT.NONE);
 		sourceUrlLabel.setText("Source code:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceUrlLabel);
+		final IObservableValue sourceUrlWidgetsEnablement =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_INITIAL_GITURL_EDITABLE)
+						.observe(pageModel);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(sourceUrlLabel))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel))
+				.to(sourceUrlWidgetsEnablement)
 				.in(dbc);
-		this.sourceUrlText = new Text(sourceGroup, SWT.BORDER);
+		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(sourceUrlText))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel))
+				.to(sourceUrlWidgetsEnablement)
 				.in(dbc);
 		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
 		ValueBindingBuilder
@@ -540,16 +549,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.to(BeanProperties.value(
 						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
-
-		dbc.bindValue(WidgetProperties.enabled()
-				.observe(useDefaultSourceButton),
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_IS_SOURCE_CODE_EDITABLE)
-						.observe(pageModel));
-
-		dbc.bindValue(WidgetProperties.enabled()
-				.observe(sourceUrlText),
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_IS_SOURCE_CODE_EDITABLE)
-						.observe(pageModel));
 
 		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable,
 				sourcecodeUrlObservable);
@@ -570,8 +569,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
-
-		// environment variables		
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(sourceCodeExplanationText))
+				.notUpdatingParticipant()
+				.to(sourceUrlWidgetsEnablement)
+				.in(dbc);
+		
+		// environment variables
 		Button environmentVariablesButton = new Button(advancedComposite, SWT.NONE);
 		environmentVariablesButton.setText("Environment Variables... ");
 		GridDataFactory.fillDefaults()
@@ -752,8 +756,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	protected void showAdvancedSection(boolean visible) {
 		advancedSectionVisibilityAdapter.setVisible(visible);
 		advancedButton.setText(getAdvancedButtonLabel(visible));
-		sourceUrlText.setEnabled(pageModel.isUseInitialGitUrl());
-		sourceUrlLabel.setEnabled(pageModel.isUseInitialGitUrl());
 	}
 
 	protected String getAdvancedButtonLabel(boolean visible) {
