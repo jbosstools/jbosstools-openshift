@@ -29,7 +29,7 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  * 
  * @author Andre Dietisheim
  * 
- * @see EmbeddedCartridgesWizardPage
+ * @see SaveSnapshotWizardPage
  * @see ICheckStateListener
  * @see CheckboxTableViewer
  * @see IEmbeddableCartridge

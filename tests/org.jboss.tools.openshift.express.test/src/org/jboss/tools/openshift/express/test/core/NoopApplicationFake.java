@@ -334,4 +334,14 @@ public class NoopApplicationFake implements IApplication {
 	public String getEnvironmentVariableValue(String name) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String getDeploymentType() {
+		throw new UnsupportedOperationException();	
+	}
+
+	@Override
+	public String setDeploymentType(String deploymentType) {
+		throw new UnsupportedOperationException();
+	}
 }

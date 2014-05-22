@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.console;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -35,6 +36,8 @@ import org.jboss.tools.openshift.express.core.IConsoleUtility;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+
+import com.openshift.client.IApplication;
 
 /**
  * A utility class to manager the message consoles creations and retrivals
@@ -95,6 +98,9 @@ public class ConsoleUtils implements IConsoleUtility {
 	}
 
 	public static void displayConsoleView(IServer server) {
+		if (server == null) {
+			return;
+		}
 		MessageConsole console = findMessageConsole(server.getId());
 		if (console == null) {
 			return;
@@ -102,7 +108,24 @@ public class ConsoleUtils implements IConsoleUtility {
 		displayConsoleView(console);
 	}
 
+	public static MessageConsole displayConsoleView(IApplication application) {
+		if (application == null) {
+			return null;
+		}
+		MessageConsole console = findMessageConsole(getMessageConsoleName(application));
+		if (console == null) {
+			return null;
+		}
+		console.clearConsole();
+		displayConsoleView(console);
+		return console;
+	}
 	
+	private static String getMessageConsoleName(final IApplication application) {
+		return MessageFormat.format(
+				"Snapshot Restore/Deploy for application {0} ({1}):",
+				application.getName(), application.getDomain().getId());
+	}
 	/**
 	 * Displays the given console in the consoles view which becomes visible if
 	 * it was not the case before.

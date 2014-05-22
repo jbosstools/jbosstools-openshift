@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.command;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -29,7 +28,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateSSHSessionJob;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
@@ -99,11 +98,10 @@ public class ListAllEnvironmentVariablesHandler extends AbstractHandler {
 			public void run() {
 				try {
 					if (!application.hasSSHSession()) {
-						application.setSSHSession(OpenShiftSshSessionFactory.getInstance().createSession(application));
+						application.setSSHSession(SSHSessionRepository.getInstance().getSession(application));
 					}
 					List<String> props = application.getEnvironmentProperties();
-					final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName(application));
-					console.clearConsole();
+					final MessageConsole console = ConsoleUtils.displayConsoleView(application);
 					MessageConsoleStream stream = console.newMessageStream();
 					for (String prop : props) {
 						stream.println(prop);
@@ -115,14 +113,4 @@ public class ListAllEnvironmentVariablesHandler extends AbstractHandler {
 			}
 		});
 	}
-
-	/**
-	 * @return
-	 */
-	private String getMessageConsoleName(final IApplication application) {
-		return MessageFormat.format(
-				"Environment Variables for application {0} ({1})",
-				application.getName(), application.getDomain().getId());
-	}
-
 }

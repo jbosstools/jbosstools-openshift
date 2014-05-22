@@ -54,7 +54,7 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 			}
 			final LoadApplicationJob job = new LoadApplicationJob(server);
 			new JobChainBuilder(job)
-					.runWhenSuccessfullyDone(new UIJob("Open Edit Embedded Cartridges wizard") {
+					.runWhenSuccessfullyDone(new UIJob("Opening Edit Embedded Cartridges wizard...") {
 
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor) {

@@ -11,7 +11,8 @@ Bundle-ClassPath: .,
  lib/log4j-1.2.17.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/slf4j-log4j12-1.6.1.jar,
- lib/jboss-dmr-1.2.0.Final.jar
+ lib/jboss-dmr-1.2.0.Final.jar,
+ lib/commons-compress-1.8.1.jar
 Require-Bundle: com.jcraft.jsch;bundle-version="0.1.44",
  org.eclipse.core.runtime;bundle-version="3.8.0"
 Bundle-ActivationPolicy: lazy

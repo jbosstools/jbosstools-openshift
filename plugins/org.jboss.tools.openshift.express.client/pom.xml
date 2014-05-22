@@ -13,6 +13,7 @@
 	<properties>
 		<openshift-java-client.version>2.6.0-SNAPSHOT</openshift-java-client.version>
 		<jboss-dmr.version>1.2.0.Final</jboss-dmr.version>
+		<commons-compress.version>1.8.1</commons-compress.version>
 		<log4j.version>1.2.17</log4j.version>
 		<slf4j-api.version>1.6.1</slf4j-api.version>
 		<slf4j-log4j12.version>1.6.1</slf4j-log4j12.version>
@@ -64,6 +65,11 @@
 							<groupId>org.slf4j</groupId>
 							<artifactId>slf4j-log4j12</artifactId>
 							<version>${slf4j-log4j12.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.apache.commons</groupId>
+							<artifactId>commons-compress</artifactId>
+							<version>${commons-compress.version}</version>
 						</artifactItem>
 					</artifactItems>
 				</configuration>

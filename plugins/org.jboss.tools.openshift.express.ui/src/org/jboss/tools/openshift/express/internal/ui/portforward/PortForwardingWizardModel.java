@@ -20,7 +20,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -231,7 +231,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		final boolean hasAlreadySSHSession = getApplication().hasSSHSession();
 		if (!hasAlreadySSHSession) {
 			Logger.debug("Opening a new SSH Session for application '" + getApplication().getName() + "'");
-			final Session session = OpenShiftSshSessionFactory.getInstance().createSession(
+			final Session session = SSHSessionRepository.getInstance().getSession(
 					getApplication());
 				getApplication().setSSHSession(session);
 		}

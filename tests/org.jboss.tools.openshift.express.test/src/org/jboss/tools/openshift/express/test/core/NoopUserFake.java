@@ -141,4 +141,14 @@ public class NoopUserFake implements IUser {
 	public Messages getMessages() {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public IOpenShiftSSHKey addSSHKey(String name, ISSHPublicKey key) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean removeSSHKey(String name) {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftSshSessionFactory;
+import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 
 import com.jcraft.jsch.Session;
 import com.openshift.client.IApplication;
@@ -55,7 +55,7 @@ public class CreateSSHSessionJob extends Job {
 			final boolean hasAlreadySSHSession = application.hasSSHSession();
 			if (!hasAlreadySSHSession) {
 				Logger.debug(NLS.bind("Opening a new SSH Session for application {0}.", application.getName()));
-				Session session = OpenShiftSshSessionFactory.getInstance().createSession(application);
+				Session session = SSHSessionRepository.getInstance().getSession(application);
 				application.setSSHSession(session);
 			}
 			// now, check if the session is valid (ie, not null and still

@@ -42,9 +42,9 @@ import com.openshift.client.OpenShiftSSHOperationException;
  * 
  */
 @SuppressWarnings("restriction")
-public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
+public class SSHSessionRepository extends JschConfigSessionFactory {
 
-	private static OpenShiftSshSessionFactory INSTANCE = new OpenShiftSshSessionFactory();
+	private static SSHSessionRepository INSTANCE = new SSHSessionRepository();
 
 	/**
 	 * Get the currently configured JVM-wide factory.
@@ -54,7 +54,7 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 	 * 
 	 * @return factory the current factory for this JVM.
 	 */
-	public static OpenShiftSshSessionFactory getInstance() {
+	public static SSHSessionRepository getInstance() {
 		return INSTANCE;
 	}
 
@@ -64,17 +64,18 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 
 	private final Map<URIish, Session> cache = new HashMap<URIish, Session>();
 
-	OpenShiftSshSessionFactory() {
+	SSHSessionRepository() {
 		final BundleContext context = OpenShiftUIActivator.getDefault().getBundle().getBundleContext();
 		final ServiceReference<?> ssh = context.getServiceReference(IJSchService.class.getName());
 		this.provider = (IJSchService) context.getService(ssh);
 	}
 
-	public Session createSession(final IApplication application) throws OpenShiftSSHOperationException {
+	public Session getSession(final IApplication application) throws OpenShiftSSHOperationException {
 		try {
 			final URIish uri = getSshUri(application);
 			final Session session = cache.get(uri);
-			if (session == null || !session.isConnected()) {
+			if (session == null 
+					|| !session.isConnected()) {
 				final FS fs = FS.DETECTED;
 				if (config == null) {
 					config = OpenSshConfig.get(fs);
@@ -87,12 +88,12 @@ public class OpenShiftSshSessionFactory extends JschConfigSessionFactory {
 				try {
 					cache.put(uri, createSession(hc, user, host, port, fs));
 				} catch (JSchException e) {
-					throw new OpenShiftSSHOperationException(e, "Unable to create SSH session for application ''{0}''", application.getName());
+					throw new OpenShiftSSHOperationException(e, "Could not create SSH session for application ''{0}''", application.getName());
 				}
 			}
 			return cache.get(uri);
 		} catch (URISyntaxException e1) {
-			throw new OpenShiftSSHOperationException(e1, "Failed to create SSH Session for application ''{0}''", application.getName());
+			throw new OpenShiftSSHOperationException(e1, "Could not create SSH Session for application ''{0}''", application.getName());
 		}
 	}
 

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -28,7 +29,11 @@ import org.eclipse.core.runtime.Assert;
  */
 public class FileUtils {
 
+	private static final char SUFFIX_DELIMITER = '.';
+	private static final String NUMERIC_SUFFIX_PATTERN = "{0}({1}){2}";
+	
 	private static final byte[] buffer = new byte[1024];
+
 
 	public static boolean canRead(String path) {
 		if (path == null) {
@@ -221,5 +226,45 @@ public class FileUtils {
 		} catch (IOException e) {
 			// ignore
 		}
+	}
+	
+	public static String createValidNumericSuffix(String filename) {
+		String suffix = getSuffix(filename);
+		String filenameNoSuffix = getNoSuffixFilename(filename);
+		
+		String newFilename = filename;
+		int i = 1;
+		while(new File(newFilename).exists()) {
+			newFilename = MessageFormat.format(NUMERIC_SUFFIX_PATTERN, filenameNoSuffix, i++, suffix);
+		}
+		return newFilename;
+	}
+
+	public static String getSuffix(String filename) {
+		if (StringUtils.isEmpty(filename)) {
+			return filename;
+		}
+		int suffixStart = filename.indexOf(SUFFIX_DELIMITER);
+		if ( suffixStart < 0) {
+			return filename;
+		}
+		return filename.substring(suffixStart);
+	}
+
+	/**
+	 * Returns the filename without the suffix
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	public static String getNoSuffixFilename(String filename) {
+		if (StringUtils.isEmpty(filename)) {
+			return filename;
+		}
+		int suffixStart = filename.indexOf(SUFFIX_DELIMITER);
+		if ( suffixStart < 0) {
+			return filename;
+		}
+		return filename.substring(0, suffixStart);
 	}
 }
