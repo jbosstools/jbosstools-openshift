@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -30,10 +32,10 @@ import org.eclipse.core.runtime.Assert;
 public class FileUtils {
 
 	private static final char SUFFIX_DELIMITER = '.';
-	private static final String NUMERIC_SUFFIX_PATTERN = "{0}({1}){2}";
-	
-	private static final byte[] buffer = new byte[1024];
+	private static final String NUMERIC_SUFFIX_FILENAME_PATTERN = "{0}({1}){2}";
+	private static final Pattern NUMERIC_SUFFIX_FILENAME_REGEX = Pattern.compile("(.*)\\([0-9]+\\)");
 
+	private static final byte[] buffer = new byte[1024];
 
 	public static boolean canRead(String path) {
 		if (path == null) {
@@ -63,12 +65,12 @@ public class FileUtils {
 		String tmpFolder = System.getProperty("java.io.tmpdir");
 		return new File(tmpFolder);
 	}
-	
+
 	public static File getRandomTmpFolder() {
 		String randomName = String.valueOf(System.currentTimeMillis());
 		return new File(getSystemTmpFolder(), randomName);
 	}
-	
+
 	/**
 	 * Copies the ginve source to the given destination recursively. Overwrites
 	 * existing files/directory on the destination path if told so.
@@ -101,7 +103,7 @@ public class FileUtils {
 		Assert.isLegal(destination != null);
 
 		destination = getDestinationDirectory(source, destination);
-		
+
 		if (!destination.exists()) {
 			destination.mkdir();
 			copyPermissions(source, destination);
@@ -129,7 +131,7 @@ public class FileUtils {
 		Assert.isLegal(destination != null);
 
 		destination = getDestinationFile(source, destination);
-		
+
 		if (exists(destination)
 				&& !overwrite) {
 			return;
@@ -174,7 +176,7 @@ public class FileUtils {
 		OutputStream out = null;
 		try {
 			out = new BufferedOutputStream(new FileOutputStream(destination));
-			for (int read = -1; (read = in.read(buffer)) != -1; ) {
+			for (int read = -1; (read = in.read(buffer)) != -1;) {
 				out.write(buffer, 0, read);
 			}
 			out.flush();
@@ -183,7 +185,7 @@ public class FileUtils {
 			silentlyClose(out);
 		}
 	}
-	
+
 	/**
 	 * Replicates the owner permissions from the source to the destination. Due
 	 * to limitation in java6 this is the best we can do (there's no way in
@@ -227,17 +229,56 @@ public class FileUtils {
 			// ignore
 		}
 	}
-	
-	public static String createValidNumericSuffix(String filename) {
-		String suffix = getSuffix(filename);
-		String filenameNoSuffix = getNoSuffixFilename(filename);
-		
-		String newFilename = filename;
+
+	public static String getParent(String filepath) {
+		String parent = null;
+		if (!StringUtils.isEmpty(filepath)) {
+			parent = new File(filepath).getParent();
+		}
+		return parent;
+	}
+
+	/**
+	 * Returns the given filepath with a suffix if the given filepath already
+	 * exists.
+	 * 
+	 * @param filepath
+	 * @return the filepath or filepath + numeric suffix if not available.
+	 * 
+	 * @see #NUMERIC_SUFFIX_FILENAME_PATTERN
+	 */
+	public static String getAvailableFilepath(String filepath) {
+		if (StringUtils.isEmpty(filepath)) {
+			return filepath;
+		}
+		String suffix = getSuffix(filepath);
+		String filenameNoSuffix = stripNumericSuffix(stripFilesuffix(filepath));
+
+		String newFilename = filepath;
 		int i = 1;
-		while(new File(newFilename).exists()) {
-			newFilename = MessageFormat.format(NUMERIC_SUFFIX_PATTERN, filenameNoSuffix, i++, suffix);
+		while (new File(newFilename).exists()) {
+			newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, filenameNoSuffix, i++, suffix);
 		}
 		return newFilename;
+	}
+
+	/**
+	 * Strips the numeric suffix off the given filepath if present. Returns the
+	 * given filepath otherwise.
+	 * 
+	 * @param filepath
+	 * @return
+	 */
+	private static String stripNumericSuffix(String filepath) {
+		if (StringUtils.isEmpty(filepath)) {
+			return filepath;
+		}
+		Matcher matcher = NUMERIC_SUFFIX_FILENAME_REGEX.matcher(filepath);
+		if (!matcher.matches()
+				|| matcher.groupCount() < 1) {
+			return filepath;
+		}
+		return matcher.group(1);
 	}
 
 	public static String getSuffix(String filename) {
@@ -245,7 +286,7 @@ public class FileUtils {
 			return filename;
 		}
 		int suffixStart = filename.indexOf(SUFFIX_DELIMITER);
-		if ( suffixStart < 0) {
+		if (suffixStart < 0) {
 			return filename;
 		}
 		return filename.substring(suffixStart);
@@ -257,12 +298,12 @@ public class FileUtils {
 	 * @param filename
 	 * @return
 	 */
-	public static String getNoSuffixFilename(String filename) {
+	public static String stripFilesuffix(String filename) {
 		if (StringUtils.isEmpty(filename)) {
 			return filename;
 		}
 		int suffixStart = filename.indexOf(SUFFIX_DELIMITER);
-		if ( suffixStart < 0) {
+		if (suffixStart < 0) {
 			return filename;
 		}
 		return filename.substring(0, suffixStart);

@@ -118,10 +118,10 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 			try {
 				if (getModel().isDeploymentSnapshot()) {
 					// set binary deployment type for deployment snapshots
-					monitor.setTaskName(NLS.bind("Setting binary deployment type for application {0}...", application.getName()));
+					monitor.subTask(NLS.bind("Setting binary deployment type for application {0}...", application.getName()));
 					application.setDeploymentType(DeploymentTypes.binary());
 				}
-				monitor.setTaskName("Restoring snapshot...");
+				monitor.subTask("Restoring snapshot...");
 				this.response = getModel().restoreSnapshot(monitor);
 				return Status.OK_STATUS;
 			} catch (IOException e) {
@@ -130,7 +130,7 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 			} finally {
 				if (getModel().isDeploymentSnapshot()) {
 					// restore
-					monitor.setTaskName(NLS.bind("Restoring deployment type {0} for application {1}", deploymentType, application.getName()));
+					monitor.subTask(NLS.bind("Restoring deployment type {0} for application {1}", deploymentType, application.getName()));
 					application.setDeploymentType(deploymentType);
 				}
 			}

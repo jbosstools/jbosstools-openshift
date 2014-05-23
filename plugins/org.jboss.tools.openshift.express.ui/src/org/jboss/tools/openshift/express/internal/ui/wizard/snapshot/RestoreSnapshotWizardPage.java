@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.snapshot;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -39,12 +37,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
-
-import com.openshift.client.utils.TarFileUtils;
-import com.openshift.internal.client.utils.StreamUtils;
 
 /**
  * @author André Dietisheim
@@ -154,6 +150,7 @@ public class RestoreSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
 				dialog.setText("Choose your snapshot file");
+				dialog.setFilterPath(FileUtils.getParent(pageModel.getFilepath()));
 				String filepath = dialog.open();
 				if (!StringUtils.isEmpty(filepath)) {
 					pageModel.setFilepath(filepath);

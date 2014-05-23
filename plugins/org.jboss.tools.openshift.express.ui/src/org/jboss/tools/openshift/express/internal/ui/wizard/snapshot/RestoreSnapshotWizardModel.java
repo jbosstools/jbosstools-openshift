@@ -18,6 +18,7 @@ import java.io.InputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.databinding.ObservablePojo;
+import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 
 import com.jcraft.jsch.Session;
@@ -30,25 +31,26 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class RestoreSnapshotWizardModel extends ObservablePojo {
 
-	private String filename;
+	private String filepath;
 	private boolean deploymentSnapshot;
 	private boolean hotDeploy;
 	private IApplication application;
 
 	public RestoreSnapshotWizardModel(IApplication application) {
 		this.application = application;
+		this.filepath = getSnapshotFromPreferences(application, isDeploymentSnapshot());
 	}
 
 	public IApplication getApplication() {
 		return application;
 	}
 
-	public String setFilepath(String filename) {
-		return this.filename = filename;
+	public String setFilepath(String filepath) {
+		return this.filepath = filepath;
 	}
 
 	public String getFilepath() {
-		return filename;
+		return filepath;
 	}
 
 	public boolean setDeploymentSnapshot(boolean deploymentSnapshot) {
@@ -63,13 +65,14 @@ public class RestoreSnapshotWizardModel extends ObservablePojo {
 		if (monitor.isCanceled()) {
 			return null;
 		}
+		storeSnapshotToPreferences(filepath, deploymentSnapshot);
 		Session session = SSHSessionRepository.getInstance().getSession(application);
 		FileInputStream snapshotFileInputStream = new FileInputStream(new File(getFilepath()));
 		InputStream saveResponse = null;
 		if (isDeploymentSnapshot()) {
 			saveResponse = new ApplicationSSHSession(application, session).restoreDeploymentSnapshot(snapshotFileInputStream, hotDeploy);
 		} else {
-			saveResponse = new ApplicationSSHSession(application, session).restoreFullSnapshot(snapshotFileInputStream, hotDeploy);
+			saveResponse = new ApplicationSSHSession(application, session).restoreFullSnapshot(snapshotFileInputStream);
 		}
 		ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
 		StreamUtils.writeTo(saveResponse, byteArrayOut);
@@ -83,4 +86,21 @@ public class RestoreSnapshotWizardModel extends ObservablePojo {
 	public boolean setHotDeploy(boolean hotDeploy) {
 		return this.hotDeploy = hotDeploy;
 	}
+	
+	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
+		if (deploymentSnapshot) {
+			OpenShiftPreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
+		} else {
+			OpenShiftPreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);	
+		}
+	}
+	
+	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
+		if (deploymentSnapshot) {
+			return OpenShiftPreferences.INSTANCE.getDeploymentSnapshot(application);
+		} else {
+			return OpenShiftPreferences.INSTANCE.getFullSnapshot(application);
+		}
+	}
+
 }

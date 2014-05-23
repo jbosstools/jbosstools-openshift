@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -136,9 +137,10 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.None);
 				dialog.setText("Choose the destination for your snapshot");
-				String filepath = dialog.open();
-				if (!StringUtils.isEmpty(filepath)) {
-					pageModel.setDestination(filepath);
+				dialog.setFilterPath(FileUtils.getParent(pageModel.getFilepath()));
+				String destination = dialog.open();
+				if (!StringUtils.isEmpty(destination)) {
+					pageModel.setDestination(destination);
 				}
 			}
 		};

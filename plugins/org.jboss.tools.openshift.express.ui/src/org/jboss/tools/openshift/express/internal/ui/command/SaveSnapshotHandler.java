@@ -56,7 +56,7 @@ public class SaveSnapshotHandler extends AbstractHandler {
 							IApplication application = loadApplicationJob.getApplication();
 							if (application == null) {
 								return OpenShiftUIActivator
-										.createCancelStatus("Could not find application to edit the embedded cartridges of");
+										.createCancelStatus("Could not find application to save the snapshot for.");
 							}
 							openSaveSnapshotWizard(loadApplicationJob.getApplication(),
 									HandlerUtil.getActiveShell(event));

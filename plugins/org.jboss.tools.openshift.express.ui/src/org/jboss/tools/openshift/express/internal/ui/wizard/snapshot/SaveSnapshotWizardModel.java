@@ -16,6 +16,8 @@ import java.io.InputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.databinding.ObservablePojo;
+import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 
 import com.jcraft.jsch.Session;
@@ -28,12 +30,13 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class SaveSnapshotWizardModel extends ObservablePojo {
 
-	private String filename;
+	private String filepath;
 	private boolean deploymentSnapshot;
 	private IApplication application;
 
 	public SaveSnapshotWizardModel(IApplication application) {
 		this.application = application;
+		this.filepath = FileUtils.getAvailableFilepath(getSnapshotFromPreferences(application, deploymentSnapshot));
 	}
 
 	public IApplication getApplication() {
@@ -41,11 +44,11 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 	}
 
 	public String setFilepath(String filename) {
-		return this.filename = filename;
+		return this.filepath = filename;
 	}
 
 	public String getFilepath() {
-		return filename;
+		return filepath;
 	}
 
 	public boolean setDeploymentSnapshot(boolean deploymentSnapshot) {
@@ -67,6 +70,23 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 		} else {
 			InputStream saveResponse = new ApplicationSSHSession(application, session).saveFullSnapshot();
 			StreamUtils.writeTo(saveResponse, new FileOutputStream(getFilepath()));
+		}
+		storeSnapshotToPreferences(filepath, deploymentSnapshot);
+	}
+
+	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
+		if (deploymentSnapshot) {
+			OpenShiftPreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
+		} else {
+			OpenShiftPreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);
+		}
+	}
+	
+	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
+		if (deploymentSnapshot) {
+			return OpenShiftPreferences.INSTANCE.getDeploymentSnapshot(application);
+		} else {
+			return OpenShiftPreferences.INSTANCE.getFullSnapshot(application);
 		}
 	}
 }

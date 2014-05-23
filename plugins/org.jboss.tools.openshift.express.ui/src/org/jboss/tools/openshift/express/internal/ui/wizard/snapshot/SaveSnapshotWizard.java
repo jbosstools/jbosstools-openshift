@@ -39,7 +39,7 @@ public class SaveSnapshotWizard extends AbstractOpenShiftWizard<SaveSnapshotWiza
 		final String applicationName = getModel().getApplication().getName();
 		try {
 			IStatus status = WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob(NLS.bind("Saving snapshot for application {0}",
+					new AbstractDelegatingMonitorJob(NLS.bind("Saving snapshot for application {0}...",
 							applicationName)) {
 
 						@Override

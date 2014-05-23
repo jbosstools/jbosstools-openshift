@@ -27,8 +27,11 @@ public interface IOpenShiftPreferenceConstants {
 	public static final String SERVERS = "org.jboss.tools.openshift.express.SERVERS";
 	/** default server */
 	public static final String DEFAULT_HOST = "org.jboss.tools.openshift.express.SERVER";
-	/** tail command */
+	/** tail command options */
 	public static final String TAIL_FILE_OPTIONS = "org.jboss.tools.openshift.express.TAILFILEOPTIONS";
 	/** the timeout that's the client's using when reading the OpenShift response */ 
 	public static final String CLIENT_READ_TIMEOUT = IHttpClient.SYSPROP_OPENSHIFT_READ_TIMEOUT;
+	/** snapshot files */
+	public static final String SNAPSHOT_FILES = "org.jboss.tools.openshift.express.SNAPSHOT_FILES";
 }
+

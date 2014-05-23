@@ -49,7 +49,7 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 	private String getFilePath(String directory, String applicationName, String snapshotType) {
 		String snashotFilename = MessageFormat.format("{0}-{1}.tar.gz", applicationName, snapshotType);
 		File destinationFile = new File(directory, snashotFilename );
-		String filepath = FileUtils.createValidNumericSuffix(destinationFile.getAbsolutePath());
+		String filepath = FileUtils.getAvailableFilepath(destinationFile.getAbsolutePath());
 		return filepath;
 	}
 

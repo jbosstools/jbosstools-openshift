@@ -27,7 +27,7 @@ public class RestoreSnapshotWizardPageModel extends ObservableUIPojo {
 		this.wizardModel = wizardModel;
 	}
 
-	public void setFilepath(String filepath) {
+	public void setFilepath(String filepath) {		
 		firePropertyChange(
 				PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
 	}
