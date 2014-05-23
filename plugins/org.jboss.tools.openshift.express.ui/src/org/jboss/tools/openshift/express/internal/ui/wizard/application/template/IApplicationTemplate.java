@@ -66,5 +66,7 @@ public interface IApplicationTemplate {
 	public ICartridge getStandaloneCartridge();
 
 	public String getInitialGitUrl();
+	
+	public boolean isInitialGitUrlEditable();
 
 }

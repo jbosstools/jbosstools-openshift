@@ -541,6 +541,16 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
 
+		dbc.bindValue(WidgetProperties.enabled()
+				.observe(useDefaultSourceButton),
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_IS_SOURCE_CODE_EDITABLE)
+						.observe(pageModel));
+
+		dbc.bindValue(WidgetProperties.enabled()
+				.observe(sourceUrlText),
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_IS_SOURCE_CODE_EDITABLE)
+						.observe(pageModel));
+
 		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable,
 				sourcecodeUrlObservable);
 		dbc.addValidationStatusProvider(sourceCodeUrlValidator);

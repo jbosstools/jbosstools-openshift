@@ -59,6 +59,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROPERTY_USE_INITIAL_GITURL = "useInitialGitUrl";
+	public static final String PROPERTY_IS_SOURCE_CODE_EDITABLE = "isSourceCodeEditable";
 
 	private final OpenShiftApplicationWizardModel wizardModel;
 
@@ -102,6 +103,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 			}
 		}
 		.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
+		
+		new PojoEventBridge() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				firePropertyChange(PROPERTY_IS_SOURCE_CODE_EDITABLE, event.getOldValue(), event.getNewValue());
+				fireIsSourceCodeEditable();
+			}
+		}
+		.listenTo(IOpenShiftApplicationWizardModel.PROPERTY_IS_SOURCE_CODE_EDITABLE, wizardModel);
+		
 		new PojoEventBridge()
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel)
 				.forwardTo(PROPERTY_USE_INITIAL_GITURL, this);
@@ -295,6 +307,12 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_CAN_ADDREMOVE_CARTRIDGES, 
 				!isCanAddRemoveCartridges(), isCanAddRemoveCartridges());
 	}
+	
+	protected void fireIsSourceCodeEditable(){
+		firePropertyChange(PROPERTY_IS_SOURCE_CODE_EDITABLE, 
+				!isSourceCodeEditable(), isSourceCodeEditable());
+		
+	}
 
 	/**
 	 * Returns <code>true</code> if the user may modify the cartridges. This is
@@ -310,6 +328,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public boolean isCanAddRemoveCartridges() {
 		return getSelectedApplicationTemplate() != null
 				&& getSelectedApplicationTemplate().canAddRemoveCartridges();
+	}
+
+	public boolean isSourceCodeEditable() {
+		return getSelectedApplicationTemplate() != null
+				&& getSelectedApplicationTemplate().isInitialGitUrlEditable();
 	}
 		
 	public boolean hasInitialGitUrl() {
@@ -351,6 +374,10 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	
 	public boolean isUseInitialGitUrl() {
 		return wizardModel.isUseInitialGitUrl();
+	}
+	
+	public void setUseInitialGitUrl(boolean useInitialGitUrl) {
+		setDefaultSourcecode(useInitialGitUrl);
 	}
 
 	public void setDefaultSourcecode(boolean useInitialGitUrl) {
