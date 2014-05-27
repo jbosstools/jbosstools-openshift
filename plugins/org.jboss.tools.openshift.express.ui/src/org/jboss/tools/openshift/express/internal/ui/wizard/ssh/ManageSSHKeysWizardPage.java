@@ -251,12 +251,13 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	protected void onPageActivated(DataBindingContext dbc) {
 		try {
 			Job loadKeysJob = new LoadKeysJob(pageModel.getConnection());
-			new JobChainBuilder(loadKeysJob).runWhenDone(new RefreshViewerJob());
+			new JobChainBuilder(loadKeysJob).runWhenSuccessfullyDone(new RefreshViewerJob());
 			WizardUtils.runInWizard(loadKeysJob, getContainer());
 		} catch (Exception e) {
 			setErrorMessage(e.getMessage());
 			StatusManager.getManager().handle(
 					OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, e), StatusManager.LOG);
+
 		}
 	}
 
