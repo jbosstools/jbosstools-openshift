@@ -41,4 +41,8 @@ public class OpenshiftUIMessages extends NLS {
 	public static String EnterDomainName;
 	public static String DomainNameMayHaveLettersAndDigits;
 	public static String DomainNameMaximumLength;
+	public static String DeletingOpenShiftApplications;
+	public static String DeletingApplication;
+	public static String FailedToDeleteApplication;
+
 }

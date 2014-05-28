@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -31,12 +32,12 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 	private LoadApplicationJob job;
 
 	public DeleteApplicationsJob(LoadApplicationJob job) {
-		super("Deleting OpenShift Application(s)..."); 
+		super(OpenshiftUIMessages.DeletingOpenShiftApplications); 
 		this.job = job;
 	}
 
 	public DeleteApplicationsJob(final List<IApplication> applications) {
-		super("Deleting OpenShift Application(s)..."); 
+		super(OpenshiftUIMessages.DeletingOpenShiftApplications); 
 		this.applications = applications;
 	}
 	
@@ -44,25 +45,28 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 	protected IStatus doRun(IProgressMonitor monitor) {
 		List<IApplication> applications = getApplications();
 		int totalWork = applications.size();
-		monitor.beginTask("Deleting OpenShift Application(s)...", totalWork);
-		for (final IApplication application : applications) {
-			if (application == null) {
-				continue;
-			}
-			final String appName = application.getName();
-			try {
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
+		monitor.beginTask(OpenshiftUIMessages.DeletingOpenShiftApplications, totalWork);
+		try{
+			for (final IApplication application : applications) {
+				if (application == null) {
+					monitor.worked(1);
+					continue;
 				}
-				monitor.subTask("Deleting Application " + application.getName());
-				application.destroy();
-				monitor.worked(1);
-			} catch (OpenShiftException e) {
-				return OpenShiftUIActivator.createErrorStatus(
-						NLS.bind("Failed to delete application \"{0}\"", appName), e);
-			} finally {
-				monitor.done();
+				final String appName = application.getName();
+				try {
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
+					monitor.setTaskName(NLS.bind(OpenshiftUIMessages.DeletingApplication, appName));
+					application.destroy();
+					monitor.worked(1);
+				} catch (OpenShiftException e) {
+					return OpenShiftUIActivator.createErrorStatus(
+							NLS.bind(OpenshiftUIMessages.FailedToDeleteApplication, appName), e);
+				}
 			}
+		}finally {
+			monitor.done();
 		}
 		return Status.OK_STATUS;
 	}
