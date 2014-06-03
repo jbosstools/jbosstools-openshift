@@ -44,5 +44,22 @@ public class OpenshiftUIMessages extends NLS {
 	public static String DeletingOpenShiftApplications;
 	public static String DeletingApplication;
 	public static String FailedToDeleteApplication;
+	
+	public static String EnvironmentVariables;
+	public static String PleaseProvadeNewVariable;
+	public static String Add;
+	public static String Edit;
+	public static String Remove;
+	public static String Refresh;
+	public static String ServerDoesNotSupportChanging;
+	public static String CouldNotLoadVariables;
+	public static String RemoveVariable;
+	public static String DoYouWantToRemoveVariable;
+	public static String CouldNotRefreshVariables;
+	public static String LoadingVariables;
+	public static String RefreshVariables;
+	public static String DoYouWantToRefreshVariables;
+	public static String RefreshingVariables;
+
 
 }

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
@@ -64,7 +65,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	private TableViewer viewer;
 
 	public EnvironmentVariablesWizardPage(AbstractEnvironmentVariablesWizardModel model, IWizard wizard) {
-		super("Environment Variables", "Please provide new environment variables or edit the existing ones", "", wizard);
+		super(OpenshiftUIMessages.EnvironmentVariables, OpenshiftUIMessages.PleaseProvadeNewVariable, "", wizard);
 		this.model = model;
 	}
 
@@ -73,7 +74,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
 
 		Group envVariableGroup = new Group(container, SWT.NONE);
-		envVariableGroup.setText("Environment Variables");
+		envVariableGroup.setText(OpenshiftUIMessages.EnvironmentVariables);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envVariableGroup);
 		GridLayoutFactory.fillDefaults()
@@ -94,13 +95,13 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		Button addButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
-		addButton.setText("Add...");
+		addButton.setText(OpenshiftUIMessages.Add);
 		addButton.addSelectionListener(onAdd());
 
 		Button editExistingButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
-		editExistingButton.setText("Edit...");
+		editExistingButton.setText(OpenshiftUIMessages.Edit);
 		editExistingButton.addSelectionListener(onEdit());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
@@ -112,7 +113,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		Button removeButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText("Remove...");
+		removeButton.setText(OpenshiftUIMessages.Remove);
 		removeButton.addSelectionListener(onRemove());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(removeButton))
@@ -128,7 +129,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		Button refreshButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(refreshButton);
-		refreshButton.setText("Refresh");
+		refreshButton.setText(OpenshiftUIMessages.Refresh);
 		refreshButton.addSelectionListener(onRefresh());
 		
 		// not supported
@@ -145,7 +146,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				public IStatus validate(Object value) {
 					if (Boolean.FALSE.equals((Boolean) value)) {
 						return ValidationStatus.warning(NLS.bind(
-								"Server at {0} does not support\nchanging environment variables", model.getHost()));
+								OpenshiftUIMessages.ServerDoesNotSupportChanging, model.getHost()));
 					}
 					return ValidationStatus.ok();
 				}
@@ -197,9 +198,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		try {
 			WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), dbc);
 		} catch (InvocationTargetException e) {
-			Logger.error("Could not load environment variables", e);
+			Logger.error(OpenshiftUIMessages.CouldNotLoadVariables, e);
 		} catch (InterruptedException e) {
-			Logger.error("Could not load environment variables", e);
+			Logger.error(OpenshiftUIMessages.CouldNotLoadVariables, e);
 		}
 	}
 
@@ -238,9 +239,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				if (MessageDialog
 						.openConfirm(
 								getShell(),
-								"Remove Environment Variable",
+								OpenshiftUIMessages.RemoveVariable,
 								NLS.bind(
-										"Are you sure that you want to remove the variable {0} from your OpenShift application?",
+										OpenshiftUIMessages.DoYouWantToRemoveVariable,
 										selectedVariable.getName() + "=" + selectedVariable.getValue())))
 					model.remove(selectedVariable);
 			}
@@ -252,11 +253,16 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				try {
+					if (MessageDialog
+							.openConfirm(
+									getShell(),
+									OpenshiftUIMessages.RefreshVariables,
+									OpenshiftUIMessages.DoYouWantToRefreshVariables))
 					WizardUtils.runInWizard(new RefreshEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
 				} catch (InvocationTargetException e) {
-					Logger.error("Could not refresh environment variables.", e);
+					Logger.error(OpenshiftUIMessages.CouldNotRefreshVariables, e);
 				} catch (InterruptedException e) {
-					Logger.error("Could not refresh environment variables.", e);
+					Logger.error(OpenshiftUIMessages.CouldNotRefreshVariables, e);
 				}
 			}
 		};
@@ -265,7 +271,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	private class LoadEnvironmentVariablesJob extends AbstractDelegatingMonitorJob {
 
 		public LoadEnvironmentVariablesJob() {
-			super("Loading Environment Variables ...");
+			super(OpenshiftUIMessages.LoadingVariables);
 		}
 
 		@Override
@@ -278,7 +284,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	private class RefreshEnvironmentVariablesJob extends AbstractDelegatingMonitorJob {
 
 		public RefreshEnvironmentVariablesJob() {
-			super("Refreshing Environment Variables ...");
+			super(OpenshiftUIMessages.RefreshingVariables);
 		}
 
 		@Override
