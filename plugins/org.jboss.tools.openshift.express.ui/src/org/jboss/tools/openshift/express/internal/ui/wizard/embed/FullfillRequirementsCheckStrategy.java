@@ -66,8 +66,6 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 	private static final int RESULT_IGNORE = 2;
 	private static final int RESULT_CANCEL = 0;
 	private static final int RESULT_APPLY = 1;
-	private static final int APP_CREATE_TIMEOUT = 5 * 60 * 1000;
-	private static final int APP_WAIT_TIMEOUT = 5 * 60 * 1000;
 
 	private EmbedCartridgeStrategy strategy;
 
@@ -246,16 +244,16 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 			CreateApplicationJob createJob =
 					new CreateApplicationJob(
 							name, ApplicationScale.NO_SCALE, gear, jenkinsCartridge, domain);
-			WizardUtils.runInWizard(
-					createJob, createJob.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
+			WizardUtils.runInWizardWithNoTimeout(
+					createJob, createJob.getDelegatingProgressMonitor(), getContainer());
 			IStatus result = createJob.getResult();
 			if (JobUtils.isOk(result)) {
 				IApplication application = createJob.getApplication();
 				openLogDialog(application, createJob.isTimeouted(result));
 
 				AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
-				IStatus waitStatus = WizardUtils.runInWizard(
-						job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
+				IStatus waitStatus = WizardUtils.runInWizardWithNoTimeout(
+						job, job.getDelegatingProgressMonitor(), getContainer());
 				return JobUtils.isOk(waitStatus);
 			}
 		} catch (Exception e) {
