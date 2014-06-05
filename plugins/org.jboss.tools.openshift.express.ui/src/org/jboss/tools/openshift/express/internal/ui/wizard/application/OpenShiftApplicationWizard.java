@@ -72,10 +72,6 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public abstract class OpenShiftApplicationWizard extends Wizard implements IImportWizard, INewWizard {
 
-	private static final int APP_CREATE_TIMEOUT = 10 * 60 * 1000;
-	private static final int APP_WAIT_TIMEOUT = 10 * 60 * 1000;
-	private static final int IMPORT_TIMEOUT = 20 * 60 * 1000;
-
 	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
@@ -199,7 +195,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		try {
 			AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
 			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer(), APP_WAIT_TIMEOUT);
+					job, job.getDelegatingProgressMonitor(), getContainer());
 			return status;
 		} catch (Exception e) {
 			return OpenShiftUIActivator.createErrorStatus(
@@ -211,7 +207,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 			IStatus jobResult = WizardUtils.runInWizard(
-					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer(), IMPORT_TIMEOUT);
+					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", OpenShiftUIActivator
@@ -277,7 +273,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					, model.getCartridges()
 					, model.getDomain());
 			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer(), APP_CREATE_TIMEOUT);
+					job, job.getDelegatingProgressMonitor(), getContainer());
 			IApplication application = job.getApplication();
 			model.setApplication(application);
 			if (status.isOK()) {

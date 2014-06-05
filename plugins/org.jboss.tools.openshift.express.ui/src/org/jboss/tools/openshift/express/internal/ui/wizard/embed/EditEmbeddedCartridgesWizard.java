@@ -42,8 +42,6 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class EditEmbeddedCartridgesWizard extends Wizard {
 
-	private static final long EMBED_CARTRIDGES_TIMEOUT = 10 * 60 * 1000;
-
 	private EmbeddedCartridgesWizardModel wizardModel;
 	private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
 	private IApplication application;
@@ -80,7 +78,7 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 					new EmbedCartridgesJob(
 							new ArrayList<ICartridge>(wizardModel.getCheckedEmbeddableCartridges()),
 							application);
-			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), EMBED_CARTRIDGES_TIMEOUT);
+			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
 			if (!result.isOK()) {
 				safeRefreshSelectedEmbeddedCartridges();
 			} else {
