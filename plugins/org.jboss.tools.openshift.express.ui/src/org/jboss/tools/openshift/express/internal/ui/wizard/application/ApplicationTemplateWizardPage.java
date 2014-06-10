@@ -12,14 +12,15 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.SelectObservableValue;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -52,9 +53,6 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -62,11 +60,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
@@ -77,6 +77,7 @@ import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonit
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
@@ -86,7 +87,6 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWiza
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
 
 import com.openshift.client.IApplication;
-import com.openshift.client.IQuickstart;
 import com.openshift.client.NotFoundOpenShiftException;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.ICartridge;
@@ -121,11 +121,14 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 				ApplicationTemplateWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel))
 			.in(dbc);
 		
-		createExistingApplicationControls(container, useExitingApplication, dbc);
-		createNewApplicationControls(container, useExitingApplication, dbc);
+		IObservableValue useExistingApplicationObservable = 
+				BeanProperties.value(ApplicationTemplateWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel);
+		
+		createExistingApplicationControls(container, useExitingApplication, useExistingApplicationObservable, dbc);
+		createNewApplicationControls(container, useExitingApplication, useExistingApplicationObservable, dbc);
 	}
 
-	private void createExistingApplicationControls(Composite parent, SelectObservableValue useExitingApplication, DataBindingContext dbc) {
+	private void createExistingApplicationControls(Composite parent, SelectObservableValue useExitingApplication, IObservableValue useExistingApplication, DataBindingContext dbc) {
 		// existing app radio
 		Button useExistingApplicationButton = new Button(parent, SWT.RADIO);
 		useExistingApplicationButton.setText("Use my existing OpenShift application:");
@@ -160,8 +163,12 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(
 						ApplicationTemplateWizardPageModel.PROPERTY_EXISTING_APPLICATION_NAME).observe(pageModel))
 				.in(dbc);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(existingAppNameText))
+				.notUpdatingParticipant()
+				.to(useExistingApplication)
+				.in(dbc);
 		createExistingAppNameContentAssist(existingAppNameText);
-		existingAppNameText.addFocusListener(onExistingApplicationNameFocused());
 		
 		IObservableValue existingApplicationsLoaded =
 				BeanProperties.value(ApplicationTemplateWizardPageModel.PROPERTY_RESOURCES_LOADED)
@@ -184,18 +191,12 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).grab(false, false)
 				.applyTo(browseAppsButton);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(browseAppsButton))
+				.notUpdatingParticipant()
+				.to(useExistingApplication)
+				.in(dbc);
 		browseAppsButton.addSelectionListener(onBrowseExistingApps(dbc));
-	}
-
-	protected FocusListener onExistingApplicationNameFocused() {
-		return new FocusAdapter() {
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				pageModel.setUseExistingApplication(true);
-			}
-
-		};
 	}
 
 	private AutoCompleteField createExistingAppNameContentAssist(Text existingAppNameText) {
@@ -231,8 +232,6 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				pageModel.setUseExistingApplication(true);
-
 				SelectApplicationWizard selectApplicationWizard = new SelectApplicationWizard(wizardModel);
 				if (new OkCancelButtonWizardDialog(getShell(), selectApplicationWizard).open()
 						== IDialogConstants.CANCEL_ID) {
@@ -246,7 +245,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private void createNewApplicationControls(Composite parent, SelectObservableValue useExitingApplication, DataBindingContext dbc) {
+	private void createNewApplicationControls(Composite parent, SelectObservableValue useExitingApplication, IObservableValue useExistingApplication, DataBindingContext dbc) {
 		// existing app radio
 		Button newApplicationButton = new Button(parent, SWT.RADIO);
 		newApplicationButton.setText("Create a new OpenShift application:");
@@ -284,14 +283,25 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(templateFilterText);
-
+		ValueBindingBuilder
+		.bind(WidgetProperties.enabled().observe(templateFilterText))
+		.notUpdatingParticipant()
+		.to(useExistingApplication)
+		.converting(new InvertingBooleanConverter())
+		.in(dbc);
+		
 		// application templates tree
 		final TreeViewer applicationTemplatesViewer = createApplicationTemplatesViewer(applicationTemplatesTreeComposite, templateFilterText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
 				.hint(400, 250)
 				.applyTo(applicationTemplatesViewer.getControl());
-
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(applicationTemplatesViewer.getControl()))
+				.notUpdatingParticipant()
+				.to(useExistingApplication)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 		templateFilterText.addModifyListener(onFilterTextModified(applicationTemplatesViewer));
 		
 		IObservableValue selectedApplicationTemplateViewerObservable =
@@ -314,18 +324,39 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 
 		
 		// selected application template details
-		Group detailsContainer = new Group(applicationTemplatesTreeComposite, SWT.NONE);
+		final Group detailsContainer = new Group(applicationTemplatesTreeComposite, SWT.NONE);
 		detailsContainer.setText("Details");
+		enableTemplateDetailsControls(detailsContainer, !pageModel.isUseExistingApplication());
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL)
 				.hint(SWT.DEFAULT, 140)
 				.applyTo(detailsContainer);
-				
+		useExistingApplication.addValueChangeListener(new IValueChangeListener() {
+			
+			@Override
+			public void handleValueChange(final ValueChangeEvent event) {
+				final Boolean enabled = Boolean.FALSE.equals(event.diff.getNewValue());
+				enableTemplateDetailsControls(detailsContainer, enabled);
+			}
+
+		});
+		
 		new ApplicationTemplateDetailViews(selectedApplicationTemplateModelObservable, useExitingApplication,
 				detailsContainer, dbc)
 				.createControls();
 	}
 
+
+	private void enableTemplateDetailsControls(final Composite detailsContainer, final Boolean enabled) {
+		UIUtils.doForAllChildren(new IWidgetVisitor() {
+			
+			@Override
+			public void visit(Control control) {
+				control.setEnabled(enabled);
+			}
+		}, detailsContainer);
+	}
+	
 	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
 		return new ModifyListener() {
 			
