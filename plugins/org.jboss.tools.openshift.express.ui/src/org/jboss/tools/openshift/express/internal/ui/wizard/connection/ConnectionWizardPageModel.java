@@ -317,4 +317,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			// wizardModelConnection.save();
 		}
 	}
+
+	public void saveRecentConnection() {
+		Connection connection = getConnection();
+		if (connection != null) {
+			ConnectionsModelSingleton.getInstance().setRecent(connection);
+		}
+	}
 }

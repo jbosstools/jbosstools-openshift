@@ -155,8 +155,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 				return false;
 			}
 
-			model.updateRecentConnection();
-
 			if (!createServerAdapter()) {
 				return false;
 			}

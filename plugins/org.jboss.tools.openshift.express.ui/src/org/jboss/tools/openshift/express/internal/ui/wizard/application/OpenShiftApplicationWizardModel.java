@@ -37,7 +37,6 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.behaviour.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
@@ -571,7 +570,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	 * 
 	 * @param connection
 	 */
-	public void update(Connection connection) {
+	private void update(Connection connection) {
 		if (!isValid(connection)) {
 			return;
 		}
@@ -582,14 +581,6 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 			setDomain(domain);
 		}
 	}			
-
-	public void updateRecentConnection() {
-		if (getConnection() == null) {
-			return;
-		}
-		
-		ConnectionsModelSingleton.getInstance().setRecent(getConnection());
-	}
 	
 	@Override
 	public IApplicationTemplate getSelectedApplicationTemplate() {
