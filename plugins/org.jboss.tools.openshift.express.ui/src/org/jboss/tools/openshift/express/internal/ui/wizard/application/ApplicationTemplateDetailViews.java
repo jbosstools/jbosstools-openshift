@@ -29,6 +29,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -246,33 +247,36 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		private Link nameLink;
 		private CLabel openshiftMaintainedLabel;
 		private CLabel securityUpdatesLabel;
-		private Text summaryText;
+		// use styled text to have vertical scrollbars hidden/visible correctly
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=180027#c11
+		private StyledText summaryText;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
-			Composite container = setControl(super.createControls(parent, dbc));
+			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
-					.numColumns(4).margins(10, 10).spacing(10, 10).applyTo(container);
+					.margins(4,4).numColumns(4).spacing(6, 6).applyTo(container);
 
 			// nameLink
 			this.nameLink = new Link(container, SWT.None);
 			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
+					.indent(6, 0).align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
 
 			// icons
 			this.openshiftMaintainedLabel = new CLabel(container, SWT.None);
 			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedLabel);
+					.indent(6, 0).align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedLabel);
 			this.securityUpdatesLabel = new CLabel(container, SWT.None);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).applyTo(securityUpdatesLabel);
 			
 			// summaryText
-			this.summaryText = new Text(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-			summaryText.setEditable(false);
+			this.summaryText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+			summaryText.setAlwaysShowScrollBars(false);
 			summaryText.setBackground(container.getBackground());
+			Rectangle containerSize = container.getClientArea();
 			GridDataFactory.fillDefaults()
-					.span(3,1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(summaryText);
+					.span(3, 1).indent(6,0).align(SWT.FILL, SWT.FILL).grab(true, true).hint(containerSize.x, SWT.DEFAULT).applyTo(summaryText);
 			return container;
 		}
 
@@ -291,14 +295,14 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			updateSecurityUpdatesIcon(template);
 			this.summaryText.setText(template.getDescription());
 		}
-
+		
 		private void updateOpenShiftMaintainedIcon(IQuickstartApplicationTemplate template) {
 			if (template.isOpenShiftMaintained()) {
-				setImageAndText(openshiftMaintainedLabel,
+				setImageAndTooltip(openshiftMaintainedLabel,
 						"OpenShift maintained",
 						OpenShiftImages.OPENSHIFT_MAINTAINED_IMG);
 			} else {
-				setImageAndText(openshiftMaintainedLabel,
+				setImageAndTooltip(openshiftMaintainedLabel,
 						"Community created",
 						OpenShiftImages.NOT_OPENSHIFT_MAINTAINED_IMG);
 			}
@@ -306,18 +310,18 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		
 		private void updateSecurityUpdatesIcon(IQuickstartApplicationTemplate template) {
 			if (template.isAutomaticSecurityUpdates()) {
-				setImageAndText(securityUpdatesLabel, 
+				setImageAndTooltip(securityUpdatesLabel, 
 						"automatic security updates",
 						OpenShiftImages.SECURITY_UPDATES_IMG);
 			} else {
-				setImageAndText(securityUpdatesLabel,
+				setImageAndTooltip(securityUpdatesLabel,
 						"no automatic security updates",
 						OpenShiftImages.NO_SECURITY_UPDATES_IMG);
 			}
 		}
 
-		private void setImageAndText(CLabel label, String text, Image image) {
-			label.setText(text);
+		private void setImageAndTooltip(CLabel label, String text, Image image) {
+			// label.setText(text);
 			label.setImage(image);
 			label.setToolTipText(text);
 		}

@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Shell;
  * 
  * @author Andre Dietisheim
  */
-public class DialogChildToggleAdapter {
+public class DialogChildVisibilityAdapter {
 
 	private boolean visible;
 	private final Composite composite;
@@ -37,7 +37,7 @@ public class DialogChildToggleAdapter {
 	private int invisibleChildShellHeight;
 	private boolean resizing;
 	
-	public DialogChildToggleAdapter(Composite child, boolean visible) {
+	public DialogChildVisibilityAdapter(Composite child, boolean visible) {
 		Assert.isTrue(child != null && !child.isDisposed());
 		this.composite = child;
 		Object layoutData = child.getLayoutData();
@@ -58,7 +58,7 @@ public class DialogChildToggleAdapter {
 			@Override
 			public void controlResized(ControlEvent e) {
 				if (!resizing) {
-					DialogChildToggleAdapter.this.invisibleChildShellHeight = shell.getSize().y;
+					DialogChildVisibilityAdapter.this.invisibleChildShellHeight = shell.getSize().y;
 				}
 			}
 

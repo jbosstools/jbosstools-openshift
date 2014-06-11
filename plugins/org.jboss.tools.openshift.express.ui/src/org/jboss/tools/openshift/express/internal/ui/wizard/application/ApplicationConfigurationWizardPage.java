@@ -76,7 +76,7 @@ import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControl
 import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildToggleAdapter;
+import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildVisibilityAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
@@ -113,7 +113,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private Text applicationNameText;
 	private OpenShiftApplicationWizardModel wizardModel;
 	private Button advancedButton;
-	private DialogChildToggleAdapter advancedSectionVisibilityAdapter;
+	private DialogChildVisibilityAdapter advancedSectionVisibilityAdapter;
 
 	ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("New or existing OpenShift Application", "", "New or existing OpenShift Application, wizard", wizard);
@@ -556,7 +556,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		ControlDecorationSupport.create(
 				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		this.advancedSectionVisibilityAdapter = new DialogChildToggleAdapter(advancedComposite, false);
+		this.advancedSectionVisibilityAdapter = new DialogChildVisibilityAdapter(advancedComposite, false);
 		advancedButton.addSelectionListener(
 				onAdvancedClicked());
 
