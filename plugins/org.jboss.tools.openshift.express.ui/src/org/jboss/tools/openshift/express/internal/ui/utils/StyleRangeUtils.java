@@ -23,7 +23,9 @@ public class StyleRangeUtils {
 	public static StyleRange createBoldStyleRange(String string, Color background) {
 		StyleRange styleRange = new StyleRange();
 		styleRange.fontStyle = SWT.BOLD;
-		styleRange.background = background;
+		if (background != null) {
+			styleRange.background = background;
+		}
 		styleRange.start = 0;
 		styleRange.length = string.length();
 		return styleRange;

@@ -35,6 +35,7 @@ import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 
 import com.openshift.client.cartridge.ICartridge;
@@ -64,7 +65,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 	private class CartridgeDetailsView extends EmptyView {
 
 		private StyledText nameLabel;
-		private Text description;
+		private StyledText description;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
@@ -73,15 +74,15 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// nameLabel			
-			this.nameLabel = new StyledText(container, SWT.None);
-			nameLabel.setEditable(false);
+			this.nameLabel = new StyledText(container, SWT.READ_ONLY);
+			UIUtils.setTransparent(nameLabel);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
 
 			// description
-			this.description = new Text(container, SWT.MULTI | SWT.WRAP);
-			description.setEditable(false);
-			description.setBackground(container.getBackground());
+			this.description = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+			description.setAlwaysShowScrollBars(false);
+			UIUtils.setTransparent(description);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(description);
 			return container;
@@ -97,7 +98,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			ICartridge embeddableCartridge = (ICartridge) value;
 			String name = OpenShiftResourceLabelUtils.toString(embeddableCartridge);
 			this.nameLabel.setText(name);
-			this.nameLabel.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, description.getBackground()));
+			this.nameLabel.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
 
 			this.description.setText(embeddableCartridge.getDescription());
 		}
@@ -121,8 +122,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// name
-			this.name = new StyledText(container, SWT.None);
-			name.setEditable(false);
+			this.name = new StyledText(container, SWT.READ_ONLY);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
@@ -146,7 +146,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			ICartridge cartridge = (ICartridge) value;
 			String cartridgeLabel = OpenShiftResourceLabelUtils.toString(cartridge);
 			this.name.setText(cartridgeLabel);
-			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(cartridgeLabel, url.getBackground()));
+			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(cartridgeLabel, null));
 			if (cartridge.getUrl() != null) {
 				this.url.setText(cartridge.getUrl().toString());
 			}
@@ -162,7 +162,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 	private class CodeAnythingDetailsView extends CartridgeDetailsView {
 
 		private StyledText name;
-		private Text description;
+		private StyledText description;
 		private Text urlText;
 		private Binding binding;
 		
@@ -173,15 +173,14 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// name
-			this.name = new StyledText(container, SWT.None);
-			name.setEditable(false);
+			this.name = new StyledText(container, SWT.READ_ONLY);
 			GridDataFactory.fillDefaults()
 					.span(2,1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
 			// description
-			this.description = new Text(container, SWT.MULTI | SWT.WRAP);
-			description.setEditable(false);
-			description.setBackground(container.getBackground());
+			this.description = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+			description.setAlwaysShowScrollBars(false);
+			UIUtils.setTransparent(description);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(description);
 
@@ -212,7 +211,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			CodeAnythingCartridge cartridge = (CodeAnythingCartridge) value;
 			String name = cartridge.getDisplayName();
 			this.name.setText(name);
-			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, description.getBackground()));
+			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
 			this.description.setText(cartridge.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(100, urlText);

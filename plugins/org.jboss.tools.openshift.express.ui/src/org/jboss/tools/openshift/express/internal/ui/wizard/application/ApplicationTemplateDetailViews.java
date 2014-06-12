@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Red Hat, Inc.
+ * boright (c) 2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -81,7 +81,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 	private class DefaultView extends EmptyView {
 
 		private StyledText nameText;
-		private Text descriptionText;
+		private StyledText descriptionText;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
@@ -90,15 +90,14 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// nameLink
-			this.nameText = new StyledText(container, SWT.None);
-			nameText.setEditable(false);
+			this.nameText = new StyledText(container, SWT.READ_ONLY);
+			UIUtils.setTransparent(nameText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
 			// summaryText
-			this.descriptionText = new Text(container, SWT.MULTI | SWT.WRAP);
-			descriptionText.setEditable(false);
-			descriptionText.setBackground(container.getBackground());
+			this.descriptionText = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			UIUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionText);
 			return container;
@@ -114,7 +113,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
 			String templateName = applicationTemplate.getName();
 			this.nameText.setText(templateName);
-			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, descriptionText.getBackground()));
+			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, null));
 			this.descriptionText.setText(applicationTemplate.getDescription());
 		}
 
@@ -127,7 +126,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 	private class CodeAnthingCartridgeView extends DefaultView {
 
 		private StyledText nameText;
-		private Text descriptionText;
+		private StyledText descriptionText;
 		private Text urlText;
 		private Binding binding;
 
@@ -138,15 +137,14 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// nameLink
-			this.nameText = new StyledText(container, SWT.None);
-			nameText.setEditable(false);
+			this.nameText = new StyledText(container, SWT.READ_ONLY);
+			UIUtils.setTransparent(nameText);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
 			// summaryText
-			this.descriptionText = new Text(container, SWT.MULTI | SWT.WRAP);
-			descriptionText.setEditable(false);
-			descriptionText.setBackground(container.getBackground());
+			this.descriptionText = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			UIUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionText);
 
@@ -172,7 +170,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
 			String name = applicationTemplate.getName();
 			this.nameText.setText(name);
-			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, descriptionText.getBackground()));
+			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
 			this.descriptionText.setText(applicationTemplate.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
