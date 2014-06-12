@@ -43,6 +43,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
@@ -273,7 +274,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			// summaryText
 			this.summaryText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			summaryText.setAlwaysShowScrollBars(false);
-			summaryText.setBackground(container.getBackground());
+			UIUtils.setTransparent(summaryText);
 			Rectangle containerSize = container.getClientArea();
 			GridDataFactory.fillDefaults()
 					.span(3, 1).indent(6,0).align(SWT.FILL, SWT.FILL).grab(true, true).hint(containerSize.x, SWT.DEFAULT).applyTo(summaryText);

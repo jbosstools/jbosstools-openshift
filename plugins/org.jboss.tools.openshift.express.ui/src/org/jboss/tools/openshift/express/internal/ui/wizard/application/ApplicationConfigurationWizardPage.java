@@ -46,6 +46,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -561,12 +562,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				onAdvancedClicked());
 
 		// explanation
-		Text sourceCodeExplanationText = new Text(sourceGroup, SWT.WRAP);
+		StyledText sourceCodeExplanationText = new StyledText(sourceGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+		sourceCodeExplanationText.setAlwaysShowScrollBars(false);
 		sourceCodeExplanationText
 				.setText("Your application will start with an exact copy of the code and configuration "
 						+ "provided in this Git repository instead of the default application.");
 		sourceCodeExplanationText.setEnabled(false);
-		UIUtils.copyBackground(sourceGroup, sourceCodeExplanationText);
+		UIUtils.setTransparent(sourceCodeExplanationText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
 		ValueBindingBuilder

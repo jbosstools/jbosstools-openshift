@@ -39,10 +39,10 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
@@ -51,6 +51,7 @@ import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -78,18 +79,11 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		Group markersGroup = new Group(parent, SWT.NONE);
-		markersGroup.setText("Markers");
-		GridDataFactory.fillDefaults()
-				.hint(SWT.DEFAULT, 300).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(markersGroup);
-		GridLayoutFactory.fillDefaults()
-				.margins(6, 6).applyTo(markersGroup);
-
 		// markers table
-		Composite tableContainer = new Composite(markersGroup, SWT.NONE);
+		Composite tableContainer = new Composite(parent, SWT.NONE);
 		this.viewer = createTable(tableContainer);
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+				.span(3, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 250).grab(true, true).applyTo(tableContainer);
 		dbc.bindSet(
 				ViewerProperties.checkedElements(IOpenShiftMarker.class).observe(viewer),
 				BeanProperties.set(
@@ -102,15 +96,15 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 
 		// marker description
-		Group descriptionGroup = new Group(markersGroup, SWT.NONE);
+		Group descriptionGroup = new Group(parent, SWT.NONE);
 		descriptionGroup.setText("Marker Description");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionGroup);
 		GridLayoutFactory.fillDefaults()
 				.margins(6, 6).applyTo(descriptionGroup);
-		Text descriptionText = new Text(descriptionGroup, SWT.MULTI | SWT.WRAP);
-		descriptionText.setEditable(false);
-		descriptionText.setBackground(descriptionGroup.getBackground());
+		StyledText descriptionText = new StyledText(descriptionGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+		descriptionText.setAlwaysShowScrollBars(false);
+		UIUtils.setTransparent(descriptionText);
 		GridDataFactory.fillDefaults()
 				.hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionText);
 		dbc.bindSet(
