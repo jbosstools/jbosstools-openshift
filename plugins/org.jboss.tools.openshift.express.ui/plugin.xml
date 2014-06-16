@@ -640,13 +640,18 @@
 	<extension
            point="org.eclipse.ui.menus">
         <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
-          <command
+				locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+			<command
                 commandId="org.jboss.tools.openshift.express.ui.command.newdomain"
                 icon="icons/globe_new.png"
                 id="org.jboss.tools.openshift.express.ui.command.newdomain"
                 mnemonic="D">
-          </command>
+				<visibleWhen>
+					<reference
+						definitionId="org.tools.openshift.express.ui.isOpenShiftResourceSelected">
+                    </reference>
+				</visibleWhen>
+			</command>
         </menuContribution>
 	</extension>
 
@@ -762,37 +767,9 @@
 				id="org.jboss.tools.openshift.express.ui.command.newapplication"
 				mnemonic="A">
 				<visibleWhen>
-					<with
-						variable="selection">
-						<count
-		                      value="1" />
-		                <or>
-							<iterate
-								ifEmpty="false"
-								operator="and">
-								<instanceof
-									value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
-							</iterate>
-							<iterate
-								ifEmpty="false"
-								operator="and">
-								<instanceof
-									value="com.openshift.client.IDomain" />
-							</iterate>
-							<iterate
-								ifEmpty="false"
-								operator="and">
-								<instanceof
-									value="com.openshift.client.IApplication" />
-							</iterate>
-							<iterate
-								ifEmpty="false"
-								operator="and">
-								<instanceof
-									value="com.openshift.client.cartridge.IEmbeddableCartridge" />
-							</iterate>
-						</or>
-					</with>
+					<reference
+						definitionId="org.tools.openshift.express.ui.isOpenShiftResourceSelected">
+                    </reference>
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -1775,6 +1752,32 @@
 			properties="ifSharedIsEGit,isInternalRSE"
 			type="org.eclipse.core.resources.IProject">
 		</propertyTester>
+	</extension>
+	
+	<!-- definitions -->
+	<extension
+		point="org.eclipse.core.expressions.definitions">
+		<definition
+			id="org.tools.openshift.express.ui.isOpenShiftResourceSelected">
+			<with variable="selection">
+				<count
+					value="1" />
+				<iterate
+					ifEmpty="false"
+					operator="and">
+					<or>
+						<instanceof
+							value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+						<instanceof
+							value="com.openshift.client.IDomain" />
+						<instanceof
+							value="com.openshift.client.IApplication" />
+						<instanceof
+							value="com.openshift.client.cartridge.IEmbeddableCartridge" />
+					</or>
+				</iterate>
+			</with>
+		</definition>
 	</extension>
 	
 	<!-- preferences page -->
