@@ -8,9 +8,12 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.behaviour;
+package org.jboss.tools.openshift.express.internal.core.server;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -24,6 +27,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.lib.Repository;
@@ -42,7 +48,6 @@ import org.jboss.ide.eclipse.as.wtp.core.server.publish.LocalZippedModulePublish
 import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
 import org.jboss.tools.as.core.server.controllable.util.PublishControllerUtility;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.core.IQuestionHandler;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 
@@ -64,20 +69,20 @@ public class OpenShiftServerPublishMethod  {
 
 	public int publishFinish(IServer server, IProgressMonitor monitor) throws CoreException {
 
-		String destProjName = OpenShiftServerUtils.getDeployProjectName(server);
-		IProject destProj = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
+		IProject project = ResourcesPlugin.getWorkspace().getRoot()
+				.getProject(OpenShiftServerUtils.getDeployProjectName(server));
 		boolean allSubModulesPublished = areAllPublished(server);
 
-		if (destProj != null 
-				&& destProj.exists()) {
+		if (project != null 
+				&& project.exists()) {
 		
-			String destinationFolder = OpenShiftServerUtils.getDeployFolder(server);
-			IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
+			String deployFolder = OpenShiftServerUtils.getDeployFolder(server);
+			IContainer container = OpenShiftServerUtils.getDeployFolderResource(deployFolder, project);
 			
 			if (allSubModulesPublished
-					|| (destFolder != null && destFolder.isAccessible())) {
-				refreshProject(destProj, submon(monitor, 100));
-				commitAndPushProject(destProj, server, submon(monitor, 100));
+					|| (container != null && container.isAccessible())) {
+				refreshProject(project, submon(monitor, 100));
+				publish(project, server, submon(monitor, 100));
 			} // else ignore. (one or more modules not published AND magic
 				// folder doesn't exist
 				// The previous exception will be propagated.
@@ -203,74 +208,76 @@ public class OpenShiftServerPublishMethod  {
 
 		IPath moduleProjectRoot = moduleProject.getLocation();
 		IPath magicProjectRoot = magic.getLocation();
-		boolean ret = magicProjectRoot.isPrefixOf(moduleProjectRoot);
-		return ret;
-	}
-
-	protected PushOperationResult commitAndPushProject(IProject p, IServer server,
-			IProgressMonitor monitor) throws CoreException {
-
-		PushOperationResult result = null;
-		int changes = OpenShiftServerUtils.countCommitableChanges(p, server, monitor);
-		if (changes > 0) {
-			String[] data = new String[]{
-					NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()),
-					NLS.bind(OpenShiftServerMessages.commitAndPushMsg, changes, p.getName())
-			};
-			
-			Object[] ret = OpenshiftCoreUIIntegration.openMultiReturnQuestion(IQuestionHandler.COMMIT_AND_PUSH_QUESTION, data);
-			if( ret != null && ret.length > 0 && ret[0] != null && ((Boolean)ret[0]).booleanValue()) {
-				String msg = (ret.length > 1 && ret[1] != null) ? ((String)ret[1]) : null;
-				
-				monitor.beginTask("Publishing " + p.getName(), 300);
-				if( msg == null )
-					EGitUtils.commit(p, new SubProgressMonitor(monitor, 100));
-				else
-					EGitUtils.commit(p, msg, new SubProgressMonitor(monitor, 100));
-					
-				OpenshiftCoreUIIntegration.displayConsoleView(server);
-				result = push(p, server, monitor);
-			}
-		} else {
-			try {
-				String openShiftRemoteName =
-						OpenShiftServerUtils.getRemoteName(server);
-				if (!EGitUtils.isAhead(p, openShiftRemoteName, monitor)) {
-					if (OpenshiftCoreUIIntegration.requestApproval(
-							NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, p.getName()),
-							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						OpenshiftCoreUIIntegration.displayConsoleView(server);
-						result = push(p, server, monitor);
-					}
-				} else {
-					if (OpenshiftCoreUIIntegration.requestApproval(
-							NLS.bind(OpenShiftServerMessages.pushCommitsMsg, p.getName()),
-							NLS.bind(OpenShiftServerMessages.publishTitle, p.getName()))) {
-						OpenshiftCoreUIIntegration.displayConsoleView(server);
-						result = push(p, server, monitor);
-					}
-				}
-			} catch (Exception e) {
-				OpenShiftCoreActivator.pluginLog().logError(e);
-			}
-		}
-
-		return result;
+		return magicProjectRoot.isPrefixOf(moduleProjectRoot);
 	}
 	
-	protected PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
-		String remoteName = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
+	protected PushOperationResult publish(IProject project, IServer server, IProgressMonitor monitor) 
+			throws CoreException {
+		int uncommittedChanges = OpenShiftServerUtils.countCommitableChanges(project, server, monitor);
+		try {
+			if (uncommittedChanges > 0) {
+				OpenshiftCoreUIIntegration.openCommitDialog(project, onCommitDone(project, server, monitor));
+			} else {
+				if (OpenshiftCoreUIIntegration.requestApproval(
+						getPushQuestion(project, server, monitor),
+						NLS.bind(OpenShiftServerMessages.publishTitle, project.getName()))) {
+					return push(project, server, monitor);
+				}
+			}
+		} catch (Exception e) {
+			OpenShiftCoreActivator.pluginLog().logError(e);
+		}
+		return null;
+	}
+
+	private IJobChangeListener onCommitDone(final IProject project, final IServer server, final IProgressMonitor monitor) {
+		return new JobChangeAdapter() {			
+			@Override
+			public void done(IJobChangeEvent event) {
+				if (event.getResult().isOK()) {
+					try {
+						push(project, server, monitor);
+					} catch (CoreException e) {
+						OpenShiftCoreActivator.getDefault().getLog().log(e.getStatus());
+					} finally {
+						monitor.done();
+					}
+				}
+			}
+		};
+	}
+		
+	private String getPushQuestion(IProject project, IServer server, IProgressMonitor monitor)
+			throws IOException, InvocationTargetException, URISyntaxException {
+		String openShiftRemoteName = OpenShiftServerUtils.getRemoteName(server);
+		if (!EGitUtils.isAhead(project, openShiftRemoteName, monitor)) {
+			return NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, project.getName());
+		} else {
+			return NLS.bind(OpenShiftServerMessages.committedChangesNotPushedYet, project.getName());
+		}
+	}
+
+	private void commit(IProject project, String message, IProgressMonitor monitor) throws CoreException {
+		monitor.beginTask(NLS.bind("Publishing {0}", project.getName()), 300);
+		if( message == null ) {
+			EGitUtils.commit(project, new SubProgressMonitor(monitor, 100));
+		} else {
+			EGitUtils.commit(project, message, new SubProgressMonitor(monitor, 100));
+		}
+	}
+	
+	private PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		Repository repository = EGitUtils.getRepository(project);
+		OpenshiftCoreUIIntegration.displayConsoleView(server);
+		String remoteName = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
 		try {
 			monitor.beginTask("Publishing " + project.getName(), 200);
-			PushOperationResult result = EGitUtils.push(
+			return EGitUtils.push(
 					remoteName, repository, new SubProgressMonitor(monitor, 100),
 					OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
-			monitor.done();
-			return result;
 		} catch (CoreException ce) {
 			// Comes if push has failed
-			if (ce.getMessage() != null && ce.getMessage().contains("UP_TO_DATE")) {
+			if (isUpToDateError(ce)) {
 				OpenshiftCoreUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
 				return null;
 			}
@@ -301,8 +308,7 @@ public class OpenShiftServerPublishMethod  {
 				monitor.done();
 				return null;
 			} catch (CoreException ce2) {
-				if (ce.getMessage() != null 
-						&& ce.getMessage().contains("UP_TO_DATE")) {
+				if (isUpToDateError(ce)) {
 					OpenshiftCoreUIIntegration.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
 					return null;
 				} else {
@@ -311,7 +317,14 @@ public class OpenShiftServerPublishMethod  {
 					throw ce2;
 				}
 			}
+		} finally {
+			monitor.done();
 		}
+	}
+
+	private boolean isUpToDateError(CoreException ce) {
+		return ce.getMessage() != null
+				&& ce.getMessage().contains("UP_TO_DATE");
 	}
 
 	protected String getModuleProjectName(IModule[] module) {

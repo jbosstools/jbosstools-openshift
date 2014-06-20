@@ -1080,15 +1080,12 @@ public class EGitUtils {
 	 * @return the changes in the index or null;
 	 * @throws IOException
 	 */
-	public static IndexDiff getIndexChanges(Repository repo,
-			IProgressMonitor monitor) throws IOException {
-		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(
-				monitor);
+	public static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
+		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
 
-		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
-				IteratorService.createInitialIterator(repo));
-		if (!indexDiff.diff(jgitMonitor, 0, 0,
-				NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
+		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
+		if (!indexDiff.diff(
+				jgitMonitor, 0, 0, NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
 			return null;
 		}
 		return indexDiff;

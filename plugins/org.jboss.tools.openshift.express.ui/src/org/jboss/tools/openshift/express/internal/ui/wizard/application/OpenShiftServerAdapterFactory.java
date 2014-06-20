@@ -31,7 +31,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.client.IApplication;

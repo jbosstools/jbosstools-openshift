@@ -51,6 +51,9 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	}
 
 	protected void initCoreUIIntegration() {
+		/* 
+		 * TODO: replace by extension point
+		 */
 		OpenshiftCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
 		OpenshiftCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
 		OpenshiftCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());

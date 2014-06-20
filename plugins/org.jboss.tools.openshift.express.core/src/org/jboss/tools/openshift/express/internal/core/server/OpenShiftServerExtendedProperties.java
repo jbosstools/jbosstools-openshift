@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.behaviour;
+package org.jboss.tools.openshift.express.internal.core.server;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;

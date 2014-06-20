@@ -6,7 +6,8 @@ Bundle-SymbolicName: org.jboss.tools.openshift.egit.ui;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.egit.ui.EGitUIActivator
 Bundle-Localization: plugin
-Require-Bundle: org.jboss.tools.openshift.egit.core;bundle-version="[2.3.0,3.0.0)",
+Require-Bundle: org.jboss.tools.openshift.express.core;bundle-version="2.6.0",
+ org.jboss.tools.openshift.egit.core;bundle-version="[2.3.0,3.0.0)",
  org.eclipse.egit.core;bundle-version="2.0.0",
  org.eclipse.egit.ui;bundle-version="2.0.0",
  org.eclipse.jgit;bundle-version="2.0.0",

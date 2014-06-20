@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 
 /**
  * Property tester for properties that are related to the OpenShift server
