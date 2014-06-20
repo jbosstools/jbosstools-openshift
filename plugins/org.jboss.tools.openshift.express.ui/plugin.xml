@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+	<extension
+			point="org.jboss.tools.openshift.express.core.ui.egit">
+		<egitui
+			class="org.jboss.tools.openshift.express.internal.ui.server.EGitUI">
+		</egitui>
+	</extension>
    <extension
          point="org.eclipse.ui.newWizards">
       <category
@@ -50,18 +56,6 @@
             id="org.jboss.ide.eclipse.as.ui.jbossIcon"/>
    </extension>
     
-	<extension point="org.eclipse.ui.navigator.viewer">
-		<viewerContentBinding 
-			viewerId="org.eclipse.wst.server.ui.ServersView" />
-    	<viewerActionBinding
-    		viewerId="org.eclipse.wst.server.ui.ServersView">
-			<includes>
-				<actionExtension
-					pattern="org.jboss.tools.openshift.express.internal.ui.serverviewer.actionDelegate.*"/>
-			</includes>
-		</viewerActionBinding>
-	</extension>
-	
 	<!-- servers view context menu: OpenShift submenu-->
 	<extension
 		point="org.eclipse.ui.menus">
@@ -97,6 +91,27 @@
 			</menu>
 		</menuContribution>
 	</extension>	
+
+	<extension
+		point="org.eclipse.wst.server.ui.editorPageSections">
+		<section
+			class="org.jboss.tools.openshift.express.internal.ui.server.OpenShiftServerEditorSection"
+			id="org.jboss.tools.openshift.express.ui.behaviour.details.section"
+			insertionId="org.eclipse.wst.server.editor.overview.left"
+			order="10"
+			typeIds="org.jboss.tools.openshift.express.openshift.server.type">
+		</section>
+	</extension>
+	<extension
+			point="org.eclipse.wst.server.ui.wizardFragments">
+		<fragment
+			class="org.jboss.tools.openshift.express.internal.ui.server.OpenShiftServerWizardFragment"
+			id="org.jboss.tools.openshift.express.ui.server.fragment"
+			typeIds="org.jboss.tools.openshift.express.openshift.server.type">
+		</fragment>
+	</extension>
+    
+	<!-- server publish method UI contributions -->
 
 	<!-- openshift tail files console -->
     <extension
@@ -143,24 +158,6 @@
     &lt;/build&gt;
 &lt;/profile&gt;</pattern>
        </template>
-    </extension>
-    <extension
-          point="org.eclipse.wst.server.ui.editorPageSections">
-       <section
-             class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftServerEditorSection"
-             id="org.jboss.tools.openshift.express.ui.behaviour.details.section"
-             insertionId="org.eclipse.wst.server.editor.overview.left"
-             order="10"
-             typeIds="org.jboss.tools.openshift.express.openshift.server.type">
-       </section>
-    </extension>
-    <extension
-          point="org.eclipse.wst.server.ui.wizardFragments">
-       <fragment
-             class="org.jboss.tools.openshift.express.internal.ui.behaviour.OpenShiftServerWizardFragment"
-             id="org.jboss.tools.openshift.express.ui.server.fragment"
-             typeIds="org.jboss.tools.openshift.express.openshift.server.type">
-       </fragment>
     </extension>
    
 	<!-- OpenShift Explorer view -->

@@ -13,7 +13,14 @@ package org.jboss.tools.openshift.express.core;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
@@ -26,24 +33,24 @@ import com.openshift.client.IHttpClient.ISSLCertificateCallback;
  */
 public class OpenshiftCoreUIIntegration {
 	
+	 private static final String EGITUI_ID = 
+		      "org.jboss.tools.openshift.express.core.ui.egit";
+	 
 	// The singleton instance
 	private static OpenshiftCoreUIIntegration instance;
+
+	private IConsoleUtility consoleUtil;
+	private IQuestionHandler questionHandler;
+	private ICredentialsPrompter credentialPrompter;
+	private ISSLCertificateCallback sslCertificateCallback;
 	
 	// Access the singleton
 	public static OpenshiftCoreUIIntegration getDefault() {
-		if( instance == null )
+		if (instance == null)
 			instance = new OpenshiftCoreUIIntegration();
 		return instance;
 	}
-	
-	private IConsoleUtility consoleUtil;
-	
-	private IQuestionHandler questionHandler;
-	
-	private ICredentialsPrompter credentialPrompter;
-	
-	private ISSLCertificateCallback sslCertificateCallback;
-	
+		
 	public ICredentialsPrompter getCredentialPrompter() {
 		return credentialPrompter;
 	}
@@ -75,7 +82,29 @@ public class OpenshiftCoreUIIntegration {
 	public void setQuestionHandler(IQuestionHandler questionHandler) {
 		this.questionHandler = questionHandler;
 	}
+	
+	public IEGitUI getEGitUI() throws CoreException {
+		IEGitUI egitUI = getConfigurationElement(getExtension(EGITUI_ID));
+		if (egitUI == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus("Could not find extension " + EGITUI_ID));
+		}
+		return egitUI;
+	}
 
+	private IConfigurationElement[] getExtension(String name) {
+		return Platform.getExtensionRegistry().getConfigurationElementsFor(name);
+	}
+
+	private <T> T getConfigurationElement(IConfigurationElement[] configurations) throws CoreException {
+		T element = null;
+		if (configurations != null) {
+			for (IConfigurationElement configuration : configurations) {
+				element = (T) configuration.createExecutableExtension("class");
+			}
+		}
+		return element;
+	}
+	
 	/**
 	 * Show the console view for the given server
 	 */
@@ -159,16 +188,7 @@ public class OpenshiftCoreUIIntegration {
 		return handler == null ? false : handler.openQuestion(title, message, defaultAnswer);
 	}
 	
-	
-	/**
-	 * Open a dialog or question that has multiple pieces of data to return. 
-	 * 
-	 * @param type an integer representing the specific question type being asked
-	 * @param data an array of object for use by the dialog
-	 * @return
-	 */
-	public static Object[] openMultiReturnQuestion(int type, Object[] data) {
-		IQuestionHandler handler = getDefault().getQuestionHandler();
-		return handler == null ? null : handler.openMultiReturnQuestion(type, data);
+	public static void openCommitDialog(IProject project, IJobChangeListener commitJobListener) throws CoreException {
+		getDefault().getEGitUI().commitWithUI(project, commitJobListener);
 	}
 }

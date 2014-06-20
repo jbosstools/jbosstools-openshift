@@ -1044,6 +1044,7 @@ public class EGitUtils {
 	 * <li>changed (but uncommitted)</li>
 	 * <li>modified (but uncommitted resources)</li>
 	 * <li>removed (but uncommitted resources)</li>
+	 * <li>new non-added</li>
 	 * </ul>
 	 * 
 	 * @param repository
@@ -1057,14 +1058,16 @@ public class EGitUtils {
 			throws NoWorkTreeException, IOException, GitAPIException {
 		Assert.isLegal(repository != null);
 		boolean hasChanges = false;
-		org.eclipse.jgit.api.Status repoStatus = new Git(repository).status()
-				.call();
+		org.eclipse.jgit.api.Status repoStatus = 
+				new Git(repository).status().call();
 		hasChanges |= !repoStatus.getAdded().isEmpty();
 		hasChanges |= !repoStatus.getChanged().isEmpty();
 		hasChanges |= !repoStatus.getModified().isEmpty();
 		hasChanges |= !repoStatus.getRemoved().isEmpty();
 		hasChanges |= !repoStatus.getConflicting().isEmpty();
 		hasChanges |= !repoStatus.getMissing().isEmpty();
+		hasChanges |= !repoStatus.getIgnoredNotInIndex().isEmpty();
+		
 		return hasChanges;
 	}
 
@@ -1080,15 +1083,12 @@ public class EGitUtils {
 	 * @return the changes in the index or null;
 	 * @throws IOException
 	 */
-	public static IndexDiff getIndexChanges(Repository repo,
-			IProgressMonitor monitor) throws IOException {
-		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(
-				monitor);
+	public static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
+		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
 
-		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD,
-				IteratorService.createInitialIterator(repo));
-		if (!indexDiff.diff(jgitMonitor, 0, 0,
-				NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
+		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
+		if (!indexDiff.diff(
+				jgitMonitor, 0, 0, NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
 			return null;
 		}
 		return indexDiff;

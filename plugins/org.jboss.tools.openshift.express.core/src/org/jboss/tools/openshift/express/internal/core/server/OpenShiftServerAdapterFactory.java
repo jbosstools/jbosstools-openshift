@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application;
+package org.jboss.tools.openshift.express.internal.core.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +31,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -44,7 +43,7 @@ import com.openshift.client.OpenShiftException;
  */
 public class OpenShiftServerAdapterFactory {
 
-	OpenShiftServerAdapterFactory() {
+	public OpenShiftServerAdapterFactory() {
 	}
 
 	public IServer create(IProject project, IApplication application, IDomain domain, IProgressMonitor monitor)
@@ -70,11 +69,11 @@ public class OpenShiftServerAdapterFactory {
 			server = createAdapter(serverType, application, domain, project.getName(), remoteName);
 			server = addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
-			OpenShiftUIActivator.getDefault().getLog().log(ce.getStatus());
+			OpenShiftCoreActivator.getDefault().getLog().log(ce.getStatus());
 		} catch (OpenShiftException ose) {
-			IStatus s = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+			IStatus s = new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
 					"Cannot create openshift server adapter", ose);
-			OpenShiftUIActivator.getDefault().getLog().log(s);
+			OpenShiftCoreActivator.getDefault().getLog().log(s);
 		}
 		return server;
 	}

@@ -15,7 +15,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.core.IQuestionHandler;
-import org.jboss.tools.openshift.express.internal.ui.behaviour.CommitAndPushDialog;
 
 public class QuestionHandler implements IQuestionHandler {
 
@@ -35,19 +34,4 @@ public class QuestionHandler implements IQuestionHandler {
 		});
 		return b[0];
 	}
-
-	@Override
-	public Object[] openMultiReturnQuestion(int type, Object[] data) {
-		if( type == IQuestionHandler.COMMIT_AND_PUSH_QUESTION) {
-			return showCommitAndPushDialog(data);
-		}
-		return null;
-	}
-	
-	private Object[] showCommitAndPushDialog(final Object[] data) {
-  		final String title = (String)data[0];
-		final String message = (String)data[1];
-		return CommitAndPushDialog.showCommitAndPushDialog(title, message);
-	}
-
 }

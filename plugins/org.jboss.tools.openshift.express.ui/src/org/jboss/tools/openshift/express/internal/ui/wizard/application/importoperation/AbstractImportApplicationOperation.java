@@ -37,9 +37,9 @@ import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
+import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
@@ -185,9 +185,9 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 *            the monitor to report progress to
 	 * @throws CoreException
 	 * @throws OpenShiftException
-	 * @throws GitAPIException 
-	 * @throws IOException 
-	 * @throws NoWorkTreeException 
+	 * @throws GitAPIException
+	 * @throws IOException
+	 * @throws NoWorkTreeException
 	 * 
 	 * @see #addToModified(Collection<IResource>)
  	 * @see #addToModified(IResource)

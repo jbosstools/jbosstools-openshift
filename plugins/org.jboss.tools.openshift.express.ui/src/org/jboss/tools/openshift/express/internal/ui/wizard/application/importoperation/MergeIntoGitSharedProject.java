@@ -105,8 +105,8 @@ public class MergeIntoGitSharedProject extends AbstractImportApplicationOperatio
 		addToModified(setupMarkers(project, monitor));
 
 		addRemote(getRemoteName(), getApplication().getGitUrl(), project);
-		
-		addAndCommitModifiedResource(project, monitor);
+		//server adapter will commit when publishing
+		//addAndCommitModifiedResource(project, monitor);
 
 		return project;
 	}

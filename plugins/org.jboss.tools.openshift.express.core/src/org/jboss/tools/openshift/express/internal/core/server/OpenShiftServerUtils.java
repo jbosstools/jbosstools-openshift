@@ -8,16 +8,16 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.behaviour;
+package org.jboss.tools.openshift.express.internal.core.server;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
@@ -81,13 +81,13 @@ public class OpenShiftServerUtils {
 	public static final String ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.override";//$NON-NLS-1$
 
 	/* Legacy Server Settings: Please usage scan before removal */
-	public static final String ATTRIBUTE_DEPLOY_PROJECT_LEGACY = "org.jboss.tools.openshift.express.internal.core.behaviour.binary.deployProject";//$NON-NLS-1$
-	public static final String ATTRIBUTE_REMOTE_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.RemoteName";//$NON-NLS-1$
-	public static final String ATTRIBUTE_APPLICATION_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationName";//$NON-NLS-1$
-	public static final String ATTRIBUTE_APPLICATION_ID = "org.jboss.tools.openshift.express.internal.core.behaviour.ApplicationId";//$NON-NLS-1$
-	public static final String ATTRIBUTE_DOMAIN = "org.jboss.tools.openshift.express.internal.core.behaviour.Domain";//$NON-NLS-1$
-	public static final String ATTRIBUTE_USERNAME = "org.jboss.tools.openshift.express.internal.core.behaviour.Username";//$NON-NLS-1$
-	public static final String ATTRIBUTE_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.express.internal.core.behaviour.DEPLOY_FOLDER_LOC";//$NON-NLS-1$
+	public static final String ATTRIBUTE_DEPLOY_PROJECT_LEGACY = "org.jboss.tools.openshift.express.internal.core.server.binary.deployProject";//$NON-NLS-1$
+	public static final String ATTRIBUTE_REMOTE_NAME = "org.jboss.tools.openshift.express.internal.core.server.RemoteName";//$NON-NLS-1$
+	public static final String ATTRIBUTE_APPLICATION_NAME = "org.jboss.tools.openshift.express.internal.core.server.ApplicationName";//$NON-NLS-1$
+	public static final String ATTRIBUTE_APPLICATION_ID = "org.jboss.tools.openshift.express.internal.core.server.ApplicationId";//$NON-NLS-1$
+	public static final String ATTRIBUTE_DOMAIN = "org.jboss.tools.openshift.express.internal.core.server.Domain";//$NON-NLS-1$
+	public static final String ATTRIBUTE_USERNAME = "org.jboss.tools.openshift.express.internal.core.server.Username";//$NON-NLS-1$
+	public static final String ATTRIBUTE_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.express.internal.core.server.DEPLOY_FOLDER_LOC";//$NON-NLS-1$
 
 	/* New Settings inside the project */
 	public static final String SETTING_REMOTE_NAME = "org.jboss.tools.openshift.RemoteName";//$NON-NLS-1$
@@ -100,11 +100,11 @@ public class OpenShiftServerUtils {
 
 	// Legacy, not to be used
 	// public static final String ATTRIBUTE_PASSWORD =
-	// "org.jboss.tools.openshift.express.internal.core.behaviour.Password";
+	// "org.jboss.tools.openshift.express.internal.core.server.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT = "origin";//$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPLOY_FOLDER_JBOSS_DEFAULT = "deployments";//$NON-NLS-1$
 
-	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.behaviour.IgnoreContextRoot";//$NON-NLS-1$
+	public static final String PREFERENCE_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.express.internal.core.server.IgnoreContextRoot";//$NON-NLS-1$
 
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";//$NON-NLS-1$
@@ -640,73 +640,100 @@ public class OpenShiftServerUtils {
 		return wc.save(false, new NullProgressMonitor());
 	}
 
-	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
-		try {
-			Repository repo = EGitUtils.checkedGetRepository(project);
-			Set<String> commitable = getCommitableChanges(repo, server, monitor);
-			return commitable.size();
-		} catch (IOException ioe) {
-			throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, "Unable to count commitable resources", ioe));
-		}
+	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor)
+			throws CoreException {
+		Collection<String> commitableChanges = new GitIndexDiffBuilder(EGitUtils.checkedGetRepository(project))
+				.conflicting(false)
+				.missing(false)
+//				.untracked(false)
+				.build(monitor);
+		return commitableChanges.size();
 	}
+	
+	public static class GitIndexDiffBuilder {
 
-	private static Set<String> getCommitableChanges(Repository repo, IServer server, IProgressMonitor monitor)
-			throws IOException {
+		private Repository repository;
 		
-		IndexDiff diff = EGitUtils.getIndexChanges(repo, monitor);
-		Set<String> set = new HashSet<String>();
-		if (diff != null) {
-			if (isCommitAddedResources(server))
-				set.addAll(diff.getAdded());
-			if (isCommitChangedResources(server))
-				set.addAll(diff.getChanged());
-			if (isCommitConflictingResources(server))
-				set.addAll(diff.getConflicting());
-			if (isCommitMissingResources(server))
-				set.addAll(diff.getMissing());
-			if (isCommitModifiedResources(server))
-				set.addAll(diff.getModified());
-			if (isCommitRemovedResources(server))
-				set.addAll(diff.getRemoved());
-			if (isCommitUntrackedResources(server))
-				set.addAll(diff.getUntracked());
+		private boolean added = true;
+		private boolean changed= true;
+		private boolean conflicting = true;
+		private boolean missing = true;
+		private boolean modified = true;
+		private boolean removed = true;
+		private boolean untracked = true;
+		
+		GitIndexDiffBuilder(Repository repository) {
+			this.repository = repository;
 		}
-		return set;
-	}
+		
+		public GitIndexDiffBuilder added(boolean filter) {
+			this.added = filter;
+			return this;
+		}
 
-	/*
-	 * Current behaviour is to commit only: added, changed, modified, removed
-	 * 
-	 * These can be customized as properties on the server one day, if we wish,
-	 * such that each server can have custom settings, or, they can be global
-	 * settings
-	 */
-	public static boolean isCommitAddedResources(IServer server) {
-		return true;
-	}
+		public GitIndexDiffBuilder changed(boolean filter) {
+			this.changed = filter;
+			return this;
+		}
+	
+		public GitIndexDiffBuilder conflicting(boolean filter) {
+			this.conflicting = filter;
+			return this;
+		}
+		
+		public GitIndexDiffBuilder missing(boolean filter) {
+			this.missing = filter;
+			return this;
+		}
+		
+		public GitIndexDiffBuilder modified(boolean filter) {
+			this.modified = filter;
+			return this;
+		}
 
-	public static boolean isCommitChangedResources(IServer server) {
-		return true;
-	}
+		public GitIndexDiffBuilder removed(boolean filter) {
+			this.removed = filter;
+			return this;
+		}
 
-	public static boolean isCommitConflictingResources(IServer server) {
-		return false;
-	}
+		public GitIndexDiffBuilder untracked(boolean filter) {
+			this.untracked = filter;
+			return this;
+		}
 
-	public static boolean isCommitMissingResources(IServer server) {
-		return false;
-	}
-
-	public static boolean isCommitModifiedResources(IServer server) {
-		return true;
-	}
-
-	public static boolean isCommitRemovedResources(IServer server) {
-		return true;
-	}
-
-	public static boolean isCommitUntrackedResources(IServer server) {
-		return false;
+		public Collection<String> build(IProgressMonitor monitor) throws CoreException {
+			try {
+				HashSet<String> resources = new HashSet<String>();
+				IndexDiff diff = EGitUtils.getIndexChanges(repository, monitor);
+				if (diff != null) {
+					if (added) {
+						resources.addAll(diff.getAdded());
+					}
+					if (changed) {
+						resources.addAll(diff.getChanged());
+					}
+					if (conflicting) {
+						resources.addAll(diff.getConflicting());
+					}
+					if (missing) {
+						resources.addAll(diff.getMissing());
+					}
+					if (modified) {
+						resources.addAll(diff.getModified());
+					}
+					if (removed) {
+						resources.addAll(diff.getRemoved());
+					}
+					if (untracked) {
+						resources.addAll(diff.getUntracked());
+					}
+				}
+				return resources;
+			} catch (IOException ioe) {
+				throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
+						"Unable to count commitable resources", ioe));
+			}
+		}
 	}
 	
 	public static String[] toNames(final IProject[] projects) {

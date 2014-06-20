@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point 
+   		id="org.jboss.tools.openshift.express.core.ui.egit" 
+   		name="openshiftCoreUIServices" 
+   		schema="schema/org.jboss.tools.openshift.express.core.ui.egit.exsd"/>
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
-            behaviourClass="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerBehaviour"
-            class="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServer"
+            behaviourClass="org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerBehaviour"
+            class="org.jboss.tools.openshift.express.internal.core.server.OpenShiftServer"
             name="%openshift.express.name"
             description="%openshift.express.description"
             hasConfiguration="false"
@@ -24,7 +28,7 @@
          point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
              vendor="%ProviderName"
-             class="org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftRuntime"
+             class="org.jboss.tools.openshift.express.internal.core.server.OpenShiftRuntime"
              description="%openshift.express.runtime.name"
              name="%openshift.express.runtime.name"
              id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
@@ -77,7 +81,7 @@
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             category="JBoss"
-            delegate="org.jboss.tools.openshift.express.internal.core.behaviour.OpenshiftDelegatingStartLaunchConfiguration"
+            delegate="org.jboss.tools.openshift.express.internal.core.server.OpenshiftDelegatingStartLaunchConfiguration"
             id="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
             modes="run,debug,profile"
             name="JBoss OpenShift Server Startup Configuration"

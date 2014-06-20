@@ -33,7 +33,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.tools.openshift.express.core.IConsoleUtility;
-import org.jboss.tools.openshift.express.internal.core.behaviour.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 

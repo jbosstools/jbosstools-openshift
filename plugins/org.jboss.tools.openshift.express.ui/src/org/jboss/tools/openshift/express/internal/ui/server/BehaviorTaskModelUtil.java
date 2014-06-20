@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.behaviour;
+package org.jboss.tools.openshift.express.internal.ui.server;
 
 import org.eclipse.wst.server.core.TaskModel;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;

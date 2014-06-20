@@ -23,32 +23,6 @@ package org.jboss.tools.openshift.express.core;
 public interface IQuestionHandler {
 	
 	/**
-	 * A constant representing the commit and push dialog during
-	 * publishing when workspace changes have been made. 
-	 * 
-	 * This question type expects an Object[] return value 
-	 * with values as follows:
-	 *   1) Boolean representing yes or no
-	 *   2) String representing the commit message to be used
-	 *   
-	 * This question type expects a String[] as data with values as follows:
-	 *   1) Title of the dialog
-	 *   2) Message in the dialog
-	 */
-	public static final int COMMIT_AND_PUSH_QUESTION = 100;
-	
-	
-	/**
-	 * Open a dialog or question that has multiple pieces of data to return. 
-	 * 
-	 * @param type an integer representing the specific question type being asked
-	 * @param data an array of object for use by the dialog
-	 * @return
-	 */
-	public Object[] openMultiReturnQuestion(int type, Object[] data);
-	
-	
-	/**
 	 * Present a simple yes or no question to the user
 	 * @param title
 	 * @param message

@@ -82,7 +82,8 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		addToModified(setupGitIgnore(project, monitor));
 		addSettingsFile(project, monitor);
 		addToModified(setupMarkers(project, monitor));
-		addAndCommitModifiedResource(project, monitor);
+		//server adapter will commit when publishing
+		//addAndCommitModifiedResource(project, monitor);
 		return getSettingsProject(importedProjects);
 	}
 	
