@@ -17,7 +17,10 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -25,12 +28,18 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
@@ -51,6 +60,7 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(parent);
 		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(parent);
 
+		// domain name
 		Label namespaceLabel = new Label(parent, SWT.NONE);
 		namespaceLabel.setText(OpenshiftUIMessages.DomainName);
 		GridDataFactory.fillDefaults()
@@ -60,16 +70,24 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
 		ISWTObservableValue namespaceTextObservable = 
 				WidgetProperties.text(SWT.Modify).observe(namespaceText);
-		final NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
+		NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
 		dbc.addValidationStatusProvider(namespaceValidator);
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
-		final IObservableValue namespaceModelObservable = 
+		IObservableValue namespaceModelObservable = 
 				BeanProperties.value(EditDomainWizardModel.PROPERTY_DOMAIN_ID).observe(pageModel);
 		ValueBindingBuilder
 			.bind(namespaceTextObservable)
 			.to(namespaceModelObservable)
 			.in(dbc);
+		
+		// edit domain members
+		Link editMembersLink = new Link(parent, SWT.NONE);
+		editMembersLink.setText("Checking web console availability...");
+		editMembersLink.setEnabled(false);
+		GridDataFactory.fillDefaults()
+				.span(2,1).align(SWT.LEFT, SWT.CENTER).applyTo(editMembersLink);
+		new EditDomainMembersEnablement(editMembersLink).schedule();
 	}
 
 	@Override
@@ -114,4 +132,48 @@ public class EditDomainWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
+	private class EditDomainMembersEnablement extends Job {
+
+		private Link editDomainMembersLink;
+
+		public EditDomainMembersEnablement(Link editDomainMembersLink) {
+			super("Enabling/disabling edit members link");
+			this.editDomainMembersLink = editDomainMembersLink;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final String webUIDomainPageUrl = pageModel.getWebUIDomainPageUrl();
+			setEditDomainMembersLink(webUIDomainPageUrl);
+			return Status.OK_STATUS;
+		}
+
+		private void setEditDomainMembersLink(final String webUIDomainPage) {
+			getShell().getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					if (webUIDomainPage != null) {
+						editDomainMembersLink.setText("<a>Edit domain members</a>");
+						editDomainMembersLink.addSelectionListener(onEditMembers(webUIDomainPage));
+					} else {
+						editDomainMembersLink.setText("Could not find the OpenShift web console");
+					}
+					editDomainMembersLink.setEnabled(webUIDomainPage != null);
+					editDomainMembersLink.getParent().layout(true, true);
+				}
+			});
+		}
+		
+		private SelectionListener onEditMembers(final String webUIDomainPage) {
+			return new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPage, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				}
+			};
+		}
+	}
+	
 }
