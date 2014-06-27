@@ -50,6 +50,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
 		setRepositoryPath(getDefaultRepositoryPath());
+		setDefaultRemoteName();
 	}
 
 
@@ -85,11 +86,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 						setRepositoryPath(IOpenShiftApplicationWizardModel.DEFAULT_REPOSITORY_PATH);
 					}
 				}
-				if(wizardModel.isNewProject()) {
-					setRemoteName(IOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
-				} else {
-					setRemoteName(IOpenShiftApplicationWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
-				}
+				setDefaultRemoteName();
 			}
 		};
 	}
@@ -119,6 +116,14 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
+	private void setDefaultRemoteName() {
+		if(wizardModel.isNewProject()) {
+			setRemoteName(IOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+		} else {
+			setRemoteName(IOpenShiftApplicationWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
+		}
+	}
+	
 	private String getDefaultRepositoryPath() {
 		return EGitUIUtils.getEGitDefaultRepositoryPath();
 	}
