@@ -11,14 +11,29 @@
 package org.jboss.tools.openshift.express.internal.core.util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.eclipse.core.runtime.Assert;
+
+import com.openshift.client.utils.Base64Coder;
 
 /**
  * @author Andre Dietisheim
@@ -32,10 +47,11 @@ public class UrlUtils {
 	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
 	public static final char CREDENTIALS_HOST_SEPARATOR = '@';
 	public static final char PORT_DELIMITER = ':';
-
 	private static final Pattern SIMPLE_URL_PATTERN =
 			Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
-
+	private static final String PROPERTY_BASIC = "Basic";
+	private static final String PROPERTY_AUTHORIZATION = "Authorization";
+	
 	private UrlUtils() {
 		// inhibit instantiation
 	}
@@ -219,7 +235,7 @@ public class UrlUtils {
 	public static boolean isEmptyHost(String host) {
 		try {
 			return StringUtils.isEmpty(host)
-					|| new URL(UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS)).getHost().isEmpty();
+					|| new URL(ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS)).getHost().isEmpty();
 		} catch (MalformedURLException e) {
 			return false;
 		}
@@ -229,5 +245,53 @@ public class UrlUtils {
 		// test via new URL(url) is far too slow, using a regex
 		return SIMPLE_URL_PATTERN.matcher(url).matches();
 	}
+	
+	/**
+	 * Sets blindly accepting trustmanager and hostname verifiers to the given
+	 * connection.
+	 * 
+	 * @param connection
+	 *            the connection that the permissive trustmanager and hostname
+	 *            verifiers are set to
+	 * @throws KeyManagementException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public static void setupPermissiveSSLHandlers(HttpsURLConnection connection) throws KeyManagementException, NoSuchAlgorithmException {
+		SSLContext sslContext = SSLContext.getInstance("SSL");
+		sslContext.init(null, new TrustManager[] { new PermissiveTrustManager() }, null);
+		SSLSocketFactory socketFactory = sslContext.getSocketFactory();
+		connection.setSSLSocketFactory(socketFactory);
 
+		connection.setHostnameVerifier(new PermissiveHostnameVerifier());
+	}
+
+	private static class PermissiveTrustManager implements X509TrustManager {
+		@Override
+		public X509Certificate[] getAcceptedIssuers() {
+			return null;
+		}
+
+		@Override
+		public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+		}
+
+		@Override
+		public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+		}		
+	}
+	
+	private static class PermissiveHostnameVerifier implements HostnameVerifier {
+
+		@Override
+		public boolean verify(String hostname, SSLSession session) {
+			return true;
+		}		
+	}
+	
+	public static void addBasicAuthorization(String username, String password, HttpURLConnection connection) {
+		String credentials = Base64Coder.encode(
+				new StringBuilder().append(username).append(':').append(password).toString().getBytes());
+		connection.setRequestProperty(PROPERTY_AUTHORIZATION,
+				new StringBuilder().append(PROPERTY_BASIC).append(' ').append(credentials).toString());
+	}
 }
