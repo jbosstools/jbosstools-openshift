@@ -33,5 +33,7 @@ public interface IOpenShiftPreferenceConstants {
 	public static final String CLIENT_READ_TIMEOUT = IHttpClient.SYSPROP_OPENSHIFT_READ_TIMEOUT;
 	/** snapshot files */
 	public static final String SNAPSHOT_FILES = "org.jboss.tools.openshift.express.SNAPSHOT_FILES";
+
+	public static final String CODEANYTHING_CARTRIDGES = "org.jboss.tools.openshift.express.CODEANYTHING_CARTRIDGES";
 }
 

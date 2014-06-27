@@ -36,11 +36,13 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
+import org.jboss.tools.openshift.express.internal.core.preferences.IOpenShiftPreferenceConstants;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.express.internal.ui.utils.ContentProposalUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
@@ -154,6 +156,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).applyTo(urlLabel);
 			this.urlText = new Text(container, SWT.BORDER);
+			ContentProposalUtils.createPreferencesBacked(urlText, IOpenShiftPreferenceConstants.CODEANYTHING_CARTRIDGES, OpenShiftUIActivator.PLUGIN_ID);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(urlText);
 
