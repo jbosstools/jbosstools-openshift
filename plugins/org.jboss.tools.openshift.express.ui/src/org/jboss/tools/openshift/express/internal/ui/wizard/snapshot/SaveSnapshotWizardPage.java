@@ -19,10 +19,12 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
@@ -41,6 +43,7 @@ import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectProjectDialog;
 
 /**
  * @author André Dietisheim
@@ -93,9 +96,9 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(SaveSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT).observe(pageModel))
 				.in(dbc);
 
-		// horizontal filler
+		// horizontal fillers
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(new Composite(parent, SWT.None));
+				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
 
@@ -108,12 +111,19 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 		Text filepathText = new Text(parent, SWT.BORDER);
 		filepathText.setEditable(false);
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filepathText);
+				.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filepathText);
 		ISWTObservableValue filenameObservable = WidgetProperties.text(SWT.Modify).observe(filepathText);
 		ValueBindingBuilder
 				.bind(filenameObservable)
 				.to(BeanProperties.value(SaveSnapshotWizardPageModel.PROPERTY_FILEPATH).observe(pageModel))
 				.in(dbc);
+
+		Button workspaceButton = new Button(parent, SWT.PUSH);
+		workspaceButton.setText("Workspace...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.CENTER, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(workspaceButton);
+		workspaceButton.addSelectionListener(onWorkspace());
+
 		Button browseButton = new Button(parent, SWT.PUSH);
 		browseButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
@@ -146,6 +156,22 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	private SelectionAdapter onWorkspace() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SelectProjectDialog dialog = new SelectProjectDialog(getShell());
+				if (dialog.open() == IDialogConstants.OK_ID) {
+					IProject project = dialog.getSelectedProject();
+					if (project != null) {
+						pageModel.setDestination(project.getLocation().toString());
+					}
+				}
+			}
+		};
+	}
+	
 	static class FilenameValidator extends MultiValidator {
 
 		private IObservableValue filenameObservable;
