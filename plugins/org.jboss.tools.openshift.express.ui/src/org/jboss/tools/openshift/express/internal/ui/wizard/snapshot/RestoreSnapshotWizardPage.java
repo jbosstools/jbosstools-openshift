@@ -19,6 +19,7 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
@@ -97,9 +98,9 @@ public class RestoreSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 
 		// horizontal filler
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(new Composite(parent, SWT.None));
+				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(new Composite(parent, SWT.None));
+				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
 
 		// file
 		Label filepathLabel = new Label(parent, SWT.None);
@@ -110,12 +111,19 @@ public class RestoreSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 		Text filepathText = new Text(parent, SWT.BORDER);
 		filepathText.setEditable(false);
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filepathText);
+				.span(2, 1).align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).grab(true, false).applyTo(filepathText);
 		ISWTObservableValue filenameObservable = WidgetProperties.text(SWT.Modify).observe(filepathText);
 		ValueBindingBuilder
 				.bind(filenameObservable)
 				.to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_FILEPATH).observe(pageModel))
 				.in(dbc);
+		
+		Button workspaceButton = new Button(parent, SWT.PUSH);
+		workspaceButton.setText("Workspace...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.CENTER, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(workspaceButton);
+		workspaceButton.addSelectionListener(onWorkspace());
+		
 		Button browseButton = new Button(parent, SWT.PUSH);
 		browseButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
@@ -159,6 +167,21 @@ public class RestoreSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	private SelectionAdapter onWorkspace() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+				dialog.setText("Choose your snapshot file");
+				dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
+				String filepath = dialog.open();
+				if (!StringUtils.isEmpty(filepath)) {
+					pageModel.setFilepath(filepath);
+				}
+			}
+		};
+	}
 	static class FilepathValidator extends MultiValidator {
 
 		private IObservableValue filepathObservable;

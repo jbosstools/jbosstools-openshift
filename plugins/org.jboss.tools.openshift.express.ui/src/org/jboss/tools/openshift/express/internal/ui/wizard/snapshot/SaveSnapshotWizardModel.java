@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
@@ -33,6 +36,7 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 	private String filepath;
 	private boolean deploymentSnapshot;
 	private IApplication application;
+	private IProject project;
 
 	public SaveSnapshotWizardModel(IApplication application) {
 		this.application = application;
@@ -43,6 +47,10 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 		return application;
 	}
 
+	public void setProject(IProject project){
+		this.project = project;
+	}
+	
 	public String setFilepath(String filename) {
 		return this.filepath = filename;
 	}
@@ -59,7 +67,7 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 		return deploymentSnapshot;
 	}
 
-	public void saveSnapshot(IProgressMonitor monitor) throws IOException {
+	public void saveSnapshot(IProgressMonitor monitor) throws IOException, CoreException {
 		if (monitor.isCanceled()) {
 			return;
 		}
@@ -72,6 +80,9 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 			StreamUtils.writeTo(saveResponse, new FileOutputStream(getFilepath()));
 		}
 		storeSnapshotToPreferences(filepath, deploymentSnapshot);
+		if (project != null) {
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+		}
 	}
 
 	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {

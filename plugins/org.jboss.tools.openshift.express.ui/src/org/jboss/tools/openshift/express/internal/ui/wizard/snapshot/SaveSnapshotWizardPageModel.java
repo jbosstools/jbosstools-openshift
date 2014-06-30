@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.snapshot;
 import java.io.File;
 import java.text.MessageFormat;
 
+import org.eclipse.core.resources.IProject;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 
@@ -53,6 +54,14 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 		return filepath;
 	}
 
+	public void setProject(IProject project) {
+		if (project == null) {
+			return;
+		}
+		wizardModel.setProject(project);
+		setDestination(project.getLocation().toString());
+	}
+	
 	private String getSnapshotTypeString(boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
 			return "deployment";

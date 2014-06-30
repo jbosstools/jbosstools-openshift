@@ -111,7 +111,7 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 		Text filepathText = new Text(parent, SWT.BORDER);
 		filepathText.setEditable(false);
 		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filepathText);
+				.span(2, 1).align(SWT.FILL, SWT.CENTER).hint(200, SWT.DEFAULT).grab(true, false).applyTo(filepathText);
 		ISWTObservableValue filenameObservable = WidgetProperties.text(SWT.Modify).observe(filepathText);
 		ValueBindingBuilder
 				.bind(filenameObservable)
@@ -165,7 +165,7 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 				if (dialog.open() == IDialogConstants.OK_ID) {
 					IProject project = dialog.getSelectedProject();
 					if (project != null) {
-						pageModel.setDestination(project.getLocation().toString());
+						pageModel.setProject(project);
 					}
 				}
 			}

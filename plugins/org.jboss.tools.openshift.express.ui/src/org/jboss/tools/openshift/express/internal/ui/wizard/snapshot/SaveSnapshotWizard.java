@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.snapshot;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -49,7 +50,9 @@ public class SaveSnapshotWizard extends AbstractOpenShiftWizard<SaveSnapshotWiza
 								return Status.OK_STATUS;
 							} catch (IOException e) {
 								return OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not save snapshot for application {0}", applicationName), e);
-							}
+							} catch (CoreException e) {
+								return e.getStatus();
+							}						
 						}
 					}, getContainer());
 			return status.isOK();
