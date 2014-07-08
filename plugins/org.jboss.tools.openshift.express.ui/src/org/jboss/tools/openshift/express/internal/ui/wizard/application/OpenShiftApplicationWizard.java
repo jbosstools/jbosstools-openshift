@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,7 +37,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
@@ -231,17 +229,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 
 	private boolean publishServerAdapter() {
 		try {
-			if (!EGitUtils.isDirty(model.getProject())) {
-				IsAheadJob isAheadJob = new IsAheadJob(model.getProject(), model.getRemoteName());
-				IStatus status =
-						WizardUtils.runInWizard(isAheadJob, isAheadJob.getDelegatingProgressMonitor(), getContainer());
-				if (!status.isOK()) {
-					return false;
-				}
-				if (!isAheadJob.isAhead()) {
-					return true;
-				}
-			}
 			IStatus status = WizardUtils.runInWizard(
 					new AbstractDelegatingMonitorJob(NLS.bind("Publishing project {0}...", model.getProjectName())) {
 						
@@ -353,7 +340,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 							NLS.bind(
 									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
 									"from server to local project and connecting local project to OpenShift Git repository.\n" +
-									"The local project will be automatically committed to local Git repository and further publishing will " +
+									"The local project will be committed to local Git repository upon confirmation and further publishing will " +
 									"eventually override existing remote content.\n\n" +
 									"This cannot be undone. Do you wish to continue?",
 									model.getApplicationName(), model.getProjectName()),
@@ -366,7 +353,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 							NLS.bind(
 									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
 									"from server to local project and connecting local project to OpenShift Git repository.\n" +
-									"The local project will be automatically committed to local Git repository and further publishing will " +
+									"The local project will be committed to local Git repository upon confirmation and further publishing will " +
 									"eventually override existing remote content.\n\n" +
 									"This cannot be undone. Do you wish to continue?",
 									model.getApplicationName(), model.getProjectName()),
@@ -418,34 +405,5 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			return null;
 		}
 
-	}
-
-	private class IsAheadJob extends AbstractDelegatingMonitorJob {
-
-		private boolean isAhead = false;
-		private CountDownLatch countdown = new CountDownLatch(1);
-		private IProject project;
-		private String remoteName;
-		
-		private IsAheadJob (IProject project, String remoteName) {
-			super("Checking branch status");
-			this.project = project;
-			this.remoteName = remoteName;
-		}
-		@Override
-		protected IStatus doRun(IProgressMonitor monitor) {
-			try {
-				isAhead = EGitUtils.isAhead(project, remoteName, monitor);
-				countdown.countDown();
-				return Status.OK_STATUS;
-			} catch (Exception e) {
-				return OpenShiftUIActivator.createErrorStatus("Could not check branch status", e);
-			}
-		}
-
-		public boolean isAhead() throws InterruptedException {
-			countdown.await();
-			return isAhead;
-		}
 	}
 }

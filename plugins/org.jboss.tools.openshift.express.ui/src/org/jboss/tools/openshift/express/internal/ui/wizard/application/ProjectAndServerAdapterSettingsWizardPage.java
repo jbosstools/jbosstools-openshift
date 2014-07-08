@@ -10,15 +10,21 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.io.IOException;
+import java.util.Collections;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.Observables;
+import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -30,6 +36,8 @@ import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -41,9 +49,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
@@ -91,11 +99,12 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		newProjectCheckbox.setFocus();
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(newProjectCheckbox);
-		final IObservableValue newProjectObservable = BeanProperties.value(
+		final IObservableValue newProjectModelObservable = BeanProperties.value(
 				ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_IS_NEW_PROJECT).observe(pageModel);
+		ISWTObservableValue newProjectCheckboxObservable = WidgetProperties.selection().observe(newProjectCheckbox);
 		ValueBindingBuilder
-			.bind(WidgetProperties.selection().observe(newProjectCheckbox))
-			.to(newProjectObservable)
+			.bind(newProjectCheckboxObservable)
+			.to(newProjectModelObservable)
 			.in(dbc);
 
 		// existing project
@@ -112,16 +121,16 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 				.align(SWT.FILL, SWT.CENTER)
 				.grab(true, false)
 				.applyTo(existingProjectNameText);
-		IObservableValue projectNameModelObservable =
-				BeanProperties.value(
-						ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_PROJECT_NAME).observe(pageModel);
+		ISWTObservableValue projectNameTextObservable = 
+				WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
 		ValueBindingBuilder
-			.bind(WidgetProperties.text(SWT.Modify).observe(existingProjectNameText))
-			.to(projectNameModelObservable)
+			.bind(projectNameTextObservable)
+			.to(BeanProperties.value(
+					ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_PROJECT_NAME).observe(pageModel))
 			.in(dbc);
 		// disable the project name text when the model state is set to 'new project'
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(existingProjectNameText))
-				.notUpdating(newProjectObservable).converting(new InvertingBooleanConverter()).in(dbc);
+				.notUpdating(newProjectModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an existing project' option.
 		newProjectCheckbox.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -151,15 +160,24 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		browseProjectsButton.addSelectionListener(onBrowseProjects());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(browseProjectsButton))
-				.notUpdating(newProjectObservable)
+				.notUpdating(newProjectModelObservable)
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 
+		// validate new project / existing project with 2 multi validators to be
+		// able to decorate separate widgets
+		// (dynamically changing targets in a multi validator triggers
+		// revalidation aka infinite loop)
 		final IObservableValue applicationNameModelObservable =
 				BeanProperties.value(
 						ProjectAndServerAdapterSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
-		final UseExistingOpenProjectValidator existingProjectValidator = 
-				new UseExistingOpenProjectValidator(applicationNameModelObservable, newProjectObservable, projectNameModelObservable);
+		final NewProjectValidator newProjectValidator = 
+				new NewProjectValidator(newProjectCheckboxObservable, applicationNameModelObservable);
+		dbc.addValidationStatusProvider(newProjectValidator);
+		ControlDecorationSupport.create(newProjectValidator, SWT.LEFT | SWT.TOP);
+		
+		final ExistingProjectValidator existingProjectValidator = 
+				new ExistingProjectValidator(newProjectCheckboxObservable, projectNameTextObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);
 		ControlDecorationSupport.create(existingProjectValidator, SWT.LEFT | SWT.TOP);
 
@@ -258,56 +276,106 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 	// }
 	// }
 
-	class UseExistingOpenProjectValidator extends MultiValidator {
+	class NewProjectValidator extends MultiValidator {
 
 		private final IObservableValue applicationNameObservable;
 		private final IObservableValue newProjectObservable;
-		private final IObservableValue projectNameObservable;
-
-		public UseExistingOpenProjectValidator(IObservableValue applicationNameObservable, IObservableValue newProjectObservable, IObservableValue projectNameObservable) {
+		
+		public NewProjectValidator(IObservableValue newProjectObservable, IObservableValue applicationNameObservable) {
+			this.newProjectObservable = newProjectObservable;
 			this.applicationNameObservable = applicationNameObservable;
+		}
+
+		@Override
+		public IStatus validate() {
+			// access all value observable to register them
+			final Boolean isNewProject = (Boolean) newProjectObservable.getValue();
+			final String applicationName = (String) applicationNameObservable.getValue();
+			IStatus status = ValidationStatus.ok();
+			if (isNewProject) {
+				if (StringUtils.isEmptyOrNull(applicationName)) {
+					status = ValidationStatus.cancel("You have to choose an application name");
+				} else if (!StringUtils.isAlphaNumeric(applicationName)) {
+					status = ValidationStatus.error(
+							"The name may only contain letters and digits.");
+				} else {
+					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
+					if (ProjectUtils.exists(project)) {
+						status = ValidationStatus.error(NLS.bind(
+									"A project named {0} already exists in the workspace. Delete, rename or merge use it as existing project",
+									applicationName));
+					}
+				}
+			} 
+			
+			return status;
+		}
+	}
+	
+	class ExistingProjectValidator extends MultiValidator {
+
+		private final IObservableValue newProjectObservable;
+		private final IObservableValue projectNameObservable;
+		
+		public ExistingProjectValidator(IObservableValue newProjectObservable, IObservableValue projectNameObservable) {
 			this.newProjectObservable = newProjectObservable;
 			this.projectNameObservable = projectNameObservable;
 		}
 
 		@Override
 		public IStatus validate() {
-			IStatus status = Status.OK_STATUS;
+			// access all value observable to register them
 			final String projectName = (String) projectNameObservable.getValue();
 			final Boolean isNewProject = (Boolean) newProjectObservable.getValue();
-			if (isNewProject) {
-				final String applicationName = (String) applicationNameObservable.getValue();
-				if (StringUtils.isEmptyOrNull(applicationName)) {
-					status = OpenShiftUIActivator.createErrorStatus("You have to choose an application name");
-				} else if (!StringUtils.isAlphaNumeric(applicationName)) {
-					status = OpenShiftUIActivator.createErrorStatus(
-							"The name may only contain letters and digits.");
-				} else {
-					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(applicationName);
-					if (project.exists()) {
-						status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-									"A project named {0} already exists in the workspace. Delete, rename or merge use it as existing project",
-									applicationName));
-					}
-				}
-			} else {
+
+			IStatus status = ValidationStatus.ok();
+			if (!isNewProject) {
 				if (StringUtils.isEmpty(projectName)) {
-					status = OpenShiftUIActivator.createErrorStatus("Select an open project in the workspace.");
+					status = ValidationStatus.cancel("Select an open project in the workspace.");
 				} else {
 					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-					if (!project.exists()) {
-						status = OpenShiftUIActivator.createErrorStatus(
+					if (!ProjectUtils.exists(project)) {
+						status = ValidationStatus.error(
 								NLS.bind("The project {0} does not exist in your workspace.", projectName));
-					} else if (!project.isOpen()) {
-						status = OpenShiftUIActivator.createErrorStatus(
+					} else if (!ProjectUtils.isAccessible(project)) {
+						status = ValidationStatus.error(
 								NLS.bind("The project {0} is not open.", projectName));
+					} else if (EGitUtils.isSharedWithGit(project)){
+						status = getGitDirtyStatus(project);
 					}
 				}
 			}
 			return status;
 		}
-	}
 
+		private IStatus getGitDirtyStatus(IProject project) {
+			IStatus repoCorruptError = ValidationStatus.error(NLS.bind(
+					"The git repository for project {0} looks corrupt. Please fix it before using it.",
+					project.getName()));
+			try {
+				if (EGitUtils.isDirty(project, false)) {
+					return ValidationStatus.error(NLS.bind(
+							"The project {0} has uncommitted changes. Please commit those changes first.",
+							project.getName()));
+				} else {
+					return ValidationStatus.ok();
+				}
+			} catch (NoWorkTreeException e) {
+				return repoCorruptError;
+			} catch (IOException e) {
+				return repoCorruptError;
+			} catch (GitAPIException e) {
+				return repoCorruptError;
+			}
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			// only decorate project name
+			return Observables.staticObservableList(Collections.singletonList(projectNameObservable));
+		}
+	}
+	
 	@Override
 	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
 		if (direction == Direction.FORWARDS) {
