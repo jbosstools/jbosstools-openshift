@@ -252,15 +252,6 @@ public class OpenShiftServerPublishMethod  {
 			return NLS.bind(OpenShiftServerMessages.committedChangesNotPushedYet, project.getName());
 		}
 	}
-
-	private void commit(IProject project, String message, IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(NLS.bind("Publishing {0}", project.getName()), 300);
-		if( message == null ) {
-			EGitUtils.commit(project, new SubProgressMonitor(monitor, 100));
-		} else {
-			EGitUtils.commit(project, message, new SubProgressMonitor(monitor, 100));
-		}
-	}
 	
 	private PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		Repository repository = EGitUtils.getRepository(project);

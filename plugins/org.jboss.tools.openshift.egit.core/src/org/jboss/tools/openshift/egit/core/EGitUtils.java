@@ -1031,44 +1031,61 @@ public class EGitUtils {
 	}
 
 
+	public static boolean isDirty(IProject project, boolean includeUntracked)
+			throws NoWorkTreeException, IOException, GitAPIException {
+		return isDirty(getRepository(project), includeUntracked);
+	}
+	
 	public static boolean isDirty(IProject project)
 			throws NoWorkTreeException, IOException, GitAPIException {
 		return isDirty(getRepository(project));
 	}
-	
+
 	/**
-	 * Returns <code>true</code> if the given repository has uncommitted
-	 * changes. Uncommitted changes taken into account are
+	 * Returns <code>true</code> if the given repository has uncommitted and
+	 * non-tracked resources.
+	 */
+	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException, GitAPIException {
+		return isDirty(repository, true);
+	}
+
+	/**
+	 * Returns <code>true</code> if the given repository has uncommitted and (if
+	 * includeTracked is <code>true</code>) non-tracked resources. Uncommitted
+	 * changes taken into account are:
 	 * <ul>
-	 * <li>freshly added (but uncommitted resources)</li>
-	 * <li>changed (but uncommitted)</li>
-	 * <li>modified (but uncommitted resources)</li>
+	 * <li>added (but uncommitted resources)</li>
+	 * <li>changed (but uncommitted resources)</li>
 	 * <li>removed (but uncommitted resources)</li>
-	 * <li>new non-added</li>
+	 * <li>missing</li>
+	 * <li>modified</li>
+	 * <li>conflicting</li>
+	 * <li>untracked files/folders</li>
 	 * </ul>
 	 * 
 	 * @param repository
-	 *            the repository to check for uncommitted changes
+	 *            the repository to check for being dirty
+	 * @param includeUntracked
+	 *            if true untracked resources will taken into account. Otherwise
+	 *            they wont.
 	 * @return
 	 * @throws IOException
 	 * @throws NoWorkTreeException
 	 * @throws GitAPIException
 	 */
-	public static boolean isDirty(Repository repository)
+	public static boolean isDirty(Repository repository, boolean includeUntracked)
 			throws NoWorkTreeException, IOException, GitAPIException {
 		Assert.isLegal(repository != null);
-		boolean hasChanges = false;
+
 		org.eclipse.jgit.api.Status repoStatus = 
 				new Git(repository).status().call();
-		hasChanges |= !repoStatus.getAdded().isEmpty();
-		hasChanges |= !repoStatus.getChanged().isEmpty();
-		hasChanges |= !repoStatus.getModified().isEmpty();
-		hasChanges |= !repoStatus.getRemoved().isEmpty();
-		hasChanges |= !repoStatus.getConflicting().isEmpty();
-		hasChanges |= !repoStatus.getMissing().isEmpty();
-		hasChanges |= !repoStatus.getIgnoredNotInIndex().isEmpty();
-		
-		return hasChanges;
+		boolean isDirty = false;
+		isDirty |= !repoStatus.getUncommittedChanges().isEmpty();
+		if (includeUntracked) {
+			isDirty |= !repoStatus.getUntracked().isEmpty();
+			isDirty |= !repoStatus.getUntrackedFolders().isEmpty();
+		}
+		return isDirty;
 	}
 
 	/**
