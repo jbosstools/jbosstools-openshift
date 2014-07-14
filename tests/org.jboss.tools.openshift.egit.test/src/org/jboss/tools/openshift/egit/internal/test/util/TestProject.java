@@ -89,6 +89,10 @@ public class TestProject {
 		}
 	}
 
+	public IFile getFile(String filepath) throws Exception {
+		return project.getFile(filepath);
+	}
+	
 	public String getFileContent(String filepath) throws Exception {
 		IFile file = project.getFile(filepath);
 		InputStream stream = file.getContents();
