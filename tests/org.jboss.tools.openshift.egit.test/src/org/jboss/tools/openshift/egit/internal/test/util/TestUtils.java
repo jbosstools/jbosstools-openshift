@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -279,8 +280,8 @@ public class TestUtils {
 	}
 
 	/**
-	 * verifies that repository contains exactly the given files with the given
-	 * content. Usage example:<br>
+	 * verifies that repository contains the given files (and eventually others)
+	 * with the given content. Usage example:<br>
 	 * 
 	 * <code>
 	 * assertRepositoryContainsFiles(repository, "foo/a.txt", "content of A",
@@ -288,20 +289,31 @@ public class TestUtils {
 	 * </code>
 	 * 
 	 * @param repository
-	 * @param args
+	 * @param fileContentToubles
 	 * @throws Exception
+	 * 
+	 * @see #assertRepositoryContainsExactlyFilesWithContent
 	 */
 	public void assertRepositoryContainsFilesWithContent(Repository repository,
-			String... args) throws Exception {
-		HashMap<String, String> expectedfiles = mkmap(args);
-		TreeWalk treeWalk = new TreeWalk(repository);
-		treeWalk.addTree(repository.resolve("HEAD^{tree}"));
-		treeWalk.setRecursive(true);
-		while (treeWalk.next()) {
+			String... fileContentToubles) throws Exception {
+		HashMap<String, String> expectedfiles = mkmap(fileContentToubles);
+				visitRepository(new Expectation(expectedfiles), repository);
+	}
+	
+	private static class ExactExpectation implements GitRepoVisitor {
+		
+		private Map<String, String> expectedFiles;
+		
+		ExactExpectation(Map<String, String> expectedFiles) {
+			this.expectedFiles = expectedFiles;
+		}
+
+		@Override
+		public void visit(TreeWalk treeWalk) throws Exception {
 			String path = treeWalk.getPathString();
-			assertTrue(expectedfiles.containsKey(path));
+			assertTrue(expectedFiles.containsKey(path));
 			ObjectId objectId = treeWalk.getObjectId(0);
-			byte[] expectedContent = expectedfiles.get(path).getBytes();
+			byte[] expectedContent = expectedFiles.get(path).getBytes();
 			byte[] repoContent = treeWalk.getObjectReader().open(objectId)
 					.getBytes();
 			if (!Arrays.equals(repoContent, expectedContent)) {
@@ -310,22 +322,55 @@ public class TestUtils {
 						+ " instead of expected content "
 						+ new String(expectedContent));
 			}
-			expectedfiles.remove(path);
+			expectedFiles.remove(path);			
 		}
-		if (expectedfiles.size() > 0) {
-			StringBuilder message = new StringBuilder(
-					"Repository does not contain expected files: ");
-			for (String path : expectedfiles.keySet()) {
-				message.append(path);
-				message.append(" ");
+	}
+	
+	private static class Expectation implements GitRepoVisitor {
+		
+		private Map<String, String> expectedFiles;
+		
+		Expectation(Map<String, String> expectedFiles) {
+			this.expectedFiles = expectedFiles;
+		}
+
+		@Override
+		public void visit(TreeWalk treeWalk) throws Exception {
+			String path = treeWalk.getPathString();
+			if (!expectedFiles.containsKey(path)) {
+				return;
 			}
-			fail(message.toString());
+			
+			byte[] expectedContent = expectedFiles.get(path).getBytes();
+			ObjectId objectId = treeWalk.getObjectId(0);
+			byte[] repoContent = 
+					treeWalk.getObjectReader().open(objectId).getBytes();
+			if (!Arrays.equals(repoContent, expectedContent)) {
+				fail("File " + path + " has repository content "
+						+ new String(repoContent)
+						+ " instead of expected content "
+						+ new String(expectedContent));
+			}
+			expectedFiles.remove(path);			
 		}
 	}
 
+	private static interface GitRepoVisitor {
+		public void visit(TreeWalk treeWalk) throws Exception;
+	}
+
+	private void visitRepository(GitRepoVisitor visitor, Repository repository) throws Exception {
+		TreeWalk treeWalk = new TreeWalk(repository);
+		treeWalk.addTree(repository.resolve("HEAD^{tree}"));
+		treeWalk.setRecursive(true);
+		while (treeWalk.next()) {
+			visitor.visit(treeWalk);
+		}
+	}
+	
 	private static HashMap<String, String> mkmap(String... args) {
 		if ((args.length % 2) > 0)
-			throw new IllegalArgumentException("needs to be pairs");
+			throw new IllegalArgumentException("needs to be filepath/content pairs");
 		HashMap<String, String> map = new HashMap<String, String>();
 		for (int i = 0; i < args.length; i += 2) {
 			map.put(args[i], args[i + 1]);
