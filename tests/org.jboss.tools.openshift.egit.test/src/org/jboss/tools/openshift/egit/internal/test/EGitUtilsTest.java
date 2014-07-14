@@ -64,21 +64,23 @@ public class EGitUtilsTest {
 		Activator.getDefault().getRepositoryCache().clear();
 
 		this.testProject = new TestProject(true);
+		this.testRepository = createTestRepository(testProject);
 
-		this.testRepository = new TestRepository(TestUtils.createGitDir(testProject));
-		testRepository.createMockSystemReader(ResourcesPlugin.getWorkspace().getRoot().getLocation());
-		testRepository.setUserAndEmail(GIT_USER, GIT_EMAIL);
-		testRepository.connect(testProject.getProject());	
-		testRepository.initialCommit();
+		this.testRepositoryClone = cloneRepository(testRepository);
 		
 		this.testProject2 = new TestProject(true);
-
-		this.testRepository2 = new TestRepository(TestUtils.createGitDir(testProject2));
-		testRepository2.setUserAndEmail(GIT_USER, GIT_EMAIL);
-		testRepository2.connect(testProject2.getProject());
-		testRepository2.initialCommit();
+		this.testRepository2 = createTestRepository(testProject2);
 		
-		this.testRepositoryClone = cloneRepository(testRepository);
+	}
+
+	private TestRepository createTestRepository(TestProject project) throws IOException, Exception {
+		TestRepository testRepository = new TestRepository(TestUtils.createGitDir(project));
+		testRepository.createMockSystemReader(ResourcesPlugin.getWorkspace().getRoot().getLocation());
+		testRepository.setUserAndEmail(GIT_USER, GIT_EMAIL);
+		testRepository.connect(testProject.getProject());
+		testRepository.add(testProject.getFile(".project"));
+		testRepository.initialCommit();
+		return testRepository;
 	}
 
 	private TestRepository cloneRepository(TestRepository repository) throws URISyntaxException,
@@ -143,7 +145,7 @@ public class EGitUtilsTest {
 		testRepositoryClone.addAndCommit(file, "adding a file");
 
 		testRepositoryClone.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
-		EGitUtils.push(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
+		EGitUtils.pushForce(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
 
 		// repo2 must contain file added to clone
 		testUtils.assertRepositoryContainsFilesWithContent(
