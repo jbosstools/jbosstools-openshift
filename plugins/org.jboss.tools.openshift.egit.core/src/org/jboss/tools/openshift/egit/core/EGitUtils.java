@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1031,22 +1033,22 @@ public class EGitUtils {
 	}
 
 
-	public static boolean isDirty(IProject project, boolean includeUntracked)
+	public static boolean isDirty(IProject project, boolean includeUntracked, IProgressMonitor monitor)
 			throws NoWorkTreeException, IOException, GitAPIException {
-		return isDirty(getRepository(project), includeUntracked);
+		return isDirty(getRepository(project), includeUntracked, monitor);
 	}
 	
-	public static boolean isDirty(IProject project)
+	public static boolean isDirty(IProject project, IProgressMonitor monitor)
 			throws NoWorkTreeException, IOException, GitAPIException {
-		return isDirty(getRepository(project));
+		return isDirty(getRepository(project), monitor);
 	}
 
 	/**
 	 * Returns <code>true</code> if the given repository has uncommitted and
 	 * non-tracked resources.
 	 */
-	public static boolean isDirty(Repository repository) throws NoWorkTreeException, IOException, GitAPIException {
-		return isDirty(repository, true);
+	public static boolean isDirty(Repository repository, IProgressMonitor monitor) throws IOException {
+		return isDirty(repository, true, monitor);
 	}
 
 	/**
@@ -1070,47 +1072,39 @@ public class EGitUtils {
 	 *            they wont.
 	 * @return
 	 * @throws IOException
-	 * @throws NoWorkTreeException
-	 * @throws GitAPIException
 	 */
-	public static boolean isDirty(Repository repository, boolean includeUntracked)
-			throws NoWorkTreeException, IOException, GitAPIException {
-		Assert.isLegal(repository != null);
-
-		org.eclipse.jgit.api.Status repoStatus = 
-				new Git(repository).status().call();
-		boolean isDirty = false;
-		isDirty |= !repoStatus.getUncommittedChanges().isEmpty();
-		if (includeUntracked) {
-			isDirty |= !repoStatus.getUntracked().isEmpty();
-			isDirty |= !repoStatus.getUntrackedFolders().isEmpty();
-		}
-		return isDirty;
+	public static boolean isDirty(Repository repository, boolean includeUntracked, IProgressMonitor monitor) throws IOException {
+		return countChanges(repository, includeUntracked, monitor) > 0;
 	}
 
 	/**
-	 * Returns the changes in the index of the HEAD branch in the given
-	 * repository. Returns the index diff if there are changes,
-	 * <code>null</code> otherwise.
+	 * Returns the number of changes for a given repository. If
+	 * <strong>includeUntracked</strong> is set to <code>true</code> then
+	 * non-tracked changes are taken into account.
 	 * 
-	 * @param repo
-	 *            the repository to get index changes for
+	 * @param repository
+	 *            the repository to check changes for
+	 * @param includeUntracked
+	 *            whether to take untracked changes into account
 	 * @param monitor
 	 *            the monitor to report progress to
-	 * @return the changes in the index or null;
+	 * @return the number of changes
 	 * @throws IOException
 	 */
-	public static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
-		EclipseGitProgressTransformer jgitMonitor = new EclipseGitProgressTransformer(monitor);
-
-		IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
-		if (!indexDiff.diff(
-				jgitMonitor, 0, 0, NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
-			return null;
-		}
-		return indexDiff;
+	public static int countChanges(Repository repository, boolean includeUntracked, IProgressMonitor monitor)
+			throws IOException {
+		Assert.isLegal(repository != null);
+		
+		Collection<String> uncommittedChanges = new GitIndexDiffBuilder(repository)
+				.changed(true)
+				.removed(true)
+				.missing(true)
+				.conflicting(true)
+				.untracked(includeUntracked)
+				.build(monitor);
+		return uncommittedChanges.size();
 	}
-
+	
 	/**
 	 * Returns <code>true</code> if the given branch in the given repository has
 	 * local commits that were not pushed to its remote yet.
@@ -1316,5 +1310,96 @@ public class EGitUtils {
 	private static final int getEgitTimeout() {
 		return Platform.getPreferencesService().
 		    	  getInt(EGIT_UI_PLUGIN_ID, REMOTE_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, null);
+	}
+	
+	public static class GitIndexDiffBuilder {
+
+		private Repository repository;
+		
+		private boolean added = true;
+		private boolean changed= true;
+		private boolean conflicting = true;
+		private boolean missing = true;
+		private boolean modified = true;
+		private boolean removed = true;
+		private boolean untracked = true;
+		
+		GitIndexDiffBuilder(Repository repository) {
+			this.repository = repository;
+		}
+		
+		public GitIndexDiffBuilder added(boolean include) {
+			this.added = include;
+			return this;
+		}
+
+		public GitIndexDiffBuilder changed(boolean include) {
+			this.changed = include;
+			return this;
+		}
+	
+		public GitIndexDiffBuilder conflicting(boolean include) {
+			this.conflicting = include;
+			return this;
+		}
+		
+		public GitIndexDiffBuilder missing(boolean include) {
+			this.missing = include;
+			return this;
+		}
+		
+		public GitIndexDiffBuilder modified(boolean include) {
+			this.modified = include;
+			return this;
+		}
+
+		public GitIndexDiffBuilder removed(boolean include) {
+			this.removed = include;
+			return this;
+		}
+
+		public GitIndexDiffBuilder untracked(boolean include) {
+			this.untracked = include;
+			return this;
+		}
+		
+		public Collection<String> build(IProgressMonitor monitor) throws IOException {
+			Set<String> resources = new HashSet<String>();
+			IndexDiff diff = getIndexChanges(repository, monitor);
+			if (diff != null) {
+				if (added) {
+					resources.addAll(diff.getAdded());
+				}
+				if (changed) {
+					resources.addAll(diff.getChanged());
+				}
+				if (conflicting) {
+					resources.addAll(diff.getConflicting());
+				}
+				if (missing) {
+					resources.addAll(diff.getMissing());
+				}
+				if (modified) {
+					resources.addAll(diff.getModified());
+				}
+				if (removed) {
+					resources.addAll(diff.getRemoved());
+				}
+				if (untracked) {
+					resources.addAll(diff.getUntracked());
+				}
+			}
+			return resources;
+		}
+		
+		private static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
+			IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
+			if (!indexDiff.diff(
+					new EclipseGitProgressTransformer(monitor), 0, 0,
+					NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
+				return null;
+			}
+			return indexDiff;
+		}
 	}
 }

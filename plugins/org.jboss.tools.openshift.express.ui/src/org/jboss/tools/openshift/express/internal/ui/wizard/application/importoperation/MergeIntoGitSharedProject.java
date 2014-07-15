@@ -93,7 +93,7 @@ public class MergeIntoGitSharedProject extends AbstractImportApplicationOperatio
 		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
-		if (EGitUtils.isDirty(project, false)) {
+		if (EGitUtils.isDirty(project, false, monitor)) {
 			throw new UnCommittedChangesException(
 					"The project {0} has uncommitted changes. Please commit those changes first.", project.getName());
 		}

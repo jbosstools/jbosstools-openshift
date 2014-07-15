@@ -23,6 +23,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -353,7 +354,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 					"The git repository for project {0} looks corrupt. Please fix it before using it.",
 					project.getName()));
 			try {
-				if (EGitUtils.isDirty(project, false)) {
+				if (EGitUtils.isDirty(project, false, new NullProgressMonitor())) {
 					return ValidationStatus.error(NLS.bind(
 							"The project {0} has uncommitted changes. Please commit those changes first.",
 							project.getName()));

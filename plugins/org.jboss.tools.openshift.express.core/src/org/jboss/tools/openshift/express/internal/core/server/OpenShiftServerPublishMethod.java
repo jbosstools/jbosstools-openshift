@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
@@ -213,8 +212,8 @@ public class OpenShiftServerPublishMethod  {
 	
 	protected PushOperationResult publish(final IProject project, final IServer server, final IProgressMonitor monitor) 
 			throws CoreException {
-		int uncommittedChanges = OpenShiftServerUtils.countCommitableChanges(project, server, monitor);
 		try {
+			int uncommittedChanges = EGitUtils.countChanges(EGitUtils.getRepository(project), true, new NullProgressMonitor());
 			if (uncommittedChanges > 0) {
 				OpenshiftCoreUIIntegration.openCommitDialog(project,new JobChangeAdapter() {			
 					@Override

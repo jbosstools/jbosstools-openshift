@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.server;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -26,14 +23,10 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
@@ -49,7 +42,6 @@ import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
@@ -638,102 +630,6 @@ public class OpenShiftServerUtils {
 		IServerWorkingCopy wc = server.createWorkingCopy();
 		wc.setAttribute(ATTRIBUTE_USERNAME, val);
 		return wc.save(false, new NullProgressMonitor());
-	}
-
-	public static int countCommitableChanges(IProject project, IServer server, IProgressMonitor monitor)
-			throws CoreException {
-		Collection<String> commitableChanges = new GitIndexDiffBuilder(EGitUtils.checkedGetRepository(project))
-				.conflicting(false)
-				.missing(false)
-//				.untracked(false)
-				.build(monitor);
-		return commitableChanges.size();
-	}
-	
-	public static class GitIndexDiffBuilder {
-
-		private Repository repository;
-		
-		private boolean added = true;
-		private boolean changed= true;
-		private boolean conflicting = true;
-		private boolean missing = true;
-		private boolean modified = true;
-		private boolean removed = true;
-		private boolean untracked = true;
-		
-		GitIndexDiffBuilder(Repository repository) {
-			this.repository = repository;
-		}
-		
-		public GitIndexDiffBuilder added(boolean filter) {
-			this.added = filter;
-			return this;
-		}
-
-		public GitIndexDiffBuilder changed(boolean filter) {
-			this.changed = filter;
-			return this;
-		}
-	
-		public GitIndexDiffBuilder conflicting(boolean filter) {
-			this.conflicting = filter;
-			return this;
-		}
-		
-		public GitIndexDiffBuilder missing(boolean filter) {
-			this.missing = filter;
-			return this;
-		}
-		
-		public GitIndexDiffBuilder modified(boolean filter) {
-			this.modified = filter;
-			return this;
-		}
-
-		public GitIndexDiffBuilder removed(boolean filter) {
-			this.removed = filter;
-			return this;
-		}
-
-		public GitIndexDiffBuilder untracked(boolean filter) {
-			this.untracked = filter;
-			return this;
-		}
-
-		public Collection<String> build(IProgressMonitor monitor) throws CoreException {
-			try {
-				HashSet<String> resources = new HashSet<String>();
-				IndexDiff diff = EGitUtils.getIndexChanges(repository, monitor);
-				if (diff != null) {
-					if (added) {
-						resources.addAll(diff.getAdded());
-					}
-					if (changed) {
-						resources.addAll(diff.getChanged());
-					}
-					if (conflicting) {
-						resources.addAll(diff.getConflicting());
-					}
-					if (missing) {
-						resources.addAll(diff.getMissing());
-					}
-					if (modified) {
-						resources.addAll(diff.getModified());
-					}
-					if (removed) {
-						resources.addAll(diff.getRemoved());
-					}
-					if (untracked) {
-						resources.addAll(diff.getUntracked());
-					}
-				}
-				return resources;
-			} catch (IOException ioe) {
-				throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
-						"Unable to count commitable resources", ioe));
-			}
-		}
 	}
 	
 	public static String[] toNames(final IProject[] projects) {

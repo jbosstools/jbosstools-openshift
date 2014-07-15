@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.egit.internal.test.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -26,6 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.op.BranchOperation;
@@ -175,24 +177,20 @@ public class TestRepository {
 	}
 
 	/**
-	 * Create a file or get an existing one
+	 * Create a file in the given project (so that you wont have to refresh the
+	 * project to get to know about the new java.io.File).
 	 * 
 	 * @param project
-	 *            instance of project inside with file will be created
 	 * @param name
-	 *            name of file
-	 * @return nearly created file
-	 * @throws IOException
+	 * @param content
+	 * @return
+	 * @throws CoreException
 	 */
-	public File createFile(IProject project, String name) throws IOException {
-		String path = project.getLocation().append(name).toOSString();
-		int lastSeparator = path.lastIndexOf(File.separator);
-		FileUtils.mkdirs(new File(path.substring(0, lastSeparator)), true);
-
-		File file = new File(path);
-		if (!file.exists())
-			FileUtils.createNewFile(file);
-
+	public IFile createFile(IProject project, String name, String content)
+			throws CoreException {
+		IFile file = project.getFile(name);
+		file.create(new ByteArrayInputStream(content.getBytes()), true,
+				new NullProgressMonitor());
 		return file;
 	}
 

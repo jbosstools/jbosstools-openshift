@@ -27,10 +27,9 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
@@ -286,43 +285,74 @@ public class EGitUtilsTest {
 	}
 	
 	@Test
-	public void addedButNotCommittedIsDirty() throws IOException, NoWorkTreeException, GitAPIException {
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+	public void untrackedWhileDontIncludeUntrackedIsNotDirty() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
+		testRepository.createFile("a.txt", "protoculture");
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), false, new NullProgressMonitor()));
+	}
+	
+	@Test
+	public void untrackedWhileIncludeUntrackedIsDirty() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
+		testRepository.createFile(testProject.getProject(), "a.txt", "42");
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), true, new NullProgressMonitor()));
+	}
+	
+	@Test
+	public void addedButNotCommittedIsDirty() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		File file = testRepository.createFile("a.txt", "protoculture");
 		testRepository.add(file);
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 	}
 	
 	@Test
 	public void changedButNotCommittedIsDirty() throws Exception {
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		File file = testRepository.createFile("a.txt", "ethnica");
 		testRepository.addAndCommit(file, "commit-by-junit-tests");
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		FileUtil.writeFileDefault(file, "depeche-mode");
 		testRepository.add(file);
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 	}
 
 	@Test
 	public void modifiedButNotCommittedIsDirty() throws Exception {
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		File file = testRepository.createFile("a.txt", "protonica");
 		testRepository.addAndCommit(file, "commit-by-junit-tests");
 		FileUtil.writeFileDefault(file, "atrix");
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 	}
 
 	@Test
 	public void removedButNotCommittedIsDirty() throws Exception {
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		File file = testRepository.createFile("a.txt", "protonica");
 		testRepository.addAndCommit(file, "commit-by-junit-tests");
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository()));
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		file.delete();
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository()));
+		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 	}
 
+	@Test
+	public void newUntrackedFilesAreCounted() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
+		testRepository.createFile(testProject.getProject(), "a.txt", "42");
+		testRepository.createFile(testProject.getProject(), "b.txt", "84");
+		int numOfChanges = EGitUtils.countChanges(testRepository.getRepository(), true, new NullProgressMonitor());
+		assertEquals(2, numOfChanges);
+	}
+	
+	@Test
+	public void newUntrackedFileIsNotCountedIfIgnoreUntracked() throws Exception {
+		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
+		testRepository.createFile(testProject.getProject(), "a.txt", "42");
+		int numOfChanges = EGitUtils.countChanges(testRepository.getRepository(), false, new NullProgressMonitor());
+		assertEquals(0, numOfChanges);
+	}
+	
 	@Test
 	public void canGetSingleRemoteConfig() throws CoreException, MalformedURLException, URISyntaxException, IOException {
 		String remoteName = "repo2";

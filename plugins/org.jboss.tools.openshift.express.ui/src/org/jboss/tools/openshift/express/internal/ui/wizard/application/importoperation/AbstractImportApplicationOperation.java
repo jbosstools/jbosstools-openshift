@@ -197,7 +197,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 			OpenShiftException, NoWorkTreeException, IOException, GitAPIException {
 		EGitUtils.checkedGetRepository(project);
 		new AddToIndexOperation(modifiedResources).execute(monitor);
-		if (EGitUtils.isDirty(project)) {
+		if (EGitUtils.isDirty(project, monitor)) {
 			EGitUtils.commit(project, monitor);
 		}
 	}
