@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
-import static org.jboss.tools.openshift.express.internal.ui.wizard.application.IOpenShiftApplicationWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT;
-import static org.jboss.tools.openshift.express.internal.ui.wizard.application.IOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -109,11 +106,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void resetRemoteName() {
-		if (!wizardModel.isNewProject()) {
-				setRemoteName(EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
-		} else {
-				setRemoteName(NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		}
+		setRemoteName(null);
 	}
 
 	private void setDefaultRemoteName() {
@@ -159,6 +152,8 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_USE_DEFAULT_REMOTE_NAME, useDefaultRemoteName,
 				this.useDefaultRemoteName = useDefaultRemoteName);
 		if (useDefaultRemoteName) {
+			setDefaultRemoteName();
+		} else {
 			resetRemoteName();
 		}
 	}

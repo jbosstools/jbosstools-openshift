@@ -77,6 +77,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	private Text remoteNameText;
 	private Label remoteNameLabel;
 	private RepoPathValidationStatusProvider repoPathValidator;
+	private RemoteNameValidationStatusProvider remoteNameValidator;
 	private Link sshLink;
 
 	public GitCloningSettingsWizardPage(OpenShiftApplicationWizard wizard,
@@ -191,7 +192,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				BeanProperties.value(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
 
 		dbc.addValidationStatusProvider(
-				new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
+				this.remoteNameValidator =
+						new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
+		ControlDecorationSupport.create(remoteNameValidator, SWT.LEFT | SWT.TOP);
 
 		this.sshLink = new Link(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -281,6 +284,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 	protected void onPageActivated(DataBindingContext dbc) {
 		enableWidgets(pageModel.isNewProject());
 		repoPathValidator.forceRevalidate();
+		remoteNameValidator.forceRevalidate();
 		setSSHLinkText();
 		if (pageModel.isConnected()) {
 			refreshHasRemoteKeys(dbc);
@@ -460,6 +464,10 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
 				return false;
 			}
+		}
+		
+		public void forceRevalidate() {
+			revalidate();
 		}
 	}
 }
