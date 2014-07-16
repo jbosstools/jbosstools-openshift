@@ -34,8 +34,10 @@ import com.openshift.client.OpenShiftException;
  */
 public class ConnectionPropertySource implements IPropertySource {
 
+	private static final String DEFAULT_MARKER = " (default)";
 	private static final String PROPERTY_DOMAINS = "Domains";
 	private static final String PROPERTY_USERNAME = "Username";
+	private static final String PROPERTY_HOST = "Host";
 	/** the key that's used to store the connection (in the preferences) **/
 	private static final String PROPERTY_KEY = "Persisted Key";
 
@@ -53,9 +55,11 @@ public class ConnectionPropertySource implements IPropertySource {
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new PropertyDescriptor(PROPERTY_KEY, PROPERTY_KEY),
+				new PropertyDescriptor(PROPERTY_DOMAINS, PROPERTY_DOMAINS),
 				new PropertyDescriptor(PROPERTY_USERNAME, PROPERTY_USERNAME),
-				new PropertyDescriptor(PROPERTY_DOMAINS, PROPERTY_DOMAINS) };
+				new PropertyDescriptor(PROPERTY_HOST, PROPERTY_HOST),
+				new PropertyDescriptor(PROPERTY_KEY, PROPERTY_KEY)
+		};
 	}
 
 	@Override
@@ -70,10 +74,12 @@ public class ConnectionPropertySource implements IPropertySource {
 				loadRemoteDetails(connection);
 			}
 
-			if (PROPERTY_USERNAME.equals(id)) {
-				return getUsername(connection);
-			} else if (PROPERTY_DOMAINS.equals(id) && connection.hasDomain()) {
+			if (PROPERTY_DOMAINS.equals(id) && connection.hasDomain()) {
 				return getDomains(connection);
+			} else if (PROPERTY_USERNAME.equals(id)) {
+				return getUsername(connection);
+			} else if (PROPERTY_HOST.equals(id)) {
+				return getHost(connection);
 			} else if (PROPERTY_KEY.equals(id)) {
 				return getKey(connection);
 			}
@@ -85,6 +91,14 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	private Object getUsername(Connection connection) {
 		return connection.getUsername();
+	}
+
+	private Object getHost(Connection connection) {
+		StringBuilder builder = new StringBuilder(connection.getHost());
+		if (connection.isDefaultHost()) {
+			builder.append(DEFAULT_MARKER);
+		}
+		return builder.toString();
 	}
 
 	private Object getDomains(Connection connection) {
