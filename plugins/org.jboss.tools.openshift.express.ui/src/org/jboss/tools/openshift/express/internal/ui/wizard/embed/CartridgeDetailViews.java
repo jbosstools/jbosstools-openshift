@@ -113,7 +113,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 	private class DownloadableCartridgeView extends CartridgeDetailsView {
 
 		private StyledText name;
-		private Text url;
+		private StyledText url;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
@@ -123,12 +123,13 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 
 			// name
 			this.name = new StyledText(container, SWT.READ_ONLY);
+			UIUtils.setTransparent(name);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
 			// url
-			this.url = new Text(container, SWT.WRAP);
-			url.setEditable(false);
+			this.url = new StyledText(container, SWT.WRAP | SWT.READ_ONLY);
+			UIUtils.setTransparent(url);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(url);
 
@@ -174,6 +175,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 
 			// name
 			this.name = new StyledText(container, SWT.READ_ONLY);
+			UIUtils.setTransparent(name);
 			GridDataFactory.fillDefaults()
 					.span(2,1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
