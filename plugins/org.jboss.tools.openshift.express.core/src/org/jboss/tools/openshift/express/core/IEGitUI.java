@@ -30,9 +30,10 @@ public interface IEGitUI {
 	 * executed in the given job change listener.
 	 * 
 	 * @param project
+	 * @param remote 
 	 * @param commitJobListener
 	 * @throws CoreException
 	 */
-	public void commitWithUI(IProject project, IJobChangeListener commitJobListener) throws CoreException;
+	public void commitWithUI(IProject project, String remote, Runnable runnable) throws CoreException;
 
 }

@@ -26,9 +26,12 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.egit.core.EclipseGitProgressTransformer;
 import org.eclipse.egit.core.IteratorService;
 import org.eclipse.egit.core.op.CommitOperation;
@@ -39,7 +42,6 @@ import org.eclipse.egit.ui.internal.UIText;
 import org.eclipse.egit.ui.internal.commit.CommitHelper;
 import org.eclipse.egit.ui.internal.commit.CommitJob;
 import org.eclipse.egit.ui.internal.dialogs.BasicConfigurationDialog;
-import org.eclipse.egit.ui.internal.dialogs.CommitDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -48,15 +50,11 @@ import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.treewalk.WorkingTreeIterator;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 
 /**
- * Based on org.eclipse.egit.ui.internal.commit.CommitUI with minimal changes
+ * Based on org.eclipse.egit.ui.internal.commit.CommitUI with minimal changes which allow us customizations.
  * (which will get contributed back and this class removed).
  */
 public class CommitUI  {
@@ -81,7 +79,9 @@ public class CommitUI  {
 
 	private boolean preselectAll;
 
-	private IJobChangeListener commitJobListener;
+	private Runnable pushRunnable;
+
+	private String remote;
 
 	/**
 	 * Constructs a CommitUI object
@@ -98,9 +98,10 @@ public class CommitUI  {
 	 * 			  preselect all changed files in the commit dialog.
 	 * 			  If set to true selectedResources are ignored.
 	 */
-	public CommitUI(Shell shell, Repository repo, IJobChangeListener commitJobListener) {
+	public CommitUI(Shell shell, Repository repo, String remote, Runnable pushRunnable) {
 		this(shell, repo, new IResource[] {}, true);
-		this.commitJobListener = commitJobListener;
+		this.remote = remote;
+		this.pushRunnable = pushRunnable;
 	}
 	
 	/**
@@ -189,25 +190,7 @@ public class CommitUI  {
 			}
 		}
 
-		CommitDialog commitDialog = new CommitDialog(shell) {
-
-			@Override
-			protected Control createDialogArea(Composite parent) {
-				Control composite = super.createDialogArea(parent);
-				setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-				setTitle("Commit and publish local changes to OpenShift");
-				return composite;
-			}
-			
-			@Override
-			protected void createButtonsForButtonBar(Composite parent) {
-				super.createButtonsForButtonBar(parent);
-				Button commitAndPushButton = getButton(COMMIT_AND_PUSH_ID);
-				commitAndPushButton.setText("Commit and Publish");
-				setButtonLayoutData(commitAndPushButton);
-				parent.layout(true, true);
-			}
-		};
+		CommitDialog commitDialog = new CommitDialog(remote, shell);
 		commitDialog.setAmending(amending);
 		commitDialog.setAmendAllowed(amendAllowed);
 		commitDialog.setFiles(repo, files, indexDiff);
@@ -222,29 +205,51 @@ public class CommitUI  {
 			return false;
 
 		final CommitOperation commitOperation;
-		try {
-			commitOperation= new CommitOperation(
-					repo,
-					commitDialog.getSelectedFiles(), notTracked, commitDialog.getAuthor(),
-					commitDialog.getCommitter(), commitDialog.getCommitMessage());
-		} catch (CoreException e1) {
-			Activator.handleError(UIText.CommitUI_commitFailed, e1, true);
-			return false;
-		}
-		if (commitDialog.isAmending())
-			commitOperation.setAmending(true);
-		commitOperation.setComputeChangeId(commitDialog.getCreateChangeId());
-		commitOperation.setCommitAll(commitHelper.isMergedResolved());
-		if (commitHelper.isMergedResolved())
-			commitOperation.setRepository(repo);
-		Job commitJob = new CommitJob(repo, commitOperation);	
-//		.setPushUpstream(commitDialog.isPushRequested());
-		if (commitJobListener != null) {
-			if (commitDialog.isPushRequested()) {
-				commitJob.addJobChangeListener(commitJobListener);
+		
+		if (commitDialog.isPushOnlyRequested()) {
+			new Job("Publishing to OpenShift") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					pushRunnable.run();
+					return Status.OK_STATUS;
+				}
+				
+			}.schedule();
+		} else {
+			try {
+				commitOperation= new CommitOperation(
+						repo,
+						commitDialog.getSelectedFiles(), notTracked, commitDialog.getAuthor(),
+						commitDialog.getCommitter(), commitDialog.getCommitMessage());
+			} catch (CoreException e1) {
+				Activator.handleError(UIText.CommitUI_commitFailed, e1, true);
+				return false;
 			}
+			if (commitDialog.isAmending())
+				commitOperation.setAmending(true);
+			commitOperation.setComputeChangeId(commitDialog.getCreateChangeId());
+			commitOperation.setCommitAll(commitHelper.isMergedResolved());
+			if (commitHelper.isMergedResolved())
+				commitOperation.setRepository(repo);
+			Job commitJob = new CommitJob(repo, commitOperation);	
+//			.setPushUpstream(commitDialog.isPushRequested());
+			if (pushRunnable != null) {
+				if (commitDialog.isPushRequested()) {
+					commitJob.addJobChangeListener(new JobChangeAdapter() {
+
+						@Override
+						public void done(IJobChangeEvent event) {
+							if (event.getResult().isOK()) {
+								pushRunnable.run();
+							}
+						}
+
+					});
+				}
+			} 
+			commitJob.schedule();
 		}
-		commitJob.schedule();
 
 		return true;
 	}

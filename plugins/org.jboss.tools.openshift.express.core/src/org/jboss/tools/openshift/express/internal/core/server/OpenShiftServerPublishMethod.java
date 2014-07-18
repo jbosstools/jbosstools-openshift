@@ -216,20 +216,15 @@ public class OpenShiftServerPublishMethod  {
 		int uncommittedChanges = OpenShiftServerUtils.countCommitableChanges(project, server, monitor);
 		try {
 			if (uncommittedChanges > 0) {
-				OpenshiftCoreUIIntegration.openCommitDialog(project,new JobChangeAdapter() {			
-					@Override
-					public void done(IJobChangeEvent event) {
-						if (event.getResult().isOK()) {
-							try {
-								push(project, server, monitor);
-							} catch (CoreException e) {
-								OpenShiftCoreActivator.getDefault().getLog().log(e.getStatus());
-							} finally {
-								monitor.done();
-							}
+				String remote = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
+				OpenshiftCoreUIIntegration.openCommitDialog(project, remote, new Runnable() {
+					public void run() {
+						try {
+							push(project, server, monitor);
+						} catch (CoreException e) {
+							OpenShiftCoreActivator.getDefault().getLog().log(e.getStatus());
 						}
-					}
-				});
+				}});
 			} else {
 				if (OpenshiftCoreUIIntegration.requestApproval(
 						getPushQuestion(project, server, monitor),

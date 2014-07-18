@@ -28,7 +28,7 @@ public class EGitUI implements IEGitUI {
 	}
 
 	@Override
-	public void commitWithUI(IProject project, final IJobChangeListener commitJobListener) throws CoreException {
+	public void commitWithUI(IProject project, final String remote, final Runnable pushRunnable) throws CoreException {
 		final Repository repository = EGitUtils.checkedGetRepository(project);
 
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -36,7 +36,7 @@ public class EGitUI implements IEGitUI {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
-				new CommitUI(shell, repository, commitJobListener).commit();
+				new CommitUI(shell, repository, remote, pushRunnable).commit();
 			}
 		});
 
