@@ -188,7 +188,7 @@ public class OpenshiftCoreUIIntegration {
 		return handler == null ? false : handler.openQuestion(title, message, defaultAnswer);
 	}
 	
-	public static void openCommitDialog(IProject project, IJobChangeListener commitJobListener) throws CoreException {
-		getDefault().getEGitUI().commitWithUI(project, commitJobListener);
+	public static void openCommitDialog(IProject project, String remote, Runnable runnable) throws CoreException {
+		getDefault().getEGitUI().commitWithUI(project, remote, runnable);
 	}
 }
