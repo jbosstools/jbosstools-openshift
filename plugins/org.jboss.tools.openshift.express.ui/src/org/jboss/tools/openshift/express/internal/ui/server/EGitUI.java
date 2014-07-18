@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.server;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -28,7 +27,7 @@ public class EGitUI implements IEGitUI {
 	}
 
 	@Override
-	public void commitWithUI(IProject project, final IJobChangeListener commitJobListener) throws CoreException {
+	public void commitWithUI(IProject project, final String remote, final String applicationName, final Runnable pushRunnable) throws CoreException {
 		final Repository repository = EGitUtils.checkedGetRepository(project);
 
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -36,7 +35,7 @@ public class EGitUI implements IEGitUI {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
-				new CommitUI(shell, repository, commitJobListener).commit();
+				new CommitUI(shell, repository, remote, applicationName, pushRunnable).commit();
 			}
 		});
 

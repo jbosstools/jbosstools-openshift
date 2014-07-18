@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.core;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 
 /**
  * This class is used to interact with EGit UI
@@ -30,9 +29,10 @@ public interface IEGitUI {
 	 * executed in the given job change listener.
 	 * 
 	 * @param project
+	 * @param remote 
 	 * @param commitJobListener
 	 * @throws CoreException
 	 */
-	public void commitWithUI(IProject project, IJobChangeListener commitJobListener) throws CoreException;
+	public void commitWithUI(IProject project, String remote, String applicationName, Runnable runnable) throws CoreException;
 
 }

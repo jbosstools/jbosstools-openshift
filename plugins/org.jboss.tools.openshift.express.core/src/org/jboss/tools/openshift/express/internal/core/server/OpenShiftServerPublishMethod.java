@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.lib.Repository;
@@ -49,6 +47,7 @@ import org.jboss.tools.as.core.server.controllable.util.PublishControllerUtility
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 
 /**
  * @author Rob Stryker
@@ -68,18 +67,13 @@ public class OpenShiftServerPublishMethod  {
 	}
 
 	public int publishFinish(IServer server, IProgressMonitor monitor) throws CoreException {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot()
-				.getProject(OpenShiftServerUtils.getDeployProjectName(server));
-		boolean allSubModulesPublished = areAllPublished(server);
+		IProject project = OpenShiftServerUtils.getDeployProject(server);
+		boolean allSubModulesPublished = areAllModulesPublished(server);
 
-		if (project != null 
-				&& project.exists()) {
-		
-			String deployFolder = OpenShiftServerUtils.getDeployFolder(server);
-			IContainer container = OpenShiftServerUtils.getDeployFolderResource(deployFolder, project);
-			
+		if (ProjectUtils.exists(project)) {
+			IContainer deployFolder = OpenShiftServerUtils.getContainer(OpenShiftServerUtils.getDeployFolder(server), project);
 			if (allSubModulesPublished
-					|| (container != null && container.isAccessible())) {
+					|| (deployFolder != null && deployFolder.isAccessible())) {
 				refreshProject(project, submon(monitor, 100));
 				publish(project, server, submon(monitor, 100));
 			} // else ignore. (one or more modules not published AND magic
@@ -90,7 +84,7 @@ public class OpenShiftServerPublishMethod  {
 		return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;
 	}
 
-	protected boolean areAllPublished(IServer server) {
+	protected boolean areAllModulesPublished(IServer server) {
 		IModule[] modules = server.getModules();
 		boolean allpublished = true;
 		for (int i = 0; i < modules.length; i++) {
@@ -172,9 +166,10 @@ public class OpenShiftServerPublishMethod  {
 			}
 		};
 	}
+
 	protected IContainer getDestination(IServer server, IProject destProj) throws CoreException {
 		String destinationFolder = OpenShiftServerUtils.getDeployFolder(server);
-		IContainer destFolder = OpenShiftServerUtils.getDeployFolderResource(destinationFolder, destProj);
+		IContainer destFolder = OpenShiftServerUtils.getContainer(destinationFolder, destProj);
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
@@ -215,20 +210,16 @@ public class OpenShiftServerPublishMethod  {
 		try {
 			int uncommittedChanges = EGitUtils.countChanges(EGitUtils.getRepository(project), true, new NullProgressMonitor());
 			if (uncommittedChanges > 0) {
-				OpenshiftCoreUIIntegration.openCommitDialog(project,new JobChangeAdapter() {			
-					@Override
-					public void done(IJobChangeEvent event) {
-						if (event.getResult().isOK()) {
-							try {
-								push(project, server, monitor);
-							} catch (CoreException e) {
-								OpenShiftCoreActivator.getDefault().getLog().log(e.getStatus());
-							} finally {
-								monitor.done();
-							}
+				String remote = OpenShiftServerUtils.getRemoteName(server);
+				String applicationName = OpenShiftServerUtils.getApplicationName(server);
+				OpenshiftCoreUIIntegration.openCommitDialog(project, remote, applicationName, new Runnable() {
+					public void run() {
+						try {
+							push(project, server, monitor);
+						} catch (CoreException e) {
+							OpenShiftCoreActivator.getDefault().getLog().log(e.getStatus());
 						}
-					}
-				});
+				}});
 			} else {
 				if (OpenshiftCoreUIIntegration.requestApproval(
 						getPushQuestion(project, server, monitor),

@@ -228,9 +228,9 @@ public class OpenShiftServerUtils {
 		return deployFolder.getDeployFolder();
 	}
 		
-	public static IContainer getDeployFolderResource(String deployFolder, IProject project) {
-		if (!StringUtils.isEmpty(deployFolder)) {
-			return (IContainer) project.findMember(new Path(deployFolder));
+	public static IContainer getContainer(String name, IProject project) {
+		if (!StringUtils.isEmpty(name)) {
+			return (IContainer) project.findMember(new Path(name));
 		} else {
 			return project;
 		}

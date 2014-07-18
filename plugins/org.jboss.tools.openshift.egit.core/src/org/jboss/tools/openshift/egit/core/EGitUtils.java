@@ -53,6 +53,8 @@ import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.lib.BranchTrackingStatus;
@@ -1228,8 +1230,7 @@ public class EGitUtils {
 	 * 
 	 * @see BranchTrackingStatus#of
 	 */
-	public static boolean isAhead(Repository repo, String remote, IProgressMonitor monitor) throws IOException,
-			InvocationTargetException, URISyntaxException {
+	public static boolean isAhead(Repository repo, String remote, IProgressMonitor monitor) throws IOException, URISyntaxException, InvocationTargetException {
 		Assert.isLegal(remote != null);
 		Assert.isLegal(repo != null);
 		if (remote.equals(getRemote(repo.getBranch(), repo.getConfig()))) {
@@ -1262,8 +1263,7 @@ public class EGitUtils {
 				ConfigConstants.CONFIG_KEY_REMOTE);
 	}
 	
-	private static boolean isNonTrackingBranchAhead(Repository repo, String remote, IProgressMonitor monitor)
-			throws URISyntaxException, InvocationTargetException, IOException {
+	private static boolean isNonTrackingBranchAhead(Repository repo, String remote, IProgressMonitor monitor) throws URISyntaxException, MissingObjectException, IncorrectObjectTypeException, IOException, InvocationTargetException {
 		RemoteConfig remoteConfig = new RemoteConfig(repo.getConfig(), remote);
 		FetchResult fetchResult = fetch(remoteConfig, repo, monitor);
 		Ref ref = fetchResult.getAdvertisedRef(Constants.HEAD);
