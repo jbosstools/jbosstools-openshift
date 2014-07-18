@@ -275,11 +275,7 @@ public class Connection {
 	}
 
 	private String updateUsername(IUser user) {
-		if (user.getRhlogin().equals(username)) {
-			OpenShiftCoreActivator.getDefault().getLog().log(
-					new Status(Status.INFO, OpenShiftCoreActivator.PLUGIN_ID, 
-							NLS.bind("User {0} was authenticated", username)));
-		} else {
+		if (!user.getRhlogin().equals(username)) {
 			OpenShiftCoreActivator.getDefault().getLog().log(
 					new Status(Status.WARNING, OpenShiftCoreActivator.PLUGIN_ID, 
 							NLS.bind("User {0} was logged in as {1}", username, user.getRhlogin())));
