@@ -275,7 +275,8 @@ public class Connection {
 	}
 
 	private String updateUsername(IUser user) {
-		if (user.getRhlogin().equals(username)) {
+	    // JBIDE-17902 - filling up error log with normal occurring events are not good. commenting out.
+	    /*if (user.getRhlogin().equals(username)) {
 			OpenShiftCoreActivator.getDefault().getLog().log(
 					new Status(Status.INFO, OpenShiftCoreActivator.PLUGIN_ID, 
 							NLS.bind("User {0} was authenticated", username)));
@@ -283,7 +284,7 @@ public class Connection {
 			OpenShiftCoreActivator.getDefault().getLog().log(
 					new Status(Status.WARNING, OpenShiftCoreActivator.PLUGIN_ID, 
 							NLS.bind("User {0} was logged in as {1}", username, user.getRhlogin())));
-		}
+							}*/
 		this.username = user.getRhlogin();
 		return username;
 	}
