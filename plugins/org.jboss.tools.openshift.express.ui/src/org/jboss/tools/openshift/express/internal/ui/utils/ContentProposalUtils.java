@@ -50,7 +50,6 @@ public class ContentProposalUtils {
 				String value = text.getText();
 				if (value != null && value.length() > 0) {
 					preferencesValues.add(text.getText());
-					preferencesValues.store();
 				}
 			}
 
