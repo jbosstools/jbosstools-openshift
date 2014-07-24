@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.utils;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
@@ -189,11 +192,36 @@ public class UIUtils {
 			}
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <E> E[] getElements(ISelection selection, Class<E> clazz) {
+			Object[] selectedElements = getElements(selection);
+			
+			ArrayList<E> elements = new ArrayList<E>();
+			
+			for(int index = 0; index < selectedElements.length; index++){
+				if (clazz.isAssignableFrom(selectedElements[index].getClass())) {
+					elements.add((E) selectedElements[index]);
+				} else if (IAdaptable.class.isAssignableFrom(selectedElements[index].getClass())) {
+					elements.add((E) ((IAdaptable) selectedElements[index]).getAdapter(clazz));
+				} else {
+					elements.add((E) Platform.getAdapterManager().getAdapter(selectedElements[index], clazz));
+				}
+			}
+			return elements.toArray((E[])Array.newInstance(clazz, 0));
+	}
+	
 	public static Object getFirstElement(ISelection selection) {
 		if (!(selection instanceof IStructuredSelection)) {
 			return null;
 		}
 		return ((IStructuredSelection) selection).getFirstElement();
+	}
+
+	public static Object[] getElements(ISelection selection) {
+		if (!(selection instanceof IStructuredSelection)) {
+			return new Object[0];
+		}
+		return ((IStructuredSelection) selection).toArray();
 	}
 
 	public static boolean areNumOfElementsSelected(int numOf, ISelection selection) {

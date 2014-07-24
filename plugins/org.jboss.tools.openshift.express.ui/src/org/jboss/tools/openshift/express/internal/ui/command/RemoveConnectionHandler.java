@@ -27,16 +27,28 @@ public class RemoveConnectionHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Connection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), Connection.class);
-		if (connection == null) {
-			return null;
-		}
+		Connection[] connections = UIUtils.getElements(HandlerUtil.getCurrentSelection(event), Connection.class);
 		if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event)
 				, "Remove connection"
-				, NLS.bind("You are about to remove the connection {0}.\n\n"
-						+ "Do you want to continue?", connection.getId()))) {
-			ConnectionsModelSingleton.getInstance().removeConnection(connection);
+				, NLS.bind("You are about to remove the connection(s) {0}.\n\n"
+						+ "Do you want to continue?", getConnectionIds(connections)))) {
+			for(Connection connection : connections){
+				ConnectionsModelSingleton.getInstance().removeConnection(connection);
+			}
 		}
 		return null;
+	}
+	
+	String getConnectionIds(Connection[] connections){
+		String ids="";
+		boolean first = true;
+		for(Connection connection : connections){
+			if(!first){
+				ids += ", ";
+			}
+			ids += connection.getId();
+			first = false;
+		}
+		return ids;
 	}
 }

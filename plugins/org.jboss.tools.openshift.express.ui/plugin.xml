@@ -421,7 +421,6 @@
 				<visibleWhen>
 					<with variable="selection">
 						<and>
-							<count value="1" />
 							<iterate ifEmpty="false" operator="and">
 								<instanceof
 									value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
