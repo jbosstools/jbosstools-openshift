@@ -16,11 +16,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
-import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
@@ -35,6 +34,11 @@ import com.openshift.client.IDomain;
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsModelListener {
 
+	private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
+	private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
+	private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
+	private IContextActivation contextActivation;
+
 	@Override
 	protected Object getInitialInput() {
 		return ConnectionsModelSingleton.getInstance();
@@ -44,22 +48,37 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	protected CommonViewer createCommonViewer(Composite aparent) {
 		CommonViewer viewer = super.createCommonViewer(aparent);
 		ConnectionsModelSingleton.getInstance().addListener(this);
-		viewer.addSelectionChangedListener(new ISelectionChangedListener(){
+		viewer.addSelectionChangedListener(onSelectionChanged());
+		return viewer;
+	}
+
+	private ISelectionChangedListener onSelectionChanged() {
+		return new ISelectionChangedListener(){
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = event.getSelection();
-				IDomain domain = UIUtils.getFirstElement(selection, IDomain.class);
-				IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
-				if(domain != null){
-					((IContextService) PlatformUI.getWorkbench().getService(IContextService.class)).activateContext("org.jboss.tools.opnenshift.domain.context");
-				}else if(application != null){
-					((IContextService) PlatformUI.getWorkbench().getService(IContextService.class)).activateContext("org.jboss.tools.opnenshift.application.context");
-				}
-			}});
-		return viewer;
+				activateContext(selection);
+			}
+		};
 	}
 
+	private void activateContext(ISelection selection) {
+		IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
+		if (contextActivation != null) {
+			// deactivate previous active context
+			contextService.deactivateContext(contextActivation);
+		}
+		if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
+			this.contextActivation = contextService.activateContext(DOMAIN_CONTEXT);
+		} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
+			this.contextActivation = contextService.activateContext(APPLICATION_CONTEXT);
+		} else if (UIUtils.isFirstElementOfType(Connection.class, selection)) {
+			// must be checked after domain, application, adapter may convert any resource to a connection
+			this.contextActivation = contextService.activateContext(CONNECTION_CONTEXT);
+		}
+	}
+	
 	@Override
 	public void dispose() {
 		ConnectionsModelSingleton.getInstance().removeListener(this);

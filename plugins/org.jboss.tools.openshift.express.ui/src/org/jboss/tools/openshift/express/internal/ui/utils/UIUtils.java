@@ -176,6 +176,10 @@ public class UIUtils {
 		return shell;
 	}
 
+	public static boolean isFirstElementOfType(Class<?> clazz, ISelection selection) {
+		return getFirstElement(selection, clazz) != null;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
 			Object firstSelectedElement = getFirstElement(selection);
