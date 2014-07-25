@@ -159,7 +159,15 @@
 &lt;/profile&gt;</pattern>
        </template>
     </extension>
-   
+   <extension point="org.eclipse.ui.contexts">
+    	<context id="org.jboss.tools.opnenshift.application.context" name="OpenShift Application Context" parentId="org.eclipse.ui.contexts.window">
+    	</context>
+	</extension>
+   <extension point="org.eclipse.ui.contexts">
+    	<context id="org.jboss.tools.opnenshift.domain.context" name="OpenShift Domain Context" parentId="org.eclipse.ui.contexts.window">
+    	</context>
+	</extension>
+	
 	<!-- OpenShift Explorer view -->
 	<extension
  		point="org.eclipse.ui.views">
@@ -407,6 +415,13 @@
         <handler
 			commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
 			class="org.jboss.tools.openshift.express.internal.ui.command.RemoveConnectionHandler">
+			<activeWhen>
+				<with variable="selection">
+    				<iterate operator="and">
+     					<adapt type="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+    				</iterate>
+   				</with>
+			</activeWhen>
      	</handler>
 	</extension>
 	<extension
@@ -709,6 +724,11 @@
               class="org.jboss.tools.openshift.express.internal.ui.command.DeleteDomainHandler">
      	</handler>
 	</extension>
+	<extension
+		point="org.eclipse.ui.bindings">
+		<key schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" contextId="org.jboss.tools.opnenshift.domain.context"
+        sequence="Del" commandId="org.jboss.tools.openshift.express.ui.command.deletedomain" />
+	</extension>
 	<!-- openshift explorer: delete domain -->
 	<extension
            point="org.eclipse.ui.menus">
@@ -817,7 +837,7 @@
            point="org.eclipse.ui.commands">
         <command
               id="org.jboss.tools.openshift.express.ui.command.deleteApplications"
-              name="%openshift.command.application.delete">
+              name="%openshift.command.application.delete" >
         </command>
 	</extension>
 	<extension
@@ -827,6 +847,15 @@
               class="org.jboss.tools.openshift.express.internal.ui.command.DeleteApplicationHandler">
      	</handler>
 	</extension>
+	<extension
+		point="org.eclipse.ui.bindings">
+		<key
+        commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications" contextId="org.jboss.tools.opnenshift.application.context"
+        schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+        sequence="Del">
+  </key>
+	</extension>
+	
 	<!-- openshift explorer: delete application -->
 	<extension
 		point="org.eclipse.ui.menus">
