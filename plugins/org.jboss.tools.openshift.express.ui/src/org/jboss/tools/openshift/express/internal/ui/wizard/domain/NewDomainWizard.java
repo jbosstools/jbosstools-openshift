@@ -59,7 +59,6 @@ public class NewDomainWizard extends AbstractOpenShiftWizard<NewDomainWizardMode
 
 	@Override
 	public void addPages() {
-		addPage(new EditDomainWizardPage(
-				"New OpenShift Domain", "Please provide a new name for your new OpenShift domain", getModel(), this));
+		addPage(new NewDomainWizardPage(getModel(), this));
 	}
 }

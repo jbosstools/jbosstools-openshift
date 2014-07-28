@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.domain;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -28,10 +27,10 @@ import com.openshift.client.OpenShiftEndpointException;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-public class EditDomainWizard extends AbstractOpenShiftWizard<EditDomainWizardModel> {
+public class EditDomainWizard extends AbstractOpenShiftWizard<DomainWizardModel> {
 
 	public EditDomainWizard(IDomain domain) {
-		super("Edit domain", new EditDomainWizardModel(domain));
+		super("Edit domain", new DomainWizardModel(domain));
 	}
 
 	@Override
@@ -64,7 +63,6 @@ public class EditDomainWizard extends AbstractOpenShiftWizard<EditDomainWizardMo
 
 	@Override
 	public void addPages() {
-		addPage(new EditDomainWizardPage(
-				"OpenShift Domain Name", "Please provide a new name for your OpenShift domain", getModel(), this));
+		addPage(new EditDomainWizardPage(getModel(), this));
 	}
 }

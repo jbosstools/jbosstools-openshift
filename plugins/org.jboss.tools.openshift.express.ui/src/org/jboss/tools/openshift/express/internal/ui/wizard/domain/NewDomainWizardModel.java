@@ -19,7 +19,7 @@ import com.openshift.client.OpenShiftException;
 /**
  * @author André Dietisheim
  */
-public class NewDomainWizardModel extends EditDomainWizardModel {
+public class NewDomainWizardModel extends DomainWizardModel {
 
 	public NewDomainWizardModel(Connection connection) {
 		super(connection);

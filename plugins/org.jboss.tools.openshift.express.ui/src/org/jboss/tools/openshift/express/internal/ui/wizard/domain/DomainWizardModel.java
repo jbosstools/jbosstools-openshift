@@ -37,7 +37,7 @@ import com.openshift.client.OpenShiftException;
  * @author André Dietisheim
  * @author Xavier Coulon
  */
-public class EditDomainWizardModel extends ObservableUIPojo {
+public class DomainWizardModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_DOMAIN_ID = "domainId";
 	
@@ -48,15 +48,15 @@ public class EditDomainWizardModel extends ObservableUIPojo {
 	private final IDomain domain;
 	private Connection connection;
 
-	public EditDomainWizardModel(Connection connection) {
+	public DomainWizardModel(Connection connection) {
 		this(null, connection);
 	}
 
-	public EditDomainWizardModel(IDomain domain) {
+	public DomainWizardModel(IDomain domain) {
 		this(domain, null);
 	}
 
-	protected EditDomainWizardModel(IDomain domain, Connection connection) {
+	protected DomainWizardModel(IDomain domain, Connection connection) {
 		this.domain = domain;
 		this.connection = connection;
 		if (domain == null) {
@@ -106,7 +106,7 @@ public class EditDomainWizardModel extends ObservableUIPojo {
 	public IDomain getDomain() {
 		return domain;
 	}
-
+	
 	public Connection getConnection() {
 		return connection;
 	}
