@@ -252,6 +252,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		// use styled text to have vertical scrollbars hidden/visible correctly
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=180027#c11
 		private StyledText summaryText;
+		private IQuickstartApplicationTemplate template;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
@@ -263,6 +264,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			this.nameLink = new Link(container, SWT.None);
 			GridDataFactory.fillDefaults()
 					.indent(6, 0).align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
+			nameLink.addSelectionListener(onLinkClicked());
+
 
 			// icons
 			this.openshiftMaintainedLabel = new CLabel(container, SWT.None);
@@ -289,10 +292,9 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					|| DisposeUtils.isDisposed(nameLink)) {
 				return;
 			}
-			IQuickstartApplicationTemplate template = (IQuickstartApplicationTemplate) value;
+			this.template = (IQuickstartApplicationTemplate) value;
 			this.nameLink.setText(new StringBuilder()
 					.append("<a>").append(template.getName()).append("</a>").toString());
-			nameLink.addSelectionListener(onLinkClicked(template.getHref()));
 			updateOpenShiftMaintainedIcon(template);
 			updateSecurityUpdatesIcon(template);
 			this.summaryText.setText(template.getDescription());
@@ -328,12 +330,15 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			label.setToolTipText(text);
 		}
 		
-		private SelectionListener onLinkClicked(final String url) {
+		private SelectionListener onLinkClicked() {
 			return new SelectionAdapter() {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+					if (template == null) {
+						return;
+					}
+					new BrowserUtility().checkedCreateExternalBrowser(template.getHref(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				}
 
 			};
