@@ -92,7 +92,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// nameLink
-			this.nameText = new StyledText(container, SWT.READ_ONLY);
+			this.nameText = new StyledText(container, SWT.READ_ONLY | SWT.MULTI | SWT.WRAP);
 			UIUtils.setTransparent(nameText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
@@ -101,7 +101,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			this.descriptionText = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 			UIUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionText);
+					.align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
 			return container;
 		}
 
@@ -148,7 +148,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			this.descriptionText = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 			UIUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
-					.span(2, 1).align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(descriptionText);
+					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
 
 			// url
 			Label urlLabel = new Label(container, SWT.None);
@@ -279,9 +279,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			this.summaryText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			summaryText.setAlwaysShowScrollBars(false);
 			UIUtils.setTransparent(summaryText);
-			Rectangle containerSize = container.getClientArea();
 			GridDataFactory.fillDefaults()
-					.span(3, 1).indent(6,0).align(SWT.FILL, SWT.FILL).grab(true, true).hint(containerSize.x, SWT.DEFAULT).applyTo(summaryText);
+					.span(3, 1).indent(6,0).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(summaryText);
 			return container;
 		}
 
