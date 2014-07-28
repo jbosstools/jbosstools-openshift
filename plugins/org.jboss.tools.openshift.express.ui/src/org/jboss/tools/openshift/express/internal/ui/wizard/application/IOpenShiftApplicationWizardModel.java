@@ -21,7 +21,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IServer;
@@ -464,16 +463,6 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public boolean isUseInitialGitUrl();
 	
 	public boolean setUseInitialGitUrl(boolean useInitialGitUrl);
-
-	/**
-	 * Publishes the project (within this wizard) to OpenShift using the server
-	 * adapter (that was possibly created when importing the new or existing
-	 * project).
-	 * 
-	 * @param monitor the monitor to report progress to.
-	 * @return
-	 */
-	public IStatus publishServerAdapter(IProgressMonitor monitor);
 
 	public List<IDomain> setDomains(List<IDomain> domains);
 

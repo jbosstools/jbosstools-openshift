@@ -157,7 +157,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 				return false;
 			}
 
-			return publishServerAdapter();
+			return true;
 	}
 
 	private boolean handleOpenShiftError(String operation, IStatus status) {
@@ -223,26 +223,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			ErrorDialog.openError(getShell(), "Error", NLS.bind("Could not create server adapter for new project {0}.",
 					model.getProjectName()),
 					OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
-			return false;
-		}
-	}
-
-	private boolean publishServerAdapter() {
-		try {
-			IStatus status = WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob(NLS.bind("Publishing project {0}...", model.getProjectName())) {
-						
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							return model.publishServerAdapter(monitor);
-						}
-					}, getContainer());
-			return JobUtils.isOk(status);
-		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error",
-					NLS.bind("Could not publish project.", model.getProjectName()),
-					OpenShiftUIActivator.createErrorStatus(
-							"An exception occurred while publishing the server adapter.", e));
 			return false;
 		}
 	}

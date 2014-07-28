@@ -28,8 +28,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IServer;
@@ -38,7 +36,6 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerAdapterFactory;
-import org.jboss.tools.openshift.express.internal.core.server.ServerUserAdaptable;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
@@ -552,16 +549,6 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	
 	protected boolean hasServerAdapter() {
 		return getServerAdapter() != null;
-	}
-
-	@Override
-	public IStatus publishServerAdapter(IProgressMonitor monitor) {
-		if (!hasServerAdapter()) {
-			return Status.OK_STATUS;
-		}
-				
-		getServerAdapter().publish(IServer.PUBLISH_FULL, null, new ServerUserAdaptable(), null);
-		return Status.OK_STATUS;
 	}
 	
 	/**
