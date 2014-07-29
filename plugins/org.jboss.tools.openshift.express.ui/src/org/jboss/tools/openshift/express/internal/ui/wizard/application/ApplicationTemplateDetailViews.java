@@ -29,7 +29,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -89,16 +88,18 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
 			Composite container = setControl(super.createControls(parent, dbc));
 			GridLayoutFactory.fillDefaults()
-					.margins(10, 10).spacing(10, 10).applyTo(container);
+					.margins(8, 2).spacing(6, 2).applyTo(container);
 
 			// nameLink
-			this.nameText = new StyledText(container, SWT.READ_ONLY | SWT.MULTI | SWT.WRAP);
+			this.nameText = new StyledText(container, SWT.READ_ONLY);
+			nameText.setAlwaysShowScrollBars(false);
 			UIUtils.setTransparent(nameText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
 			// summaryText
-			this.descriptionText = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+			descriptionText.setAlwaysShowScrollBars(false);
 			UIUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
@@ -136,7 +137,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
-					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
+					.numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
 
 			// nameLink
 			this.nameText = new StyledText(container, SWT.READ_ONLY);
@@ -145,7 +146,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					.span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
 			// summaryText
-			this.descriptionText = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+			descriptionText.setAlwaysShowScrollBars(false);
 			UIUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
@@ -258,19 +260,19 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
-					.margins(4,4).numColumns(4).spacing(6, 6).applyTo(container);
+					.margins(8, 2).numColumns(4).spacing(6, 2).applyTo(container);
 
 			// nameLink
 			this.nameLink = new Link(container, SWT.None);
 			GridDataFactory.fillDefaults()
-					.indent(6, 0).align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
+					.align(SWT.LEFT, SWT.CENTER).applyTo(nameLink);
 			nameLink.addSelectionListener(onLinkClicked());
 
 
 			// icons
 			this.openshiftMaintainedLabel = new CLabel(container, SWT.None);
 			GridDataFactory.fillDefaults()
-					.indent(6, 0).align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedLabel);
+					.align(SWT.FILL, SWT.FILL).applyTo(openshiftMaintainedLabel);
 			this.securityUpdatesLabel = new CLabel(container, SWT.None);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).applyTo(securityUpdatesLabel);
@@ -280,7 +282,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			summaryText.setAlwaysShowScrollBars(false);
 			UIUtils.setTransparent(summaryText);
 			GridDataFactory.fillDefaults()
-					.span(3, 1).indent(6,0).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(summaryText);
+					.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(summaryText);
 			return container;
 		}
 

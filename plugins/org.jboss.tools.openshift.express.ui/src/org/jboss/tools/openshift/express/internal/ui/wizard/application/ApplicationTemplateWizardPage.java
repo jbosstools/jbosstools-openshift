@@ -109,7 +109,8 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2)
-				.margins(10, 10)
+				.margins(10, 6)
+				.spacing(2,2)
 				.applyTo(container);
 
 		setWizardPageDescription(pageModel.isUseExistingApplication());
@@ -252,9 +253,9 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		newApplicationButton.setToolTipText("If selected we will create a new application in OpenShift.");
 		GridDataFactory.fillDefaults()
 				.span(2, 1)
+				.indent(0,8)
 				.align(SWT.FILL, SWT.CENTER)
 				.grab(true, false)
-				.indent(0, 20)
 				.applyTo(newApplicationButton);
 
 		useExitingApplication.addOption(Boolean.FALSE, WidgetProperties.selection().observe(newApplicationButton));
@@ -284,17 +285,17 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(templateFilterText);
 		ValueBindingBuilder
-		.bind(WidgetProperties.enabled().observe(templateFilterText))
-		.notUpdatingParticipant()
-		.to(useExistingApplication)
-		.converting(new InvertingBooleanConverter())
-		.in(dbc);
+				.bind(WidgetProperties.enabled().observe(templateFilterText))
+				.notUpdatingParticipant()
+				.to(useExistingApplication)
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
 		
 		// application templates tree
 		final TreeViewer applicationTemplatesViewer = createApplicationTemplatesViewer(applicationTemplatesTreeComposite, templateFilterText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
-				.hint(400, 250)
+				.hint(400, 180)
 				.applyTo(applicationTemplatesViewer.getControl());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(applicationTemplatesViewer.getControl()))
@@ -329,7 +330,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		enableTemplateDetailsControls(detailsContainer, !pageModel.isUseExistingApplication());
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL)
-				.hint(SWT.DEFAULT, 140)
+				.hint(SWT.DEFAULT, 106)
 				.applyTo(detailsContainer);
 		useExistingApplication.addValueChangeListener(new IValueChangeListener() {
 			
