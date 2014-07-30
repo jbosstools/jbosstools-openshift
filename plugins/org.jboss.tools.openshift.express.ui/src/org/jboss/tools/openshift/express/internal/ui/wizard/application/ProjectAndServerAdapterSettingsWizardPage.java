@@ -141,7 +141,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 			}
 		});
 		// project name content assist
-		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.LEFT);
+		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
 		FieldDecoration contentProposalFieldIndicator =
 				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
 		dec.setImage(contentProposalFieldIndicator.getImage());
