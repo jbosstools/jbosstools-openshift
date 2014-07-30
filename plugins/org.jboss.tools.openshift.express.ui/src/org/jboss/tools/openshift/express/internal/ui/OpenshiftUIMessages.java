@@ -61,5 +61,5 @@ public class OpenshiftUIMessages extends NLS {
 	public static String DoYouWantToRefreshVariables;
 	public static String RefreshingVariables;
 
-
+	public static String NoConnectionsAreAvailable;
 }
