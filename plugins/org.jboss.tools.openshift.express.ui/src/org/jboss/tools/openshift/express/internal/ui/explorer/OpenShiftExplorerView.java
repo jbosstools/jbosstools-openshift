@@ -13,18 +13,32 @@ package org.jboss.tools.openshift.express.internal.ui.explorer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.forms.widgets.Form;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
+import org.eclipse.ui.part.PageBook;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -93,6 +107,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 					return;
 				}
 				viewer.refresh();
+				whichControlToShow();
 			}
 		});
 	}
@@ -105,6 +120,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 					return;
 				}
 				viewer.refresh(connection);
+				whichControlToShow();
 			}
 		});
 	}
@@ -123,4 +139,52 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void connectionChanged(Connection connection) {
 		refreshViewer(connection);
 	}
+	
+	private PageBook pageBook;
+	private Control control;
+	private Control linkControl;
+	
+	@Override
+	public void createPartControl(Composite parent) {
+		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+		pageBook = new PageBook(parent, SWT.NONE);
+		
+		super.createPartControl(pageBook);
+		
+		control = getCommonViewer().getControl();
+		linkControl = createLinkControl(toolkit); 
+		whichControlToShow();
+	}
+	
+	private Control createLinkControl(FormToolkit kit){
+		Form form = kit.createForm(pageBook);
+		Composite composite = form.getBody();
+		GridLayout layout = new GridLayout(2, false);
+		composite.setLayout(layout);
+    
+		Link link = new Link(composite, SWT.NONE);
+		link.setText(OpenshiftUIMessages.NoConnectionsAreAvailable);
+		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		GridData gd = new GridData(SWT.LEFT, SWT.FILL, true, false);
+		link.setLayoutData(gd);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				ConnectionWizard wizard = new ConnectionWizard();
+				WizardDialog dialog = new WizardDialog(pageBook.getShell(), wizard);
+				if( dialog.open() == Window.OK){
+					whichControlToShow();
+				}
+			}
+		});
+		return form;
+	}
+	
+	private void whichControlToShow(){
+		if(ConnectionsModelSingleton.getInstance().getConnections().length < 1){
+			pageBook.showPage(linkControl);
+		} else{
+			pageBook.showPage(control);
+		}
+	}
+
 }
