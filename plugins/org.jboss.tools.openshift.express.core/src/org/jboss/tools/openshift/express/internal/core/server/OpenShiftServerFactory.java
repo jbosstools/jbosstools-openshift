@@ -41,9 +41,9 @@ import com.openshift.client.OpenShiftException;
  * @author Rob Stryker
  * @author André Dietisheim
  */
-public class OpenShiftServerAdapterFactory {
+public class OpenShiftServerFactory {
 
-	public OpenShiftServerAdapterFactory() {
+	public OpenShiftServerFactory() {
 	}
 
 	public IServer create(IProject project, IApplication application, IDomain domain, IProgressMonitor monitor)

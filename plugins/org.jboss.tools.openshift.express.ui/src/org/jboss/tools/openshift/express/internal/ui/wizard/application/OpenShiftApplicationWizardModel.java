@@ -35,7 +35,7 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerAdapterFactory;
+import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerFactory;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
@@ -195,7 +195,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 						"Could not create a server adapter for your application {0}. No project was found when importing",
 						getApplication().getName());
 			}
-			server = new OpenShiftServerAdapterFactory().create(project, getApplication(), getDomain(), monitor);
+			server = new OpenShiftServerFactory().create(project, getApplication(), getDomain(), monitor);
 			setServerAdapter(server);
 		}
 		return server;

@@ -73,6 +73,8 @@
 				<separator
 					name="group.edit" visible="true"/>
 				<separator
+					name="group.project" visible="true"/>
+				<separator
 					name="group.properties" visible="true"/>
 				<visibleWhen>
 					<with variable="selection">
@@ -111,8 +113,6 @@
 		</fragment>
 	</extension>
     
-	<!-- server publish method UI contributions -->
-
 	<!-- openshift tail files console -->
     <extension
           point="org.eclipse.ui.console.consolePageParticipants">
@@ -881,6 +881,7 @@
 			</command>
 		</menuContribution>
     </extension>
+
     <!-- servers view: delete application -->
     <extension
            point="org.eclipse.ui.menus">
@@ -1550,7 +1551,6 @@
 		</menuContribution>
 	</extension>
 	
-	
 	<!-- configure markers -->
 	<extension
 		point="org.eclipse.ui.commands">
@@ -1566,8 +1566,20 @@
 			commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers">
 		</handler>
 	</extension>
-	<!-- project explorer: configure markers -->
+
 	<extension point="org.eclipse.ui.menus">
+		<!-- server adapter: configure markers -->
+		<menuContribution
+       		locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.project">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.configureMarkers"
+		    	icon="icons/marker16.png"
+				id="org.jboss.tools.openshift.express.ui.command.configureMarkers"
+				mnemonic="K">
+        	</command>
+		</menuContribution>
+
+		<!-- project explorer: configure markers -->
 		<menuContribution
     		locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
     		<menu
@@ -1597,6 +1609,7 @@
 				mnemonic="M">
 			</command>
 		</menuContribution>
+
 		<!-- package explorer: configure markers -->
 		<menuContribution
 	   		locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">

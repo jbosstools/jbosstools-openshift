@@ -15,12 +15,9 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.markers.ConfigureMarkersWizard;
 
 /**
@@ -32,16 +29,8 @@ public class ConfigureMarkersHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IProject project = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IProject.class);
 		if (project != null) {
-			new WizardDialog(HandlerUtil.getActiveShell(event), new ConfigureMarkersWizard(project)) {
-				
-				@Override
-				protected Control createButtonBar(Composite parent) {
-					Control control = super.createButtonBar(parent);
-					getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
-					return control;
-				}
-
-			}.open();
+			new OkCancelButtonWizardDialog(HandlerUtil.getActiveShell(event), new ConfigureMarkersWizard(project))
+					.open();
 		}
 		return Status.OK_STATUS;
 	}

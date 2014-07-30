@@ -121,6 +121,14 @@
                  type="org.jboss.tools.openshift.express.internal.core.connection.Connection">
            </adapter>
         </factory>
+		
+		<!-- Project Adapter factory -->
+        <factory
+              adaptableType="org.eclipse.wst.server.core.IServer"
+              class="org.jboss.tools.openshift.express.internal.core.server.OpenShiftProjectAdapterFactory">
+           <adapter
+                 type="org.eclipse.core.resources.IProject">
+           </adapter>
+        </factory>
      </extension>
-
 </plugin>
