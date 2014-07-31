@@ -504,18 +504,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		useDefaultSourceButton.setText("Use default source code");
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
-		IObservableValue defaultSourceCodeObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
-		IObservableValue useInitialGitUrlModelObservable = BeanProperties.value(
-				ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel);
+		IObservableValue useDefaultSourceButtonObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
+		IObservableValue useInitialGitUrlModelObservable =
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL)
+						.observe(pageModel);
 		ValueBindingBuilder
-				.bind(defaultSourceCodeObservable)
+				.bind(useDefaultSourceButtonObservable)
 				.converting(new InvertingBooleanConverter())
 				.to(useInitialGitUrlModelObservable)
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 		IObservableValue initialGitUrlEditable =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_EDITABLE).observe(
-						pageModel);
+				BeanProperties.value(
+						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_EDITABLE).observe(pageModel);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(useDefaultSourceButton))
 				.notUpdatingParticipant()
@@ -528,7 +529,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceUrlLabel);
 		final IObservableValue sourceUrlWidgetsEnablement =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_EXISTING_INITIAL_GITURL_EDITABLE)
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_USEREDITABLE)
 						.observe(pageModel);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(sourceUrlLabel))
@@ -551,7 +552,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
 				.in(dbc);
 
-		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(defaultSourceCodeObservable,
+		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(useDefaultSourceButtonObservable,
 				sourcecodeUrlObservable);
 		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
 		ControlDecorationSupport.create(

@@ -59,7 +59,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROPERTY_USE_INITIAL_GITURL = "useInitialGitUrl";
 	public static final String PROPERTY_INITIAL_GITURL_EDITABLE = "initialGitUrlEditable";
-	public static final String PROPERTY_EXISTING_INITIAL_GITURL_EDITABLE = "existingInitialGitUrlEditable";
+	public static final String PROPERTY_INITIAL_GITURL_USEREDITABLE = "initialGitUrlUsereditable";
 	
 	private final OpenShiftApplicationWizardModel wizardModel;
 
@@ -98,16 +98,22 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
-				firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
 				fireCanAddRemoveCartridges();
 				fireInitialGitUrlEditable();
-				fireExistingInitialGitUrlEditable();
+				fireInitialGitUrlUsereditable();
+				firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
 			}
 		}
 		.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel)
-				.forwardTo(PROPERTY_USE_INITIAL_GITURL, this);
+		new PojoEventBridge() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				fireUseInitialGitUrl();
+				fireInitialGitUrlUsereditable();
+			}
+		}
+		.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel);
 		new PojoEventBridge()
 				.listenTo(IOpenShiftApplicationWizardModel.PROP_INITIAL_GIT_URL, wizardModel)
 				.forwardTo(PROPERTY_INITIAL_GITURL, this);
@@ -335,9 +341,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				&& getSelectedApplicationTemplate().isInitialGitUrlEditable();
 	}
 	
-	protected void fireExistingInitialGitUrlEditable() {
-		firePropertyChange(PROPERTY_EXISTING_INITIAL_GITURL_EDITABLE,
-				null, isInitialGitUrlEditable());
+	protected void fireInitialGitUrlUsereditable() {
+		firePropertyChange(PROPERTY_INITIAL_GITURL_USEREDITABLE,
+				null, isInitialGitUrlUsereditable());
 	}
 	
 	/**
@@ -350,7 +356,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @see #setUseInitialGitUrl(boolean)
 	 * @see #isInitialGitUrlEditable()
 	 */
-	public boolean isExistingInitialGitUrlEditable() {
+	public boolean isInitialGitUrlUsereditable() {
 		return isUseInitialGitUrl()
 				&& isInitialGitUrlEditable();
 	}
@@ -391,7 +397,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public boolean isUseInitialGitUrl() {
 		return wizardModel.isUseInitialGitUrl();
 	}
-
+	
 	/**
 	 * if <code>true</code> is given this model is set to use an initial git
 	 * url. An initial git url wont get used if <code>false</code> is given.
@@ -399,11 +405,14 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @param useInitialGitUrl
 	 */
 	public void setUseInitialGitUrl(boolean useInitialGitUrl) {
-		// resetInitialGitUrl();
 		wizardModel.setUseInitialGitUrl(useInitialGitUrl);
-		fireExistingInitialGitUrlEditable();
 	}
 
+	protected void fireUseInitialGitUrl() {
+		firePropertyChange(PROPERTY_USE_INITIAL_GITURL,
+				null, isUseInitialGitUrl());
+	}
+	
 	public String getInitialGitUrl() {
 		return wizardModel.getInitialGitUrl();
 	}

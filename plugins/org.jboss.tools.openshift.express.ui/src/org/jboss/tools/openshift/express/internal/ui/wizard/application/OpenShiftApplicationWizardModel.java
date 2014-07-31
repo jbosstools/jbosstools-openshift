@@ -518,8 +518,10 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 
 	@Override
 	public boolean setUseInitialGitUrl(boolean useInitialGitUrl) {
-		setProperty(PROP_USE_INITIAL_GIT_URL, useInitialGitUrl);
-		return useInitialGitUrl;
+		if (!useInitialGitUrl) {
+			setInitialGitUrl(null);
+		}
+		return setProperty(PROP_USE_INITIAL_GIT_URL, useInitialGitUrl);
 	}
 
 	@Override
@@ -576,11 +578,11 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 
 	@Override
 	public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template) {
-		setProperty(PROP_SELECTED_APPLICATION_TEMPLATE, template);
 		setUseExistingApplication(false);
-		setUseInitialGitUrl(!StringUtils.isEmpty(template.getInitialGitUrl()));
 		setInitialGitUrl(template.getInitialGitUrl());
+		setUseInitialGitUrl(!StringUtils.isEmpty(template.getInitialGitUrl()));
 		setEmbeddedCartridges(template.getEmbeddedCartridges());
+		setProperty(PROP_SELECTED_APPLICATION_TEMPLATE, template);
 		return template;
 	}
 
