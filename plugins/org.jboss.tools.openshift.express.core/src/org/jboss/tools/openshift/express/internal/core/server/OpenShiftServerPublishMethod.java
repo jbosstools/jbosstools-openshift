@@ -220,8 +220,9 @@ public class OpenShiftServerPublishMethod  {
 			throws CoreException {
 		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 200);
 		try {
-			int uncommittedChanges = EGitUtils.countChanges(EGitUtils.getRepository(project), true, new NullProgressMonitor());
-			if (uncommittedChanges > 0) {
+			boolean uncommittedChanges = EGitUtils.countChanges(
+					EGitUtils.getRepository(project), true, new NullProgressMonitor()) > 0;
+			if (uncommittedChanges) {
 				String remote = OpenShiftServerUtils.getRemoteName(server);
 				String applicationName = OpenShiftServerUtils.getApplicationName(server);
 				OpenshiftCoreUIIntegration.openCommitDialog(project, remote, applicationName, 
@@ -234,7 +235,9 @@ public class OpenShiftServerPublishMethod  {
 				}
 			}
 		} catch (Exception e) {
-			OpenShiftCoreActivator.pluginLog().logError(e);
+			IStatus status = OpenShiftCoreActivator.statusFactory().errorStatus(e);
+			OpenShiftCoreActivator.pluginLog().logStatus(status);
+			throw new CoreException(status);
 		} finally {
 			subMonitor.done();
 		}
