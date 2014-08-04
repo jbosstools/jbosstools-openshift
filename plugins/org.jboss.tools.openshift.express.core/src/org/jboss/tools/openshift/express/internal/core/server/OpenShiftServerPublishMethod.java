@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.op.AddToIndexOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.lib.Repository;
@@ -41,9 +42,9 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.server.IModulePathFilter;
 import org.jboss.ide.eclipse.as.core.server.IModulePathFilterProvider;
 import org.jboss.ide.eclipse.as.core.util.ServerConverter;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.util.PublishControllerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.publish.LocalZippedModulePublishRunner;
 import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
-import org.jboss.tools.as.core.server.controllable.util.PublishControllerUtility;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
@@ -74,8 +75,8 @@ public class OpenShiftServerPublishMethod  {
 			IContainer deployFolder = OpenShiftServerUtils.getContainer(OpenShiftServerUtils.getDeployFolder(server), project);
 			if (allSubModulesPublished
 					|| (deployFolder != null && deployFolder.isAccessible())) {
-				refreshProject(project, submon(monitor, 100));
-				publish(project, server, submon(monitor, 100));
+				project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				publish(project, server, monitor);
 			} // else ignore. (one or more modules not published AND magic
 				// folder doesn't exist
 				// The previous exception will be propagated.
@@ -84,7 +85,7 @@ public class OpenShiftServerPublishMethod  {
 		return allSubModulesPublished ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL;
 	}
 
-	protected boolean areAllModulesPublished(IServer server) {
+	private boolean areAllModulesPublished(IServer server) {
 		IModule[] modules = server.getModules();
 		boolean allpublished = true;
 		for (int i = 0; i < modules.length; i++) {
@@ -94,8 +95,7 @@ public class OpenShiftServerPublishMethod  {
 		return allpublished;
 	}
 
-	public int publishModule(IServer server, int kind,
-			int deltaKind, IModule[] module, IProgressMonitor monitor)
+	public int publishModule(IServer server, int kind, int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
 
 		if (module.length > 1)
@@ -167,7 +167,7 @@ public class OpenShiftServerPublishMethod  {
 		};
 	}
 
-	protected IContainer getDestination(IServer server, IProject destProj) throws CoreException {
+	private IContainer getDestination(IServer server, IProject destProj) throws CoreException {
 		String destinationFolder = OpenShiftServerUtils.getDeployFolder(server);
 		IContainer destFolder = OpenShiftServerUtils.getContainer(destinationFolder, destProj);
 		if (destFolder == null 
@@ -180,7 +180,7 @@ public class OpenShiftServerPublishMethod  {
 		return destFolder;
 	}
 
-	protected StringBuilder createMissingPath(IProject destProj, String destinationFolder, IContainer destFolder) {
+	private StringBuilder createMissingPath(IProject destProj, String destinationFolder, IContainer destFolder) {
 		StringBuilder missingPath = new StringBuilder();
 		if (destFolder != null) {
 			missingPath.append(destFolder.getName());
@@ -192,43 +192,51 @@ public class OpenShiftServerPublishMethod  {
 		return missingPath;
 	}
 
-	protected boolean isInDestProjectTree(String magicProject, IModule[] module) {
+	private boolean isInDestProjectTree(String magicProject, IModule[] modules) {
 		IProject magic = magicProject == null ? null :
 				ResourcesPlugin.getWorkspace().getRoot().getProject(magicProject);
-		IProject moduleProject = module == null ? null : module.length == 0 ? null : module[module.length - 1]
-				.getProject();
-		if (magic == null || moduleProject == null)
+		IProject moduleProject = getModuleProject(modules);
+		if (magic == null 
+				|| moduleProject == null) {
 			return false;
+		}
 
 		IPath moduleProjectRoot = moduleProject.getLocation();
 		IPath magicProjectRoot = magic.getLocation();
 		return magicProjectRoot.isPrefixOf(moduleProjectRoot);
 	}
 	
+	private IProject getModuleProject(IModule[] modules) {
+		if (modules == null) {
+			return null;
+		} else if (modules.length == 0) {
+			return null;
+		} else {
+			return modules[modules.length - 1].getProject();
+		}
+	}
+	
 	protected PushOperationResult publish(final IProject project, final IServer server, final IProgressMonitor monitor) 
 			throws CoreException {
+		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 200);
 		try {
 			int uncommittedChanges = EGitUtils.countChanges(EGitUtils.getRepository(project), true, new NullProgressMonitor());
 			if (uncommittedChanges > 0) {
 				String remote = OpenShiftServerUtils.getRemoteName(server);
 				String applicationName = OpenShiftServerUtils.getApplicationName(server);
-				OpenshiftCoreUIIntegration.openCommitDialog(project, remote, applicationName, new Runnable() {
-					public void run() {
-						try {
-							push(project, server, monitor);
-						} catch (CoreException e) {
-							OpenShiftCoreActivator.getDefault().getLog().log(e.getStatus());
-						}
-				}});
+				OpenshiftCoreUIIntegration.openCommitDialog(project, remote, applicationName, 
+						new PublishJob(applicationName, project, server));
 			} else {
 				if (OpenshiftCoreUIIntegration.requestApproval(
-						getPushQuestion(project, server, monitor),
+						getPushQuestion(project, server, subMonitor),
 						NLS.bind(OpenShiftServerMessages.publishTitle, project.getName()))) {
-					return push(project, server, monitor);
+					return push(project, server, subMonitor);
 				}
 			}
 		} catch (Exception e) {
 			OpenShiftCoreActivator.pluginLog().logError(e);
+		} finally {
+			subMonitor.done();
 		}
 		return null;
 	}
@@ -244,16 +252,17 @@ public class OpenShiftServerPublishMethod  {
 	}
 	
 	private PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
+		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
 		Repository repository = EGitUtils.getRepository(project);
 		OpenshiftCoreUIIntegration.displayConsoleView(server);
 		String remoteName = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
 		try {
-			monitor.beginTask("Publishing " + project.getName(), 200);
 			return EGitUtils.push(
-					remoteName, repository, new SubProgressMonitor(monitor, 100),
+					remoteName, repository, subMonitor,
 					OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
 		} catch (CoreException ce) {
 			// Comes if push has failed
+			subMonitor.worked(100);
 			if (isUpToDateError(ce)) {
 				OpenshiftCoreUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
 				return null;
@@ -268,7 +277,7 @@ public class OpenShiftServerPublishMethod  {
 								+ "\n\n Do you want to do a forced push and overwrite any remote changes ? ",
 						"Attempt push force ?", false)) {
 					return EGitUtils.pushForce(
-							remoteName, repository, new SubProgressMonitor(monitor, 100),
+							remoteName, repository, subMonitor,
 							OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
 				} else {
 					// printing out variation of the standard git output
@@ -282,7 +291,6 @@ public class OpenShiftServerPublishMethod  {
 											+ "\nMerge the remote changes (e.g. 'Team > Fetch from Upstream' in Eclipse or 'git pull' on command line ) before pushing again. "
 											+ "\nSee the 'Note about fast-forwards' section of 'git push --help' for details.");
 				}
-				monitor.done();
 				return null;
 			} catch (CoreException ce2) {
 				if (isUpToDateError(ce)) {
@@ -295,7 +303,7 @@ public class OpenShiftServerPublishMethod  {
 				}
 			}
 		} finally {
-			monitor.done();
+			subMonitor.done();
 		}
 	}
 
@@ -318,37 +326,44 @@ public class OpenShiftServerPublishMethod  {
 		IDeployableServer s = ServerConverter.getDeployableServer(server);
 		return s.getTempDeployFolder();
 	}
-
-	protected void refreshProject(final IProject project, IProgressMonitor monitor) throws CoreException {
-		// Already inside a workspace scheduling rule
-		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-	}
-
-	public static IProgressMonitor submon(final IProgressMonitor parent, final int ticks) {
-		return submon(parent, ticks, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-	}
-
-	public static IProgressMonitor submon(final IProgressMonitor parent,
-			final int ticks, final int style) {
-		return (parent == null ? new NullProgressMonitor() : new SubProgressMonitor(parent, ticks, style));
-	}
 	
-	
-	public int getPublishType(int kind, int deltaKind, int modulePublishState) {
+	private int getPublishType(int kind, int deltaKind, int modulePublishState) {
 		if( deltaKind == ServerBehaviourDelegate.ADDED ) 
-			return PublishControllerUtility.FULL_PUBLISH;
+			return PublishControllerUtil.FULL_PUBLISH;
 		else if (deltaKind == ServerBehaviourDelegate.REMOVED) {
-			return PublishControllerUtility.REMOVE_PUBLISH;
+			return PublishControllerUtil.REMOVE_PUBLISH;
 		} else if (kind == IServer.PUBLISH_FULL 
 				|| modulePublishState == IServer.PUBLISH_STATE_FULL 
 				|| kind == IServer.PUBLISH_CLEAN ) {
-			return PublishControllerUtility.FULL_PUBLISH;
+			return PublishControllerUtil.FULL_PUBLISH;
 		} else if (kind == IServer.PUBLISH_INCREMENTAL 
 				|| modulePublishState == IServer.PUBLISH_STATE_INCREMENTAL 
 				|| kind == IServer.PUBLISH_AUTO) {
 			if( ServerBehaviourDelegate.CHANGED == deltaKind ) 
-				return PublishControllerUtility.INCREMENTAL_PUBLISH;
+				return PublishControllerUtil.INCREMENTAL_PUBLISH;
 		} 
-		return PublishControllerUtility.NO_PUBLISH;
+		return PublishControllerUtil.NO_PUBLISH;
+	}
+
+	private class PublishJob extends Job {
+
+		private IProject project;
+		private IServer server;
+
+		PublishJob(String applicationName, IProject project, IServer server) {
+			super(NLS.bind("Publishing to {0} on OpenShift...", applicationName));
+			this.project = project;
+			this.server = server;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try {
+				push(project, server, monitor);
+				return Status.OK_STATUS;
+			} catch (CoreException e) {
+				return e.getStatus();
+			}
+		}
 	}
 }

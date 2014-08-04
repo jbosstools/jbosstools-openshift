@@ -14,11 +14,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
 
@@ -188,7 +187,7 @@ public class OpenshiftCoreUIIntegration {
 		return handler == null ? false : handler.openQuestion(title, message, defaultAnswer);
 	}
 	
-	public static void openCommitDialog(IProject project, String remote, String applicationName, Runnable runnable) throws CoreException {
-		getDefault().getEGitUI().commitWithUI(project, remote, applicationName, runnable);
+	public static void openCommitDialog(IProject project, String remote, String applicationName, Job pushJob) throws CoreException {
+		getDefault().getEGitUI().publish(project, remote, applicationName, pushJob);
 	}
 }
