@@ -215,7 +215,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 
 		// create server adapter checkbox
 		final Button serverAdapterCheckbox = new Button(container, SWT.CHECK);
-		serverAdapterCheckbox.setText("Create and set up a server for easy publishing");
+		serverAdapterCheckbox.setText("Create and set up a server adapter for easy publishing");
 		serverAdapterCheckbox
 				.setToolTipText("This Server Adapter will let you publish your local changes onto OpenShift, right from your Eclipse workbench.");
 		GridDataFactory.fillDefaults()
