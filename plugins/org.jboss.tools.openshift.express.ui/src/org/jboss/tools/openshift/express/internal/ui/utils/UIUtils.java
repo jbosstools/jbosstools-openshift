@@ -32,6 +32,7 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -70,27 +71,30 @@ public class UIUtils {
 	}
 
 	/**
-	 * Ensures that the given text gets the focus if the given control is
+	 * Ensures that the given text gets the focus if the given button is
 	 * selected.
 	 * 
-	 * @param control
+	 * @param button
 	 * @param text
 	 */
-	public static void focusOnSelection(final Control control, final Text text) {
+	public static void focusOnSelection(final Button button, final Text text) {
 		final Listener onSelect = new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
-				text.selectAll();
-				text.setFocus();
+				if (!button.getSelection()) {
+					// button was deselected, got selected
+					text.selectAll();
+					text.setFocus();
+				}
 			}
 		};
-		control.addListener(SWT.Selection, onSelect);
-		control.addDisposeListener(new DisposeListener() {
+		button.addListener(SWT.Selection, onSelect);
+		button.addDisposeListener(new DisposeListener() {
 
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				control.removeListener(SWT.Selection, onSelect);
+				button.removeListener(SWT.Selection, onSelect);
 			}
 		});
 	}
