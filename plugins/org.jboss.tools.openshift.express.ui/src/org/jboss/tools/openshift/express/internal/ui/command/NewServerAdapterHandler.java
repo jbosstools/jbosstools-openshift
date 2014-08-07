@@ -72,7 +72,7 @@ public class NewServerAdapterHandler extends AbstractHandler {
 			WizardUtils.openWizard(400, 700, wizard, HandlerUtil.getActiveShell(event));
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
-			return OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not create OpenShift server for application {0}", application.getName()), e);
+			return OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not create OpenShift server adapter for application {0}", application.getName()), e);
 		}
 	}
 

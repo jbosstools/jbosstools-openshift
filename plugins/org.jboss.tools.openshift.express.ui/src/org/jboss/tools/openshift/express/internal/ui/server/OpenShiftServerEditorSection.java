@@ -85,7 +85,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 		Section section = toolkit.createSection(parent,
 				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
-		section.setText("OpenShift Server");
+		section.setText("OpenShift Server Adapter");
 		section.setLayoutData(new GridData(
 				GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL
 						| GridData.GRAB_VERTICAL));

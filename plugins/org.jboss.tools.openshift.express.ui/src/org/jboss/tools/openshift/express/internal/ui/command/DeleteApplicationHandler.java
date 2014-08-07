@@ -55,7 +55,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 		} else {
 			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 			if (server == null) {
-				return OpenShiftUIActivator.createCancelStatus("Could not find the server to delete");
+				return OpenShiftUIActivator.createCancelStatus("Could not find the server adapter to delete");
 			}
 			return deleteApplicationAndServer(server, shell);
 		}
@@ -110,7 +110,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 						shell,
 						"Application and Server removal",
 						NLS.bind(
-								"You are about to remove the application and the server \"{0}\".\n"
+								"You are about to remove the application and the server adapter \"{0}\".\n"
 										+ "This is NOT reversible, all remote data for this application and the local server adapter will be removed.",
 								server.getName()))) {
 			LoadApplicationJob applicationJob = new LoadApplicationJob(server);

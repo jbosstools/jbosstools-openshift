@@ -45,8 +45,8 @@ public class OpenShiftServerWizardFragment extends WizardFragment implements ICo
 	}
 	
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		handle.setTitle("Create an OpenShift Server");
-		handle.setDescription("Create an OpenShift Server by choosing your connection, application and deploy project.");
+		handle.setTitle("Create an OpenShift Server Adapter");
+		handle.setDescription("Create an OpenShift Server Adapter by choosing your connection, application and deploy project.");
 		IServerModeUICallback callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
 			public void executeLongRunning(Job j) {
 				// depends on COMMON, DAMN

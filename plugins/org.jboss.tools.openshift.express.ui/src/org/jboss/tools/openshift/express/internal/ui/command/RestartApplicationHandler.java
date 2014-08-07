@@ -43,7 +43,7 @@ public class RestartApplicationHandler extends AbstractHandler {
 		} else {
 			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 			if (server == null) {
-				return OpenShiftUIActivator.createCancelStatus("Could not restart application: server not found.");
+				return OpenShiftUIActivator.createCancelStatus("Could not restart application: server adapter not found.");
 			}
 			return restartFor(server, shell);
 		}
@@ -62,7 +62,7 @@ public class RestartApplicationHandler extends AbstractHandler {
 		String applicationName = OpenShiftServerUtils.getApplicationName(server);
 		if (StringUtils.isEmpty(applicationName)) {
 			return OpenShiftUIActivator.createCancelStatus(NLS.bind(
-					"Could not restart application: application for server {0} not found.",
+					"Could not restart application: application for server adapter {0} not found.",
 					server.getName()));
 		}
 		if (!promptUserToConfirm(applicationName, shell)) {

@@ -32,7 +32,7 @@ public class LoadApplicationJob extends Job {
 	private final IServer server;
 
 	public LoadApplicationJob(final IServer server) {
-		super(NLS.bind("Identifying OpenShift Application for server {0}...", server.getName()));
+		super(NLS.bind("Identifying OpenShift Application for server adapter {0}...", server.getName()));
 		this.server = server;
 	}
 
@@ -41,7 +41,7 @@ public class LoadApplicationJob extends Job {
 		this.application = OpenShiftServerUtils.getApplication(server);
 		if (application == null) {
 			return OpenShiftUIActivator.createErrorStatus(
-					NLS.bind("Failed to retrieve Application from server {0}.\n" +
+					NLS.bind("Failed to retrieve Application from server adapter {0}.\n" +
 							"Please verify that the associated OpenShift application and workspace project still exist.", 
 							server.getName()));
 		}
