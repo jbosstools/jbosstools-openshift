@@ -19,12 +19,15 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -35,7 +38,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.express.internal.core.preferences.IOpenShiftPreferenceConstants;
+import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
@@ -158,11 +161,28 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).applyTo(urlLabel);
 			this.urlText = new Text(container, SWT.BORDER);
-			ContentProposalUtils.createPreferencesBacked(urlText, IOpenShiftPreferenceConstants.CODEANYTHING_CARTRIDGES, OpenShiftUIActivator.PLUGIN_ID);
+			createContentProposal(urlText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(urlText);
 
 			return container;
+		}
+
+		private void createContentProposal(Text text) {
+			final ControlDecoration decoration = ContentProposalUtils.createContenProposalDecoration("History available", text);
+			ContentProposalUtils.createContentProposal(text, OpenShiftPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
+			text.addFocusListener(new FocusAdapter() {
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					decoration.show();
+				}
+
+				@Override
+				public void focusLost(FocusEvent e) {
+					decoration.hide();
+				}
+			});
 		}
 
 		@Override

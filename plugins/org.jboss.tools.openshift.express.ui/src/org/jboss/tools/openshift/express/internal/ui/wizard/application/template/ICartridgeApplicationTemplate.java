@@ -18,5 +18,4 @@ public interface ICartridgeApplicationTemplate extends IApplicationTemplate {
 
 	public static final String PROPERTY_CARTRIDGE = "cartridge";
 
-	public boolean isCodeAnything();
 }

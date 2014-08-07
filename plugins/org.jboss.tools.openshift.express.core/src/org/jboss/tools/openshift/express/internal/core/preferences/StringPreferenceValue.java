@@ -19,15 +19,13 @@ public class StringPreferenceValue extends AbstractPreferenceValue<String> {
 		super(prefsKey, pluginId);
 	}
 
+	@Override
 	public String get() {
-		return get(null);
-	}
-	
-	public String get(String currentValue) {
-		return doGet(currentValue);
+		return doGet();
 	}
 
-	public void store(String value) {
+	@Override
+	public void set(String value) {
 		doStore(value);
 	}
 }

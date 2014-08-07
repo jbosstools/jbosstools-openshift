@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -27,6 +27,19 @@ import com.openshift.client.IApplication;
  */
 public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 
+	/** available connections */
+	public static final String CONNECTIONS = "org.jboss.tools.openshift.express.CONNECTION_NAMES";
+	/** the prefs key used in prior versions */
+	public static final String RHLOGIN_LIST_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN_LIST";
+	/** last user name */
+	public static final String LAST_USERNAME = "org.jboss.tools.openshift.express.LAST_USERNAME";
+	/** default server */
+	public static final String DEFAULT_HOST = "org.jboss.tools.openshift.express.SERVER";
+	/** tail command options */
+	public static final String TAIL_FILE_OPTIONS = "org.jboss.tools.openshift.express.TAILFILEOPTIONS";
+	public static final String SNAPSHOT_FILES = "org.jboss.tools.openshift.express.SNAPSHOT_FILES";
+	public static final String DOWNLOADABLE_STANDALONECART_URLS = "org.jboss.tools.openshift.express.DONWLOADABLE_STANDALONECART";
+
 	/* Legacy pref location */
 	private static final String UI_PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
 
@@ -34,35 +47,34 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 
 	public static final OpenShiftPreferences INSTANCE = new OpenShiftPreferences();
 
-	private StringsPreferenceValue connectionsPreferenceValue;
-	private StringsPreferenceValue legacyConnections;
+	private final StringsPreferenceValue connectionsPreferenceValue = 
+			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
+	private final StringsPreferenceValue legacyConnections = 
+			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, OpenShiftCoreActivator.PLUGIN_ID);
 
 	/* The following three keys are from the legacy UI plugin pref-store */
-	private StringsPreferenceValue UI_connectionsPreferenceValue;
-	private StringsPreferenceValue UI_legacyConnections;
+	private final StringsPreferenceValue UI_connectionsPreferenceValue =
+			new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
+	private final StringsPreferenceValue UI_legacyConnections =
+			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, UI_PLUGIN_ID);
 
-	private StringsPreferenceValue tailFileOptionsPreferenceValues;
-	private Map<String, String> tailOptionsByUUID = new HashMap<String, String>();
+	private final StringsPreferenceValue tailFileOptionsPreferenceValues;
+	private final Map<String, String> tailOptionsByUUID = new HashMap<String, String>();
 
-	private StringsPreferenceValue snapshotFilesPreferenceValues;
-	private Map<String, Snapshots> snapshotsByUUID = new HashMap<String, Snapshots>();
+	private final StringsPreferenceValue snapshotFilesPreferenceValues;
+	private final Map<String, Snapshots> snapshotsByUUID = new HashMap<String, Snapshots>();
+	
+	private final StringsPreferenceValue downloadableStandaloneCartUrls =
+			new StringsPreferenceValue('|', 10, DOWNLOADABLE_STANDALONECART_URLS, OpenShiftCoreActivator.PLUGIN_ID);;
 
 	private OpenShiftPreferences() {
-		this.connectionsPreferenceValue =
-				new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
-		this.legacyConnections = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY,
-				OpenShiftCoreActivator.PLUGIN_ID);
 
-		this.UI_connectionsPreferenceValue =
-				new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
-		this.UI_legacyConnections = new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, UI_PLUGIN_ID);
-
-		this.tailFileOptionsPreferenceValues = new StringsPreferenceValue('|', TAIL_FILE_OPTIONS,
-				OpenShiftCoreActivator.PLUGIN_ID);
+		this.tailFileOptionsPreferenceValues = 
+				new StringsPreferenceValue('|', TAIL_FILE_OPTIONS, OpenShiftCoreActivator.PLUGIN_ID);
 		initTailFileOptions(tailFileOptionsPreferenceValues.get());
 
-		this.snapshotFilesPreferenceValues = new StringsPreferenceValue('|', SNAPSHOT_FILES,
-				OpenShiftCoreActivator.PLUGIN_ID);
+		this.snapshotFilesPreferenceValues = 
+				new StringsPreferenceValue('|', SNAPSHOT_FILES, OpenShiftCoreActivator.PLUGIN_ID);
 		initSnapshotFiles(snapshotFilesPreferenceValues.get());
 	}
 
@@ -142,7 +154,7 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 			uuidsAndOptions.add(uuid);
 			uuidsAndOptions.add(options);
 		}
-		tailFileOptionsPreferenceValues.store(
+		tailFileOptionsPreferenceValues.set(
 				uuidsAndOptions.toArray(new String[uuidsAndOptions.size()]));
 	}
 
@@ -215,7 +227,7 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 			uuidsAndSnapshots.add(snapshots.getFullSnapshotFile());
 			uuidsAndSnapshots.add(snapshots.getDeploymentSnapshotFile());
 		}
-		tailFileOptionsPreferenceValues.store(
+		tailFileOptionsPreferenceValues.set(
 				uuidsAndSnapshots.toArray(new String[uuidsAndSnapshots.size()]));
 	}
 
@@ -225,7 +237,7 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 	}
 
 	public void saveConnections(String[] connections) {
-		connectionsPreferenceValue.store(connections);
+		connectionsPreferenceValue.set(connections);
 	}
 
 	public String[] getLegacyConnections() {
@@ -234,7 +246,7 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 	}
 
 	public void saveLegacyConnections(String[] connections) {
-		legacyConnections.store(connections);
+		legacyConnections.set(connections);
 	}
 
 	public void setClientReadTimeout(int timeout) {
@@ -247,6 +259,14 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 		return toInteger(timeout);
 	}
 
+	public String[] getDownloadableStandaloneCartUrls() {
+		return downloadableStandaloneCartUrls.get();
+	}
+
+	public void addDownloadableStandaloneCartUrl(String url) {
+		downloadableStandaloneCartUrls.add(url);
+	}
+	
 	public void flush() {
 		// TODO: implement
 	}

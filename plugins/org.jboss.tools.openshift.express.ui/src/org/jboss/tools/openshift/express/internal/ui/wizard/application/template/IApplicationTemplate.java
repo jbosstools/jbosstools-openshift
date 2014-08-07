@@ -68,5 +68,8 @@ public interface IApplicationTemplate {
 	public String getInitialGitUrl();
 	
 	public boolean isInitialGitUrlEditable();
+	
+	public boolean isCodeAnything();
+
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,23 +17,9 @@ import com.openshift.client.IHttpClient;
  */
 public interface IOpenShiftPreferenceConstants {
 
-	/** available connections */
-	public static final String CONNECTIONS = "org.jboss.tools.openshift.express.CONNECTION_NAMES";
-	/** the prefs key used in prior versions */
-	public static final String RHLOGIN_LIST_PREFS_KEY = "org.jboss.tools.openshift.express.internal.ui.wizard.CredentialsWizardModel_RHLOGIN_LIST";
-	/** last user name */
-	public static final String LAST_USERNAME = "org.jboss.tools.openshift.express.LAST_USERNAME";
-	/** server history */
-	public static final String SERVERS = "org.jboss.tools.openshift.express.SERVERS";
-	/** default server */
-	public static final String DEFAULT_HOST = "org.jboss.tools.openshift.express.SERVER";
-	/** tail command options */
-	public static final String TAIL_FILE_OPTIONS = "org.jboss.tools.openshift.express.TAILFILEOPTIONS";
 	/** the timeout that's the client's using when reading the OpenShift response */ 
 	public static final String CLIENT_READ_TIMEOUT = IHttpClient.SYSPROP_OPENSHIFT_READ_TIMEOUT;
 	/** snapshot files */
-	public static final String SNAPSHOT_FILES = "org.jboss.tools.openshift.express.SNAPSHOT_FILES";
 
-	public static final String CODEANYTHING_CARTRIDGES = "org.jboss.tools.openshift.express.CODEANYTHING_CARTRIDGES";
 }
 

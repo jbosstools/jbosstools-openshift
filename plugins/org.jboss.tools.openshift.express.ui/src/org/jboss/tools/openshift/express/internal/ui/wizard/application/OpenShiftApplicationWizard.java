@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,6 +38,7 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
@@ -52,6 +53,8 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
 
 import com.openshift.client.IApplication;
@@ -147,6 +150,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 				}
 
 				new FireConnectionsChangedJob(model.getConnection()).schedule();
+				saveCodeAnythingUrl();
 			}
 
 			if (!importProject()) {
@@ -210,6 +214,16 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					.createErrorStatus("An exception occurred while creating local git repository.", e));
 			return false;
 		}
+	}
+
+	private void saveCodeAnythingUrl() {
+		IApplicationTemplate template = model.getSelectedApplicationTemplate();
+		if (!(template instanceof ICodeAnythingApplicationTemplate)) {
+			return;
+		}
+		
+		String url = ((ICodeAnythingApplicationTemplate) template).getUrl();
+		OpenShiftPreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
 	}
 	
 	private boolean createServerAdapter() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,12 +31,10 @@ public class ContentProposalUtils {
 
 	public static ContentProposalAdapter createPreferencesBacked(final Text text, String preferencesKey,
 			String pluginId) {
-		final ControlDecoration decoration = createContenAssistDecoration("History available", text);
-
+		final ControlDecoration decoration = createContenProposalDecoration("History available", text);
 		final StringsPreferenceValue preferencesValues =
 				new StringsPreferenceValue(',', preferencesKey, pluginId);
-		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(preferencesValues.get());
-		proposalProvider.setFiltering(true);
+		ContentProposalAdapter proposalAdapter = createContentProposal(text, preferencesValues.get());
 		text.addFocusListener(new FocusAdapter() {
 
 			@Override
@@ -54,6 +52,12 @@ public class ContentProposalUtils {
 			}
 
 		});
+		return proposalAdapter;
+	}
+
+	public static ContentProposalAdapter createContentProposal(final Text text, String[] proposedValues) {
+		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(proposedValues);
+		proposalProvider.setFiltering(true);
 		KeyStroke keyStroke = KeyStroke.getInstance(SWT.CONTROL, ' ');
 		ContentProposalAdapter proposalAdapter =
 				new ContentProposalAdapter(text, new TextContentAdapter(), proposalProvider, keyStroke, null);
@@ -61,7 +65,7 @@ public class ContentProposalUtils {
 		return proposalAdapter;
 	}
 
-	private static ControlDecoration createContenAssistDecoration(String tooltip, Control control) {
+	public static ControlDecoration createContenProposalDecoration(String tooltip, Control control) {
 		return createDecoration(tooltip, FieldDecorationRegistry.DEC_CONTENT_PROPOSAL, SWT.RIGHT | SWT.TOP,
 				control);
 	}
@@ -69,9 +73,9 @@ public class ContentProposalUtils {
 	private static ControlDecoration createDecoration(String text, String fieldDecorationImageKey, int position,
 			Control control) {
 		ControlDecoration decoration = new ControlDecoration(control, position);
-		Image errorImage = FieldDecorationRegistry.getDefault()
+		Image icon = FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(fieldDecorationImageKey).getImage();
-		decoration.setImage(errorImage);
+		decoration.setImage(icon);
 		decoration.setDescriptionText(text);
 		decoration.setShowHover(true);
 		decoration.hide();

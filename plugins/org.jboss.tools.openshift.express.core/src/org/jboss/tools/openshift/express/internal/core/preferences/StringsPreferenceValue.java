@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Red Hat, Inc.
+ * Copyright (c) 2010-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,12 +24,19 @@ import java.util.StringTokenizer;
  */
 public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 
+	private static final int NO_MAXSIZE = -1;
 	private String delimiter;
 	private String escapedDelimiter;
+	private int maxSize;
 
 	public StringsPreferenceValue(char delimiter, String prefsKey, String pluginId) {
+		this(delimiter, NO_MAXSIZE, prefsKey, pluginId);
+	}
+	
+	public StringsPreferenceValue(char delimiter, int maxSize, String prefsKey, String pluginId) {
 		super(prefsKey, pluginId);
 		this.delimiter = String.valueOf(delimiter);
+		this.maxSize = maxSize;
 		try {
 			this.escapedDelimiter = URLEncoder.encode(String.valueOf(delimiter), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -37,15 +44,9 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 		}
 	}
 
+	@Override
 	public String[] get() {
-		return get(null);
-	}
-
-	public String[] get(String[] currentValues) {
-
-		String string = doGet(null);
-		String[] prefValues = split(string);
-		return overrideValues(currentValues, prefValues);
+		return split(doGet());
 	}
 
 	private String[] split(String string) {
@@ -59,42 +60,42 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 		return values.toArray(new String[values.size()]);
 	}
 
-	private String[] overrideValues(String[] newValues, String[] prefValues) {
-		if (prefValues == null) {
-			return newValues;
-		}
-
-		for (int i = 0; i < prefValues.length; i++) {
-			if (newValues == null
-					|| newValues.length < i) {
-				break;
-			}
-			prefValues[i] = newValues[i];
-		}
-		return prefValues;
-	}
-
 	/**
-	 * Adds the given string value to this preference value(s). Duplicate values
-	 * are not added.
+	 * Adds the given string value to this preference value(s) and stores it. 
+	 * Duplicate values are not added. 
 	 * 
 	 * @param value
 	 *            the value to add
 	 */
 	public void add(String value) {
 		String currentValues = doGet();
-		StringBuilder builder = new StringBuilder(currentValues);
 		value = escapeDelimiterCharacter(value);
-		if (!contains(value, currentValues)) {
-			if (hasValues(currentValues)) {
-				builder.append(delimiter);
+		if (!isContained(value, currentValues)) {
+			StringBuilder builder = new StringBuilder(currentValues);
+			if (!isEmpty(currentValues)) {
+				String[] values = split(currentValues);
+				if (maxSize != NO_MAXSIZE
+						&& values.length >= maxSize) {
+					values = shiftLeft(value, values);
+					values[maxSize - 1] = value;
+					builder = new StringBuilder(concatenate(values));
+				} else {
+					builder.append(delimiter).append(value);
+				}
+			} else {
+				builder.append(value);
 			}
-			builder.append(value);
 			doStore(builder.toString());
 		}
 	}
 
-	private String escapeDelimiterCharacter(String value) {
+	protected String[] shiftLeft(String value, String[] values) {
+		String[] copy = new String[maxSize];
+		System.arraycopy(values, 1, copy, 0, maxSize - 1);
+		return copy;
+	}
+
+	protected String escapeDelimiterCharacter(String value) {
 		if (value == null || value.length() == 0) {
 			return value;
 		}
@@ -109,7 +110,7 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 		return builder.toString();
 	}
 
-	private String unescapeDelimiterCharacter(String value) {
+	protected String unescapeDelimiterCharacter(String value) {
 		if (value == null || value.length() == 0) {
 			return value;
 		}
@@ -124,18 +125,19 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 		return builder.toString();
 	}
 
-	private boolean contains(String value, String currentValues) {
+	protected boolean isContained(String value, String currentValues) {
 		return currentValues != null
 				&& currentValues.length() > 0
 				&& currentValues.indexOf(value) >= 0;
 	}
 
-	private boolean hasValues(String currentValues) {
-		return currentValues != null && currentValues.length() > 0;
+	protected boolean isEmpty(String currentValues) {
+		return currentValues == null 
+					|| currentValues.length() == 0;
 	}
 
 	/**
-	 * Removes the given values from the strings stored in the preferences and
+	 * Removes the given values and
 	 * stores the preferences.
 	 * 
 	 * @param values
@@ -155,23 +157,8 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 			}
 		}
 		if (removed) {
-			store(currentValues);
+			doStore(concatenate(currentValues));
 		}
-	}
-
-	/**
-	 * Overrides the current values in the preferences with the values in the
-	 * given array (value in the preferences at index x is overridden with the
-	 * value in the given array at index x) and stores the preferences.
-	 */
-	public void store(String[] newValues) {
-		//String[] currentValues = get();
-		//overrideValues(newValues, currentValues);
-		doStore(concatenate(newValues));
-	}
-
-	public void store() {
-		store(null);
 	}
 
 	protected String concatenate(String[] values) {
@@ -185,5 +172,14 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 			}
 		}
 		return builder.toString();
+	}
+	
+	@Override
+	public void set(String[] values) {
+		doStore(concatenate(values));
+	}
+	
+	public int size() {
+		return get().length;
 	}
 }
