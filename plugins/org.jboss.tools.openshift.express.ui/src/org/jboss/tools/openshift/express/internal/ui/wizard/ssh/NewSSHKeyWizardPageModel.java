@@ -81,16 +81,17 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	}
 
 	public void setPrivateKeyName(String privateKeyName) {
+		String oldPrivateKeyName = getPrivateKeyName();
 		firePropertyChange(PROPERTY_PRIVATEKEY_FILENAME, this.privateKeyName, this.privateKeyName = privateKeyName);
-		updatePublicKeyNameFromPrivateKey(privateKeyName);
+		updatePublicKeyNameFromPrivateKey(oldPrivateKeyName, privateKeyName);
 	}
 
-	private void updatePublicKeyNameFromPrivateKey(String privateKeyName) {
+	private void updatePublicKeyNameFromPrivateKey(String oldPrivateKeyName, String privateKeyName) {
 		if (StringUtils.isEmpty(publicKeyName)) {
 			setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
 		} else {
 			String publicKeyNameNoSuffix = StringUtils.getWithoutSuffix(publicKeyName, PUBLICKEY_SUFFIX);
-			if (privateKeyName.startsWith(publicKeyNameNoSuffix)) {
+			if (oldPrivateKeyName.startsWith(publicKeyNameNoSuffix)) {
 				setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
 			}
 		}
