@@ -64,8 +64,8 @@ public class TailServerLogWorker implements Runnable {
 			}
 		} catch (Throwable e) {
 			org.jboss.tools.openshift.express.internal.ui.utils.Logger.error(
-					"Error while receiving the remote server log", e);
-			console.newMessageStream().println("Error while receiving the remote server log: " + e.getMessage());
+					"Error while receiving the remote server adapter log", e);
+			console.newMessageStream().println("Error while receiving the remote server adapter log: " + e.getMessage());
 		} finally {
 
 		}

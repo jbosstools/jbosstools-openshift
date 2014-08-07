@@ -130,7 +130,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 		if (!OpenShiftServerUtils.isOpenShiftRuntime(server)
 				|| !OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
 			return OpenShiftUIActivator.createErrorStatus(
-					NLS.bind("Server {0} is not an OpenShift Server", server.getName()));
+					NLS.bind("Server {0} is not an OpenShift Server Adapter", server.getName()));
 		}
 		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
 		new JobChainBuilder(applicationJob)
@@ -141,7 +141,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 					IApplication application = applicationJob.getApplication();
 					if (application == null) {
 						return OpenShiftUIActivator.createErrorStatus(
-								NLS.bind("Could not retrieve application for server {0}", server.getName()));
+								NLS.bind("Could not retrieve application for server adapter {0}", server.getName()));
 					}
 					return execute(application, shell);
 				}

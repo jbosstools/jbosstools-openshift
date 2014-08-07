@@ -351,25 +351,25 @@ public class OpenShiftServerUtils {
 	}
 
 	/**
-	 * Fills the given settings into the given server working copy.
-	 * <b>IMPORTANT:</b> If the server name is matching an existing server, then
-	 * we're updating this existing server. If the name is a new one, then we're
-	 * creating a new server.
+	 * Fills the given settings into the given server adapter working copy.
+	 * <b>IMPORTANT:</b> If the server adapter name is matching an existing server adapter, then
+	 * we're updating this existing server adapter. If the name is a new one, then we're
+	 * creating a new server adapter.
 	 * 
 	 * @param wc
-	 *            the server working copy to configure
+	 *            the server adapter working copy to configure
 	 * @param serverName
-	 *            the name for the server
+	 *            the name for the server adapter
 	 * @param host
-	 *            the host for the server
+	 *            the host for the server adapter
 	 * @param deployProject
-	 *            the deploy project for the server
+	 *            the deploy project for the server adapter
 	 * @param deployFolder
-	 *            the deploy folder for the server
+	 *            the deploy folder for the server adapter
 	 * @param remote
-	 *            the remote for the server
+	 *            the remote for the server adapter
 	 * @param applicationName
-	 *            the application name for the server
+	 *            the application name for the server adapter
 	 */
 	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName, String host,
 			String deployProject, String deployFolder, String remote, String applicationName, String domainName) {
@@ -441,7 +441,7 @@ public class OpenShiftServerUtils {
 	 * Returns true if the given server is an OpenShift one, false otherwise.
 	 * 
 	 * @param server
-	 *            the server to check
+	 *            the server adapter to check
 	 * @return true or false
 	 */
 	public static boolean isOpenShiftRuntime(IServerAttributes server) {
@@ -453,7 +453,7 @@ public class OpenShiftServerUtils {
 	 * Returns true if the given server is a server using an openshift behaviour
 	 * 
 	 * @param server
-	 *            the server to check
+	 *            the server adapter to check
 	 * @return true or false
 	 */
 	public static boolean isInOpenshiftBehaviourMode(IServer server) {

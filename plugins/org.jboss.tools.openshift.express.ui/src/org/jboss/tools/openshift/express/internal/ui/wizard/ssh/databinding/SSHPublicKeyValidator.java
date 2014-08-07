@@ -62,7 +62,7 @@ public class SSHPublicKeyValidator extends MultiValidator {
 
 		if (hasSSHConfigurationIdentityKey()) {
 			return ValidationStatus.warning(
-					NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift servers. " +
+					NLS.bind("Your SSH config ({0}) contains fixed keys for OpenShift server adapters. " +
 							"This can override any Eclipse specific SSH key preferences.",
 							new SSHUserConfig(SSHUtils.getSSH2Home()).getFile()));
 		} else if (!SSHUtils.publicKeyMatchesPrivateKeyInPreferences(new File(filePath))) {
