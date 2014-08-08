@@ -558,8 +558,12 @@ public class OpenShiftServerWizardComposite {
 		String error = null;
 		if (message != null) {
 			error = message;
-		} else if (applications == null) {
+		} else if (connection == null) {
 			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseSelectConnection;
+		} else if (domains == null) {
+			error = NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardPleaseCreateDomain, connection.getId());
+		} else if (applications.isEmpty()) {
+			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseCreateApplication;
 		} else if (application == null) {
 			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseSelectApplication;
 		} else {
@@ -634,19 +638,19 @@ public class OpenShiftServerWizardComposite {
 	private List<IApplication> safeGetApplications(IDomain domain) {
 		try {
 			if (domain == null) {
-				return Collections.emptyList();
+				return null;
 			}
 			return domain.getApplications();
 		} catch (NotFoundOpenShiftException nfose) {
 			// Credentials work, but no domain, so no applications either
-			return Collections.emptyList();
+			return null;
 		}
 	}
 
 	private List<IDomain> safeGetDomains(Connection connection) {
 		try {
 			if (connection == null) {
-				return Collections.emptyList();
+				return null;
 			}
 			return connection.getDomains();
 		} catch (NotFoundOpenShiftException e) {
@@ -655,7 +659,7 @@ public class OpenShiftServerWizardComposite {
 		} catch (OpenShiftException e) {
 			// Credentials work, but no domain, so no applications either
 			updateErrorMessage(NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardCouldNotLoadDomains, connection.getId(), e.getMessage()));
-			return Collections.emptyList();
+			return null;
 		}
 	}
 

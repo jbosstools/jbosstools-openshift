@@ -78,7 +78,10 @@ public class OpenshiftUIMessages extends NLS {
 	public static String OpenShiftServerWizardDeployLocation;
 	public static String OpenShiftServerWizardPleaseChooseLocation;
 	public static String OpenShiftServerWizardPleaseSelectConnection;
+	public static String OpenShiftServerWizardPleaseCreateDomain;
+	public static String OpenShiftServerWizardPleaseSelectDomain;
 	public static String OpenShiftServerWizardPleaseSelectApplication;
+	public static String OpenShiftServerWizardPleaseCreateApplication;
 	public static String OpenShiftServerWizardYourWorkspaceDoesNotHaveProject;
 	public static String OpenShiftServerWizardCouldNotLoadDomains;
 	public static String OpenShiftServerWizardFetchingDomainsAndApplications;
