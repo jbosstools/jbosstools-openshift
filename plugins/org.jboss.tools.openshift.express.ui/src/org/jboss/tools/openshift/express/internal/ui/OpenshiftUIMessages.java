@@ -62,4 +62,25 @@ public class OpenshiftUIMessages extends NLS {
 	public static String RefreshingVariables;
 
 	public static String NoConnectionsAreAvailable;
+	
+	public static String OpenShiftServerWizardConnection;
+	public static String OpenShiftServerWizardNew;
+	public static String OpenShiftServerWizardDomainName;
+	public static String OpenShiftServerWizardApplicationName;
+	public static String OpenShiftServerWizardDeployProject;
+	public static String OpenShiftServerWizardImportLink;
+	public static String OpenShiftServerWizardCreateLink;
+	public static String OpenShiftServerWizardRemote;
+	public static String OpenShiftServerWizardProjectSettings;
+	public static String OpenShiftServerWizardOutputDirectory;
+	public static String OpenShiftServerWizardBrowse;
+	public static String OpenShiftServerWizardCouldNotGetRemotePointing;
+	public static String OpenShiftServerWizardDeployLocation;
+	public static String OpenShiftServerWizardPleaseChooseLocation;
+	public static String OpenShiftServerWizardPleaseSelectConnection;
+	public static String OpenShiftServerWizardPleaseSelectApplication;
+	public static String OpenShiftServerWizardYourWorkspaceDoesNotHaveProject;
+	public static String OpenShiftServerWizardCouldNotLoadDomains;
+	public static String OpenShiftServerWizardFetchingDomainsAndApplications;
+
 }

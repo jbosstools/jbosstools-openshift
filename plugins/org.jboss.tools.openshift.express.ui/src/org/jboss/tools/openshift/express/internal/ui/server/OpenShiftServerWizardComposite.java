@@ -80,11 +80,13 @@ import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUti
 import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.DomainColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
 
@@ -176,7 +178,7 @@ public class OpenShiftServerWizardComposite {
 
 		// connection
 		Label connectionLabel = new Label(composite, SWT.NONE);
-		connectionLabel.setText("Connection:");
+		connectionLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardConnection);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
 
@@ -191,12 +193,12 @@ public class OpenShiftServerWizardComposite {
 		Button newConnectionButton = new Button(composite, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(newConnectionButton);
-		newConnectionButton.setText("New...");
+		newConnectionButton.setText(OpenshiftUIMessages.OpenShiftServerWizardNew);
 		newConnectionButton.addSelectionListener(onNewConnection());
 
 		// domain
 		Label domainNameLabel = new Label(composite, SWT.NONE);
-		domainNameLabel.setText("Domain Name: ");
+		domainNameLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardDomainName);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
 
@@ -209,7 +211,7 @@ public class OpenShiftServerWizardComposite {
 
 		// application
 		Label appNameLabel = new Label(composite, SWT.NONE);
-		appNameLabel.setText("Application Name: ");
+		appNameLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardApplicationName);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 
@@ -236,19 +238,19 @@ public class OpenShiftServerWizardComposite {
 		});
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectComboViewer.getControl());
-		deployLocationLabel.setText("Deploy Project: ");
+		deployLocationLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardDeployProject);
 		deployProjectComboViewer.addSelectionChangedListener(onSelectDeployProject());
 
 		// import
 		importLink = new Link(composite, SWT.None);
-		importLink.setText("<a>Import this application</a>"); //$NON-NLS-1$
+		importLink.setText(OpenshiftUIMessages.OpenShiftServerWizardImportLink); //$NON-NLS-1$
 		GridDataFactory.fillDefaults()
 				.span(3, 1).applyTo(importLink);
-		importLink.addSelectionListener(onClickImport());
+		importLink.addSelectionListener(onClickCreateOrImport());
 
 		// remote
 		Label remoteLabel = new Label(composite, SWT.NONE);
-		remoteLabel.setText("Remote: ");
+		remoteLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardRemote);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		remoteText.setEditable(false);
@@ -257,19 +259,19 @@ public class OpenShiftServerWizardComposite {
 		remoteText.addModifyListener(onModifyRemote());
 
 		Group projectSettings = new Group(composite, SWT.NONE);
-		projectSettings.setText("Project Settings");
+		projectSettings.setText(OpenshiftUIMessages.OpenShiftServerWizardProjectSettings);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectSettings);
 		projectSettings.setLayout(new GridLayout(2, false));
 
 		Label zipDestLabel = new Label(projectSettings, SWT.NONE);
-		zipDestLabel.setText("Output Directory: ");
+		zipDestLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardOutputDirectory);
 
 		Composite zipDestComposite = new Composite(projectSettings, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
 		browseDeployFolderButton = new Button(zipDestComposite, SWT.PUSH);
-		browseDeployFolderButton.setText("Browse...");
+		browseDeployFolderButton.setText(OpenshiftUIMessages.OpenShiftServerWizardBrowse);
 		browseDeployFolderButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
 		browseDeployFolderButton.addSelectionListener(onBrowseDeployFolder());
 
@@ -330,11 +332,15 @@ public class OpenShiftServerWizardComposite {
 		};
 	}
 
-	protected SelectionAdapter onClickImport() {
+	protected SelectionAdapter onClickCreateOrImport() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				OpenShiftApplicationWizard wizard =
-						new ImportOpenShiftApplicationWizard(connection, application);
+				OpenShiftApplicationWizard wizard = null;
+				if(application != null){
+					wizard = new ImportOpenShiftApplicationWizard(connection, application);
+				}else{
+					wizard = new NewOpenShiftApplicationWizard(connection);
+				}
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 				dialog.create();
 				int success = dialog.open();
@@ -346,7 +352,7 @@ public class OpenShiftServerWizardComposite {
 				} else {
 					projectsByApplication = createProjectsByApplication(applications);
 					setDeployProjectCombo(application, projectsByApplication);
-					enableImportLink(application);
+					updateCreateOrImportLink();
 					updateErrorMessage(null);
 				}
 			}
@@ -401,7 +407,7 @@ public class OpenShiftServerWizardComposite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				application = UIUtils.getFirstElement(event.getSelection(), IApplication.class);
 				setDeployProjectCombo(application, projectsByApplication);
-				enableImportLink(application);
+				updateCreateOrImportLink();
 				setDeploymentFolderText(application, deployProject);
 				setRemoteText(application, deployProject);
 				updateErrorMessage(null);
@@ -428,7 +434,7 @@ public class OpenShiftServerWizardComposite {
 			return remoteConfig.getName();
 		} catch (CoreException e) {
 			OpenShiftUIActivator.log(
-					NLS.bind("Could not get remote pointing to {0} for project {1}",
+					NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardCouldNotGetRemotePointing,
 							application.getGitUrl(), project.getName()), e);
 			return null;
 		}
@@ -457,8 +463,8 @@ public class OpenShiftServerWizardComposite {
 
 		ElementTreeSelectionDialog dialog =
 				new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp, cp);
-		dialog.setTitle("Deploy Location");
-		dialog.setMessage("Please choose a location to put zipped projects");
+		dialog.setTitle(OpenshiftUIMessages.OpenShiftServerWizardDeployLocation);
+		dialog.setMessage(OpenshiftUIMessages.OpenShiftServerWizardPleaseChooseLocation);
 		dialog.setInput(deployProject);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
@@ -482,7 +488,7 @@ public class OpenShiftServerWizardComposite {
 		setApplicationComboInput(applications);
 		selectApplicationCombo(application);
 		selectDeployProjectCombo(getImportedProjects(application, projectsByApplication));
-		enableImportLink(application);
+		updateCreateOrImportLink();
 		updateErrorMessage(null);
 	}
 
@@ -528,9 +534,16 @@ public class OpenShiftServerWizardComposite {
 		}
 	}
 
-	private void enableImportLink(IApplication application) {
-		IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
-		importLink.setEnabled(p == null || p.length == 0);
+	private void updateCreateOrImportLink() {
+		boolean enabled = true;
+		if(application != null){
+			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
+			enabled = p == null || p.length == 0;
+			importLink.setText(OpenshiftUIMessages.OpenShiftServerWizardImportLink);
+		}else{
+			importLink.setText(OpenshiftUIMessages.OpenShiftServerWizardCreateLink);
+		}
+		importLink.setEnabled(enabled);
 	}
 
 	private void updateErrorMessage(String message) {
@@ -546,15 +559,15 @@ public class OpenShiftServerWizardComposite {
 		if (message != null) {
 			error = message;
 		} else if (applications == null) {
-			error = "Please select an existing connection or create a new one.";
+			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseSelectConnection;
 		} else if (application == null) {
-			error = "Please select an application from the combo below.";
+			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseSelectApplication;
 		} else {
 			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 			if (p == null || p.length == 0) {
 				error = NLS.bind(
-								"Your workspace does not have a project that corresponds to the application {0}. Please import the application first.",
-								application.getName());
+					OpenshiftUIMessages.OpenShiftServerWizardYourWorkspaceDoesNotHaveProject,
+					application.getName());
 			}
 		}
 		return error;
@@ -641,7 +654,7 @@ public class OpenShiftServerWizardComposite {
 			return Collections.emptyList();
 		} catch (OpenShiftException e) {
 			// Credentials work, but no domain, so no applications either
-			updateErrorMessage(NLS.bind("Could not load domains for connection {0}: {1}", connection.getId(), e.getMessage()));
+			updateErrorMessage(NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardCouldNotLoadDomains, connection.getId(), e.getMessage()));
 			return Collections.emptyList();
 		}
 	}
@@ -747,7 +760,7 @@ public class OpenShiftServerWizardComposite {
 		private IApplication application;
 
 		private UpdateModelJob(Connection connection, IDomain domain, IApplication application) {
-			super(NLS.bind("Fetching domains and applications for connection {0}...", connection.getUsername()));
+			super(NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardFetchingDomainsAndApplications, connection.getUsername()));
 			this.connection = connection;
 			this.domain = domain;
 			this.application = application;
