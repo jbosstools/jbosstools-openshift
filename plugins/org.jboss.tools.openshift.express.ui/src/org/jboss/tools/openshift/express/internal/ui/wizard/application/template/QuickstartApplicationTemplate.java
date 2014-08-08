@@ -47,10 +47,21 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	}
 	
 	@Override
-	public String getHref() {
-		return quickstart.getHref();
+	public String getPageUrl() {
+		String href = quickstart.getHref();
+		if (StringUtils.isEmpty(href)) {
+			// OpenShift Enterprise has no href that points to the quickstart page.
+			// use the website instead
+			href = quickstart.getWebsite();
+		}
+		return href;
 	}
-
+	
+	@Override
+	public boolean hasPageUrl() {
+		return !StringUtils.isEmpty(getPageUrl()); 
+	}
+	
 	@Override
 	public String getInitialGitUrl() {
 		return quickstart.getInitialGitUrl();

@@ -296,6 +296,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			this.template = (IQuickstartApplicationTemplate) value;
 			this.nameLink.setText(new StringBuilder()
 					.append("<a>").append(template.getName()).append("</a>").toString());
+			nameLink.setEnabled(template.hasPageUrl());
 			updateOpenShiftMaintainedIcon(template);
 			updateSecurityUpdatesIcon(template);
 			this.summaryText.setText(template.getDescription());
@@ -339,7 +340,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					if (template == null) {
 						return;
 					}
-					new BrowserUtility().checkedCreateExternalBrowser(template.getHref(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+					new BrowserUtility().checkedCreateExternalBrowser(template.getPageUrl(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				}
 
 			};

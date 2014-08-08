@@ -24,7 +24,9 @@ public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 
 	public String getLanguage();
 	
-	public String getHref();
+	public String getPageUrl();
+
+	public boolean hasPageUrl();
 	
 	public List<ICartridge> getAlternativesFor(ICartridge cartridge);
 	
