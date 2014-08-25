@@ -83,6 +83,7 @@ Export-Package: org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jb
  org.jboss.tools.openshift.express.internal.ui.wizard.embed;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.environment;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.markers;x-friends:="org.jboss.tools.openshift.express.test",
+ org.jboss.tools.openshift.express.internal.ui.wizard.snapshot;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.ssh;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding;x-friends:="org.jboss.tools.openshift.express.test"
 
