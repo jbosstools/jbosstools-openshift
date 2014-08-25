@@ -18,6 +18,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -48,10 +50,6 @@ import com.openshift.client.IDomain;
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsModelListener {
 
-	private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
-	private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
-	private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
-	private IContextActivation contextActivation;
 	private Control connectionsPane;
 	private Control explanationsPane;
 	private PageBook pageBook;
@@ -62,39 +60,11 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	@Override
-	protected CommonViewer createCommonViewer(Composite aparent) {
-		CommonViewer viewer = super.createCommonViewer(aparent);
+	protected CommonViewer createCommonViewer(Composite parent) {
+		CommonViewer viewer = super.createCommonViewer(parent);
+		new OpenShiftExplorerContextsHandler(viewer);
 		ConnectionsModelSingleton.getInstance().addListener(this);
-		viewer.addSelectionChangedListener(onSelectionChanged());
 		return viewer;
-	}
-
-	private ISelectionChangedListener onSelectionChanged() {
-		return new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection selection = event.getSelection();
-				activateContext(selection);
-			}
-		};
-	}
-
-	private void activateContext(ISelection selection) {
-		IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
-		if (contextActivation != null) {
-			// deactivate previous active context
-			contextService.deactivateContext(contextActivation);
-		}
-		if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
-			this.contextActivation = contextService.activateContext(DOMAIN_CONTEXT);
-		} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
-			this.contextActivation = contextService.activateContext(APPLICATION_CONTEXT);
-		} else if (UIUtils.isFirstElementOfType(Connection.class, selection)) {
-			// must be checked after domain, application, adapter may convert
-			// any resource to a connection
-			this.contextActivation = contextService.activateContext(CONNECTION_CONTEXT);
-		}
 	}
 
 	@Override
@@ -178,6 +148,69 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 			pageBook.showPage(explanationsPane);
 		} else {
 			pageBook.showPage(connectionsPane);
+		}
+	}
+	
+	private static class OpenShiftExplorerContextsHandler extends Contexts {
+
+		private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
+		private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
+		private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
+		
+		OpenShiftExplorerContextsHandler(CommonViewer viewer) {
+			viewer.getControl().addFocusListener(onFocusLost());
+			viewer.addSelectionChangedListener(onSelectionChanged());
+		}
+		
+		private FocusAdapter onFocusLost() {
+			return new FocusAdapter() {
+				
+				@Override
+				public void focusLost(FocusEvent event) {
+					deactivateCurrent();
+				}
+			};
+		}
+
+		private ISelectionChangedListener onSelectionChanged() {
+			return new ISelectionChangedListener() {
+
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					ISelection selection = event.getSelection();
+					if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
+						activate(DOMAIN_CONTEXT);
+					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
+						activate(APPLICATION_CONTEXT);
+					} else if (UIUtils.isFirstElementOfType(Connection.class, selection)) {
+						// must be checked after domain, application, adapter may convert
+						// any resource to a connection
+						activate(CONNECTION_CONTEXT);
+					}
+				}
+			};
+		}
+	}
+	
+	private static class Contexts {
+		
+		private IContextActivation contextActivation;
+		
+		public void activate(String contextId) {
+			deactivateCurrent();
+			IContextService service = getService();
+			this.contextActivation = service.activateContext(contextId);
+		}
+		
+		public void deactivateCurrent() {
+			if (contextActivation != null) {
+				IContextService service = getService();
+				service.deactivateContext(contextActivation);
+			}
+		}
+		
+		private IContextService getService() {
+			return (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
 		}
 	}
 
