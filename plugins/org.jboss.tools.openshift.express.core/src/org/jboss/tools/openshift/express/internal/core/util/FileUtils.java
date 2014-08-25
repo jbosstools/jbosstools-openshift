@@ -24,6 +24,7 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.Assert;
 
 /**
@@ -31,8 +32,9 @@ import org.eclipse.core.runtime.Assert;
  */
 public class FileUtils {
 
+	private static final String EXT_TAR_GZ = ".tar.gz";
 	private static final char SUFFIX_DELIMITER = '.';
-	private static final String NUMERIC_SUFFIX_FILENAME_PATTERN = "{0}({1}){2}";
+	private static final String NUMERIC_SUFFIX_FILENAME_PATTERN = "{0}/{1}({2}){3}";
 	private static final Pattern NUMERIC_SUFFIX_FILENAME_REGEX = Pattern.compile("(.*)\\([0-9]+\\)");
 
 	private static final byte[] buffer = new byte[1024];
@@ -251,13 +253,14 @@ public class FileUtils {
 		if (StringUtils.isEmpty(filepath)) {
 			return filepath;
 		}
-		String suffix = getSuffix(filepath);
-		String filenameNoSuffix = stripNumericSuffix(stripFilesuffix(filepath));
+		String extension = getExtension(filepath);
+		String dir = FilenameUtils.getFullPathNoEndSeparator(filepath);
+		String filenameWithoutExtension = stripNumericSuffix(getBaseName(filepath));
 
 		String newFilename = filepath;
 		int i = 1;
 		while (new File(newFilename).exists()) {
-			newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, filenameNoSuffix, i++, suffix);
+			newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, dir, filenameWithoutExtension, i++, extension);
 		}
 		return newFilename;
 	}
@@ -281,15 +284,14 @@ public class FileUtils {
 		return matcher.group(1);
 	}
 
-	public static String getSuffix(String filename) {
+	private static String getExtension(String filename) {
 		if (StringUtils.isEmpty(filename)) {
 			return filename;
 		}
-		int suffixStart = filename.indexOf(SUFFIX_DELIMITER);
-		if (suffixStart < 0) {
-			return filename;
+		if(filename.endsWith(EXT_TAR_GZ)){
+			return EXT_TAR_GZ;
 		}
-		return filename.substring(suffixStart);
+		return FilenameUtils.getExtension(filename);
 	}
 
 	/**
@@ -298,14 +300,15 @@ public class FileUtils {
 	 * @param filename
 	 * @return
 	 */
-	public static String stripFilesuffix(String filename) {
+	public static String getBaseName(String filename) {
 		if (StringUtils.isEmpty(filename)) {
 			return filename;
 		}
-		int suffixStart = filename.indexOf(SUFFIX_DELIMITER);
-		if (suffixStart < 0) {
-			return filename;
+		if(filename.endsWith(EXT_TAR_GZ))
+		{
+			filename = org.apache.commons.lang.StringUtils.left(filename, filename.length() - EXT_TAR_GZ.length());
 		}
-		return filename.substring(0, suffixStart);
+
+		return FilenameUtils.getBaseName(filename);
 	}
 }
