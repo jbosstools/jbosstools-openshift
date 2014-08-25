@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.snapshot;
 import java.io.File;
 import java.text.MessageFormat;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
@@ -30,6 +32,12 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 	
 	public SaveSnapshotWizardPageModel(SaveSnapshotWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
+		String filepath = wizardModel.getFilepath();
+		if(filepath != null){
+			this.directory = StringUtils.left(filepath, 
+				filepath.length() - FilenameUtils.getName(filepath).length());
+		}
+			
 	}
 
 	public void setFilepath(String filepath) {
@@ -40,7 +48,11 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 	public String getFilepath() {
 		return wizardModel.getFilepath();
 	}
-
+	
+	public String getDestination(){
+		return this.directory;
+	}
+	
 	public void setDestination(String directory) {
 		this.directory = directory;
 		String filepath = getFilePath(directory, wizardModel.getApplication().getName(), getSnapshotTypeString(isDeploymentSnapshot()));
