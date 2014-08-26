@@ -837,6 +837,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to reset page fields", e);
 		}
+		getControl().pack(true);
 	}
 	
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
