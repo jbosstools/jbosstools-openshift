@@ -56,6 +56,11 @@ import com.openshift.client.cartridge.query.LatestVersionOf;
  * fullfilling requirements and resolving conflicts (ex. mutual exclusivity
  * etc.)
  * <p>
+ * The basic assumption in this strategy is that the UI is adding/removing
+ * cartridges from the model. This strategy will then correct the result and
+ * add/remove further depdencies/conflicting cartridges and possibly do/undo
+ * additions/removals if the users refuses these outcomes.
+ * <p>
  * TODO: replaced this manual code by a generic dependency-tree analysis
  * mechanism as soon as OpenShift completed design of cartridge metamodel
  * 
@@ -87,11 +92,12 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 	@Override
 	protected void add(ICartridge cartridge, CheckStateChangedEvent event) {
 		try {
-			getPageModel().checkEmbeddedCartridge(cartridge);
 			ApplicationRequirement missingRequirement = 
 					strategy.getMissingRequirement(cartridge, getPageModel());
 			if (missingRequirement != null) {
 				if (!shouldAddToInappropriateApplication(missingRequirement, cartridge, getPageModel())) {
+					// revert cartidge addition (propagated by direct binding of UI/model)
+					getPageModel().uncheckEmbeddedCartridge(cartridge);
 					return;
 				}
 			}
@@ -108,10 +114,10 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 	@Override
 	protected void remove(ICartridge cartridge, CheckStateChangedEvent event) {
 		try {
-			getPageModel().uncheckEmbeddedCartridge(cartridge);
 			EmbeddableCartridgeDiff additionalOperations = 
 					strategy.remove(cartridge, getPageModel().getCheckedCartridges());
 			if (additionalOperations.hasChanges()) {
+				getPageModel().uncheckEmbeddedCartridge(cartridge);
 				executeAdditionalOperations(false, cartridge, additionalOperations);
 			} else if (getPageModel().isEmbedded(cartridge)) {
 				executeRemove(cartridge);
@@ -127,11 +133,9 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 		String message = requirement.getMessage(cartridge, applicationProperties)
 				+ NLS.bind("\n\nAdding may fail, are you sure that you want to add cartridge {0}?",
 						cartridge.getName());
-			// revert
 		switch (openQuestionDialog(title, message)) {
 			default:
 			case 0:
-				getPageModel().uncheckEmbeddedCartridge(cartridge);
 				return false;
 			case 1:
 				return true;
@@ -145,7 +149,7 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 								"You are about to remove cartridge {0}.\n"
 										+ "Removing a cartridge is not reversible and can cause you to loose the data you have stored in it."
 										+ "\nAre you sure?", cartridge.getName()))) {
-			// revert removal
+			// revert removal (propagated by direct binding UI/model)
 			getPageModel().checkEmbeddedCartridge(cartridge);
 		}
 	}

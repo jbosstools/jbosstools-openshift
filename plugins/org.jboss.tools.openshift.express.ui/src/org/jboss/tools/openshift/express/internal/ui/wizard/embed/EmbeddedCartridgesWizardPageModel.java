@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.embed;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,17 +35,17 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 
 	private EmbeddedCartridgesWizardModel applicationCartridges;
 	private List<ICartridge> embeddableCartridges = new ArrayList<ICartridge>();
-	private ICartridge selectedCartridge ;
+	private ICartridge selectedCartridge;
 
 	public EmbeddedCartridgesWizardPageModel(EmbeddedCartridgesWizardModel applicationCartridges) {
 		this.applicationCartridges = applicationCartridges;
 	}
 	
-	public void loadOpenShiftResources() throws OpenShiftException, SocketTimeoutException {
+	public void loadOpenShiftResources() throws OpenShiftException {
 		loadEmbeddableCartridges();
 	}
 	
-	private void loadEmbeddableCartridges() throws OpenShiftException, SocketTimeoutException {
+	private void loadEmbeddableCartridges() throws OpenShiftException {
 		List<ICartridge> cartridges = applicationCartridges.getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
 		setCheckedCartridges(applicationCartridges.getEmbeddedCartridges());

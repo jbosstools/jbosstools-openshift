@@ -27,16 +27,18 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 
-	private Set<ICartridge> embeddedCartridges;
+	private Set<ICartridge> checkedEmbeddedCartridges;
 	private List<ICartridge> availableCartridges;
 	private Connection connection;
 	private IDomain domain;
 	private IApplicationProperties applicationProperties;
+	private Set<ICartridge> embeddedCartridges;
 
-	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartrdiges, List<ICartridge> availableCartridges, 
+	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges, 
 			IApplicationProperties applicationProperties, IDomain domain, Connection connection) {
-		this.embeddedCartridges = new HashSet<ICartridge>();
-		this.embeddedCartridges.addAll(embeddedCartrdiges);
+		this.embeddedCartridges = embeddedCartidges;
+		this.checkedEmbeddedCartridges = new HashSet<ICartridge>();
+		this.checkedEmbeddedCartridges.addAll(embeddedCartidges);
 		this.availableCartridges = availableCartridges;
 		this.applicationProperties = applicationProperties;
 		this.domain = domain;
@@ -56,11 +58,11 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 	}
 	
 	public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) {
-		return	this.embeddedCartridges = cartridges;
+		return	this.checkedEmbeddedCartridges = cartridges;
 	}
 
 	public Set<ICartridge> getCheckedEmbeddableCartridges() {
-		return embeddedCartridges;
+		return checkedEmbeddedCartridges;
 	}
 
 	public void refresh() {

@@ -87,6 +87,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 		viewer.setInput(
 				BeanProperties.list(EmbeddedCartridgesWizardPageModel.PROPERTY_EMBEDDABLE_CARTRIDGES)
 						.observe(pageModel));
+		// directly bind UI to model so that UI/model are synced (we'd have to update UI with strategy results otherwise)
 		dbc.bindSet(
 				ViewerProperties.checkedElements(ICartridge.class).observe(viewer),
 				BeanProperties.set(
