@@ -40,8 +40,7 @@ public class CodeAnythingApplicationTemplate
 		String oldUrl = getUrl();
 		((CodeAnythingCartridge) getStandaloneCartridge()).setUrlString(url);
 		firePropertyChange(PROPERTY_CARTRIDGE_URL, oldUrl, url);
-		String oldName = getName();
-		firePropertyChange(PROPERTY_NAME, oldName, getName());
+		firePropertyChange(PROPERTY_NAME, null, getName());
 	}
 	
 	@Override
