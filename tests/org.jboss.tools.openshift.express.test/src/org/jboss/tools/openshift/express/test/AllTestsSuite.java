@@ -16,8 +16,10 @@ import org.jboss.tools.openshift.express.test.core.StringsPreferenceValueTest;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.express.test.core.connection.ConnectionsModelTest;
+import org.jboss.tools.openshift.express.test.core.internal.util.FileUtilsTest;
 import org.jboss.tools.openshift.express.test.ui.utils.SSHUserConfigTest;
 import org.jboss.tools.openshift.express.test.ui.wizard.application.importoperation.OpenShiftMavenProfileTests;
+import org.jboss.tools.openshift.express.test.ui.wizard.snapshot.SaveSnapshotWizardPageModelTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -30,7 +32,9 @@ import org.junit.runners.Suite.SuiteClasses;
 		ConnectionsModelTest.class,
 		ConnectionTest.class,
 		ConnectionURLTest.class,
+		FileUtilsTest.class,
 		OpenShiftMarkerTest.class,
+		SaveSnapshotWizardPageModelTest.class,
 		StringsPreferenceValueTest.class
 })
 /**
