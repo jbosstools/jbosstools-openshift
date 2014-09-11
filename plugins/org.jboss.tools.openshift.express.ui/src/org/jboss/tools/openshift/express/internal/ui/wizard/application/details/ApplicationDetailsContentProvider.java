@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.AbstractPropertyTableContentProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.ContainerElement;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.IProperty;
@@ -38,13 +39,14 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 				elements.add(new StringElement("Name", application.getName()));
 				elements.add(
 						new StringElement("Public URL", application.getApplicationUrl().toString(), true));
-				elements.add(new StringElement("Type", application.getCartridge().getName()));
+				elements.add(new StringElement("Type", OpenShiftResourceLabelUtils.toString(application.getCartridge())));
 				SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss");
 				elements.add(
 						new StringElement("Created on", format.format(application.getCreationTime())));
 				elements.add(new StringElement("UUID", application.getUUID()));
 				elements.add(new StringElement("Git URL", application.getGitUrl()));
 				elements.add(new StringElement("SSH Connection", getSSHConnectionString(application.getGitUrl())));
+				elements.add(new StringElement("Scalable", application.getApplicationScale().getValue()));
 				elements.add(createCartridges(application));
 
 			} catch (Exception e) {

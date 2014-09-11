@@ -1748,6 +1748,13 @@
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
+        <factory
+              adaptableType="com.openshift.client.IApplication"
+              class="org.jboss.tools.openshift.express.internal.ui.filters.ActionFilterAdapterFactory">
+           <adapter
+                 type="org.eclipse.ui.IActionFilter">
+           </adapter>
+        </factory>
      </extension>
      <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -1829,4 +1836,27 @@
 			category="org.jboss.tools.common.model.ui.MainPreferencePage">
 		</page>
 	</extension>
+ <extension
+       point="org.eclipse.ui.decorators">
+    <decorator
+          icon="icons/scaleable_overlay.png"
+          id="org.jboss.tools.openshift.express.ui.scalabledecorator"
+          label="Scalable Application"
+          lightweight="true"
+          location="TOP_RIGHT"
+          state="true">
+       <enablement>
+          <and>
+             <objectClass
+                   name="com.openshift.client.IApplication">
+             </objectClass>
+             <objectState
+                   name="applicationScale"
+                   value="SCALE">
+             </objectState>
+          </and>
+
+       </enablement>
+    </decorator>
+ </extension>
 </plugin>
