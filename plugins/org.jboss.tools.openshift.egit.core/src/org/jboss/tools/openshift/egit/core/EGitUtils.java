@@ -79,6 +79,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.util.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.core.RepositoryProvider;
 import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
@@ -150,6 +151,21 @@ public class EGitUtils {
 		}
 		return new File(project.getLocation().toOSString(), Constants.DOT_GIT)
 				.exists();
+	}
+	
+	@SuppressWarnings("restriction")
+	public static boolean isGitFolderInRootOf(IProject project) {
+		RepositoryMapping mapping = RepositoryMapping.getMapping(project);
+		if (mapping == null) {
+			return false;
+		}
+		
+		String gitFolderRelativePath = mapping.getGitDir();
+		if (StringUtils.isEmptyOrNull(gitFolderRelativePath)) {
+			return false;
+		}
+		
+		return !gitFolderRelativePath.startsWith("..");
 	}
 
 	/**
