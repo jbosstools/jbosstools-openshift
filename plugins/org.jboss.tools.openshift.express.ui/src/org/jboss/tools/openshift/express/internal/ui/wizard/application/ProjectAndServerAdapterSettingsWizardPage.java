@@ -342,7 +342,13 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 						status = ValidationStatus.error(
 								NLS.bind("The project {0} is not open.", projectName));
 					} else if (EGitUtils.isSharedWithGit(project)){
-						status = getGitDirtyStatus(project);
+						if (!EGitUtils.isGitFolderInRootOf(project)) {
+							status = ValidationStatus.error(NLS.bind(
+									"The project {0} is not at the root of your git repository and appears to be a sub-project. Please copy your project to it's own repository.",
+									project.getName()));
+						} else {
+							status = getGitDirtyStatus(project);						
+						}
 					}
 				}
 			}
