@@ -288,7 +288,12 @@ public class UIUtils {
 	 * @see StyledText
 	 */
 	public static void setTransparent(StyledText styledText) {
-		styledText.setBackgroundImage(OpenShiftImages.TRANSPARENT_PIXEL_IMG);
+		if (Platform.getWS() == Platform.WS_GTK) {
+			// RHEL 6.5 cannot display transparent pixels in images (neither png, gif, bmp, etc.)
+			styledText.setBackground(styledText.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		} else {
+			styledText.setBackgroundImage(OpenShiftImages.TRANSPARENT_PIXEL_IMG);
+		}
 	}
 	
 }
