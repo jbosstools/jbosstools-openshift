@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,6 +22,8 @@ import com.openshift.client.OpenShiftSSHOperationException;
 
 /**
  * @author Xavier Coulon
+ * @author Andre Dietisheim
+ * @author Jeff Cantrill
  */
 public class ApplicationPropertySource implements IPropertySource {
 
@@ -38,12 +40,16 @@ public class ApplicationPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { new PropertyDescriptor("3.URL", "Public URL"),
-				new PropertyDescriptor("1.Name", "Name"), 
-				new PropertyDescriptor("6.UUID", "UUID"), 
-				new PropertyDescriptor("5.Git URI", "Git URI"), 
-				new PropertyDescriptor("2.Type", "Type"), 
-				new PropertyDescriptor("4.Created on", "Created on"), new PropertyDescriptor("7.Port Forwarding", "Port Forwarding") }; 
+		return new IPropertyDescriptor[] {
+				new PropertyDescriptor("3.URL", "Public URL"),
+				new PropertyDescriptor("1.Name", "Name"),
+				new PropertyDescriptor("6.UUID", "UUID"),
+				new PropertyDescriptor("5.Git URL", "Git URL"),
+				new PropertyDescriptor("2.Type", "Type"),
+				new PropertyDescriptor("4.Created on", "Created on"),
+				new PropertyDescriptor("7.Port Forwarding", "Port Forwarding"),
+				new PropertyDescriptor("8.Scalable", "Scalable")
+		};
 	}
 
 	@Override
@@ -65,25 +71,27 @@ public class ApplicationPropertySource implements IPropertySource {
 		if (id.equals("2.Type")) {
 			return OpenShiftResourceLabelUtils.toString(application.getCartridge());
 		}
-		if (id.equals("5.Git URI")) {
+		if (id.equals("5.Git URL")) {
 			return application.getGitUrl();
 		}
-		if(id.equals("7.Port Forwarding")) {
+		if (id.equals("7.Port Forwarding")) {
 			try {
 				StringBuffer bf = new StringBuffer();
 				boolean portFowardingStarted = application.isPortFowardingStarted();
-				
+
 				if (portFowardingStarted == true) {
 					return bf.append("Yes");
 				} else if (portFowardingStarted == false) {
-					return	bf.append("No");
+					return bf.append("No");
 				}
-				
+
 			} catch (OpenShiftSSHOperationException e) {
-				return "Unknown"; //e.printStackTrace();
+				return "Unknown";
 			}
 		}
-
+		if (id.equals("8.Scalable")) {
+			return application.getApplicationScale() != null ? application.getApplicationScale().getValue() : "";
+		}
 		return null;
 	}
 
