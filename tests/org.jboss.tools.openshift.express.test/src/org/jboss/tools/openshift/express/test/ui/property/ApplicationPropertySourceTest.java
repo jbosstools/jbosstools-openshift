@@ -10,19 +10,22 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.ui.property;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.jboss.tools.openshift.express.internal.ui.property.ApplicationPropertySource;
+import org.jboss.tools.openshift.express.test.core.ApplicationDetailsFake;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.openshift.client.IApplication;
 
-import static org.jboss.tools.openshift.express.test.mocks.ApplicationMocks.*;
-
+/**
+ * @author Jeff Cantrill
+ */
 public class ApplicationPropertySourceTest {
 	
 	private IApplication app;
@@ -30,7 +33,7 @@ public class ApplicationPropertySourceTest {
 	
 	@Before
 	public void setup(){
-		app = givenAnApplication(); 
+		app = new ApplicationDetailsFake(); 
 		propertySource = new ApplicationPropertySource(app);
 	}
 

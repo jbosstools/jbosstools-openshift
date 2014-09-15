@@ -19,6 +19,7 @@ import org.eclipse.ui.IActionFilter;
  * 
  * This adapter must be registered with the org.eclipse.runtime.adapters
  *
+ * @author Jeff Cantrill
  */
 public class ActionFilterAdapterFactory implements IAdapterFactory{
 

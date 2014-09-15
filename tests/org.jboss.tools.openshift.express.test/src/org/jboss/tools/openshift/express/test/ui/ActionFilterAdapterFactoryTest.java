@@ -10,17 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.ui;
 
-import static org.junit.Assert.*;
-import static org.jboss.tools.openshift.express.test.mocks.ApplicationMocks.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.ui.IActionFilter;
 import org.jboss.tools.openshift.express.internal.ui.filters.ActionFilterAdapterFactory;
 import org.jboss.tools.openshift.express.internal.ui.filters.SimplePropertyActionFilter;
+import org.jboss.tools.openshift.express.test.core.ApplicationDetailsFake;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.openshift.client.IApplication;
 
+/**
+ * @author Jeff Cantrill
+ */
 public class ActionFilterAdapterFactoryTest {
 
 	private ActionFilterAdapterFactory factory = new ActionFilterAdapterFactory();
@@ -28,7 +34,7 @@ public class ActionFilterAdapterFactoryTest {
 	
 	@Before
 	public void Setup()	{
-		app = givenAnApplication(); 
+		app = new ApplicationDetailsFake(); 
 	}
 			
 	@Test
