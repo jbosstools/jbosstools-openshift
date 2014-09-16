@@ -840,7 +840,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		// fix GTK3 combo boxes too small
 		// https://issues.jboss.org/browse/JBIDE-16877,
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425
-		getControl().pack(true);
+		((Composite) getControl()).layout(true, true);
 	}
 	
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
