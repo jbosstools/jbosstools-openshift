@@ -288,7 +288,7 @@ public class UIUtils {
 	 * @see StyledText
 	 */
 	public static void setTransparent(StyledText styledText) {
-		if (Platform.getWS() == Platform.WS_GTK) {
+		if (Platform.WS_GTK.equals(Platform.getWS())) {
 			// RHEL 6.5 cannot display transparent pixels in images (neither png, gif, bmp, etc.)
 			styledText.setBackground(styledText.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		} else {
