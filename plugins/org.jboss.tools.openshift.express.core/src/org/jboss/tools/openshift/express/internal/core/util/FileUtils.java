@@ -53,6 +53,23 @@ public class FileUtils {
 		return file.canRead();
 	}
 
+	public static boolean canWrite(String path) {
+		if (path == null) {
+			return false;
+		}
+		return canWrite(new File(path));
+	}
+	
+	public static boolean canWrite(File file) {
+		if (file == null) {
+			return false;
+		}
+		if (!file.exists()) {
+			return canWrite(file.getParent());
+		}
+		return file.canWrite();
+	}
+	
 	public static boolean exists(File file) {
 		return file != null
 				&& file.exists();
