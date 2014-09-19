@@ -52,6 +52,7 @@ import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
@@ -381,15 +382,17 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			if (newProject) {
 				final IPath repoResourcePath = new Path(repoPath);
 				if (repoResourcePath.isEmpty()
-						|| !repoResourcePath.isAbsolute()
-						|| !repoResourcePath.toFile().canWrite()) {
-					return OpenShiftUIActivator.createErrorStatus("The location '" + repoResourcePath.toOSString()
-							+ "' does not exist or is not writeable.");
-				}
-				final IPath applicationPath = applicationName != null ? repoResourcePath.append(new Path(
-						applicationName)) : null;
-				if (applicationPath != null && applicationPath.toFile().exists()) {
-					return OpenShiftUIActivator.createErrorStatus(
+						|| !repoResourcePath.isAbsolute()) {
+					return ValidationStatus.cancel("You need to provide an absolute path that we'll clone to.");
+				} else if (!FileUtils.canWrite(repoResourcePath.toOSString())) {
+					return ValidationStatus.error(
+							NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
+				} 
+				final IPath applicationPath = applicationName != null ?
+						repoResourcePath.append(new Path(applicationName)) : null;
+				if (applicationPath != null
+						&& applicationPath.toFile().exists()) {
+					return ValidationStatus.error(
 							NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
 									repoResourcePath.toOSString(), applicationName));
 				}
