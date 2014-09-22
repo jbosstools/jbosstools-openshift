@@ -52,7 +52,7 @@ public class PortForwardingHandler extends AbstractHandler {
 	private IStatus openPortForwardingDialogFor(final IApplication application) {
 		final CreateSSHSessionJob sshJob = new CreateSSHSessionJob(application);
 		new JobChainBuilder(sshJob)
-				.runWhenSuccessfullyDone(new UIJob("Opening port forwarding dialog") {
+				.runWhenSuccessfullyDone(new UIJob("Configuring port forwarding") {
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -70,7 +70,7 @@ public class PortForwardingHandler extends AbstractHandler {
 		final CreateSSHSessionJob sshJob = new CreateSSHSessionJob(applicationJob);
 		new JobChainBuilder(applicationJob)
 				.runWhenSuccessfullyDone(sshJob)
-				.runWhenSuccessfullyDone(new UIJob("Opening port forwarding dialog") {
+				.runWhenSuccessfullyDone(new UIJob("Configuring port forwarding") {
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
