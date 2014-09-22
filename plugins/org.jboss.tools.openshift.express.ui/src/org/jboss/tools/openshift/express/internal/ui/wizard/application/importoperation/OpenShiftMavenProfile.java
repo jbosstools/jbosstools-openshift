@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -54,75 +55,40 @@ public class OpenShiftMavenProfile {
 	private static final String ELEMENT_PROFILES = "profiles";
 	private static final String ELEMENT_PROFILE = "profile";
 	private static final String ELEMENT_ID = "id";
-
+	
 	private static final String OPENSHIFT_WAR_PROFILE =
 			"<profile>\n"
 					+ "<!-- When built in OpenShift the 'openshift' profile will be used when invoking mvn. -->\n"
 					+ "<!-- Use this profile for any OpenShift specific customization your app will need. -->\n"
 					+ "<!-- By default that is to put the resulting archive into the 'deployments' folder. -->\n"
 					+ "<!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->\n"
-					+ "<id>openshift</id>\n"
-					+ "<build>\n"
-					+ "   <finalName>{0}</finalName>\n"
-					+ "   <plugins>\n"
-					+ "     <plugin>\n"
+					+ "	<id>openshift</id>\n"
+					+ "	<build>\n"
+					+ "		<finalName>{0}</finalName>\n"
+					+ "		<plugins>\n"
+					+ "			{1}\n"
+					+ "		</plugins>\n"
+					+ "	</build>\n"
+					+ "</profile>\n";
+
+	private static final String MAVEN_WAR_PLUGIN = 
+			"<plugin>\n"
 					+ "       <artifactId>maven-war-plugin</artifactId>\n"
 					+ "       <version>2.4</version>\n"
 					+ "       <configuration>\n"
-					+ "         <outputDirectory>{1}</outputDirectory>\n"
+					+ "         <outputDirectory>{0}</outputDirectory>\n"
 					+ "         <warName>ROOT</warName>\n"
 					+ "       </configuration>\n"
-					+ "     </plugin>\n"
-					+ "   </plugins>\n"
-					+ " </build>\n"
-					+ "</profile>\n";
-
-	private static final String OPENSHIFT_MULTIPROJECT_WAR_PROFILE =
-			"<profile>\n"
-					+ "<!-- When built in OpenShift the 'openshift' profile will be used when invoking mvn. -->\n"
-					+ "<!-- Use this profile for any OpenShift specific customization your app will need. -->\n"
-					+ "<!-- By default that is to put the resulting archive into the 'deployments' folder. -->\n"
-					+ "<!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->\n"
-					+ "<id>openshift</id>\n"
-					+ "<build>\n"
-					+ "   <finalName>{0}</finalName>\n"
-					+ "   <plugins>\n"
-					+ "     <plugin>\n"
-					+ "       <artifactId>maven-war-plugin</artifactId>\n"
-					+ "       <version>2.4</version>\n"
-					+ "       <configuration>\n"
-					+ "         <outputDirectory>deployments</outputDirectory>\n"
-					+ "       </configuration>\n"
-					+ "     </plugin>\n"
-					+ "   </plugins>\n"
-					+ " </build>\n"
-					+ "</profile>\n";
-
-	private static final String OPENSHIFT_EAR_PROFILE =
-			"<profile>\n"
-					+ "<!-- When built in OpenShift the 'openshift' profile will be used when invoking mvn. -->\n"
-					+ "<!-- Use this profile for any OpenShift specific customization your app will need. -->\n"
-					+ "<!-- By default that is to put the resulting archive into the 'deployments' folder. -->\n"
-					+ "<!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->\n"
-					+ "<id>openshift</id>\n"
-					+ "  <build>\n"
-					+ "    <pluginManagement>\n"
-					+ "      <plugins>\n"
-					+ "        <plugin>\n"
-					+ "	         <artifactId>maven-ear-plugin</artifactId>\n"
-					+ "	         <version>2.7</version>\n"
-					+ "	         <configuration>\n"
-					+ "	           <outputDirectory>deployments</outputDirectory>\n"
-					+ "	         </configuration>\n"
-					+ "        </plugin>\n"
-					+ "      </plugins>\n"
-					+ "    </pluginManagement>\n"
-					+ "  </build>\n"
-					+ "</profile>\n";
-
+					+ "     </plugin>\n";
+	
+	private static final String COMMENT_START = "<!--\n ";
+	private static final String COMMENT_STOP = " -->";
+	
 	private IFile pomFile;
 	private String pluginId;
 	private Document document;
+
+	private DocumentBuilder documentBuilder;
 
 	public OpenShiftMavenProfile(IProject project, String pluginId) {
 		this(project.getFile(POM_FILENAME), pluginId);
@@ -173,7 +139,7 @@ public class OpenShiftMavenProfile {
 			}
 			Document document = getDocument();
 			Element profilesElement = getOrCreateProfilesElement(document);
-			Node profileNode = document.importNode(createOpenShiftProfileElement(finalName, outputDirectory), true);
+			Node profileNode = document.importNode(createOpenShiftProfile(finalName, outputDirectory), true);
 			profilesElement.appendChild(profileNode);
 			return true;
 		} catch (SAXException e) {
@@ -185,16 +151,23 @@ public class OpenShiftMavenProfile {
 		}
 	}
 
-	private Element createOpenShiftProfileElement(String finalName, String outputDirectory) throws ParserConfigurationException, SAXException,
-			IOException {
-		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		String openShiftProfile = MessageFormat.format(getProfileTemplate(), finalName, outputDirectory);
-		Document document = documentBuilder.parse(new ByteArrayInputStream(openShiftProfile.getBytes()));
+	private Node createOpenShiftProfile(String finalName, String outputDirectory)
+			throws ParserConfigurationException, SAXException, IOException {
+		String openShiftProfile = MessageFormat.format(OPENSHIFT_WAR_PROFILE, finalName, getWarPluginFragment(outputDirectory));
+		Document document = getDocumentBuilder().parse(new ByteArrayInputStream(openShiftProfile.getBytes()));
 		return document.getDocumentElement();
 	}
 
-	private String getProfileTemplate() {
-		return OPENSHIFT_WAR_PROFILE;
+	private String getWarPluginFragment(String outputDirectory) {
+		if (!StringUtils.isEmpty(outputDirectory)) {
+			return MessageFormat.format(MAVEN_WAR_PLUGIN, outputDirectory);
+		} else {
+			return new StringBuilder()
+				.append(COMMENT_START)
+				.append(MessageFormat.format(MAVEN_WAR_PLUGIN, "YOUR WAR DESTINATION"))
+				.append(COMMENT_STOP)
+				.toString();
+		}
 	}
 
 	private Element getOrCreateProfilesElement(Document document) throws CoreException {
@@ -206,13 +179,12 @@ public class OpenShiftMavenProfile {
 	}
 
 	private Element createProfilesElement(Document document) throws CoreException {
-		Element profilesElement;
-		profilesElement = document.createElement(ELEMENT_PROFILES);
 		Element projectElement = getProjectElement(document);
 		if (projectElement == null) {
 			throw new CoreException(
 					createStatus(NLS.bind("Could not find <project> tag in pom {0}", pomFile.toString())));
 		}
+		Element profilesElement = document.createElement(ELEMENT_PROFILES);
 		projectElement.appendChild(profilesElement);
 		return profilesElement;
 	}
@@ -296,8 +268,7 @@ public class OpenShiftMavenProfile {
 	private Document getDocument() throws CoreException {
 		try {
 			if (document == null) {
-				DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				this.document = documentBuilder.parse(pomFile.getContents());
+				this.document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pomFile.getContents());
 			}
 			return document;
 		} catch (ParserConfigurationException e) {
@@ -309,6 +280,13 @@ public class OpenShiftMavenProfile {
 		}
 	}
 
+	private DocumentBuilder getDocumentBuilder() throws ParserConfigurationException {
+		if (documentBuilder == null) {
+			this.documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		}
+		return documentBuilder;
+	}
+	
 	private interface IMatcher {
 		public boolean isMatch(Element element);
 	}

@@ -19,6 +19,7 @@ public enum DeployFolder {
 
 	JBOSSAS(IStandaloneCartridge.NAME_JBOSSAS, "deployments"), 
 	JBOSSEAP(IStandaloneCartridge.NAME_JBOSSEAP, "deployments"), 
+	WILDFLY8("wildfly", "deployments"),
 	JBOSSEWS(IStandaloneCartridge.NAME_JBOSSEWS, "webapps");
 
 	private String cartridgeName;

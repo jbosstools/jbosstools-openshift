@@ -17,6 +17,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -356,6 +358,7 @@ public class OpenShiftMavenProfileTests {
 		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName(), JBOSSAS_DEPLOYMENTS_FOLDER);
 		assertTrue(added);
 		profile.savePom(new NullProgressMonitor());
+		assertTrue(profile.existsInPom());
 		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
 		int tagIndex = pomContent.indexOf(OUTPUT_DIRECTORY_TAG);
 		assertTrue(tagIndex >= 0);
@@ -368,12 +371,26 @@ public class OpenShiftMavenProfileTests {
 		boolean added = profile.addToPom(nonOpenShiftProfilesProject.getName(), JBOSSEWS_DEPLOYMENTS_FOLDER);
 		assertTrue(added);
 		profile.savePom(new NullProgressMonitor());
+		assertTrue(profile.existsInPom());
 		String pomContent = toString(nonOpenShiftProfilesProject.getFile(POM_FILENAME));
 		int tagIndex = pomContent.indexOf(OUTPUT_DIRECTORY_TAG);
 		assertTrue(tagIndex >= 0);
 		assertTrue(pomContent.substring(tagIndex + OUTPUT_DIRECTORY_TAG.length()).startsWith(JBOSSEWS_DEPLOYMENTS_FOLDER));
 	}
 
+	@Test
+	public void doesNotAddMavenWarPluginIfNullOutputFolder() throws CoreException, IOException {
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(pomWithoutOpenShiftProfile, PLUGIN_ID);
+		boolean added = profile.addToPom(nonOpenShiftProject.getName(), null);
+		assertTrue(added);
+		profile.savePom(new NullProgressMonitor());
+		assertTrue(profile.existsInPom());
+		String pomContent = toString(nonOpenShiftProject.getFile(POM_FILENAME));
+		Matcher matcher = Pattern.compile("<!--[\\n \t]*<plugin>[\\n \t]*<artifactId>maven-war-plugin").matcher(pomContent);
+		assertTrue(matcher.find());
+		assertFalse(matcher.find());
+	}
+	
 	@Test
 	public void doesNotAddOpenShiftProfileIfAlreadyPresent() throws CoreException {
 		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(pomWithOpenShiftProfile, PLUGIN_ID);
