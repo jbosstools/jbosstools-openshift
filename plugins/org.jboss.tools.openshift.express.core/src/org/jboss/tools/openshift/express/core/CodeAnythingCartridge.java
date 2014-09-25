@@ -32,7 +32,7 @@ public class CodeAnythingCartridge extends BaseCartridge implements IStandaloneC
 	
 	public CodeAnythingCartridge() {
 		super("Downloadable cartridge", "Code Anything", 
-				"Have your own framework? Provide the URL of a cartridge here, and OpenShift will download and provision it automatically into your new app!");
+				"Have your own framework? Provide the URL of a cartridge here, and OpenShift will download and provision it automatically into your new app!", false);
 	}
 
 	public void setUrlString(String url) {

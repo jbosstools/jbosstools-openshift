@@ -53,6 +53,11 @@ public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 	}
 
 	@Override
+	public List<IStandaloneCartridge> getStandaloneCartridges(boolean isObsolete) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	public List<IStandaloneCartridge> getStandaloneCartridges() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
@@ -62,6 +67,11 @@ public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public List<IEmbeddableCartridge> getEmbeddableCartridges(boolean includeObsolete) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+	
 	@Override
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
 		throw new UnsupportedOperationException();
@@ -77,6 +87,11 @@ public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public List<ICartridge> getCartridges(boolean includeObsolete) throws OpenShiftException {
+		throw new UnsupportedOperationException();
+	}
+	
 	@Override
 	public List<ICartridge> getCartridges() throws OpenShiftException {
 		throw new UnsupportedOperationException();

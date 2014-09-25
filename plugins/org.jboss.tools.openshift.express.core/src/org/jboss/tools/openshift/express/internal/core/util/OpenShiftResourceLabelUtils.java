@@ -71,16 +71,20 @@ public class OpenShiftResourceLabelUtils {
 		} else if (cartridge.isDownloadable()) {
 			return toDownloadableCartridgeLabel(cartridge.getName(), cartridge.getDisplayName(), cartridge.getUrl());
 		} else {
-			return toCatridgeLabel(cartridge.getName(), cartridge.getDisplayName());
+			return toCatridgeLabel(cartridge.getName(), cartridge.getDisplayName(), cartridge.isObsolete());
 		}
 	}
 
-	private static String toCatridgeLabel(String name, String displayName) {
+	private static String toCatridgeLabel(String name, String displayName, boolean isObsolete) {
 		StringBuilder builder = new StringBuilder();
 		if (!StringUtils.isEmpty(displayName)) {
 			builder.append(displayName).append(" (").append(name).append(')');
 		} else {
 			builder.append(name);
+		}
+		
+		if (isObsolete) {
+			builder.append("[obsolete]");
 		}
 		return builder.toString();
 	}
