@@ -7,7 +7,7 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- lib/openshift-java-client-2.6.0-SNAPSHOT.jar,
+ lib/openshift-java-client-2.6.1.Final.jar,
  lib/log4j-1.2.17.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/slf4j-log4j12-1.6.1.jar,
