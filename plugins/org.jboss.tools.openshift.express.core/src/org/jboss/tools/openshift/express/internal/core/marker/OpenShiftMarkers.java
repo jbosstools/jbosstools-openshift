@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ResourceUtils;
 
 /**
  * @author Andre Dietisheim
@@ -74,6 +75,9 @@ public class OpenShiftMarkers {
 					if (startsWithDot(resource)) {
 						return false;
 					}
+					if (isReadme(resource)) {
+						return false;
+					}
 					if (!isKnownMarker(resource.getName())) {
 						allMarkers.add(createUnknownMarker(resource));
 					}
@@ -95,8 +99,7 @@ public class OpenShiftMarkers {
 	public List<IOpenShiftMarker> getPresent() throws CoreException {
 		final List<IOpenShiftMarker> allMarkers = new ArrayList<IOpenShiftMarker>();
 		final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
-		if (folder != null
-				&& folder.isAccessible()) {
+		if (ResourceUtils.exists(folder)) {
 			folder.accept(new IResourceVisitor() {
 
 				@Override
@@ -109,7 +112,12 @@ public class OpenShiftMarkers {
 					if (resource.getType() != IResource.FILE) {
 						return false;
 					}
+					// exclude dot-files (.gitignore etc.)
 					if (startsWithDot(resource)) {
+						return false;
+					} 
+					// exclude README
+					if (isReadme(resource)) {
 						return false;
 					}
 					allMarkers.add(getMarker(resource));
@@ -122,11 +130,17 @@ public class OpenShiftMarkers {
 	}
 
 	private boolean startsWithDot(IResource resource) {
-		if (resource == null
-				|| !resource.isAccessible()) {
+		if (!ResourceUtils.exists(resource)) {
 			return false;
 		}
 		return resource.getName().startsWith(".");
+	}
+	
+	private boolean isReadme(IResource resource) {
+		if (!ResourceUtils.exists(resource)) {
+			return false;
+		}
+		return "README.MD".equalsIgnoreCase(resource.getName());
 	}
 	
 	private IOpenShiftMarker getMarker(IResource resource) {
