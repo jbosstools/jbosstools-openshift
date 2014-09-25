@@ -96,6 +96,12 @@ public class ApplicationDetailsFake extends NoopApplicationFake {
 			public String getDescription() {
 				return null;
 			}
+
+			@Override
+			public boolean isObsolete() {
+				// TODO Auto-generated method stub
+				return false;
+			}
 		};
 	}
 
