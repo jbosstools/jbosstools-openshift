@@ -96,6 +96,11 @@ public class ApplicationDetailsFake extends NoopApplicationFake {
 			public String getDescription() {
 				return null;
 			}
+
+			@Override
+			public boolean isObsolete() {
+				return false;
+			}
 		};
 	}
 
