@@ -7,6 +7,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-dmr-1.2.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.8.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/openshift-java-client-2.6.1.Final.jar" sourcepath="/openshift-java-client"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-java-client-2.7.0-SNAPSHOT.jar" sourcepath="/openshift-java-client"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

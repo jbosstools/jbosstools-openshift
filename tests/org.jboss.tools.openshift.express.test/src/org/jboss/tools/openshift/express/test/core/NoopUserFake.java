@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.core;
 
+import java.util.Collection;
 import java.util.List;
 
+import com.openshift.client.IAuthorization;
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.IOpenShiftSSHKey;
@@ -149,6 +151,36 @@ public class NoopUserFake implements IUser {
 
 	@Override
 	public boolean removeSSHKey(String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IAuthorization createAuthorization(String arg0, String arg1) throws OpenShiftException {
+		throw new UnsupportedOperationException();	}
+
+	@Override
+	public IAuthorization createAuthorization(String arg0, String arg1, int arg2) throws OpenShiftException {
+		throw new UnsupportedOperationException();	}
+
+	@Override
+	public IAuthorization getAuthorization() throws OpenShiftException {
+		return null;
+	}
+
+	@Override
+	public IAuthorization getAuthorization(String arg0) throws OpenShiftException {
+		throw new UnsupportedOperationException();	}
+
+	@Override
+	public Collection<IAuthorization> getAuthorizations() throws OpenShiftException {
+		throw new UnsupportedOperationException();	}
+
+	@Override
+	public String getId() {
+		throw new UnsupportedOperationException();	}
+
+	@Override
+	public boolean removeAuthorization(String arg0) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 }
