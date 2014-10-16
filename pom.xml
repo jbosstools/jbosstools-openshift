@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.2.0.CR2-SNAPSHOT</version>
+		<version>4.2.0.Final-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>openshift</artifactId>
