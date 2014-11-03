@@ -30,6 +30,7 @@ import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.EmbeddableCartridge;
 import com.openshift.client.cartridge.ICartridge;
+import com.openshift.client.cartridge.IDeployedStandaloneCartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 import com.openshift.client.cartridge.StandaloneCartridge;
@@ -271,14 +272,14 @@ public class EmbedCartridgeStrategyTest {
 
 	private static final class ApplicationFake extends NoopApplicationFake {
 
-		private IStandaloneCartridge cartridge;
+		private IDeployedStandaloneCartridge cartridge;
 
 		private ApplicationFake(IStandaloneCartridge cartridge) {
-			this.cartridge = cartridge;
+			this.cartridge = new StandaloneCartridgeResourceFake(cartridge);
 		}
 
 		@Override
-		public IStandaloneCartridge getCartridge() {
+		public IDeployedStandaloneCartridge getCartridge() {
 			return cartridge;
 		}
 	}

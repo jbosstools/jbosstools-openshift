@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,26 +26,6 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Andre Dietisheim
  */
 public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
-
-	@Override
-	public void setProxySet(boolean proxySet) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setProxyPort(String proxyPort) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setProxyHost(String proxyHost) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setEnableSSLCertChecks(boolean doSSLChecks) {
-		throw new UnsupportedOperationException();
-	}
 
 	@Override
 	public IUser getUser() throws OpenShiftException {

@@ -28,9 +28,9 @@ import com.openshift.client.Messages;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftSSHOperationException;
 import com.openshift.client.cartridge.ICartridge;
+import com.openshift.client.cartridge.IDeployedStandaloneCartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
-import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author Andre Dietisheim
@@ -78,7 +78,7 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public IStandaloneCartridge getCartridge() {
+	public IDeployedStandaloneCartridge getCartridge() {
 		throw new UnsupportedOperationException();
 	}
 

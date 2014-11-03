@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.core;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,9 +17,9 @@ import java.util.List;
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IGearProfile;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.cartridge.IDeployedStandaloneCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
-import com.openshift.client.cartridge.IStandaloneCartridge;
-import com.openshift.internal.client.CartridgeType;
+import com.openshift.internal.client.StandaloneCartridgeResource;
 
 /**
  * @author Jeff Cantrill
@@ -64,45 +63,10 @@ public class ApplicationDetailsFake extends NoopApplicationFake {
 	}
 
 	@Override
-	public IStandaloneCartridge getCartridge() {
-		return new IStandaloneCartridge() {
-
-			@Override
-			public boolean isDownloadable() {
-				return false;
-			}
-
-			@Override
-			public URL getUrl() {
-				return null;
-			}
-
-			@Override
-			public CartridgeType getType() {
-				return null;
-			}
-
-			@Override
-			public String getName() {
-				return "mockApplicationName";
-			}
-
-			@Override
-			public String getDisplayName() {
-				return null;
-			}
-
-			@Override
-			public String getDescription() {
-				return null;
-			}
-
-			@Override
-			public boolean isObsolete() {
-				return false;
-			}
-		};
-	}
+	public IDeployedStandaloneCartridge getCartridge() {
+		return new StandaloneCartridgeResource(
+				"mockApplicationName", "mockApplicationName","mockApplicationName", null, null, false, null, null, null, null) {};
+		}
 
 	@Override
 	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
