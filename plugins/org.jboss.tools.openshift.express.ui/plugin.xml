@@ -550,8 +550,130 @@
         	</command>
 		</menuContribution>
 	</extension>
-    
-   	<!-- manage keys -->
+
+	<!-- start application -->
+	<extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.startApplication"
+              name="%openshift.command.application.start">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+			class="org.jboss.tools.openshift.express.internal.ui.command.StartApplicationHandler"
+			commandId="org.jboss.tools.openshift.express.ui.command.startApplication">
+		</handler>
+	</extension>
+	<!-- openshift explorer: start application -->
+    <extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.startApplication"
+				icon="icons/lrun_obj.gif"
+				id="org.jboss.tools.openshift.express.ui.command.startApplication"
+				mnemonic="S">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<instanceof
+									value="com.openshift.client.IApplication" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<!-- servers view: start application -->
+		<menuContribution
+       		locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.startApplication"
+				icon="icons/lrun_obj.gif"
+				id="org.jboss.tools.openshift.express.ui.command.startApplication"
+				mnemonic="S">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<instanceof
+									value="org.eclipse.wst.server.core.IServer" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+        	</command>
+		</menuContribution>
+	</extension>
+	
+	<!-- stop application -->
+	<extension
+           point="org.eclipse.ui.commands">
+        <command
+              id="org.jboss.tools.openshift.express.ui.command.stopApplication"
+              name="%openshift.command.application.stop">
+        </command>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+			class="org.jboss.tools.openshift.express.internal.ui.command.StopApplicationHandler"
+			commandId="org.jboss.tools.openshift.express.ui.command.stopApplication">
+		</handler>
+	</extension>
+	<!-- openshift explorer: stop application -->
+    <extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.stopApplication"
+				icon="icons/terminatedlaunch_obj.gif"
+				id="org.jboss.tools.openshift.express.ui.command.stopApplication"
+				mnemonic="T">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<instanceof
+									value="com.openshift.client.IApplication" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<!-- servers view: stop application -->
+		<menuContribution
+       		locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.stopApplication"
+				icon="icons/terminatedlaunch_obj.gif"
+				id="org.jboss.tools.openshift.express.ui.command.stopApplication"
+				mnemonic="S">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<instanceof
+									value="org.eclipse.wst.server.core.IServer" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+        	</command>
+		</menuContribution>
+	</extension>
+	
+	<!-- manage keys -->
 	<extension
 		point="org.eclipse.ui.commands">
 		<command

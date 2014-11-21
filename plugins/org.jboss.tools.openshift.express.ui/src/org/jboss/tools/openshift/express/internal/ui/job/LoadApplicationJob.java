@@ -54,5 +54,8 @@ public class LoadApplicationJob extends Job {
 	public final IApplication getApplication() {
 		return application;
 	}
-
+	
+	public String getApplicationName() {
+		return server.getName();
+	}
 }
