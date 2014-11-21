@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.jboss.tools.openshift.egit.ui;singleton:=true
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.6.1.qualifier
 Bundle-Activator: org.jboss.tools.openshift.egit.ui.EGitUIActivator
 Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.express.core;bundle-version="2.6.0",
