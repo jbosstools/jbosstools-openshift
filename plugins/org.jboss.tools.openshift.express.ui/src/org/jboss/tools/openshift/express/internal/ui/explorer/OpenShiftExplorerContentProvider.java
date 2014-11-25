@@ -31,6 +31,9 @@ import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsMod
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
+import com.openshift.internal.kube.Resource;
+import com.openshift.kube.Project;
+import com.openshift.kube.ResourceKind;
 
 /**
  * @author Xavier Coulon
@@ -65,13 +68,19 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		loadingElements.clear();
 		errors.clear();
 		if (parentElement instanceof IWorkspaceRoot) {
-			return ConnectionsModelSingleton.getInstance().getConnections();
+			return ConnectionsModelSingleton.getInstance().getAllConnections();
 		} else if (parentElement instanceof ConnectionsModel) {
-			Connection[] connections = ((ConnectionsModel) parentElement).getConnections();
-			return connections;
+			return ((ConnectionsModel) parentElement).getAllConnections();
 		} else if (parentElement instanceof Connection) {
 			List<IDomain> domains = ((Connection) parentElement).getDomains();
 			return domains.toArray(new IDomain[domains.size()]);
+		} else if (parentElement instanceof com.openshift.kube.Client){
+			List<Project> openshiftProjects = ((com.openshift.kube.Client) parentElement).list(ResourceKind.Project);
+			openshiftProjects.toArray(new Project[openshiftProjects.size()]);
+		} else if (parentElement instanceof Project){
+			Project p = (Project) parentElement;
+			List<Resource> resources = new ArrayList<Resource>(p.getResources(ResourceKind.DeploymentConfig));
+			return resources.toArray();
 		}
 		return new Object[0];
 	}
@@ -82,6 +91,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof com.openshift.kube.Client){
+			return loadChildren(parentElement);
+		}
 		if (parentElement instanceof Connection) {
 			Connection connection = (Connection) parentElement;
 			if (!connection.isConnected() 
@@ -123,6 +135,13 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			if (parentElement instanceof OpenShiftExplorerContentCategory) {
 				Connection user = ((OpenShiftExplorerContentCategory) parentElement).getUser();
 				children = new Object[] { user };
+			}else if (parentElement instanceof com.openshift.kube.Client){
+				children = ((com.openshift.kube.Client) parentElement).list(ResourceKind.Project).toArray();
+			}else if (parentElement instanceof Project){
+				Project p = (Project) parentElement;
+				children = p.getResources(ResourceKind.DeploymentConfig).toArray();
+			} else if(parentElement instanceof ResourceGrouping){
+				children = ((ResourceGrouping) parentElement).getResources();
 			} else if (parentElement instanceof Connection) {
 				final Connection connection = (Connection) parentElement;
 				children = connection.getDomains().toArray();
@@ -175,7 +194,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return element instanceof Connection
+		return element instanceof org.jboss.tools.openshift.core.Connection
+				|| element instanceof Project
+				|| element instanceof ResourceGrouping
 				|| element instanceof IDomain
 				|| element instanceof IApplication;
 	}
@@ -184,6 +205,30 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	}
 
 	public static class NotConnectedUserStub {
+	}
+	
+	static class ResourceGrouping{
+		private List<Resource> resources;
+		private String title;
+		private ResourceKind kind;
+
+		ResourceGrouping (String title, List<Resource> resources, ResourceKind kind){
+			this.title = title;
+			this.resources = resources;
+			this.kind = kind;
+		}
+		public ResourceKind getKind(){
+			return kind;
+		}
+		public Object [] getResources(){
+			return resources.toArray();
+		}
+
+		@Override
+		public String toString() {
+			return title;
+		}
+		
 	}
 
 }

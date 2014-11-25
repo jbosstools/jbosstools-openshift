@@ -138,7 +138,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					return false;
 				}
 
-				new FireConnectionsChangedJob(model.getConnection()).schedule();
+				new FireConnectionsChangedJob(model.getLegacyConnection()).schedule();
 				saveCodeAnythingUrl();
 			}
 
@@ -164,8 +164,8 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			// dont open error-dialog, the jobs will do if they fail
 			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
 			if (model.getConnection() != null) {
-				new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
-					.runWhenDone(new FireConnectionsChangedJob(model.getConnection()))
+				new JobChainBuilder(new RefreshConnectionJob(model.getLegacyConnection()))
+					.runWhenDone(new FireConnectionsChangedJob(model.getLegacyConnection()))
 					.schedule();
 			}
 			return false;

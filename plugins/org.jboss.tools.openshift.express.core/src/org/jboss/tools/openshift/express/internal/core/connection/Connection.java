@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.core.ConnectionVisitor;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
@@ -38,6 +39,7 @@ import com.openshift.client.IUser;
 import com.openshift.client.OpenShiftConnectionFactory;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
+import com.openshift.client.Refreshable;
 import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
@@ -47,7 +49,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public class Connection {
+public class Connection implements org.jboss.tools.openshift.core.Connection, Refreshable{
 
 	private static final String USER_ID =
 			OpenShiftCoreActivator.PLUGIN_ID + " " + OpenShiftCoreActivator.getDefault().getBundle().getVersion();
@@ -553,5 +555,10 @@ public class Connection {
 				+ ", rememberPassword=" + rememberPassword
 				+ ", didPromptForPassword=" + didPromptForPassword 
 				+ ", passwordLoaded=" + passwordLoaded + "]";
+	}
+
+	@Override
+	public void accept(ConnectionVisitor visitor) {
+		visitor.visit(this);
 	}
 }

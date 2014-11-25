@@ -21,6 +21,8 @@ import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils.UrlPortions;
 
+import org.jboss.tools.openshift.core.Connection;
+
 /**
  * An url-alike connection identifier that holds all relevant part for an
  * OpenShift Connection. ConnectionURL is used when storing a connection to the

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.core.ConnectionType;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.core.OpenShiftCoreException;
@@ -48,6 +49,9 @@ public class ConnectionsModel {
 	private Connection recentConnection = null;
 	private HashMap<ConnectionURL, Connection> connectionsByUrl = new HashMap<ConnectionURL, Connection>();
 	private List<IConnectionsModelListener> listeners = new ArrayList<IConnectionsModelListener>();
+	
+	// TODO fix me so i work with all connection types
+	private List<org.jboss.tools.openshift.core.Connection> kubeConnections = new ArrayList<org.jboss.tools.openshift.core.Connection>();
 
 	protected ConnectionsModel() {
 		load();
@@ -67,7 +71,16 @@ public class ConnectionsModel {
 			removeConnection(connection);
 		}
 	}
-
+	
+	public boolean addConnection(org.jboss.tools.openshift.core.Connection connection){
+		if(kubeConnections.contains(connection)){
+			return false;
+		}
+		kubeConnections.add(connection);
+		fireModelChange(connection, ADDED, ConnectionType.Kubernetes);
+		return true;
+	}
+	
 	public boolean addConnection(Connection connection) {
 		try {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
@@ -87,7 +100,7 @@ public class ConnectionsModel {
 		}
 		connectionsByUrl.put(connectionUrl, connection);
 		this.recentConnection = connection;
-		fireModelChange(connection, ADDED);
+		fireModelChange(connection, ADDED, ConnectionType.Legacy);
 		return true;
 	}
 
@@ -117,11 +130,14 @@ public class ConnectionsModel {
 	}
 
 	// TODO: dont allow/require external trigger to changer notification
-	public void fireConnectionChanged(Connection connection) {
+	public void fireConnectionChanged(org.jboss.tools.openshift.core.Connection connection) {
 		if (connection == null) {
 			return;
 		}
-		fireModelChange(connection, CHANGED);
+		ConnectionType type = ConnectionType.Kubernetes;
+		if(connection instanceof Connection)
+			type = ConnectionType.Legacy;
+		fireModelChange(connection, CHANGED, type);
 	}
 
 	// TODO: dont allow/require external trigger to changer notification
@@ -143,7 +159,7 @@ public class ConnectionsModel {
 			if (this.recentConnection == connection) {
 				this.recentConnection = null;
 			}
-			fireModelChange(connection, REMOVED);
+			fireModelChange(connection, REMOVED, ConnectionType.Legacy);
 			return true;
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftCoreException(e,
@@ -154,22 +170,22 @@ public class ConnectionsModel {
 		}
 	}
 
-	private void fireModelChange(Connection connection, int type) {
+	private void fireModelChange(org.jboss.tools.openshift.core.Connection  connection, int event, ConnectionType type) {
 		if (connection == null) {
 			return;
 		}
 		Iterator<IConnectionsModelListener> i = listeners.iterator();
 		while (i.hasNext()) {
 			IConnectionsModelListener l = i.next();
-			switch (type) {
+			switch (event) {
 			case ADDED:
-				l.connectionAdded(connection);
+				l.connectionAdded(connection, type);
 				break;
 			case REMOVED:
-				l.connectionRemoved(connection);
+				l.connectionRemoved(connection, type);
 				break;
 			case CHANGED:
-				l.connectionChanged(connection);
+				l.connectionChanged(connection, type);
 				break;
 
 			default:
@@ -180,6 +196,13 @@ public class ConnectionsModel {
 
 	public Connection getRecentConnection() {
 		return recentConnection;
+	}
+	
+	/*
+	 * Punt here..needs a way to map connections
+	 */
+	public org.jboss.tools.openshift.core.Connection getRecentKubeConnection(){
+		return kubeConnections.get(0);
 	}
 
 	/**
@@ -263,6 +286,12 @@ public class ConnectionsModel {
 		Collection<Connection> c = connectionsByUrl.values();
 		Connection[] rets = (Connection[]) c.toArray(new Connection[c.size()]);
 		return rets;
+	}
+	
+	public org.jboss.tools.openshift.core.Connection[] getAllConnections(){
+		Collection<org.jboss.tools.openshift.core.Connection> all = new ArrayList<org.jboss.tools.openshift.core.Connection>(connectionsByUrl.values());
+		all.addAll(kubeConnections);
+		return all.toArray(new org.jboss.tools.openshift.core.Connection[all.size()]);
 	}
 
 	/**

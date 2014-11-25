@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.core.Connection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
 /**

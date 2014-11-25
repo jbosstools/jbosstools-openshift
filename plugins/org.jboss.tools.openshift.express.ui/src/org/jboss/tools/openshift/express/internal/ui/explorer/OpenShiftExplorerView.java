@@ -34,8 +34,9 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
 import org.eclipse.ui.part.PageBook;
+import org.jboss.tools.openshift.core.Connection;
+import org.jboss.tools.openshift.core.ConnectionType;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
@@ -91,17 +92,17 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	@Override
-	public void connectionAdded(Connection connection) {
+	public void connectionAdded(Connection connection, ConnectionType type) {
 		refreshViewer(null);
 	}
 
 	@Override
-	public void connectionRemoved(Connection connection) {
+	public void connectionRemoved(Connection connection, ConnectionType type) {
 		refreshViewer(null);
 	}
 
 	@Override
-	public void connectionChanged(Connection connection) {
+	public void connectionChanged(Connection connection, ConnectionType type) {
 		refreshViewer(connection);
 	}
 
@@ -144,7 +145,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	private void showConnectionsOrExplanations(Control connectionsPane, Control explanationsPane) {
-		if (ConnectionsModelSingleton.getInstance().getConnections().length < 1) {
+		if (ConnectionsModelSingleton.getInstance().getAllConnections().length < 1) {
 			pageBook.showPage(explanationsPane);
 		} else {
 			pageBook.showPage(connectionsPane);
@@ -182,7 +183,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 						activate(DOMAIN_CONTEXT);
 					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
 						activate(APPLICATION_CONTEXT);
-					} else if (UIUtils.isFirstElementOfType(Connection.class, selection)) {
+					} else if (UIUtils.isFirstElementOfType(org.jboss.tools.openshift.express.internal.core.connection.Connection.class, selection)) {
 						// must be checked after domain, application, adapter may convert
 						// any resource to a connection
 						activate(CONNECTION_CONTEXT);

@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.test.core.connection;
 
 import java.util.List;
 
+import org.jboss.tools.openshift.core.ConnectionType;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModel;
@@ -92,21 +93,21 @@ public class ConnectionsModelFake extends ConnectionsModel {
 		private class Listener implements IConnectionsModelListener {
 
 			@Override
-			public void connectionAdded(Connection connection) {
+			public void connectionAdded(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
 				additionNotified = true;
-				notifiedConnection = connection;
+				notifiedConnection = (Connection) connection;
 			}
 
 			@Override
-			public void connectionRemoved(Connection connection) {
+			public void connectionRemoved(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
 				removalNotified = true;
-				notifiedConnection = connection;
+				notifiedConnection = (Connection)connection;
 			}
 
 			@Override
-			public void connectionChanged(Connection connection) {
+			public void connectionChanged(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
 				changeNotified = true;
-				notifiedConnection = connection;
+				notifiedConnection = (Connection)connection;
 			}
 		}
 	}

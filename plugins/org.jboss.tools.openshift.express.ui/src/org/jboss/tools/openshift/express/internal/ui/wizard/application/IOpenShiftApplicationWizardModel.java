@@ -72,7 +72,15 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
 	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
-
+	
+	/**
+	 * Retrieve a legacy OpenShift connection 
+	 * @return
+	 */
+	public Connection getLegacyConnection();
+	
+	public Connection setLegacyConnection(Connection connection);
+	
 	/**
 	 * Imports the project that the user has chosen into the workspace.
 	 * 

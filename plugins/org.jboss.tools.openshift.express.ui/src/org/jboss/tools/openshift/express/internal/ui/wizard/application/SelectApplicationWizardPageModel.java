@@ -46,7 +46,7 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private void refreshDomains() {
-		wizardModel.getConnection().refresh();
+		wizardModel.getLegacyConnection().refresh();
 		wizardModel.setDomains(loadDomains());
 	}
 
@@ -68,13 +68,13 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected List<IDomain> loadDomains() {
-		List<IDomain> domains = wizardModel.getConnection().getDomains();
+		List<IDomain> domains = wizardModel.getLegacyConnection().getDomains();
 		wizardModel.setDomains(domains);
 		return domains;
 	}
 	
 	public Connection getConnection() {
-		return wizardModel.getConnection();
+		return wizardModel.getLegacyConnection();
 	}
 
 	public void clearSelectedApplication() {
