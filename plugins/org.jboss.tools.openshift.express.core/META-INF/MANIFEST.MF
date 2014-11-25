@@ -21,7 +21,9 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.0",
  org.apache.commons.lang;bundle-version="2.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.jboss.tools.openshift.express.core,
+Export-Package: org.jboss.tools.openshift.core,
+ org.jboss.tools.openshift.core.internal,
+ org.jboss.tools.openshift.express.core,
  org.jboss.tools.openshift.express.internal.core;x-friends:="org.jboss.tools.openshift.express.ui,org.jboss.tools.openshift.express.core,org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.core.connection;x-friends:="org.jboss.tools.openshift.express.ui,org.jboss.tools.openshift.express.core,org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.core.marker;x-friends:="org.jboss.tools.openshift.express.ui,org.jboss.tools.openshift.express.core,org.jboss.tools.openshift.express.test",

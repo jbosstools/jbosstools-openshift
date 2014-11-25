@@ -28,4 +28,11 @@ Export-Package: com.openshift.client,
  com.openshift.internal.client.response;x-friends:="org.jboss.tools.openshift.express.core,org.jboss.tools.openshift.express.ui",
  com.openshift.internal.client.ssh;x-friends:="org.jboss.tools.openshift.express.core,org.jboss.tools.openshift.express.ui",
  com.openshift.internal.client.utils;x-friends:="org.jboss.tools.openshift.express.core,org.jboss.tools.openshift.express.ui",
- org.jboss.tools.openshift.express.client
+ com.openshift.internal.kube,
+ com.openshift.internal.kube.builders,
+ com.openshift.internal.kube.factories,
+ com.openshift.kube,
+ com.openshift.kube.capability,
+ com.openshift.kube.images,
+ org.jboss.tools.openshift.express.client,
+ org.slf4j.impl

@@ -13,10 +13,12 @@ package org.jboss.tools.openshift.express.internal.ui.property;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.internal.ui.property.DeploymentConfigPropertySource;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.kube.DeploymentConfig;
 
 /**
  * @author Xavier Coulon
@@ -35,6 +37,8 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 				return new ApplicationPropertySource((IApplication) adaptableObject);
 			} else if (adaptableObject instanceof IEmbeddedCartridge) {
 				return new EmbeddedCartridgePropertySource((IEmbeddedCartridge) adaptableObject);
+			} else if (adaptableObject instanceof DeploymentConfig){
+				return new DeploymentConfigPropertySource((DeploymentConfig) adaptableObject);
 			}
 		}
 		return null;

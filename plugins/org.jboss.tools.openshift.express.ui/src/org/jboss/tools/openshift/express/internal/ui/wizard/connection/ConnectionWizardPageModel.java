@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,7 +23,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.core.Connection;
+import org.jboss.tools.openshift.core.ConnectionVisitor;
+import org.jboss.tools.openshift.core.internal.KubernetesConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
@@ -43,7 +46,7 @@ import com.openshift.client.configuration.OpenShiftConfiguration;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class ConnectionWizardPageModel extends ObservableUIPojo {
+class ConnectionWizardPageModel extends ObservableUIPojo{
 
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
 	public static final String PROPERTY_USERNAME = "username";
@@ -75,18 +78,27 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void updateFrom(Connection connection) {
-		if (isCreateNewConnection(connection)) {
-			setUsername(getDefaultUsername());
-			setUseDefaultServer(true);
-			setDefaultHost();
-			setPassword(null);
-		} else {
-			setUsername(connection.getUsername());
-			setHost(connection.getHost());
-			setUseDefaultServer(connection.isDefaultHost());
-			setRememberPassword(connection.isRememberPassword());
-			setPassword(connection.getPassword());
-		}
+		connection.accept(
+			new ConnectionVisitor(){
+				public void visit(org.jboss.tools.openshift.express.internal.core.connection.Connection connection){
+					if (isCreateNewConnection(connection)) {
+						setUsername(getDefaultUsername());
+						setUseDefaultServer(true);
+						setDefaultHost();
+						setPassword(null);
+					} else {
+						setUsername(connection.getUsername());
+						setHost(connection.getHost());
+						setUseDefaultServer(connection.isDefaultHost());
+						setRememberPassword(connection.isRememberPassword());
+						setPassword(connection.getPassword());
+					}
+				};
+				
+				public void visit(KubernetesConnection connection){;
+				}
+			}
+		);
 	}
 
 	private boolean isCreateNewConnection(Connection connection) {
@@ -130,7 +142,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	public List<Connection> getConnections() {
 		if (allowConnectionChange) {
 			List<Connection> connections = 
-					CollectionUtils.toList(ConnectionsModelSingleton.getInstance().getConnections());
+					new ArrayList<Connection>(CollectionUtils.toList(ConnectionsModelSingleton.getInstance().getConnections()));
 			connections.add(new NewConnectionMarker());
 			return connections;
 		} else {
@@ -235,27 +247,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	public IStatus connect() {
 		IStatus status = Status.OK_STATUS;
 		try {
-			try {
-				Connection connection = null;
-				if (isCreateNewConnection()
-						|| isSelectedConnectionChanged()) {
-					connection = createConnection();
-				} else {
-					connection = selectedConnection;
-					connection.setRememberPassword(isRememberPassword());
-				}
-				connection.connect();
-				this.newConnection = connection;
-			} catch (OpenShiftTimeoutException e) {
-				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-						"Could not reach host at {0}. Connection timeouted.", host));
-			} catch (InvalidCredentialsOpenShiftException e) {
-				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-						"The credentials for user {0} are not valid", username));
-			} catch (OpenShiftException e) {
-				status = OpenShiftUIActivator.createErrorStatus(NLS.bind(
-						"Unknown error, can not verify user {0} - see Error Log for details", username));
-				OpenShiftUIActivator.log(e);
+			if((status = tryConnection(true)) != Status.OK_STATUS){
+				status = tryConnection(false);
 			}
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
@@ -267,13 +260,55 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		setValid(status);
 		return status;
 	}
-
-	private Connection createConnection() {
-		String host = this.host; 
+	
+	private IStatus tryConnection(boolean legacy){
+		try {
+			Connection connection = null;
+			if (isCreateNewConnection()
+					|| isSelectedConnectionChanged()) {
+				connection = createConnection(legacy);
+			} else {
+				connection = selectedConnection;
+				connection.accept(new ConnectionVisitor() {
+					@Override
+					public void visit(KubernetesConnection connection) {
+					}
+					
+					@Override
+					public void visit(org.jboss.tools.openshift.express.internal.core.connection.Connection connection) {
+						connection.setRememberPassword(isRememberPassword());
+					}
+				});
+			}
+			connection.connect();
+			this.newConnection = connection;
+		} catch (OpenShiftTimeoutException e) {
+			return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					"Could not reach host at {0}. Connection timeouted.", host));
+		} catch (InvalidCredentialsOpenShiftException e) {
+			return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					"The credentials for user {0} are not valid", username));
+		} catch (OpenShiftException e) {
+			OpenShiftUIActivator.log(e);
+			return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					"Unknown error, can not verify user {0} - see Error Log for details", username));
+		}
+		return Status.OK_STATUS;
+	}
+	
+	private Connection createConnection(boolean legacy) {
+		String host = this.host;
+		if(!legacy){
+			try {
+				return new KubernetesConnection(host, username, password);
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		if (isDefaultServer) {
-			return new Connection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
+			return new org.jboss.tools.openshift.express.internal.core.connection.Connection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
 		} else {
-			return new Connection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
+			return new org.jboss.tools.openshift.express.internal.core.connection.Connection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
 		}
 	}
 	
@@ -302,26 +337,57 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	public void createOrUpdateConnection() {
 		if (isCreateNewConnection()) {
 			wizardModel.setConnection(newConnection);
-			ConnectionsModelSingleton.getInstance().addConnection(newConnection);
-			// editedConnection.save();
+			newConnection.accept(new ConnectionVisitor(){
+				@Override
+				public void visit(org.jboss.tools.openshift.express.internal.core.connection.Connection connection) {
+					ConnectionsModelSingleton.getInstance().addConnection(connection);
+				}
+
+				@Override
+				public void visit(KubernetesConnection connection) {
+					ConnectionsModelSingleton.getInstance().addConnection(connection);
+				}
+				
+			});
 		} else {
 			if (selectedConnection != newConnection) {
-				// dont update since we were editing the connection we we already holding
-				// JBIDE-14771
-				selectedConnection.update(newConnection);
+				selectedConnection.accept(new ConnectionVisitor() {
+					@Override
+					public void visit(KubernetesConnection connection) {
+					}
+					
+					@Override
+					public void visit(org.jboss.tools.openshift.express.internal.core.connection.Connection selectedConnection) {
+						if(!(newConnection instanceof org.jboss.tools.openshift.express.internal.core.connection.Connection))
+							return;
+						// dont update since we were editing the connection we we already holding
+						// JBIDE-14771
+						selectedConnection.update((org.jboss.tools.openshift.express.internal.core.connection.Connection) newConnection);
+					}
+				});
 			}
 			// we may have get started from new wizard without a connection
 			// in wizard model: set it to wizard model
 			wizardModel.setConnection(selectedConnection);
 			ConnectionsModelSingleton.getInstance().fireConnectionChanged(selectedConnection);
-			// wizardModelConnection.save();
 		}
 	}
 
 	public void saveRecentConnection() {
 		Connection connection = getConnection();
 		if (connection != null) {
-			ConnectionsModelSingleton.getInstance().setRecent(connection);
+			connection.accept(new ConnectionVisitor() {
+				
+				@Override
+				public void visit(KubernetesConnection connection) {
+					//TODO figure out how to save connection
+				}
+				
+				@Override
+				public void visit(org.jboss.tools.openshift.express.internal.core.connection.Connection connection) {
+					ConnectionsModelSingleton.getInstance().setRecent(connection);
+				}
+			});
 		}
 	}
 }

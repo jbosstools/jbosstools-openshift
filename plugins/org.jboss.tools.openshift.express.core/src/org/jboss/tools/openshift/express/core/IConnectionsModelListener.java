@@ -10,7 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.core;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.core.Connection;
+import org.jboss.tools.openshift.core.ConnectionType;
 
 /**
  *   A listener for the connections model. 
@@ -21,17 +22,17 @@ public interface IConnectionsModelListener {
 	 * Be alerted that a connection has been added
 	 * @param connection
 	 */
-	public void connectionAdded(Connection connection);
+	public void connectionAdded(Connection connection, ConnectionType type);
 	
 	/**
 	 * Be alerted that a connection has been removed
 	 * @param connection
 	 */
-	public void connectionRemoved(Connection connection);
+	public void connectionRemoved(Connection connection, ConnectionType type);
 	
 	/**
 	 * Be alerted that a connection has been changed
 	 * @param connection
 	 */
-	public void connectionChanged(Connection connection);
+	public void connectionChanged(Connection connection, ConnectionType type);
 }

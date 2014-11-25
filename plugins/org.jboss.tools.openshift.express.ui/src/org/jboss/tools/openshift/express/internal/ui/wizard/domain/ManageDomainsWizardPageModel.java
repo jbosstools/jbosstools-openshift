@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.openshift.core.ConnectionType;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
@@ -48,20 +49,26 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 		return new IConnectionsModelListener() {
 			
 			@Override
-			public void connectionRemoved(Connection connection) {
-				ManageDomainsWizardPageModel.this.connection = null;
-				loadDomains();
+			public void connectionRemoved(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
+				if(ConnectionType.Legacy == type){
+					ManageDomainsWizardPageModel.this.connection = null;
+					loadDomains();
+				}
 			}
 			
 			@Override
-			public void connectionChanged(Connection connection) {
-				setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
-				loadDomains();
+			public void connectionChanged(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
+				if(ConnectionType.Legacy == type){
+					setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
+					loadDomains();
+				}
 			}
 			
 			@Override
-			public void connectionAdded(Connection connection) {
-				loadDomains();
+			public void connectionAdded(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
+				if(ConnectionType.Legacy == type){
+					loadDomains();
+				}
 			}
 		};
 	}

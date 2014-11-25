@@ -17,18 +17,24 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.core.Connection;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
+import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.ResourceGrouping;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.kube.BuildConfig;
+import com.openshift.kube.DeploymentConfig;
+import com.openshift.kube.Project;
+import com.openshift.kube.ResourceKind;
+import com.openshift.kube.Service;
 
 /**
  * @author Xavier Coulon
@@ -60,10 +66,12 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		Image image = null;
 		if (element instanceof Connection) {
 			image = OpenShiftImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
-		} else if (element instanceof IDomain) {
+		} else if (element instanceof IDomain || element instanceof Project) {
 			image = OpenShiftImages.GLOBE_IMG;
-		} else if (element instanceof IApplication) {
+		} else if (element instanceof IApplication || element instanceof DeploymentConfig) {
 			image = OpenShiftImages.QUERY_IMG;
+		} else if (element instanceof BuildConfig){
+			image = OpenShiftImages.BUILDCONFIG_IMG;
 		} else if (element instanceof IEmbeddedCartridge) {
 			image = OpenShiftImages.TASK_REPO_IMG;
 		} else if (element instanceof LoadingStub) {
@@ -83,8 +91,31 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	public StyledString getStyledText(Object element) {
 		StyledString styledString = null;
 		if (element instanceof Connection) {
-			styledString = createStyledString((Connection) element);
-		} else if (element instanceof IDomain) {
+			styledString = createStyledString((org.jboss.tools.openshift.core.Connection) element);
+		} else if (element instanceof Project){
+			Project p = (Project) element;
+			String label = 
+					new StringBuilder(p.getDisplayName()).append(" (ns:").append(p.getNamespace()).append(')').toString();
+
+			styledString = new StyledString(label);
+			styledString.setStyle(p.getDisplayName().length() +1, label.length() - p.getDisplayName().length() - 1, StyledString.QUALIFIER_STYLER);
+		} else if (element instanceof Service){
+			Service s = (Service) element;
+			StringBuilder b = new StringBuilder(s.getName());
+			b.append(" (selector: ").append(s.getSelector()).append(")");
+			styledString = new StyledString(b.toString());
+			styledString.setStyle(s.getName().length() + 1,b.length() - s.getName().length() -1 , StyledString.QUALIFIER_STYLER);
+		} else if (element instanceof DeploymentConfig){
+			DeploymentConfig config = (DeploymentConfig) element;
+			StringBuilder b = new StringBuilder(config.getName());
+			styledString = new StyledString(b.toString());
+		} else if (element instanceof BuildConfig){
+			BuildConfig config = (BuildConfig) element;
+			StringBuilder b = new StringBuilder(config.getName());
+			b.append(" ").append(config.getSourceUri());
+			styledString = new StyledString(b.toString());
+			styledString.setStyle(config.getName().length() + 1,b.length() - config.getName().length() -1 , StyledString.QUALIFIER_STYLER);
+		}else if (element instanceof IDomain) {
 			styledString = createStyledString((IDomain) element);
 		} else if (element instanceof IApplication) {
 			styledString = createStyledString((IApplication) element);
@@ -96,6 +127,8 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 			styledString = new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
 		} else if (element instanceof OpenShiftException) {
 			styledString = new StyledString(((OpenShiftException) element).getMessage());
+		} else {
+			styledString = new StyledString(element.toString());
 		}
 		return styledString;
 	}
@@ -104,7 +137,8 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		String name = connection.getUsername();
 		String host = connection.getHost();
 		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
-		if (connection.isDefaultHost()) {
+		if (connection instanceof org.jboss.tools.openshift.express.internal.core.connection.Connection 
+				&& ((org.jboss.tools.openshift.express.internal.core.connection.Connection)connection).isDefaultHost()) {
 			builder.append(' ').append(DEFAULT_MARKER);
 		}
 		String label = builder.toString();

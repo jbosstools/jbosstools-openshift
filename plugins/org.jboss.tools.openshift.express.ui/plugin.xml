@@ -328,6 +328,10 @@
               commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
               class="org.jboss.tools.openshift.express.internal.ui.command.NewConnectionHandler">
      	</handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.command.NewDeploymentHandler"
+        commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig">
+  </handler>
 	</extension>
     <extension
         point="org.eclipse.ui.menus">
@@ -347,6 +351,21 @@
 					</or>
 				</visibleWhen>
 			</command>
+   <command
+         commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
+         id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
+         style="push">
+      <visibleWhen>
+         <with
+               variable="selection">
+            <iterate>
+               <instanceof
+                     value="com.openshift.kube.Project">
+               </instanceof>
+            </iterate>
+         </with>
+      </visibleWhen>
+   </command>
 		</menuContribution>
 		<!-- openshift explorer toolbar: new connection -->
 		<menuContribution
@@ -482,6 +501,12 @@
 			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
 			                 <instanceof
 			                       value="com.openshift.client.IOpenShiftResource" />
+                    <instanceof
+                          value="com.openshift.internal.kube.Resource">
+                    </instanceof>
+                    <instanceof
+                          value="org.jboss.tools.openshift.core.Connection">
+                    </instanceof>
 			              </or>
 	                </iterate>
 				</and>
@@ -754,13 +779,6 @@
 	
 	<!-- New Domain -->
 	<extension
-           point="org.eclipse.ui.commands">
-        <command
-              id="org.jboss.tools.openshift.express.ui.command.newdomain"
-              name="%openshift.command.domain.new">
-        </command>
-	</extension>
-	<extension
            point="org.eclipse.ui.handlers">
         <handler
               commandId="org.jboss.tools.openshift.express.ui.command.newdomain"
@@ -783,6 +801,17 @@
                     </reference>
 				</visibleWhen>
 			</command>
+   <command
+         commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
+         id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
+         style="push">
+      <visibleWhen
+            checkEnabled="false">
+         <reference
+               definitionId="org.tools.openshift.express.ui.isOpenShiftProjectSelected">
+         </reference>
+      </visibleWhen>
+   </command>
         </menuContribution>
 	</extension>
 
@@ -1836,6 +1865,10 @@
 					</with>
 				</visibleWhen>
 			</command>
+   <command
+         commandId="org.jboss.tools.openshift.express.ui.comma"
+         style="push">
+   </command>
 		</menuContribution>
 	</extension>
   
@@ -1875,6 +1908,13 @@
               class="org.jboss.tools.openshift.express.internal.ui.filters.ActionFilterAdapterFactory">
            <adapter
                  type="org.eclipse.ui.IActionFilter">
+           </adapter>
+        </factory>
+        <factory
+              adaptableType="com.openshift.internal.kube.Resource"
+              class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
+           <adapter
+                 type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
      </extension>
@@ -1946,6 +1986,24 @@
 				</iterate>
 			</with>
 		</definition>
+  <definition
+        id="org.tools.openshift.express.ui.isOpenShiftProjectSelected">
+     <with
+           variable="selection">
+        <iterate
+              ifEmpty="false"
+              operator="and">
+           <count
+                 value="1">
+           </count>
+           <or>
+              <instanceof
+                    value="com.openshift.kube.Project">
+              </instanceof>
+           </or>
+        </iterate>
+     </with>
+  </definition>
 	</extension>
 	
 	<!-- preferences page -->
@@ -1980,5 +2038,12 @@
 
        </enablement>
     </decorator>
+ </extension>
+ <extension
+       point="org.eclipse.ui.commands">
+    <command
+          id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
+          name="%openshift.command.deploymentconfig.new">
+    </command>
  </extension>
 </plugin>

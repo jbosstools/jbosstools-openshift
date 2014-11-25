@@ -171,7 +171,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	}
 
 	public Connection getConnection() {
-		return wizardModel.getConnection();
+		return wizardModel.getLegacyConnection();
 	}
 	
 	public boolean isConnected() {

@@ -69,7 +69,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		setDomain(domain);
 		setApplication(application);
 		setUseExistingApplication(useExistingApplication);
-		setConnection(connection);
+		setLegacyConnection(connection);
 		setEnvironmentVariables(new LinkedHashMap<String, String>());
 	}
 
@@ -97,7 +97,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getRemoteName()
 				, getRepositoryFile()
 				, getMarkers()
-				, getConnection())
+				, getLegacyConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -138,7 +138,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getApplication()
 				, getRemoteName()
 				, getMarkers()
-				, getConnection())
+				, getLegacyConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -180,7 +180,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getApplication()
 				, getRemoteName()
 				, getMarkers()
-				, getConnection())
+				, getLegacyConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -230,7 +230,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	public void setDefaultDomainIfRequired() {
 		Assert.isNotNull(getConnection());
 		if (!hasDomain()) {
-			setDomain(getConnection().getDefaultDomain());
+			setDomain(getLegacyConnection().getDefaultDomain());
 		}
 	}
 
@@ -535,14 +535,14 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public Connection setConnection(Connection connection) {
+	public org.jboss.tools.openshift.express.internal.core.connection.Connection setLegacyConnection(org.jboss.tools.openshift.express.internal.core.connection.Connection connection) {
 		update(connection);
 		setProperty(PROP_CONNECTION, connection);
 		return connection;
 	}
 	
 	@Override
-	public Connection getConnection() {
+	public org.jboss.tools.openshift.express.internal.core.connection.Connection getLegacyConnection() {
 		return getProperty(PROP_CONNECTION);
 	}
 
@@ -632,4 +632,15 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		return binaryValue != null 
 				&& binaryValue.booleanValue();
 	}
+
+	@Override
+	public org.jboss.tools.openshift.core.Connection getConnection() {
+		return getLegacyConnection();
+	}
+
+	@Override
+	public org.jboss.tools.openshift.core.Connection setConnection(org.jboss.tools.openshift.core.Connection connection) {
+		throw new RuntimeException(String.format("Method not implemented for connection type: %s", connection.getClass().getCanonicalName()));
+	}
+
 }

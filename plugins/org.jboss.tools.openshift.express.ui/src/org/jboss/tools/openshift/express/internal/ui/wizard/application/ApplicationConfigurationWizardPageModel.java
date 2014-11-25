@@ -120,7 +120,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public Connection getConnection() {
-		return wizardModel.getConnection();
+		return wizardModel.getLegacyConnection();
 	}
 
 	public ApplicationScale getScale() {

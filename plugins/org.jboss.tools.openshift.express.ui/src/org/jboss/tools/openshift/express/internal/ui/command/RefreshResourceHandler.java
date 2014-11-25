@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.core.Connection;
 import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
 import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
@@ -31,6 +31,8 @@ import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftResource;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.Refreshable;
+import com.openshift.internal.kube.Resource;
 
 /**
  * @author Xavier Coulon
@@ -62,11 +64,9 @@ public class RefreshResourceHandler extends AbstractHandler {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
-					monitor.beginTask("Loading OpenShift informations...", IProgressMonitor.UNKNOWN);
-					if(element instanceof Connection) {
-						((Connection)element).refresh();
-					} else if (element instanceof IOpenShiftResource) {
-						((IOpenShiftResource)element).refresh();
+					if (element instanceof Refreshable) {
+						monitor.beginTask("Loading OpenShift informations...", IProgressMonitor.UNKNOWN);
+						((Refreshable) element).refresh();
 					}
 				} catch (OpenShiftException e) {
 					Logger.error("Failed to refresh element", e);
@@ -96,6 +96,8 @@ public class RefreshResourceHandler extends AbstractHandler {
 		} else if (resource instanceof IApplication) {
 			IApplication application = (IApplication) resource;
 			connection = ConnectionsModelSingleton.getInstance().getConnectionByResource(application);
+		} else if (resource instanceof Resource){
+			connection = ConnectionsModelSingleton.getInstance().getRecentKubeConnection();
 		}
 		return connection;
 	}
