@@ -396,7 +396,7 @@ public class EGitUtilsTest {
 		assertNotNull(host);
 		assertEquals("eap2-honkabonka2.rhcloud.com", host);
 	}
-	
+
 	public void shouldReturnHostFromHostOnlyGitUrl() {
 		//pre-conditions
 		//operation
@@ -433,4 +433,19 @@ public class EGitUtilsTest {
 		assertEquals("516e82ca4382ec2174000098", user);
 	}
 
+	@Test
+	public void shouldConsiderSSHGitUrlValid() {
+		//pre-conditions
+		//operation
+		assertTrue(EGitUtils.isValidGitUrl("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/"));
+		// verification
+	}
+	
+	@Test
+	public void shouldConsiderSCPGitUrlValid() {
+		//pre-conditions
+		//operation
+		assertTrue(EGitUtils.isValidGitUrl("git@eap2-honkabonka2.rhcloud.com:openshift/eap2.git/"));
+		// verification
+	}
 }

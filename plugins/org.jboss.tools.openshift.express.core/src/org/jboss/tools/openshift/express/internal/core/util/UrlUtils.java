@@ -47,8 +47,9 @@ public class UrlUtils {
 	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
 	public static final char CREDENTIALS_HOST_SEPARATOR = '@';
 	public static final char PORT_DELIMITER = ':';
+	
 	private static final Pattern SIMPLE_URL_PATTERN =
-			Pattern.compile("(\\w+://)|(git@)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
+			Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
 	private static final String PROPERTY_BASIC = "Basic";
 	private static final String PROPERTY_AUTHORIZATION = "Authorization";
 	

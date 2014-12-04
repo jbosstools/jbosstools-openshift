@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
@@ -252,7 +253,8 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 					return ValidationStatus
 							.cancel("Please provide an url for your cartridge.");
 				}
-				if (!UrlUtils.isValid(url)) {
+				if (!UrlUtils.isValid(url)
+						&& !EGitUtils.isValidGitUrl(url)) {
 					return ValidationStatus.error(NLS.bind("{0} is not a valid url.", url));
 				}
 				return ValidationStatus.ok();

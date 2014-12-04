@@ -104,7 +104,12 @@ public class EGitUtils {
 			+ Constants.MASTER; // refs/heads/master
 	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
 
-	private static final Pattern GIT_URL_PATTERN = Pattern.compile(".+://([^@]+)@*([^/]*)");
+//	private static final Pattern GIT_URL_PATTERN = Pattern.compile(".+://([^@]+)@*([^/]*)");
+	private static final Pattern GIT_URL_PATTERN =
+			Pattern.compile("(\\w+://)(([^@]+)@)*(([\\w\\d\\.-]+)(:[\\d]+){0,1}/*(.*))");
+	/* @see http://git-scm.com/book/it/v2/Git-on-the-Server-The-Protocols#The-SSH-Protocol */
+	private static final Pattern GIT_SSH_URL_PATTERN = 
+			Pattern.compile("(ssh:\\/\\/){0,1}[^@]+@*[\\w\\d\\.-]+(:|\\/).+");
 	
 	private EGitUtils() {
 		// inhibit instantiation
@@ -1302,12 +1307,17 @@ public class EGitUtils {
 		return aheadCount > 0;
 	}	
 
+	public static boolean isValidGitUrl(String url) {
+		return GIT_SSH_URL_PATTERN.matcher(url).matches()
+				|| GIT_URL_PATTERN.matcher(url).matches();
+	}
+	
 	public static String getGitHost(String gitUrl) {
-		return getGitUrlGroup(2, gitUrl);		
+		return getGitUrlGroup(5, gitUrl);		
 	}
 
 	public static String getGitUsername(String gitUrl) {
-		return getGitUrlGroup(1, gitUrl);
+		return getGitUrlGroup(3, gitUrl);
 	}
 
 	private static String getGitUrlGroup(int group, String gitUrl) {
@@ -1317,7 +1327,7 @@ public class EGitUtils {
 		}
 		Matcher matcher = GIT_URL_PATTERN.matcher(gitUrl);
 		if (!matcher.find()
-				|| matcher.groupCount() < 2) {
+				|| matcher.groupCount() < 7) {
 			return null;
 		}
 		return matcher.group(group);
