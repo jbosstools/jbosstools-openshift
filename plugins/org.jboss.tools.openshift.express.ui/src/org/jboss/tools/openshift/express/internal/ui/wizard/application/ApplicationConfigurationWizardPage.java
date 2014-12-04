@@ -62,6 +62,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
 import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
 import org.jboss.tools.openshift.express.internal.core.connection.Connection;
@@ -939,7 +940,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (StringUtils.isEmpty(gitUri)) {
 					return ValidationStatus.cancel("Please provide a git url for your source code");
 				}
-				if (UrlUtils.isValid(gitUri)) {
+				if (UrlUtils.isValid(gitUri)
+						|| EGitUtils.isValidGitUrl(gitUri)) {
 					return ValidationStatus.ok();
 				}
 			}
