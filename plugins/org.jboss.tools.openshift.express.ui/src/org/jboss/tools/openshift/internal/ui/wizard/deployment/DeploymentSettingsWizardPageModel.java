@@ -6,6 +6,7 @@ public class DeploymentSettingsWizardPageModel  extends ObservablePojo  {
 
 	public static final String PROPERTY_INCLUDE_BUILD_CONFIG = "includeBuildConfig";
 	public static final String PROPERTY_ECLIPSE_PROJECT_NAME = "eclipseProjectName";
+	public static final String PROPERTY_ECLIPSE_SERVICES_DEPENDENCIES = "serviceDependencies";
 	private DeploymentWizardContext context;
 
 	public DeploymentSettingsWizardPageModel(DeploymentWizardContext context) {
@@ -28,6 +29,16 @@ public class DeploymentSettingsWizardPageModel  extends ObservablePojo  {
 
 	public String getEclipseProjectName() {
 		return context.getProjectName();
+	}
+	
+	public void setServiceDependencies(String services){
+		String old = context.getServiceDependencies();
+		context.setServiceDependencies(services);
+		firePropertyChange(PROPERTY_ECLIPSE_SERVICES_DEPENDENCIES, old, services);
+	}
+	
+	public String getServiceDependencies(){
+		return context.getServiceDependencies();
 	}
 
 	public void reset() {

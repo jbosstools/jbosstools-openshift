@@ -34,14 +34,13 @@ public class CreateDeploymentJob extends AbstractDelegatingMonitorJob {
 			List<Resource> resources;
 			if(context.includeBuildConfig()){
 				SourceDeploymentBuilder builder = new SourceDeploymentBuilder(context.getNamespace(), this.sourceUrl, context.getUserName(),context.getImage().getImageUri(),context.getRepositoryUri());
+				builder.serviceDependencies(context.getServiceDependencies());
 				resources = builder.build();
 			}else{
-				ImageDeploymentBuilder builder = new ImageDeploymentBuilder(context.getNamespace(), context.getImage().getImageUri(), 8080);
+				ImageDeploymentBuilder builder = new ImageDeploymentBuilder(context.getNamespace(), context.getImage().getImageUri(), 27017);
+				builder.addEnvironmentVariables(context.getImage().getEnvironmentVariables());
+				builder.serviceDependencies(context.getServiceDependencies());
 				resources = builder.build();
-			}
-
-			for (Resource r : resources) {
-				updateResourceNameIfItExists(r);
 			}
 			
 			List<com.openshift.kube.Status> errors = new ArrayList<com.openshift.kube.Status>();
@@ -66,23 +65,6 @@ public class CreateDeploymentJob extends AbstractDelegatingMonitorJob {
 		Resource response = context.getClient().create(resource);
 		if(ResourceKind.Status == response.getKind()){
 			errors.add((com.openshift.kube.Status) response);
-		}
-	}
-
-	private void updateResourceNameIfItExists(Resource resource) {
-		Resource response;
-		int i = 0;
-		String name = resource.getName();
-		do {
-			try{
-				response = context.getClient().get(resource.getKind(), name, resource.getNamespace());
-				name = String.format("%s_%s", resource.getName(),i++);
-			}catch(OpenShiftKubeException e){
-				response = e.getStatus();
-			}
-		} while (resource.getKind() == response.getKind());
-		if(i > 0){
-			resource.setName(name);
 		}
 	}
 

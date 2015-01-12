@@ -28,6 +28,7 @@ public class DeploymentWizardContext {
 	private Client client;
 	private String repositoryUri;
 	private boolean includeBuildConfig = true;
+	private String serviceDependencies;
 
 	public DeploymentWizardContext(Client client, Project p, String repositoryUri) {
 		this.client = client;
@@ -97,6 +98,14 @@ public class DeploymentWizardContext {
 	
 	public boolean includeBuildConfig(){
 		return this.includeBuildConfig;
+	}
+
+	public String getServiceDependencies() {
+		return this.serviceDependencies;
+	}
+
+	public void setServiceDependencies(String services) {
+		this.serviceDependencies = services;
 	}
 	
 }
