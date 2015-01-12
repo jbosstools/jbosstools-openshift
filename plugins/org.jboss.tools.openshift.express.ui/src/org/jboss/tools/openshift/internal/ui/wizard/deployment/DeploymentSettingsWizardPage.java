@@ -169,6 +169,26 @@ public class DeploymentSettingsWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 		
+		Label usesLabel = new Label(projectComposite, SWT.NONE);
+		usesLabel.setText("Service Dependencies:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(false, false)
+				.indent(10, 0)
+				.applyTo(usesLabel);
+		final Text usesServicesText = new Text(projectComposite, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.applyTo(usesServicesText);
+		ISWTObservableValue usesTextObservable = 
+				WidgetProperties.text(SWT.Modify).observe(usesServicesText);
+		ValueBindingBuilder
+			.bind(usesTextObservable)
+			.to(BeanProperties.value(
+					DeploymentSettingsWizardPageModel.PROPERTY_ECLIPSE_SERVICES_DEPENDENCIES).observe(pageModel))
+			.in(dbc);
+		
 		final EclipseProjectValidator existingProjectValidator = 
 				new EclipseProjectValidator(buildConfigCheckboxObservable, projectNameTextObservable);
 		dbc.addValidationStatusProvider(existingProjectValidator);

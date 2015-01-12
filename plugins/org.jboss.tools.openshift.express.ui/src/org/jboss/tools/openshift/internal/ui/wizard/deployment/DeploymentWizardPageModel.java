@@ -11,7 +11,9 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 
@@ -31,7 +33,11 @@ public class DeploymentWizardPageModel extends ObservablePojo {
 	public List<DockerImageDescriptor> getBaseImages(){
 		List<DockerImageDescriptor> images = new ArrayList<DockerImageDescriptor>();
 		images.add(new DockerImageDescriptor(new ImageUri("openshift/wildfly-8-centos"), "WildFly Application Server 8.1.0.Final"));
-		images.add(new DockerImageDescriptor(new ImageUri("library/mongo"), "MongoDB Document Database"));
+		
+		Map<String, String> mongoEnv = new HashMap<String, String>();
+		mongoEnv.put("OPENSHIFT_MONGODB_DB_USERNAME", "mongo");
+		mongoEnv.put("OPENSHIFT_MONGODB_DB_PASSWORD", "mongo");
+		images.add(new DockerImageDescriptor(new ImageUri("library/mongo"), "MongoDB Document Database", mongoEnv));
 		return images;
 	}
 	
