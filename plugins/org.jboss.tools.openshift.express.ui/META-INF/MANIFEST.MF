@@ -53,6 +53,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.io,
  org.apache.commons.lang;version="2.6.0",
+ org.eclipse.pde.internal.ui.shared,
  org.jboss.tools.common,
  org.jboss.tools.common.databinding;version:="3.6.0",
  org.jboss.tools.common.ui,

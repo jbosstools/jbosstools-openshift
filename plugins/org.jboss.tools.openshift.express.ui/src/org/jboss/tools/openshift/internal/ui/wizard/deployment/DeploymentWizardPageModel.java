@@ -37,7 +37,7 @@ public class DeploymentWizardPageModel extends ObservablePojo {
 		Map<String, String> mongoEnv = new HashMap<String, String>();
 		mongoEnv.put("OPENSHIFT_MONGODB_DB_USERNAME", "mongo");
 		mongoEnv.put("OPENSHIFT_MONGODB_DB_PASSWORD", "mongo");
-		images.add(new DockerImageDescriptor(new ImageUri("library/mongo"), "MongoDB Document Database", mongoEnv));
+		images.add(new DockerImageDescriptor(new ImageUri("library/mongo"), "MongoDB Document Database"));
 		return images;
 	}
 	
