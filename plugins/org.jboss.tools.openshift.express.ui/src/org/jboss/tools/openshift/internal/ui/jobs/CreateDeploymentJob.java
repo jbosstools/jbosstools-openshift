@@ -34,12 +34,9 @@ public class CreateDeploymentJob extends AbstractDelegatingMonitorJob {
 			List<Resource> resources;
 			if(context.includeBuildConfig()){
 				SourceDeploymentBuilder builder = new SourceDeploymentBuilder(context.getNamespace(), this.sourceUrl, context.getUserName(),context.getImage().getImageUri(),context.getRepositoryUri());
-				builder.serviceDependencies(context.getServiceDependencies());
 				resources = builder.build();
 			}else{
 				ImageDeploymentBuilder builder = new ImageDeploymentBuilder(context.getNamespace(), context.getImage().getImageUri(), 27017);
-				builder.addEnvironmentVariables(context.getImage().getEnvironmentVariables());
-				builder.serviceDependencies(context.getServiceDependencies());
 				resources = builder.build();
 			}
 			
