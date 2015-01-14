@@ -20,6 +20,11 @@ public interface IOpenShiftPreferenceConstants {
 	/** the timeout that's the client's using when reading the OpenShift response */ 
 	public static final String CLIENT_READ_TIMEOUT = IHttpClient.SYSPROP_OPENSHIFT_READ_TIMEOUT;
 	/** snapshot files */
+	
+	/**
+	 * The list of hosts for kubernetes
+	 */
+	public static final String KUBERNETES_CONNECTIONS_KEY = "org.jboss.tools.openshift.express.KUBERNETES_CONNECTIONS";
 
 }
 

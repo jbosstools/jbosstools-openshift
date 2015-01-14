@@ -21,6 +21,9 @@ import java.util.Map.Entry;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.ConnectionType;
+import org.jboss.tools.openshift.core.ConnectionVisitor;
+import org.jboss.tools.openshift.core.internal.ConnectionRegistry;
+import org.jboss.tools.openshift.core.internal.KubernetesConnection;
 import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.core.OpenShiftCoreException;
@@ -49,10 +52,11 @@ public class ConnectionsModel {
 	private Connection recentConnection = null;
 	private HashMap<ConnectionURL, Connection> connectionsByUrl = new HashMap<ConnectionURL, Connection>();
 	private List<IConnectionsModelListener> listeners = new ArrayList<IConnectionsModelListener>();
-	
-	// TODO fix me so i work with all connection types
-	private List<org.jboss.tools.openshift.core.Connection> kubeConnections = new ArrayList<org.jboss.tools.openshift.core.Connection>();
 
+	/** Kubernetes resources */
+	private final ConnectionRegistry kubeConnectionRegistry = new ConnectionRegistry();
+	private org.jboss.tools.openshift.core.Connection recentKubeConnection = null;
+	
 	protected ConnectionsModel() {
 		load();
 	}
@@ -73,25 +77,34 @@ public class ConnectionsModel {
 	}
 	
 	public boolean addConnection(org.jboss.tools.openshift.core.Connection connection){
-		if(kubeConnections.contains(connection)){
-			return false;
+		class AddConnectionVisitor implements ConnectionVisitor {
+			boolean added = false;
+
+			@Override
+			public void visit(Connection connection) {
+				try {
+					ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+					added = addConnection(connectionUrl, connection);
+				} catch (UnsupportedEncodingException e) {
+					throw new OpenShiftCoreException(
+							e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
+				} catch (MalformedURLException e) {
+					throw new OpenShiftCoreException(
+							e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
+				}
+			}
+
+			@Override
+			public void visit(KubernetesConnection connection) {
+				if(kubeConnectionRegistry.add(connection)){
+					fireModelChange(connection, ADDED, ConnectionType.Kubernetes);
+					added = true;
+				}
+			};
 		}
-		kubeConnections.add(connection);
-		fireModelChange(connection, ADDED, ConnectionType.Kubernetes);
-		return true;
-	}
-	
-	public boolean addConnection(Connection connection) {
-		try {
-			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
-			return addConnection(connectionUrl, connection);
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(
-					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
-		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(
-					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
-		}
+		AddConnectionVisitor visitor = new AddConnectionVisitor();
+		connection.accept(visitor);
+		return visitor.added;
 	}
 
 	protected boolean addConnection(ConnectionURL connectionUrl, Connection connection) {
@@ -149,25 +162,44 @@ public class ConnectionsModel {
 		fireConnectionChanged(connection);
 	}
 
-	public boolean removeConnection(Connection connection) {
-		try {
-			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
-			if (!connectionsByUrl.containsKey(connectionUrl)) {
-				return false;
+	public boolean removeConnection(org.jboss.tools.openshift.core.Connection connection){
+		
+		class RemoveConnectionVisitor implements ConnectionVisitor {
+			boolean removed = false;
+			@Override
+			public void visit(KubernetesConnection connection) {
+				if(!kubeConnectionRegistry.remove(connection)) return;
+				setRecent(null);
+				fireModelChange(connection, REMOVED, ConnectionType.Kubernetes);
+				removed = true;
 			}
-			connectionsByUrl.remove(connectionUrl);
-			if (this.recentConnection == connection) {
-				this.recentConnection = null;
+			
+			@Override
+			public void visit(Connection connection) {
+				try {
+					ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+					if (!connectionsByUrl.containsKey(connectionUrl)) {
+						removed = false;
+						return;
+					}
+					connectionsByUrl.remove(connectionUrl);
+					if (getRecentConnection() == connection) {
+						setRecent(null);
+					}
+					fireModelChange(connection, REMOVED, ConnectionType.Legacy);
+					removed = true;
+				} catch (UnsupportedEncodingException e) {
+					throw new OpenShiftCoreException(e,
+							NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
+				} catch (MalformedURLException e) {
+					throw new OpenShiftCoreException(e,
+							NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
+				}
 			}
-			fireModelChange(connection, REMOVED, ConnectionType.Legacy);
-			return true;
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
-		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
-		}
+		};
+		RemoveConnectionVisitor visitor = new RemoveConnectionVisitor();
+		connection.accept(visitor);
+		return visitor.removed;
 	}
 
 	private void fireModelChange(org.jboss.tools.openshift.core.Connection  connection, int event, ConnectionType type) {
@@ -198,11 +230,12 @@ public class ConnectionsModel {
 		return recentConnection;
 	}
 	
-	/*
-	 * Punt here..needs a way to map connections
+	/**
+	 * Get the most recently used connection to OpenShift that uses
+	 * Kubernetes
 	 */
 	public org.jboss.tools.openshift.core.Connection getRecentKubeConnection(){
-		return kubeConnections.get(0);
+		return recentKubeConnection;
 	}
 
 	/**
@@ -282,15 +315,24 @@ public class ConnectionsModel {
 		}
 	}
 
+	/**
+	 * Returns all the connections to OpenShift servers that do not
+	 * utilize Kubernetes
+	 * @return
+	 */
 	public Connection[] getConnections() {
 		Collection<Connection> c = connectionsByUrl.values();
 		Connection[] rets = (Connection[]) c.toArray(new Connection[c.size()]);
 		return rets;
 	}
 	
+	/**
+	 * Return all known connections to OpenShift servers
+	 * @return
+	 */
 	public org.jboss.tools.openshift.core.Connection[] getAllConnections(){
 		Collection<org.jboss.tools.openshift.core.Connection> all = new ArrayList<org.jboss.tools.openshift.core.Connection>(connectionsByUrl.values());
-		all.addAll(kubeConnections);
+		all.addAll(kubeConnectionRegistry.getConnections());
 		return all.toArray(new org.jboss.tools.openshift.core.Connection[all.size()]);
 	}
 
@@ -343,8 +385,24 @@ public class ConnectionsModel {
 		return connectionsByUrl.size();
 	}
 
-	public Connection setRecent(Connection connection) {
-		return this.recentConnection = connection;
+	public void setRecent(org.jboss.tools.openshift.core.Connection connection) {
+		if(connection == null){
+			recentConnection = null;
+			recentKubeConnection = null;
+			return;
+		}
+		connection.accept(new ConnectionVisitor() {
+			
+			@Override
+			public void visit(KubernetesConnection connection) {
+				recentKubeConnection = connection;
+			}
+			
+			@Override
+			public void visit(Connection connection) {
+				recentConnection = connection;
+			}
+		});
 	}
 	
 	/**
@@ -353,6 +411,7 @@ public class ConnectionsModel {
 	public void save() {
 		List<String> customHostConnections = new ArrayList<String>();
 		List<String> defaultHostConnections = new ArrayList<String>();
+	
 		for (Entry<ConnectionURL, Connection> entry : connectionsByUrl.entrySet()) {
 			Connection connection = entry.getValue();
 			connection.save();
@@ -364,9 +423,10 @@ public class ConnectionsModel {
 				customHostConnections.add(connectionUrl.toString());
 			}
 		}
-
 		saveCustomHostConnections(customHostConnections);
 		saveDefaultHostConnections(defaultHostConnections);
+
+		kubeConnectionRegistry.save();
 	}
 	
 	protected void saveDefaultHostConnections(List<String> usernames) {
@@ -378,5 +438,5 @@ public class ConnectionsModel {
 		OpenShiftPreferences.INSTANCE.saveConnections(
 				(String[]) connectionUrls.toArray(new String[connectionUrls.size()]));
 	}
-	
+
 }
