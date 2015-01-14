@@ -376,18 +376,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo{
 	public void saveRecentConnection() {
 		Connection connection = getConnection();
 		if (connection != null) {
-			connection.accept(new ConnectionVisitor() {
-				
-				@Override
-				public void visit(KubernetesConnection connection) {
-					//TODO figure out how to save connection
-				}
-				
-				@Override
-				public void visit(org.jboss.tools.openshift.express.internal.core.connection.Connection connection) {
-					ConnectionsModelSingleton.getInstance().setRecent(connection);
-				}
-			});
+			ConnectionsModelSingleton.getInstance().setRecent(connection);
 		}
 	}
 }

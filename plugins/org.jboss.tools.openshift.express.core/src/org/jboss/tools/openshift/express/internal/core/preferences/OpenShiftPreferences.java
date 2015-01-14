@@ -18,6 +18,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.IApplication;
@@ -51,6 +52,8 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
 	private final StringsPreferenceValue legacyConnections = 
 			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, OpenShiftCoreActivator.PLUGIN_ID);
+	private final StringsPreferenceValue kubernetesConnections = 
+			new StringsPreferenceValue('|', KUBERNETES_CONNECTIONS_KEY, OpenShiftCoreActivator.PLUGIN_ID);
 
 	/* The following three keys are from the legacy UI plugin pref-store */
 	private final StringsPreferenceValue UI_connectionsPreferenceValue =
@@ -243,6 +246,24 @@ public class OpenShiftPreferences implements IOpenShiftPreferenceConstants {
 	public String[] getLegacyConnections() {
 		String[] ret = legacyConnections.get();
 		return ret == null ? UI_legacyConnections.get() : ret;
+	}
+	
+	/**
+	 * Return a list of the kubernetes connection strings
+	 * @return java.util.List<String>
+	 */
+	public List<String> getKubernetesConnections(){
+		String [] ret = kubernetesConnections.get();
+		return ret != null ? CollectionUtils.toList(ret) : new ArrayList<String>();
+	}
+	
+	/**
+	 * Save the list of kubernetes connections
+	 * @param connectionStrings java.util.List<String> of Kubernetes Hosts
+	 */
+	public void saveKubernetesConnections(List<String> connectionStrings){
+		if(connectionStrings == null) return;
+		kubernetesConnections.set(connectionStrings.toArray(new String[connectionStrings.size()]));
 	}
 
 	public void saveLegacyConnections(String[] connections) {

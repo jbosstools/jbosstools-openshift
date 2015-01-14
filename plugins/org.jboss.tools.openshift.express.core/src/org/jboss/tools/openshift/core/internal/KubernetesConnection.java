@@ -1,10 +1,22 @@
+/******************************************************************************* 
+ * Copyright (c) 2015 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.internal;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.jboss.tools.openshift.core.Connection;
 import org.jboss.tools.openshift.core.ConnectionVisitor;
+import org.jboss.tools.openshift.express.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
 
 import com.openshift.kube.OpenShiftKubeClient;
@@ -59,11 +71,7 @@ public class KubernetesConnection extends OpenShiftKubeClient implements Connect
 
 	@Override
 	public String getScheme() {
-		if(host.startsWith(UrlUtils.SCHEME_HTTPS))
-			return UrlUtils.SCHEME_HTTPS;
-		if(host.startsWith(UrlUtils.SCHEME_HTTP))
-			return UrlUtils.SCHEME_HTTP;
-		return null;
+		return UrlUtils.getScheme(host);
 	}
 
 	@Override
@@ -109,6 +117,14 @@ public class KubernetesConnection extends OpenShiftKubeClient implements Connect
 	public void refresh() {
 		this.connect();
 	}
-	
+
+	@Override
+	public String toString() {
+		try {
+			return UrlUtils.getUrlFor(username, host);
+		} catch (UnsupportedEncodingException e) {
+			throw new OpenShiftCoreException(e, "Unable to determine URL from username: '%s', host: '%s'", username, host);
+		}
+	}
 	
 }
