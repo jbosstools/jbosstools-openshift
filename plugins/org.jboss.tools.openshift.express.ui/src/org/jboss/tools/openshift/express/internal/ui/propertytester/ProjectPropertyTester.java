@@ -12,8 +12,8 @@ package org.jboss.tools.openshift.express.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
+import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
 
 /**
  * Property tester for properties that are related to the OpenShift server

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
+import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCartridge;
 import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EmbeddedCartridgesWizardModel;

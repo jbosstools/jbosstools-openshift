@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -25,19 +27,19 @@ public class ConnectionAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-		if (adapterType != Connection.class) {
+		if (adapterType != ExpressConnection.class) {
 			return null;
 		}
 
-		Connection connection = null;
-		if (adaptableObject instanceof Connection) {
-			connection = (Connection) adaptableObject;
+		ExpressConnection connection = null;
+		if (adaptableObject instanceof ExpressConnection) {
+			connection = (ExpressConnection) adaptableObject;
 		} else if (adaptableObject instanceof IDomain) {
 			IDomain domain = (IDomain) adaptableObject;
-			connection = ConnectionsModelSingleton.getInstance().getConnectionByResource(domain.getUser());
+			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
 		} else if (adaptableObject instanceof IUser) {
 			IUser user = (IUser) adaptableObject;
-			connection = ConnectionsModelSingleton.getInstance().getConnectionByResource(user);
+			connection = ExpressConnectionUtils.getByResource(user, ConnectionsRegistrySingleton.getInstance());
 		} else if (adaptableObject instanceof IApplication) {
 			IApplication application = (IApplication) adaptableObject;
 			connection = getConnection(application);
@@ -51,17 +53,17 @@ public class ConnectionAdapterFactory implements IAdapterFactory {
 		return connection;
 	}
 
-	private Connection getConnection(IApplication application) {
+	private ExpressConnection getConnection(IApplication application) {
 		IDomain domain = application.getDomain();
 		if (domain == null) {
 			return null;
 		}
-		return ConnectionsModelSingleton.getInstance().getConnectionByResource(domain.getUser());
+		return ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
 	}
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return new Class[] { Connection.class };
+		return new Class[] { ExpressConnection.class };
 	}
 
 }

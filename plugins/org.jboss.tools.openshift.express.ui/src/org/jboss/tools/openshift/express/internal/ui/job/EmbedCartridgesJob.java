@@ -19,8 +19,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -59,7 +60,7 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 					application, monitor);
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
-			return OpenShiftUIActivator.createErrorStatus("Could not embed cartridges for application {0}", e,
+			return ExpressUIActivator.createErrorStatus("Could not embed cartridges for application {0}", e,
 					application.getName());
 		}
 	}

@@ -17,7 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
 
 /**
  * @author André Dietisheim

@@ -26,8 +26,8 @@ import org.jboss.ide.eclipse.as.core.server.internal.IExtendedPropertiesProvider
 import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 
 /**
  * @author Rob Stryker
@@ -38,7 +38,7 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 	public static final String OPENSHIFT_MODE_ID = "openshift";
 	
 	public void setDefaults(IProgressMonitor monitor) {
-		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ConnectionUtils.getDefaultHostUrl()));
+		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ExpressConnectionUtils.getDefaultHostUrl()));
 		getServerWorkingCopy().setName(OpenShiftServerUtils.getDefaultServerName(DEFAULT_SERVER_NAME_BASE));
 		setAttribute(IDeployableServer.SERVER_MODE, OPENSHIFT_MODE_ID);
 	}

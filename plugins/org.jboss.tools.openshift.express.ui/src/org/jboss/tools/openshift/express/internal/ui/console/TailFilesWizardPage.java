@@ -42,9 +42,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.IGearGroup;
 import com.openshift.client.NotFoundOpenShiftException;
@@ -193,9 +193,9 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 	// try {
 	// addJenkinsCartridge(IEmbeddedCartridge.JENKINS_14);
 	// } catch (OpenShiftException ex) {
-	// OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+	// ExpressUIActivator.log("Could not select jenkins cartridge", ex);
 	// } catch (SocketTimeoutException ex) {
-	// OpenShiftUIActivator.log("Could not select jenkins cartridge", ex);
+	// ExpressUIActivator.log("Could not select jenkins cartridge", ex);
 	// }
 	// }
 	//
@@ -234,7 +234,7 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus(
+						return ExpressUIActivator.createErrorStatus(
 								"Could not load application's gear list", e);
 					}
 				}

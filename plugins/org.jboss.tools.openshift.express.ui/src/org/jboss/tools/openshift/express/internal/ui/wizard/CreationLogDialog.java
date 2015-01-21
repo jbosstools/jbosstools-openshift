@@ -32,9 +32,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.BrowserUtil;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 
 /**
  * @author André Dietisheim
@@ -62,7 +62,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 	private void setupDialog(Composite parent) {
 		parent.getShell().setText("Embedded Cartridges");
 		setTitle("Please make note of the credentials and url that were reported\nwhen your cartridges were embedded / application was created. ");
-		setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
+		setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 		setDialogHelpAvailable(false);
 	}
 
@@ -97,7 +97,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 					try {
 						link.execute();
 					} catch (Exception e) {
-						OpenShiftUIActivator.log(e);
+						ExpressUIActivator.log(e);
 						MessageDialog.openError(getShell(), "Could not execute link", e.getMessage());
 					}
 				} catch (IllegalArgumentException e) {
@@ -304,7 +304,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 				return;
 			}
 			BrowserUtil.checkedCreateExternalBrowser(
-					url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+					url, ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 		}
 	}
 	

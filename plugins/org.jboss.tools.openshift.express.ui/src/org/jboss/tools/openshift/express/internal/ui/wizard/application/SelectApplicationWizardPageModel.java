@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 
 import com.openshift.client.IApplication;
@@ -73,7 +73,7 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 		return domains;
 	}
 	
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return wizardModel.getLegacyConnection();
 	}
 

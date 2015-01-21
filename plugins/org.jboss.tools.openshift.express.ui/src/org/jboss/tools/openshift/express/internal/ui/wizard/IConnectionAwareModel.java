@@ -10,17 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard;
 
-import org.jboss.tools.openshift.core.Connection;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 /**
  * @author Andre Dietisheim
  */
 public interface IConnectionAwareModel {
 
-	public Connection getConnection();
+	public IConnection getConnection();
 
 	public boolean hasConnection();
 	
-	public Connection setConnection(Connection connection);
+	public IConnection setConnection(IConnection connection);
 
 }

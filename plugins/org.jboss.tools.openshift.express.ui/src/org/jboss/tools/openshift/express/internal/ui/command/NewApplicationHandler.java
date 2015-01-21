@@ -18,10 +18,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IDomain;
 
@@ -38,7 +38,7 @@ public class NewApplicationHandler extends AbstractHandler {
 		if (domain != null) {
 			open(new NewOpenShiftApplicationWizard(domain), shell);
 		} else {
-			Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+			ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
 			if (connection != null) {
 				open(new NewOpenShiftApplicationWizard(connection), shell);
 			} else {

@@ -16,8 +16,8 @@ import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
-import org.jboss.tools.openshift.express.internal.core.preferences.IOpenShiftPreferenceConstants;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.core.preferences.IExpressConstants;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
 /**
@@ -34,15 +34,15 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	public void createFieldEditors() {
 		this.clientReadTimeout =
 				new IntegerFieldEditor(
-						IOpenShiftPreferenceConstants.CLIENT_READ_TIMEOUT,
+						IExpressConstants.CLIENT_READ_TIMEOUT,
 						OpenshiftUIMessages.ClientReadTimeout, getFieldEditorParent());
 		clientReadTimeout.setValidRange(0, Integer.MAX_VALUE / 1000); // seconds
 		addField(clientReadTimeout);
 	}
 
 	public void init(IWorkbench workbench) {
-		IPreferenceStore preferenceStore = OpenShiftUIActivator.getDefault().getCorePreferenceStore();
-		preferenceStore.setDefault(IOpenShiftPreferenceConstants.CLIENT_READ_TIMEOUT, ClientSystemProperties.getReadTimeoutSeconds());
+		IPreferenceStore preferenceStore = ExpressUIActivator.getDefault().getCorePreferenceStore();
+		preferenceStore.setDefault(IExpressConstants.CLIENT_READ_TIMEOUT, ClientSystemProperties.getReadTimeoutSeconds());
 		setPreferenceStore(preferenceStore);
 	}
 

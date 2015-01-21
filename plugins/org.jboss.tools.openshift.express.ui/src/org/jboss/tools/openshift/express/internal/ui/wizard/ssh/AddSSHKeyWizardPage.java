@@ -34,13 +34,13 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyNameValidator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyValidator;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -54,7 +54,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 	private AddSSHKeyWizardPageModel pageModel;
 
-	public AddSSHKeyWizardPage(Connection user, IWizard wizard) {
+	public AddSSHKeyWizardPage(ExpressConnection user, IWizard wizard) {
 		super("Add existing SSH Key", "Add an exiting SSH key to your OpenShift user " + user.getUsername(),
 				"AddSSHKeysPage", wizard);
 		this.pageModel = new AddSSHKeyWizardPageModel(user);
@@ -161,7 +161,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 		try {
 			return WizardUtils.runInWizard(new AddSSHKeyJob(pageModel), getContainer());
 		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus("Could not add ssh key " + pageModel.getName() + ".");
+			return ExpressUIActivator.createErrorStatus("Could not add ssh key " + pageModel.getName() + ".");
 		}
 	}
 

@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.templat
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
  * @author Andre Dietisheim

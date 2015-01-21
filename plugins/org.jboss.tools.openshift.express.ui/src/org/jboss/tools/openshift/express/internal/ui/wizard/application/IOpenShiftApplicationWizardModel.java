@@ -26,7 +26,7 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
@@ -77,9 +77,9 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 * Retrieve a legacy OpenShift connection 
 	 * @return
 	 */
-	public Connection getLegacyConnection();
+	public ExpressConnection getLegacyConnection();
 	
-	public Connection setLegacyConnection(Connection connection);
+	public ExpressConnection setLegacyConnection(ExpressConnection connection);
 	
 	/**
 	 * Imports the project that the user has chosen into the workspace.
@@ -168,7 +168,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	/**
 	 * Sets the default to this wizard if there's no domain set to it yet.
 	 * 
-	 * @see Connection#getDefaultDomain()
+	 * @see ExpressConnection#getDefaultDomain()
 	 * @see #setDomain(IDomain)
 	 * @see #hasDomain()
 	 */
@@ -481,7 +481,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	 * @return all domains that exist in the connection used in this wizard.
 	 * 
 	 * @see #getConnection()
-	 * @see Connection#getDomains()
+	 * @see ExpressConnection#getDomains()
 	 */
 	public List<IDomain> getDomains();
 	

@@ -40,17 +40,17 @@ import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.OpenShiftException;
@@ -63,13 +63,13 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	private SSHKeysWizardPageModel pageModel;
 	private TableViewer viewer;
 
-	ManageSSHKeysWizardPage(Connection connection, IWizard wizard) {
+	ManageSSHKeysWizardPage(ExpressConnection connection, IWizard wizard) {
 		this(OpenShiftExpressUIMessages.MANAGE_SSH_KEYS_WIZARD_PAGE,
 				NLS.bind(OpenShiftExpressUIMessages.MANAGE_SSH_KEYS_WIZARD_PAGE_DESCRIPTION ,connection.getUsername()),
 				"ManageSSHKeysPage", connection, wizard);
 	}
 	
-	ManageSSHKeysWizardPage(String title, String description, String pageName, Connection connection, IWizard wizard) {
+	ManageSSHKeysWizardPage(String title, String description, String pageName, ExpressConnection connection, IWizard wizard) {
 		super(title, description, pageName, wizard);
 		this.pageModel = new SSHKeysWizardPageModel(connection);
 	}
@@ -158,7 +158,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 					} catch (Exception ex) {
 						setErrorMessage(ex.getMessage());
 						StatusManager.getManager().handle(
-								OpenShiftUIActivator.createErrorStatus(NLS.bind(OpenShiftExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, keyName), ex),
+								ExpressUIActivator.createErrorStatus(NLS.bind(OpenShiftExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, keyName), ex),
 								StatusManager.LOG);
 					}
 			}
@@ -182,7 +182,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				} catch (Exception ex) {
 					setErrorMessage(ex.getMessage());
 					StatusManager.getManager().handle(
-							OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex), StatusManager.LOG);
+							ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex), StatusManager.LOG);
 				}
 			}
 		};
@@ -205,7 +205,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				} catch (Exception ex) {
 					setErrorMessage(ex.getMessage());
 					StatusManager.getManager().handle(
-							OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex), StatusManager.LOG);
+							ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex), StatusManager.LOG);
 				}
 			}
 		};
@@ -256,7 +256,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		} catch (Exception e) {
 			setErrorMessage(e.getMessage());
 			StatusManager.getManager().handle(
-					OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, e), StatusManager.LOG);
+					ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, e), StatusManager.LOG);
 
 		}
 	}
@@ -278,7 +278,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				} catch (Exception ex) {
 					setErrorMessage(ex.getMessage());
 					StatusManager.getManager().handle(
-							OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex), StatusManager.LOG);
+							ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex), StatusManager.LOG);
 				}
 			}
 		};
@@ -310,7 +310,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				pageModel.removeKey();
 				return Status.OK_STATUS;
 			}catch(OpenShiftException ex){
-				return OpenShiftUIActivator.createErrorStatus(NLS.bind(OpenShiftExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, pageModel.getSelectedSSHKey().getName()), ex);
+				return ExpressUIActivator.createErrorStatus(NLS.bind(OpenShiftExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, pageModel.getSelectedSSHKey().getName()), ex);
 			}
 		}
 	}
@@ -327,7 +327,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				pageModel.refresh();
 				return Status.OK_STATUS;
 			}catch(OpenShiftException ex){
-				return OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex);
+				return ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex);
 			}
 		}
 	}
@@ -350,7 +350,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				return Status.OK_STATUS;
 			}catch(OpenShiftException ex){
 				setErrorMessage(ex.getMessage());
-				return OpenShiftUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex);
+				return ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex);
 			}
 		}
 	}

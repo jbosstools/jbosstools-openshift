@@ -28,13 +28,13 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.DeleteApplicationsJob;
-import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireExpressConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IUser;
@@ -55,7 +55,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 		} else {
 			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 			if (server == null) {
-				return OpenShiftUIActivator.createCancelStatus("Could not find the server adapter to delete");
+				return ExpressUIActivator.createCancelStatus("Could not find the server adapter to delete");
 			}
 			return deleteApplicationAndServer(server, shell);
 		}
@@ -65,11 +65,11 @@ public class DeleteApplicationHandler extends AbstractHandler {
 		if (promptForDeleteConfirmation(appsToDelete, shell)) {
 			List<IUser> users = getUsers(appsToDelete);
 			new JobChainBuilder(new DeleteApplicationsJob(appsToDelete))
-					.runWhenDone(new FireConnectionsChangedJob(users))
+					.runWhenDone(new FireExpressConnectionsChangedJob(users))
 					.schedule();
 			return Status.OK_STATUS;
 		} else {
-			return OpenShiftUIActivator.createCancelStatus("Cancelled application removal.");
+			return ExpressUIActivator.createCancelStatus("Cancelled application removal.");
 		}
 	}
 
@@ -117,7 +117,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 			new JobChainBuilder(applicationJob)
 					.runWhenSuccessfullyDone(
 							new DeleteApplicationsJob(applicationJob))
-					.runWhenSuccessfullyDone(new FireConnectionsChangedJob(applicationJob))
+					.runWhenSuccessfullyDone(new FireExpressConnectionsChangedJob(applicationJob))
 					.runWhenSuccessfullyDone(new AbstractDelegatingMonitorJob(NLS.bind("Delete Server Adapter {0}", server.getName())) {
 						
 						@Override

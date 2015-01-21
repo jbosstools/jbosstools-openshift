@@ -23,10 +23,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.IDomain;
@@ -46,9 +47,9 @@ public class DomainWizardModel extends ObservableUIPojo {
 
 	private String domainId;
 	private final IDomain domain;
-	private Connection connection;
+	private ExpressConnection connection;
 
-	public DomainWizardModel(Connection connection) {
+	public DomainWizardModel(ExpressConnection connection) {
 		this(null, connection);
 	}
 
@@ -56,7 +57,7 @@ public class DomainWizardModel extends ObservableUIPojo {
 		this(domain, null);
 	}
 
-	protected DomainWizardModel(IDomain domain, Connection connection) {
+	protected DomainWizardModel(IDomain domain, ExpressConnection connection) {
 		this.domain = domain;
 		this.connection = connection;
 		if (domain == null) {
@@ -83,12 +84,11 @@ public class DomainWizardModel extends ObservableUIPojo {
 		fireConnectionChanged(domain, connection);
 	}
 
-	private void fireConnectionChanged(IDomain domain, Connection connection) {
-		if (connection != null) {
-			ConnectionsModelSingleton.getInstance().fireConnectionChanged(connection);
-		} else if (domain != null) {
-			ConnectionsModelSingleton.getInstance().fireConnectionChanged(domain.getUser());
+	private void fireConnectionChanged(IDomain domain, ExpressConnection connection) {
+		if (connection == null) {
+			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
 		}
+		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 	}
 
 	public boolean isCurrentDomainId(String domainId) {
@@ -98,7 +98,7 @@ public class DomainWizardModel extends ObservableUIPojo {
 			}
 			return domain.getId().equals(domainId);
 		} catch (Exception e) {
-			OpenShiftUIActivator.log(e);
+			ExpressUIActivator.log(e);
 			return true;
 		}
 	}
@@ -107,7 +107,7 @@ public class DomainWizardModel extends ObservableUIPojo {
 		return domain;
 	}
 	
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return connection;
 	}
 
@@ -158,11 +158,11 @@ public class DomainWizardModel extends ObservableUIPojo {
 				connection.connect();
 				return connection.getResponseCode() == 200;
 			} catch (KeyManagementException e) {
-				OpenShiftUIActivator.log(NLS.bind(
+				ExpressUIActivator.log(NLS.bind(
 						"Could not install permissive trust manager and hostname verifier for connection {0}", url), e);
 				return false;
 			} catch (NoSuchAlgorithmException e) {
-				OpenShiftUIActivator.log(NLS.bind(
+				ExpressUIActivator.log(NLS.bind(
 						"Could not install permissive trust manager and hostname verifier for connection {0}", url), e);
 				return false;
 			} catch (IOException e) {

@@ -14,8 +14,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -42,7 +43,7 @@ public abstract class AbstratApplicationJob extends AbstractDelegatingMonitorJob
 				doRun(application);
 			}
 		} catch (OpenShiftException e) {
-			return OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not {0}", getName()), e);
+			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not {0}", getName()), e);
 		}
 		return Status.OK_STATUS;
 	}

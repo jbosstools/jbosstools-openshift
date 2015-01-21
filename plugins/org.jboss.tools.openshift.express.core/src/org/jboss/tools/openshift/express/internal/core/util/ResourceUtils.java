@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
 
 /**
  * @author André Dietisheim

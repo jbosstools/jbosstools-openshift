@@ -31,7 +31,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -69,11 +69,11 @@ public class OpenShiftServerFactory {
 			server = createAdapter(serverType, application, domain, project.getName(), remoteName);
 			server = addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
-			OpenShiftCoreActivator.getDefault().getLog().log(ce.getStatus());
+			ExpressCoreActivator.getDefault().getLog().log(ce.getStatus());
 		} catch (OpenShiftException ose) {
-			IStatus s = new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+			IStatus s = new Status(IStatus.ERROR, ExpressCoreActivator.PLUGIN_ID,
 					"Cannot create openshift server adapter", ose);
-			OpenShiftCoreActivator.getDefault().getLog().log(s);
+			ExpressCoreActivator.getDefault().getLog().log(s);
 		}
 		return server;
 	}

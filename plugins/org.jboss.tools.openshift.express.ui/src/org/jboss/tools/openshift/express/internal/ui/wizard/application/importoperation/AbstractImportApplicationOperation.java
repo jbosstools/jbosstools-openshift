@@ -37,11 +37,11 @@ import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
 
 import com.openshift.client.IApplication;
@@ -56,11 +56,11 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	private IApplication application;
 	private String remoteName;
 	protected List<IResource> modifiedResources;
-	private Connection user;
+	private ExpressConnection user;
 	private List<IOpenShiftMarker> markers;
 
 	public AbstractImportApplicationOperation(String projectName, IApplication application, String remoteName,
-			List<IOpenShiftMarker> markers, Connection user) {
+			List<IOpenShiftMarker> markers, ExpressConnection user) {
 		this.projectName = projectName;
 		this.application = application;
 		this.remoteName = remoteName;
@@ -100,7 +100,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		return remoteName;
 	}
 
-	protected Connection getUser() {
+	protected ExpressConnection getUser() {
 		return user;
 	}
 
@@ -246,7 +246,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 			return null;
 		}
 
-		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, OpenShiftUIActivator.PLUGIN_ID);
+		OpenShiftMavenProfile profile = new OpenShiftMavenProfile(project, ExpressUIActivator.PLUGIN_ID);
 		if (profile.existsInPom()) {
 			return null;
 		}

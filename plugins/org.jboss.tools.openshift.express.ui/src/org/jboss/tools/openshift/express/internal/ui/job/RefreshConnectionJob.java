@@ -14,17 +14,18 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 /**
  * @author Andre Dietisheim
  */
 public class RefreshConnectionJob extends AbstractDelegatingMonitorJob {
 
-	private Connection connection;
+	private ExpressConnection connection;
 
-	public RefreshConnectionJob(Connection connection) {
-		super(NLS.bind("Refreshing connection {0}", connection.getId()));
+	public RefreshConnectionJob(ExpressConnection connection) {
+		super(NLS.bind("Refreshing iConnection {0}", connection.getId()));
 		this.connection = connection;
 	}
 

@@ -69,22 +69,22 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils.IWidgetVisitor;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.NoSSHKeysWizard;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils.IWidgetVisitor;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.NotFoundOpenShiftException;
@@ -390,7 +390,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		if (!ensureHasDomain()
 				|| !ensureHasSSHKeys()) {
 			dispose();
-			org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(getWizard());
+			org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(getWizard());
 			return;
 		}
 
@@ -407,7 +407,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 	 * for any application creation). Otherwise, returns true.
 	 */
 	protected boolean ensureHasDomain() {
-		final Connection connection = pageModel.getConnection();
+		final ExpressConnection connection = pageModel.getConnection();
 		try {
 			if (connection == null
 					|| connection.hasDomain()) {
@@ -419,18 +419,18 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 			dialog.setBlockOnOpen(true);
 			return dialog.open() == Dialog.OK;
 		} catch (OpenShiftException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
 					NLS.bind("Could not lookup domain in OpenShift connection {0}", connection.getId()),
 					status, IStatus.ERROR)
 					.open();
-			OpenShiftUIActivator.log(status);
+			ExpressUIActivator.log(status);
 			return false;
 		}
 	}
 
 	protected boolean ensureHasSSHKeys() {
-		final Connection connection = pageModel.getConnection();
+		final ExpressConnection connection = pageModel.getConnection();
 		try {
 			if (connection == null
 					|| connection.hasSSHKeys()) {
@@ -442,12 +442,12 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 			dialog.setBlockOnOpen(true);
 			return dialog.open() == Dialog.OK;
 		} catch (OpenShiftException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
 					NLS.bind("Could not lookup ssh keys in OpenShift connection {0}", connection.getId()),
 					status, IStatus.ERROR)
 					.open();
-			OpenShiftUIActivator.log(status);;
+			ExpressUIActivator.log(status);;
 			return false;
 		}
 	}
@@ -469,7 +469,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus(
+						return ExpressUIActivator.createErrorStatus(
 								"Could not load applications, cartridges and gears", e);
 					}
 				}

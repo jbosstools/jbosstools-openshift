@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.server;
 
 import org.eclipse.wst.server.core.TaskModel;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -24,12 +24,12 @@ public class BehaviorTaskModelUtil {
 	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
 	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
 
-	public static void put(Connection connection, TaskModel taskModel) {
+	public static void put(ExpressConnection connection, TaskModel taskModel) {
 		taskModel.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
 	}
 
-	public static Connection getConnection(IServerModeUICallback callback) {
-		return (Connection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
+	public static ExpressConnection getConnection(IServerModeUICallback callback) {
+		return (ExpressConnection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
 	}
 
 	public static void put(IDomain domain, TaskModel taskModel) {

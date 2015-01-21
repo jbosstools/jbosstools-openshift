@@ -23,11 +23,11 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 
 import com.openshift.client.DeploymentTypes;
 import com.openshift.client.IApplication;
@@ -58,7 +58,7 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 								public IStatus runInUIThread(IProgressMonitor monitor) {
 									MessageConsole console = ConsoleUtils.displayConsoleView(application);
 									if (console == null) {
-										return OpenShiftUIActivator.createCancelStatus(NLS.bind(
+										return ExpressUIActivator.createCancelStatus(NLS.bind(
 												"Cound not open console for application {0}", applicationName));
 									}
 									printResponse(restoreJob.getResponse(), console);
@@ -78,14 +78,14 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 			WizardUtils.runInWizard(jobChain, getContainer());
 			return restoreJob.getResult().isOK();
 		} catch (InvocationTargetException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
 					NLS.bind("Could not restore snapshot for application {0}", applicationName),
 					status, IStatus.ERROR)
 					.open();
 			return false;
 		} catch (InterruptedException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
 					NLS.bind("Could not restore snapshot for application {0}", applicationName),
 					status, IStatus.ERROR)
@@ -125,7 +125,7 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 				this.response = getModel().restoreSnapshot(monitor);
 				return Status.OK_STATUS;
 			} catch (IOException e) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						NLS.bind("Could not restore snapshot for application {0}", application.getName()), e);
 			} finally {
 				if (getModel().isDeploymentSnapshot()) {

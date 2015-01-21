@@ -23,16 +23,16 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * @author André Dietisheim
  */
 public class NoSSHKeysWizard extends Wizard {
 
-	private Connection user;
+	private ExpressConnection user;
 
-	public NoSSHKeysWizard(Connection user) {
+	public NoSSHKeysWizard(ExpressConnection user) {
 		this.user = user;
 		setWindowTitle("No SSH Keys");
 		setNeedsProgressMonitor(true);
@@ -50,7 +50,7 @@ public class NoSSHKeysWizard extends Wizard {
 
 	private class NoSSHKeysWizardPage extends ManageSSHKeysWizardPage {
 
-		NoSSHKeysWizardPage(Connection connection, IWizard wizard) {
+		NoSSHKeysWizardPage(ExpressConnection connection, IWizard wizard) {
 			super("Add SSH Keys",
 					"Please make sure you have an SSH public key uploaded to your OpenShift account " + connection.getUsername(),
 					"NoSSHKeysPage", connection, wizard);

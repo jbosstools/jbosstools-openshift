@@ -14,10 +14,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.core.ConnectionType;
-import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.common.core.connection.ConnectionType;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.IDomain;
 
@@ -29,44 +30,45 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_DOMAIN = "selectedDomain";
 	public static final String PROPERTY_DOMAINS = "domains";
 
-	private Connection connection;
+	private ExpressConnection connection;
 	private IDomain selectedDomain;
 	private List<IDomain> domains;
-	private IConnectionsModelListener connectionChangeListener;
+	private IConnectionsRegistryListener connectionChangeListener;
 
-	public ManageDomainsWizardPageModel(IDomain domain, Connection connection) {
+	public ManageDomainsWizardPageModel(IDomain domain, ExpressConnection connection) {
 		this(connection);
 		setSelectedDomain(domain);
 	}
 
-	public ManageDomainsWizardPageModel(Connection connection) {
+	public ManageDomainsWizardPageModel(ExpressConnection connection) {
 		this.connection = connection;
 		this.connectionChangeListener = onConnectionsChanged();
-		ConnectionsModelSingleton.getInstance().addListener(connectionChangeListener );
+		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener );
 	}
 
-	private IConnectionsModelListener onConnectionsChanged() {
-		return new IConnectionsModelListener() {
+	private IConnectionsRegistryListener onConnectionsChanged() {
+		return new IConnectionsRegistryListener() {
 			
 			@Override
-			public void connectionRemoved(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
-				if(ConnectionType.Legacy == type){
+			public void connectionRemoved(IConnection connection) {
+				if(ConnectionType.Legacy == connection.getType()){
 					ManageDomainsWizardPageModel.this.connection = null;
 					loadDomains();
 				}
 			}
 			
 			@Override
-			public void connectionChanged(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
-				if(ConnectionType.Legacy == type){
+			public void connectionChanged(IConnection connection) {
+
+				if(ConnectionType.Legacy == connection.getType()){
 					setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
 					loadDomains();
 				}
 			}
 			
 			@Override
-			public void connectionAdded(org.jboss.tools.openshift.core.Connection connection, ConnectionType type) {
-				if(ConnectionType.Legacy == type){
+			public void connectionAdded(IConnection connection) {
+				if(ConnectionType.Legacy == connection.getType()){
 					loadDomains();
 				}
 			}
@@ -102,11 +104,11 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 		return selectedDomain;
 	}
 
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return connection;
 	}
 	
 	public void dispose() {
-		ConnectionsModelSingleton.getInstance().removeListener(connectionChangeListener);
+		ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);
 	}
 }

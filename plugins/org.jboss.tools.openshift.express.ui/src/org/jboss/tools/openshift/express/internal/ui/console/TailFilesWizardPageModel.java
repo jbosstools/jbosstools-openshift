@@ -15,8 +15,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IGearGroup;
@@ -46,13 +46,13 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 
 	public TailFilesWizardPageModel(final IApplication app) {
 		this.application = app;
-		setFilePattern(ensureValidDefault(OpenShiftPreferences.INSTANCE.getTailFileOptions(application)));
+		setFilePattern(ensureValidDefault(ExpressPreferences.INSTANCE.getTailFileOptions(application)));
 	}
 
 	public void setFilePattern(final String filePattern) {
 		firePropertyChange(
 				PROPERTY_FILE_PATTERN, this.filePattern, this.filePattern = filePattern);
-		OpenShiftPreferences.INSTANCE.saveTailFileOptions(application, filePattern);
+		ExpressPreferences.INSTANCE.saveTailFileOptions(application, filePattern);
 	}
 
 	public String getFilePattern() {

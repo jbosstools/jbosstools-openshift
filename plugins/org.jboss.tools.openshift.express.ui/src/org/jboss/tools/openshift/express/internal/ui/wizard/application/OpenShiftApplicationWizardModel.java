@@ -32,11 +32,12 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.databinding.ObservablePojo;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerFactory;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.ImportNewProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoGitSharedProject;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.MergeIntoUnsharedProject;
@@ -58,11 +59,11 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 
 	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
 
-	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain) {
+	public OpenShiftApplicationWizardModel(ExpressConnection connection, IDomain domain) {
 		this(connection, domain, null, null, false);
 	}
 
-	public OpenShiftApplicationWizardModel(Connection connection, IDomain domain, IApplication application, IProject project, 
+	public OpenShiftApplicationWizardModel(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication) {
 		setProject(project);
 		setApplicationName(project);
@@ -535,14 +536,14 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public org.jboss.tools.openshift.express.internal.core.connection.Connection setLegacyConnection(org.jboss.tools.openshift.express.internal.core.connection.Connection connection) {
+	public ExpressConnection setLegacyConnection(ExpressConnection connection) {
 		update(connection);
 		setProperty(PROP_CONNECTION, connection);
 		return connection;
 	}
 	
 	@Override
-	public org.jboss.tools.openshift.express.internal.core.connection.Connection getLegacyConnection() {
+	public ExpressConnection getLegacyConnection() {
 		return getProperty(PROP_CONNECTION);
 	}
 
@@ -564,7 +565,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	 * 
 	 * @param connection
 	 */
-	private void update(Connection connection) {
+	private void update(ExpressConnection connection) {
 		if (!isValid(connection)) {
 			return;
 		}
@@ -602,7 +603,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 
-	public boolean isValid(Connection connection) {
+	public boolean isValid(ExpressConnection connection) {
 		return connection != null
 				&& connection.isConnected();
 	}
@@ -634,12 +635,12 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public org.jboss.tools.openshift.core.Connection getConnection() {
+	public IConnection getConnection() {
 		return getLegacyConnection();
 	}
 
 	@Override
-	public org.jboss.tools.openshift.core.Connection setConnection(org.jboss.tools.openshift.core.Connection connection) {
+	public IConnection setConnection(IConnection connection) {
 		throw new RuntimeException(String.format("Method not implemented for connection type: %s", connection.getClass().getCanonicalName()));
 	}
 

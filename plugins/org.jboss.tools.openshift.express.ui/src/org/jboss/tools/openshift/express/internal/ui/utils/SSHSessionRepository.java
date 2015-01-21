@@ -23,7 +23,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jsch.core.IJSchService;
 import org.eclipse.jsch.ui.UserInfoPrompter;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -65,7 +65,7 @@ public class SSHSessionRepository extends JschConfigSessionFactory {
 	private final Map<URIish, Session> cache = new HashMap<URIish, Session>();
 
 	SSHSessionRepository() {
-		final BundleContext context = OpenShiftUIActivator.getDefault().getBundle().getBundleContext();
+		final BundleContext context = ExpressUIActivator.getDefault().getBundle().getBundleContext();
 		final ServiceReference<?> ssh = context.getServiceReference(IJSchService.class.getName());
 		this.provider = (IJSchService) context.getService(ssh);
 	}

@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import org.eclipse.jface.viewers.IElementComparer;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * @author Andre Dietisheim
@@ -46,8 +46,8 @@ public class NewConnectionAwareConnectionComparer implements IElementComparer {
 			} else if (thatObject instanceof NewConnectionMarker) {
 				return true;
 			}
-			Connection thisConnection = (Connection) thisObject;
-			Connection thatConnection = (Connection) thatObject;
+			ExpressConnection thisConnection = (ExpressConnection) thisObject;
+			ExpressConnection thatConnection = (ExpressConnection) thatObject;
 			return thisConnection.getUsername().equals(thatConnection.getUsername())
 					&& thisConnection.getHost().equals(thatConnection.getHost());
 		}

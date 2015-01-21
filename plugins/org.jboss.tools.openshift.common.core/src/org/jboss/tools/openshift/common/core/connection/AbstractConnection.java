@@ -1,0 +1,56 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2014 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+package org.jboss.tools.openshift.common.core.connection;
+
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+
+/**
+ * @author Rob Stryker
+ * @author Xavier Coulon
+ * @author Andre Dietisheim
+ */
+public abstract class AbstractConnection implements IConnection {
+
+	private String host;
+
+	protected AbstractConnection(String scheme, String host) {
+		this.host = getHost(scheme, host);
+	}
+
+	private String getHost(String scheme, String host) {
+		if (StringUtils.isEmpty(host)) {
+			return host;
+		}
+		
+		if (StringUtils.isEmpty(scheme)) {
+			scheme = UrlUtils.SCHEME_HTTPS;
+		}
+		return UrlUtils.ensureStartsWithScheme(host, scheme);
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public String getScheme() {
+		return UrlUtils.getScheme(host);
+	}
+
+	public String setHost(String host) {
+		this.host = UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS);
+		return host;
+	}
+
+	public abstract boolean connect();
+	
+	public abstract boolean isConnected();
+}

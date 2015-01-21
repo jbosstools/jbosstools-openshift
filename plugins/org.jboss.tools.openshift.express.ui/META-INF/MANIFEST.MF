@@ -4,10 +4,12 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.ui;singleton:=true
 Bundle-Version: 2.6.100.qualifier
 Bundle-Localization: plugin
-Bundle-Activator: org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator
+Bundle-Activator: org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator
 Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,3.0.0)",
  org.jboss.tools.openshift.egit.core;bundle-version="[2.5.0,3.0.0)",
  org.jboss.tools.openshift.egit.ui;bundle-version="[2.5.0,3.0.0)",
+ org.jboss.tools.openshift.common.ui;bundle-version="1.0.0",
+ org.jboss.tools.openshift.common.core;bundle-version="1.0.0",
  org.jboss.ide.eclipse.as.ui;bundle-version="3.0.0",
  org.eclipse.egit.ui;bundle-version="3.0.0",
  org.eclipse.egit.core;bundle-version="3.0.0",
@@ -59,8 +61,7 @@ Import-Package: org.apache.commons.io,
  org.jboss.tools.common.ui,
  org.jboss.tools.common.ui.databinding,
  org.jboss.tools.common.ui.preferencevalue,
- org.jboss.tools.common.ui.ssh,
- org.jboss.tools.openshift.core
+ org.jboss.tools.common.ui.ssh
 Bundle-Vendor: %Bundle-Vendor
 Export-Package: org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.command;x-friends:="org.jboss.tools.openshift.express.test",

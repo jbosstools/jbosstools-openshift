@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
@@ -85,7 +85,7 @@ public class OpenshiftCoreUIIntegration {
 	public IEGitUI getEGitUI() throws CoreException {
 		IEGitUI egitUI = getConfigurationElement(getExtension(EGITUI_ID));
 		if (egitUI == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus("Could not find extension " + EGITUI_ID));
+			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus("Could not find extension " + EGITUI_ID));
 		}
 		return egitUI;
 	}

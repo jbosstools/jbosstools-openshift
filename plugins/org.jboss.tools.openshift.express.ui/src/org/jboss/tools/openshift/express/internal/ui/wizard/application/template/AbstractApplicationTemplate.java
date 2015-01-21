@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.client.cartridge.ICartridge;
 

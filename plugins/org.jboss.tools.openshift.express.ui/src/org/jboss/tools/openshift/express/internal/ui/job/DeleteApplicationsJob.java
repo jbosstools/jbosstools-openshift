@@ -17,8 +17,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -61,7 +62,7 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 					application.destroy();
 					monitor.worked(1);
 				} catch (OpenShiftException e) {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							NLS.bind(OpenshiftUIMessages.FailedToDeleteApplication, appName), e);
 				}
 			}

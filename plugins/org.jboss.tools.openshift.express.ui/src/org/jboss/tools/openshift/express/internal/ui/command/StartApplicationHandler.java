@@ -13,9 +13,9 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.StartApplicationJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 
 import com.openshift.client.IApplication;
 

@@ -11,8 +11,9 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import org.eclipse.core.resources.IProject;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.IDomain;
 
@@ -29,7 +30,7 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 * Constructor invoked via File->Import
 	 */
 	public NewOpenShiftApplicationWizard() {
-		super(ConnectionsModelSingleton.getInstance().getRecentConnection(),
+		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class),
 				null, null, null, false, true, "New OpenShift Application");
 	}
 
@@ -37,7 +38,7 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 * Constructor invoked via PackageExplorer Configure->New OpenShift Application
 	 */
 	public NewOpenShiftApplicationWizard(IProject project) {
-		super(ConnectionsModelSingleton.getInstance().getRecentConnection(),
+		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class),
 				null, null, project, false, true, "New OpenShift Application");
 	}
 
@@ -45,14 +46,14 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 * Constructor invoked via OpenShift Explorer context menu
 	 */
 	public NewOpenShiftApplicationWizard(IDomain domain) {
-		super(ConnectionsModelSingleton.getInstance().getConnectionByResource(domain.getUser()),
+		super(ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance()),
 				domain, null, null, false, false, "New OpenShift Application");
 	}
 
 	/**
 	 * Constructor invoked via OpenShift Explorer context menu
 	 */
-	public NewOpenShiftApplicationWizard(Connection connection) {
+	public NewOpenShiftApplicationWizard(ExpressConnection connection) {
 		super(connection, connection.getDefaultDomain(), null, null, false, false, "New OpenShift Application");
 	}
 }

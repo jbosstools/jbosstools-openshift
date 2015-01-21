@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.domain;
 
 import java.util.List;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IDomain;
@@ -24,11 +24,11 @@ public class ManageDomainsWizard extends AbstractOpenShiftWizard<ManageDomainsWi
 
 	private String description;
 
-	public ManageDomainsWizard(String title, String description, Connection connection) {
+	public ManageDomainsWizard(String title, String description, ExpressConnection connection) {
 		this(title, description, null, connection);
 	}
 
-	public ManageDomainsWizard(String title, String description, IDomain domain, Connection connection) {
+	public ManageDomainsWizard(String title, String description, IDomain domain, ExpressConnection connection) {
 		super(title, new ManageDomainsWizardPageModel(domain, connection));
 		this.description = description;
 	}

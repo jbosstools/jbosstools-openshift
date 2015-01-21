@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCartridge;
 
 import com.openshift.client.cartridge.ICartridge;
 

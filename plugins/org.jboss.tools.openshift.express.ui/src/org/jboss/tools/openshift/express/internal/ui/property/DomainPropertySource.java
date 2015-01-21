@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 
 import com.openshift.client.IDomain;
 
@@ -52,7 +52,7 @@ public class DomainPropertySource implements IPropertySource {
 		} else if (PROPERTY_SUFFIX.equals(id)) {
 			return domain.getSuffix();
 		} else if (PROPERTY_FULLNAME.equals(id)) {
-			return OpenShiftResourceLabelUtils.toString(domain);
+			return ExpressResourceLabelUtils.toString(domain);
 		}
 		return null;
 	}

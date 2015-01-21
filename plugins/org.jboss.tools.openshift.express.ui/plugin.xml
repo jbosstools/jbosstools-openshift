@@ -233,8 +233,8 @@
 	<extension
 		point="org.eclipse.ui.navigator.navigatorContent">
 		<navigatorContent
-			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
 			id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent"
+			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
 			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider"
 			name="OpenShift Explorer Content">
 			<triggerPoints></triggerPoints>
@@ -409,7 +409,7 @@
 							<count value="1" />
 							<iterate ifEmpty="false" operator="or">
 								<instanceof
-									value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+									value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 							</iterate>
 						</and>
 					</with>
@@ -455,7 +455,7 @@
 						<and>
 							<iterate ifEmpty="false" operator="and">
 								<instanceof
-									value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+									value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 	                    </iterate>
 					</and>
                 </with>
@@ -498,14 +498,14 @@
 						operator="and">
 			              <or>
 			                 <instanceof
-			                       value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+			                       value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 			                 <instanceof
 			                       value="com.openshift.client.IOpenShiftResource" />
                     <instanceof
                           value="com.openshift.internal.kube.Resource">
                     </instanceof>
                     <instanceof
-                          value="org.jboss.tools.openshift.core.Connection">
+                          value="org.jboss.tools.openshift.core.IConnection">
                     </instanceof>
 			              </or>
 	                </iterate>
@@ -729,7 +729,7 @@
 						<count value="1" />
 	         			<iterate ifEmpty="false" operator="or">
 	            			<instanceof
-	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 	                    </iterate>
 					</and>
                 </with>
@@ -768,7 +768,7 @@
 						<count value="1" />
 	         			<iterate ifEmpty="false" operator="or">
 	            			<instanceof
-	                       		value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+	                       		value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 	                    </iterate>
 					</and>
                 </with>
@@ -1649,7 +1649,7 @@
 							operator="and">
 							<or>
 								<instanceof
-									value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+									value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 								<instanceof
 									value="com.openshift.client.IDomain" />
 								<instanceof
@@ -1876,7 +1876,7 @@
      <extension
            point="org.eclipse.core.runtime.adapters">
         <factory
-              adaptableType="org.jboss.tools.openshift.express.internal.core.connection.Connection"
+              adaptableType="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection"
               class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
@@ -1975,7 +1975,7 @@
 					operator="and">
 					<or>
 						<instanceof
-							value="org.jboss.tools.openshift.express.internal.core.connection.Connection" />
+							value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
 						<instanceof
 							value="com.openshift.client.IDomain" />
 						<instanceof

@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftSSHOperationException;
@@ -69,7 +69,7 @@ public class ApplicationPropertySource implements IPropertySource {
 		}
 
 		if (id.equals("2.Type")) {
-			return OpenShiftResourceLabelUtils.toString(application.getCartridge());
+			return ExpressResourceLabelUtils.toString(application.getCartridge());
 		}
 		if (id.equals("5.Git URL")) {
 			return application.getGitUrl();

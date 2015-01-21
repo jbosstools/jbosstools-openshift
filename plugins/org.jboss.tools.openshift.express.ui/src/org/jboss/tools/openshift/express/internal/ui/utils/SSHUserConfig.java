@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
 
 import com.openshift.client.OpenShiftException;
 

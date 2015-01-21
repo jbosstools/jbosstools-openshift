@@ -20,9 +20,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -55,14 +56,14 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 				if (!openKeepWaitingDialog()) {
 					return new Status(
 							IStatus.CANCEL,
-							OpenShiftUIActivator.PLUGIN_ID,
+							ExpressUIActivator.PLUGIN_ID,
 							TIMEOUTED,
 							NLS.bind(OpenShiftExpressUIMessages.APPLICATION_NOT_ANSWERING, application.getName()),
 							null);
 				}
 			}
 		} catch (OpenShiftException e) {
-			return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+			return ExpressUIActivator.createErrorStatus(NLS.bind(
 					"Could not wait for application \"{0}\" to become reachable", application.getName()), e);
 		}
 		return Status.OK_STATUS;

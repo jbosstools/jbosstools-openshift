@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.IOpenShiftSSHKey;
 
@@ -21,10 +21,10 @@ import com.openshift.client.IOpenShiftSSHKey;
  */
 public class AddSSHKeyWizard extends Wizard {
 
-	private Connection user;
+	private ExpressConnection user;
 	private AddSSHKeyWizardPage addSSHKeyWizardPage;
 	
-	public AddSSHKeyWizard(Connection user) {
+	public AddSSHKeyWizard(ExpressConnection user) {
 		this.user = user;
 		setWindowTitle("Add SSH Key");
 		setNeedsProgressMonitor(true);

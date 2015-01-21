@@ -17,11 +17,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.ui.job.FireExpressConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -31,7 +31,7 @@ public class ManageDomainsHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		final Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+		final ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
 		if (connection == null) {
 			return Status.OK_STATUS;
 		}
@@ -39,7 +39,7 @@ public class ManageDomainsHandler extends AbstractHandler {
 		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), 
 				new ManageDomainsWizard("Domains", 
 						NLS.bind("Manage your domains for connection {0}", connection.getId()), connection)).open();
-		new FireConnectionsChangedJob(connection).schedule();
+		new FireExpressConnectionsChangedJob(connection).schedule();
 		return Status.OK_STATUS;
 	}
 }

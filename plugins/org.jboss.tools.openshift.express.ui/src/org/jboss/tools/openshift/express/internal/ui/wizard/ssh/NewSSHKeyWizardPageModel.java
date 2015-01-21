@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 
 import com.openshift.client.IOpenShiftSSHKey;
@@ -45,7 +45,7 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	private String publicKeyName;
 	private IOpenShiftSSHKey key;
 
-	public NewSSHKeyWizardPageModel(Connection user) {
+	public NewSSHKeyWizardPageModel(ExpressConnection user) {
 		super(user);
 	}
 

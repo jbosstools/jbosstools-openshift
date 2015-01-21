@@ -15,10 +15,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftEndpointException;
@@ -42,12 +42,12 @@ public class EditDomainWizard extends AbstractOpenShiftWizard<DomainWizardModel>
 					getModel().renameDomain();
 					return Status.OK_STATUS;
 				} catch (OpenShiftEndpointException e) {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							NLS.bind(
 									"Could not rename domain \"{0}\": {1}", getModel().getDomainId(),
 									e.getRestResponseMessages()), e);
 				} catch (Exception e) {
-					return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					return ExpressUIActivator.createErrorStatus(NLS.bind(
 							"Could not rename domain {0}", getModel().getDomainId()), e);
 				}
 			}

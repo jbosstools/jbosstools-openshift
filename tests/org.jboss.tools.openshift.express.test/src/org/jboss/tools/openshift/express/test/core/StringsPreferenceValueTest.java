@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.test.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
-import org.jboss.tools.openshift.express.internal.core.preferences.StringsPreferenceValue;
+import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

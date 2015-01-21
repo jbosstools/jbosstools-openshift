@@ -20,14 +20,14 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.IApplicationProperties;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCartridge;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
-import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireExpressConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 
@@ -46,7 +46,7 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 	private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
 	private IApplication application;
 
-	public EditEmbeddedCartridgesWizard(IApplication application, Connection connection) {
+	public EditEmbeddedCartridgesWizard(IApplication application, ExpressConnection connection) {
 		Assert.isLegal(application != null);
 		
 		this.wizardModel = new EmbeddedCartridgesWizardModel(
@@ -84,11 +84,11 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 			} else {
 				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
 			}
-			new FireConnectionsChangedJob(wizardModel.getConnection()).schedule();
+			new FireExpressConnectionsChangedJob(wizardModel.getConnection()).schedule();
 			return result.isOK();
 		} catch (Exception e) {
 			String errorMessage = NLS.bind("Could not embed cartridge(s) for application {0}", application.getName());
-			IStatus status = OpenShiftUIActivator.createErrorStatus(errorMessage, e);
+			IStatus status = ExpressUIActivator.createErrorStatus(errorMessage, e);
 			ErrorDialog.openError(getShell(), "Error while embedding cartridges",
 					errorMessage + ": " + StringUtils.null2emptyString(e.getMessage()), status);
 			return false;
@@ -117,7 +117,7 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 				try {
 					embeddedCartridgesWizardPage.setCheckedEmbeddableCartridges(wizardModel.getEmbeddedCartridges());
 				} catch (Exception e) {
-					OpenShiftUIActivator.log(e);
+					ExpressUIActivator.log(e);
 				}
 			}
 		});

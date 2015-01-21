@@ -17,7 +17,7 @@ import java.util.Date;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 
 /**
  * A logger wrapper utility for classes in the current bundle only.
@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 public final class Logger {
 
 	/** The debug name, matching the .options file. */
-	private static final String DEBUG = OpenShiftUIActivator.PLUGIN_ID + "/debug";
+	private static final String DEBUG = ExpressUIActivator.PLUGIN_ID + "/debug";
 
 	private static final ThreadLocal<DateFormat> dateFormatter = new ThreadLocal<DateFormat>() {
 		@Override
@@ -51,8 +51,8 @@ public final class Logger {
 	 *            the throwable cause
 	 */
 	public static void error(final String message, final Throwable t) {
-		OpenShiftUIActivator.getDefault().getLog()
-				.log(new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, t));
+		ExpressUIActivator.getDefault().getLog()
+				.log(new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, message, t));
 	}
 
 	/**
@@ -62,8 +62,8 @@ public final class Logger {
 	 *            the message to log
 	 */
 	public static void error(final String message) {
-		OpenShiftUIActivator.getDefault().getLog()
-				.log(new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message));
+		ExpressUIActivator.getDefault().getLog()
+				.log(new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, message));
 	}
 
 	/**
@@ -75,8 +75,8 @@ public final class Logger {
 	 *            the throwable cause
 	 */
 	public static void warn(final String message, final Throwable t) {
-		OpenShiftUIActivator.getDefault().getLog()
-				.log(new Status(Status.WARNING, OpenShiftUIActivator.PLUGIN_ID, message, t));
+		ExpressUIActivator.getDefault().getLog()
+				.log(new Status(Status.WARNING, ExpressUIActivator.PLUGIN_ID, message, t));
 	}
 
 	/**
@@ -86,8 +86,8 @@ public final class Logger {
 	 *            the message to log
 	 */
 	public static void warn(final String message) {
-		OpenShiftUIActivator.getDefault().getLog()
-				.log(new Status(Status.WARNING, OpenShiftUIActivator.PLUGIN_ID, message));
+		ExpressUIActivator.getDefault().getLog()
+				.log(new Status(Status.WARNING, ExpressUIActivator.PLUGIN_ID, message));
 	}
 
 	/**
@@ -97,8 +97,8 @@ public final class Logger {
 	 *            the message to log
 	 */
 	public static void info(String message) {
-		OpenShiftUIActivator.getDefault().getLog()
-				.log(new Status(Status.INFO, OpenShiftUIActivator.PLUGIN_ID, message));
+		ExpressUIActivator.getDefault().getLog()
+				.log(new Status(Status.INFO, ExpressUIActivator.PLUGIN_ID, message));
 	}
 
 	/**
@@ -111,10 +111,10 @@ public final class Logger {
 	 */
 	public static void debug(final String message) {
 		String debugOption = Platform.getDebugOption(DEBUG);
-		if( OpenShiftUIActivator.getDefault() == null )
+		if( ExpressUIActivator.getDefault() == null )
 			return;
 		
-		if (OpenShiftUIActivator.getDefault().isDebugging() && "true".equalsIgnoreCase(debugOption)) {
+		if (ExpressUIActivator.getDefault().isDebugging() && "true".equalsIgnoreCase(debugOption)) {
 			System.out.println("[" + Thread.currentThread().getName() + "] " + message);
 		}
 
@@ -131,7 +131,7 @@ public final class Logger {
 	public static void debug(final String message, Object... items) {
 		String debugOption = Platform.getDebugOption(DEBUG);
 		String valuedMessage = message;
-		if (OpenShiftUIActivator.getDefault() != null && OpenShiftUIActivator.getDefault().isDebugging()
+		if (ExpressUIActivator.getDefault() != null && ExpressUIActivator.getDefault().isDebugging()
 				&& "true".equalsIgnoreCase(debugOption)) {
 			for (Object item : items) {
 				valuedMessage = valuedMessage.replaceFirst("\\{\\}", (item != null ? item.toString() : "null"));
