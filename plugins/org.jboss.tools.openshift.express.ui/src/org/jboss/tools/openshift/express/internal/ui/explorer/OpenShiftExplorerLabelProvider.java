@@ -17,24 +17,18 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.core.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
-import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.ResourceGrouping;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
-import com.openshift.kube.BuildConfig;
-import com.openshift.kube.DeploymentConfig;
-import com.openshift.kube.Project;
-import com.openshift.kube.ResourceKind;
-import com.openshift.kube.Service;
 
 /**
  * @author Xavier Coulon
@@ -64,18 +58,18 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	@Override
 	public Image getImage(Object element) {
 		Image image = null;
-		if (element instanceof Connection) {
-			image = OpenShiftImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+		if (element instanceof IConnection) {
+			image = ExpressImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
 		} else if (element instanceof IDomain || element instanceof Project) {
-			image = OpenShiftImages.GLOBE_IMG;
+			image = ExpressImages.GLOBE_IMG;
 		} else if (element instanceof IApplication || element instanceof DeploymentConfig) {
-			image = OpenShiftImages.QUERY_IMG;
+			image = ExpressImages.QUERY_IMG;
 		} else if (element instanceof BuildConfig){
-			image = OpenShiftImages.BUILDCONFIG_IMG;
+			image = ExpressImages.BUILDCONFIG_IMG;
 		} else if (element instanceof IEmbeddedCartridge) {
-			image = OpenShiftImages.TASK_REPO_IMG;
+			image = ExpressImages.TASK_REPO_IMG;
 		} else if (element instanceof LoadingStub) {
-			image = OpenShiftImages.SYSTEM_PROCESS_IMG;
+			image = ExpressImages.SYSTEM_PROCESS_IMG;
 		} else if (element instanceof OpenShiftException) {
 			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 		}
@@ -90,8 +84,8 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString styledString = null;
-		if (element instanceof Connection) {
-			styledString = createStyledString((org.jboss.tools.openshift.core.Connection) element);
+		if (element instanceof IConnection) {
+			styledString = createStyledString((IConnection) element);
 		} else if (element instanceof Project){
 			Project p = (Project) element;
 			String label = 
@@ -133,12 +127,12 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		return styledString;
 	}
 
-	private StyledString createStyledString(Connection connection) {
+	private StyledString createStyledString(IConnection connection) {
 		String name = connection.getUsername();
 		String host = connection.getHost();
 		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
-		if (connection instanceof org.jboss.tools.openshift.express.internal.core.connection.Connection 
-				&& ((org.jboss.tools.openshift.express.internal.core.connection.Connection)connection).isDefaultHost()) {
+		if (connection instanceof org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection 
+				&& ((org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection)connection).isDefaultHost()) {
 			builder.append(' ').append(DEFAULT_MARKER);
 		}
 		String label = builder.toString();
@@ -149,7 +143,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	private StyledString createStyledString(IDomain domain) {
 		String id = domain.getId();
-		String fullName = OpenShiftResourceLabelUtils.toString(domain); 
+		String fullName = ExpressResourceLabelUtils.toString(domain); 
 		String label = 
 				new StringBuilder(id).append(' ').append(fullName).toString();
 
@@ -160,7 +154,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	private StyledString createStyledString(IApplication application) {
 		String appName = application.getName();
-		String appType = StringUtils.null2emptyString(OpenShiftResourceLabelUtils.toString(application.getCartridge()));
+		String appType = StringUtils.null2emptyString(ExpressResourceLabelUtils.toString(application.getCartridge()));
 		StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
 		StyledString styledString = new StyledString(sb.toString());
 		styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);

@@ -51,17 +51,17 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.ui.ssh.SshPrivateKeysPreferences;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.LinkSelectionAdapter;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -328,7 +328,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			WizardUtils.runInWizard(loadKeysJob, getContainer(), dbc);
 		} catch (Exception e) {
 			StatusManager.getManager().handle(
-					OpenShiftUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
+					ExpressUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
 		}
 	}
 
@@ -431,14 +431,14 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 			// The name and state of the existing project do
 			// not matter...
 			if (StringUtils.isEmpty(remoteName)) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						"The custom remote name must not be empty.");
 			} else if (!remoteName.matches("\\S+")) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						"The custom remote name must not contain spaces.");
 			} else if (!pageModel.isNewProject()
 					&& hasRemoteName(remoteName, getProject(projectName))) {
-				return OpenShiftUIActivator.createErrorStatus(NLS.bind(
+				return ExpressUIActivator.createErrorStatus(NLS.bind(
 						"The project {0} already has a remote named {1}.", projectName, remoteName));
 			}
 			return status;
@@ -464,7 +464,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage im
 				}
 				return EGitUtils.hasRemote(remoteName, repository);
 			} catch (Exception e) {
-				OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
+				ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(e.getMessage(), e));
 				return false;
 			}
 		}

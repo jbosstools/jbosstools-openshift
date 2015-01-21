@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.domain;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.OpenShiftException;
@@ -21,17 +21,17 @@ import com.openshift.client.OpenShiftException;
  */
 public class NewDomainWizardModel extends DomainWizardModel {
 
-	public NewDomainWizardModel(Connection connection) {
+	public NewDomainWizardModel(ExpressConnection connection) {
 		super(connection);
 	}
 
 	public void createDomain() throws OpenShiftException {
-		Connection connection = getConnection();
+		ExpressConnection connection = getConnection();
 		if (connection == null) {
 			Logger.error("Could not create domain, missing connection.");
 		}
 		connection.createDomain(getDomainId());
-		ConnectionsModelSingleton.getInstance().fireConnectionChanged(connection);
+		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 	}
 
 	@Override

@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.OpenShiftException;
@@ -26,10 +26,10 @@ public class SSHKeysWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_KEY = "selectedSSHKey";
 	public static final String PROPERTY_HAS_KEY = "hasSSHKey";
 
-	private Connection connection;
+	private ExpressConnection connection;
 	private IOpenShiftSSHKey selectedKey;
 
-	public SSHKeysWizardPageModel(Connection connection) {
+	public SSHKeysWizardPageModel(ExpressConnection connection) {
 		this.connection = connection;
 	}
 
@@ -86,7 +86,7 @@ public class SSHKeysWizardPageModel extends ObservableUIPojo {
 	}
 
 	
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return connection;
 	}
 

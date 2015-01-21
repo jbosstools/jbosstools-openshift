@@ -16,9 +16,9 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.markers.ConfigureMarkersWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim

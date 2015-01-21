@@ -62,36 +62,36 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNullConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.MultiConverter;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildVisibilityAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.environment.NewEnvironmentVariablesWizard;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;
@@ -223,11 +223,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						}
 					}, getContainer(), dbc);
 				} catch (InvocationTargetException e) {
-					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(NLS.bind(
 							"Could not load applications for domain {0}.",
 							domain), e));
 				} catch (InterruptedException e) {
-					OpenShiftUIActivator.log(OpenShiftUIActivator.createErrorStatus(NLS.bind(
+					ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(NLS.bind(
 							"Could not load applications for domain {0}.",
 							domain), e));
 				}
@@ -304,7 +304,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public String getText(Object element) {
-				return OpenShiftResourceLabelUtils.toString((IGearProfile) element);			
+				return ExpressResourceLabelUtils.toString((IGearProfile) element);			
 			}
 		});
 		gearViewer.setInput(
@@ -599,7 +599,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Connection connection = pageModel.getConnection();
+				ExpressConnection connection = pageModel.getConnection();
 				if (connection == null) {
 					return;
 				}
@@ -627,7 +627,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	
 						@Override
 						public String getValue(ICartridge cartridge) {
-							return OpenShiftResourceLabelUtils.toString(cartridge);
+							return ExpressResourceLabelUtils.toString(cartridge);
 						}
 					}).buildColumn()
 				.buildViewer();
@@ -861,7 +861,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus(
+						return ExpressUIActivator.createErrorStatus(
 								"Could not load applications, cartridges and gears", e);
 					}
 				}

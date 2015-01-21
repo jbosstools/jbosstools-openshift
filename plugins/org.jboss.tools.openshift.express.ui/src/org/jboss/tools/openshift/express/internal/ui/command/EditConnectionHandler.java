@@ -16,9 +16,9 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -27,11 +27,11 @@ public class EditConnectionHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Connection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), Connection.class);
+		ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ExpressConnection.class);
 		return openConnectionWizard(connection, event);
 	}
 
-	protected Object openConnectionWizard(Connection connection, ExecutionEvent event) {
+	protected Object openConnectionWizard(ExpressConnection connection, ExecutionEvent event) {
 		final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection);
 		WizardUtils.openWizardDialog(connectToOpenShiftWizard, HandlerUtil.getActiveShell(event));
 		return null;

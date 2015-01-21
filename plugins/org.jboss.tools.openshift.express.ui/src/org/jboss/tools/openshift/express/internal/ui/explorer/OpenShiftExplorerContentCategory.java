@@ -10,23 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.explorer;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * @author Xavier Coulon
  */
 public class OpenShiftExplorerContentCategory {
 
-	private final Connection user;
+	private final ExpressConnection user;
 	
-	public OpenShiftExplorerContentCategory(final Connection user) {
+	public OpenShiftExplorerContentCategory(final ExpressConnection user) {
 		this.user = user;
 	}
 
 	/**
 	 * @return the user
 	 */
-	public Connection getUser() {
+	public ExpressConnection getUser() {
 		return user;
 	}
 	

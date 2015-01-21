@@ -20,9 +20,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
@@ -41,9 +41,9 @@ public class ConnectionPropertySource implements IPropertySource {
 	/** the key that's used to store the connection (in the preferences) **/
 	private static final String PROPERTY_KEY = "Persisted Key";
 
-	private final Connection connection;
+	private final ExpressConnection connection;
 
-	public ConnectionPropertySource(Connection connection) {
+	public ConnectionPropertySource(ExpressConnection connection) {
 		this.connection = connection;
 	}
 
@@ -89,11 +89,11 @@ public class ConnectionPropertySource implements IPropertySource {
 		return null;
 	}
 
-	private Object getUsername(Connection connection) {
+	private Object getUsername(ExpressConnection connection) {
 		return connection.getUsername();
 	}
 
-	private Object getHost(Connection connection) {
+	private Object getHost(ExpressConnection connection) {
 		StringBuilder builder = new StringBuilder(connection.getHost());
 		if (connection.isDefaultHost()) {
 			builder.append(DEFAULT_MARKER);
@@ -101,11 +101,11 @@ public class ConnectionPropertySource implements IPropertySource {
 		return builder.toString();
 	}
 
-	private Object getDomains(Connection connection) {
-		return OpenShiftResourceLabelUtils.toString(connection.getDomains());
+	private Object getDomains(ExpressConnection connection) {
+		return ExpressResourceLabelUtils.toString(connection.getDomains());
 	}
 
-	private String getKey(Connection connection) {
+	private String getKey(ExpressConnection connection) {
 		try {
 			return ConnectionURL.forConnection(connection).toString();
 		} catch (UnsupportedEncodingException e) {
@@ -116,10 +116,10 @@ public class ConnectionPropertySource implements IPropertySource {
 		return "";
 	}
 
-	private void loadRemoteDetails(final Connection connection) throws OpenShiftException {
+	private void loadRemoteDetails(final ExpressConnection connection) throws OpenShiftException {
 		IRunnableWithProgress longRunning = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InterruptedException {
-				monitor.beginTask("Loading Connection Details", 200);
+				monitor.beginTask("Loading ExpressConnection Details", 200);
 				try {
 					if (!connection.isConnected()
 							&& connection.canPromptForPassword()) {

@@ -45,9 +45,9 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.IApplicationPortForwarding;
 import com.openshift.client.OpenShiftSSHOperationException;
@@ -206,7 +206,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 								wizardModel.startPortForwarding();
 								refreshViewerInput(wizardModel.getForwardablePorts());
 							} catch (OpenShiftSSHOperationException e) {
-								return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding.", e);
+								return ExpressUIActivator.createErrorStatus("Failed to start port-forwarding.", e);
 							}
 							
 							try {
@@ -214,14 +214,14 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 									List<IApplicationPortForwarding> forwardablePorts = wizardModel.getForwardablePorts();
 									for (IApplicationPortForwarding portfwd : forwardablePorts) {
 										if (!portfwd.isStarted(wizardModel.getApplication().getSSHSession())) {
-											return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding for one or more ports. See console for errors.");											
+											return ExpressUIActivator.createErrorStatus("Failed to start port-forwarding for one or more ports. See console for errors.");											
 										}
 									}
 								} else {
-									return OpenShiftUIActivator.createErrorStatus("Failed to start port-forwarding. See console for errors.");
+									return ExpressUIActivator.createErrorStatus("Failed to start port-forwarding. See console for errors.");
 								}
 							} catch (OpenShiftSSHOperationException e) {
-								return OpenShiftUIActivator.createErrorStatus("Problem checking port forward status during start. See console for errors.");
+								return ExpressUIActivator.createErrorStatus("Problem checking port forward status during start. See console for errors.");
 							}
 							
 							return Status.OK_STATUS;
@@ -250,7 +250,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 								wizardModel.stopPortForwarding();
 								refreshViewerInput(wizardModel.getForwardablePorts());
 							} catch (OpenShiftSSHOperationException e) {
-								return OpenShiftUIActivator.createErrorStatus("Failed to stop port-forwarding.", e);
+								return ExpressUIActivator.createErrorStatus("Failed to stop port-forwarding.", e);
 							}
 							return Status.OK_STATUS;
 						}
@@ -360,7 +360,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 					monitor.worked(1);
 					return Status.OK_STATUS;
 				} catch (OpenShiftSSHOperationException e) {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							"Could not load forwardable ports for application ''{0}''", e, wizardModel.getApplication().getName());
 				}
 			}

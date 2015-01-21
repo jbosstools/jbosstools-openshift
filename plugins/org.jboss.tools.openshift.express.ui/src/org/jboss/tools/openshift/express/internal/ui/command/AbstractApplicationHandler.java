@@ -19,9 +19,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.internal.client.utils.StringUtils;
@@ -39,7 +39,7 @@ public abstract class AbstractApplicationHandler extends AbstractHandler {
 		} else {
 			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 			if (server == null) {
-				return OpenShiftUIActivator.createCancelStatus(NLS.bind("Could not {0}: server adapter not found.", getOperationName()));
+				return ExpressUIActivator.createCancelStatus(NLS.bind("Could not {0}: server adapter not found.", getOperationName()));
 			}
 			return execute(server, shell);
 		}
@@ -48,7 +48,7 @@ public abstract class AbstractApplicationHandler extends AbstractHandler {
 	protected IStatus execute(IServer server, Shell shell) {
 		String applicationName = OpenShiftServerUtils.getApplicationName(server);
 		if (StringUtils.isEmpty(applicationName)) {
-			return OpenShiftUIActivator.createCancelStatus(NLS.bind(
+			return ExpressUIActivator.createCancelStatus(NLS.bind(
 					"Could not {0} application: application for server adapter {1} not found.",
 					getOperationName(),
 					server.getName()));

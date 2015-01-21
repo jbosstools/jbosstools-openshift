@@ -16,8 +16,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
@@ -31,12 +31,12 @@ public class OpenInWebBrowserHandler extends AbstractHandler{
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
 		if (application == null) {
-			return OpenShiftUIActivator.createCancelStatus("Could not find application to show in a browser.");
+			return ExpressUIActivator.createCancelStatus("Could not find application to show in a browser.");
 		}
 		final String appName = application.getName();
 		final String appUrl = application.getApplicationUrl();
 		new BrowserUtility().checkedCreateInternalBrowser(appUrl, appName,
-				OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 		return Status.OK_STATUS;
 	}
 

@@ -28,16 +28,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.core.CodeAnythingCartridge;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
+import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCartridge;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.cartridge.ICartridge;
 
@@ -97,7 +97,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 				return;
 			}
 			ICartridge embeddableCartridge = (ICartridge) value;
-			String name = OpenShiftResourceLabelUtils.toString(embeddableCartridge);
+			String name = ExpressResourceLabelUtils.toString(embeddableCartridge);
 			this.nameLabel.setText(name);
 			this.nameLabel.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
 
@@ -146,7 +146,7 @@ public class CartridgeDetailViews extends AbstractDetailViews {
 			}
 			
 			ICartridge cartridge = (ICartridge) value;
-			String cartridgeLabel = OpenShiftResourceLabelUtils.toString(cartridge);
+			String cartridgeLabel = ExpressResourceLabelUtils.toString(cartridge);
 			this.name.setText(cartridgeLabel);
 			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(cartridgeLabel, null));
 			if (cartridge.getUrl() != null) {

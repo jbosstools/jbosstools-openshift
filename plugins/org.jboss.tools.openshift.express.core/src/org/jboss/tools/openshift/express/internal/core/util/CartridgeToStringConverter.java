@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.util;
 
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils.ToStringConverter;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.client.cartridge.ICartridge;
 
 /**
  * @author Andre Dietisheim
  */
-public class CartridgeToStringConverter implements ToStringConverter<ICartridge> {
+public class CartridgeToStringConverter implements StringUtils.ToStringConverter<ICartridge> {
 
 		@Override
 		public String toString(ICartridge cartridge) {

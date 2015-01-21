@@ -134,7 +134,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.server.CommitItem.Status;
 
 /**
@@ -733,7 +733,7 @@ public class CommitDialog extends TitleAreaDialog {
 //		Image titleImage = UIIcons.WIZBAN_CONNECT_REPO.createImage();
 //		UIUtils.hookDisposal(parent, titleImage);
 //		setTitleImage(titleImage);
-		setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
+		setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 //		setTitle(UIText.CommitDialog_Title);
 		setTitle("Commit and push local changes to OpenShift");
 		setMessage(UIText.CommitDialog_Message, IMessageProvider.INFORMATION);

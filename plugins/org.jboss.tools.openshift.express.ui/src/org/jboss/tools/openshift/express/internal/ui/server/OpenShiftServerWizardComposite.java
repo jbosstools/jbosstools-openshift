@@ -73,15 +73,14 @@ import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.DomainColumnLabelProvider;
@@ -89,6 +88,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOp
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -119,7 +119,7 @@ public class OpenShiftServerWizardComposite {
 	private IProject deployProject;
 	private IDomain domain;
 	private IApplication application;
-	private Connection connection;
+	private ExpressConnection connection;
 	private List<IDomain> domains;
 	private List<IApplication> applications;
 	private IServerWorkingCopy server;
@@ -144,10 +144,10 @@ public class OpenShiftServerWizardComposite {
 		updateModel(getConnection(callback), domain, application);
 	}
 	
-	private Connection getConnection(IServerModeUICallback callback) {
-		Connection connection = BehaviorTaskModelUtil.getConnection(callback);
+	private ExpressConnection getConnection(IServerModeUICallback callback) {
+		ExpressConnection connection = BehaviorTaskModelUtil.getConnection(callback);
 		if (connection == null) {
-			connection = ConnectionsModelSingleton.getInstance().getRecentConnection();
+			connection = ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class);
 		}
 		return connection;
 	}
@@ -162,7 +162,7 @@ public class OpenShiftServerWizardComposite {
 	}
 
 	private void initWidgets() {
-		connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
+		connectionComboViewer.setInput(ConnectionsRegistrySingleton.getInstance().getAll());
 		selectConnectionCombo(connection);
 		domainComboViewer.setInput(domains);
 		selectDomainCombo(domain);
@@ -285,14 +285,14 @@ public class OpenShiftServerWizardComposite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Connection connection = UIUtils.getFirstElement(connectionComboViewer.getSelection(), Connection.class);
+				ExpressConnection connection = UIUtils.getFirstElement(connectionComboViewer.getSelection(), ExpressConnection.class);
 				ConnectionWizard wizard = new ConnectionWizard(connection);
 				if (WizardUtils.openWizardDialog(
 						wizard, connectionComboViewer.getControl().getShell()) == Window.OK) {
 					connectionComboViewer.getControl().setEnabled(true);
-					connectionComboViewer.setInput(ConnectionsModelSingleton.getInstance().getConnections());
-					final Connection selectedConnection =
-							ConnectionsModelSingleton.getInstance().getRecentConnection();
+					connectionComboViewer.setInput(ConnectionsRegistrySingleton.getInstance().getAll());
+					final ExpressConnection selectedConnection =
+							ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class);
 					selectConnectionCombo(selectedConnection);
 				}
 			}
@@ -304,7 +304,7 @@ public class OpenShiftServerWizardComposite {
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				final Connection selectedConnection = UIUtils.getFirstElement(event.getSelection(), Connection.class);
+				final ExpressConnection selectedConnection = UIUtils.getFirstElement(event.getSelection(), ExpressConnection.class);
 				if (selectedConnection == null ||
 						(selectedConnection.equals(connection))) {
 					return;
@@ -369,7 +369,7 @@ public class OpenShiftServerWizardComposite {
 			return;
 		}
 		IWizard wizard = ((IWizardPage) handle).getWizard();
-		org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(wizard);
+		org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(wizard);
 	}
 
 	private ISelectionChangedListener onSelectDeployProject() {
@@ -433,7 +433,7 @@ public class OpenShiftServerWizardComposite {
 			}
 			return remoteConfig.getName();
 		} catch (CoreException e) {
-			OpenShiftUIActivator.log(
+			ExpressUIActivator.log(
 					NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardCouldNotGetRemotePointing,
 							application.getGitUrl(), project.getName()), e);
 			return null;
@@ -577,7 +577,7 @@ public class OpenShiftServerWizardComposite {
 		return error;
 	}
 
-	private void updateModel(Connection connection, IDomain domain, IApplication application) {
+	private void updateModel(ExpressConnection connection, IDomain domain, IApplication application) {
 		this.connection = connection;
 		this.domains = safeGetDomains(connection);
 		this.domain = getDomain(domain, domains);
@@ -647,7 +647,7 @@ public class OpenShiftServerWizardComposite {
 		}
 	}
 
-	private List<IDomain> safeGetDomains(Connection connection) {
+	private List<IDomain> safeGetDomains(ExpressConnection connection) {
 		try {
 			if (connection == null) {
 				return null;
@@ -695,7 +695,7 @@ public class OpenShiftServerWizardComposite {
 				server, serverName, deployProject, deployFolder, remote, application, domain);
 	}
 
-	private void updateProjectSettings(IApplication application, IDomain domain, String remote, IProject deployProject, String deployFolder, Connection connection) {
+	private void updateProjectSettings(IApplication application, IDomain domain, String remote, IProject deployProject, String deployFolder, ExpressConnection connection) {
 		String projRemote = 
 				OpenShiftServerUtils.getProjectAttribute(deployProject, OpenShiftServerUtils.SETTING_REMOTE_NAME, null);
 		String projDepFolder = 
@@ -707,7 +707,7 @@ public class OpenShiftServerWizardComposite {
 		}
 	}
 
-	private void selectConnectionCombo(final Connection connection) {
+	private void selectConnectionCombo(final ExpressConnection connection) {
 		IStructuredSelection selection = new StructuredSelection();
 		if (connection != null) {
 			selection = new StructuredSelection(connection);
@@ -759,11 +759,11 @@ public class OpenShiftServerWizardComposite {
 
 	private class UpdateModelJob extends Job {
 		
-		private Connection connection;
+		private ExpressConnection connection;
 		private IDomain domain;
 		private IApplication application;
 
-		private UpdateModelJob(Connection connection, IDomain domain, IApplication application) {
+		private UpdateModelJob(ExpressConnection connection, IDomain domain, IApplication application) {
 			super(NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardFetchingDomainsAndApplications, connection.getUsername()));
 			this.connection = connection;
 			this.domain = domain;

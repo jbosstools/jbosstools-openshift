@@ -54,9 +54,9 @@ import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.core.Connection;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredStringValidator;
@@ -67,8 +67,8 @@ import org.jboss.tools.openshift.express.internal.ui.utils.UIUpdatingJob;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionAwareConnectionComparer;
 import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 
 /**
  * @author Andre Dietisheim
@@ -88,7 +88,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	protected ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
-		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server Connection",
+		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server ExpressConnection",
 				wizard);
 		this.pageModel = new ConnectionWizardPageModel(wizardModel, allowConnectionChange);
 		/*
@@ -112,7 +112,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.span(2, 1).hint(SWT.DEFAULT, 6).applyTo(fillerLabel);
 
 		Label connectionLabel = new Label(container, SWT.NONE);
-		connectionLabel.setText("Connection:");
+		connectionLabel.setText("ExpressConnection:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(connectionLabel);
 		Combo connectionCombo = new Combo(container, SWT.DEFAULT);
@@ -137,7 +137,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					}
 				})
 				.to(BeanProperties.value(
-						ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, Connection.class).observe(
+						ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, IConnection.class).observe(
 						pageModel))
 				.in(dbc);
 		ControlDecorationSupport
@@ -170,7 +170,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				Connection selectedConnection = pageModel.getSelectedConnection();
+				IConnection selectedConnection = pageModel.getSelectedConnection();
 				boolean isNewConnection = selectedConnection instanceof NewConnectionMarker;
 				showConnectionWidgets(isNewConnection, passwordWidget, connectionWidgets, stackLayout, container);
 			}
@@ -340,9 +340,12 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				new BrowserUtility().checkedCreateInternalBrowser(OPENSHIFT_EXPRESS_SIGNUP_URL, OPENSHIFT_EXPRESS_SIGNUP_URL,
-						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-				org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils.close(getWizard());;
+				new BrowserUtility().checkedCreateInternalBrowser(
+						OPENSHIFT_EXPRESS_SIGNUP_URL, 
+						OPENSHIFT_EXPRESS_SIGNUP_URL, 
+						ExpressUIActivator.PLUGIN_ID, 
+						ExpressUIActivator.getDefault().getLog());
+				org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(getWizard());;
 			}
 		};
 	}
@@ -447,7 +450,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 	}		
 
-	public Connection getConnection() {
+	public IConnection getConnection() {
 		return pageModel.getConnection();
 	}
 

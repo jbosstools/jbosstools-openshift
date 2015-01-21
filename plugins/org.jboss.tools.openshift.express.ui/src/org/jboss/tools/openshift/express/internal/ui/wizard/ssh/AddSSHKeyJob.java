@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 
 /**
  * @author Andre Dietisheim
@@ -35,7 +35,7 @@ public class AddSSHKeyJob extends Job {
 			model.addSSHKey();
 			return Status.OK_STATUS;
 		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus(
+			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Could not add SSH key {0} to OpenShift", model.getName()), e);
 		}
 	}

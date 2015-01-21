@@ -34,7 +34,7 @@ public class ApplicationDetailsContentProviderTest {
 		IApplication app = new ApplicationDetailsFake();
 		ApplicationDetailsContentProvider provider = new ApplicationDetailsContentProvider();
 
-		String[] exp = { "Name", "Public URL", "Type", "Created on", "UUID", "Git URL", "SSH Connection", "Scalable",
+		String[] exp = { "Name", "Public URL", "Type", "Created on", "UUID", "Git URL", "SSH ExpressConnection", "Scalable",
 				"Cartridges" };
 		assertApplicationDetails(exp, provider.getElements(app));
 	}

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.core;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * 
@@ -31,6 +31,6 @@ public interface ICredentialsPrompter {
 	 * 
 	 * @param connection  The connection
 	 */
-	public void promptAndAuthenticate(Connection connection);
+	public void promptAndAuthenticate(ExpressConnection connection);
 	
 }

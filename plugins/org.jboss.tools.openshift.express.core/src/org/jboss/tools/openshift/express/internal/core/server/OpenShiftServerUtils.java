@@ -41,13 +41,13 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.core.util.RegExUtils;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.client.IApplication;
@@ -139,15 +139,15 @@ public class OpenShiftServerUtils {
 			return null;
 		}
 		try {
-			Connection connection = ConnectionsModelSingleton.getInstance().getConnectionByUrl(connectionUrl);
+			ExpressConnection connection = ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, ExpressConnection.class);
 			if (connection == null) {
-				OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
+				ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
 				return null;
 			}
 			IDomain domain = connection.getDomain(getDomainName(server));
 			return connection.getApplication(appName, domain);
 		} catch (OpenShiftException e) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
 			return null;
 		}
 	}
@@ -188,9 +188,9 @@ public class OpenShiftServerUtils {
 				return ConnectionURL.forUsername(username);
 			}
 		} catch (UnsupportedEncodingException e) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		} catch (MalformedURLException e) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		}
 
 		return null;
@@ -513,7 +513,7 @@ public class OpenShiftServerUtils {
 				return EGitUtils.hasRemoteUrl(gitURIPattern, repository);
 			}
 		} catch (CoreException ce) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not look up remotes for project {0}", project), ce);
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not look up remotes for project {0}", project), ce);
 		}
 		return false;
 	}
@@ -556,7 +556,7 @@ public class OpenShiftServerUtils {
 	}
 
 	public static void updateOpenshiftProjectSettings(IProject project, IApplication app,
-			IDomain domain, Connection connection, String remoteName, String deployFolder) {
+			IDomain domain, ExpressConnection connection, String remoteName, String deployFolder) {
 		String qualifier = QUALIFIER;
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);
@@ -571,11 +571,11 @@ public class OpenShiftServerUtils {
 		try {
 			node.flush();
 		} catch (BackingStoreException e) {
-			OpenShiftCoreActivator.pluginLog().logError(e);
+			ExpressCoreActivator.pluginLog().logError(e);
 		}
 	}
 
-	private static void setConnectionUrl(Connection connection, IEclipsePreferences node) {
+	private static void setConnectionUrl(ExpressConnection connection, IEclipsePreferences node) {
 		try {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
 			node.put(OpenShiftServerUtils.SETTING_CONNECTIONURL, connectionUrl.toString());
@@ -583,10 +583,10 @@ public class OpenShiftServerUtils {
 				node.put(OpenShiftServerUtils.SETTING_USERNAME, connection.getUsername());
 			}
 		} catch (UnsupportedEncodingException e) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for connection {0}/{1}",
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for connection {0}/{1}",
 					connection.getUsername(), connection.getHost()), e);
 		} catch (MalformedURLException e) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for connection {0}/{1}",
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for connection {0}/{1}",
 					connection.getUsername(), connection.getHost()), e);
 		}
 	}

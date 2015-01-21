@@ -24,12 +24,12 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateSSHSessionJob;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
@@ -108,7 +108,7 @@ public class ListAllEnvironmentVariablesHandler extends AbstractHandler {
 					}
 					ConsoleUtils.displayConsoleView(console);
 				} catch (Exception e) {
-					OpenShiftUIActivator.createErrorStatus("Failed to display remote environment variables", e);
+					ExpressUIActivator.createErrorStatus("Failed to display remote environment variables", e);
 				}
 			}
 		});

@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
@@ -119,7 +119,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				.forwardTo(PROPERTY_INITIAL_GITURL, this);
 	}
 
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return wizardModel.getLegacyConnection();
 	}
 
@@ -192,7 +192,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadResources() throws OpenShiftException {
-		Connection connection = getConnection();
+		ExpressConnection connection = getConnection();
 		if (!wizardModel.isValid(connection)) {
 			return;
 		}
@@ -362,7 +362,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
-		Connection connection = getConnection();
+		ExpressConnection connection = getConnection();
 		if (wizardModel.isValid(connection)) {
 			return false;
 		}

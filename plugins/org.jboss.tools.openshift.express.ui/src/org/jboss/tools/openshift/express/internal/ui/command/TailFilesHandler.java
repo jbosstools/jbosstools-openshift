@@ -42,10 +42,9 @@ import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.GearGroupsUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.JschToEclipseLogger;
@@ -53,7 +52,8 @@ import org.jboss.tools.openshift.express.internal.ui.console.TailFilesWizard;
 import org.jboss.tools.openshift.express.internal.ui.console.TailServerLogWorker;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.jcraft.jsch.JSch;
 import com.openshift.client.IApplication;
@@ -94,7 +94,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 			}
 			return Status.OK_STATUS;
 		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus("Could not open OpenShift console", e);
+			return ExpressUIActivator.createErrorStatus("Could not open OpenShift console", e);
 		}
 	}
 
@@ -115,7 +115,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 					}
 				}
 			} catch (MalformedURLException e) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						NLS.bind("Could tail files for application {0}", application.getName()), e);
 			}
 		}
@@ -129,7 +129,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 	private IStatus execute(final IServer server, final Shell shell) throws MalformedURLException {
 		if (!OpenShiftServerUtils.isOpenShiftRuntime(server)
 				|| !OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
-			return OpenShiftUIActivator.createErrorStatus(
+			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Server {0} is not an OpenShift Server Adapter", server.getName()));
 		}
 		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
@@ -140,7 +140,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					IApplication application = applicationJob.getApplication();
 					if (application == null) {
-						return OpenShiftUIActivator.createErrorStatus(
+						return ExpressUIActivator.createErrorStatus(
 								NLS.bind("Could not retrieve application for server adapter {0}", server.getName()));
 					}
 					return execute(application, shell);
@@ -159,10 +159,10 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 					Thread thread = new Thread(tailServerLogWorker);
 					thread.start();
 				} catch (IOException e) {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							NLS.bind("Failed to tail files from ''{0}''", sshUrl), e);
 				} catch (URISyntaxException e) {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							NLS.bind("Failed to tail files from ''{0}''", sshUrl), e);
 				}
 				return Status.OK_STATUS;

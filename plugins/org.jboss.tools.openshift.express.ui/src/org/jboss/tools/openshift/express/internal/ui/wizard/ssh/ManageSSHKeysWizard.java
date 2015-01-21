@@ -10,15 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
 
 /**
  * @author André Dietisheim
  */
-public class ManageSSHKeysWizard extends AbstractOpenShiftWizard<Connection> {
+public class ManageSSHKeysWizard extends AbstractOpenShiftWizard<ExpressConnection> {
 
-	public ManageSSHKeysWizard(Connection connection) {
+	public ManageSSHKeysWizard(ExpressConnection connection) {
 		super("Manage SSH Keys", connection);
 	}
 

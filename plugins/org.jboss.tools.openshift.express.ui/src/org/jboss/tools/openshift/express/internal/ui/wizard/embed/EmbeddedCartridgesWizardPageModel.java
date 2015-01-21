@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationProperties;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy.IApplicationProperties;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;

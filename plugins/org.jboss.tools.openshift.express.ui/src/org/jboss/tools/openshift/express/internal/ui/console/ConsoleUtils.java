@@ -35,7 +35,7 @@ import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.tools.openshift.express.core.IConsoleUtility;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 

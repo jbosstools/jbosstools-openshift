@@ -14,14 +14,14 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * @author Andre Dietisheim
  */
 public class OpenShiftExplorerUtils {
 
-	public static Connection getConnectionFor(ISelection selection) {
+	public static ExpressConnection getConnectionFor(ISelection selection) {
 		if (selection == null
 				|| !ITreeSelection.class.isAssignableFrom(selection.getClass())) {
 			return null;
@@ -39,7 +39,7 @@ public class OpenShiftExplorerUtils {
 	 * @param selection
 	 * @return
 	 */
-	public static Connection getConnectionFor(ITreeSelection selection) {
+	public static ExpressConnection getConnectionFor(ITreeSelection selection) {
 		if (selection == null
 				|| selection.size() < 1) {
 			return null;
@@ -52,7 +52,7 @@ public class OpenShiftExplorerUtils {
 			return null;
 		}
 		Object firstPathSegment = paths[0].getFirstSegment();
-		Assert.isLegal(firstPathSegment instanceof Connection);
-		return (Connection) firstPathSegment;
+		Assert.isLegal(firstPathSegment instanceof ExpressConnection);
+		return (ExpressConnection) firstPathSegment;
 	}
 }

@@ -17,10 +17,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.CartridgeNameComparator;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.QuickstartNameComparator;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.cartridges.CartridgeNameComparator;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
@@ -97,7 +97,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 				.forwardTo(PROPERTY_EXISTING_APPLICATION, this);
 	}
 
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return wizardModel.getLegacyConnection();
 	}
 
@@ -214,7 +214,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadResources() throws OpenShiftException {
-		Connection connection = getConnection();
+		ExpressConnection connection = getConnection();
 		if (!wizardModel.isValid(connection)) {
 			return;
 		}

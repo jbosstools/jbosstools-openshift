@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy;
 import org.junit.Before;
 import org.junit.Test;
 

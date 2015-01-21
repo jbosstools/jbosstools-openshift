@@ -45,10 +45,10 @@ import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.util.PublishControllerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.publish.LocalZippedModulePublishRunner;
 import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
+import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
-import org.jboss.tools.openshift.express.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.express.internal.core.util.ProjectUtils;
+import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 /**
  * @author Rob Stryker
@@ -62,7 +62,7 @@ public class OpenShiftServerPublishMethod  {
 		if (magicProject == null 
 				|| !magicProject.isAccessible()) {
 			throw new CoreException(new Status(IStatus.ERROR,
-					OpenShiftCoreActivator.PLUGIN_ID,
+					ExpressCoreActivator.PLUGIN_ID,
 					NLS.bind(OpenShiftServerMessages.publishFailMissingProject, server.getName(), destProjName)));
 		}
 	}
@@ -141,11 +141,11 @@ public class OpenShiftServerPublishMethod  {
 				try {
 					operation.execute(new SubProgressMonitor(monitor, 60));
 				} catch (CoreException e) {
-					OpenShiftCoreActivator.pluginLog().logStatus((e.getStatus()));
+					ExpressCoreActivator.pluginLog().logStatus((e.getStatus()));
 				}
 			}
 		} catch (Exception e) {
-			OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
+			ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
 		}
 		return IServer.PUBLISH_STATE_NONE;
 	}
@@ -172,7 +172,7 @@ public class OpenShiftServerPublishMethod  {
 		IContainer destFolder = OpenShiftServerUtils.getContainer(destinationFolder, destProj);
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
+			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus(NLS.bind(
 					OpenShiftServerMessages.publishFailMissingFolder,
 					server.getName(),
 					createMissingPath(destProj, destinationFolder, destFolder))));
@@ -235,8 +235,8 @@ public class OpenShiftServerPublishMethod  {
 				}
 			}
 		} catch (Exception e) {
-			IStatus status = OpenShiftCoreActivator.statusFactory().errorStatus(e);
-			OpenShiftCoreActivator.pluginLog().logStatus(status);
+			IStatus status = ExpressCoreActivator.statusFactory().errorStatus(e);
+			ExpressCoreActivator.pluginLog().logStatus(status);
 			throw new CoreException(status);
 		} finally {
 			subMonitor.done();

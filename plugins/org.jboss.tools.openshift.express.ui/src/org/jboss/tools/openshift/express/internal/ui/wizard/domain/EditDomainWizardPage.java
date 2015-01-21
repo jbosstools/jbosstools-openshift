@@ -30,8 +30,8 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 
 /**
  * @author André Dietisheim
@@ -68,7 +68,7 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 								String webUIDomainPage = getURLJob.getWebUIDomainPageUrl();
 								if (webUIDomainPage != null) {
 									new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPage,
-											OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+											ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 								} else {
 									new WebUIDomainPageNotFoundDialog(getShell(), getModel().getOriginWebUIDomainPageUrl()).open();
 								}
@@ -135,7 +135,7 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPageUrl,
-							OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+							ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 				}
 
 			};

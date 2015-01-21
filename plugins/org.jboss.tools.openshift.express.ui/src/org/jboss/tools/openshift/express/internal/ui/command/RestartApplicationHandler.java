@@ -15,10 +15,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.RestartApplicationJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 
 import com.openshift.client.IApplication;
 
@@ -30,7 +30,7 @@ public class RestartApplicationHandler extends AbstractApplicationHandler {
 	@Override
 	protected IStatus execute(IApplication application, Shell shell) {
 		if (!promptUserToConfirm(application.getName(), shell)) {
-			return OpenShiftUIActivator.createCancelStatus(
+			return ExpressUIActivator.createCancelStatus(
 					"Restarting application {0} was cancelled.", application.getName());
 		}
 		new RestartApplicationJob(application).schedule();
@@ -40,7 +40,7 @@ public class RestartApplicationHandler extends AbstractApplicationHandler {
 	@Override
 	protected IStatus execute(LoadApplicationJob job, Shell shell) {
 		if (!promptUserToConfirm(job.getApplicationName(), shell)) {
-			return OpenShiftUIActivator.createCancelStatus(
+			return ExpressUIActivator.createCancelStatus(
 					"Restarting application {0} was cancelled.", job.getApplicationName());
 		}
 		new JobChainBuilder(job)

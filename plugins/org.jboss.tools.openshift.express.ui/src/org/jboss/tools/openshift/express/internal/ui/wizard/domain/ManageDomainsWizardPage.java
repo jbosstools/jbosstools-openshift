@@ -39,13 +39,13 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.DestroyDomainJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IDomain;
 

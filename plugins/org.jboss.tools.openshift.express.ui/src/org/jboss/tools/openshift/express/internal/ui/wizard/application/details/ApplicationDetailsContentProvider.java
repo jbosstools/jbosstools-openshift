@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.AbstractPropertyTableContentProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.ContainerElement;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.IProperty;
@@ -61,7 +61,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 						new ApplicationPropertyGetter(application) {
 							@Override
 							protected String doGet(IApplication application) {
-								return OpenShiftResourceLabelUtils.toString(application.getCartridge());
+								return ExpressResourceLabelUtils.toString(application.getCartridge());
 							}
 						}.safeGet()));
 				elements.add(
@@ -87,7 +87,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 								return application.getGitUrl();
 							}
 						}.safeGet()));
-				elements.add(new StringElement("SSH Connection",
+				elements.add(new StringElement("SSH ExpressConnection",
 						new ApplicationPropertyGetter(application) {
 							@Override
 							protected String doGet(IApplication application) {

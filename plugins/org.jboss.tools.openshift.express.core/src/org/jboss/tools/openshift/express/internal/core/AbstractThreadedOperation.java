@@ -43,7 +43,7 @@ public abstract class AbstractThreadedOperation {
 			return future.get();
 		} catch (Exception e) { // InterruptedException and ExecutionException
 			Throwable cause = e.getCause() != null ? e.getCause() : e;
-			OpenShiftCoreActivator.pluginLog().logError("Failed to create application", cause);
+			ExpressCoreActivator.pluginLog().logError("Failed to create application", cause);
 			throw new OpenShiftException("Failed to create application: {0}", cause.getMessage());
 		} finally {
 			executor.shutdown();

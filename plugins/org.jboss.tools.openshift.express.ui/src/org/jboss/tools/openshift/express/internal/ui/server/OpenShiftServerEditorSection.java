@@ -53,10 +53,10 @@ import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyButtonCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 
 /**
@@ -142,7 +142,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private String createConnectionLabel(ConnectionURL connectionUrl) {
 		String connectionLabel = "";
 		if (connectionUrl != null) {
-			Connection connection = new Connection(connectionUrl.getUsername(), connectionUrl.getHost());
+			ExpressConnection connection = new ExpressConnection(connectionUrl.getUsername(), connectionUrl.getHost());
 			StringBuilder builder =
 					new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
 			if (connectionUrl.isDefaultHost()) {

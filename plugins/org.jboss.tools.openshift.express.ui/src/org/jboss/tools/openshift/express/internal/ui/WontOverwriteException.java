@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
+/**
+ * @author Andre Dietisheim
+ */
 public class WontOverwriteException extends OpenShiftUIException {
 
 	private static final long serialVersionUID = 1L;

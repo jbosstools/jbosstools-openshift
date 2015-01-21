@@ -19,20 +19,19 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.core.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.core.job.FireConnectionsChangedJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IOpenShiftResource;
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.Refreshable;
-import com.openshift.internal.kube.Resource;
 
 /**
  * @author Xavier Coulon
@@ -53,7 +52,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 	private Object getResource(ISelection selection) {
 		Object resource = UIUtils.getFirstElement(selection, IOpenShiftResource.class);
 		if (resource == null) {
-			resource = UIUtils.getFirstElement(selection, Connection.class);
+			resource = UIUtils.getFirstElement(selection, IConnection.class);
 		}
 		return resource;
 	}
@@ -64,12 +63,14 @@ public class RefreshResourceHandler extends AbstractHandler {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
-					if (element instanceof Refreshable) {
-						monitor.beginTask("Loading OpenShift informations...", IProgressMonitor.UNKNOWN);
-						((Refreshable) element).refresh();
+					monitor.beginTask("Loading OpenShift informations...", IProgressMonitor.UNKNOWN);
+					if(element instanceof IConnection) {
+						((IConnection)element).refresh();
+					} else if (element instanceof IOpenShiftResource) {
+						((IOpenShiftResource)element).refresh();
 					}
 				} catch (OpenShiftException e) {
-					Logger.error("Failed to refresh element", e);
+					ExpressUIActivator.log("Failed to refresh element", e);
 				} finally {
 					monitor.done();
 				}
@@ -77,7 +78,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 			}
 		};
 
-		Connection connection = getConnection(element);
+		IConnection connection = getConnection(element);
 		if (connection != null) {
 			new JobChainBuilder(job)
 			.runWhenSuccessfullyDone(new FireConnectionsChangedJob(connection)).schedule();;
@@ -86,18 +87,16 @@ public class RefreshResourceHandler extends AbstractHandler {
 		}
 	}
 
-	private Connection getConnection(final Object resource) {
-		Connection connection = null;
-		if (resource instanceof Connection) {
-			connection = (Connection) resource; 
+	private IConnection getConnection(final Object resource) {
+		IConnection connection = null;
+		if (resource instanceof IConnection) {
+			connection = (IConnection) resource; 
 		} else if (resource instanceof IDomain) {
 			IDomain domain = (IDomain) resource;
-			connection = ConnectionsModelSingleton.getInstance().getConnectionByResource(domain.getUser());
+			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
 		} else if (resource instanceof IApplication) {
 			IApplication application = (IApplication) resource;
-			connection = ConnectionsModelSingleton.getInstance().getConnectionByResource(application);
-		} else if (resource instanceof Resource){
-			connection = ConnectionsModelSingleton.getInstance().getRecentKubeConnection();
+			connection = ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance());
 		}
 		return connection;
 	}

@@ -26,19 +26,19 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.ApplicationRequirement;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
-import org.jboss.tools.openshift.express.internal.core.EmbedCartridgeStrategy.IApplicationProperties;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy.ApplicationRequirement;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy.EmbeddableCartridgeDiff;
+import org.jboss.tools.openshift.express.internal.core.cartridges.EmbedCartridgeStrategy.IApplicationProperties;
 import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.LogEntry;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -107,7 +107,7 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 				executeAdditionalOperations(true, cartridge, additionalOperations);
 			}
 		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+			ExpressUIActivator.log("Could not process embeddable cartridges", e);
 		}
 	}
 	
@@ -123,7 +123,7 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 				executeRemove(cartridge);
 			}
 		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log("Could not process embeddable cartridges", e);
+			ExpressUIActivator.log("Could not process embeddable cartridges", e);
 		}
 	}
 
@@ -239,7 +239,7 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 		try {
 			IGearProfile gear = getFirstAvailableGearProfile(domain);
 			if (gear == null) {
-				IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Could not find any available gear profiles.");
+				IStatus status = new Status(IStatus.ERROR, ExpressUIActivator.PLUGIN_ID, "Could not find any available gear profiles.");
 				new ErrorDialog(getShell(), "Error", "Could create jenkins application.", status, -1).open();
 				return false;
 			}
@@ -261,7 +261,7 @@ public class FullfillRequirementsCheckStrategy extends AbstractCheckEmbeddableCa
 				return JobUtils.isOk(waitStatus);
 			}
 		} catch (Exception e) {
-			IStatus status = new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getMessage());
+			IStatus status = new Status(IStatus.ERROR, ExpressUIActivator.PLUGIN_ID, e.getMessage());
 			new ErrorDialog(getShell(), "Error", "Could not create jenkins application.", status, -1).open();		
 		}
 		return false;

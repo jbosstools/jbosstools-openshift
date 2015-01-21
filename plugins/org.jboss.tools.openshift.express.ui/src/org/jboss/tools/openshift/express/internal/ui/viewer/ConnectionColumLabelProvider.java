@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * @author Andre Dietisheim
@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.Connection;
 public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 
 	private static final String DEFAULT_MARKER = " (default)";
-	private static final String LABEL_NEW_CONNECTION = "<New Connection>";
+	private static final String LABEL_NEW_CONNECTION = "<New ExpressConnection>";
 
 	@Override
 	public String getText(Object element) {
@@ -27,13 +27,13 @@ public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 			return LABEL_NEW_CONNECTION;
 		}
 
-		if (!(element instanceof Connection)) {
+		if (!(element instanceof ExpressConnection)) {
 			return super.getText(element);
 		}
-		return createLabel((Connection) element);
+		return createLabel((ExpressConnection) element);
 	}
 
-	private String createLabel(Connection connection) {
+	private String createLabel(ExpressConnection connection) {
 		StringBuilder builder =
 				new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
 		if (connection.isDefaultHost()) {

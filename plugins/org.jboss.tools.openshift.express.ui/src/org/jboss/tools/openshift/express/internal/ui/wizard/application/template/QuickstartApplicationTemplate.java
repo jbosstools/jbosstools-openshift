@@ -15,8 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
 
 import com.openshift.client.IQuickstart;
 import com.openshift.client.cartridge.ICartridge;

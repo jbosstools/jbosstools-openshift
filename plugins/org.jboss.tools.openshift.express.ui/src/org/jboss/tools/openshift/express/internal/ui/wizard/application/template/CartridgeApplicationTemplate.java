@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application.templat
 import java.util.Collections;
 import java.util.Set;
 
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;

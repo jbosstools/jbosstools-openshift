@@ -16,5 +16,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<module>org.jboss.tools.openshift.express.client</module>
 		<module>org.jboss.tools.openshift.express.core</module>
 		<module>org.jboss.tools.openshift.express.ui</module>
+		<module>org.jboss.tools.openshift.client</module>
+		<module>org.jboss.tools.openshift.common.corei</module>
+		<module>org.jboss.tools.openshift.common.ui</module>
+		<module>org.jboss.tools.openshift.core</module>
+		<module>org.jboss.tools.openshift.ui</module>
 	</modules>
 </project>

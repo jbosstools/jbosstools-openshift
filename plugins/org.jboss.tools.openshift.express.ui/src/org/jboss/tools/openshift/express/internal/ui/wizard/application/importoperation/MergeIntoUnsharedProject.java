@@ -22,10 +22,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
-import org.jboss.tools.openshift.express.internal.core.util.FileUtils;
 import org.jboss.tools.openshift.express.internal.core.util.ResourceUtils;
 
 import com.openshift.client.IApplication;
@@ -40,7 +40,7 @@ import com.openshift.client.OpenShiftException;
 public class MergeIntoUnsharedProject extends AbstractImportApplicationOperation {
 
 	public MergeIntoUnsharedProject(String projectName, IApplication application, String remoteName,
-			List<IOpenShiftMarker> markers, Connection connection) {
+			List<IOpenShiftMarker> markers, ExpressConnection connection) {
 		super(projectName, application, remoteName, markers, connection);
 	}
 

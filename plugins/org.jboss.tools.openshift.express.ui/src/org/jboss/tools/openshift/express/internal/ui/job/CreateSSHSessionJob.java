@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 
@@ -49,7 +49,7 @@ public class CreateSSHSessionJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		IApplication application = getApplication();
 		if (application == null) {
-			return OpenShiftUIActivator.createErrorStatus("Could not verify SSH seesion. Application was not found.");
+			return ExpressUIActivator.createErrorStatus("Could not verify SSH seesion. Application was not found.");
 		}
 		try {		
 			final boolean hasAlreadySSHSession = application.hasSSHSession();
@@ -63,7 +63,7 @@ public class CreateSSHSessionJob extends Job {
 			this.validSession = application.hasSSHSession();
 			return Status.OK_STATUS;
 		} catch (OpenShiftSSHOperationException e) {
-			return OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application));
+			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application));
 		}
 	}
 

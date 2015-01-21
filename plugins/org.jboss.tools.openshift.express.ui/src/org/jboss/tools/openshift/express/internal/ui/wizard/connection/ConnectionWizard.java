@@ -11,8 +11,8 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.core.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 /**
  * @author Xavier Coulon
@@ -25,17 +25,17 @@ public class ConnectionWizard extends Wizard {
 	 * Constructor to use when connecting with the default connection.
 	 */
 	public ConnectionWizard() {
-		this(ConnectionsModelSingleton.getInstance().getRecentConnection());
+		this(ConnectionsRegistrySingleton.getInstance().getRecentConnection());
 	}
 	
-	public ConnectionWizard(final Connection connection) {
+	public ConnectionWizard(final IConnection connection) {
 		this(connection, true);
 	}
 
 	/**
 	 * Constructor to use when connection to use is known.
 	 */
-	public ConnectionWizard(final Connection connection, boolean allowConnectionChange) {
+	public ConnectionWizard(final IConnection connection, boolean allowConnectionChange) {
 		this.page = new ConnectionWizardPage(this, new ConnectionWizardModel(connection), allowConnectionChange);
 		setNeedsProgressMonitor(true);
 	}
@@ -50,7 +50,7 @@ public class ConnectionWizard extends Wizard {
 		addPage(page);
 	}
 	
-	public Connection getConnection() {
+	public IConnection getConnection() {
 		return page.getConnection();
 	}
 }

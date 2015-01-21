@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.utils;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 
 /**
  * A small utility class that accesses the preferences to keep the last
@@ -23,14 +23,14 @@ import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
  */
 public class OpenShiftUserPreferencesProvider {
 
-	private static final String LAST_SELECTED_CARTRIDGE_KEY = OpenShiftUIActivator.PLUGIN_ID + ".lastSelectedCartridge";
+	private static final String LAST_SELECTED_CARTRIDGE_KEY = ExpressUIActivator.PLUGIN_ID + ".lastSelectedCartridge";
 
 	/**
 	 * @return the last selected value, or null if that preference does not exist yet.
 	 */
 	public String getLastSelectedCartridgeName() {
 		// Find the last-selected one
-		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(OpenShiftUIActivator.PLUGIN_ID);
+		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(ExpressUIActivator.PLUGIN_ID);
 		return prefs.get(LAST_SELECTED_CARTRIDGE_KEY, null);
 	}
 
@@ -39,7 +39,7 @@ public class OpenShiftUserPreferencesProvider {
 	 * @param name
 	 */
 	public void setLastSelectedCartridgeName(String name) {
-		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(OpenShiftUIActivator.PLUGIN_ID);
+		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(ExpressUIActivator.PLUGIN_ID);
 		prefs.put(LAST_SELECTED_CARTRIDGE_KEY, name);
 	}
 

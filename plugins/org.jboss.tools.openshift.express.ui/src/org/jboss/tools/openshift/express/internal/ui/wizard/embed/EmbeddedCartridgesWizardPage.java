@@ -38,16 +38,16 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.core.util.OpenShiftResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationConfigurationWizardPageModel;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.cartridge.ICartridge;
 
@@ -148,7 +148,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 
 					@Override
 					public String getValue(ICartridge cartridge) {
-						return OpenShiftResourceLabelUtils.toString(cartridge);
+						return ExpressResourceLabelUtils.toString(cartridge);
 					}
 				})
 				.weight(1)
@@ -168,7 +168,7 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 						pageModel.loadOpenShiftResources();
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return OpenShiftUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
+						return ExpressUIActivator.createErrorStatus("Could not load embeddable cartridges", e);
 					}
 				}
 			};

@@ -36,10 +36,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.express.internal.core.connection.X509CertificateParser;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
+import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
@@ -49,9 +49,9 @@ import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 public class SSLCertificateCallback implements ISSLCertificateCallback {
 	
 	private static final boolean REMEMBER_DECISION_DEFAULT = true;
-	
+
 	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
-	
+
 	// TODO: store certificates and decision in Eclipse preferences
 	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<X509Certificate, Boolean>();
 	
@@ -106,7 +106,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 		private void setupDialog(Composite parent) {
 			parent.getShell().setText("Untrusted SSL Certificate");
 			setTitle("Please accept or deny the following untrusted SSL certificate");
-			setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
+			setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 			setDialogHelpAvailable(false);
 		}
 

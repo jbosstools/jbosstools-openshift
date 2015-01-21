@@ -38,22 +38,22 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.express.internal.ui.utils.ContentProposalUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -171,7 +171,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 		private void createContentProposal(Text text) {
 			final ControlDecoration decoration = ContentProposalUtils.createContenProposalDecoration("History available", text);
-			ContentProposalUtils.createContentProposal(text, OpenShiftPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
+			ContentProposalUtils.createContentProposal(text, ExpressPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
 			text.addFocusListener(new FocusAdapter() {
 
 				@Override
@@ -328,11 +328,11 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			if (template.isOpenShiftMaintained()) {
 				setImageAndTooltip(openshiftMaintainedLabel,
 						"OpenShift maintained",
-						OpenShiftImages.OPENSHIFT_MAINTAINED_IMG);
+						ExpressImages.OPENSHIFT_MAINTAINED_IMG);
 			} else {
 				setImageAndTooltip(openshiftMaintainedLabel,
 						"Community created",
-						OpenShiftImages.NOT_OPENSHIFT_MAINTAINED_IMG);
+						ExpressImages.NOT_OPENSHIFT_MAINTAINED_IMG);
 			}
 		}
 		
@@ -340,11 +340,11 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 			if (template.isAutomaticSecurityUpdates()) {
 				setImageAndTooltip(securityUpdatesLabel, 
 						"automatic security updates",
-						OpenShiftImages.SECURITY_UPDATES_IMG);
+						ExpressImages.SECURITY_UPDATES_IMG);
 			} else {
 				setImageAndTooltip(securityUpdatesLabel,
 						"no automatic security updates",
-						OpenShiftImages.NO_SECURITY_UPDATES_IMG);
+						ExpressImages.NO_SECURITY_UPDATES_IMG);
 			}
 		}
 
@@ -362,7 +362,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 					if (template == null) {
 						return;
 					}
-					new BrowserUtility().checkedCreateExternalBrowser(template.getPageUrl(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+					new BrowserUtility().checkedCreateExternalBrowser(template.getPageUrl(), ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 				}
 
 			};

@@ -22,13 +22,14 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.embed.EditEmbeddedCartridgesWizard;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -50,7 +51,7 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 			IServer server = (IServer) 
 					UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 			if (server == null) {
-				return OpenShiftUIActivator.createErrorStatus("Could not find application to restart");
+				return ExpressUIActivator.createErrorStatus("Could not find application to restart");
 			}
 			final LoadApplicationJob job = new LoadApplicationJob(server);
 			new JobChainBuilder(job)
@@ -60,7 +61,7 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 						public IStatus runInUIThread(IProgressMonitor monitor) {
 							IApplication application = job.getApplication();
 							if (application == null) {
-								return OpenShiftUIActivator
+								return ExpressUIActivator
 										.createCancelStatus("Could not find application to edit the embedded cartridges of");
 							}
 							return openEditEmbeddedCartridgesWizard(application, HandlerUtil.getActiveShell(event));
@@ -85,13 +86,13 @@ public class EditCartridgesHandler extends AbstractDomainHandler {
 	protected IStatus openEditEmbeddedCartridgesWizard(IApplication application, Shell shell) {
 		try {
 			WizardUtils.openWizardDialog(
-					new EditEmbeddedCartridgesWizard(application, 
-							ConnectionsModelSingleton.getInstance().getConnectionByResource(application)), 
+					new EditEmbeddedCartridgesWizard(
+							application, ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance())),
 							shell);
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to edit cartridges", e);
-			return OpenShiftUIActivator.createErrorStatus(
+			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Failed to edit cartridges for application {0}", application.getName()), e);
 		}
 	}

@@ -21,10 +21,10 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.jboss.tools.common.ui.BrowserUtil;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.TreeUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Xavier Coulon
@@ -79,7 +79,7 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 			public void mouseUp(MouseEvent e) {
 				if (e.button == 1) { // left button only
 					BrowserUtil.checkedCreateExternalBrowser(
-							url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+							url, ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 				}
 			}
 		};

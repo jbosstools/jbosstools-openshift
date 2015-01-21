@@ -13,10 +13,10 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
-import org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 /**
  * @author Andre Dietisheim
@@ -25,12 +25,12 @@ public class NewDomainHandler extends AbstractDomainHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Connection connection = getConnection(event);
+		ExpressConnection connection = getConnection(event);
 		if (connection == null) {
 			return null;
 		}
 		if (WizardUtils.openWizard(new NewDomainWizard(connection), HandlerUtil.getActiveShell(event))) {
-			ConnectionsModelSingleton.getInstance().fireConnectionChanged(connection);
+			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 		}
 		return null;
 	}

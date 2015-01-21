@@ -25,8 +25,8 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 /**
  * @author André Dietisheim
@@ -51,7 +51,7 @@ public class ConfigureMarkersWizard extends Wizard {
 			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
 			return result.isOK();
 		} catch (Exception e) {
-			OpenShiftUIActivator.log(e);
+			ExpressUIActivator.log(e);
 			return false;
 		}
 	}
@@ -78,7 +78,7 @@ public class ConfigureMarkersWizard extends Wizard {
 		@Override
 		protected IStatus doRun(IProgressMonitor monitor) {
 			MultiStatus multiStatus = 
-					new MultiStatus(OpenShiftUIActivator.PLUGIN_ID, 0, "Error(s) occurred while adding/removing marker(s)",null);
+					new MultiStatus(ExpressUIActivator.PLUGIN_ID, 0, "Error(s) occurred while adding/removing marker(s)",null);
 			Repository repository = EGitUtils.getRepository(project);
 			removeMarkers(markersToRemove, project, monitor, multiStatus);
 			addMarkers(markersToAdd, project, repository, monitor, multiStatus);
@@ -94,7 +94,7 @@ public class ConfigureMarkersWizard extends Wizard {
 					monitor.internalWorked(1);
 					marker.removeFrom(project, monitor);
 				} catch (CoreException e) {
-					multiStatus.add(OpenShiftUIActivator.createErrorStatus(
+					multiStatus.add(ExpressUIActivator.createErrorStatus(
 							NLS.bind("Could not remove marker {0}", marker.getName()), e));
 				}
 			}
@@ -114,7 +114,7 @@ public class ConfigureMarkersWizard extends Wizard {
 					}
 					
 				} catch (CoreException e) {
-					multiStatus.add(OpenShiftUIActivator.createErrorStatus(
+					multiStatus.add(ExpressUIActivator.createErrorStatus(
 							NLS.bind("Could not add marker {0}", marker.getName()), e));
 				}
 			}

@@ -13,9 +13,9 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.EditDomainWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IDomain;
 

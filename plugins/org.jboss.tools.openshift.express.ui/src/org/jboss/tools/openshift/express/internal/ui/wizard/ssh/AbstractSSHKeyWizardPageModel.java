@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.express.internal.ui.wizard.ssh;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 
 import com.openshift.client.OpenShiftException;
@@ -22,9 +22,9 @@ import com.openshift.client.OpenShiftException;
 public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo implements ISSHKeyWizardPageModel {
 
 	private String name;
-	private Connection connection;
+	private ExpressConnection connection;
 	
-	AbstractSSHKeyWizardPageModel(Connection user) {
+	AbstractSSHKeyWizardPageModel(ExpressConnection user) {
 		this.connection = user;
 	}
 
@@ -48,7 +48,7 @@ public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo imp
 		return connection.hasSSHPublicKey(publicKeyContent);
 	}
 	
-	protected Connection getConnection() {
+	protected ExpressConnection getConnection() {
 		return connection;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -34,22 +34,23 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.CommonViewer;
 import org.eclipse.ui.part.PageBook;
-import org.jboss.tools.openshift.core.Connection;
-import org.jboss.tools.openshift.core.ConnectionType;
-import org.jboss.tools.openshift.express.core.IConnectionsModelListener;
-import org.jboss.tools.openshift.express.internal.core.connection.ConnectionsModelSingleton;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 
 /**
  * @author Xavier Coulon
+ * @author Andre Dietisheim
  */
-public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsModelListener {
+public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsRegistryListener {
 
 	private Control connectionsPane;
 	private Control explanationsPane;
@@ -57,24 +58,24 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 
 	@Override
 	protected Object getInitialInput() {
-		return ConnectionsModelSingleton.getInstance();
+		return ConnectionsRegistrySingleton.getInstance();
 	}
 
 	@Override
 	protected CommonViewer createCommonViewer(Composite parent) {
 		CommonViewer viewer = super.createCommonViewer(parent);
 		new OpenShiftExplorerContextsHandler(viewer);
-		ConnectionsModelSingleton.getInstance().addListener(this);
+		ConnectionsRegistrySingleton.getInstance().addListener(this);
 		return viewer;
 	}
 
 	@Override
 	public void dispose() {
-		ConnectionsModelSingleton.getInstance().removeListener(this);
+		ConnectionsRegistrySingleton.getInstance().removeListener(this);
 		super.dispose();
 	}
 
-	public void refreshViewer(final Connection connection) {
+	public void refreshViewer(final IConnection connection) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				CommonViewer viewer = getCommonViewer();
@@ -92,17 +93,17 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	@Override
-	public void connectionAdded(Connection connection, ConnectionType type) {
+	public void connectionAdded(IConnection connection) {
 		refreshViewer(null);
 	}
 
 	@Override
-	public void connectionRemoved(Connection connection, ConnectionType type) {
+	public void connectionRemoved(IConnection connection) {
 		refreshViewer(null);
 	}
 
 	@Override
-	public void connectionChanged(Connection connection, ConnectionType type) {
+	public void connectionChanged(IConnection connection) {
 		refreshViewer(connection);
 	}
 
@@ -145,7 +146,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	private void showConnectionsOrExplanations(Control connectionsPane, Control explanationsPane) {
-		if (ConnectionsModelSingleton.getInstance().getAllConnections().length < 1) {
+		if (ConnectionsRegistrySingleton.getInstance().getAll().length < 1) {
 			pageBook.showPage(explanationsPane);
 		} else {
 			pageBook.showPage(connectionsPane);
@@ -183,7 +184,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 						activate(DOMAIN_CONTEXT);
 					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
 						activate(APPLICATION_CONTEXT);
-					} else if (UIUtils.isFirstElementOfType(org.jboss.tools.openshift.express.internal.core.connection.Connection.class, selection)) {
+					} else if (UIUtils.isFirstElementOfType(ExpressConnection.class, selection)) {
 						// must be checked after domain, application, adapter may convert
 						// any resource to a connection
 						activate(CONNECTION_CONTEXT);

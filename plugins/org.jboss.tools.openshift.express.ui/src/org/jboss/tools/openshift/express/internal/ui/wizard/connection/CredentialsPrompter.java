@@ -14,9 +14,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
@@ -27,7 +27,7 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 	}
 	
 	@Override
-	public void promptAndAuthenticate(final Connection connection) {
+	public void promptAndAuthenticate(final ExpressConnection connection) {
 		Display.getDefault().syncExec(
 				new Runnable() {
 					public void run() {

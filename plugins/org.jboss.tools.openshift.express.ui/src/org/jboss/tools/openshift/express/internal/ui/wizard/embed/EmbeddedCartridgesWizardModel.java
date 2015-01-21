@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.express.internal.core.IApplicationProperties;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;
@@ -29,13 +29,13 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 
 	private Set<ICartridge> checkedEmbeddedCartridges;
 	private List<ICartridge> availableCartridges;
-	private Connection connection;
+	private ExpressConnection connection;
 	private IDomain domain;
 	private IApplicationProperties applicationProperties;
 	private Set<ICartridge> embeddedCartridges;
 
 	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges, 
-			IApplicationProperties applicationProperties, IDomain domain, Connection connection) {
+			IApplicationProperties applicationProperties, IDomain domain, ExpressConnection connection) {
 		this.embeddedCartridges = embeddedCartidges;
 		this.checkedEmbeddedCartridges = new HashSet<ICartridge>();
 		this.checkedEmbeddedCartridges.addAll(embeddedCartidges);
@@ -80,7 +80,7 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 		return applicationProperties.getApplicationName();
 	}
 	
-	public Connection getConnection() {
+	public ExpressConnection getConnection() {
 		return connection;
 	}
 

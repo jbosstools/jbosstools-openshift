@@ -26,8 +26,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.ApplicationBuilder;
 import com.openshift.client.ApplicationScale;
@@ -90,19 +91,19 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 					.setEnvironmentVariables(environmentVariables)
 					.setInitialGitUrl(initialGitUrl)
 					.build();
-				return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, OK, "timeouted", null);
+				return new Status(IStatus.OK, ExpressUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
 				if (application != null) {
 					// creation went ok, but initial request timed out
-					return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
+					return new Status(IStatus.OK, ExpressUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
 				} else {
-					return new Status(IStatus.CANCEL, OpenShiftUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
+					return new Status(IStatus.CANCEL, ExpressUIActivator.PLUGIN_ID, TIMEOUTED, "timeouted", null);
 				}
 			}
 		} catch (Exception e) {
 			safeRefreshDomain();
-			return OpenShiftUIActivator.createErrorStatus(
+			return ExpressUIActivator.createErrorStatus(
 					OpenShiftExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, StringUtils.nullToEmptyString(name));
 		}
 	}
@@ -141,7 +142,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		try {
 			domain.refresh();
 		} catch (OpenShiftException e) {
-			OpenShiftUIActivator.log(e);
+			ExpressUIActivator.log(e);
 		}
 	}
 	
@@ -164,7 +165,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 						new MessageDialog(display.getActiveShell()
 								, NLS.bind("Creating {0}", name)
 								, display.getSystemImage(SWT.ICON_QUESTION)
-								, NLS.bind("Could not create application {0}. Connection timed out.\n\nKeep trying?",
+								, NLS.bind("Could not create application {0}. ExpressConnection timed out.\n\nKeep trying?",
 										name)
 								, MessageDialog.QUESTION
 								, new String[] { "Keep trying",

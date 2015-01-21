@@ -37,16 +37,14 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-import org.jboss.tools.openshift.express.internal.core.preferences.OpenShiftPreferences;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.core.util.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.express.internal.ui.job.CreateApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
+import org.jboss.tools.openshift.express.internal.ui.job.FireExpressConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.job.RefreshConnectionJob;
 import org.jboss.tools.openshift.express.internal.ui.job.WaitForApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
@@ -55,6 +53,8 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -75,7 +75,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
-	OpenShiftApplicationWizard(Connection connection, IDomain domain, IApplication application, IProject project, 
+	OpenShiftApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication, boolean showCredentialsPage, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
@@ -138,7 +138,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					return false;
 				}
 
-				new FireConnectionsChangedJob(model.getLegacyConnection()).schedule();
+				new FireExpressConnectionsChangedJob(model.getLegacyConnection()).schedule();
 				saveCodeAnythingUrl();
 			}
 
@@ -165,7 +165,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
 			if (model.getConnection() != null) {
 				new JobChainBuilder(new RefreshConnectionJob(model.getLegacyConnection()))
-					.runWhenDone(new FireConnectionsChangedJob(model.getLegacyConnection()))
+					.runWhenDone(new FireExpressConnectionsChangedJob(model.getLegacyConnection()))
 					.schedule();
 			}
 			return false;
@@ -187,7 +187,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					job, job.getDelegatingProgressMonitor(), getContainer());
 			return status;
 		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus(
+			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Could not wait for application {0} to become reachable", application.getName()), e);
 		}
 	}
@@ -199,7 +199,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", OpenShiftUIActivator
+			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", ExpressUIActivator
 					.createErrorStatus("An exception occurred while creating local git repository.", e));
 			return false;
 		}
@@ -212,7 +212,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		}
 		
 		String url = ((ICodeAnythingApplicationTemplate) template).getUrl();
-		OpenShiftPreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
+		ExpressPreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
 	}
 	
 	private boolean createServerAdapter() {
@@ -225,7 +225,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", NLS.bind("Could not create server adapter for new project {0}.",
 					model.getProjectName()),
-					OpenShiftUIActivator.createErrorStatus(e.getMessage(), e));
+					ExpressUIActivator.createErrorStatus(e.getMessage(), e));
 			return false;
 		}
 	}
@@ -250,7 +250,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			}
 			return status;
 		} catch (Exception e) {
-			return OpenShiftUIActivator.createErrorStatus(
+			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Could not create application {0}", model.getApplicationName()), e);
 		}
 	}
@@ -350,28 +350,28 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 				openError("Project already present", e.getMessage());
 				return Status.CANCEL_STATUS;
 			} catch (final ImportFailedException e) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						"Could not import project from application {0}.", e, model.getApplicationName());
 			} catch (IOException e) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						"Could not copy openshift configuration files to project {0}", e, model
 								.getProjectName());
 			} catch (OpenShiftException e) {
-				return OpenShiftUIActivator.createErrorStatus("Could not import project to the workspace.", e);
+				return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
 			} catch (URISyntaxException e) {
-				return OpenShiftUIActivator.createErrorStatus("The url of the remote git repository is not valid", e);
+				return ExpressUIActivator.createErrorStatus("The url of the remote git repository is not valid", e);
 			} catch (InvocationTargetException e) {
 				TransportException te = getTransportException(e);
 				if (te != null) {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							"Could not clone the repository. Authentication failed.\n"
 									+ " Please make sure that you added your private key to the ssh preferences.", te);
 				} else {
-					return OpenShiftUIActivator.createErrorStatus(
+					return ExpressUIActivator.createErrorStatus(
 							"An exception occurred while creating local git repository.", e);
 				}
 			} catch (Exception e) {
-				return OpenShiftUIActivator.createErrorStatus("Could not import project to the workspace.", e);
+				return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
 			} finally {
 				delegatingMonitor.done();
 			}

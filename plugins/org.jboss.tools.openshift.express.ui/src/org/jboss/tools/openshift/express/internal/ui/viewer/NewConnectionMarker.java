@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
- * A class that is used to have an entry <New Connection> in a combo view with
+ * A class that is used to have an entry <New ExpressConnection> in a combo view with
  * connections.
  * 
  * @author Andre Dietisheim
  * 
  */
-public class NewConnectionMarker extends Connection {
+public class NewConnectionMarker extends ExpressConnection {
 
 	public NewConnectionMarker() {
-		super("<New Connection>");
+		super("<New ExpressConnection>");
 	}
 
 	@Override

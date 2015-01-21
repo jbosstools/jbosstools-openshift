@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
-import org.jboss.tools.openshift.core.Connection;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 
 /**
@@ -18,19 +18,19 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareMode
  */
 class ConnectionWizardModel implements IConnectionAwareModel {
 	
-	protected Connection connection;
+	protected IConnection connection;
 
-	ConnectionWizardModel(final Connection connection) {
+	ConnectionWizardModel(final IConnection connection) {
 		this.connection = connection;
 	}
 	
 	@Override
-	public Connection getConnection() {
+	public IConnection getConnection() {
 		return connection;
 	}
 
 	@Override
-	public Connection setConnection(Connection connection) {
+	public IConnection setConnection(IConnection connection) {
 		this.connection = connection;
 		return connection;
 	}

@@ -28,11 +28,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.CopyPropertyAction;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyNameCellLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.propertytable.PropertyValueCellLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
@@ -119,7 +119,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	private void setupDialog(Composite parent) {
 		parent.getShell().setText("Application Details");
 		setTitle(NLS.bind("Details of Application {0}", application.getName()));
-		setTitleImage(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
+		setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 		setDialogHelpAvailable(false);
 	}
 

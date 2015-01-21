@@ -49,10 +49,10 @@ import org.jboss.tools.openshift.express.internal.core.marker.BaseOpenShiftMarke
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 
@@ -268,7 +268,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 				setViewerCheckedElements(pageModel.getCheckedMarkers());
 				return Status.OK_STATUS;
 			} catch (CoreException e) {
-				return OpenShiftUIActivator.createErrorStatus(
+				return ExpressUIActivator.createErrorStatus(
 						NLS.bind("Could not load markers for project {0}", pageModel.getProject().getName()), e);
 			}
 

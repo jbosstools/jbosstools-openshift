@@ -11,7 +11,7 @@
 	<artifactId>org.jboss.tools.openshift.express.client</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
-		<openshift-java-client.version>3.0.0-SNAPSHOT</openshift-java-client.version>
+		<openshift-java-client.version>2.7.0.Final</openshift-java-client.version>
 		<jboss-dmr.version>1.2.0.Final</jboss-dmr.version>
 		<commons-compress.version>1.8.1</commons-compress.version>
 		<log4j.version>1.2.17</log4j.version>

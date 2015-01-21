@@ -13,17 +13,17 @@ package org.jboss.tools.openshift.express.internal.ui.command;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
  * @author Andre Dietisheim
  */
 public abstract class AbstractDomainHandler extends AbstractHandler {
 
-	protected Connection getConnection(ExecutionEvent event) {
-		Connection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), Connection.class);
+	protected ExpressConnection getConnection(ExecutionEvent event) {
+		ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ExpressConnection.class);
 		if (connection == null) {
 			Logger.warn("Could not launch domain wizard, no connection selected");
 			return null;

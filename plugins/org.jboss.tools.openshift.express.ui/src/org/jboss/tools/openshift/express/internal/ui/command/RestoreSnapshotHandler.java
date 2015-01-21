@@ -20,12 +20,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.util.JobChainBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.snapshot.RestoreSnapshotWizard;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IApplication;
 
@@ -45,7 +45,7 @@ public class RestoreSnapshotHandler extends AbstractHandler {
 					IServer server = (IServer)
 							UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 					if (server == null) {
-						return OpenShiftUIActivator.createErrorStatus("Could not find application to snapshot");
+						return ExpressUIActivator.createErrorStatus("Could not find application to snapshot");
 					}
 					final LoadApplicationJob loadApplicationJob = new LoadApplicationJob(server);
 					new JobChainBuilder(loadApplicationJob)
@@ -55,7 +55,7 @@ public class RestoreSnapshotHandler extends AbstractHandler {
 								public IStatus runInUIThread(IProgressMonitor monitor) {
 									IApplication application = loadApplicationJob.getApplication();
 									if (application == null) {
-										return OpenShiftUIActivator
+										return ExpressUIActivator
 												.createCancelStatus("Could not find application to edit the embedded cartridges of");
 									}
 									openRestoreSnapshotWizard(loadApplicationJob.getApplication(), HandlerUtil.getActiveShell(event));

@@ -20,9 +20,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
 
@@ -49,7 +49,7 @@ public class SaveSnapshotWizard extends AbstractOpenShiftWizard<SaveSnapshotWiza
 								getModel().saveSnapshot(monitor);
 								return Status.OK_STATUS;
 							} catch (IOException e) {
-								return OpenShiftUIActivator.createErrorStatus(NLS.bind("Could not save snapshot for application {0}", applicationName), e);
+								return ExpressUIActivator.createErrorStatus(NLS.bind("Could not save snapshot for application {0}", applicationName), e);
 							} catch (CoreException e) {
 								return e.getStatus();
 							}						
@@ -57,14 +57,14 @@ public class SaveSnapshotWizard extends AbstractOpenShiftWizard<SaveSnapshotWiza
 					}, getContainer());
 			return status.isOK();
 		} catch (InvocationTargetException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
 					NLS.bind("Could not save snapshot for application {0}", applicationName),
 					status, IStatus.ERROR)
 					.open();
 			return false;
 		} catch (InterruptedException e) {
-			IStatus status = OpenShiftUIActivator.createErrorStatus(e.getMessage(), e);
+			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
 					NLS.bind("Could not save snapshot for application {0}", applicationName),
 					status, IStatus.ERROR)
