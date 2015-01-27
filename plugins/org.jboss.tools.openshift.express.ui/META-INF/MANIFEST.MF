@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.ui;singleton:=true
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.6.100.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator
 Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,3.0.0)",
