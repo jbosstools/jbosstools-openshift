@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.explorer;
+package org.jboss.tools.openshift.internal.ui.explorer;
 
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -19,7 +19,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
@@ -61,10 +60,12 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		Image image = null;
 		if (element instanceof IConnection) {
 			image = ExpressImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
-		} else if (element instanceof IDomain) {
+		} else if (element instanceof IDomain || element instanceof Project) {
 			image = ExpressImages.GLOBE_IMG;
-		} else if (element instanceof IApplication) {
+		} else if (element instanceof IApplication || element instanceof DeploymentConfig) {
 			image = ExpressImages.QUERY_IMG;
+		} else if (element instanceof BuildConfig){
+			image = ExpressImages.BUILDCONFIG_IMG;
 		} else if (element instanceof IEmbeddedCartridge) {
 			image = ExpressImages.TASK_REPO_IMG;
 		} else if (element instanceof LoadingStub) {
@@ -83,9 +84,32 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString styledString = null;
-		if (element instanceof ExpressConnection) {
-			styledString = createStyledString((ExpressConnection) element);
-		} else if (element instanceof IDomain) {
+		if (element instanceof IConnection) {
+			styledString = createStyledString((IConnection) element);
+		} else if (element instanceof Project){
+			Project p = (Project) element;
+			String label = 
+					new StringBuilder(p.getDisplayName()).append(" (ns:").append(p.getNamespace()).append(')').toString();
+
+			styledString = new StyledString(label);
+			styledString.setStyle(p.getDisplayName().length() +1, label.length() - p.getDisplayName().length() - 1, StyledString.QUALIFIER_STYLER);
+		} else if (element instanceof Service){
+			Service s = (Service) element;
+			StringBuilder b = new StringBuilder(s.getName());
+			b.append(" (selector: ").append(s.getSelector()).append(")");
+			styledString = new StyledString(b.toString());
+			styledString.setStyle(s.getName().length() + 1,b.length() - s.getName().length() -1 , StyledString.QUALIFIER_STYLER);
+		} else if (element instanceof DeploymentConfig){
+			DeploymentConfig config = (DeploymentConfig) element;
+			StringBuilder b = new StringBuilder(config.getName());
+			styledString = new StyledString(b.toString());
+		} else if (element instanceof BuildConfig){
+			BuildConfig config = (BuildConfig) element;
+			StringBuilder b = new StringBuilder(config.getName());
+			b.append(" ").append(config.getSourceUri());
+			styledString = new StyledString(b.toString());
+			styledString.setStyle(config.getName().length() + 1,b.length() - config.getName().length() -1 , StyledString.QUALIFIER_STYLER);
+		}else if (element instanceof IDomain) {
 			styledString = createStyledString((IDomain) element);
 		} else if (element instanceof IApplication) {
 			styledString = createStyledString((IApplication) element);
@@ -103,11 +127,12 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 		return styledString;
 	}
 
-	private StyledString createStyledString(ExpressConnection connection) {
+	private StyledString createStyledString(IConnection connection) {
 		String name = connection.getUsername();
 		String host = connection.getHost();
 		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
-		if (connection.isDefaultHost()) {
+		if (connection instanceof org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection 
+				&& ((org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection)connection).isDefaultHost()) {
 			builder.append(' ').append(DEFAULT_MARKER);
 		}
 		String label = builder.toString();

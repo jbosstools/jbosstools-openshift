@@ -46,7 +46,7 @@ import com.openshift.client.configuration.OpenShiftConfiguration;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class ConnectionWizardPageModel extends ObservableUIPojo{
+class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
 	public static final String PROPERTY_USERNAME = "username";
@@ -78,27 +78,18 @@ class ConnectionWizardPageModel extends ObservableUIPojo{
 	}
 
 	private void updateFrom(IConnection connection) {
-		connection.accept(
-			new IConnectionVisitor(){
-				public void visit(org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection connection){
-					if (isCreateNewConnection(connection)) {
-						setUsername(getDefaultUsername());
-						setUseDefaultServer(true);
-						setDefaultHost();
-						setPassword(null);
-					} else {
-						setUsername(connection.getUsername());
-						setHost(connection.getHost());
-						setUseDefaultServer(connection.isDefaultHost());
-						setRememberPassword(connection.isRememberPassword());
-						setPassword(connection.getPassword());
-					}
-				};
-				
-				public void visit(KubernetesConnection connection){;
-				}
-			}
-		);
+		if (isCreateNewConnection(connection)) {
+			setUsername(getDefaultUsername());
+			setUseDefaultServer(true);
+			setDefaultHost();
+			setPassword(null);
+		} else {
+			setUsername(connection.getUsername());
+			setHost(connection.getHost());
+			setUseDefaultServer(connection.isDefaultHost());
+			setRememberPassword(connection.isRememberPassword());
+			setPassword(connection.getPassword());
+		}
 	}
 
 	private boolean isCreateNewConnection(IConnection connection) {
@@ -142,7 +133,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo{
 	public List<IConnection> getConnections() {
 		if (allowConnectionChange) {
 			List<IConnection> connections = 
-					new ArrayList<IConnection>(CollectionUtils.toList(ConnectionsRegistrySingleton.getInstance().getAll()));
+					CollectionUtils.toList(ConnectionsRegistrySingleton.getInstance().getAll());
 			connections.add(new NewConnectionMarker());
 			return connections;
 		} else {
@@ -295,7 +286,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo{
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	private IConnection createConnection(boolean legacy) {
 		String host = this.host;
 		if(!legacy){
@@ -304,8 +295,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo{
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}
-		}
-		if (isDefaultServer) {
+		} else if (isDefaultServer) {
 			return new ExpressConnection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
 		} else {
 			return new ExpressConnection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
