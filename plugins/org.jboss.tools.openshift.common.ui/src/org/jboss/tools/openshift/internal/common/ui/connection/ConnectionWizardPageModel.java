@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
@@ -120,8 +121,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public List<IConnection> getConnections() {
 		if (allowConnectionChange) {
-			List<IConnection> connections = 
-					Arrays.asList(ConnectionsRegistrySingleton.getInstance().getAll());
+			List<IConnection> connections = Arrays.asList(ConnectionsRegistrySingleton.getInstance().getAll());
 			connections.add(new NewConnectionMarker());
 			return connections;
 		} else {
@@ -156,7 +156,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		try {
 			return new OpenShiftConfiguration().getLibraServer();
 		} catch (Exception e) {
-			ExpressUIActivator.log(e);
+			OpenShiftCommonUIActivator.log(e);
 			return null;
 		}
 	}
@@ -232,9 +232,9 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		} catch (NotFoundOpenShiftException e) {
 			// valid user without domain
 		} catch (Exception e) {
-			status = ExpressUIActivator.createErrorStatus(NLS.bind(
-					"Unknown error, can not verify user {0} - see Error Log for details", username));
-			ExpressUIActivator.log(e);
+			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
+					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
+			OpenShiftCommonUIActivator.log(e);
 		}
 		setValid(status);
 		return status;
@@ -262,15 +262,15 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			connection.connect();
 			this.newConnection = connection;
 		} catch (OpenShiftTimeoutException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind(
-					"Could not reach host at {0}. ExpressConnection timeouted.", host));
+			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
+					NLS.bind("Could not reach host at {0}. ExpressConnection timeouted.", host));
 		} catch (InvalidCredentialsOpenShiftException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind(
-					"The credentials for user {0} are not valid", username));
+			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
+					NLS.bind("The credentials for user {0} are not valid", username));
 		} catch (OpenShiftException e) {
-			ExpressUIActivator.log(e);
-			return ExpressUIActivator.createErrorStatus(NLS.bind(
-					"Unknown error, can not verify user {0} - see Error Log for details", username));
+			OpenShiftCommonUIActivator.log(e);
+			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
+					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
 		}
 		return Status.OK_STATUS;
 	}
