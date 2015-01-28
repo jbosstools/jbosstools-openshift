@@ -17,8 +17,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
-import org.jboss.tools.openshift.internal.ui.wizard.deployment.DeploymentWizard;
-import org.jboss.tools.openshift.internal.ui.wizard.deployment.DeploymentWizardContext;
+import org.jboss.tools.openshift.internal.ui.deployment.DeploymentWizard;
+import org.jboss.tools.openshift.internal.ui.deployment.DeploymentWizardContext;
 
 import com.openshift.kube.Project;
 import com.openshift.kube.capability.ImageRegistryHosting;

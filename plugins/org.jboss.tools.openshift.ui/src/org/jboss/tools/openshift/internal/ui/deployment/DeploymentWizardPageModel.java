@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.deployment;
+package org.jboss.tools.openshift.internal.ui.deployment;
 
 import java.util.ArrayList;
 import java.util.HashMap;

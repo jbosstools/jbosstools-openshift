@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,32 +8,25 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.property;
+package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
-import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
-import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.kube.DeploymentConfig;
 
 /**
  * @author Xavier Coulon
+ * @author Jeff Cantrill
+ * 
  */
 public class PropertySourceAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
 		if (adapterType == IPropertySource.class) {
-			if (adaptableObject instanceof ExpressConnection) {
-				return new ConnectionPropertySource((ExpressConnection) adaptableObject);
-			} else if (adaptableObject instanceof IDomain) {
-				return new DomainPropertySource((IDomain) adaptableObject);
-			} else if (adaptableObject instanceof IApplication) {
-				return new ApplicationPropertySource((IApplication) adaptableObject);
-			} else if (adaptableObject instanceof IEmbeddedCartridge) {
-				return new EmbeddedCartridgePropertySource((IEmbeddedCartridge) adaptableObject);
+			if (adaptableObject instanceof DeploymentConfig){
+				return new DeploymentConfigPropertySource((DeploymentConfig) adaptableObject);
 			}
 		}
 		return null;

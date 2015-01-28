@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="connection" name="Connection" schema="schema/org.jboss.tools.openshift.ui.connection.exsd"/>
+
+</plugin>
