@@ -54,7 +54,7 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.ui.SelectExistingProjectDialog;
+import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 
 /**
  * @author Andre Dietisheim
@@ -242,41 +242,6 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 						.observe(pageModel))
 				.in(dbc);
 	}
-
-	/**
-	 * Verify that if the 'use an existing project' option was chose, then the project name actually matches an open
-	 * project in the workspace.
-	 */
-	// @Override
-	// protected void onPageWillGetDeactivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
-	// if (direction == Direction.BACKWARDS) {
-	// return;
-	// }
-	// if (!pageModel.isNewProject()) {
-	// try {
-	// final ArrayBlockingQueue<IStatus> queue = new ArrayBlockingQueue<IStatus>(1);
-	// WizardUtils.runInWizard(new Job("Verifying existing project exists and is open...") {
-	// @Override
-	// protected IStatus run(IProgressMonitor monitor) {
-	// IStatus status = pageModel.validateExistingProject();
-	// queue.offer(status);
-	// monitor.done();
-	// return Status.OK_STATUS;
-	// }
-	// }, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
-	// final IStatus status = queue.poll(10, TimeUnit.SECONDS);
-	// event.doit = status.isOK();
-	// if (!event.doit) {
-	// existingProjectNameText.setFocus();
-	// existingProjectNameText.selectAll();
-	// }
-	// } catch (Exception ex) {
-	// event.doit = false;
-	// } finally {
-	// }
-	//
-	// }
-	// }
 
 	class NewProjectValidator extends MultiValidator {
 
