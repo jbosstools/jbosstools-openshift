@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.common.ui.connection;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -22,25 +23,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.common.core.connection.ConnectionUtils;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
-import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
-import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
-import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
-
-import com.openshift.client.InvalidCredentialsOpenShiftException;
-import com.openshift.client.NotFoundOpenShiftException;
-import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftTimeoutException;
-import com.openshift.client.configuration.OpenShiftConfiguration;
 
 /**
  * @author Andre Dietisheim
@@ -102,9 +90,9 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			try {
 				username = new OpenShiftConfiguration().getRhlogin();
 			} catch (IOException e) {
-				Logger.error("Could not load default user name from OpenShift configuration.", e);
+				OpenShiftCommonUIActivator.log("Could not load default user name from OpenShift configuration.", e);
 			} catch (OpenShiftException e) {
-				Logger.error("Could not load default user name from OpenShift configuration.", e);
+				OpenShiftCommonUIActivator.log("Could not load default user name from OpenShift configuration.", e);
 			}
 		}
 		return username;
@@ -133,7 +121,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	public List<IConnection> getConnections() {
 		if (allowConnectionChange) {
 			List<IConnection> connections = 
-					CollectionUtils.toList(ConnectionsRegistrySingleton.getInstance().getAll());
+					Arrays.asList(ConnectionsRegistrySingleton.getInstance().getAll());
 			connections.add(new NewConnectionMarker());
 			return connections;
 		} else {

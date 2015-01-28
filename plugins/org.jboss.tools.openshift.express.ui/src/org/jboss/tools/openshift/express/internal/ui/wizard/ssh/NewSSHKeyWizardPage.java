@@ -44,10 +44,10 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.databinding.DirectoryValidator;
-import org.jboss.tools.openshift.express.internal.ui.databinding.FileNameValidator;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.databinding.SSHPublicKeyNameValidator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.DirectoryValidator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.FileNameValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 

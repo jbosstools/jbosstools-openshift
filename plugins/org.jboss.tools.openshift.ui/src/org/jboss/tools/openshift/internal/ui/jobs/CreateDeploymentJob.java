@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.wizard.deployment.DeploymentWizardContext;
+import org.jboss.tools.openshift.internal.ui.deployment.DeploymentWizardContext;
 
 import com.openshift.internal.kube.Resource;
 import com.openshift.internal.kube.builders.ImageDeploymentBuilder;

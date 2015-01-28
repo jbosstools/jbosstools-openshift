@@ -8,14 +8,13 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.databinding;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import java.io.File;
 
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
 
 /**
  * Validates a given String positively if it is non-empty and has no separator

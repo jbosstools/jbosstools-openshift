@@ -19,16 +19,17 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
-import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
-import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
+import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.kube.BuildConfig;
+import com.openshift.kube.DeploymentConfig;
+import com.openshift.kube.Project;
+import com.openshift.kube.Service;
 
 /**
  * @author Xavier Coulon
