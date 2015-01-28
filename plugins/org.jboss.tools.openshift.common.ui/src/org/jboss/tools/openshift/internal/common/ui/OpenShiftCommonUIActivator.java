@@ -38,6 +38,10 @@ public class OpenShiftCommonUIActivator extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	public static void log(Throwable t) {
+		log(null, t);
+	}
+
 	public static void log(String message, Throwable t) {
 		log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
 	}
