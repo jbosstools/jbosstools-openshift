@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui;
+package org.jboss.tools.openshift.internal.common.ui.wizard;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IStatus;
@@ -26,13 +26,14 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftImages;
 
 /**
  * @author André Dietisheim
  */
 public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
-	protected enum Direction {
+	public enum Direction {
 		FORWARDS {
 			public IWizardPage getFollowingPage(IWizardPage page) {
 				return page.getNextPage();

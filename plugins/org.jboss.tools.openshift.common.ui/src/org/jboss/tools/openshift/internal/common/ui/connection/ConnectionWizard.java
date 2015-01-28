@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
+package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;

@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.common.ui;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.osgi.framework.BundleContext;
 
 public class OpenShiftCommonUIActivator extends AbstractUIPlugin {
@@ -37,6 +38,10 @@ public class OpenShiftCommonUIActivator extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	public static void log(String message, Throwable t) {
+		log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
+	}
+	
 	public static void log(IStatus status) {
 		plugin.getLog().log(status);
 	}

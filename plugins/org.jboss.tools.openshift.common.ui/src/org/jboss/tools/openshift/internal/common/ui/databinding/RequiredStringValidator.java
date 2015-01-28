@@ -8,9 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.databinding;
-
-import java.util.regex.Pattern;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -18,23 +16,39 @@ import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
+ * A validator that handles empty strings as invalid. Non-empty strings are
+ * valid.
+ * <p>
+ * Invalid states are reported via ValidationStatus.cancel("message") so that
+ * {@link RequiredControlDecorationUpdater} may decorate in custom way.
+ * 
  * @author Andre Dietisheim
+ * 
+ * @see RequiredControlDecorationUpdater
  */
-public class HostNameValidator implements IValidator {
+public class RequiredStringValidator implements IValidator {
 
-	private static final Pattern urlPattern =
-			Pattern.compile("(https?://){0,1}[^\\.:0-9]+(\\.[^\\.:0-9]+)*(:[0-9]+){0,1}");
+	private String fieldName;
+
+	public RequiredStringValidator(String fieldName) {
+		this.fieldName = fieldName;
+	}
 
 	@Override
 	public IStatus validate(Object value) {
-		String server = (String) value;
-		if (StringUtils.isEmpty(server)) {
-			return ValidationStatus.cancel("You have to provide a server to connect to.");
+		String name = (String) value;
+		if (StringUtils.isEmpty(name)) {
+			return ValidationStatus.cancel("You have to provide a " + fieldName);
 		}
-		if (!urlPattern.matcher(server).matches()) {
-			return ValidationStatus.error("You have to provide a valid server to connect to.");
-		}
-		return ValidationStatus.ok();
-
+		return validateString((String) value);
 	}
+
+	public IStatus validateString(String value) {
+		return ValidationStatus.ok();
+	}
+	
+	protected String getFieldName() {
+		return fieldName;
+	}
+
 }

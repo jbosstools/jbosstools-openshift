@@ -21,10 +21,6 @@ public interface IConnection {
 
 	public String getHost();
 
-	public String getPassword();
-
-	public String getUsername();
-
 	public boolean isDefaultHost();
 
 	public String getScheme();

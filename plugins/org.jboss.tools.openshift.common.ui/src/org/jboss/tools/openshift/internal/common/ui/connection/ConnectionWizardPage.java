@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
+package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -55,20 +55,16 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
-import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredStringValidator;
-import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
-import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.UIUpdatingJob;
-import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionAwareConnectionComparer;
-import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
-import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
-import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
+import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
+import org.jboss.tools.openshift.internal.common.ui.viewer.AbstractLabelProvider;
+import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
 /**
  * @author Andre Dietisheim
@@ -88,7 +84,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	protected ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
-		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server ExpressConnection",
+		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server Connection",
 				wizard);
 		this.pageModel = new ConnectionWizardPageModel(wizardModel, allowConnectionChange);
 		/*
@@ -112,7 +108,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.span(2, 1).hint(SWT.DEFAULT, 6).applyTo(fillerLabel);
 
 		Label connectionLabel = new Label(container, SWT.NONE);
-		connectionLabel.setText("ExpressConnection:");
+		connectionLabel.setText("Connection:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(connectionLabel);
 		Combo connectionCombo = new Combo(container, SWT.DEFAULT);
@@ -213,7 +209,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 		// remember password
 		Button rememberPasswordCheckBox = new Button(passwordWidgets, SWT.CHECK);
-		rememberPasswordCheckBox.setText(OpenshiftUIMessages.OpenshiftWizardSavePassword);
+		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
 		ValueBindingBuilder
@@ -318,7 +314,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.create(passwordValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		Button rememberPasswordCheckBox = new Button(connectionWidgets, SWT.CHECK);
-		rememberPasswordCheckBox.setText(OpenshiftUIMessages.OpenshiftWizardSavePassword);
+		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
 		ValueBindingBuilder
@@ -343,8 +339,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				new BrowserUtility().checkedCreateInternalBrowser(
 						OPENSHIFT_EXPRESS_SIGNUP_URL, 
 						OPENSHIFT_EXPRESS_SIGNUP_URL, 
-						ExpressUIActivator.PLUGIN_ID, 
-						ExpressUIActivator.getDefault().getLog());
+						OpenShiftCommonUIActivator.PLUGIN_ID, 
+						OpenShiftCommonUIActivator.getDefault().getLog());
 				org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(getWizard());;
 			}
 		};
@@ -392,10 +388,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					new ConnectJob(), new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
 			return JobUtils.isOk(pageModel.getValid());
 		} catch (InterruptedException e) {
-			Logger.error("Failed to authenticate on OpenShift", e);
+			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
 			return false;
 		} catch (InvocationTargetException e) {
-			Logger.error("Failed to authenticate on OpenShift", e);
+			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
 			return false;
 		}
 	}

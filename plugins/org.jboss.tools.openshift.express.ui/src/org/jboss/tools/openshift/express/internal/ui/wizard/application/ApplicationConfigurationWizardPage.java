@@ -71,12 +71,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.databinding.EmptyStringToNullConverter;
-import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
-import org.jboss.tools.openshift.express.internal.ui.databinding.MultiConverter;
-import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.express.internal.ui.databinding.TrimmingStringConverter;
-import org.jboss.tools.openshift.express.internal.ui.explorer.AbstractLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildVisibilityAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
@@ -90,8 +84,14 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.environment.NewEnvironmentVariablesWizard;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.databinding.EmptyStringToNullConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.MultiConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.viewer.AbstractLabelProvider;
+import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;

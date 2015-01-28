@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
+package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -34,7 +34,7 @@ import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
-import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
 import com.openshift.client.InvalidCredentialsOpenShiftException;
 import com.openshift.client.NotFoundOpenShiftException;

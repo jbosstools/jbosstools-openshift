@@ -8,10 +8,11 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.viewer;
+package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import org.eclipse.jface.viewers.IElementComparer;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
 
 /**
  * @author Andre Dietisheim

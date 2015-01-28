@@ -52,8 +52,8 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
+import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
  * @author Jeff Cantrill

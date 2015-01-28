@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 
 public class CommitAndPushDialog extends MessageDialog {
 
@@ -74,9 +74,9 @@ public class CommitAndPushDialog extends MessageDialog {
     	c.setLayoutData(new GridData(GridData.FILL_BOTH));
     	c.setLayout(new GridLayout(1,true));
     	Label commitMsgLabel = new Label(c, SWT.CHECK);
-    	commitMsgLabel.setText(OpenshiftUIMessages.PublishDialogCustomizeGitCommitMsg);
+    	commitMsgLabel.setText(ExpressUIMessages.PublishDialogCustomizeGitCommitMsg);
     	final Text t = new Text(c, SWT.MULTI | SWT.BORDER | SWT.WRAP);
-    	t.setText(OpenshiftUIMessages.PublishDialogDefaultGitCommitMsg);
+    	t.setText(ExpressUIMessages.PublishDialogDefaultGitCommitMsg);
     	t.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				customizeMessageText = t.getText();

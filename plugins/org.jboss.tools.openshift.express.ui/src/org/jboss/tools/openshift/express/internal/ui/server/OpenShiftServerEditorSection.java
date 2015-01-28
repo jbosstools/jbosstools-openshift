@@ -57,7 +57,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 
 /**
  * @author Rob Stryker
@@ -172,7 +172,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				.numColumns(2).equalWidth(false).applyTo(composite);
 
 		Label deployLocationLabel =
-				toolkit.createLabel(composite, OpenshiftUIMessages.EditorSectionDeployLocLabel, SWT.NONE);
+				toolkit.createLabel(composite, ExpressUIMessages.EditorSectionDeployLocLabel, SWT.NONE);
 		deployProjectCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
 
@@ -180,22 +180,22 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1)
 				.applyTo(projectSettingGroup);
 		projectSettingGroup.setLayout(new GridLayout(2, false));
-		projectSettingGroup.setText(OpenshiftUIMessages.EditorSectionProjectSettingsGroup);
+		projectSettingGroup.setText(ExpressUIMessages.EditorSectionProjectSettingsGroup);
 
 		overrideProjectSettings = toolkit.createButton(projectSettingGroup,
-				OpenshiftUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
+				ExpressUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
 
 		Label userLabel = toolkit
-				.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionConnectionLabel, SWT.NONE);
+				.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionConnectionLabel, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(userLabel);
 		connectionText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionText);
 
 		// domain name
 		Label domainNameLabel = toolkit.createLabel(
-				projectSettingGroup, OpenshiftUIMessages.EditorSectionDomainNameLabel, SWT.NONE);
+				projectSettingGroup, ExpressUIMessages.EditorSectionDomainNameLabel, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
 		domainNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
@@ -204,26 +204,26 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 		// application name
 		Label appNameLabel = toolkit.createLabel(
-				projectSettingGroup, OpenshiftUIMessages.EditorSectionAppNameLabel,SWT.NONE);
+				projectSettingGroup, ExpressUIMessages.EditorSectionAppNameLabel,SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 		appNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameText);
 
 		Label outputDestLabel = 
-				toolkit.createLabel(projectSettingGroup, OpenshiftUIMessages.EditorSectionOutputDestLabel, SWT.NONE);
+				toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionOutputDestLabel, SWT.NONE);
 		Composite outputDestComposite = toolkit.createComposite(projectSettingGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(outputDestComposite);
 		outputDestComposite.setLayout(new FormLayout());
 
 		browseDestButton = toolkit.createButton(
-				outputDestComposite, OpenshiftUIMessages.EditorSectionBrowseDestButton, SWT.PUSH);
+				outputDestComposite, ExpressUIMessages.EditorSectionBrowseDestButton, SWT.PUSH);
 		browseDestButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
 		deployFolderText = toolkit.createText(outputDestComposite, "", SWT.SINGLE | SWT.BORDER);
 		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDestButton, -5));
 
 		Label remoteLabel = toolkit.createLabel(
-				projectSettingGroup, OpenshiftUIMessages.EditorSectionRemoteLabel, SWT.NONE);
+				projectSettingGroup, ExpressUIMessages.EditorSectionRemoteLabel, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);

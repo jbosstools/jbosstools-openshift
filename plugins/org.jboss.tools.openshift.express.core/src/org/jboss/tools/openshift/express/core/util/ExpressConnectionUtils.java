@@ -70,7 +70,7 @@ public class ExpressConnectionUtils {
 			return null;
 		}
 		try {
-			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndServer(user.getRhlogin(), user.getServer());
+			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndHost(user.getRhlogin(), user.getServer());
 			ExpressConnection connection = connectionsRegistry.getByUrl(connectionUrl, ExpressConnection.class);
 			String defaultHost = ExpressConnectionUtils.getDefaultHostUrl();
 			if (connection == null 

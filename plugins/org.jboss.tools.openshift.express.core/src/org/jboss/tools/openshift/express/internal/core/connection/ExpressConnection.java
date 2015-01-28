@@ -537,7 +537,7 @@ public class ExpressConnection extends AbstractConnection {
 
 	@Override
 	public ConnectionType getType() {
-		return ConnectionType.Legacy;
+		return ConnectionType.Express;
 	}
 
 	@Override

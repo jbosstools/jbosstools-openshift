@@ -22,6 +22,10 @@ public abstract class AbstractConnection implements IConnection {
 
 	private String host;
 
+	protected AbstractConnection(String host) {
+		this(null, host);
+	}
+	
 	protected AbstractConnection(String scheme, String host) {
 		this.host = getHost(scheme, host);
 	}

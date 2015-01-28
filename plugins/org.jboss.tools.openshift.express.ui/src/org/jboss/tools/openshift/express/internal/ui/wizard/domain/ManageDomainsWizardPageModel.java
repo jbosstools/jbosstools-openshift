@@ -51,7 +51,7 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 			
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				if(ConnectionType.Legacy == connection.getType()){
+				if(ConnectionType.Express == connection.getType()){
 					ManageDomainsWizardPageModel.this.connection = null;
 					loadDomains();
 				}
@@ -60,7 +60,7 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 			@Override
 			public void connectionChanged(IConnection connection) {
 
-				if(ConnectionType.Legacy == connection.getType()){
+				if(ConnectionType.Express == connection.getType()){
 					setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
 					loadDomains();
 				}
@@ -68,7 +68,7 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 			
 			@Override
 			public void connectionAdded(IConnection connection) {
-				if(ConnectionType.Legacy == connection.getType()){
+				if(ConnectionType.Express == connection.getType()){
 					loadDomains();
 				}
 			}

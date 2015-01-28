@@ -52,9 +52,9 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.Lo
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizardPage;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;

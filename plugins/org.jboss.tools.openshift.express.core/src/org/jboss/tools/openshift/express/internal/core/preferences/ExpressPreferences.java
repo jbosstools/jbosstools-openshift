@@ -41,7 +41,7 @@ public class ExpressPreferences implements IExpressConstants {
 	public static final String SNAPSHOT_FILES = "org.jboss.tools.openshift.express.SNAPSHOT_FILES";
 	public static final String DOWNLOADABLE_STANDALONECART_URLS = "org.jboss.tools.openshift.express.DONWLOADABLE_STANDALONECART";
 
-	/* Legacy pref location */
+	/* Express pref location */
 	private static final String UI_PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
 
 	private static final String DEFAULT_TAIL_FILE_OPTIONS = "-f -n 100 */logs/*";
