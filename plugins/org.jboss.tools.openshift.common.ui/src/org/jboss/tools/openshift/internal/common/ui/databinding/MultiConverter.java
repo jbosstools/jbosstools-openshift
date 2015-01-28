@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.databinding;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.osgi.util.NLS;

@@ -31,9 +31,9 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
  * @author André Dietisheim
@@ -57,7 +57,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 
 		// domain name
 		Label namespaceLabel = new Label(parent, SWT.NONE);
-		namespaceLabel.setText(OpenshiftUIMessages.DomainName);
+		namespaceLabel.setText(ExpressUIMessages.DomainName);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
 		Text namespaceText = new Text(parent, SWT.BORDER);
@@ -102,15 +102,15 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 			}
 			if (domainName.isEmpty()) {
 				return ValidationStatus.cancel(
-						OpenshiftUIMessages.EnterDomainName);
+						ExpressUIMessages.EnterDomainName);
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
 				return ValidationStatus.error(
-						OpenshiftUIMessages.DomainNameMayHaveLettersAndDigits);
+						ExpressUIMessages.DomainNameMayHaveLettersAndDigits);
 			}
 			if (domainName.length() > 16) {
 				return ValidationStatus.error(
-						OpenshiftUIMessages.DomainNameMaximumLength);
+						ExpressUIMessages.DomainNameMaximumLength);
 			}
 			return ValidationStatus.ok();
 		}

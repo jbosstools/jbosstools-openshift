@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Red Hat, Inc.
+ * Copyright (c) 2011 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,30 +8,27 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.databinding;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import org.eclipse.core.databinding.conversion.Converter;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.eclipse.core.runtime.Assert;
 
 /**
- * A converter that turns empty strings to null. Leaves them untouched
- * otherwise.
- * 
- * @author Andre Dietisheim
+ * @author André Dietisheim
  */
-public class EmptyStringToNullConverter extends Converter {
+public class TrimTrailingSlashConverter extends Converter {
 
-	public EmptyStringToNullConverter() {
+	public TrimTrailingSlashConverter() {
 		super(String.class, String.class);
 	}
 
 	@Override
 	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof String)
-				|| StringUtils.isEmpty((String) fromObject)) {
-			return null;
-		} else {
-			return fromObject;
+		Assert.isLegal(fromObject instanceof String);
+		String url = (String) fromObject;
+		if (url.charAt(url.length() - 1) == '/') {
+			return url.substring(0, url.length() - 1);
 		}
+		return url;
 	}
 }

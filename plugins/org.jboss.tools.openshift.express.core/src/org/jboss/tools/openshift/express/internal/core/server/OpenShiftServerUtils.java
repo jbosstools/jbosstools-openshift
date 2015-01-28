@@ -72,7 +72,7 @@ public class OpenShiftServerUtils {
 	public static final String ATTRIBUTE_DEPLOY_PROJECT = "org.jboss.tools.openshift.binary.deployProject"; //$NON-NLS-1$
 	public static final String ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.override";//$NON-NLS-1$
 
-	/* Legacy Server Settings: Please usage scan before removal */
+	/* Express Server Settings: Please usage scan before removal */
 	public static final String ATTRIBUTE_DEPLOY_PROJECT_LEGACY = "org.jboss.tools.openshift.express.internal.core.server.binary.deployProject";//$NON-NLS-1$
 	public static final String ATTRIBUTE_REMOTE_NAME = "org.jboss.tools.openshift.express.internal.core.server.RemoteName";//$NON-NLS-1$
 	public static final String ATTRIBUTE_APPLICATION_NAME = "org.jboss.tools.openshift.express.internal.core.server.ApplicationName";//$NON-NLS-1$
@@ -90,7 +90,7 @@ public class OpenShiftServerUtils {
 	public static final String SETTING_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
 	public static final String SETTING_DEPLOY_FOLDER_NAME = "org.jboss.tools.openshift.DeployFolder";//$NON-NLS-1$
 
-	// Legacy, not to be used
+	// Express, not to be used
 	// public static final String ATTRIBUTE_PASSWORD =
 	// "org.jboss.tools.openshift.express.internal.core.server.Password";
 	public static final String ATTRIBUTE_REMOTE_NAME_DEFAULT = "origin";//$NON-NLS-1$

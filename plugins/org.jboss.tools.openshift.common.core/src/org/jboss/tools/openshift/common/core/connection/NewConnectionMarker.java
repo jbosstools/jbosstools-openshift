@@ -8,9 +8,8 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.viewer;
+package org.jboss.tools.openshift.common.core.connection;
 
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 /**
  * A class that is used to have an entry <New ExpressConnection> in a combo view with
@@ -19,19 +18,46 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
  * @author Andre Dietisheim
  * 
  */
-public class NewConnectionMarker extends ExpressConnection {
+public class NewConnectionMarker extends AbstractConnection {
 
 	public NewConnectionMarker() {
-		super("<New ExpressConnection>");
+		super("<New Connection>");
 	}
 
 	@Override
 	public int hashCode() {
-		return getUsername().hashCode();
+		return getHost().hashCode();
 	}
 	
+	@Override
 	public boolean equals(Object object) {
 		return object instanceof NewConnectionMarker;
+	}
+	
+	@Override
+	public boolean isDefaultHost() {
+		return false;
+	}
+
+	@Override
+	public ConnectionType getType() {
+		return null;
+	}
+
+	@Override
+	public void refresh() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean connect() {
+		return false;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return false;
 	}
 
 }

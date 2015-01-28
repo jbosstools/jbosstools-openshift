@@ -60,8 +60,8 @@ import org.jboss.tools.openshift.express.internal.ui.utils.LinkSelectionAdapter;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
-import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
  * @author Andre Dietisheim

@@ -65,10 +65,10 @@ public class ConnectionsRegistry {
 			return add(connectionUrl, connection);
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftCoreException(
-					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
+					e, "Could not add connection {0}", connection.getHost());
 		} catch (MalformedURLException e) {
 			throw new OpenShiftCoreException(
-					e, "Could not add connection {0}/{1}", connection.getUsername(), connection.getHost());
+					e, "Could not add connection {0}", connection.getHost());
 		}
 	}
 
@@ -87,13 +87,9 @@ public class ConnectionsRegistry {
 			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
 			return getByUrl(connectionUrl) != null;
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not get url for connection {0} - {1}", connection.getUsername(),
-							connection.getHost()));
+			throw new OpenShiftCoreException(e, NLS.bind("Could not get url for connection {0}", connection.getHost()));
 		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not get url for connection {0} - {1}", connection.getUsername(),
-							connection.getHost()));
+			throw new OpenShiftCoreException(e, NLS.bind("Could not get url for connection {0}", connection.getHost()));
 		}
 	}
 
@@ -118,11 +114,9 @@ public class ConnectionsRegistry {
 			fireChange(connection, REMOVED);
 			return true;
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
+			throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
 		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not remove connection {0} - {1}", connection.getUsername(), connection.getHost()));
+			throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
 		}
 	}
 

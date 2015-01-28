@@ -42,16 +42,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.ui.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils.IWidgetVisitor;
+import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
  * @author Martes G Wigglesworth
@@ -65,7 +65,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	private TableViewer viewer;
 
 	public EnvironmentVariablesWizardPage(AbstractEnvironmentVariablesWizardModel model, IWizard wizard) {
-		super(OpenshiftUIMessages.EnvironmentVariables, OpenshiftUIMessages.PleaseProvadeNewVariable, "", wizard);
+		super(ExpressUIMessages.EnvironmentVariables, ExpressUIMessages.PleaseProvadeNewVariable, "", wizard);
 		this.model = model;
 	}
 
@@ -74,7 +74,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
 
 		Group envVariableGroup = new Group(container, SWT.NONE);
-		envVariableGroup.setText(OpenshiftUIMessages.EnvironmentVariables);
+		envVariableGroup.setText(ExpressUIMessages.EnvironmentVariables);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envVariableGroup);
 		GridLayoutFactory.fillDefaults()
@@ -95,13 +95,13 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		Button addButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
-		addButton.setText(OpenshiftUIMessages.Add);
+		addButton.setText(ExpressUIMessages.Add);
 		addButton.addSelectionListener(onAdd());
 
 		Button editExistingButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
-		editExistingButton.setText(OpenshiftUIMessages.Edit);
+		editExistingButton.setText(ExpressUIMessages.Edit);
 		editExistingButton.addSelectionListener(onEdit());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
@@ -113,7 +113,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		Button removeButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText(OpenshiftUIMessages.Remove);
+		removeButton.setText(ExpressUIMessages.Remove);
 		removeButton.addSelectionListener(onRemove());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(removeButton))
@@ -129,7 +129,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		Button refreshButton = new Button(envVariableGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(refreshButton);
-		refreshButton.setText(OpenshiftUIMessages.Refresh);
+		refreshButton.setText(ExpressUIMessages.Refresh);
 		refreshButton.addSelectionListener(onRefresh());
 		
 		// not supported
@@ -146,7 +146,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				public IStatus validate(Object value) {
 					if (Boolean.FALSE.equals((Boolean) value)) {
 						return ValidationStatus.warning(NLS.bind(
-								OpenshiftUIMessages.ServerDoesNotSupportChanging, model.getHost()));
+								ExpressUIMessages.ServerDoesNotSupportChanging, model.getHost()));
 					}
 					return ValidationStatus.ok();
 				}
@@ -198,9 +198,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		try {
 			WizardUtils.runInWizard(new LoadEnvironmentVariablesJob(), getContainer(), dbc);
 		} catch (InvocationTargetException e) {
-			Logger.error(OpenshiftUIMessages.CouldNotLoadVariables, e);
+			Logger.error(ExpressUIMessages.CouldNotLoadVariables, e);
 		} catch (InterruptedException e) {
-			Logger.error(OpenshiftUIMessages.CouldNotLoadVariables, e);
+			Logger.error(ExpressUIMessages.CouldNotLoadVariables, e);
 		}
 	}
 
@@ -239,9 +239,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				if (MessageDialog
 						.openConfirm(
 								getShell(),
-								OpenshiftUIMessages.RemoveVariable,
+								ExpressUIMessages.RemoveVariable,
 								NLS.bind(
-										OpenshiftUIMessages.DoYouWantToRemoveVariable,
+										ExpressUIMessages.DoYouWantToRemoveVariable,
 										selectedVariable.getName() + "=" + selectedVariable.getValue())))
 					model.remove(selectedVariable);
 			}
@@ -256,13 +256,13 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 					if (MessageDialog
 							.openConfirm(
 									getShell(),
-									OpenshiftUIMessages.RefreshVariables,
-									OpenshiftUIMessages.DoYouWantToRefreshVariables))
+									ExpressUIMessages.RefreshVariables,
+									ExpressUIMessages.DoYouWantToRefreshVariables))
 					WizardUtils.runInWizard(new RefreshEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
 				} catch (InvocationTargetException e) {
-					Logger.error(OpenshiftUIMessages.CouldNotRefreshVariables, e);
+					Logger.error(ExpressUIMessages.CouldNotRefreshVariables, e);
 				} catch (InterruptedException e) {
-					Logger.error(OpenshiftUIMessages.CouldNotRefreshVariables, e);
+					Logger.error(ExpressUIMessages.CouldNotRefreshVariables, e);
 				}
 			}
 		};
@@ -271,7 +271,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	private class LoadEnvironmentVariablesJob extends AbstractDelegatingMonitorJob {
 
 		public LoadEnvironmentVariablesJob() {
-			super(OpenshiftUIMessages.LoadingVariables);
+			super(ExpressUIMessages.LoadingVariables);
 		}
 
 		@Override
@@ -284,7 +284,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 	private class RefreshEnvironmentVariablesJob extends AbstractDelegatingMonitorJob {
 
 		public RefreshEnvironmentVariablesJob() {
-			super(OpenshiftUIMessages.RefreshingVariables);
+			super(ExpressUIMessages.RefreshingVariables);
 		}
 
 		@Override

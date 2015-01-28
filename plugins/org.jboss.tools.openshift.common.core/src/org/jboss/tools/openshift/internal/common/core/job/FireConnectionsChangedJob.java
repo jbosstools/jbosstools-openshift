@@ -28,7 +28,7 @@ public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 	protected List<IConnection> connections = new ArrayList<IConnection>();
 	
 	public FireConnectionsChangedJob(IConnection connection) {
-		super(NLS.bind("Refreshing connection {0}", connection.getUsername()));
+		super(NLS.bind("Refreshing connection {0}", connection.getHost()));
 		add(connection);
 	}
 

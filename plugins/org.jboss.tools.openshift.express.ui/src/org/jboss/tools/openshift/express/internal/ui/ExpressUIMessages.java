@@ -12,18 +12,17 @@ package org.jboss.tools.openshift.express.internal.ui;
 
 import org.eclipse.osgi.util.NLS;
 
-public class OpenshiftUIMessages extends NLS {
+public class ExpressUIMessages extends NLS {
 	
-	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages"; //$NON-NLS-1$
 
 	static {
-		NLS.initializeMessages(BUNDLE_NAME, OpenshiftUIMessages.class);
+		NLS.initializeMessages(BUNDLE_NAME, ExpressUIMessages.class);
 	}
 	
-	private OpenshiftUIMessages() {
+	private ExpressUIMessages() {
 	}
 
-	public static String OpenshiftWizardSavePassword;
 	public static String EditorSectionDomainNameLabel;
 	public static String EditorSectionAppNameLabel;
 	public static String EditorSectionDeployLocLabel;

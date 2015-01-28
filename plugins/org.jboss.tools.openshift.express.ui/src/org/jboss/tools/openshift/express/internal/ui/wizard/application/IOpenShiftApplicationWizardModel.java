@@ -27,10 +27,10 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.wizard.IConnectionAwareModel;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;

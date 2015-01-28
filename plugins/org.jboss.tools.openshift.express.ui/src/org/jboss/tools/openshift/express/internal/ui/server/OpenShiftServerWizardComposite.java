@@ -80,14 +80,14 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.viewer.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.DomainColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
@@ -178,7 +178,7 @@ public class OpenShiftServerWizardComposite {
 
 		// connection
 		Label connectionLabel = new Label(composite, SWT.NONE);
-		connectionLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardConnection);
+		connectionLabel.setText(ExpressUIMessages.OpenShiftServerWizardConnection);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
 
@@ -193,12 +193,12 @@ public class OpenShiftServerWizardComposite {
 		Button newConnectionButton = new Button(composite, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(newConnectionButton);
-		newConnectionButton.setText(OpenshiftUIMessages.OpenShiftServerWizardNew);
+		newConnectionButton.setText(ExpressUIMessages.OpenShiftServerWizardNew);
 		newConnectionButton.addSelectionListener(onNewConnection());
 
 		// domain
 		Label domainNameLabel = new Label(composite, SWT.NONE);
-		domainNameLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardDomainName);
+		domainNameLabel.setText(ExpressUIMessages.OpenShiftServerWizardDomainName);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
 
@@ -211,7 +211,7 @@ public class OpenShiftServerWizardComposite {
 
 		// application
 		Label appNameLabel = new Label(composite, SWT.NONE);
-		appNameLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardApplicationName);
+		appNameLabel.setText(ExpressUIMessages.OpenShiftServerWizardApplicationName);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 
@@ -238,19 +238,19 @@ public class OpenShiftServerWizardComposite {
 		});
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectComboViewer.getControl());
-		deployLocationLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardDeployProject);
+		deployLocationLabel.setText(ExpressUIMessages.OpenShiftServerWizardDeployProject);
 		deployProjectComboViewer.addSelectionChangedListener(onSelectDeployProject());
 
 		// import
 		importLink = new Link(composite, SWT.None);
-		importLink.setText(OpenshiftUIMessages.OpenShiftServerWizardImportLink); //$NON-NLS-1$
+		importLink.setText(ExpressUIMessages.OpenShiftServerWizardImportLink); //$NON-NLS-1$
 		GridDataFactory.fillDefaults()
 				.span(3, 1).applyTo(importLink);
 		importLink.addSelectionListener(onClickCreateOrImport());
 
 		// remote
 		Label remoteLabel = new Label(composite, SWT.NONE);
-		remoteLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardRemote);
+		remoteLabel.setText(ExpressUIMessages.OpenShiftServerWizardRemote);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		remoteText.setEditable(false);
@@ -259,19 +259,19 @@ public class OpenShiftServerWizardComposite {
 		remoteText.addModifyListener(onModifyRemote());
 
 		Group projectSettings = new Group(composite, SWT.NONE);
-		projectSettings.setText(OpenshiftUIMessages.OpenShiftServerWizardProjectSettings);
+		projectSettings.setText(ExpressUIMessages.OpenShiftServerWizardProjectSettings);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectSettings);
 		projectSettings.setLayout(new GridLayout(2, false));
 
 		Label zipDestLabel = new Label(projectSettings, SWT.NONE);
-		zipDestLabel.setText(OpenshiftUIMessages.OpenShiftServerWizardOutputDirectory);
+		zipDestLabel.setText(ExpressUIMessages.OpenShiftServerWizardOutputDirectory);
 
 		Composite zipDestComposite = new Composite(projectSettings, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(zipDestComposite);
 		zipDestComposite.setLayout(new FormLayout());
 		browseDeployFolderButton = new Button(zipDestComposite, SWT.PUSH);
-		browseDeployFolderButton.setText(OpenshiftUIMessages.OpenShiftServerWizardBrowse);
+		browseDeployFolderButton.setText(ExpressUIMessages.OpenShiftServerWizardBrowse);
 		browseDeployFolderButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
 		browseDeployFolderButton.addSelectionListener(onBrowseDeployFolder());
 
@@ -434,7 +434,7 @@ public class OpenShiftServerWizardComposite {
 			return remoteConfig.getName();
 		} catch (CoreException e) {
 			ExpressUIActivator.log(
-					NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardCouldNotGetRemotePointing,
+					NLS.bind(ExpressUIMessages.OpenShiftServerWizardCouldNotGetRemotePointing,
 							application.getGitUrl(), project.getName()), e);
 			return null;
 		}
@@ -463,8 +463,8 @@ public class OpenShiftServerWizardComposite {
 
 		ElementTreeSelectionDialog dialog =
 				new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp, cp);
-		dialog.setTitle(OpenshiftUIMessages.OpenShiftServerWizardDeployLocation);
-		dialog.setMessage(OpenshiftUIMessages.OpenShiftServerWizardPleaseChooseLocation);
+		dialog.setTitle(ExpressUIMessages.OpenShiftServerWizardDeployLocation);
+		dialog.setMessage(ExpressUIMessages.OpenShiftServerWizardPleaseChooseLocation);
 		dialog.setInput(deployProject);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
@@ -539,9 +539,9 @@ public class OpenShiftServerWizardComposite {
 		if(application != null){
 			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 			enabled = p == null || p.length == 0;
-			importLink.setText(OpenshiftUIMessages.OpenShiftServerWizardImportLink);
+			importLink.setText(ExpressUIMessages.OpenShiftServerWizardImportLink);
 		}else{
-			importLink.setText(OpenshiftUIMessages.OpenShiftServerWizardCreateLink);
+			importLink.setText(ExpressUIMessages.OpenShiftServerWizardCreateLink);
 		}
 		importLink.setEnabled(enabled);
 	}
@@ -559,18 +559,18 @@ public class OpenShiftServerWizardComposite {
 		if (message != null) {
 			error = message;
 		} else if (connection == null) {
-			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseSelectConnection;
+			error = ExpressUIMessages.OpenShiftServerWizardPleaseSelectConnection;
 		} else if (domains == null) {
-			error = NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardPleaseCreateDomain, connection.getId());
+			error = NLS.bind(ExpressUIMessages.OpenShiftServerWizardPleaseCreateDomain, connection.getId());
 		} else if (applications.isEmpty()) {
-			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseCreateApplication;
+			error = ExpressUIMessages.OpenShiftServerWizardPleaseCreateApplication;
 		} else if (application == null) {
-			error = OpenshiftUIMessages.OpenShiftServerWizardPleaseSelectApplication;
+			error = ExpressUIMessages.OpenShiftServerWizardPleaseSelectApplication;
 		} else {
 			IProject[] p = OpenShiftServerUtils.findProjectsForApplication(application);
 			if (p == null || p.length == 0) {
 				error = NLS.bind(
-					OpenshiftUIMessages.OpenShiftServerWizardYourWorkspaceDoesNotHaveProject,
+					ExpressUIMessages.OpenShiftServerWizardYourWorkspaceDoesNotHaveProject,
 					application.getName());
 			}
 		}
@@ -658,7 +658,7 @@ public class OpenShiftServerWizardComposite {
 			return Collections.emptyList();
 		} catch (OpenShiftException e) {
 			// Credentials work, but no domain, so no applications either
-			updateErrorMessage(NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardCouldNotLoadDomains, connection.getId(), e.getMessage()));
+			updateErrorMessage(NLS.bind(ExpressUIMessages.OpenShiftServerWizardCouldNotLoadDomains, connection.getId(), e.getMessage()));
 			return null;
 		}
 	}
@@ -764,7 +764,7 @@ public class OpenShiftServerWizardComposite {
 		private IApplication application;
 
 		private UpdateModelJob(ExpressConnection connection, IDomain domain, IApplication application) {
-			super(NLS.bind(OpenshiftUIMessages.OpenShiftServerWizardFetchingDomainsAndApplications, connection.getUsername()));
+			super(NLS.bind(ExpressUIMessages.OpenShiftServerWizardFetchingDomainsAndApplications, connection.getUsername()));
 			this.connection = connection;
 			this.domain = domain;
 			this.application = application;

@@ -38,9 +38,9 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.ConnectionWizard;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
@@ -125,7 +125,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 
 		Link link = new Link(composite, SWT.NONE);
-		link.setText(OpenshiftUIMessages.NoConnectionsAreAvailable);
+		link.setText(ExpressUIMessages.NoConnectionsAreAvailable);
 		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(link);
 		link.addSelectionListener(onExplanationClicked(connectionsPane, link));

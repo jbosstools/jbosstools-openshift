@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2013 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,25 +8,24 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.databinding;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import org.eclipse.core.databinding.conversion.Converter;
 
 /**
+ * A converter that turns empty strings to null. Leaves them untouched
+ * otherwise.
+ * 
  * @author Andre Dietisheim
  */
-public class TrimmingStringConverter extends Converter {
+public class IsNotNull2BooleanConverter extends Converter {
 
-	public TrimmingStringConverter() {
-		super(String.class, String.class);
+	public IsNotNull2BooleanConverter() {
+		super(Object.class, Boolean.class);
 	}
 
 	@Override
 	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof String)) {
-			return fromObject;
-		}
-		return ((String) fromObject).trim();
+		return fromObject != null;
 	}
-
 }

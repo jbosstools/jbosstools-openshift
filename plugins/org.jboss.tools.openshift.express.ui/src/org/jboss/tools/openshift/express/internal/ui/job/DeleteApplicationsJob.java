@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
@@ -33,12 +33,12 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 	private LoadApplicationJob job;
 
 	public DeleteApplicationsJob(LoadApplicationJob job) {
-		super(OpenshiftUIMessages.DeletingOpenShiftApplications); 
+		super(ExpressUIMessages.DeletingOpenShiftApplications); 
 		this.job = job;
 	}
 
 	public DeleteApplicationsJob(final List<IApplication> applications) {
-		super(OpenshiftUIMessages.DeletingOpenShiftApplications); 
+		super(ExpressUIMessages.DeletingOpenShiftApplications); 
 		this.applications = applications;
 	}
 	
@@ -46,7 +46,7 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 	protected IStatus doRun(IProgressMonitor monitor) {
 		List<IApplication> applications = getApplications();
 		int totalWork = applications.size();
-		monitor.beginTask(OpenshiftUIMessages.DeletingOpenShiftApplications, totalWork);
+		monitor.beginTask(ExpressUIMessages.DeletingOpenShiftApplications, totalWork);
 		try{
 			for (final IApplication application : applications) {
 				if (application == null) {
@@ -58,12 +58,12 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 					if (monitor.isCanceled()) {
 						return Status.CANCEL_STATUS;
 					}
-					monitor.setTaskName(NLS.bind(OpenshiftUIMessages.DeletingApplication, appName));
+					monitor.setTaskName(NLS.bind(ExpressUIMessages.DeletingApplication, appName));
 					application.destroy();
 					monitor.worked(1);
 				} catch (OpenShiftException e) {
 					return ExpressUIActivator.createErrorStatus(
-							NLS.bind(OpenshiftUIMessages.FailedToDeleteApplication, appName), e);
+							NLS.bind(ExpressUIMessages.FailedToDeleteApplication, appName), e);
 				}
 			}
 		}finally {

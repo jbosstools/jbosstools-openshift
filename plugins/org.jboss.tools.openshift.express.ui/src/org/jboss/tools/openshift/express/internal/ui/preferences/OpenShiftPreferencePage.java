@@ -18,7 +18,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
 import org.jboss.tools.openshift.express.internal.core.preferences.IExpressConstants;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenshiftUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 
 /**
  * @author Andre Dietisheim
@@ -35,7 +35,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		this.clientReadTimeout =
 				new IntegerFieldEditor(
 						IExpressConstants.CLIENT_READ_TIMEOUT,
-						OpenshiftUIMessages.ClientReadTimeout, getFieldEditorParent());
+						ExpressUIMessages.ClientReadTimeout, getFieldEditorParent());
 		clientReadTimeout.setValidRange(0, Integer.MAX_VALUE / 1000); // seconds
 		addField(clientReadTimeout);
 	}
