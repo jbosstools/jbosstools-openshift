@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 /**
  * @author Xavier Coulon
@@ -44,9 +45,8 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	@Override
 	public Image getImage(Object element) {
-		Image image = null;
-//		if (element instanceof IConnection) {
-//			image = ExpressImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+		if (element instanceof IConnection) {
+			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
 //		} else if (element instanceof IDomain || element instanceof Project) {
 //			image = ExpressImages.GLOBE_IMG;
 //		} else if (element instanceof IApplication || element instanceof DeploymentConfig) {
@@ -59,18 +59,20 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 //			image = ExpressImages.SYSTEM_PROCESS_IMG;
 //		} else if (element instanceof OpenShiftException) {
 //			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
-//		}
-		return image;
+		}
+		return null;
 	}
 
 	@Override
 	public String getText(Object element) {
-		return getStyledText(element).getString();
+		return element.toString();
+//		return getStyledText(element).getString();
 	}
 
 	@Override
 	public StyledString getStyledText(Object element) {
-		StyledString styledString = null;
+		return new StyledString(element.toString());
+//		StyledString styledString = null;
 //FIXME leaving here as examples of what we might do
 		//		if (element instanceof IConnection) {
 //			styledString = createStyledString((IConnection) element);
@@ -112,7 +114,7 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 //		} else {
 //			styledString = new StyledString(element.toString());
 //		}
-		return styledString;
+//		return styledString;
 	}
 
 	private StyledString createStyledString(IConnection connection) {

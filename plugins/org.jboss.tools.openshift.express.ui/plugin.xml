@@ -166,16 +166,6 @@
 	</extension>
 	
 	<!-- OpenShift Explorer view -->
-	<extension
- 		point="org.eclipse.ui.views">
-		<view
-			category="org.jboss.tools.common.model.ui.views"
-			class="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerView"
-			icon="icons/openshift-logo-white-icon.png"
-			id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
-			name="OpenShift Explorer">
-		</view>
-	</extension>
 
 	<extension point="org.eclipse.ui.navigator.viewer">
 		<viewer

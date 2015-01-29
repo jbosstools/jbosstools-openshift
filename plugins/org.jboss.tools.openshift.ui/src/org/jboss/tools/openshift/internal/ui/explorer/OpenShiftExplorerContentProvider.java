@@ -181,7 +181,8 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return false;
+		return element instanceof ConnectionsRegistry;
+//		return false;
 //		return element instanceof IConnection
 //				|| element instanceof Project
 //				|| element instanceof ResourceGrouping

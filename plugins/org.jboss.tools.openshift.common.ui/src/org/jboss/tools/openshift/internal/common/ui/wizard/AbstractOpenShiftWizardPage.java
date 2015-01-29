@@ -26,7 +26,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 /**
  * @author André Dietisheim
@@ -54,7 +54,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 		setWizard(wizard);
 		setTitle(title);
 		setDescription(description);
-		setImageDescriptor(OpenShiftImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+		setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
 	}
 
 	@Override

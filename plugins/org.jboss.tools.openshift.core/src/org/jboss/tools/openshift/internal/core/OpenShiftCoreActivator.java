@@ -15,6 +15,9 @@ import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.osgi.framework.BundleContext;
 
 /**

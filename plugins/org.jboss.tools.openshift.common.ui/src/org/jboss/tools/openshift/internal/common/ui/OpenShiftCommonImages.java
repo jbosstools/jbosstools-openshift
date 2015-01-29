@@ -16,7 +16,7 @@ import org.eclipse.swt.graphics.Image;
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftImages {
+public class OpenShiftCommonImages {
 
 	private static final String ICONS_FOLDER = "icons/";
 

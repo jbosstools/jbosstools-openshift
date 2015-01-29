@@ -73,11 +73,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			setDefaultHost();
 			setPassword(null);
 		} else {
-			setUsername(connection.getUsername());
+//			setUsername(connection.getUsername());
 			setHost(connection.getHost());
 			setUseDefaultServer(connection.isDefaultHost());
-			setRememberPassword(connection.isRememberPassword());
-			setPassword(connection.getPassword());
+//			setRememberPassword(connection.isRememberPassword());
+//			setPassword(connection.getPassword());
 		}
 	}
 
@@ -86,17 +86,18 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected String getDefaultUsername() {
-		String username = ExpressPreferences.INSTANCE.getLastUsername();
-		if (StringUtils.isEmpty(username)) {
-			try {
-				username = new OpenShiftConfiguration().getRhlogin();
-			} catch (IOException e) {
-				OpenShiftCommonUIActivator.log("Could not load default user name from OpenShift configuration.", e);
-			} catch (OpenShiftException e) {
-				OpenShiftCommonUIActivator.log("Could not load default user name from OpenShift configuration.", e);
-			}
-		}
-		return username;
+		return "";
+//		String username = ExpressPreferences.INSTANCE.getLastUsername();
+//		if (StringUtils.isEmpty(username)) {
+//			try {
+//				username = new OpenShiftConfiguration().getRhlogin();
+//			} catch (IOException e) {
+//				OpenShiftCommonUIActivator.log("Could not load default user name from OpenShift configuration.", e);
+//			} catch (OpenShiftException e) {
+//				OpenShiftCommonUIActivator.log("Could not load default user name from OpenShift configuration.", e);
+//			}
+//		}
+//		return username;
 	}
 
 	private IConnection null2NewConnectionMarker(IConnection connection) {
@@ -154,7 +155,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	private String getDefaultServer() {
 		try {
-			return new OpenShiftConfiguration().getLibraServer();
+			return "";
+//			return new OpenShiftConfiguration().getLibraServer();
 		} catch (Exception e) {
 			OpenShiftCommonUIActivator.log(e);
 			return null;
@@ -195,7 +197,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void setDefaultHost() {
-		setHost(ExpressConnectionUtils.getDefaultHostUrl());
+//		setHost(ExpressConnectionUtils.getDefaultHostUrl());
 	}
 	
 	public List<String> getServers() {
@@ -229,8 +231,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			if((status = tryConnection(true)) != Status.OK_STATUS){
 				status = tryConnection(false);
 			}
-		} catch (NotFoundOpenShiftException e) {
-			// valid user without domain
+//		} catch (NotFoundOpenShiftException e) {
+//			// valid user without domain
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
 					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
@@ -241,57 +243,59 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private IStatus tryConnection(boolean legacy){
-		try {
-			IConnection connection = null;
-			if (isCreateNewConnection()
-					|| isSelectedConnectionChanged()) {
-				connection = createConnection(legacy);
-			} else {
-				connection = selectedConnection;
-				connection.accept(new IConnectionVisitor() {
-					@Override
-					public void visit(KubernetesConnection connection) {
-					}
-					
-					@Override
-					public void visit(ExpressConnection connection) {
-						connection.setRememberPassword(isRememberPassword());
-					}
-				});
-			}
-			connection.connect();
-			this.newConnection = connection;
-		} catch (OpenShiftTimeoutException e) {
-			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-					NLS.bind("Could not reach host at {0}. ExpressConnection timeouted.", host));
-		} catch (InvalidCredentialsOpenShiftException e) {
-			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-					NLS.bind("The credentials for user {0} are not valid", username));
-		} catch (OpenShiftException e) {
-			OpenShiftCommonUIActivator.log(e);
-			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
-		}
+//		try {
+//			IConnection connection = null;
+//			if (isCreateNewConnection()
+//					|| isSelectedConnectionChanged()) {
+//				connection = createConnection(legacy);
+//			} else {
+//				connection = selectedConnection;
+//				connection.accept(new IConnectionVisitor() {
+//					@Override
+//					public void visit(KubernetesConnection connection) {
+//					}
+//					
+//					@Override
+//					public void visit(ExpressConnection connection) {
+//						connection.setRememberPassword(isRememberPassword());
+//					}
+//				});
+//			}
+//			connection.connect();
+//			this.newConnection = connection;
+//		} catch (OpenShiftTimeoutException e) {
+//			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
+//					NLS.bind("Could not reach host at {0}. ExpressConnection timeouted.", host));
+//		} catch (InvalidCredentialsOpenShiftException e) {
+//			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
+//					NLS.bind("The credentials for user {0} are not valid", username));
+//		} catch (OpenShiftException e) {
+//			OpenShiftCommonUIActivator.log(e);
+//			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
+//					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
+//		}
 		return Status.OK_STATUS;
 	}
 
 	private IConnection createConnection(boolean legacy) {
 		String host = this.host;
-		if(!legacy){
-			try {
-				return new KubernetesConnection(host, username, password);
-			} catch (MalformedURLException e) {
-				throw new RuntimeException(e);
-			}
-		} else if (isDefaultServer) {
-			return new ExpressConnection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
-		} else {
-			return new ExpressConnection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
-		}
+//		if(!legacy){
+//			try {
+//				return new KubernetesConnection(host, username, password);
+//			} catch (MalformedURLException e) {
+//				throw new RuntimeException(e);
+//			}
+//		} else if (isDefaultServer) {
+//			return new ExpressConnection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
+//		} else {
+//			return new ExpressConnection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
+//		}
+		return null;
 	}
 	
 	private boolean isSelectedConnectionChanged() {
-		return !password.equals(selectedConnection.getPassword());
+		return false;
+//		return !password.equals(selectedConnection.getPassword());
 	}
 
 	public IConnection getConnection() {
@@ -313,59 +317,59 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	 *            newConnection to edit. Updates the existing one otherwise.
 	 */
 	public void createOrUpdateConnection() {
-		if (isCreateNewConnection()) {
-			wizardModel.setConnection(newConnection);
-			newConnection.accept(new IConnectionVisitor(){
-				@Override
-				public void visit(ExpressConnection connection) {
-					ConnectionsRegistrySingleton.getInstance().add(connection);
-				}
-
-				@Override
-				public void visit(KubernetesConnection connection) {
-					ConnectionsRegistrySingleton.getInstance().add(connection);
-				}
-				
-			});
-		} else {
-			if (selectedConnection != newConnection) {
-				selectedConnection.accept(new IConnectionVisitor() {
-					@Override
-					public void visit(KubernetesConnection connection) {
-					}
-					
-					@Override
-					public void visit(ExpressConnection selectedConnection) {
-						if(!(newConnection instanceof ExpressConnection))
-							return;
-						// dont update since we were editing the connection we we already holding
-						// JBIDE-14771
-						selectedConnection.edit((ExpressConnection) newConnection);
-					}
-				});
-			}
-			// we may have get started from new wizard without a iConnection
-			// in wizard model: set it to wizard model
-			wizardModel.setConnection(selectedConnection);
-			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(selectedConnection);
-		}
+//		if (isCreateNewConnection()) {
+//			wizardModel.setConnection(newConnection);
+//			newConnection.accept(new IConnectionVisitor(){
+//				@Override
+//				public void visit(ExpressConnection connection) {
+//					ConnectionsRegistrySingleton.getInstance().add(connection);
+//				}
+//
+//				@Override
+//				public void visit(KubernetesConnection connection) {
+//					ConnectionsRegistrySingleton.getInstance().add(connection);
+//				}
+//				
+//			});
+//		} else {
+//			if (selectedConnection != newConnection) {
+//				selectedConnection.accept(new IConnectionVisitor() {
+//					@Override
+//					public void visit(KubernetesConnection connection) {
+//					}
+//					
+//					@Override
+//					public void visit(ExpressConnection selectedConnection) {
+//						if(!(newConnection instanceof ExpressConnection))
+//							return;
+//						// dont update since we were editing the connection we we already holding
+//						// JBIDE-14771
+//						selectedConnection.edit((ExpressConnection) newConnection);
+//					}
+//				});
+//			}
+//			// we may have get started from new wizard without a iConnection
+//			// in wizard model: set it to wizard model
+////			wizardModel.setConnection(selectedConnection);
+////			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(selectedConnection);
+////		}
 	}
 
 	public void saveRecentConnection() {
-		IConnection connection = getConnection();
-		if (connection != null) {
-			connection.accept(new IConnectionVisitor() {
-				
-				@Override
-				public void visit(KubernetesConnection connection) {
-					//TODO figure out how to save connection
-				}
-				
-				@Override
-				public void visit(ExpressConnection connection) {
-					ConnectionsRegistrySingleton.getInstance().setRecent(connection);
-				}
-			});
-		}
+//		IConnection connection = getConnection();
+//		if (connection != null) {
+//			connection.accept(new IConnectionVisitor() {
+//				
+//				@Override
+//				public void visit(KubernetesConnection connection) {
+//					//TODO figure out how to save connection
+//				}
+//				
+//				@Override
+//				public void visit(ExpressConnection connection) {
+//					ConnectionsRegistrySingleton.getInstance().setRecent(connection);
+//				}
+//			});
+//		}
 	}
 }
