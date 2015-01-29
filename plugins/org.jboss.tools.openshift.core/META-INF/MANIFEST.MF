@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.core
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.jboss.tools.openshift.core.connection.Activator
+Bundle-Activator: org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.jboss.tools.openshift.client;bundle-version="2.6.0",
  org.jboss.tools.openshift.common.core;bundle-version="1.0.0",
