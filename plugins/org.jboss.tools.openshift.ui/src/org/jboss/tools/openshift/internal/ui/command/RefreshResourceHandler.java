@@ -19,20 +19,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.common.core.connection.ConnectionUtils;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
-import org.jboss.tools.openshift.express.internal.ui.job.FireConnectionsChangedJob;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
-import com.openshift.client.IOpenShiftResource;
 import com.openshift.client.OpenShiftException;
+import com.openshift.client.Refreshable;
 
 /**
  * @author Jeff Cantrill
@@ -50,7 +44,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 	}
 
 	private Object getResource(ISelection selection) {
-		Object resource = UIUtils.getFirstElement(selection, IOpenShiftResource.class);
+		Object resource = UIUtils.getFirstElement(selection, Refreshable.class);
 		if (resource == null) {
 			resource = UIUtils.getFirstElement(selection, IConnection.class);
 		}
@@ -68,7 +62,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 						((Refreshable) element).refresh();
 					}
 				} catch (OpenShiftException e) {
-					Logger.error("Failed to refresh element", e);
+					OpenShiftUIActivator.getDefault().getLogger().logError("Failed to refresh element", e);
 				} finally {
 					monitor.done();
 				}
