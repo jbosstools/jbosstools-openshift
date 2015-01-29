@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.connection;
+package org.jboss.tools.openshift.internal.ui.connection;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

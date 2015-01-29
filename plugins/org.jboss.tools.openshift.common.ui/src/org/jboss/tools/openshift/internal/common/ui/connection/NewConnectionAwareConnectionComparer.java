@@ -11,8 +11,10 @@
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import org.eclipse.jface.viewers.IElementComparer;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.viewer.NewConnectionMarker;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.ICredentialsConnection;
+import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
  * @author Andre Dietisheim
@@ -47,10 +49,18 @@ public class NewConnectionAwareConnectionComparer implements IElementComparer {
 			} else if (thatObject instanceof NewConnectionMarker) {
 				return true;
 			}
-			ExpressConnection thisConnection = (ExpressConnection) thisObject;
-			ExpressConnection thatConnection = (ExpressConnection) thatObject;
-			return thisConnection.getUsername().equals(thatConnection.getUsername())
-					&& thisConnection.getHost().equals(thatConnection.getHost());
+
+			IConnection thisConnection = (IConnection) thisObject;
+			IConnection thatConnection = (IConnection) thatObject;
+			boolean hostEquals = StringUtils.areEqual(thisConnection.getHost(), thatConnection.getHost());
+			if (!ICredentialsConnection.class.isAssignableFrom(thisConnection.getClass())) {
+				return hostEquals;
+			} else {
+				return hostEquals 
+						&& StringUtils.areEqual(
+								((ICredentialsConnection) thisConnection).getUsername(), 
+								((ICredentialsConnection) thatConnection).getUsername());
+			}
 		}
 	}
 }
