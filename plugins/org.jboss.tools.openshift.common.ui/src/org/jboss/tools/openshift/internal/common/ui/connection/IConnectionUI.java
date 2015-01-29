@@ -15,15 +15,17 @@ package org.jboss.tools.openshift.common.core.connection;
  * 
  * @author Andre Dietisheim
  */
-public interface IConnectionFactory {
+public interface IConnectionUI {
 
+	public <T extends IConnection> boolean edits(T connection);
+	
 	/**
-	 * Returns <code>true</code> if this factory can create connections for the given host (url)
+	 * Returns <code>true</code> if the connections handled in this UI can connect to the given host (url)
 	 * 
 	 * @param host
 	 * @return
 	 */
-	public boolean canCreateFor(String host);
+	public boolean canConnect(String host);
 
 	public IConnection create();
 	
