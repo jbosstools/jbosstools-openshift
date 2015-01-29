@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
+import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.osgi.framework.BundleContext;
 
-public class OpenShiftUIActivator extends AbstractUIPlugin {
+public class OpenShiftUIActivator extends BaseCorePlugin {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
 
@@ -21,7 +22,10 @@ public class OpenShiftUIActivator extends AbstractUIPlugin {
 	
 	public OpenShiftUIActivator() {
 	}
-
+	
+	public IPluginLog getLogger(){
+		return pluginLogInternal();
+	}
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;

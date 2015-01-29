@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,35 +13,31 @@ package org.jboss.tools.openshift.core.connection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.security.auth.Refreshable;
-
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 
 import com.openshift.client.OpenShiftException;
-import com.openshift.kube.OpenShiftKubeClient;
+import com.openshift.client.Refreshable;
+//import com.openshift.kube.OpenShiftKubeClient;
 
-/**
- * @author Jeff Cantrill
- */
-public class KubernetesConnection extends OpenShiftKubeClient implements IConnection, Refreshable {
+public class Connection implements IConnection, Refreshable { //extends OpenShiftKubeClient implements IConnection, Refreshable {
 
 	private String host;
-	private String password;
-	private String username;
+//	private String password;
+//	private String username;
 
-	public KubernetesConnection(String host, String username, String password) throws MalformedURLException {
-		super(new URL(host));
-		this.host = host;
-		this.username = username;
-		this.password = password;
-	}
+//	public Connection(String host, String username, String password) throws MalformedURLException {
+//		super(new URL(host));
+//		this.host = host;
+//		this.username = username;
+//		this.password = password;
+//	}
 
-	@Override
+//	@Override
 	public boolean connect() throws OpenShiftException {
-		authorize();
-		initializeCapabilities();
+//		authorize();
+//		initializeCapabilities();
 		return true;
 	}
 
@@ -50,15 +46,15 @@ public class KubernetesConnection extends OpenShiftKubeClient implements IConnec
 		return host;
 	}
 
-	@Override
-	public String getPassword() {
-		return password;
-	}
-
-	@Override
-	public String getUsername() {
-		return username;
-	}
+//	@Override
+//	public String getPassword() {
+//		return password;
+//	}
+//
+//	@Override
+//	public String getUsername() {
+//		return username;
+//	}
 
 	@Override
 	public boolean isDefaultHost() {
@@ -81,10 +77,10 @@ public class KubernetesConnection extends OpenShiftKubeClient implements IConnec
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((host == null) ? 0 : host.hashCode());
-		result = prime * result
-				+ ((password == null) ? 0 : password.hashCode());
-		result = prime * result
-				+ ((username == null) ? 0 : username.hashCode());
+//		result = prime * result
+//				+ ((password == null) ? 0 : password.hashCode());
+//		result = prime * result
+//				+ ((username == null) ? 0 : username.hashCode());
 		return result;
 	}
 
@@ -96,22 +92,22 @@ public class KubernetesConnection extends OpenShiftKubeClient implements IConnec
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		KubernetesConnection other = (KubernetesConnection) obj;
+		Connection other = (Connection) obj;
 		if (host == null) {
 			if (other.host != null)
 				return false;
 		} else if (!host.equals(other.host))
 			return false;
-		if (password == null) {
-			if (other.password != null)
-				return false;
-		} else if (!password.equals(other.password))
-			return false;
-		if (username == null) {
-			if (other.username != null)
-				return false;
-		} else if (!username.equals(other.username))
-			return false;
+//		if (password == null) {
+//			if (other.password != null)
+//				return false;
+//		} else if (!password.equals(other.password))
+//			return false;
+//		if (username == null) {
+//			if (other.username != null)
+//				return false;
+//		} else if (!username.equals(other.username))
+//			return false;
 		return true;
 	}
 
@@ -120,7 +116,8 @@ public class KubernetesConnection extends OpenShiftKubeClient implements IConnec
 		this.connect();
 	}
 	
-	@Override
+//	@Override
+	//TODO deleteme?
 	public ConnectionType getType() {
 		return ConnectionType.Kubernetes;
 	}
