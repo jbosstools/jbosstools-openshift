@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
-import com.openshift.kube.images.DockerImageDescriptor;
+//import com.openshift.kube.images.DockerImageDescriptor;
 
 /**
  * @author Jeff Cantrill
@@ -77,67 +77,67 @@ public class DeploymentWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private TreeViewer createBaseImagesViewer(Composite parent, DataBindingContext dbc) {
-		TreeViewer viewer =
-				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		viewer.setLabelProvider(new StyledCellLabelProvider() {
-			@Override
-			public void update(ViewerCell cell) {
-				Object element = cell.getElement();
-				StyledString text = new StyledString();
-				if (element instanceof DockerImageDescriptor) {
-					DockerImageDescriptor descriptor = (DockerImageDescriptor) element;
-					text.append(descriptor.getDescription());
-					text.append(" ", StyledString.DECORATIONS_STYLER);
-					text.append(descriptor.getImageUri().getUriWithoutHost());
-				}else{
-					text.append(element.toString());
-				}
-				cell.setText(text.toString());
-				super.update(cell);
-			}
-		});
-		viewer.setContentProvider(new ITreeContentProvider() {
-
-			List<DockerImageDescriptor> images = pageModel.getBaseImages();
-
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-
-			@Override
-			public void dispose() {
-			}
-
-			@Override
-			public boolean hasChildren(Object element) {
-				return false;
-			}
-
-			@Override
-			public Object getParent(Object element) {
-				return null;
-			}
-
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return images.toArray();
-			}
-
-			@Override
-			public Object[] getChildren(Object parentElement) {
-				return null;
-			}
-		});
-		viewer.setInput(pageModel.getBaseImages());
-
-		// bind selection
-		IObservableValue viewObservable = ViewerProperties.singleSelection().observe(viewer);
-		IObservableValue modelObservable = BeanProperties.value(
-				DeploymentWizardPageModel.PROPERTY_SELECTED_IMAGE).observe(pageModel);
-		ValueBindingBuilder
-				.bind(viewObservable)
-				.to(modelObservable)
-				.in(dbc);
+		TreeViewer viewer = null;
+//				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+//		viewer.setLabelProvider(new StyledCellLabelProvider() {
+//			@Override
+//			public void update(ViewerCell cell) {
+//				Object element = cell.getElement();
+//				StyledString text = new StyledString();
+//				if (element instanceof DockerImageDescriptor) {
+//					DockerImageDescriptor descriptor = (DockerImageDescriptor) element;
+//					text.append(descriptor.getDescription());
+//					text.append(" ", StyledString.DECORATIONS_STYLER);
+//					text.append(descriptor.getImageUri().getUriWithoutHost());
+//				}else{
+//					text.append(element.toString());
+//				}
+//				cell.setText(text.toString());
+//				super.update(cell);
+//			}
+//		});
+//		viewer.setContentProvider(new ITreeContentProvider() {
+//
+//			List<DockerImageDescriptor> images = pageModel.getBaseImages();
+//
+//			@Override
+//			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+//			}
+//
+//			@Override
+//			public void dispose() {
+//			}
+//
+//			@Override
+//			public boolean hasChildren(Object element) {
+//				return false;
+//			}
+//
+//			@Override
+//			public Object getParent(Object element) {
+//				return null;
+//			}
+//
+//			@Override
+//			public Object[] getElements(Object inputElement) {
+//				return images.toArray();
+//			}
+//
+//			@Override
+//			public Object[] getChildren(Object parentElement) {
+//				return null;
+//			}
+//		});
+//		viewer.setInput(pageModel.getBaseImages());
+//
+//		// bind selection
+//		IObservableValue viewObservable = ViewerProperties.singleSelection().observe(viewer);
+//		IObservableValue modelObservable = BeanProperties.value(
+//				DeploymentWizardPageModel.PROPERTY_SELECTED_IMAGE).observe(pageModel);
+//		ValueBindingBuilder
+//				.bind(viewObservable)
+//				.to(modelObservable)
+//				.in(dbc);
 		return viewer;
 	}
 

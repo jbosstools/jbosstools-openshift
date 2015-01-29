@@ -23,7 +23,7 @@ import com.openshift.client.Refreshable;
 
 public class Connection implements IConnection, Refreshable { //extends OpenShiftKubeClient implements IConnection, Refreshable {
 
-	private String host;
+	private String host = "http://localhost:8080";
 //	private String password;
 //	private String username;
 
@@ -122,4 +122,9 @@ public class Connection implements IConnection, Refreshable { //extends OpenShif
 		return ConnectionType.Kubernetes;
 	}
 
+	@Override
+	public String toString() {
+		return host;
+	}
+	
 }

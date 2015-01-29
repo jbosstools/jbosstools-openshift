@@ -2,5 +2,17 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="connection" name="Connection" schema="schema/org.jboss.tools.openshift.ui.connection.exsd"/>
-
+    
+    <!-- OpenShift Explorer view -->
+    <extension
+        point="org.eclipse.ui.views">
+        <view
+            category="org.jboss.tools.common.model.ui.views"
+            class="org.jboss.tools.openshift.internal.common.ui.explorer.OpenShiftExplorerView"
+            icon="icons/openshift-logo-white-icon.png"
+            id="org.jboss.tools.openshift.common.ui.explorer.expressConsoleView"
+            name="OpenShift Explorer">
+        </view>
+    </extension>
+    
 </plugin>

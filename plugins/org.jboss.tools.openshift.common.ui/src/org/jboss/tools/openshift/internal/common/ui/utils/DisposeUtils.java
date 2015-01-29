@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.utils;
+package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.jface.viewers.Viewer;

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.explorer;
+package org.jboss.tools.openshift.internal.common.ui.explorer;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -37,14 +37,9 @@ import org.eclipse.ui.part.PageBook;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
-import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
+import org.jboss.tools.openshift.internal.common.ui.CommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-
-import com.openshift.client.IApplication;
-import com.openshift.client.IDomain;
+import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 
 /**
  * @author Xavier Coulon
@@ -125,7 +120,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 
 		Link link = new Link(composite, SWT.NONE);
-		link.setText(ExpressUIMessages.NoConnectionsAreAvailable);
+		link.setText(CommonUIMessages.NoConnectionsAreAvailable);
 		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(link);
 		link.addSelectionListener(onExplanationClicked(connectionsPane, link));
@@ -156,8 +151,8 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	private static class OpenShiftExplorerContextsHandler extends Contexts {
 
 		private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
-		private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
-		private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
+//		private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
+//		private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
 		
 		OpenShiftExplorerContextsHandler(CommonViewer viewer) {
 			viewer.getControl().addFocusListener(onFocusLost());
@@ -180,15 +175,15 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					ISelection selection = event.getSelection();
-					if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
-						activate(DOMAIN_CONTEXT);
-					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
-						activate(APPLICATION_CONTEXT);
-					} else if (UIUtils.isFirstElementOfType(ExpressConnection.class, selection)) {
-						// must be checked after domain, application, adapter may convert
-						// any resource to a connection
+//					if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
+//						activate(DOMAIN_CONTEXT);
+//					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
+//						activate(APPLICATION_CONTEXT);
+//					} else if (UIUtils.isFirstElementOfType(ExpressConnection.class, selection)) {
+//						// must be checked after domain, application, adapter may convert
+//						// any resource to a connection
 						activate(CONNECTION_CONTEXT);
-					}
+//					}
 				}
 			};
 		}

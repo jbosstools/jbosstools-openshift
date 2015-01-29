@@ -45,7 +45,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 /**
  * @author André Dietisheim
@@ -295,7 +295,7 @@ public class UIUtils {
 	public static void setTransparent(StyledText styledText) {
 		if (Platform.WS_COCOA.equals(Platform.getWS())) {
 			// MacOS has no default widget background in groups (JBIDE-16913)
-			styledText.setBackgroundImage(OpenShiftImages.TRANSPARENT_PIXEL_IMG);
+			styledText.setBackgroundImage(OpenShiftCommonImages.TRANSPARENT_PIXEL_IMG);
 		} else {
 			// RHEL 6.5 cannot display transparent pixels in images (neither
 			// png, gif, bmp, etc.)

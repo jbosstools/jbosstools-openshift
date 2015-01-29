@@ -20,8 +20,8 @@ import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 import org.jboss.tools.openshift.internal.ui.deployment.DeploymentWizard;
 import org.jboss.tools.openshift.internal.ui.deployment.DeploymentWizardContext;
 
-import com.openshift.kube.Project;
-import com.openshift.kube.capability.ImageRegistryHosting;
+//import com.openshift.kube.Project;
+//import com.openshift.kube.capability.ImageRegistryHosting;
 
 /**
  * @author Jeff Cantrill
@@ -31,22 +31,22 @@ public class NewDeploymentHandler extends AbstractHandler{
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getActiveMenuSelection(event);
-		if (selection == null 
-				|| selection.isEmpty()
-				|| !(selection instanceof StructuredSelection))
-			return null;
-		Object element = ((StructuredSelection) selection).getFirstElement();
-		if (!(element instanceof Project))
-			return null;
-		
-		Project p = (Project) element;
-		if(!p.getClient().isCapableOf(ImageRegistryHosting.class))
-			return null;
-		
-		ImageRegistryHosting hosting = p.getClient().getCapability(ImageRegistryHosting.class);
-		DeploymentWizardContext context = new DeploymentWizardContext(p.getClient(), p, hosting.getRegistryUri());
-		if (WizardUtils.openWizard(new DeploymentWizard(context), HandlerUtil.getActiveShell(event))) {
-		}
+//		if (selection == null 
+//				|| selection.isEmpty()
+//				|| !(selection instanceof StructuredSelection))
+//			return null;
+//		Object element = ((StructuredSelection) selection).getFirstElement();
+//		if (!(element instanceof Project))
+//			return null;
+//		
+//		Project p = (Project) element;
+//		if(!p.getClient().isCapableOf(ImageRegistryHosting.class))
+//			return null;
+//		
+//		ImageRegistryHosting hosting = p.getClient().getCapability(ImageRegistryHosting.class);
+//		DeploymentWizardContext context = new DeploymentWizardContext(p.getClient(), p, hosting.getRegistryUri());
+//		if (WizardUtils.openWizard(new DeploymentWizard(context), HandlerUtil.getActiveShell(event))) {
+//		}
 
 		return null;
 	}

@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+//import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 
 /**

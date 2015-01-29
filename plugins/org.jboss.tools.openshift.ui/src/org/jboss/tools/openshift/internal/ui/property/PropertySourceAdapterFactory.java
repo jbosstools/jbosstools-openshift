@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.internal.ui.property;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.openshift.kube.DeploymentConfig;
+import com.openshift3.client.model.IDeploymentConfig;
 
 /**
  * @author Xavier Coulon
@@ -24,11 +24,11 @@ public class PropertySourceAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-		if (adapterType == IPropertySource.class) {
-			if (adaptableObject instanceof DeploymentConfig){
-				return new DeploymentConfigPropertySource((DeploymentConfig) adaptableObject);
-			}
-		}
+//		if (adapterType == IPropertySource.class) {
+//			if (adaptableObject instanceof IDeploymentConfig){
+//				return new DeploymentConfigPropertySource((DeploymentConfig) adaptableObject);
+//			}
+//		}
 		return null;
 	}
 

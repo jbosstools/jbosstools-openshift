@@ -17,8 +17,8 @@ import java.util.Map;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 
-import com.openshift.kube.images.DockerImageDescriptor;
-import com.openshift.kube.images.ImageUri;
+	//import com.openshift.kube.images.DockerImageDescriptor;
+	//import com.openshift.kube.images.ImageUri;
 
 /**
  * @author Jeff Cantrill
@@ -33,22 +33,22 @@ public class DeploymentWizardPageModel extends ObservablePojo {
 		this.context = context;
 	}
 	
-	public List<DockerImageDescriptor> getBaseImages(){
-		List<DockerImageDescriptor> images = new ArrayList<DockerImageDescriptor>();
-		images.add(new DockerImageDescriptor(new ImageUri("openshift/wildfly-8-centos"), "WildFly Application Server 8.1.0.Final"));
-		
-		Map<String, String> mongoEnv = new HashMap<String, String>();
-		mongoEnv.put("OPENSHIFT_MONGODB_DB_USERNAME", "mongo");
-		mongoEnv.put("OPENSHIFT_MONGODB_DB_PASSWORD", "mongo");
-		images.add(new DockerImageDescriptor(new ImageUri("library/mongo"), "MongoDB Document Database"));
-		return images;
-	}
-	
-	public DockerImageDescriptor getSelectedImage() {
-		return context.getImage();
-	}
-
-	public void setSelectedImage(DockerImageDescriptor selectedImage) {
-		context.setImage(selectedImage);
-	}
+//	public List<DockerImageDescriptor> getBaseImages(){
+//		List<DockerImageDescriptor> images = new ArrayList<DockerImageDescriptor>();
+//		images.add(new DockerImageDescriptor(new ImageUri("openshift/wildfly-8-centos"), "WildFly Application Server 8.1.0.Final"));
+//		
+//		Map<String, String> mongoEnv = new HashMap<String, String>();
+//		mongoEnv.put("OPENSHIFT_MONGODB_DB_USERNAME", "mongo");
+//		mongoEnv.put("OPENSHIFT_MONGODB_DB_PASSWORD", "mongo");
+//		images.add(new DockerImageDescriptor(new ImageUri("library/mongo"), "MongoDB Document Database"));
+//		return images;
+//	}
+//	
+//	public DockerImageDescriptor getSelectedImage() {
+//		return context.getImage();
+//	}
+//
+//	public void setSelectedImage(DockerImageDescriptor selectedImage) {
+//		context.setImage(selectedImage);
+//	}
 }

@@ -58,25 +58,25 @@ public class DeploymentWizard extends Wizard implements IImportWizard, INewWizar
 
 	@Override
 	public boolean performFinish() {
-		try {
-			CreateDeploymentJob job;
-			if(context.includeBuildConfig()){
-				List<URIish> remotes = EGitUtils.getDefaultRemoteURIs(context.getProject());
-				if(remotes.isEmpty()){
-					MessageDialog.openError(getShell(), "Error", "No GitHub remotes exist for the project");
-					return true;
-				}
-				job = new CreateDeploymentJob(remotes.get(0).toString(), context);
-			}else{
-				job = new CreateDeploymentJob(null, context);
-			}
-			job.schedule();
-			
-			//TODO - FIX TO REMOVE CAST
-			new FireConnectionsChangedJob((IConnection)context.getClient()).schedule();
-		} catch (CoreException e) {
-			throw new RuntimeException("",e);
-		}
+//		try {
+//			CreateDeploymentJob job;
+//			if(context.includeBuildConfig()){
+//				List<URIish> remotes = EGitUtils.getDefaultRemoteURIs(context.getProject());
+//				if(remotes.isEmpty()){
+//					MessageDialog.openError(getShell(), "Error", "No GitHub remotes exist for the project");
+//					return true;
+//				}
+//				job = new CreateDeploymentJob(remotes.get(0).toString(), context);
+//			}else{
+//				job = new CreateDeploymentJob(null, context);
+//			}
+//			job.schedule();
+//			
+//			//TODO - FIX TO REMOVE CAST
+////			new FireConnectionsChangedJob((IConnection)context.getClient()).schedule();
+//		} catch (CoreException e) {
+//			throw new RuntimeException("",e);
+//		}
 		return true;
 	}
 

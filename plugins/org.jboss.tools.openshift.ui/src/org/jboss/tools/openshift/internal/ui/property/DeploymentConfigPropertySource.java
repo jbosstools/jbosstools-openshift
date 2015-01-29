@@ -18,28 +18,28 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
-import com.openshift.kube.DeploymentConfig;
+import com.openshift3.client.model.IDeploymentConfig;
 
 /**
  * @author Jeff Cantrill
  */
 public class DeploymentConfigPropertySource implements IPropertySource{
 	
-	private final DeploymentConfig config;
+	private final IDeploymentConfig config;
 	private final Map<Object, Object> values = new HashMap<Object,Object>();
-	public DeploymentConfigPropertySource(DeploymentConfig config){
+	public DeploymentConfigPropertySource(IDeploymentConfig config){
 		this.config = config;
 		values.put("name", config.getName());
 		values.put("namespace", config.getNamespace());
 		values.put("createdOn", config.getCreationTimeStamp());
 //		values.put("sourceUrl","");
 		values.put("url", "TBD");
-		values.put("deploymentTriggers", StringUtils.join(config.getTriggerTypes().toArray()));
+//		values.put("deploymentTriggers", StringUtils.join(config.getTriggerTypes().toArray()));
 //		values.put("buildTriggers", "");
 //		values.put("baseImage", "");
-		values.put("deployImage", config.getImageNames());
+//		values.put("deployImage", config.getImageNames());
 //		values.put("buildType", "");
-		values.put("replicas", config.getReplicas());
+//		values.put("replicas", config.getReplicas());
 	}
 
 	@Override
