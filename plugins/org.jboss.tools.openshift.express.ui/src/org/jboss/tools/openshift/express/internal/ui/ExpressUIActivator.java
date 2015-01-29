@@ -95,7 +95,8 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		ConnectionsRegistrySingleton.getInstance().save();
+		// TODO: implement connection saving
+		// ConnectionsRegistrySingleton.getInstance().save();
 		plugin = null;
 		super.stop(context);
 	}

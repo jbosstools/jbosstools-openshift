@@ -2046,4 +2046,10 @@
           name="%openshift.command.deploymentconfig.new">
     </command>
  </extension>
+ <extension
+       point="org.jboss.tools.openshift.common.ui.connection">
+    <connectionUI
+          class="org.jboss.tools.openshift.express.ui.ConnectionUI1">
+    </connectionUI>
+ </extension>
 </plugin>

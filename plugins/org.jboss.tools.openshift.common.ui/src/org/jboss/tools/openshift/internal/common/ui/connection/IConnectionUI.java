@@ -8,16 +8,24 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.common.core.connection;
+package org.jboss.tools.openshift.internal.common.ui.connection;
+
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 /**
  * A factory that can create connections
  * 
  * @author Andre Dietisheim
  */
-public interface IConnectionUI {
+public interface IConnectionUI<T extends IConnection> {
 
-	public <T extends IConnection> boolean edits(T connection);
+	/**
+	 * Returns <code>true</code> if this connection ui handles the given type
+	 * 
+	 * @param connection
+	 * @return
+	 */
+	public boolean handles(Class<T> clazz);
 	
 	/**
 	 * Returns <code>true</code> if the connections handled in this UI can connect to the given host (url)
@@ -27,6 +35,19 @@ public interface IConnectionUI {
 	 */
 	public boolean canConnect(String host);
 
-	public IConnection create();
+	/**
+	 * Creates a connection.
+	 * 
+	 * @return
+	 */
+	public T create();
 	
+	/**
+	 * Edits the given connection.
+	 * 
+	 * @param connection
+	 * @return
+	 */
+	public void edit(T connection);
+
 }
