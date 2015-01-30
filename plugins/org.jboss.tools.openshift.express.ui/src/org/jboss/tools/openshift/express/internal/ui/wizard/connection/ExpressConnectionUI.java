@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
+import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.IConnectionUI;
 
@@ -23,6 +24,12 @@ public class ExpressConnectionUI implements IConnectionUI<ExpressConnection> {
 	}
 
 	@Override
+	public void createUI(Composite parent) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public boolean handles(Class<ExpressConnection> clazz) {
 		// TODO Auto-generated method stub
 		return false;
@@ -35,13 +42,13 @@ public class ExpressConnectionUI implements IConnectionUI<ExpressConnection> {
 	}
 
 	@Override
-	public ExpressConnection create() {
+	public ExpressConnection createConnection() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void edit(ExpressConnection connection) {
+	public void editConnection(ExpressConnection connection) {
 		// TODO Auto-generated method stub
 		
 	}

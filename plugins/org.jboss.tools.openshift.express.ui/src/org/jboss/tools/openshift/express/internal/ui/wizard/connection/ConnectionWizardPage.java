@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.connection;
+package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -167,8 +167,168 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				IConnection selectedConnection = pageModel.getSelectedConnection();
+				boolean isNewConnection = selectedConnection instanceof NewConnectionMarker;
+				showConnectionWidgets(isNewConnection, passwordWidget, connectionWidgets, stackLayout, container);
 			}
 		};
+	}
+
+	private void showConnectionWidgets(boolean isNewConnection, Composite passwordWidgets,
+			Composite connectionsWidgets,
+			StackLayout stackLayout, Composite container) {
+		Control topControl = null;
+		if (isNewConnection) {
+			topControl = connectionsWidgets;
+		} else {
+			topControl = passwordWidgets;
+		}
+		stackLayout.topControl = topControl;
+		container.layout();
+	}
+
+	private Composite createExistingConnectionComposite(Composite container, DataBindingContext dbc) {
+		Composite passwordWidgets = new Composite(container, SWT.NONE);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).applyTo(passwordWidgets);
+
+		// password
+		Label passwordLabel = new Label(passwordWidgets, SWT.NONE);
+		passwordLabel.setText("&Password:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(passwordLabel);
+		this.passwordCompositePasswordText = new Text(passwordWidgets, SWT.BORDER | SWT.PASSWORD);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordCompositePasswordText);
+		Binding passwordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(passwordCompositePasswordText))
+				.validatingAfterGet(new RequiredStringValidator("password"))
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_PASSWORD).observe(pageModel))
+				.in(dbc);
+		ControlDecorationSupport
+				.create(passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		// remember password
+		Button rememberPasswordCheckBox = new Button(passwordWidgets, SWT.CHECK);
+		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
+		ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_REMEMBER_PASSWORD).observe(pageModel))
+				.in(dbc);
+
+		// credentials status
+		IObservableValue credentialsStatusObservable =
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_VALID, IStatus.class).observe(pageModel);
+		final CredentialsValidator credentialsValidator =
+				new CredentialsValidator(credentialsStatusObservable);
+		dbc.addValidationStatusProvider(credentialsValidator);
+		ControlDecorationSupport.create(credentialsValidator, SWT.LEFT | SWT.TOP);
+
+		return passwordWidgets;
+	}
+
+	private Composite createNewConnectionComposite(Composite container, DataBindingContext dbc) {
+		Composite connectionWidgets = new Composite(container, SWT.NONE);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(2).applyTo(connectionWidgets);
+
+		// use default server
+		Button defaultServerCheckbox = new Button(connectionWidgets, SWT.CHECK);
+		defaultServerCheckbox.setText("Use default server");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).applyTo(defaultServerCheckbox);
+		ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(defaultServerCheckbox))
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USE_DEFAULTSERVER).observe(pageModel))
+				.in(dbc);
+
+		// host
+		Label serverLabel = new Label(connectionWidgets, SWT.NONE);
+		serverLabel.setText("&Server:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
+		Combo serversCombo = new Combo(connectionWidgets, SWT.BORDER);
+		ComboViewer serverComboViewer = new ComboViewer(serversCombo);
+		serverComboViewer.setLabelProvider(new ServerLabelProvider());
+		serverComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		serverComboViewer.setInput(pageModel.getServers());
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(serversCombo);
+		IObservableValue serverObservable = WidgetProperties.text().observe(serversCombo);
+		Binding serverBinding = ValueBindingBuilder
+				.bind(serverObservable)
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel))
+				.in(dbc);
+		ControlDecorationSupport
+				.create(serverBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ValidationStatusProvider hostValidation = 
+				new RequiredStringValidationProvider(serverObservable, "server");
+		dbc.addValidationStatusProvider(hostValidation);
+		ControlDecorationSupport
+				.create(hostValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(serversCombo))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USE_DEFAULTSERVER).observe(pageModel))
+				.converting(new InvertingBooleanConverter())
+				.in(dbc);
+
+		// username
+		Label rhLoginLabel = new Label(connectionWidgets, SWT.NONE);
+		rhLoginLabel.setText("&Username:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
+		connectionCompositeUsernameText = new Text(connectionWidgets, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(connectionCompositeUsernameText);
+				IObservableValue usernameObservable = WidgetProperties.text(SWT.Modify).observe(connectionCompositeUsernameText);
+				ValueBindingBuilder
+						.bind(usernameObservable)
+		 				.converting(new TrimmingStringConverter())
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USERNAME).observe(pageModel))
+				.in(dbc);
+		ValidationStatusProvider usernameValidation = 
+				new RequiredStringValidationProvider(usernameObservable, "username");
+		dbc.addValidationStatusProvider(usernameValidation);
+		ControlDecorationSupport
+				.create(usernameValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		// password
+		Label passwordLabel = new Label(connectionWidgets, SWT.NONE);
+		passwordLabel.setText("&Password:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
+		this.connectionCompositePasswordText = new Text(connectionWidgets, SWT.BORDER | SWT.PASSWORD);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(connectionCompositePasswordText);
+		IObservableValue passwordObservable = WidgetProperties.text(SWT.Modify).observe(connectionCompositePasswordText);
+		ValueBindingBuilder
+				.bind(passwordObservable)
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_PASSWORD).observe(pageModel))
+				.in(dbc);
+		ValidationStatusProvider passwordValidation =
+				new RequiredStringValidationProvider(passwordObservable, "password");
+		dbc.addValidationStatusProvider(passwordValidation);
+		ControlDecorationSupport
+				.create(passwordValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		Button rememberPasswordCheckBox = new Button(connectionWidgets, SWT.CHECK);
+		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
+		ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_REMEMBER_PASSWORD).observe(pageModel))
+				.in(dbc);
+		// credentials status
+		IObservableValue credentialsStatusObservable =
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_VALID, IStatus.class).observe(pageModel);
+		final CredentialsValidator credentialsValidator =
+				new CredentialsValidator(credentialsStatusObservable);
+		dbc.addValidationStatusProvider(credentialsValidator);
+
+		return connectionWidgets;
 	}
 
 	protected SelectionAdapter onSignupLinkClicked() {
@@ -189,52 +349,52 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		super.onPageActivated(dbc);
-//		setInitialFocus();
+		setInitialFocus();
 	}
 
 	@Override
 	protected void onPageDeactivated(DataBindingContext dbc) {
 		pageModel.saveRecentConnection();
 	}
-
+	
 	@Override
 	protected void onPageWillGetDeactivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
-//		event.doit = connect();
+		event.doit = connect();
 		if (!event.doit) {
-//			setInitialFocus();
+			setInitialFocus();
 		}
 	}
 	
-//	private void setInitialFocus() {
-//		if (pageModel.isCreateNewConnection()) {
-//			if (connectionCompositeUsernameText.getText().isEmpty()) {
-//				connectionCompositeUsernameText.setFocus();
-//			} else {
-//				connectionCompositePasswordText.setFocus();
-//				connectionCompositePasswordText.selectAll();
-//			}
-//		} else {
-//			passwordCompositePasswordText.setFocus();
-//			passwordCompositePasswordText.selectAll();
-//		}
-//	}
+	private void setInitialFocus() {
+		if (pageModel.isCreateNewConnection()) {
+			if (connectionCompositeUsernameText.getText().isEmpty()) {
+				connectionCompositeUsernameText.setFocus();
+			} else {
+				connectionCompositePasswordText.setFocus();
+				connectionCompositePasswordText.selectAll();
+			}
+		} else {
+			passwordCompositePasswordText.setFocus();
+			passwordCompositePasswordText.selectAll();
+		}
+	}
 
-//	public boolean connect() {
-//		try {
-//			WizardUtils.runInWizard(
-//					new ConnectJob(), new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
-//			return JobUtils.isOk(pageModel.getValid());
-//		} catch (InterruptedException e) {
-//			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
-//			return false;
-//		} catch (InvocationTargetException e) {
-//			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
-//			return false;
-//		}
-//	}
+	public boolean connect() {
+		try {
+			WizardUtils.runInWizard(
+					new ConnectJob(), new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
+			return JobUtils.isOk(pageModel.getValid());
+		} catch (InterruptedException e) {
+			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
+			return false;
+		} catch (InvocationTargetException e) {
+			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
+			return false;
+		}
+	}
 
 	class CredentialsValidator extends MultiValidator {
 

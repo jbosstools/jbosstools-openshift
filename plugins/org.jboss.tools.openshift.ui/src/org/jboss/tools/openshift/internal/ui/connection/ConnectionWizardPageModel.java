@@ -317,42 +317,42 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	 *            newConnection to edit. Updates the existing one otherwise.
 	 */
 	public void createOrUpdateConnection() {
-//		if (isCreateNewConnection()) {
-//			wizardModel.setConnection(newConnection);
-//			newConnection.accept(new IConnectionVisitor(){
-//				@Override
-//				public void visit(ExpressConnection connection) {
-//					ConnectionsRegistrySingleton.getInstance().add(connection);
-//				}
-//
-//				@Override
-//				public void visit(KubernetesConnection connection) {
-//					ConnectionsRegistrySingleton.getInstance().add(connection);
-//				}
-//				
-//			});
-//		} else {
-//			if (selectedConnection != newConnection) {
-//				selectedConnection.accept(new IConnectionVisitor() {
-//					@Override
-//					public void visit(KubernetesConnection connection) {
-//					}
-//					
-//					@Override
-//					public void visit(ExpressConnection selectedConnection) {
-//						if(!(newConnection instanceof ExpressConnection))
-//							return;
-//						// dont update since we were editing the connection we we already holding
-//						// JBIDE-14771
-//						selectedConnection.edit((ExpressConnection) newConnection);
-//					}
-//				});
-//			}
-//			// we may have get started from new wizard without a iConnection
-//			// in wizard model: set it to wizard model
-//			wizardModel.setConnection(selectedConnection);
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(selectedConnection);
-//		}
+		if (isCreateNewConnection()) {
+			wizardModel.setConnection(newConnection);
+			newConnection.accept(new IConnectionVisitor(){
+				@Override
+				public void visit(ExpressConnection connection) {
+					ConnectionsRegistrySingleton.getInstance().add(connection);
+				}
+
+				@Override
+				public void visit(KubernetesConnection connection) {
+					ConnectionsRegistrySingleton.getInstance().add(connection);
+				}
+				
+			});
+		} else {
+			if (selectedConnection != newConnection) {
+				selectedConnection.accept(new IConnectionVisitor() {
+					@Override
+					public void visit(KubernetesConnection connection) {
+					}
+					
+					@Override
+					public void visit(ExpressConnection selectedConnection) {
+						if(!(newConnection instanceof ExpressConnection))
+							return;
+						// dont update since we were editing the connection we we already holding
+						// JBIDE-14771
+						selectedConnection.editConnection((ExpressConnection) newConnection);
+					}
+				});
+			}
+			// we may have get started from new wizard without a iConnection
+			// in wizard model: set it to wizard model
+			wizardModel.setConnection(selectedConnection);
+			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(selectedConnection);
+		}
 	}
 
 	public void saveRecentConnection() {
