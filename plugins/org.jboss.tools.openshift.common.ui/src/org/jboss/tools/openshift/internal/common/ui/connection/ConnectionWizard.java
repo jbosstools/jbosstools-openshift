@@ -42,7 +42,8 @@ public class ConnectionWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
-		return page.connect();
+//		return page.connect();
+		return false;
 	}
 
 	@Override

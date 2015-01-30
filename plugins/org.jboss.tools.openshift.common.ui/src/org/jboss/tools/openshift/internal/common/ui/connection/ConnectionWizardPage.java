@@ -145,19 +145,19 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.span(2, 1).applyTo(connectionWidgetsContainer);
 		StackLayout stackLayout = new StackLayout();
 		connectionWidgetsContainer.setLayout(stackLayout);
-		Composite connectionWidgets = createNewConnectionComposite(connectionWidgetsContainer, dbc);
-		Composite passwordWidgets = createExistingConnectionComposite(connectionWidgetsContainer, dbc);
+//		Composite connectionWidgets = createNewConnectionComposite(connectionWidgetsContainer, dbc);
+//		Composite passwordWidgets = createExistingConnectionComposite(connectionWidgetsContainer, dbc);
+//
+//		showConnectionWidgets(
+//				pageModel.isCreateNewConnection(), passwordWidgets, connectionWidgets, stackLayout,
+//				connectionWidgetsContainer);
 
-		showConnectionWidgets(
-				pageModel.isCreateNewConnection(), passwordWidgets, connectionWidgets, stackLayout,
-				connectionWidgetsContainer);
-
-		BeanProperties
-				.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION)
-				.observe(pageModel)
-				.addValueChangeListener(
-						onNewConnectionSelected(passwordWidgets, connectionWidgets, stackLayout,
-								connectionWidgetsContainer));
+//		BeanProperties
+//				.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION)
+//				.observe(pageModel)
+//				.addValueChangeListener(
+//						onNewConnectionSelected(passwordWidgets, connectionWidgets, stackLayout,
+//								connectionWidgetsContainer));
 	}
 
 	private IValueChangeListener onNewConnectionSelected(final Composite passwordWidget,

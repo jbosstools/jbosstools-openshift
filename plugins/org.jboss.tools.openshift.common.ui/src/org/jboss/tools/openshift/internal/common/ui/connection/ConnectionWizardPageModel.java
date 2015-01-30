@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +25,6 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
@@ -131,14 +128,14 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setUseDefaultServer(boolean isDefaultServer) {
-		if (this.isDefaultServer != isDefaultServer) {
-			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
-					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
-			if (isDefaultServer) {
-				setDefaultHost();
-			}
-			resetValid();
-		}
+//		if (this.isDefaultServer != isDefaultServer) {
+//			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
+//					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
+//			if (isDefaultServer) {
+//				setDefaultHost();
+//			}
+//			resetValid();
+//		}
 	}
 	
 	private List<String> getServers(IConnection connection) {
@@ -164,10 +161,10 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setUsername(String username) {
-		if (!Diffs.equals(this.username, username)) {
-			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
-			resetValid();
-		}
+//		if (!Diffs.equals(this.username, username)) {
+//			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
+//			resetValid();
+//		}
 	}
 
 	public String getPassword() {
@@ -175,10 +172,10 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setPassword(String password) {
-		if (!Diffs.equals(password, this.password)) {
-			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
-			resetValid();
-		}
+//		if (!Diffs.equals(password, this.password)) {
+//			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
+//			resetValid();
+//		}
 	}
 
 	public String getHost() {
@@ -205,8 +202,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setRememberPassword(boolean rememberPassword) {
-		firePropertyChange(PROPERTY_REMEMBER_PASSWORD,
-				this.isRememberPassword, this.isRememberPassword = rememberPassword);
+//		firePropertyChange(PROPERTY_REMEMBER_PASSWORD,
+//				this.isRememberPassword, this.isRememberPassword = rememberPassword);
 	}
 
 	private void resetValid() {

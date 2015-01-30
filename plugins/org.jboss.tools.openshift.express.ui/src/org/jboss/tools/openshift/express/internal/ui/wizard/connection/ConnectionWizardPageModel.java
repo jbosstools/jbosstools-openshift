@@ -159,6 +159,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			OpenShiftCommonUIActivator.log(e);
 			return null;
 		}
+		return null;
 	}
 
 	public String getUsername() {
