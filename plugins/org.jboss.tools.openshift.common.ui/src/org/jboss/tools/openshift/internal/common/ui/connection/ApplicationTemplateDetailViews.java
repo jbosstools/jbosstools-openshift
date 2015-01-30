@@ -17,6 +17,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -41,18 +42,9 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
-import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
-import org.jboss.tools.openshift.express.internal.ui.utils.ContentProposalUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.DisposeUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
-import org.jboss.tools.openshift.express.internal.ui.viewer.AbstractDetailViews;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
+import org.jboss.tools.openshift.internal.common.ui.AbstractDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
@@ -112,21 +104,22 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 		@Override
 		public void onVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
-			Object value = applicationTemplateObservable.getValue();
-			if (!(value instanceof IApplicationTemplate)
-					|| DisposeUtils.isDisposed(nameText)) {
-				return;
-			}
-			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
-			String templateName = applicationTemplate.getName();
-			this.nameText.setText(templateName);
-			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, null));
-			this.descriptionText.setText(applicationTemplate.getDescription());
+//			Object value = applicationTemplateObservable.getValue();
+//			if (!(value instanceof IApplicationTemplate)
+//					|| DisposeUtils.isDisposed(nameText)) {
+//				return;
+//			}
+//			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
+//			String templateName = applicationTemplate.getName();
+//			this.nameText.setText(templateName);
+//			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, null));
+//			this.descriptionText.setText(applicationTemplate.getDescription());
 		}
 
 		@Override
 		public boolean isViewFor(Object object) {
-			return object instanceof ICartridgeApplicationTemplate;
+//			return object instanceof ICartridgeApplicationTemplate;
+			return false;
 		}
 	}
 
@@ -170,46 +163,46 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		}
 
 		private void createContentProposal(Text text) {
-			final ControlDecoration decoration = ContentProposalUtils.createContenProposalDecoration("History available", text);
-			ContentProposalUtils.createContentProposal(text, ExpressPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
-			text.addFocusListener(new FocusAdapter() {
-
-				@Override
-				public void focusGained(FocusEvent e) {
-					decoration.show();
-				}
-
-				@Override
-				public void focusLost(FocusEvent e) {
-					decoration.hide();
-				}
-			});
+//			final ControlDecoration decoration = ContentProposalUtils.createContenProposalDecoration("History available", text);
+//			ContentProposalUtils.createContentProposal(text, ExpressPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
+//			text.addFocusListener(new FocusAdapter() {
+//
+//				@Override
+//				public void focusGained(FocusEvent e) {
+//					decoration.show();
+//				}
+//
+//				@Override
+//				public void focusLost(FocusEvent e) {
+//					decoration.hide();
+//				}
+//			});
 		}
 
 		@Override
 		public void onVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
-			Object value = applicationTemplateObservable.getValue();
-			if (!(value instanceof IApplicationTemplate)
-					|| DisposeUtils.isDisposed(nameText)) {
-				return;
-			}
-			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
-			String name = applicationTemplate.getName();
-			this.nameText.setText(name);
-			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
-			this.descriptionText.setText(applicationTemplate.getDescription());
-
-			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
-			this.binding = ValueBindingBuilder
-					.bind(urlTextObservable)
-					.to(BeanProperties.value(ICodeAnythingApplicationTemplate.PROPERTY_CARTRIDGE_URL, String.class)
-							.observeDetail(applicationTemplateObservable))
-					.in(dbc);
-			CodeAnythingCartridgeUrlValidator codeAnythingCartridgeUrlValidator =
-					new CodeAnythingCartridgeUrlValidator(urlTextObservable, applicationTemplateObservable, disabled);
-			dbc.addValidationStatusProvider(codeAnythingCartridgeUrlValidator);
-			ControlDecorationSupport.create(codeAnythingCartridgeUrlValidator,
-					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+//			Object value = applicationTemplateObservable.getValue();
+//			if (!(value instanceof IApplicationTemplate)
+//					|| DisposeUtils.isDisposed(nameText)) {
+//				return;
+//			}
+//			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
+//			String name = applicationTemplate.getName();
+//			this.nameText.setText(name);
+//			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
+//			this.descriptionText.setText(applicationTemplate.getDescription());
+//
+//			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
+//			this.binding = ValueBindingBuilder
+//					.bind(urlTextObservable)
+//					.to(BeanProperties.value(ICodeAnythingApplicationTemplate.PROPERTY_CARTRIDGE_URL, String.class)
+//							.observeDetail(applicationTemplateObservable))
+//					.in(dbc);
+//			CodeAnythingCartridgeUrlValidator codeAnythingCartridgeUrlValidator =
+//					new CodeAnythingCartridgeUrlValidator(urlTextObservable, applicationTemplateObservable, disabled);
+//			dbc.addValidationStatusProvider(codeAnythingCartridgeUrlValidator);
+//			ControlDecorationSupport.create(codeAnythingCartridgeUrlValidator,
+//					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		}
 
 		
@@ -236,34 +229,36 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 			@Override
 			protected IStatus validate() {
-				String url = (String) this.url.getValue();
-				IApplicationTemplate applicationTemplate = (IApplicationTemplate) this.applicationTemplate.getValue();
-				Boolean disabled = (Boolean) this.disabled.getValue();
-				
-				if (Boolean.valueOf(disabled)) {
-					return ValidationStatus.ok();
-				}
-				
-				if (applicationTemplate == null
-						|| !(applicationTemplate instanceof ICodeAnythingApplicationTemplate)) {
-					return ValidationStatus.ok();
-				}
-				
-				if (StringUtils.isEmpty(url)) {
-					return ValidationStatus
-							.cancel("Please provide an url for your cartridge.");
-				}
-				if (!UrlUtils.isValid(url)
-						&& !EGitUtils.isValidGitUrl(url)) {
-					return ValidationStatus.error(NLS.bind("{0} is not a valid url.", url));
-				}
-				return ValidationStatus.ok();
+//				String url = (String) this.url.getValue();
+//				IApplicationTemplate applicationTemplate = (IApplicationTemplate) this.applicationTemplate.getValue();
+//				Boolean disabled = (Boolean) this.disabled.getValue();
+//				
+//				if (Boolean.valueOf(disabled)) {
+//					return ValidationStatus.ok();
+//				}
+//				
+//				if (applicationTemplate == null
+//						|| !(applicationTemplate instanceof ICodeAnythingApplicationTemplate)) {
+//					return ValidationStatus.ok();
+//				}
+//				
+//				if (StringUtils.isEmpty(url)) {
+//					return ValidationStatus
+//							.cancel("Please provide an url for your cartridge.");
+//				}
+//				if (!UrlUtils.isValid(url)
+//						&& !EGitUtils.isValidGitUrl(url)) {
+//					return ValidationStatus.error(NLS.bind("{0} is not a valid url.", url));
+//				}
+//				return ValidationStatus.ok();
+				return Status.CANCEL_STATUS;
 			}
 		}
 
 		@Override
 		public boolean isViewFor(Object object) {
-			return object instanceof ICodeAnythingApplicationTemplate;
+//			return object instanceof ICodeAnythingApplicationTemplate;
+			return false;
 		}
 
 	}
@@ -276,7 +271,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		// use styled text to have vertical scrollbars hidden/visible correctly
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=180027#c11
 		private StyledText summaryText;
-		private IQuickstartApplicationTemplate template;
+//		private IQuickstartApplicationTemplate template;
 
 		@Override
 		public Composite createControls(Composite parent, DataBindingContext dbc) {
@@ -310,43 +305,43 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 		@Override
 		public void onVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
-			Object value = applicationTemplateObservable.getValue();
-			if (!(value instanceof IQuickstartApplicationTemplate)
-					|| DisposeUtils.isDisposed(nameLink)) {
-				return;
-			}
-			this.template = (IQuickstartApplicationTemplate) value;
-			this.nameLink.setText(new StringBuilder()
-					.append("<a>").append(template.getName()).append("</a>").toString());
-			nameLink.setEnabled(template.hasPageUrl());
-			updateOpenShiftMaintainedIcon(template);
-			updateSecurityUpdatesIcon(template);
-			this.summaryText.setText(template.getDescription());
+//			Object value = applicationTemplateObservable.getValue();
+//			if (!(value instanceof IQuickstartApplicationTemplate)
+//					|| DisposeUtils.isDisposed(nameLink)) {
+//				return;
+//			}
+//			this.template = (IQuickstartApplicationTemplate) value;
+//			this.nameLink.setText(new StringBuilder()
+//					.append("<a>").append(template.getName()).append("</a>").toString());
+//			nameLink.setEnabled(template.hasPageUrl());
+//			updateOpenShiftMaintainedIcon(template);
+//			updateSecurityUpdatesIcon(template);
+//			this.summaryText.setText(template.getDescription());
 		}
 		
-		private void updateOpenShiftMaintainedIcon(IQuickstartApplicationTemplate template) {
-			if (template.isOpenShiftMaintained()) {
-				setImageAndTooltip(openshiftMaintainedLabel,
-						"OpenShift maintained",
-						ExpressImages.OPENSHIFT_MAINTAINED_IMG);
-			} else {
-				setImageAndTooltip(openshiftMaintainedLabel,
-						"Community created",
-						ExpressImages.NOT_OPENSHIFT_MAINTAINED_IMG);
-			}
-		}
-		
-		private void updateSecurityUpdatesIcon(IQuickstartApplicationTemplate template) {
-			if (template.isAutomaticSecurityUpdates()) {
-				setImageAndTooltip(securityUpdatesLabel, 
-						"automatic security updates",
-						ExpressImages.SECURITY_UPDATES_IMG);
-			} else {
-				setImageAndTooltip(securityUpdatesLabel,
-						"no automatic security updates",
-						ExpressImages.NO_SECURITY_UPDATES_IMG);
-			}
-		}
+//		private void updateOpenShiftMaintainedIcon(IQuickstartApplicationTemplate template) {
+//			if (template.isOpenShiftMaintained()) {
+//				setImageAndTooltip(openshiftMaintainedLabel,
+//						"OpenShift maintained",
+//						ExpressImages.OPENSHIFT_MAINTAINED_IMG);
+//			} else {
+//				setImageAndTooltip(openshiftMaintainedLabel,
+//						"Community created",
+//						ExpressImages.NOT_OPENSHIFT_MAINTAINED_IMG);
+//			}
+//		}
+//		
+//		private void updateSecurityUpdatesIcon(IQuickstartApplicationTemplate template) {
+//			if (template.isAutomaticSecurityUpdates()) {
+//				setImageAndTooltip(securityUpdatesLabel, 
+//						"automatic security updates",
+//						ExpressImages.SECURITY_UPDATES_IMG);
+//			} else {
+//				setImageAndTooltip(securityUpdatesLabel,
+//						"no automatic security updates",
+//						ExpressImages.NO_SECURITY_UPDATES_IMG);
+//			}
+//		}
 
 		private void setImageAndTooltip(CLabel label, String text, Image image) {
 			// label.setText(text);
@@ -359,10 +354,10 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					if (template == null) {
-						return;
-					}
-					new BrowserUtility().checkedCreateExternalBrowser(template.getPageUrl(), ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
+//					if (template == null) {
+//						return;
+//					}
+//					new BrowserUtility().checkedCreateExternalBrowser(template.getPageUrl(), ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 				}
 
 			};
@@ -370,7 +365,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 		@Override
 		public boolean isViewFor(Object object) {
-			return object instanceof IQuickstartApplicationTemplate;
+//			return object instanceof IQuickstartApplicationTemplate;
+			return false;
 		}
 	}
 }
