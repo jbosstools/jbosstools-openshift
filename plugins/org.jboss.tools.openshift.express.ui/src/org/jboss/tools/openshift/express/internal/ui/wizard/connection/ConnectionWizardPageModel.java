@@ -8,8 +8,10 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.connection;
+package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +27,7 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
@@ -35,7 +38,11 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel
 class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
+	public static final String PROPERTY_USERNAME = "username";
+	public static final String PROPERTY_PASSWORD = "password";
 	public static final String PROPERTY_HOST = "host";
+	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+	public static final String PROPERTY_USE_DEFAULTSERVER = "useDefaultServer";
 	public static final String PROPERTY_VALID = "valid";
 	public static final String PROPERTY_CREATE_CONNECTION = "createConnection";
 
@@ -60,18 +67,18 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void updateFrom(IConnection connection) {
-		if (isCreateNewConnection(connection)) {
-			setUsername(getDefaultUsername());
-			setUseDefaultServer(true);
-			setDefaultHost();
-			setPassword(null);
-		} else {
+//		if (isCreateNewConnection(connection)) {
+//			setUsername(getDefaultUsername());
+//			setUseDefaultServer(true);
+//			setDefaultHost();
+//			setPassword(null);
+//		} else {
 //			setUsername(connection.getUsername());
-			setHost(connection.getHost());
-			setUseDefaultServer(connection.isDefaultHost());
+//			setHost(connection.getHost());
+//			setUseDefaultServer(connection.isDefaultHost());
 //			setRememberPassword(connection.isRememberPassword());
 //			setPassword(connection.getPassword());
-		}
+//		}
 	}
 
 	private boolean isCreateNewConnection(IConnection connection) {
@@ -79,7 +86,6 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected String getDefaultUsername() {
-		return "";
 //		String username = ExpressPreferences.INSTANCE.getLastUsername();
 //		if (StringUtils.isEmpty(username)) {
 //			try {
@@ -91,6 +97,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //			}
 //		}
 //		return username;
+		return null;
 	}
 
 	private IConnection null2NewConnectionMarker(IConnection connection) {
@@ -128,14 +135,14 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setUseDefaultServer(boolean isDefaultServer) {
-//		if (this.isDefaultServer != isDefaultServer) {
-//			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
-//					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
-//			if (isDefaultServer) {
-//				setDefaultHost();
-//			}
-//			resetValid();
-//		}
+		if (this.isDefaultServer != isDefaultServer) {
+			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
+					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
+			if (isDefaultServer) {
+				setDefaultHost();
+			}
+			resetValid();
+		}
 	}
 	
 	private List<String> getServers(IConnection connection) {
@@ -147,13 +154,13 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private String getDefaultServer() {
-		try {
-			return "";
+//		try {
 //			return new OpenShiftConfiguration().getLibraServer();
-		} catch (Exception e) {
-			OpenShiftCommonUIActivator.log(e);
-			return null;
-		}
+//		} catch (Exception e) {
+//			OpenShiftCommonUIActivator.log(e);
+//			return null;
+//		}
+		return null;
 	}
 
 	public String getUsername() {
@@ -161,10 +168,10 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setUsername(String username) {
-//		if (!Diffs.equals(this.username, username)) {
-//			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
-//			resetValid();
-//		}
+		if (!Diffs.equals(this.username, username)) {
+			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
+			resetValid();
+		}
 	}
 
 	public String getPassword() {
@@ -172,10 +179,10 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setPassword(String password) {
-//		if (!Diffs.equals(password, this.password)) {
-//			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
-//			resetValid();
-//		}
+		if (!Diffs.equals(password, this.password)) {
+			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
+			resetValid();
+		}
 	}
 
 	public String getHost() {
@@ -202,8 +209,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setRememberPassword(boolean rememberPassword) {
-//		firePropertyChange(PROPERTY_REMEMBER_PASSWORD,
-//				this.isRememberPassword, this.isRememberPassword = rememberPassword);
+		firePropertyChange(PROPERTY_REMEMBER_PASSWORD,
+				this.isRememberPassword, this.isRememberPassword = rememberPassword);
 	}
 
 	private void resetValid() {
@@ -219,20 +226,21 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IStatus connect() {
-		IStatus status = Status.OK_STATUS;
-		try {
-			if((status = tryConnection(true)) != Status.OK_STATUS){
-				status = tryConnection(false);
-			}
+//		IStatus status = Status.OK_STATUS;
+//		try {
+//			if((status = tryConnection(true)) != Status.OK_STATUS){
+//				status = tryConnection(false);
+//			}
 //		} catch (NotFoundOpenShiftException e) {
 //			// valid user without domain
-		} catch (Exception e) {
-			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
-			OpenShiftCommonUIActivator.log(e);
-		}
-		setValid(status);
-		return status;
+//		} catch (Exception e) {
+//			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
+//					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
+//			OpenShiftCommonUIActivator.log(e);
+//		}
+//		setValid(status);
+//		return status;
+		return Status.CANCEL_STATUS;
 	}
 	
 	private IStatus tryConnection(boolean legacy){
@@ -271,7 +279,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private IConnection createConnection(boolean legacy) {
-		String host = this.host;
+//		String host = this.host;
 //		if(!legacy){
 //			try {
 //				return new KubernetesConnection(host, username, password);
@@ -287,8 +295,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private boolean isSelectedConnectionChanged() {
-		return false;
 //		return !password.equals(selectedConnection.getPassword());
+		return false;
 	}
 
 	public IConnection getConnection() {
@@ -337,7 +345,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //							return;
 //						// dont update since we were editing the connection we we already holding
 //						// JBIDE-14771
-//						selectedConnection.edit((ExpressConnection) newConnection);
+//						selectedConnection.editConnection((ExpressConnection) newConnection);
 //					}
 //				});
 //			}
