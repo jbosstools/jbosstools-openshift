@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.connection;
+package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -38,7 +38,11 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel
 class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
+	public static final String PROPERTY_USERNAME = "username";
+	public static final String PROPERTY_PASSWORD = "password";
 	public static final String PROPERTY_HOST = "host";
+	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+	public static final String PROPERTY_USE_DEFAULTSERVER = "useDefaultServer";
 	public static final String PROPERTY_VALID = "valid";
 	public static final String PROPERTY_CREATE_CONNECTION = "createConnection";
 

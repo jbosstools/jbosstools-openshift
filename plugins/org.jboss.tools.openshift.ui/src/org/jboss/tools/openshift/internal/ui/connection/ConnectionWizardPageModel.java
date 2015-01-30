@@ -340,7 +340,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 							return;
 						// dont update since we were editing the connection we we already holding
 						// JBIDE-14771
-						selectedConnection.edit((ExpressConnection) newConnection);
+						selectedConnection.editConnection((ExpressConnection) newConnection);
 					}
 				});
 			}

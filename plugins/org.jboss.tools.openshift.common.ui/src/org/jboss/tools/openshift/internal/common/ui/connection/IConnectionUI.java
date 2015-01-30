@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
+import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 /**
@@ -35,12 +36,14 @@ public interface IConnectionUI<T extends IConnection> {
 	 */
 	public boolean canConnect(String host);
 
+	public void createUI(Composite parent);
+	
 	/**
 	 * Creates a connection.
 	 * 
 	 * @return
 	 */
-	public T create();
+	public T createConnection();
 	
 	/**
 	 * Edits the given connection.
@@ -48,6 +51,6 @@ public interface IConnectionUI<T extends IConnection> {
 	 * @param connection
 	 * @return
 	 */
-	public void edit(T connection);
+	public void editConnection(T connection);
 
 }
