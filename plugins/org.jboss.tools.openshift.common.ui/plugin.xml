@@ -15,4 +15,104 @@
         </view>
     </extension>
     
+    <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      	<perspectiveExtension
+            targetID="org.jboss.tools.common.ui.JBossPerspective">
+            <view relative="org.eclipse.ui.views.ProblemView"
+         	   relationship="stack"
+               id="org.jboss.tools.openshift.common.ui.explorer.expressConsoleView">
+         </view>
+      	</perspectiveExtension> 
+	</extension>
+	
+	<!-- openshift explorer toolbar: new connection -->
+	<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="toolbar:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+				<command
+					commandId="org.jboss.tools.openshift.common.ui.command.newconnection"
+					icon="icons/openshift-new.png"
+					id="org.jboss.tools.openshift.express.ui.command.newconnection"
+					style="push"
+					mnemonic="N">
+				</command>
+		</menuContribution>
+	</extension>
+	
+	<!-- New Connection -->
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+              id="org.jboss.tools.openshift.common.ui.command.newconnection"
+              name="%openshift.command.connection.new">
+        </command>
+	</extension>
+    <extension
+		point="org.eclipse.ui.handlers">
+		<handler
+              commandId="org.jboss.tools.openshift.common.ui.command.newconnection"
+              class="org.jboss.tools.openshift.internal.common.ui.command.NewConnectionHandler">
+     	</handler>
+     </extension>
+     <extension
+        point="org.eclipse.ui.menus">
+		<!-- openshift explorer context menu: new connection -->
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+			<command
+				commandId="org.jboss.tools.openshift.common.ui.command.newconnection"
+                icon="icons/openshift-new.png"
+                id="org.jboss.tools.openshift.express.ui.command.newconnection"
+                mnemonic="N">
+				<visibleWhen>
+					<or>
+						<with variable="activePartId">
+							<equals value="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView" />
+						</with>
+					</or>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+		
+	<!-- Edit Connection -->
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			id="org.jboss.tools.openshift.common.ui.command.editconnection"
+			name="%openshift.command.connection.edit">
+		</command>
+	</extension>
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler
+			class="org.jboss.tools.openshift.internal.common.ui.command.EditConnectionHandler"
+			commandId="org.jboss.tools.openshift.common.ui.command.editconnection">
+		</handler>
+	</extension>
+		<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
+			<command
+				commandId="org.jboss.tools.openshift.common.ui.command.editconnection"
+				icon="icons/openshift-edit.png"
+				mnemonic="E">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<instanceof
+									value="org.jboss.tools.openshift.common.core.connection.IConnection" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+	
 </plugin>

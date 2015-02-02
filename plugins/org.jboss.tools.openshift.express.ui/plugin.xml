@@ -303,110 +303,6 @@
 			</menu>
 		</menuContribution>
 	</extension>
-
-	<!-- New Connection -->
-	<extension
-		point="org.eclipse.ui.commands">
-		<command
-              id="org.jboss.tools.openshift.express.ui.command.newconnection"
-              name="%openshift.command.connection.new">
-        </command>
-	</extension>
-    <extension
-		point="org.eclipse.ui.handlers">
-		<handler
-              commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
-              class="org.jboss.tools.openshift.express.internal.ui.command.NewConnectionHandler">
-     	</handler>
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.command.NewDeploymentHandler"
-        commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig">
-  </handler>
-	</extension>
-    <extension
-        point="org.eclipse.ui.menus">
-		<!-- openshift explorer context menu: new connection -->
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
-			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
-                icon="icons/openshift-new.png"
-                id="org.jboss.tools.openshift.express.ui.command.newconnection"
-                mnemonic="N">
-				<visibleWhen>
-					<or>
-						<with variable="activePartId">
-							<equals value="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView" />
-						</with>
-					</or>
-				</visibleWhen>
-			</command>
-   <command
-         commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-         id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-         style="push">
-      <visibleWhen>
-         <with
-               variable="selection">
-            <iterate>
-               <instanceof
-                     value="com.openshift.kube.Project">
-               </instanceof>
-            </iterate>
-         </with>
-      </visibleWhen>
-   </command>
-		</menuContribution>
-		<!-- openshift explorer toolbar: new connection -->
-		<menuContribution
-			locationURI="toolbar:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-				<command
-					commandId="org.jboss.tools.openshift.express.ui.command.newconnection"
-					icon="icons/openshift-new.png"
-					id="org.jboss.tools.openshift.express.ui.command.newconnection"
-					style="push"
-					mnemonic="N">
-				</command>
-		</menuContribution>
-	</extension>
-		
-	<!-- Edit Connection -->
-	<extension
-		point="org.eclipse.ui.commands">
-		<command
-			id="org.jboss.tools.openshift.express.ui.command.editconnection"
-			name="%openshift.command.connection.edit">
-		</command>
-	</extension>
-	<extension
-		point="org.eclipse.ui.handlers">
-		<handler
-			class="org.jboss.tools.openshift.express.internal.ui.command.EditConnectionHandler"
-			commandId="org.jboss.tools.openshift.express.ui.command.editconnection">
-		</handler>
-	</extension>
-	<extension
-		point="org.eclipse.ui.menus">
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
-			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.editconnection"
-				icon="icons/openshift-edit.png"
-				mnemonic="E">
-				<visibleWhen>
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false" operator="or">
-								<instanceof
-									value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
-							</iterate>
-						</and>
-					</with>
-				</visibleWhen>
-			</command>
-		</menuContribution>
-	</extension>
 	
 	<!-- Remove Connection -->
 	<extension
@@ -791,17 +687,6 @@
                     </reference>
 				</visibleWhen>
 			</command>
-   <command
-         commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-         id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-         style="push">
-      <visibleWhen
-            checkEnabled="false">
-         <reference
-               definitionId="org.tools.openshift.express.ui.isOpenShiftProjectSelected">
-         </reference>
-      </visibleWhen>
-   </command>
         </menuContribution>
 	</extension>
 
@@ -1855,10 +1740,6 @@
 					</with>
 				</visibleWhen>
 			</command>
-   <command
-         commandId="org.jboss.tools.openshift.express.ui.comma"
-         style="push">
-   </command>
 		</menuContribution>
 	</extension>
   
@@ -1867,28 +1748,28 @@
            point="org.eclipse.core.runtime.adapters">
         <factory
               adaptableType="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection"
-              class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.ui.property.ExpressPropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IApplication"
-              class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.ui.property.ExpressPropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.cartridge.IEmbeddedCartridge"
-              class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.ui.property.ExpressPropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IDomain"
-              class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.ui.property.ExpressPropertySourceAdapterFactory">
            <adapter
                  type="org.eclipse.ui.views.properties.IPropertySource">
            </adapter>
@@ -1900,24 +1781,7 @@
                  type="org.eclipse.ui.IActionFilter">
            </adapter>
         </factory>
-        <factory
-              adaptableType="com.openshift.internal.kube.Resource"
-              class="org.jboss.tools.openshift.express.internal.ui.property.PropertySourceAdapterFactory">
-           <adapter
-                 type="org.eclipse.ui.views.properties.IPropertySource">
-           </adapter>
-        </factory>
      </extension>
-     <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      	<perspectiveExtension
-            targetID="org.jboss.tools.common.ui.JBossPerspective">
-            <view relative="org.eclipse.ui.views.ProblemView"
-         	   relationship="stack"
-               id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-         </view>
-      	</perspectiveExtension> 
-	</extension>
 	
 	<!-- property testers -->
 	<extension
@@ -1976,24 +1840,7 @@
 				</iterate>
 			</with>
 		</definition>
-  <definition
-        id="org.tools.openshift.express.ui.isOpenShiftProjectSelected">
-     <with
-           variable="selection">
-        <iterate
-              ifEmpty="false"
-              operator="and">
-           <count
-                 value="1">
-           </count>
-           <or>
-              <instanceof
-                    value="com.openshift.kube.Project">
-              </instanceof>
-           </or>
-        </iterate>
-     </with>
-  </definition>
+
 	</extension>
 	
 	<!-- preferences page -->
@@ -2039,7 +1886,7 @@
  <extension
        point="org.jboss.tools.openshift.common.ui.connection">
     <connectionUI
-          class="org.jboss.tools.openshift.express.ui.ConnectionUI1">
+          class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionUI">
     </connectionUI>
  </extension>
 </plugin>
