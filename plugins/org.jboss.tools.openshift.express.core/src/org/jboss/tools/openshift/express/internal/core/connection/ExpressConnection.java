@@ -54,6 +54,17 @@ public class ExpressConnection extends AbstractConnection {
 
 	private static final String USER_ID = ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
 
+	/*
+	 * Added to resolve testing
+	 */
+	private static String initUserId(){
+		try{
+			return ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
+		}catch(Exception e){
+			//Log?
+			return "";
+		}
+	}
 	private String username;
 	private String password;
 	private IUser user;
