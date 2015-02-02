@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -103,17 +103,6 @@ public class ExpressConnection extends AbstractConnection {
 		setUser(user);
 	}
 
-	private String getHost(String scheme, String host) {
-		if (StringUtils.isEmpty(host)) {
-			return host;
-		}
-		
-		if (StringUtils.isEmpty(scheme)) {
-			scheme = UrlUtils.SCHEME_HTTPS;
-		}
-		return UrlUtils.ensureStartsWithScheme(host, scheme);
-	}
-
 	protected void setUser(IUser user) {
 		this.user = user;
 	}
@@ -150,6 +139,13 @@ public class ExpressConnection extends AbstractConnection {
 			return ExpressConnectionUtils.getDefaultHostUrl();
 		}
 		return super.getHost();
+	}
+	
+	@Override
+	public String setHost(String host) {
+		String ret = super.setHost(host);
+		clearUser();
+		return ret;
 	}
 
 	@Override
