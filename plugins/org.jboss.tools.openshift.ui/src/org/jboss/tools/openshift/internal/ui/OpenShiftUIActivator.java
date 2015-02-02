@@ -10,13 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui;
 
+import org.eclipse.ui.IStartup;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.osgi.framework.BundleContext;
 
-public class OpenShiftUIActivator extends BaseCorePlugin {
+public class OpenShiftUIActivator extends BaseCorePlugin implements IStartup{
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
 
@@ -31,9 +32,6 @@ public class OpenShiftUIActivator extends BaseCorePlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
-		//TODO remove once connection logic works
-		ConnectionsRegistrySingleton.getInstance().add(new Connection());
 	}
 
 	public void stop(BundleContext context) throws Exception {
@@ -43,5 +41,11 @@ public class OpenShiftUIActivator extends BaseCorePlugin {
 
 	public static OpenShiftUIActivator getDefault() {
 		return plugin;
+	}
+
+	@Override
+	//TODO remove early startup once connection logic works
+	public void earlyStartup() {
+		ConnectionsRegistrySingleton.getInstance().add(new Connection());
 	}
 }

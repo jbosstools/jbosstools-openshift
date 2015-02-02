@@ -3,11 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.core;singleton:=true
 Bundle-Vendor: %Bundle-Vendor
-Bundle-Version: 2.6.100.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator
-Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,3.0.0)",
- org.jboss.tools.openshift.egit.core;bundle-version="[2.5.0,3.0.0)",
+Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[3.0.0,4.0.0)",
+ org.jboss.tools.openshift.egit.core;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.foundation.core;bundle-version="1.1.0",
  org.jboss.tools.openshift.common.core;bundle-version="1.0.0",
  org.eclipse.core.resources;bundle-version="3.8.100",

@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.express.ui;singleton:=true
-Bundle-Version: 2.6.100.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator
-Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[2.5.0,3.0.0)",
- org.jboss.tools.openshift.egit.core;bundle-version="[2.5.0,3.0.0)",
- org.jboss.tools.openshift.egit.ui;bundle-version="[2.5.0,3.0.0)",
+Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[3.0.0, 4.0.0)",
+ org.jboss.tools.openshift.egit.core;bundle-version="[3.0.0, 4.0.0)",
+ org.jboss.tools.openshift.egit.ui;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.openshift.common.ui;bundle-version="1.0.0",
  org.jboss.tools.openshift.common.core;bundle-version="1.0.0",
  org.jboss.ide.eclipse.as.ui;bundle-version="3.0.0",
