@@ -21,7 +21,7 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
 /**
  * @author Xavier Coulon
  */
-public class PropertySourceAdapterFactory implements IAdapterFactory {
+public class ExpressPropertySourceAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {

@@ -18,7 +18,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * @author Jeff Cantrill
  * 
  */
-public class PropertySourceAdapterFactory implements IAdapterFactory {
+public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
