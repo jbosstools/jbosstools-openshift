@@ -52,8 +52,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class ExpressConnection extends AbstractConnection {
 
-	private static final String USER_ID =
-			ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
+	private static final String USER_ID = ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
 
 	private String username;
 	private String password;

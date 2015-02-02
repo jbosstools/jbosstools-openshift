@@ -219,15 +219,37 @@
 				</contentExtension>
 			</includes>
 		</viewerContentBinding>
+  <viewerContentBinding
+        viewerId="org.jboss.tools.openshift.common.ui.explorer.expressConsoleView">
+     <includes>
+        <contentExtension
+              isRoot="true"
+              pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
+        </contentExtension>
+     </includes>
+  </viewerContentBinding>
 	</extension>
 	<extension
 		point="org.eclipse.ui.navigator.navigatorContent">
 		<navigatorContent
 			id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent"
-			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
-			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider"
+			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider"
+			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerLabelProvider"
 			name="OpenShift Explorer Content">
-			<triggerPoints></triggerPoints>
+			<triggerPoints>
+      <instanceof
+            value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
+      </instanceof></triggerPoints>
+   <possibleChildren>
+      <or>
+         <instanceof
+               value="com.openshift.client.IApplication">
+         </instanceof>
+         <instanceof
+               value="com.openshift.client.IDomain">
+         </instanceof>
+      </or>
+   </possibleChildren>
 		</navigatorContent>
 	</extension>
 
@@ -250,8 +272,8 @@
 		<navigatorContent
 			id="org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPageContent"
 			name="Select Application Dialog Content"
-			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider"
-			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerLabelProvider">
+			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider"
+			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerLabelProvider">
 			<triggerPoints></triggerPoints>
 		</navigatorContent>
 	</extension>
@@ -1888,5 +1910,11 @@
     <connectionUI
           class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionUI">
     </connectionUI>
+ </extension>
+ <extension
+       point="org.eclipse.ui.startup">
+    <startup
+          class="org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator">
+    </startup>
  </extension>
 </plugin>

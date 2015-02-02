@@ -23,10 +23,13 @@ import com.openshift.client.Refreshable;
 
 public class Connection implements IConnection, Refreshable { //extends OpenShiftKubeClient implements IConnection, Refreshable {
 
-	private String host = "http://localhost:8080";
+	private String host;
 //	private String password;
 //	private String username;
-
+	
+	public Connection(String host){
+		this.host = host;
+	}
 //	public Connection(String host, String username, String password) throws MalformedURLException {
 //		super(new URL(host));
 //		this.host = host;

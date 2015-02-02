@@ -22,8 +22,8 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
-import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.LoadingStub;
-import org.jboss.tools.openshift.express.internal.ui.explorer.OpenShiftExplorerContentProvider.NotConnectedUserStub;
+import org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider.LoadingStub;
+import org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider.NotConnectedUserStub;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
 
 import com.openshift.client.IApplication;
@@ -35,7 +35,7 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
+public class ExpressExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
 	private static final String DEFAULT_MARKER = "(default)";
 

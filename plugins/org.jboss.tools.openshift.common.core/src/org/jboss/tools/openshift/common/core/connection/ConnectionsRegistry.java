@@ -172,11 +172,12 @@ public class ConnectionsRegistry {
 		return (T) connection;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T extends IConnection> Collection<T> get(Class<T> clazz) {
 		List<T> connections = new ArrayList<T>();
 		for (IConnection connection : connectionsByUrl.values()) {
 			if (connection != null
-					&& !clazz.isAssignableFrom(connection.getClass())) {
+					&& clazz.isAssignableFrom(connection.getClass())) {
 				connections.add((T) connection);
 			}
 		}

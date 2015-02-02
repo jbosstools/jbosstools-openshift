@@ -55,7 +55,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	protected Object getInitialInput() {
 		return ConnectionsRegistrySingleton.getInstance();
 	}
-
+	
 	@Override
 	protected CommonViewer createCommonViewer(Composite parent) {
 		CommonViewer viewer = super.createCommonViewer(parent);

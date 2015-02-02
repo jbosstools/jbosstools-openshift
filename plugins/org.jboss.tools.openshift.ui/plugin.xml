@@ -112,7 +112,8 @@
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator"></startup>
+            class="org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator">
+      </startup>
    </extension>
 
 </plugin>

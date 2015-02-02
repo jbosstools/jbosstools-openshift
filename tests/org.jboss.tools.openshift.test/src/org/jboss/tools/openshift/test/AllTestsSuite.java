@@ -10,36 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
-import org.jboss.tools.openshift.express.test.core.EmbedCartridgeStrategyTest;
-import org.jboss.tools.openshift.express.test.core.OpenShiftMarkerTest;
-import org.jboss.tools.openshift.express.test.core.StringsPreferenceValueTest;
-import org.jboss.tools.openshift.express.test.core.connection.ConnectionTest;
-import org.jboss.tools.openshift.express.test.core.connection.ConnectionURLTest;
-import org.jboss.tools.openshift.express.test.core.connection.ConnectionsModelTest;
-import org.jboss.tools.openshift.express.test.ui.ActionFilterAdapterFactoryTest;
-import org.jboss.tools.openshift.express.test.ui.filters.SimplePropertyActionFilterTest;
-import org.jboss.tools.openshift.express.test.ui.property.ApplicationPropertySourceTest;
-import org.jboss.tools.openshift.express.test.ui.utils.SSHUserConfigTest;
-import org.jboss.tools.openshift.express.test.ui.wizard.application.details.ApplicationDetailsContentProviderTest;
-import org.jboss.tools.openshift.express.test.ui.wizard.application.importoperation.OpenShiftMavenProfileTests;
+import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
+import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
+import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-		ActionFilterAdapterFactoryTest.class,
-		ApplicationDetailsContentProviderTest.class,
-		ApplicationPropertySourceTest.class,
-		OpenShiftMavenProfileTests.class,
-		EmbedCartridgeStrategyTest.class,
-		SSHUserConfigTest.class,
-		ConnectionsModelTest.class,
+		ConnectionRegistryTest.class,
 		ConnectionTest.class,
 		ConnectionURLTest.class,
-		OpenShiftMarkerTest.class,
-		SimplePropertyActionFilterTest.class,
-		StringsPreferenceValueTest.class
 })
 /**
  * @author Andre Dietisheim

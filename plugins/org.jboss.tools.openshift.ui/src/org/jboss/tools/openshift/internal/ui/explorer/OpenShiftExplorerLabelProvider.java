@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,10 +18,6 @@ import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
-/**
- * @author Xavier Coulon
- * @author Andre Dietisheim
- */
 public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
 	private static final String DEFAULT_MARKER = "(default)";
@@ -47,18 +43,6 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	public Image getImage(Object element) {
 		if (element instanceof IConnection) {
 			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
-//		} else if (element instanceof IDomain || element instanceof Project) {
-//			image = ExpressImages.GLOBE_IMG;
-//		} else if (element instanceof IApplication || element instanceof DeploymentConfig) {
-//			image = ExpressImages.QUERY_IMG;
-//		} else if (element instanceof BuildConfig){
-//			image = ExpressImages.BUILDCONFIG_IMG;
-//		} else if (element instanceof IEmbeddedCartridge) {
-//			image = ExpressImages.TASK_REPO_IMG;
-//		} else if (element instanceof LoadingStub) {
-//			image = ExpressImages.SYSTEM_PROCESS_IMG;
-//		} else if (element instanceof OpenShiftException) {
-//			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 		}
 		return null;
 	}
@@ -66,7 +50,6 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 	@Override
 	public String getText(Object element) {
 		return element.toString();
-//		return getStyledText(element).getString();
 	}
 
 	@Override
@@ -99,64 +82,6 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 //			b.append(" ").append(config.getSourceUri());
 //			styledString = new StyledString(b.toString());
 //			styledString.setStyle(config.getName().length() + 1,b.length() - config.getName().length() -1 , StyledString.QUALIFIER_STYLER);
-//		}else if (element instanceof IDomain) {
-//			styledString = createStyledString((IDomain) element);
-//		} else if (element instanceof IApplication) {
-//			styledString = createStyledString((IApplication) element);
-//		} else if (element instanceof IEmbeddedCartridge) {
-//			styledString = createStyledString((IEmbeddedCartridge) element);
-//		} else if (element instanceof LoadingStub) {
-//			styledString = new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
-//		} else if (element instanceof NotConnectedUserStub) {
-//			styledString = new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
-//		} else if (element instanceof OpenShiftException) {
-//			styledString = new StyledString(((OpenShiftException) element).getMessage());
-//		} else {
-//			styledString = new StyledString(element.toString());
-//		}
-//		return styledString;
 	}
 
-	private StyledString createStyledString(IConnection connection) {
-//		String name = connection.getUsername();
-//		String host = connection.getHost();
-//		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
-//		if (connection instanceof org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection 
-//				&& ((org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection)connection).isDefaultHost()) {
-//			builder.append(' ').append(DEFAULT_MARKER);
-//		}
-//		String label = builder.toString();
-		StyledString styledString = new StyledString(String.format("%s:%s", connection.getScheme(), connection.getHost()));
-//		styledString.setStyle(name.length() + 1, builder.length() - name.length() - 1, StyledString.QUALIFIER_STYLER);
-		return styledString;
-	}
-
-//	private StyledString createStyledString(IDomain domain) {
-//		String id = domain.getId();
-//		String fullName = ExpressResourceLabelUtils.toString(domain); 
-//		String label = 
-//				new StringBuilder(id).append(' ').append(fullName).toString();
-//
-//		StyledString styledString = new StyledString(label);
-//		styledString.setStyle(id.length() + 1, fullName.length(), StyledString.QUALIFIER_STYLER);
-//		return styledString;
-//	}
-
-//	private StyledString createStyledString(IApplication application) {
-//		String appName = application.getName();
-//		String appType = StringUtils.null2emptyString(ExpressResourceLabelUtils.toString(application.getCartridge()));
-//		StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
-//		StyledString styledString = new StyledString(sb.toString());
-//		styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);
-//		return styledString;
-//	}
-
-//	private StyledString createStyledString(IEmbeddedCartridge cartridge) {
-//		String displayName = cartridge.getDisplayName();
-//		String name = cartridge.getName();
-//		StringBuilder sb = new StringBuilder(displayName).append(' ').append(name);
-//		StyledString styledString = new StyledString(sb.toString());
-//		styledString.setStyle(displayName.length() + 1, name.length(), StyledString.QUALIFIER_STYLER);
-//		return styledString;
-//	}
 }
