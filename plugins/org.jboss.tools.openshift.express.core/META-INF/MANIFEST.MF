@@ -32,3 +32,4 @@ Export-Package: org.jboss.tools.openshift.express.core;x-friends:="org.jboss.too
  org.jboss.tools.openshift.express.internal.core.security;x-friends:="org.jboss.tools.openshift.express.test,org.jboss.tools.openshift.express.ui",
  org.jboss.tools.openshift.express.internal.core.server;x-friends:="org.jboss.tools.openshift.express.test,org.jboss.tools.openshift.express.ui",
  org.jboss.tools.openshift.express.internal.core.util;x-friends:="org.jboss.tools.openshift.express.test,org.jboss.tools.openshift.express.ui"
+Import-Package: com.openshift.client

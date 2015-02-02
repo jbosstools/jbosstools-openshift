@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,7 +24,6 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
@@ -38,7 +36,7 @@ import com.openshift.client.OpenShiftException;
  * @author Andre Dietisheim
  * 
  */
-public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
+public class ExpressExplorerContentProvider implements ITreeContentProvider {
 
 	private StructuredViewer viewer;
 
@@ -66,10 +64,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		loadedElements.clear();
 		loadingElements.clear();
 		errors.clear();
-		if (parentElement instanceof IWorkspaceRoot) {
-			return ConnectionsRegistrySingleton.getInstance().getAll();
-		} else if (parentElement instanceof ConnectionsRegistry) {
-			return ((ConnectionsRegistry) parentElement).getAll();
+		if (parentElement instanceof ConnectionsRegistry) {
+			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
+			return registry.get(ExpressConnection.class).toArray();
 		} else if (parentElement instanceof ExpressConnection) {
 			List<IDomain> domains = ((ExpressConnection) parentElement).getDomains();
 			return domains.toArray(new IDomain[domains.size()]);
@@ -176,7 +173,8 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return element instanceof IConnection
+		return element instanceof ConnectionsRegistry
+				|| element instanceof IConnection
 				|| element instanceof IDomain
 				|| element instanceof IApplication;
 	}

@@ -53,7 +53,9 @@ Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[3.0.0,
  org.apache.commons.lang;bundle-version="2.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.commons.io,
+Import-Package: com.openshift.client,
+ com.openshift.client.cartridge,
+ org.apache.commons.io,
  org.apache.commons.lang;version="2.6.0",
  org.eclipse.pde.internal.ui.shared,
  org.jboss.tools.common,

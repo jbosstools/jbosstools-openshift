@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * All rights reserved. This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: Red Hat, Inc.
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
 import java.util.ArrayList;
@@ -5,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -15,16 +22,12 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-//import org.osgi.resource.Resource;
+
+import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.client.OpenShiftException;
 
-/**
- * @author Xavier Coulon
- * 
- */
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	private StructuredViewer viewer;
@@ -54,22 +57,11 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		loadedElements.clear();
 		loadingElements.clear();
 		errors.clear();
-		if (parentElement instanceof IWorkspaceRoot) {
-			return ConnectionsRegistrySingleton.getInstance().getAll();
-		} else if (parentElement instanceof ConnectionsRegistry) {
-			return ((ConnectionsRegistry) parentElement).getAll();
-//		} else if (parentElement instanceof ExpressConnection) {
-//			List<IDomain> domains = ((ExpressConnection) parentElement).getDomains();
-//			return domains.toArray(new IDomain[domains.size()]);
-//		} else if (parentElement instanceof com.openshift.kube.Client) {
-//			List<Project> openshiftProjects = ((com.openshift.kube.Client) parentElement).list(ResourceKind.Project);
-//			openshiftProjects.toArray(new Project[openshiftProjects.size()]);
-//		} else if (parentElement instanceof Project) {
-//			Project p = (Project) parentElement;
-//			List<Resource> resources = new ArrayList<Resource>(p.getResources(ResourceKind.DeploymentConfig));
-//			return resources.toArray();
+		if(parentElement instanceof ConnectionsRegistry){
+			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
+			return registry.get(Connection.class).toArray();
 		}
-		return new Object[0];
+		return null;
 	}
 
 	/**
@@ -129,15 +121,6 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 //				children = p.getResources(ResourceKind.DeploymentConfig).toArray();
 //			} else if (parentElement instanceof ResourceGrouping) {
 //				children = ((ResourceGrouping) parentElement).getResources();
-//			} else if (parentElement instanceof ExpressConnection) {
-//				final ExpressConnection connection = (ExpressConnection) parentElement;
-//				children = connection.getDomains().toArray();
-//			} else if (parentElement instanceof IDomain) {
-//				final IDomain domain = (IDomain) parentElement;
-//				children = domain.getApplications().toArray();
-//			} else if (parentElement instanceof IApplication) {
-//				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
-//			}
 		} catch (OpenShiftException e) {
 			errors.put(parentElement, e);
 		}
@@ -181,13 +164,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return element instanceof ConnectionsRegistry;
-//		return false;
-//		return element instanceof IConnection
-//				|| element instanceof Project
-//				|| element instanceof ResourceGrouping
-//				|| element instanceof IDomain
-//				|| element instanceof IApplication;
+		return element instanceof IConnection;
 	}
 
 	public static class LoadingStub {

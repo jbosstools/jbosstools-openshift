@@ -46,6 +46,7 @@ public class OpenShiftUIActivator extends BaseCorePlugin implements IStartup{
 	@Override
 	//TODO remove early startup once connection logic works
 	public void earlyStartup() {
-		ConnectionsRegistrySingleton.getInstance().add(new Connection());
+		ConnectionsRegistrySingleton.getInstance().add(new Connection("http://localhost:8080"));
+		ConnectionsRegistrySingleton.getInstance().add(new Connection("http://localhost:8443"));
 	}
 }
