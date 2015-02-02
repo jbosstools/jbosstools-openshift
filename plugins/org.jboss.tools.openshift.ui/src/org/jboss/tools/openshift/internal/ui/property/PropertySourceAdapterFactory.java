@@ -13,8 +13,6 @@ package org.jboss.tools.openshift.internal.ui.property;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.openshift3.client.model.IDeploymentConfig;
-
 /**
  * @author Xavier Coulon
  * @author Jeff Cantrill

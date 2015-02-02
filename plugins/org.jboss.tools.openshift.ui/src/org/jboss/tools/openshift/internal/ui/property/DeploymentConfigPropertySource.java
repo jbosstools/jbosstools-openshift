@@ -13,25 +13,23 @@ package org.jboss.tools.openshift.internal.ui.property;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
-
-import com.openshift3.client.model.IDeploymentConfig;
 
 /**
  * @author Jeff Cantrill
  */
 public class DeploymentConfigPropertySource implements IPropertySource{
 	
-	private final IDeploymentConfig config;
+//	private final IDeploymentConfig config;
 	private final Map<Object, Object> values = new HashMap<Object,Object>();
-	public DeploymentConfigPropertySource(IDeploymentConfig config){
-		this.config = config;
-		values.put("name", config.getName());
-		values.put("namespace", config.getNamespace());
-		values.put("createdOn", config.getCreationTimeStamp());
+//	public DeploymentConfigPropertySource(IDeploymentConfig config){
+	public DeploymentConfigPropertySource(){
+//		this.config = config;
+//		values.put("name", config.getName());
+//		values.put("namespace", config.getNamespace());
+//		values.put("createdOn", config.getCreationTimeStamp());
 //		values.put("sourceUrl","");
 		values.put("url", "TBD");
 //		values.put("deploymentTriggers", StringUtils.join(config.getTriggerTypes().toArray()));

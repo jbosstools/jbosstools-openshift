@@ -10,11 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.deployment;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
-
-import com.openshift3.client.IClient;
-import com.openshift3.client.model.IProject;;
 
 //import com.openshift.kube.Client;
 //import com.openshift.kube.Project;
@@ -28,14 +23,15 @@ public class DeploymentWizardContext {
 //	private DockerImageDescriptor image;
 	private String projectName = "";
 	private boolean createServerAdapter;
-	private IProject openshiftProject;
+//	private IProject openshiftProject;
 	private String userName = "jcantrill";
-	private IClient client;
+//	private IClient client;
 	private String repositoryUri;
 	private boolean includeBuildConfig = true;
 	private String serviceDependencies;
 
-	public DeploymentWizardContext(IClient client, IProject p, String repositoryUri) {
+//	public DeploymentWizardContext(IClient client, IProject p, String repositoryUri) {
+	public DeploymentWizardContext() {
 //		this.client = client;
 //		this.openshiftProject = p;
 		this.repositoryUri = repositoryUri;
@@ -49,14 +45,14 @@ public class DeploymentWizardContext {
 //		return this.image;
 //	}
 
-	public IProject getProject() {
-		String projectName = getProjectName();
-		if (StringUtils.isEmpty(projectName)) {
-			return null;
-		}
-		return null;
+//	public IProject getProject() {
+//		String projectName = getProjectName();
+//		if (StringUtils.isEmpty(projectName)) {
+//			return null;
+//		}
+//		return null;
 //		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-	}
+//	}
 
 	public void setProjectName(String projectName) {
 		this.projectName = projectName;
@@ -74,25 +70,25 @@ public class DeploymentWizardContext {
 		this.createServerAdapter = createServerAdapter;
 	}
 
-	public String getNamespace() {
-		return this.openshiftProject.getNamespace();
-	}
+//	public String getNamespace() {
+//		return this.openshiftProject.getNamespace();
+//	}
 	
 	public String getUserName(){
 		return this.userName;
 	}
 
-	public void setOpenShiftProject(IProject project) {
-		this.openshiftProject = project;
-	}
+//	public void setOpenShiftProject(IProject project) {
+//		this.openshiftProject = project;
+//	}
 
-	public void setClient(IClient client) {
+//	public void setClient(IClient client) {
 //		this.client = client;
-	}
+//	}
 
-	public IClient getClient() {
-		return this.client;
-	}
+//	public IClient getClient() {
+//		return this.client;
+//	}
 
 	public String getRepositoryUri() {
 		return this.repositoryUri ;

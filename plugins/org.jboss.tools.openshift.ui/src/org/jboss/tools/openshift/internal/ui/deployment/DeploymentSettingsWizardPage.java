@@ -67,7 +67,8 @@ public class DeploymentSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	public DeploymentSettingsWizardPage(IWizard wizard, DeploymentWizardContext context) {
 		super("Set up resources for a new OpenShift Deployment",
-				NLS.bind(PAGE_DESCRIPTION_PATTERN, context.getNamespace()),
+//				NLS.bind(PAGE_DESCRIPTION_PATTERN, context.getNamespace()),
+				NLS.bind(PAGE_DESCRIPTION_PATTERN, ""),
 				"Deployment Configuration", wizard);
 		this.pageModel = new DeploymentSettingsWizardPageModel(context);
 	}

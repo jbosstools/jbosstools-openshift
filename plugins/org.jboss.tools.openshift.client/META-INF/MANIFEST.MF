@@ -24,7 +24,9 @@ Export-Package: com.openshift.client,
  com.openshift.internal.client.response,
  com.openshift.internal.client.ssh,
  com.openshift.internal.client.utils,
- com.openshift3.client,
- com.openshift3.client.capability,
- com.openshift3.client.images,
- com.openshift3.client.model
+ com.openshift.internal.kube,
+ com.openshift.internal.kube.builders,
+ com.openshift.internal.kube.factories,
+ com.openshift.kube,
+ com.openshift.kube.capability,
+ com.openshift.kube.images
