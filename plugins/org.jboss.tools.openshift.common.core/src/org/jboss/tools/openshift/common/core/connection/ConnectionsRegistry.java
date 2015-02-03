@@ -189,7 +189,7 @@ public class ConnectionsRegistry {
 	public Collection<IConnection> getAll() {
 		return connectionsByUrl.values();
 	}
-
+	
 	public int size() {
 		return connectionsByUrl.size();
 	}

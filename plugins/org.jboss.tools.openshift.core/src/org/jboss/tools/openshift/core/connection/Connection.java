@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.core.connection;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -19,23 +20,14 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.Refreshable;
-//import com.openshift.kube.OpenShiftKubeClient;
+import com.openshift3.client.model.IProject;
+import com.openshift3.internal.client.DefaultClient;
 
-public class Connection implements IConnection, Refreshable { //extends OpenShiftKubeClient implements IConnection, Refreshable {
+public class Connection extends DefaultClient implements IConnection, Refreshable {
 
-	private String host;
-//	private String password;
-//	private String username;
-	
-	public Connection(String host){
-		this.host = host;
+	public Connection(String url) throws MalformedURLException{
+		super(new URL(url));
 	}
-//	public Connection(String host, String username, String password) throws MalformedURLException {
-//		super(new URL(host));
-//		this.host = host;
-//		this.username = username;
-//		this.password = password;
-//	}
 
 //	@Override
 	public boolean connect() throws OpenShiftException {
@@ -128,6 +120,10 @@ public class Connection implements IConnection, Refreshable { //extends OpenShif
 	@Override
 	public String toString() {
 		return host;
+	}
+
+	public List<IProject> getProjects() {
+		return null;
 	}
 	
 }

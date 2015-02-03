@@ -10,18 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
-import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
-import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
-import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-		ConnectionRegistryTest.class,
-		ConnectionTest.class,
-		ConnectionURLTest.class,
 })
 /**
  * @author Andre Dietisheim

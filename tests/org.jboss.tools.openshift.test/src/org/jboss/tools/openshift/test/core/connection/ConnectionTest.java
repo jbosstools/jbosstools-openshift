@@ -20,9 +20,11 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 
-import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
-import org.jboss.tools.openshift.common.core.connection.ConnectionUtils;
-import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+//import org.jboss.tools.openshift.express.internal.core.connection.Connection;
+//import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
+//import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
+//import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
+
 import org.junit.Test;
 
 /**
