@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
+import org.junit.Test;
 
 /**
  * @author Andre Dietisheim
