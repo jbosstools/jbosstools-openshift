@@ -32,9 +32,7 @@ import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
- * @author Xavier Coulon
- * @author Andre Dietisheim
- * 
+ * @author Jeff Cantrill
  */
 public class ExpressExplorerContentProvider implements ITreeContentProvider {
 

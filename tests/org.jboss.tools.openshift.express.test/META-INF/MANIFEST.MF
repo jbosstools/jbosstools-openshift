@@ -8,13 +8,13 @@ Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.express.ui;bundle-version="3.0.0",
  org.jboss.tools.openshift.express.core;bundle-version="3.0.0",
  org.jboss.tools.openshift.common.core;bundle-version="3.0.0",
+ org.jboss.tools.openshift.express.client;bundle-version="3.0.0",
+ com.jcraft.jsch;bundle-version="0.1.51",
  org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="[3.7.100,4.0.0)",
  org.eclipse.core.filesystem;bundle-version="1.3.100",
  org.junit;bundle-version="[4.8.2,5.0.0)",
  org.eclipse.ui.views,
- org.eclipse.ui;bundle-version="3.106.0",
- com.jcraft.jsch;bundle-version="0.1.51",
- org.jboss.tools.openshift.express.client;bundle-version="3.0.0"
+ org.eclipse.ui;bundle-version="3.106.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
