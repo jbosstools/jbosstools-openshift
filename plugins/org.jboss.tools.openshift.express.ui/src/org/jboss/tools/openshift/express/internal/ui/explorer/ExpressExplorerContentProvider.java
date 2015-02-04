@@ -54,7 +54,7 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 	private Map<Object, Exception> errors = new HashMap<Object, Exception>();
 
 	/**
-	 * Called to obtain the root elements of the tree viewer, ie, the Users
+	 * Called to obtain the root elements of the tree viewer, the connections
 	 */
 	@Override
 	public Object[] getElements(final Object parentElement) {
@@ -68,13 +68,14 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof ExpressConnection) {
 			List<IDomain> domains = ((ExpressConnection) parentElement).getDomains();
 			return domains.toArray(new IDomain[domains.size()]);
+		} else {
+			return new Object[0];
 		}
-		return new Object[0];
 	}
 
 	/**
 	 * Called to obtain the children of any element in the tree viewer, ie, from
-	 * a user or an application
+	 * a connection or an application
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
@@ -89,8 +90,9 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 			return loadChildren(parentElement);
 		} else if (parentElement instanceof IApplication) {
 			return loadChildren(parentElement);
+		} else {
+			return getChildrenFor(parentElement);
 		}
-		return getChildrenFor(parentElement);
 	}
 
 	/**

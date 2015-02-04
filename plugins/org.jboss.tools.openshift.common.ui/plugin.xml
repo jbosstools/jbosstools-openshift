@@ -7,10 +7,10 @@
     <extension
         point="org.eclipse.ui.views">
         <view
+            id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
             category="org.jboss.tools.common.model.ui.views"
             class="org.jboss.tools.openshift.internal.common.ui.explorer.OpenShiftExplorerView"
             icon="icons/openshift-logo-white-icon.png"
-            id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView"
             name="OpenShift Explorer">
         </view>
     </extension>
@@ -24,10 +24,10 @@
       	</perspectiveExtension> 
 	</extension>
 	
+	<!-- openshift explorer view: context menu -->
 	<extension point="org.eclipse.ui.navigator.viewer">
 		<viewer
 			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-			<!-- openshift explorer view: context menu -->
 			<popupMenu
 				allowsPlatformContributions="true"
 				id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup">
@@ -60,25 +60,6 @@
 				</property>
 			</options>
 		</viewer>
-	</extension>
-	<!-- openshift explorer view: content binding-->
-	<extension point="org.eclipse.ui.navigator.viewer">
-		<viewerActionBinding
-			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-			<includes>
-				<actionExtension
-					pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
-			</includes>
-		</viewerActionBinding>
-		<viewerContentBinding
-			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-			<includes>
-				<contentExtension
-					isRoot="false"
-					pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
-				</contentExtension>
-			</includes>
-		</viewerContentBinding>
 	</extension>
 	
 	<!-- openshift explorer view: toolbar/new connection -->
