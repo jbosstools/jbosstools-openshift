@@ -148,6 +148,7 @@ public class ConnectionsRegistry {
 		return recentConnection;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T extends IConnection> T getRecentConnection(Class<T> clazz) {
 		if (recentConnection == null
 				|| !clazz.isAssignableFrom(recentConnection.getClass())) {
@@ -163,6 +164,7 @@ public class ConnectionsRegistry {
 		return connectionsByUrl.get(connectionUrl);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T extends IConnection> T getByUrl(ConnectionURL connectionUrl, Class<T> clazz) {
 		IConnection connection = getByUrl(connectionUrl);
 		if (connection != null
@@ -173,7 +175,7 @@ public class ConnectionsRegistry {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T extends IConnection> Collection<T> get(Class<T> clazz) {
+	public <T extends IConnection> Collection<T> getAll(Class<T> clazz) {
 		List<T> connections = new ArrayList<T>();
 		for (IConnection connection : connectionsByUrl.values()) {
 			if (connection != null
@@ -184,9 +186,8 @@ public class ConnectionsRegistry {
 		return connections;
 	}
 
-	public IConnection[] getAll() {
-		Collection<IConnection> connection = connectionsByUrl.values();
-		return (IConnection[]) connection.toArray(new IConnection[connection.size()]);
+	public Collection<IConnection> getAll() {
+		return connectionsByUrl.values();
 	}
 
 	public int size() {

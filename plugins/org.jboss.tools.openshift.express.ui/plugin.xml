@@ -165,70 +165,7 @@
     	<context id="org.jboss.tools.openshift.explorer.context.connection" name="OpenShift Explorer Connection Context" parentId="org.eclipse.ui.contexts.window" />
 	</extension>
 	
-	<!-- OpenShift Explorer view -->
-
-	<extension point="org.eclipse.ui.navigator.viewer">
-		<viewer
-			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-			<!-- openshift explorer context menu -->
-			<popupMenu
-				allowsPlatformContributions="true"
-				id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup">
-				<insertionPoint
-					name="group.new"
-					separator="true"/>
-				<insertionPoint
-					name="group.showIn"
-					separator="true"/>
-				<insertionPoint
-					name="group.edit"
-					separator="true"/>
-				<insertionPoint
-					name="group.import"
-					separator="true"/>
-				<insertionPoint
-					name="group.modify"
-					separator="true"/>
-				<insertionPoint
-					name="additions"
-					separator="true"/>
-				<insertionPoint
-					name="group.properties"
-					separator="true"/>
-			</popupMenu>
-			<options>
-				<property
-					name="org.eclipse.ui.navigator.hideLinkWithEditorAction"
-					value="true">
-				</property>
-			</options>
-		</viewer>
-		<viewerActionBinding
-			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-			<includes>
-				<actionExtension
-					pattern="org.jboss.tools.openshift.express.internal.ui.explorer.actionProvider.*"/>
-			</includes>
-		</viewerActionBinding>
-		<viewerContentBinding
-			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-			<includes>
-				<contentExtension
-					isRoot="false"
-					pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
-				</contentExtension>
-			</includes>
-		</viewerContentBinding>
-  <viewerContentBinding
-        viewerId="org.jboss.tools.openshift.common.ui.explorer.expressConsoleView">
-     <includes>
-        <contentExtension
-              isRoot="true"
-              pattern="org.jboss.tools.openshift.express.ui.explorer.expressConsoleContent">
-        </contentExtension>
-     </includes>
-  </viewerContentBinding>
-	</extension>
+	<!-- OpenShift Explorer view: content -->
 	<extension
 		point="org.eclipse.ui.navigator.navigatorContent">
 		<navigatorContent
@@ -237,19 +174,17 @@
 			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerLabelProvider"
 			name="OpenShift Explorer Content">
 			<triggerPoints>
-      <instanceof
-            value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
-      </instanceof></triggerPoints>
-   <possibleChildren>
-      <or>
-         <instanceof
-               value="com.openshift.client.IApplication">
-         </instanceof>
-         <instanceof
-               value="com.openshift.client.IDomain">
-         </instanceof>
-      </or>
-   </possibleChildren>
+				<instanceof
+					value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
+			</triggerPoints>
+			<possibleChildren>
+				<or>
+					<instanceof
+						value="com.openshift.client.IApplication" />
+					<instanceof
+						value="com.openshift.client.IDomain" />
+				</or>
+			</possibleChildren>
 		</navigatorContent>
 	</extension>
 
@@ -326,52 +261,6 @@
 		</menuContribution>
 	</extension>
 	
-	<!-- Remove Connection -->
-	<extension
-		point="org.eclipse.ui.commands">
-		<command
-			id="org.jboss.tools.openshift.express.ui.command.removeconnection"
-			name="%openshift.command.connection.remove">
-		</command>
-	</extension>
-	<extension
-		point="org.eclipse.ui.bindings">
-		<key
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
-			contextId="org.jboss.tools.openshift.explorer.context.connection"
-			sequence="Del" 
-			commandId="org.jboss.tools.openshift.express.ui.command.removeconnection" />
-	</extension>
-	<extension
-		point="org.eclipse.ui.handlers">
-        <handler
-			commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
-			class="org.jboss.tools.openshift.express.internal.ui.command.RemoveConnectionHandler">
-     	</handler>
-	</extension>
-	<extension
-		point="org.eclipse.ui.menus">
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
-			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
-				icon="icons/delete_edit.gif"
-				id="org.jboss.tools.openshift.express.ui.command.removeconnection"
-				mnemonic="R">
-				<visibleWhen>
-					<with variable="selection">
-						<and>
-							<iterate ifEmpty="false" operator="and">
-								<instanceof
-									value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
-	                    </iterate>
-					</and>
-                </with>
-			</visibleWhen>
-          </command>
-        </menuContribution>
-    </extension>
-    
 	<!-- Refresh OpenShift resource (connection, domain, application) -->
      <extension
            point="org.eclipse.ui.commands">

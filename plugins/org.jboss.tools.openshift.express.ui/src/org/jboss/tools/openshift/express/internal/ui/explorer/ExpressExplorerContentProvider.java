@@ -64,7 +64,7 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 		errors.clear();
 		if (parentElement instanceof ConnectionsRegistry) {
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
-			return registry.get(ExpressConnection.class).toArray();
+			return registry.getAll(ExpressConnection.class).toArray();
 		} else if (parentElement instanceof ExpressConnection) {
 			List<IDomain> domains = ((ExpressConnection) parentElement).getDomains();
 			return domains.toArray(new IDomain[domains.size()]);

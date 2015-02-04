@@ -10,10 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.connection;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,14 +19,10 @@ import java.util.List;
 import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
 /**
@@ -120,10 +114,9 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return selectedConnection;
 	}
 
-	public List<IConnection> getConnections() {
+	public Collection<IConnection> getConnections() {
 		if (allowConnectionChange) {
-			List<IConnection> connections = Arrays.asList(ConnectionsRegistrySingleton.getInstance().getAll());
-			connections.add(new NewConnectionMarker());
+			Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 			return connections;
 		} else {
 			return Collections.singletonList(selectedConnection);

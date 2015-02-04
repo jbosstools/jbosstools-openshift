@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -113,9 +113,9 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return selectedConnection;
 	}
 
-	public List<IConnection> getConnections() {
+	public Collection<IConnection> getConnections() {
 		if (allowConnectionChange) {
-			List<IConnection> connections = Arrays.asList(ConnectionsRegistrySingleton.getInstance().getAll());
+			Collection<IConnection> connections = new ArrayList(ConnectionsRegistrySingleton.getInstance().getAll());
 			connections.add(new NewConnectionMarker());
 			return connections;
 		} else {

@@ -59,7 +59,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		errors.clear();
 		if(parentElement instanceof ConnectionsRegistry){
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
-			return registry.get(Connection.class).toArray();
+			return registry.getAll(Connection.class).toArray();
 		}
 		return null;
 	}
