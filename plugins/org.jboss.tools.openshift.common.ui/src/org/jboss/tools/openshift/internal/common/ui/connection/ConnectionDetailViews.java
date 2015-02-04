@@ -50,7 +50,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 /**
  * @author Andre Dietisheim
  */
-public class ApplicationTemplateDetailViews extends AbstractDetailViews {
+public class ConnectionDetailViews extends AbstractDetailViews {
 
 	private final IDetailView defaultView = new DefaultView();
 	private final IDetailView downloadableCartridgeView = new CodeAnthingCartridgeView();
@@ -58,7 +58,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 	private IObservableValue disabled;
 
-	ApplicationTemplateDetailViews(IObservableValue detailViewModel, IObservableValue disabled, Composite parent, DataBindingContext dbc) {
+	ConnectionDetailViews(IObservableValue detailViewModel, IObservableValue disabled, Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, parent, dbc);
 		this.disabled = disabled;
 	}

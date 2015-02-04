@@ -141,7 +141,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	private void showConnectionsOrExplanations(Control connectionsPane, Control explanationsPane) {
-		if (ConnectionsRegistrySingleton.getInstance().getAll().length < 1) {
+		if (ConnectionsRegistrySingleton.getInstance().getAll().size() < 1) {
 			pageBook.showPage(explanationsPane);
 		} else {
 			pageBook.showPage(connectionsPane);
