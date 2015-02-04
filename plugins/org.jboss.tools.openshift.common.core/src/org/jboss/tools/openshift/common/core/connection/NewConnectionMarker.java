@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.common.core.connection;
 
-
 /**
- * A class that is used to have an entry <New ExpressConnection> in a combo view with
- * connections.
+ * A class that is used to have an entry "<New Connection>" in a combo that
+ * shows all connections.
  * 
  * @author Andre Dietisheim
  * 
@@ -21,19 +20,19 @@ package org.jboss.tools.openshift.common.core.connection;
 public class NewConnectionMarker extends AbstractConnection {
 
 	public NewConnectionMarker() {
-		super("<New Connection>");
+		super(null);
 	}
 
 	@Override
 	public int hashCode() {
 		return getHost().hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object object) {
 		return object instanceof NewConnectionMarker;
 	}
-	
+
 	@Override
 	public boolean isDefaultHost() {
 		return false;
@@ -47,7 +46,7 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public void refresh() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -58,6 +57,21 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public boolean isConnected() {
 		return false;
+	}
+
+	@Override
+	public String getHost() {
+		return "<New Connection>";
+	}
+
+	@Override
+	public String getScheme() {
+		return null;
+	}
+
+	@Override
+	public String setHost(String host) {
+		throw new UnsupportedOperationException();
 	}
 
 }
