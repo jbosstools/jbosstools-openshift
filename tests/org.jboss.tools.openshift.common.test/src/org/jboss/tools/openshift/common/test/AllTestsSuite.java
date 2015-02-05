@@ -11,12 +11,14 @@
 package org.jboss.tools.openshift.common.test;
 
 import org.jboss.tools.openshift.common.test.core.connection.ConnectionURLTest;
+import org.jboss.tools.openshift.common.test.core.connection.ConnectionsRegistryTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+		ConnectionsRegistryTest.class,
 		ConnectionURLTest.class
 })
 /**
