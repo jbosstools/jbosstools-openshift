@@ -47,16 +47,8 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
         super.start(context);
         myContext = context;
 	}
-	/**
-	 * Gets message from plugin.properties
-	 * @param key
-	 * @return
-	 */
-	public static String getMessage(String key)	{
-		return Platform.getResourceString(instance.getBundle(), key);
-	}
 
-	/**
+    /**
 	 * Get the IPluginLog for this plugin. This method 
 	 * helps to make logging easier, for example:
 	 * 

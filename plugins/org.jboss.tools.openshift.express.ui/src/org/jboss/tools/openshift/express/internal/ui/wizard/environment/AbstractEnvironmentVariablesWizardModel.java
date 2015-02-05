@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
+import org.jboss.tools.openshift.express.internal.ui.ExpressException;
 
 
 /**
@@ -49,7 +49,7 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 
 	public void add(EnvironmentVariableItem variable) {
 		if (variables.contains(variable)) {
-			throw new OpenShiftUIException("Cannot add a variable that already exists");
+			throw new ExpressException("Cannot add a variable that already exists");
 		}
 		variables.add(variable);
 		firePropertyChange(PROPERTY_VARIABLES, null, variables);

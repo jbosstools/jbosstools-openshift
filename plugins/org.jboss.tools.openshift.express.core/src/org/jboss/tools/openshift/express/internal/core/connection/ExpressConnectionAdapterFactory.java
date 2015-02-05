@@ -23,7 +23,7 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Andre Dietisheim
  * 
  */
-public class ConnectionAdapterFactory implements IAdapterFactory {
+public class ExpressConnectionAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {

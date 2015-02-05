@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="connection" name="Connection" schema="schema/org.jboss.tools.openshift.ui.connection.exsd"/>
+   <extension-point id="org.jboss.tools.openshift.common.ui.connectionUI" name="Connection" schema="schema/org.jboss.tools.openshift.ui.connection.exsd"/>
     
     <!-- OpenShift Explorer view -->
     <extension
@@ -179,7 +179,7 @@
 		</menuContribution>
 	</extension>
 	
-		<!-- Remove Connection -->
+	<!-- Remove Connection -->
 	<extension
 		point="org.eclipse.ui.commands">
 		<command
@@ -224,5 +224,4 @@
           </command>
         </menuContribution>
     </extension>
-	
 </plugin>

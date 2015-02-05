@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.core.connection;
 
+import java.io.IOException;
+
 
 /**
  * @author Jeff Cantrill
@@ -28,4 +30,6 @@ public interface IConnection {
 	public ConnectionType getType();
 
 	public void refresh();
+
+	public boolean canConnect() throws IOException;
 }

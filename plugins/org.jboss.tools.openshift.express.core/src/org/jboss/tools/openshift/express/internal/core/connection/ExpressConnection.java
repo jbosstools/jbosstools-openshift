@@ -10,7 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.connection;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,6 +49,7 @@ import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
 import com.openshift.client.cartridge.ICartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
+import com.openshift.internal.client.utils.StreamUtils;
 
 /**
  * @author Rob Stryker
@@ -66,8 +72,8 @@ public class ExpressConnection extends AbstractConnection {
 		this(null, null, null, null, false, null, null);
 	}
 
-	protected ExpressConnection(String username) {
-		this(username, null, null, null, false, null, null);
+	protected ExpressConnection(String host) {
+		this(null, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, null);
 	}
 
 	public ExpressConnection(String username, String scheme, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
@@ -98,17 +104,6 @@ public class ExpressConnection extends AbstractConnection {
 		this.rememberPassword = rememberPassword;
 		this.sslCallback = sslCallback;
 		setUser(user);
-	}
-
-	private String getHost(String scheme, String host) {
-		if (StringUtils.isEmpty(host)) {
-			return host;
-		}
-		
-		if (StringUtils.isEmpty(scheme)) {
-			scheme = UrlUtils.SCHEME_HTTPS;
-		}
-		return UrlUtils.ensureStartsWithScheme(host, scheme);
 	}
 
 	protected void setUser(IUser user) {
@@ -538,6 +533,37 @@ public class ExpressConnection extends AbstractConnection {
 		return builder.toString();
 	}
 
+	@Override
+	public boolean canConnect() throws IOException {
+		// TODO: move to client library
+		HttpURLConnection connection = null;
+		try {
+			connection = (HttpURLConnection) new URL(getHost() + "/broker/rest/api").openConnection();
+			connection.setConnectTimeout(2 * 1000);
+			connection.setInstanceFollowRedirects(true);
+			connection.setRequestProperty("Accept", "application/json");
+			InputStream in = connection.getInputStream();
+			StreamUtils.readToString(in);
+			return connection.getResponseCode() == 200;
+		} catch (MalformedURLException e) {
+			return false;
+		} catch (SocketTimeoutException e) {
+			throw e;
+		} catch (IOException e) {
+			if (connection != null
+					// can throw IOException (ex. UnknownHostException)
+					&& connection.getResponseCode() != -1) {
+				return false;
+			} else {
+				throw e;
+			}
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+	}
+	
 	@Override
 	public ConnectionType getType() {
 		return ConnectionType.Express;

@@ -95,28 +95,28 @@
            point="org.eclipse.core.runtime.adapters">
         <factory
               adaptableType="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection"
-              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionAdapterFactory">
            <adapter
                  type="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IDomain"
-              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionAdapterFactory">
            <adapter
                  type="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IUser"
-              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionAdapterFactory">
            <adapter
                  type="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
            </adapter>
         </factory>
         <factory
               adaptableType="com.openshift.client.IApplication"
-              class="org.jboss.tools.openshift.express.internal.core.connection.ConnectionAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionAdapterFactory">
            <adapter
                  type="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
            </adapter>

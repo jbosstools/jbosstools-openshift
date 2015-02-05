@@ -42,7 +42,7 @@ import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.OpenShiftUIException;
+import org.jboss.tools.openshift.express.internal.ui.ExpressException;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;
@@ -233,7 +233,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 			}
 			// we shouldn't get here, the UI should validate the remote name and
 			// inform about an error in this case
-			throw new OpenShiftUIException(
+			throw new ExpressException(
 					"Could not enable OpenShift on project \"{0}\". There already is a remote called \"{1}\" that points to a different git repository.",
 					project.getName(), remoteName);
 		}
