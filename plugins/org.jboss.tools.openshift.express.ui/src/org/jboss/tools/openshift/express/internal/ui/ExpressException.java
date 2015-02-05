@@ -15,15 +15,15 @@ import com.openshift.client.OpenShiftException;
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftUIException extends OpenShiftException {
+public class ExpressException extends OpenShiftException {
 
 	private static final long serialVersionUID = 1L;
 
-	public OpenShiftUIException(String message, Object... arguments) {
+	public ExpressException(String message, Object... arguments) {
 		super(message, arguments);
 	}
 
-	public OpenShiftUIException(Throwable cause, String message, Object... arguments) {
+	public ExpressException(Throwable cause, String message, Object... arguments) {
 		super(cause, message, arguments);
 	}
 

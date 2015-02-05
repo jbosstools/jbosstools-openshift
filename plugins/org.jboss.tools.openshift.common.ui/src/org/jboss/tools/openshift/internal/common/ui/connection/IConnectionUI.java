@@ -10,40 +10,15 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
-import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews.IDetailView;
 
 /**
  * A factory that can create connections
  * 
  * @author Andre Dietisheim
  */
-public interface IConnectionUI<T extends IConnection> {
-
-	/**
-	 * Returns <code>true</code> if this connection ui handles the given type
-	 * 
-	 * @param connection
-	 * @return
-	 */
-	public boolean handles(Class<T> clazz);
-	
-	/**
-	 * Returns <code>true</code> if the connections handled in this UI can connect to the given host (url)
-	 * 
-	 * @param host
-	 * @return
-	 */
-	public boolean canConnect(String host);
-
-	public void createUI(Composite parent);
-	
-	/**
-	 * Creates a connection.
-	 * 
-	 * @return
-	 */
-	public T createConnection();
+public interface IConnectionUI<T extends IConnection> extends IDetailView {
 	
 	/**
 	 * Edits the given connection.
@@ -51,6 +26,6 @@ public interface IConnectionUI<T extends IConnection> {
 	 * @param connection
 	 * @return
 	 */
-	public void editConnection(T connection);
+	public void updateConnection(T connection);
 
 }

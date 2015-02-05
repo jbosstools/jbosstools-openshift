@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -17,8 +20,9 @@ import java.util.List;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
-import com.openshift.client.OpenShiftException;
 import com.openshift.client.IRefreshable;
+import com.openshift.client.OpenShiftException;
+import com.openshift.internal.client.utils.StreamUtils;
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
 import com.openshift3.client.model.IResource;
@@ -106,5 +110,29 @@ public class Connection  implements IConnection, IRefreshable {
 	public <T extends IResource> List<T> get(ResourceKind kind) {
 		return client.list(kind);
 	}
+	
+	@Override
+	public boolean canConnect() throws IOException {
+		// TODO: move to client library
+		HttpURLConnection connection = null;
+		try {
+			connection = (HttpURLConnection) new URL(client.getBaseURL() + "/osapi").openConnection();
+			connection.setConnectTimeout(2 * 1000);
+			connection.setInstanceFollowRedirects(true);
+			connection.setRequestProperty("Accept", "application/json");
+			InputStream in = connection.getInputStream();
+			StreamUtils.readToString(in);
+			return connection.getResponseCode() == 200;
+		} catch (MalformedURLException e) {
+			return false;
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+	}
+
 	
 }

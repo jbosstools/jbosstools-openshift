@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui;
+package org.jboss.tools.openshift.internal.common.ui.detailviews;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 
 /**
  * @author Andre Dietisheim
@@ -44,6 +45,8 @@ public abstract class AbstractDetailViews {
 	}
 
 	public void createControls() {
+		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(), detailViewModel, parent);
+
 		detailViewModel.addValueChangeListener(onDetailViewModelChanged());
 		parent.setLayout(stackLayout);
 		createViewControls(parent, dbc);
@@ -62,76 +65,37 @@ public abstract class AbstractDetailViews {
 		};
 	}
 
-	protected void showView(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
-		showView(selectedCartridgeObservable, getView(selectedCartridgeObservable), dbc);
+	protected void showView(IObservableValue triggeringObservable, DataBindingContext dbc) {
+		showView(triggeringObservable, getView(triggeringObservable), dbc);
 	}
 
-	protected void showView(IObservableValue selectedCartridgeObservable, IDetailView view, DataBindingContext dbc) {
+	protected void showView(IObservableValue triggeringObservable, IDetailView view, DataBindingContext dbc) {
 		if (view == null
 				|| view.getControl() == null) {
 			return;
 		}
-		if (selectedCartridgeObservable == null) {
+		if (triggeringObservable == null) {
 			return;
 		}
-		currentView.onInVisible(selectedCartridgeObservable, dbc);
-		view.onVisible(selectedCartridgeObservable, dbc);
+		currentView.onInVisible(triggeringObservable, dbc);
+		view.onVisible(triggeringObservable, dbc);
 		stackLayout.topControl = view.getControl();
 		parent.layout(true, true);
 	}
 
-	protected class EmptyView extends BaseDetailsView {
-
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
-			Composite container = setControl(new Composite(parent, SWT.NONE));
-			GridLayoutFactory.fillDefaults()
-					.margins(6, 6).spacing(6, 6).applyTo(container);
-			return container;
-		}
-		
-		public boolean isViewFor(Object object) {
-			return true;
-		}
-	}
-
-	private abstract class BaseDetailsView implements IDetailView {
-
-		private Composite control;
-
-		@Override
-		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
-		}
-
-		@Override
-		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
-		}
-
-		@Override
-		public Control getControl() {
-			return control;
-		}
-
-		protected Composite setControl(Composite composite) {
-			this.control = composite;
-			return composite;
-		}
-
-		@Override
-		public abstract boolean isViewFor(Object object);
-	}
-	
 	protected void createViewControls(Composite parent, DataBindingContext dbc) {
+		emptyView.createControls(parent, dbc);
 		for (IDetailView detailView : getDetailViews()) {
 			detailView.createControls(parent, dbc);
 		}
 	};
 
-	protected IDetailView getView(IObservableValue selectedCartridgeObservable) {
-		return getViewFor(selectedCartridgeObservable, getDetailViews());
+	protected IDetailView getView(IObservableValue triggeringObservable) {
+		return getViewFor(triggeringObservable, getDetailViews());
 	};
 
-	protected IDetailView getViewFor(IObservableValue selectedCartridgeObservable, IDetailView... detailViews) {
-		Object value = selectedCartridgeObservable.getValue();
+	protected IDetailView getViewFor(IObservableValue triggeringObservable, IDetailView... detailViews) {
+		Object value = triggeringObservable.getValue();
 		IDetailView view = emptyView;
 
 		for(IDetailView detailView : detailViews) {
@@ -142,6 +106,20 @@ public abstract class AbstractDetailViews {
 		}
 		
 		return view;
+	}
+	
+	public class EmptyView extends BaseDetailsView {
+
+		public Composite createControls(Composite parent, DataBindingContext dbc) {
+			Composite container = setControl(new Composite(parent, SWT.NONE));
+			GridLayoutFactory.fillDefaults()
+					.margins(6, 6).spacing(6, 6).applyTo(container);
+			return container;
+		}
+		
+		public boolean isViewFor(Object object) {
+			return false;
+		}
 	}
 	
 	public interface IDetailView {

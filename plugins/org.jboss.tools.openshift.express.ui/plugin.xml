@@ -1815,15 +1815,15 @@
     </command>
  </extension>
  <extension
-       point="org.jboss.tools.openshift.common.ui.connection">
-    <connectionUI
-          class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionUI">
-    </connectionUI>
- </extension>
- <extension
        point="org.eclipse.ui.startup">
     <startup
           class="org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator">
     </startup>
+ </extension>
+ <extension
+       point="org.jboss.tools.openshift.common.ui.connectionUI">
+    <connectionUI
+          class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionUI">
+    </connectionUI>
  </extension>
 </plugin>

@@ -19,7 +19,13 @@ package org.jboss.tools.openshift.common.core.connection;
  */
 public class NewConnectionMarker extends AbstractConnection {
 
-	public NewConnectionMarker() {
+	private static final NewConnectionMarker INSTANCE = new NewConnectionMarker();
+	
+	public static final NewConnectionMarker getInstance() {
+		return INSTANCE;
+	}
+	
+	private NewConnectionMarker() {
 		super(null);
 	}
 
@@ -72,6 +78,11 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public String setHost(String host) {
 		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public boolean canConnect() {
+		return false;
 	}
 
 }

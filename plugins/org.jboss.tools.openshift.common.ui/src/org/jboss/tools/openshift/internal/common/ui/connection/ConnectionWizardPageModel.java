@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.databinding.observable.Diffs;
@@ -22,9 +22,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.common.core.connection.AutomaticConnectionFactoryMarker;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
@@ -34,48 +39,44 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel
  */
 class ConnectionWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
+	public static final String PROPERTY_CONNECTION = "connection";
+	public static final String PROPERTY_CONNECTION_FACTORY = "connectionFactory";
 	public static final String PROPERTY_HOST = "host";
-	public static final String PROPERTY_VALID = "valid";
-	public static final String PROPERTY_CREATE_CONNECTION = "createConnection";
+	public static final String PROPERTY_CONNECTED = "connected";
+	public static final String PROPERTY_USE_DEFAULT_HOST = "useDefaultHost";
 
 	final private IConnectionAwareModel wizardModel;
-	private IConnection selectedConnection;
-	final private List<String> servers;
-	private boolean isDefaultServer = true;
-	private IStatus valid;
+	private IConnection connection;
+	private IStatus connected;
 	private String host;
-	private String username;
-	private String password;
-	private boolean isRememberPassword;
-	private IConnection newConnection;
 	private boolean allowConnectionChange;
-
+	private final ConnectionsFactoryTracker connectionsFactory;
+	private IConnectionFactory connectionFactory;
+	private boolean useDefaultHost;
+	
 	ConnectionWizardPageModel(IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		this.wizardModel = wizardModel;
 		this.allowConnectionChange = allowConnectionChange;
-		this.selectedConnection = null2NewConnectionMarker(wizardModel.getConnection());
-		this.servers = getServers(selectedConnection);
-		updateFrom(selectedConnection);
+		this.connection = wizardModel.getConnection();
+		this.connectionsFactory = new ConnectionsFactoryTracker();
+		connectionsFactory.open();
+		this.connectionFactory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
+		setUseDefaultHost(true);
 	}
 
 	private void updateFrom(IConnection connection) {
-		if (isCreateNewConnection(connection)) {
-			setUsername(getDefaultUsername());
-			setUseDefaultServer(true);
-			setDefaultHost();
-			setPassword(null);
-		} else {
+//		if (isCreateNewConnection(connection)) {
+//			setUsername(getDefaultUsername());
+//			setUseDefaultServer(true);
+//			setDefaultHost();
+//			setPassword(null);
+//		} else {
 //			setUsername(connection.getUsername());
-			setHost(connection.getHost());
-			setUseDefaultServer(connection.isDefaultHost());
+//			setHost(connection.getHost());
+//			setUseDefaultServer(connection.isDefaultHost());
 //			setRememberPassword(connection.isRememberPassword());
 //			setPassword(connection.getPassword());
-		}
-	}
-
-	private boolean isCreateNewConnection(IConnection connection) {
-		return connection instanceof NewConnectionMarker;
+//		}
 	}
 
 	protected String getDefaultUsername() {
@@ -93,89 +94,43 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //		return username;
 	}
 
-	private IConnection null2NewConnectionMarker(IConnection connection) {
-		if (connection == null) {
-			return new NewConnectionMarker();
-		} else {
-			return connection;
-		}
+	public void resetConnection() {
+		setConnection(null);
 	}
 
-	public void setSelectedConnection(IConnection connection) {
-		if (Diffs.equals(selectedConnection, connection)) {
-			return;
-		}
-		updateFrom(connection);
-		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = connection);
-	}
-
-	public IConnection getSelectedConnection() {
-		return selectedConnection;
-	}
-
-	public Collection<IConnection> getConnections() {
-		if (allowConnectionChange) {
-			Collection<IConnection> connections = new ArrayList(ConnectionsRegistrySingleton.getInstance().getAll());
-			connections.add(new NewConnectionMarker());
-			return connections;
-		} else {
-			return Collections.singletonList(selectedConnection);
-		}
-	}
-
-	public boolean isUseDefaultServer() {
-		return isDefaultServer;
-	}
-
-	public void setUseDefaultServer(boolean isDefaultServer) {
-//		if (this.isDefaultServer != isDefaultServer) {
-//			firePropertyChange(PROPERTY_USE_DEFAULTSERVER,
-//					this.isDefaultServer, this.isDefaultServer = isDefaultServer);
-//			if (isDefaultServer) {
-//				setDefaultHost();
-//			}
-//			resetValid();
+	public void setConnection(IConnection connection) {
+//		if (Diffs.equals(this.connection, connection)) {
+//			return;
 //		}
+//		updateFrom(connection);
+		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+	}
+
+	public IConnection getConnection() {
+		return connection;
+	}
+
+	public void setConnectionFactory(IConnectionFactory factory) {
+		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
+		if (factory != null) {
+			setUseDefaultHost(connectionFactory.hasDefaultHost());
+			setConnection(null);
+		}
+	}
+
+	public IConnectionFactory getConnectionFactory() {
+		return connectionFactory;
 	}
 	
-	private List<String> getServers(IConnection connection) {
-		List<String> servers = new ArrayList<String>();
-		HashSet<String> uniqueServers = new HashSet<String>();
-		uniqueServers.add(getDefaultServer());
-		servers.add(connection.getHost());
-		return servers;
-	}
-
-	private String getDefaultServer() {
-		try {
-			return "";
-//			return new OpenShiftConfiguration().getLibraServer();
-		} catch (Exception e) {
-			OpenShiftCommonUIActivator.log(e);
-			return null;
+	public Collection<IConnection> getConnections() {
+		if (allowConnectionChange) {
+			List<IConnection> connections = new ArrayList<IConnection>();
+			connections.add(NewConnectionMarker.getInstance());
+			connections.addAll(ConnectionsRegistrySingleton.getInstance().getAll());
+			return connections;
+		} else {
+			return Collections.singletonList(connection);
 		}
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-//		if (!Diffs.equals(this.username, username)) {
-//			firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
-//			resetValid();
-//		}
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-//		if (!Diffs.equals(password, this.password)) {
-//			firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
-//			resetValid();
-//		}
 	}
 
 	public String getHost() {
@@ -183,55 +138,107 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setHost(String host) {
-		if (!Diffs.equals(this.host, host)) {
-			firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
-			resetValid();
-		}
-	}
-
-	private void setDefaultHost() {
-//		setHost(ExpressConnectionUtils.getDefaultHostUrl());
+		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
+		resetConnected();
 	}
 	
-	public List<String> getServers() {
-		return servers;
+	/**
+	 * Creates a connection for the host present in this model and stores it in this model. If
+	 * the given host is empty or <code>null</code> no connection is created.
+	 * Does blocking remote http calls.
+	 * 
+	 * @param host
+	 *            the host to get the connection for.
+	 */
+	public void createConnection() {
+		createConnection(host);
 	}
 
-	public boolean isRememberPassword() {
-		return isRememberPassword;
+	/**
+	 * Creates a connection for the given host and stores it in this model. If
+	 * the given host is empty or <code>null</code> no connection is created.
+	 * Does blocking remote http calls.
+	 * 
+	 * @param host
+	 *            the host to get the connection for.
+	 */
+	private void createConnection(String host) {
+		IConnection connection = null;
+		if (connectionFactory != null
+				&& !StringUtils.isEmpty(host)) {
+			if (connectionFactory instanceof AutomaticConnectionFactoryMarker) {
+				try {
+					connection = connectionsFactory.create(host);
+					if (connection == null) {
+						setConnected(StatusFactory.errorStatus(
+								OpenShiftCommonUIActivator.PLUGIN_ID,
+								NLS.bind("The host at {0} is no OpenShift host", host)));
+					} else {
+						// switches <automatic> to detected type
+						setConnectionFactory(connectionsFactory.getByConnection(connection.getClass()));
+					}
+				} catch (IOException e) {
+					resetConnection();
+					setConnected(StatusFactory.errorStatus(
+							OpenShiftCommonUIActivator.PLUGIN_ID, NLS.bind("Could not connect to host at {0}.", host),
+							e));
+				}
+			} else {
+				try {
+					connection = connectionFactory.create(host);
+					if (!connection.canConnect()) {
+						connection = null;
+					}
+				} catch (IOException e) {
+					resetConnection();
+					setConnected(StatusFactory.errorStatus(
+							OpenShiftCommonUIActivator.PLUGIN_ID, NLS.bind("Could not connect to host at {0}.", host),
+							e));
+				}
+			}
+		}
+
+			setConnection(connection);
+	}
+	
+	public void setUseDefaultHost(boolean useDefaultHost) {
+		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
+		if (useDefaultHost) {
+			setHost(connectionFactory.getDefaultHost());
+		}
+		resetConnected();
+	}
+	
+	public boolean isUseDefaultHost() {
+		return useDefaultHost;
 	}
 
-	public void setRememberPassword(boolean rememberPassword) {
-//		firePropertyChange(PROPERTY_REMEMBER_PASSWORD,
-//				this.isRememberPassword, this.isRememberPassword = rememberPassword);
+	private void resetConnected() {
+		setConnected(null);
 	}
 
-	private void resetValid() {
-		setValid(null);
+	private void setConnected(IStatus status) {
+		firePropertyChange(PROPERTY_CONNECTED, this.connected, this.connected = status);
 	}
 
-	private void setValid(IStatus status) {
-		firePropertyChange(PROPERTY_VALID, this.valid, this.valid = status);
-	}
-
-	public IStatus getValid() {
-		return valid;
+	public IStatus getConnected() {
+		return connected;
 	}
 
 	public IStatus connect() {
 		IStatus status = Status.OK_STATUS;
 		try {
-			if((status = tryConnection(true)) != Status.OK_STATUS){
-				status = tryConnection(false);
+			if(connection != null) {
+				connection.connect();
 			}
 //		} catch (NotFoundOpenShiftException e) {
-//			// valid user without domain
+//			// connected user without domain
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
+					NLS.bind("Unknown error, can not verify connection to host {0} - see Error Log for details", connection.getHost()));
 			OpenShiftCommonUIActivator.log(e);
 		}
-		setValid(status);
+		setConnected(status);
 		return status;
 	}
 	
@@ -242,7 +249,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //					|| isSelectedConnectionChanged()) {
 //				connection = createConnection(legacy);
 //			} else {
-//				connection = selectedConnection;
+//				connection = connection;
 //				connection.accept(new IConnectionVisitor() {
 //					@Override
 //					public void visit(KubernetesConnection connection) {
@@ -261,7 +268,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //					NLS.bind("Could not reach host at {0}. ExpressConnection timeouted.", host));
 //		} catch (InvalidCredentialsOpenShiftException e) {
 //			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-//					NLS.bind("The credentials for user {0} are not valid", username));
+//					NLS.bind("The credentials for user {0} are not connected", username));
 //		} catch (OpenShiftException e) {
 //			OpenShiftCommonUIActivator.log(e);
 //			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
@@ -269,34 +276,10 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //		}
 		return Status.OK_STATUS;
 	}
-
-	private IConnection createConnection(boolean legacy) {
-		String host = this.host;
-//		if(!legacy){
-//			try {
-//				return new KubernetesConnection(host, username, password);
-//			} catch (MalformedURLException e) {
-//				throw new RuntimeException(e);
-//			}
-//		} else if (isDefaultServer) {
-//			return new ExpressConnection(username, password, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
-//		} else {
-//			return new ExpressConnection(username, password, host, isRememberPassword, OpenshiftCoreUIIntegration.getDefault().getSSLCertificateCallback());
-//		}
-		return null;
-	}
 	
 	private boolean isSelectedConnectionChanged() {
 		return false;
-//		return !password.equals(selectedConnection.getPassword());
-	}
-
-	public IConnection getConnection() {
-		return newConnection;
-	}
-
-	public boolean isCreateNewConnection() {
-		return isCreateNewConnection(selectedConnection);
+//		return !password.equals(connection.getPassword());
 	}
 
 	/**
@@ -325,26 +308,26 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //				
 //			});
 //		} else {
-//			if (selectedConnection != newConnection) {
-//				selectedConnection.accept(new IConnectionVisitor() {
+//			if (connection != newConnection) {
+//				connection.accept(new IConnectionVisitor() {
 //					@Override
 //					public void visit(KubernetesConnection connection) {
 //					}
 //					
 //					@Override
-//					public void visit(ExpressConnection selectedConnection) {
+//					public void visit(ExpressConnection connection) {
 //						if(!(newConnection instanceof ExpressConnection))
 //							return;
 //						// dont update since we were editing the connection we we already holding
 //						// JBIDE-14771
-//						selectedConnection.edit((ExpressConnection) newConnection);
+//						connection.edit((ExpressConnection) newConnection);
 //					}
 //				});
 //			}
 //			// we may have get started from new wizard without a iConnection
 //			// in wizard model: set it to wizard model
-//			wizardModel.setConnection(selectedConnection);
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(selectedConnection);
+//			wizardModel.setConnection(connection);
+//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 //		}
 	}
 
@@ -364,5 +347,16 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //				}
 //			});
 //		}
+	}
+	
+	public Collection<IConnectionFactory> getConnectionFactories() {
+		List<IConnectionFactory> connectionFactories = new ArrayList<IConnectionFactory>();
+		connectionFactories.add(new AutomaticConnectionFactoryMarker());
+		connectionFactories.addAll(connectionsFactory.getAll());
+		return connectionFactories;
+	}
+	
+	public void dispose() {
+		connectionsFactory.close();
 	}
 }

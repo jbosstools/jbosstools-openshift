@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
-public class ImportFailedException extends OpenShiftUIException {
+public class ImportFailedException extends ExpressException {
 
 	private static final long serialVersionUID = 1L;
 
