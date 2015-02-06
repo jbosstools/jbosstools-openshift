@@ -1,2 +1,2 @@
-org.jboss.tools.openshift.express.client/debug=false
-org.jboss.tools.openshift.express.client/debug/client=false
+org.jboss.tools.openshift.client/debug=false
+org.jboss.tools.openshift.client/debug/client=false

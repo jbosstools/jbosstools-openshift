@@ -10,28 +10,57 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
-//import org.jboss.tools.openshift.express.internal.core.connection.Connection;
-//import org.jboss.tools.openshift.express.internal.core.connection.ConnectionURL;
-//import org.jboss.tools.openshift.express.internal.core.connection.ConnectionUtils;
-//import org.jboss.tools.openshift.express.internal.core.util.UrlUtils;
-
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.openshift3.client.IClient;
+import com.openshift3.client.ResourceKind;
+import com.openshift3.client.model.IProject;
+import com.openshift3.client.model.IResource;
 
 /**
  * @author Andre Dietisheim
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ConnectionTest {
-
+	
+	private Connection connection;
+	@Mock IClient client;
+	
+	@Before
+	public void setup() throws Exception{
+		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8433"));
+		connection = new Connection(client);
+	}
+	@Test
+	public void getResourceKindShouldCallClient(){
+		List<IProject> projects = Arrays.asList(mock(IProject.class));
+		when(client.<IProject>list(ResourceKind.Project)).thenReturn(projects);
+		
+		assertArrayEquals("Exp. to get projects from the client",projects.toArray(), connection.get(ResourceKind.Project).toArray());
+	}
+	@Test
+	public void testGetHost() {
+		assertEquals("localhost", connection.getHost());
+	}
+	@Test
+	public void testGetScheme() {
+		assertEquals("https", connection.getScheme());
+	}
 //	@Test
 //	public void nullHostShouldBeDefaultHost() {
 //		// pre-conditions

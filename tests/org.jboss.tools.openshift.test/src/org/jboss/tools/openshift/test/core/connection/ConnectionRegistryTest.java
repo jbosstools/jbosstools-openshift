@@ -129,7 +129,7 @@ public class ConnectionRegistryTest {
 		registry.add(ones[1]);
 		registry.add(others[1]);
 		
-		assertArrayEquals(ones, registry.get(OneConnectionImpl.class).toArray());
+		assertArrayEquals(ones, registry.getAll(OneConnectionImpl.class).toArray());
 	}
 //
 //	@Test
