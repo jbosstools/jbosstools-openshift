@@ -16,17 +16,24 @@ import java.util.List;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.Refreshable;
-import com.openshift3.client.model.IProject;
+import com.openshift3.client.IClient;
+import com.openshift3.client.ResourceKind;
+import com.openshift3.client.model.IResource;
 import com.openshift3.internal.client.DefaultClient;
 
-public class Connection extends DefaultClient implements IConnection, Refreshable {
+public class Connection  implements IConnection, Refreshable {
 
+	private final IClient client;
+	
 	public Connection(String url) throws MalformedURLException{
-		super(new URL(url));
+		this(new DefaultClient(new URL(url)));
+	}
+	
+	public Connection(IClient client){
+		this.client = client;
 	}
 
 //	@Override
@@ -38,18 +45,8 @@ public class Connection extends DefaultClient implements IConnection, Refreshabl
 
 	@Override
 	public String getHost() {
-		return host;
+			return client.getBaseURL().getHost();
 	}
-
-//	@Override
-//	public String getPassword() {
-//		return password;
-//	}
-//
-//	@Override
-//	public String getUsername() {
-//		return username;
-//	}
 
 	@Override
 	public boolean isDefaultHost() {
@@ -59,23 +56,14 @@ public class Connection extends DefaultClient implements IConnection, Refreshabl
 
 	@Override
 	public String getScheme() {
-		if (host.startsWith(UrlUtils.SCHEME_HTTPS)) {
-			return UrlUtils.SCHEME_HTTPS;
-		} else if (host.startsWith(UrlUtils.SCHEME_HTTP)) {
-			return UrlUtils.SCHEME_HTTP;
-		}
-		return null;
+		return client.getBaseURL().getProtocol();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((host == null) ? 0 : host.hashCode());
-//		result = prime * result
-//				+ ((password == null) ? 0 : password.hashCode());
-//		result = prime * result
-//				+ ((username == null) ? 0 : username.hashCode());
+		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().hashCode());
 		return result;
 	}
 
@@ -88,21 +76,11 @@ public class Connection extends DefaultClient implements IConnection, Refreshabl
 		if (getClass() != obj.getClass())
 			return false;
 		Connection other = (Connection) obj;
-		if (host == null) {
-			if (other.host != null)
+		if (client == null) {
+			if (other.client != null)
 				return false;
-		} else if (!host.equals(other.host))
+		} else if (!client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
 			return false;
-//		if (password == null) {
-//			if (other.password != null)
-//				return false;
-//		} else if (!password.equals(other.password))
-//			return false;
-//		if (username == null) {
-//			if (other.username != null)
-//				return false;
-//		} else if (!username.equals(other.username))
-//			return false;
 		return true;
 	}
 
@@ -111,19 +89,22 @@ public class Connection extends DefaultClient implements IConnection, Refreshabl
 		this.connect();
 	}
 	
-//	@Override
-	//TODO deleteme?
+	@Override
 	public ConnectionType getType() {
 		return ConnectionType.Kubernetes;
 	}
 
 	@Override
 	public String toString() {
-		return host;
+		return client.getBaseURL().toString();
 	}
 
-	public List<IProject> getProjects() {
-		return null;
+	/**
+	 * Get a list of resource types
+	 * @return List<IResource>
+	 */
+	public <T extends IResource> List<T> get(ResourceKind kind) {
+		return client.list(kind);
 	}
 	
 }

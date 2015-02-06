@@ -10,17 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
-public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
+import com.openshift3.client.model.IProject;
+import com.openshift3.client.model.IResource;
 
-	private static final String DEFAULT_MARKER = "(default)";
+public class OpenShiftExplorerLabelProvider implements ILabelProvider { 
+
 
 	@Override
 	public void addListener(ILabelProviderListener listener) {
@@ -41,47 +43,44 @@ public class OpenShiftExplorerLabelProvider implements IStyledLabelProvider, ILa
 
 	@Override
 	public Image getImage(Object element) {
+		if(element instanceof ResourceGrouping){
+			return OpenShiftCommonImages.FOLDER;
+		}
 		if (element instanceof IConnection) {
 			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+		}
+		if(element instanceof IResource){
+			IResource resource = (IResource) element;
+			switch (resource.getKind()) {
+			case BuildConfig:
+				return OpenShiftImages.BUILDCONFIG_IMG;
+			case ImageRepository:
+				return OpenShiftImages.LAYER_IMG;
+			case Pod:
+				return OpenShiftImages.BLOCKS_IMG;
+			case Project:
+				return OpenShiftCommonImages.GLOBE_IMG;
+			case Service:
+				return OpenShiftImages.GEAR_IMG;
+			default:
+				 return OpenShiftCommonImages.FILE;
+			}
 		}
 		return null;
 	}
 
 	@Override
 	public String getText(Object element) {
+		if(element instanceof IProject){
+			return ((IProject) element).getDisplayName();
+		}
+		if(element instanceof IResource){
+			return ((IResource) element).getName();
+		}
+		if(element instanceof ResourceGrouping){
+			return StringUtils.humanize(((ResourceGrouping) element).getKind().pluralize());
+		}
 		return element.toString();
-	}
-
-	@Override
-	public StyledString getStyledText(Object element) {
-		return new StyledString(element.toString());
-//		StyledString styledString = null;
-//FIXME leaving here as examples of what we might do
-		//		if (element instanceof IConnection) {
-//			styledString = createStyledString((IConnection) element);
-//		} else if (element instanceof Project){
-//			Project p = (Project) element;
-//			String label = 
-//					new StringBuilder(p.getDisplayName()).append(" (ns:").append(p.getNamespace()).append(')').toString();
-//
-//			styledString = new StyledString(label);
-//			styledString.setStyle(p.getDisplayName().length() +1, label.length() - p.getDisplayName().length() - 1, StyledString.QUALIFIER_STYLER);
-//		} else if (element instanceof Service){
-//			Service s = (Service) element;
-//			StringBuilder b = new StringBuilder(s.getName());
-//			b.append(" (selector: ").append(s.getSelector()).append(")");
-//			styledString = new StyledString(b.toString());
-//			styledString.setStyle(s.getName().length() + 1,b.length() - s.getName().length() -1 , StyledString.QUALIFIER_STYLER);
-//		} else if (element instanceof DeploymentConfig){
-//			DeploymentConfig config = (DeploymentConfig) element;
-//			StringBuilder b = new StringBuilder(config.getName());
-//			styledString = new StyledString(b.toString());
-//		} else if (element instanceof BuildConfig){
-//			BuildConfig config = (BuildConfig) element;
-//			StringBuilder b = new StringBuilder(config.getName());
-//			b.append(" ").append(config.getSourceUri());
-//			styledString = new StyledString(b.toString());
-//			styledString.setStyle(config.getName().length() + 1,b.length() - config.getName().length() -1 , StyledString.QUALIFIER_STYLER);
 	}
 
 }

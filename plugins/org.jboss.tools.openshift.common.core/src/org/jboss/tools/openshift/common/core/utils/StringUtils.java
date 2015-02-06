@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.common.core.utils;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang.WordUtils;
+
 /**
  * @author André Dietisheim
  */
@@ -154,5 +156,17 @@ public class StringUtils {
 		} else {
 			return thisString.equals(thatString);
 		}
+	}
+
+	/**
+	 * Rudimentary implementation of humanizing a String
+	 * to a human readable form (e.g. Build Configs from buildConfigs)
+	 * @param string
+	 * @return
+	 */
+	public static String humanize(String value) {
+		String[] parts = org.apache.commons.lang.StringUtils.splitByCharacterTypeCamelCase(value);
+		String split = org.apache.commons.lang.StringUtils.join(parts, " ");
+		return  WordUtils.capitalize(split);
 	}
 }

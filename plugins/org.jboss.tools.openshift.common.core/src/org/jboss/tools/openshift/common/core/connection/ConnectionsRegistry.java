@@ -174,6 +174,10 @@ public class ConnectionsRegistry {
 		return (T) connection;
 	}
 	
+	/**
+	 * Return a list of connections that are of the given type
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends IConnection> Collection<T> getAll(Class<T> clazz) {
 		List<T> connections = new ArrayList<T>();
@@ -197,4 +201,5 @@ public class ConnectionsRegistry {
 	public IConnection setRecent(IConnection connection) {
 		return this.recentConnection = connection;
 	}
+	
 }
