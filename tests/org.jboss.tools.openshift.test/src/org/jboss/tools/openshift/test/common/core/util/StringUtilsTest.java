@@ -10,6 +10,9 @@ package org.jboss.tools.openshift.test.common.core.util;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.junit.Test;
 
@@ -18,6 +21,15 @@ public class StringUtilsTest {
 	@Test
 	public void testHumanize() {
 		assertEquals("Build Configs", StringUtils.humanize("buildConfigs"));
+	}
+	
+	@Test
+	public void testSerialize(){
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("first", "avalue");
+		map.put("second", "secondvalue");
+		
+		assertEquals("first=avalue,second=secondvalue", StringUtils.serialize(map));
 	}
 
 }

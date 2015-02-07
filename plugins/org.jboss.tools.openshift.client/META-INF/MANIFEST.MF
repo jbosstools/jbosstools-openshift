@@ -25,6 +25,7 @@ Export-Package: com.openshift.client,
  com.openshift.internal.client.ssh,
  com.openshift.internal.client.utils,
  com.openshift3.client,
+ com.openshift3.client.images,
  com.openshift3.client.model,
  com.openshift3.internal.client
 Import-Package: org.eclipse.debug.internal.core,
