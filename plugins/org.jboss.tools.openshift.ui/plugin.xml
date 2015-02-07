@@ -40,12 +40,23 @@
                <instanceof
                      value="com.openshift3.client.model.IDeploymentConfig">
                </instanceof>
+               <instanceof
+                     value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping">
+               </instanceof>
             </or>
          </possibleChildren>
          <triggerPoints>
-            <instanceof
-                  value="org.jboss.tools.openshift.core.connection.Connection">
-            </instanceof>
+            <or>
+               <instanceof
+                     value="org.jboss.tools.openshift.core.connection.Connection">
+               </instanceof>
+               <instanceof
+                     value="com.openshift3.client.model.IProject">
+               </instanceof>
+               <instanceof
+                     value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping">
+               </instanceof>
+            </or>
          </triggerPoints>
       </navigatorContent>
 	</extension>

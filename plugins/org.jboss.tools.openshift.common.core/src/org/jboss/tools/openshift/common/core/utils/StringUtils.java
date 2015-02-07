@@ -10,8 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.core.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.WordUtils;
 
@@ -168,5 +171,20 @@ public class StringUtils {
 		String[] parts = org.apache.commons.lang.StringUtils.splitByCharacterTypeCamelCase(value);
 		String split = org.apache.commons.lang.StringUtils.join(parts, " ");
 		return  WordUtils.capitalize(split);
+	}
+	
+	/**
+	 * Serialize Map<String, String> to a string
+	 * of key value pairs
+	 * @param map
+	 * @return String
+	 */
+	public static String serialize(Map<String, String> map){
+		List<String> out = new ArrayList<String>(map.size());
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			out.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
+		}
+		Collections.sort(out);
+		return org.apache.commons.lang.StringUtils.join(out.toArray(), ",");
 	}
 }
