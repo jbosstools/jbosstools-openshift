@@ -8,16 +8,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
-import java.util.Collection;
-
 import com.openshift3.client.ResourceKind;
-import com.openshift3.client.model.IResource;
+import com.openshift3.client.model.IProject;
+
 /**
  * A UI class to facilitate grouping like resources
  * in the explorer view
  */
-public class ResourceGrouping {
-	private Collection<IResource> resources;
+public class ResourceGrouping{
+	private IProject project;
 	private ResourceKind kind;
 
 	/**
@@ -25,9 +24,9 @@ public class ResourceGrouping {
 	 * @param title            The title to display
 	 * @param resources   The resource of this grouping
 	 */
-	public ResourceGrouping(ResourceKind kind, Collection<IResource> resources) {
+	public ResourceGrouping(ResourceKind kind, IProject project) {
 		this.kind = kind;
-		this.resources = resources;
+		this.project = project;
 	}
 
 	public ResourceKind getKind() {
@@ -35,7 +34,7 @@ public class ResourceGrouping {
 	}
 
 	public Object[] getResources() {
-		return resources.toArray();
+		return project.getResources(kind).toArray();
 	}
 
 	@Override
@@ -72,5 +71,5 @@ public class ResourceGrouping {
 			return false;
 		return true;
 	}
-	
+
 }

@@ -52,19 +52,6 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class ExpressConnection extends AbstractConnection {
 
-	private static final String USER_ID = ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
-
-	/*
-	 * Added to resolve testing
-	 */
-	private static String initUserId(){
-		try{
-			return ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
-		}catch(Exception e){
-			//Log?
-			return "";
-		}
-	}
 	private String username;
 	private String password;
 	private IUser user;
@@ -74,7 +61,7 @@ public class ExpressConnection extends AbstractConnection {
 	private boolean passwordLoaded;
 	private ICredentialsPrompter passwordPrompter;
 	private ISSLCertificateCallback sslCallback;
-
+	
 	public ExpressConnection() {
 		this(null, null, null, null, false, null, null);
 	}
@@ -228,11 +215,17 @@ public class ExpressConnection extends AbstractConnection {
 			return promptForCredentials();
 		} else {
 			setClientTimeout();
-			IUser user = new OpenShiftConnectionFactory()
-					.getConnection(USER_ID, username, password, getHost(), sslCallback).getUser();
+			IUser user = getUserForConnection();
 			setUser(user);
 			return true;
 		}
+	}
+	
+	public IUser getUserForConnection(){
+		final String userId = ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
+
+		return new OpenShiftConnectionFactory()
+		.getConnection(userId, username, password, getHost(), sslCallback).getUser();
 	}
 
 	private void setClientTimeout() {

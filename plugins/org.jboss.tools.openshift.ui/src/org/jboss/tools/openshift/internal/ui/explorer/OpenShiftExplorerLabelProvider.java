@@ -10,15 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
 import com.openshift3.client.model.IBuild;
@@ -31,33 +28,12 @@ import com.openshift3.client.model.IReplicationController;
 import com.openshift3.client.model.IResource;
 import com.openshift3.client.model.IService;
 
-public class OpenShiftExplorerLabelProvider implements ILabelProvider,  IStyledLabelProvider { 
-
-
-	@Override
-	public void addListener(ILabelProviderListener listener) {
-	}
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-	}
+public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider { 
 
 	@Override
 	public Image getImage(Object element) {
 		if(element instanceof ResourceGrouping){
 			return OpenShiftCommonImages.FOLDER;
-		}
-		if (element instanceof IConnection) {
-			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
 		}
 		if(element instanceof IResource){
 			IResource resource = (IResource) element;
@@ -76,12 +52,7 @@ public class OpenShiftExplorerLabelProvider implements ILabelProvider,  IStyledL
 				 return OpenShiftCommonImages.FILE;
 			}
 		}
-		return null;
-	}
-
-	@Override
-	public String getText(Object element) {
-		return getStyledText(element).toString();
+		return super.getImage(element);
 	}
 
 	@Override
@@ -132,7 +103,7 @@ public class OpenShiftExplorerLabelProvider implements ILabelProvider,  IStyledL
 		if(element instanceof Connection){
 			return new StyledString(element.toString());
 		}
-		return null;
+		return super.getStyledText(element);
 	}
 
 	private StyledString style(String baseText, String qualifiedText) {

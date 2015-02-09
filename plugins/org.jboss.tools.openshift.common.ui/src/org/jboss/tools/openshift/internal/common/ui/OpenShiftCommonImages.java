@@ -36,6 +36,8 @@ public class OpenShiftCommonImages {
 	public static final Image OPENSHIFT_LOGO_WHITE_MEDIUM_IMG = repo.getImage("openshift-logo-white-medium.png"); //$NON-NLS-1$ 	
 	public static final ImageDescriptor GLOBE = repo.create("globe.png"); //$NON-NLS-1$ 
 	public static final Image GLOBE_IMG = repo.getImage("globe.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor SYSTEM_PROCESS = repo.create("systemprocess.gif"); //$NON-NLS-1$ 
+	public static final Image SYSTEM_PROCESS_IMG = repo.getImage("systemprocess.gif"); //$NON-NLS-1$ 
 
 	public static final Image TRANSPARENT_PIXEL_IMG = repo.getImage("transparent_pixel.png"); //$NON-NLS-1$}
 }

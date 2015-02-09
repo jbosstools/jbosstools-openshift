@@ -18,13 +18,13 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.Refreshable;
+import com.openshift.client.IRefreshable;
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
 import com.openshift3.client.model.IResource;
 import com.openshift3.internal.client.DefaultClient;
 
-public class Connection  implements IConnection, Refreshable {
+public class Connection  implements IConnection, IRefreshable {
 
 	private final IClient client;
 	

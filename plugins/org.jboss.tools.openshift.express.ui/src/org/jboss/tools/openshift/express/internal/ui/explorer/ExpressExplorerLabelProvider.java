@@ -10,21 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.explorer;
 
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
-import org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider.LoadingStub;
-import org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider.NotConnectedUserStub;
 import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
+import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -35,44 +29,22 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public class ExpressExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
+public class ExpressExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	private static final String DEFAULT_MARKER = "(default)";
 
 	@Override
-	public void addListener(ILabelProviderListener listener) {
-	}
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-	}
-
-	@Override
 	public Image getImage(Object element) {
-		Image image = null;
-		if (element instanceof IConnection) {
-			image = ExpressImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
-		} else if (element instanceof IDomain) {
-			image = ExpressImages.GLOBE_IMG;
-		} else if (element instanceof IApplication) {
-			image = ExpressImages.QUERY_IMG;
-		} else if (element instanceof IEmbeddedCartridge) {
-			image = ExpressImages.TASK_REPO_IMG;
-		} else if (element instanceof LoadingStub) {
-			image = ExpressImages.SYSTEM_PROCESS_IMG;
-		} else if (element instanceof OpenShiftException) {
-			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+		if (element instanceof IDomain) {
+			return ExpressImages.GLOBE_IMG;
 		}
-		return image;
+		if (element instanceof IApplication) {
+			return ExpressImages.QUERY_IMG;
+		} 
+		if (element instanceof IEmbeddedCartridge) {
+			return ExpressImages.TASK_REPO_IMG;
+		} 
+		return super.getImage(element);
 	}
 
 	@Override
@@ -82,25 +54,22 @@ public class ExpressExplorerLabelProvider implements IStyledLabelProvider, ILabe
 
 	@Override
 	public StyledString getStyledText(Object element) {
-		StyledString styledString = null;
 		if (element instanceof ExpressConnection) {
-			styledString = createStyledString((ExpressConnection) element);
+			return createStyledString((ExpressConnection) element);
 		} else if (element instanceof IDomain) {
-			styledString = createStyledString((IDomain) element);
+			return createStyledString((IDomain) element);
 		} else if (element instanceof IApplication) {
-			styledString = createStyledString((IApplication) element);
+			return createStyledString((IApplication) element);
 		} else if (element instanceof IEmbeddedCartridge) {
-			styledString = createStyledString((IEmbeddedCartridge) element);
-		} else if (element instanceof LoadingStub) {
-			styledString = new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
-		} else if (element instanceof NotConnectedUserStub) {
-			styledString = new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
+			return createStyledString((IEmbeddedCartridge) element);
+		} else if (element instanceof BaseExplorerContentProvider.LoadingStub) {
+			return new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
+		} else if (element instanceof BaseExplorerContentProvider.NotConnectedUserStub) {
+			return new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
 		} else if (element instanceof OpenShiftException) {
-			styledString = new StyledString(((OpenShiftException) element).getMessage());
-		} else {
-			styledString = new StyledString(element.toString());
+			return new StyledString(((OpenShiftException) element).getMessage());
 		}
-		return styledString;
+		return super.getStyledText(element);
 	}
 
 	private StyledString createStyledString(ExpressConnection connection) {
