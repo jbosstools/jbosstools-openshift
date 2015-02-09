@@ -91,18 +91,22 @@ public class OpenShiftExplorerLabelProvider implements ILabelProvider,  IStyledL
 			switch (resource.getKind()) {
 			case Build:
 				IBuild build = (IBuild)resource;
-				return style(resource.getName(), String.format("(%s)", build.getStatus()));
+				return style(resource.getName(), build.getStatus());
 			case BuildConfig:
 				return style(resource.getName(), ((IBuildConfig) resource).getSourceURI());
 			case DeploymentConfig:
 				IDeploymentConfig config = (IDeploymentConfig) resource;
-				return style(config.getName(), "(selector: " + StringUtils.serialize(config.getReplicaSelector()) + ")");
+				return style(config.getName(), String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())));
 			case ImageRepository:
 				IImageRepository repo = (IImageRepository) resource;
 				return style(repo.getName(), repo.getDockerImageRepository().toString());
 			case Pod:
 				IPod pod = (IPod) resource;
-				String podQualifiedText = String.format("(ip: %s, labels: %s)", pod.getIP(), StringUtils.serialize(pod.getLabels()));
+				String labels = StringUtils.serialize(pod.getLabels());
+				if(StringUtils.isEmpty(labels)){
+					return new StyledString(pod.getName());
+				}
+				String podQualifiedText = String.format("labels: %s", labels);
 				return style(pod.getName(), podQualifiedText);
 			case Project:
 				IProject project = (IProject) resource;
@@ -110,13 +114,13 @@ public class OpenShiftExplorerLabelProvider implements ILabelProvider,  IStyledL
 				if(org.apache.commons.lang.StringUtils.isEmpty(namespace)){
 					return new StyledString(project.getDisplayName());
 				}
-				return style(project.getDisplayName(), String.format("(ns: %s)", namespace));
+				return style(project.getDisplayName(), String.format("ns: %s", namespace));
 			case ReplicationController:
 				IReplicationController rc = (IReplicationController) resource;
-				return (style(resource.getName(), String.format("(selector: %s)", StringUtils.serialize(rc.getReplicaSelector()))));
+				return (style(resource.getName(), String.format("selector: %s", StringUtils.serialize(rc.getReplicaSelector()))));
 			case Service:
 				IService service = (IService) resource;
-				String serviceQualifiedText = String.format("routing TCP traffic on %s:%s to %s", service.getPortalIP(), service.getPort(), service.getContainerPort());
+				String serviceQualifiedText = String.format("selector: %s", StringUtils.serialize(service.getSelector()));
 				return style(service.getName(), serviceQualifiedText);
 			default:
 				break;

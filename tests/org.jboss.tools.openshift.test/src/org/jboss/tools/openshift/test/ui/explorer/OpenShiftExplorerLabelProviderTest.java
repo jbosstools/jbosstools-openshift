@@ -66,7 +66,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		IBuild build = givenAResource(IBuild.class, ResourceKind.Build);
 		when(build.getStatus()).thenReturn("Running");
 		
-		assertEquals(String.format("%s (Running)", build.getName()), provider.getStyledText(build).getString());
+		assertEquals(String.format("%s Running", build.getName()), provider.getStyledText(build).getString());
 	}
 	
 	@Test
@@ -76,7 +76,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		selector.put("foo", "bar");
 		when(rc.getReplicaSelector()).thenReturn(selector);
 		
-		assertEquals(String.format("%s (selector: foo=bar)", rc.getName()), provider.getStyledText(rc).getString());
+		assertEquals(String.format("%s selector: foo=bar", rc.getName()), provider.getStyledText(rc).getString());
 	}
 
 	@Test
@@ -87,8 +87,18 @@ public class OpenShiftExplorerLabelProviderTest {
 		labels.put("foo", "bar");
 		when(pod.getLabels()).thenReturn(labels);
 		
-		String exp = String.format("%s (ip: %s, labels: %s)", pod.getName(), pod.getIP(), StringUtils.serialize(pod.getLabels()));
+		String exp = String.format("%s labels: %s", pod.getName(), StringUtils.serialize(pod.getLabels()));
 		assertEquals(exp, provider.getStyledText(pod).getString());
+	}
+
+	@Test
+	public void getStyledTextForAPodWithoutLabels(){
+		IPod pod = givenAResource(IPod.class, ResourceKind.Pod);
+		when(pod.getIP()).thenReturn("172.17.2.226");
+		Map<String, String> labels = new HashMap<String, String>();
+		when(pod.getLabels()).thenReturn(labels);
+		
+		assertEquals(pod.getName(), provider.getStyledText(pod).getString());
 	}
 	
 	@Test
@@ -97,7 +107,11 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(service.getPortalIP()).thenReturn("172.17.2.226");
 		when(service.getPort()).thenReturn(5432);
 		when(service.getContainerPort()).thenReturn(3306);
-		String exp = String.format("%s routing TCP traffic on 172.17.2.226:5432 to 3306", service.getName());
+		Map<String, String> labels = new HashMap<String, String>();
+		labels.put("foo", "bar");
+		when(service.getSelector()).thenReturn(labels);
+		
+		String exp = String.format("%s selector: foo=bar", service.getName());
 		assertEquals(exp, provider.getStyledText(service).getString());
 	}
 	@Test
@@ -116,7 +130,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		selector.put("deployment", "bar");
 		when(config.getReplicaSelector()).thenReturn(selector );
 		
-		assertEquals(config.getName() + " (selector: deployment=bar,name=foo)", provider.getStyledText(config).getString());
+		assertEquals(config.getName() + " selector: deployment=bar,name=foo", provider.getStyledText(config).getString());
 	}
 	
 	@Test
@@ -137,10 +151,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(project.getDisplayName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
 
-		StyledString exp = new StyledString(displayName + " (ns: " + namespace + ")");
-		exp.setStyle(displayName.length() + 1, namespace.length() + 5, StyledString.QUALIFIER_STYLER);
-		StyledString actual = provider.getStyledText(project);
-		assertEquals(exp.getString(), actual.getString());
+		assertEquals(String.format("%s ns: %s", project.getDisplayName(), project.getNamespace()), provider.getStyledText(project).getString());
 	}
 
 	@Test
