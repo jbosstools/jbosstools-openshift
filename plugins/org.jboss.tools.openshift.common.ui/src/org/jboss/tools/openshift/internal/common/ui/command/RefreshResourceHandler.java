@@ -8,7 +8,9 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.command;
+package org.jboss.tools.openshift.internal.common.ui.command;
+
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -18,20 +20,28 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+//import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+
+
+
+
+
 
 import com.openshift.client.OpenShiftException;
-import com.openshift.client.Refreshable;
+import com.openshift.client.IRefreshable;
 
 /**
  * @author Jeff Cantrill
  */
-public class RefreshResourceHandler extends AbstractHandler {
+public class RefreshResourceHandler extends AbstractHandler{
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -44,7 +54,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 	}
 
 	private Object getResource(ISelection selection) {
-		Object resource = UIUtils.getFirstElement(selection, Refreshable.class);
+		Object resource = UIUtils.getFirstElement(selection, IRefreshable.class);
 		if (resource == null) {
 			resource = UIUtils.getFirstElement(selection, IConnection.class);
 		}
@@ -57,12 +67,12 @@ public class RefreshResourceHandler extends AbstractHandler {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
-					if (element instanceof Refreshable) {
+					if (element instanceof IRefreshable) {
 						monitor.beginTask("Loading OpenShift informations...", IProgressMonitor.UNKNOWN);
-						((Refreshable) element).refresh();
+						((IRefreshable) element).refresh();
 					}
 				} catch (OpenShiftException e) {
-					OpenShiftUIActivator.getDefault().getLogger().logError("Failed to refresh element", e);
+					OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to refresh element", e);
 				} finally {
 					monitor.done();
 				}
@@ -78,7 +88,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 			job.schedule();
 		}
 	}
-
+	
 	private IConnection getConnection(final Object resource) {
 		IConnection connection = null;
 		if (resource instanceof IConnection) {

@@ -53,14 +53,15 @@ public class OpenShiftExplorerContentProviderTest {
 	private ResourceGrouping givenAResourceGroup(){
 		ArrayList<IResource> resources = new ArrayList<IResource>();
 		resources.add(mock(IService.class));
-		ResourceGrouping group = new ResourceGrouping(ResourceKind.Service, resources);
+		when(project.getResources(ResourceKind.Service)).thenReturn(resources);
+		ResourceGrouping group = new ResourceGrouping(ResourceKind.Service, project);
 		return group;
 	}
 	@Test
 	public void getChildrenForResourceGroupReturnsResources(){
 		ResourceGrouping group = givenAResourceGroup();
 		
-		assertArrayEquals("Exp. to get the resources associated with a group", group.getResources(), provider.getChildren(group));
+		assertArrayEquals("Exp. to get the resources associated with a group", group.getResources(), provider.getChildrenFor(group));
 	}
 	
 	@Test
@@ -68,16 +69,16 @@ public class OpenShiftExplorerContentProviderTest {
 		when(project.getResources(any(ResourceKind.class))).thenReturn(new ArrayList<IResource>());
 
 		ResourceGrouping [] groups = new ResourceGrouping[]{
-				new ResourceGrouping(ResourceKind.BuildConfig, new ArrayList<IResource>()),
-				new ResourceGrouping(ResourceKind.DeploymentConfig, new ArrayList<IResource>()),
-				new ResourceGrouping(ResourceKind.Service, new ArrayList<IResource>()),
-				new ResourceGrouping(ResourceKind.Pod, new ArrayList<IResource>()),
-				new ResourceGrouping(ResourceKind.ReplicationController, new ArrayList<IResource>()),
-				new ResourceGrouping(ResourceKind.Build, new ArrayList<IResource>()),
-				new ResourceGrouping(ResourceKind.ImageRepository, new ArrayList<IResource>()),
+				new ResourceGrouping(ResourceKind.BuildConfig, project),
+				new ResourceGrouping(ResourceKind.DeploymentConfig, project),
+				new ResourceGrouping(ResourceKind.Service, project),
+				new ResourceGrouping(ResourceKind.Pod, project),
+				new ResourceGrouping(ResourceKind.ReplicationController, project),
+				new ResourceGrouping(ResourceKind.Build, project),
+				new ResourceGrouping(ResourceKind.ImageRepository, project),
 		};
 		
-		Object[] children = provider.getChildren(project);
+		Object[] children = provider.getChildrenFor(project);
 		assertArrayEquals("Exp. to get a set of resource groups for a project", groups, children);
 	}
 	
@@ -86,24 +87,18 @@ public class OpenShiftExplorerContentProviderTest {
 		List<IProject> projects = Arrays.asList(new IProject[]{project});
 		when(client.<IProject>list(ResourceKind.Project)).thenReturn(projects);
 		
-		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  provider.getChildren(connection));
+		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  provider.getChildrenFor(connection));
 	}
 
 	@Test
-	public void getElementsForRegistryReturnsConnections(){
-		assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", new Object []{connection},  provider.getElements(registry));
+	public void getExplorerElementsForRegistryReturnsConnections(){
+		assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", new Object []{connection},  provider.getExplorerElements(registry));
 	}
 
 	@Test
 	public void resourceGroupingsShouldHaveChildrenWhenTheyHaveNonEmptyList(){
 		ResourceGrouping group = givenAResourceGroup();
 		assertTrue("Exp. #hasChildren to return true for ResourceGrouping with resources", provider.hasChildren(group));
-	}
-
-	@Test
-	public void resourceGroupingsShouldNotHaveChildrenWhenItHasAnEmptyList(){
-		ResourceGrouping group = new ResourceGrouping(ResourceKind.Service, new ArrayList<IResource>());
-		assertFalse("Exp. #hasChildren to return false for ResourceGrouping with no resources", provider.hasChildren(group));
 	}
 	
 	@Test

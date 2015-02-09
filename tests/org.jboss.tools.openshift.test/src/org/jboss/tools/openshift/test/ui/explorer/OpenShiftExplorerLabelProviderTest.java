@@ -13,7 +13,6 @@ import static org.mockito.Mockito.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -170,7 +169,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForResourceGrouping(){
-		ResourceGrouping grouping = new ResourceGrouping(ResourceKind.Service, new ArrayList<IResource>());
+		ResourceGrouping grouping = new ResourceGrouping(ResourceKind.Service, mock(IProject.class));
 		assertEquals("Services", provider.getStyledText(grouping).getString());
 	}
 	

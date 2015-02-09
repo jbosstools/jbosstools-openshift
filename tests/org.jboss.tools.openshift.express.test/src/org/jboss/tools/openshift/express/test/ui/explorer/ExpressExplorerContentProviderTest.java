@@ -9,7 +9,7 @@
 package org.jboss.tools.openshift.express.test.ui.explorer;
 
 import static org.junit.Assert.*;
-//import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,25 +19,26 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 import org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider;
 import org.junit.Before;
 import org.junit.Test;
-//import org.junit.runner.RunWith;
-//import org.mockito.Mock;
-//import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.runner.RunWith;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
+import com.openshift.client.IUser;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-//@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ExpressExplorerContentProviderTest {
 
 	private ExpressExplorerContentProvider provider;
 	private ConnectionsRegistry registry;
-//	@Mock 
+	@Mock
 	private IApplication application;
-//	@Mock 
+	@Mock 
 	private IDomain domain;
-//	@Mock 
+	@Mock 
 	private IConnection connection;
 
 	@Before
@@ -48,13 +49,14 @@ public class ExpressExplorerContentProviderTest {
 	}
 	
 	@Test
-	public void getElementsReturnsDomainsForExpressConnections(){
-		ExpressConnection xpressConnection = new ExpressConnection("","http://localhost");//spy(new ExpressConnection("", "http://localhost"));
+	public void getExplorerElementsReturnsDomainsForExpressConnections(){
+		ExpressConnection xpressConnection = spy(new ExpressConnection("", "http://localhost"));
+		doReturn(mock(IUser.class)).when(xpressConnection).getUserForConnection();
 		registry.add(xpressConnection);
 		List<IDomain> domains = Arrays.asList(domain);
-//		doReturn(domains).when(xpressConnection).getDomains();
+		doReturn(domains).when(xpressConnection).getDomains();
 		
-		assertArrayEquals(domains.toArray(), provider.getElements(xpressConnection));
+		assertArrayEquals(domains.toArray(), provider.getExplorerElements(xpressConnection));
 	}
 	
 	@Test
@@ -62,7 +64,7 @@ public class ExpressExplorerContentProviderTest {
 		registry.add(new ExpressConnection("", "http://localhost"));
 		registry.add(new ExpressConnection("", "http://localhost:8080"));
 		
-		Object[] elements = provider.getElements(registry);
+		Object[] elements = provider.getExplorerElements(registry);
 		assertEquals("Exp. only ExpressConnections to be returned by this provider", 2, elements.length);
 		for (Object e : elements) {
 			if(!(e instanceof ExpressConnection)){

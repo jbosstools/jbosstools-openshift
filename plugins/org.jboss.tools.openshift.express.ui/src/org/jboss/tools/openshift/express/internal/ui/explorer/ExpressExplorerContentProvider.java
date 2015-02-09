@@ -10,58 +10,27 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.explorer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
- * @author Jeff Cantrill
+ * Content Provider for OpenShift v2 content
  */
-public class ExpressExplorerContentProvider implements ITreeContentProvider {
-
-	private StructuredViewer viewer;
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer = (StructuredViewer) viewer;
-	}
-
-	// Keep track of what's loading and what's finished
-	private List<Object> loadedElements = new ArrayList<Object>();
-	private List<Object> loadingElements = new ArrayList<Object>();
-
-	private Map<Object, Exception> errors = new HashMap<Object, Exception>();
+public class ExpressExplorerContentProvider extends BaseExplorerContentProvider {
 
 	/**
 	 * Called to obtain the root elements of the tree viewer, the connections
 	 */
 	@Override
-	public Object[] getElements(final Object parentElement) {
-		// A refresh on the whole model... clear our cache
-		loadedElements.clear();
-		loadingElements.clear();
-		errors.clear();
+	public Object[] getExplorerElements(final Object parentElement) {
 		if (parentElement instanceof ConnectionsRegistry) {
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
 			return registry.getAll(ExpressConnection.class).toArray();
@@ -95,27 +64,8 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 		}
 	}
 
-	/**
-	 * @param parentElement
-	 * @return
-	 */
-	private Object[] loadChildren(Object parentElement) {
-		if (!loadedElements.contains(parentElement)) {
-			if (!loadingElements.contains(parentElement)) {
-				// Load the data
-				launchLoadingJob(parentElement);
-			}
-			// return a stub object that says loading...
-			return new Object[] { new LoadingStub() };
-		}
-		Exception ose = errors.get(parentElement);
-		if (ose != null) {
-			return new Object[] { ose };
-		}
-		return getChildrenFor(parentElement);
-	}
-
-	private Object[] getChildrenFor(Object parentElement) {
+	@Override
+	protected Object[] getChildrenFor(Object parentElement) {
 		Object[] children = new Object[0];
 		try {
 			if (parentElement instanceof OpenShiftExplorerContentCategory) {
@@ -131,44 +81,10 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 				children = ((IApplication) parentElement).getEmbeddedCartridges().toArray();
 			}
 		} catch (OpenShiftException e) {
-			errors.put(parentElement, e);
+			addException(parentElement, e);
 		}
 
 		return children;
-	}
-
-	private void launchLoadingJob(final Object element) {
-		Job job = new Job("Loading OpenShift resources...") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask("Loading OpenShift resources...", IProgressMonitor.UNKNOWN);
-				monitor.worked(1);
-				// Get the actual children, with the delay
-				loadingElements.add(element);
-				getChildrenFor(element);
-				loadedElements.add(element);
-				loadingElements.remove(element);
-				refreshViewerObject(element);
-				monitor.done();
-				return Status.OK_STATUS;
-			}
-		};
-		job.setPriority(Job.LONG);
-		job.schedule();
-	}
-
-	private void refreshViewerObject(final Object object) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				viewer.refresh(object);
-			}
-		});
-	}
-
-	@Override
-	public Object getParent(Object element) {
-		return null;
 	}
 
 	@Override
@@ -177,11 +93,5 @@ public class ExpressExplorerContentProvider implements ITreeContentProvider {
 				|| element instanceof IConnection
 				|| element instanceof IDomain
 				|| element instanceof IApplication;
-	}
-
-	public static class LoadingStub {
-	}
-
-	public static class NotConnectedUserStub {
 	}
 }

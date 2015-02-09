@@ -84,6 +84,11 @@
               id="org.jboss.tools.openshift.common.ui.command.newconnection"
               name="%openshift.command.connection.new">
         </command>
+  <command
+        description="Refresh the Resource"
+        id="org.jboss.tools.openshift.common.ui.command.refresh.resource"
+        name="%openshift.common.command.refresh.resource">
+  </command>
 	</extension>
     <extension
 		point="org.eclipse.ui.handlers">
@@ -91,6 +96,10 @@
               commandId="org.jboss.tools.openshift.common.ui.command.newconnection"
               class="org.jboss.tools.openshift.internal.common.ui.command.NewConnectionHandler">
      	</handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.common.ui.command.RefreshResourceHandler"
+        commandId="org.jboss.tools.openshift.common.ui.command.refresh.resource">
+  </handler>
      </extension>
      <extension
         point="org.eclipse.ui.menus">
@@ -148,6 +157,25 @@
 					</with>
 				</visibleWhen>
 			</command>
+   <command
+         commandId="org.jboss.tools.openshift.common.ui.command.refresh.resource"
+         icon="icons/refresh.gif"
+         id="org.jboss.tools.openshift.common.ui.command.refresh.resource"
+         style="push"
+         tooltip="Refresh the resource">
+      <visibleWhen>
+         <and>
+            <count
+                  value="1">
+            </count>
+            <iterate>
+               <instanceof
+                     value="com.openshift.client.IRefreshable">
+               </instanceof>
+            </iterate>
+         </and>
+      </visibleWhen>
+   </command>
 		</menuContribution>
 	</extension>
 	
