@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jboss.tools.openshift.express.feature"
+      id="org.jboss.tools.openshift.feature"
       label="%featureName"
       version="3.0.0.qualifier"
       provider-name="%providerName">
@@ -28,21 +28,21 @@ Raleigh NC 27606 USA.
    </requires>
 
    <plugin
-         id="org.jboss.tools.openshift.express.ui"
+         id="org.jboss.tools.openshift.client"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.jboss.tools.openshift.express.core"
+         id="org.jboss.tools.openshift.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.jboss.tools.openshift.express.client"
+         id="org.jboss.tools.openshift.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
