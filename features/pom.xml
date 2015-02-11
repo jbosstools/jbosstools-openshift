@@ -12,9 +12,11 @@
 	<name>openshift.features</name>
 	<packaging>pom</packaging>
 	<modules>
+		<module>org.jboss.tools.openshift.feature</module>
+		<module>org.jboss.tools.openshift.test.feature</module>
 		<module>org.jboss.tools.openshift.egit.integration.feature</module>
-		<module>org.jboss.tools.openshift.express.feature</module>
 		<module>org.jboss.tools.openshift.egit.integration.test.feature</module>
+		<module>org.jboss.tools.openshift.express.feature</module>
 		<module>org.jboss.tools.openshift.express.test.feature</module>
 	</modules>
 	<build>
