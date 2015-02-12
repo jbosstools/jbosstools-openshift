@@ -118,10 +118,9 @@ public class ExpressConnection extends AbstractConnection {
 		return username;
 	}
 
-	public String setUsername(String username) {
+	public void setUsername(String username) {
 		this.username = username;
 		clearUser();
-		return username;
 	}
 
 	public String getPassword() {
@@ -129,11 +128,10 @@ public class ExpressConnection extends AbstractConnection {
 		return password;
 	}
 
-	public String setPassword(String password) {
+	public void setPassword(String password) {
 		this.password = password;
 		this.passwordLoaded = true;
 		clearUser();
-		return password;
 	}
 
 	@Override
@@ -166,8 +164,8 @@ public class ExpressConnection extends AbstractConnection {
 		return rememberPassword;
 	}
 
-	public final boolean setRememberPassword(boolean rememberPassword) {
-		return this.rememberPassword = rememberPassword;
+	public final void setRememberPassword(boolean rememberPassword) {
+		this.rememberPassword = rememberPassword;
 	}
 
 	public boolean canPromptForPassword() {

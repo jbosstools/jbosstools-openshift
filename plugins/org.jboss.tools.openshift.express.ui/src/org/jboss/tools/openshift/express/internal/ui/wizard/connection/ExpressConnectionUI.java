@@ -13,8 +13,10 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
+import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
@@ -26,11 +28,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.IConnectionUI;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidationProvider;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 
@@ -40,43 +43,37 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 public class ExpressConnectionUI extends BaseDetailsView implements IConnectionUI<ExpressConnection> {
 
 	private DataBindingContext privateDbc;
-	private IObservableValue nameObservable;
 	private WritableValue passwordObservable;
 	private IObservableValue rememberPasswordObservable;
 
 	public ExpressConnectionUI() {
 		this.privateDbc = new DataBindingContext();
-		this.nameObservable = new WritableValue(null, String.class);
-		this.passwordObservable = new WritableValue(null, String.class);
 		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
 	}
 
 	@Override
-	public Composite createControls(Composite parent, DataBindingContext dbc) {
+	public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
-
+		
 		// username
 		Label rhLoginLabel = new Label(composite, SWT.NONE);
 		rhLoginLabel.setText("&Username:");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(rhLoginLabel);
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(rhLoginLabel);
 		Text usernameText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
-		IObservableValue usernameObservable = WidgetProperties.text(SWT.Modify).observe(usernameText);
-		ValueBindingBuilder
-				.bind(usernameObservable)
+		Binding usernameBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
 				.converting(new TrimmingStringConverter())
-				.to(nameObservable)
-				.in(dbc);
-		ValidationStatusProvider usernameValidation =
-				new RequiredStringValidationProvider(usernameObservable, "username");
-		privateDbc.addValidationStatusProvider(usernameValidation);
+				.validatingAfterConvert(new RequiredStringValidator("username"))
+				.to(PojoProperties.value(ExpressConnection.class, "username").observeDetail(detailViewModel))
+				.in(privateDbc);
 		ControlDecorationSupport
-				.create(usernameValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
+				.create(usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
 		// password
 		Label passwordLabel = new Label(composite, SWT.NONE);
 		passwordLabel.setText("&Password:");
@@ -85,36 +82,31 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		Text passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
-		IObservableValue passwordTextObservable = WidgetProperties.text(SWT.Modify).observe(passwordText);
-		ValueBindingBuilder
-				.bind(passwordTextObservable)
-				.to(passwordObservable)
+		Binding passwordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
+				.converting(new TrimmingStringConverter())
+				.validatingAfterConvert(new RequiredStringValidator("password"))
+				.to(PojoProperties.value(ExpressConnection.class, "password").observeDetail(detailViewModel))
 				.in(privateDbc);
-		ValidationStatusProvider passwordValidation =
-				new RequiredStringValidationProvider(passwordTextObservable, "password");
-		privateDbc.addValidationStatusProvider(passwordValidation);
 		ControlDecorationSupport
-				.create(passwordValidation, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+				.create(passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		Button rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
 		rememberPasswordCheckBox.setText("&Save Password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
-				.to(rememberPasswordObservable)
-				.in(privateDbc);
 
+		DataBindingUtils.observeAndPrintValidationState("", dbc);
 		return composite;
 	}
 
 	@Override
-	public void onVisible(IObservableValue selectedConnectionObservable, DataBindingContext dbc) {
+	public void onVisible(IObservableValue connectionObservable, DataBindingContext dbc) {
 		addValidationStatusProviders(privateDbc.getValidationStatusProviders(), dbc);
 	}
 
 	@Override
-	public void onInVisible(IObservableValue selectedConnectionObservable, DataBindingContext dbc) {
+	public void onInVisible(IObservableValue connectionObservable, DataBindingContext dbc) {
 		removeValidationStatusProviders(privateDbc.getValidationStatusProviders(), dbc);
 	}
 
@@ -139,4 +131,8 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		}
 	}
 
+	@Override
+	public void dispose() {
+		privateDbc.dispose();
+	}
 }

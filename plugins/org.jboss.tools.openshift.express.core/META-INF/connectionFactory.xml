@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.jboss.tools.openshift.express.core">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.jboss.tools.openshift.express.core.ConnectionFactory">
    <implementation class="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionFactory"/>
    <service>
       <provide interface="org.jboss.tools.openshift.common.core.connection.IConnectionFactory"/>
