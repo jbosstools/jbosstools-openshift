@@ -10,9 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
@@ -45,9 +48,17 @@ public class ConnectionRegistryTest {
 		registry.add(ones[1]);
 		registry.add(others[1]);
 		
-		assertArrayEquals(ones, registry.getAll(OneConnectionImpl.class).toArray());
+		assertEqualsNoOrdering(Arrays.<OneConnectionImpl>asList(ones), registry.getAll(OneConnectionImpl.class));
 	}
 
+	private <T extends IConnection> void assertEqualsNoOrdering(Collection<T> allExpected, Collection<T> allActual) {
+		assertEquals(allExpected.size(), allExpected.size());
+		
+		for (IConnection expected : allExpected) {
+			assertTrue(allActual.contains(expected));
+		}
+	}
+	
 	static class OneConnectionImpl implements IConnection{
 		String host;
 		String scheme;
