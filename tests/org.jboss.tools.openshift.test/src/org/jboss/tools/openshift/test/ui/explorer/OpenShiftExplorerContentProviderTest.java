@@ -78,7 +78,7 @@ public class OpenShiftExplorerContentProviderTest {
 				new ResourceGrouping(ResourceKind.ImageRepository, project),
 		};
 		
-		Object[] children = provider.getChildrenFor(project);
+		Object[] children = provider.getChildren(project);
 		assertArrayEquals("Exp. to get a set of resource groups for a project", groups, children);
 	}
 	

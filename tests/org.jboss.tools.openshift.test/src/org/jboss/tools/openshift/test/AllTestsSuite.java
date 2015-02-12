@@ -10,12 +10,25 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
+import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
+import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
+import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
+import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
+import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
+import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	ConnectionRegistryTest.class,
+	ConnectionTest.class,
+	//TODO add back in when tests exist
+//	ConnectionURLTest.class,
+	OpenShiftExplorerContentProviderTest.class,
+	OpenShiftExplorerLabelProviderTest.class,
+	StringUtilsTest.class
 })
 /**
  * @author Andre Dietisheim

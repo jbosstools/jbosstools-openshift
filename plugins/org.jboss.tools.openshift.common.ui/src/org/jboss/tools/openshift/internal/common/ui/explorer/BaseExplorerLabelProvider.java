@@ -21,8 +21,6 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 
-import com.openshift.client.OpenShiftException;
-
 public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
 	@Override
@@ -50,7 +48,7 @@ public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider,
 		if (element instanceof BaseExplorerContentProvider.LoadingStub) {
 			return OpenShiftCommonImages.SYSTEM_PROCESS_IMG;
 		} 
-		if (element instanceof OpenShiftException) {
+		if (element instanceof Exception) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 		}
 		return null;

@@ -80,6 +80,25 @@
 						</with>
 					</visibleWhen>
 				</command>
+				   <command
+         commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
+         icon="icons/refresh.gif"
+         id="org.jboss.tools.openshift.ui.command.refresh.resource"
+         style="push"
+         tooltip="Refresh the resource">
+      <visibleWhen>
+         <and>
+            <count
+                  value="1">
+            </count>
+            <iterate>
+               <instanceof
+                     value="com.openshift.client.IRefreshable">
+               </instanceof>
+            </iterate>
+         </and>
+      </visibleWhen>
+   </command>
 		</menuContribution>
 	</extension>
 	<extension
@@ -121,10 +140,12 @@
 		</definition>
 	</extension>
    <extension
-         point="org.eclipse.ui.startup">
-      <startup
-            class="org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator">
-      </startup>
+         point="org.eclipse.ui.commands">
+           <command
+        description="Refresh the Resource"
+        id="org.jboss.tools.openshift.ui.command.refresh.resource"
+        name="Refresh">
+  </command>
    </extension>
 
 </plugin>

@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
@@ -41,7 +40,7 @@ import org.osgi.framework.BundleContext;
  * @author Andre Dietisheim
  * @author Rob Stryker
  */
-public class ExpressUIActivator extends AbstractUIPlugin implements IStartup{
+public class ExpressUIActivator extends AbstractUIPlugin {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
 
@@ -174,10 +173,4 @@ public class ExpressUIActivator extends AbstractUIPlugin implements IStartup{
         return corePreferenceStore;
     }
 
-	@Override
-	public void earlyStartup() {
-        //TODO delete me
-		ConnectionsRegistrySingleton.getInstance().add(new ExpressConnection("", "http://localhost:9090"));
-		ConnectionsRegistrySingleton.getInstance().add(new ExpressConnection("","http://localhost:9443"));		
-	}
 }

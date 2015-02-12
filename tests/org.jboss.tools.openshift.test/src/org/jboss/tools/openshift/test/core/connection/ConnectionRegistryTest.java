@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.test.core.connection;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.io.IOException;
+
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -33,6 +35,19 @@ public class ConnectionRegistryTest {
 //		this.connectionsModel = new ConnectionsModelFake();
 //		this.connection = new ConnectionFake();
 	}
+	
+	@Test
+	public void getForAConnectionTypeShouldReturnACollectionOfTheRightTypeTest(){
+		OneConnectionImpl [] ones = new OneConnectionImpl[]{ new OneConnectionImpl("localhost:8080", "http://"), new OneConnectionImpl("localhost:8081", "http://")};
+		OtherConnectionImpl [] others = new OtherConnectionImpl[]{ new OtherConnectionImpl("localhost:9080", "http://"), new OtherConnectionImpl("localhost:9081", "http://")};
+		registry.add(ones[0]);
+		registry.add(others[0]);
+		registry.add(ones[1]);
+		registry.add(others[1]);
+		
+		assertArrayEquals(ones, registry.getAll(OneConnectionImpl.class).toArray());
+	}
+
 	static class OneConnectionImpl implements IConnection{
 		String host;
 		String scheme;
@@ -73,6 +88,11 @@ public class ConnectionRegistryTest {
 		public void refresh() {
 			// TODO Auto-generated method stub
 			
+		}
+		@Override
+		public boolean canConnect() throws IOException {
+			// TODO Auto-generated method stub
+			return false;
 		}
 		
 	}
@@ -117,19 +137,12 @@ public class ConnectionRegistryTest {
 			// TODO Auto-generated method stub
 			
 		}
+		@Override
+		public boolean canConnect() throws IOException {
+			// TODO Auto-generated method stub
+			return false;
+		}
 		
-	}
-	
-	@Test
-	public void getForAConnectionTypeShouldReturnACollectionOfTheRightType(){
-		OneConnectionImpl [] ones = new OneConnectionImpl[]{ new OneConnectionImpl("localhost:8080", "http://"), new OneConnectionImpl("localhost:8081", "http://")};
-		OtherConnectionImpl [] others = new OtherConnectionImpl[]{ new OtherConnectionImpl("localhost:9080", "http://"), new OtherConnectionImpl("localhost:9081", "http://")};
-		registry.add(ones[0]);
-		registry.add(others[0]);
-		registry.add(ones[1]);
-		registry.add(others[1]);
-		
-		assertArrayEquals(ones, registry.getAll(OneConnectionImpl.class).toArray());
 	}
 //
 //	@Test
