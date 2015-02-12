@@ -41,7 +41,7 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.ContentProposalUtils;
@@ -171,7 +171,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 		private void createContentProposal(Text text) {
 			final ControlDecoration decoration = ContentProposalUtils.createContenProposalDecoration("History available", text);
-			ContentProposalUtils.createContentProposal(text, ExpressPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
+			ContentProposalUtils.createContentProposal(text, ExpressCorePreferences.INSTANCE.getDownloadableStandaloneCartUrls());
 			text.addFocusListener(new FocusAdapter() {
 
 				@Override

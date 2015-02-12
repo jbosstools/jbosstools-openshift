@@ -18,7 +18,7 @@ import java.io.InputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHSessionRepository;
 
 import com.jcraft.jsch.Session;
@@ -89,17 +89,17 @@ public class RestoreSnapshotWizardModel extends ObservablePojo {
 	
 	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
-			ExpressPreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
+			ExpressCorePreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
 		} else {
-			ExpressPreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);	
+			ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);	
 		}
 	}
 	
 	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
-			return ExpressPreferences.INSTANCE.getDeploymentSnapshot(application);
+			return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);
 		} else {
-			return ExpressPreferences.INSTANCE.getFullSnapshot(application);
+			return ExpressCorePreferences.INSTANCE.getFullSnapshot(application);
 		}
 	}
 

@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.jobs.Job;
  * 
  * Since the EGit UI is a UI construct, no direct references to the console
  * classes may be done in a core plugin. Instead, the UI plugin should set a
- * proper console handler in the {@link OpenshiftCoreUIIntegration} class.
+ * proper console handler in the {@link ExpressCoreUIIntegration} class.
  */
 public interface IEGitUI {
 

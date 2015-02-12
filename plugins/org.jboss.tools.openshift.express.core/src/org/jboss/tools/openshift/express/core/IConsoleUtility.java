@@ -21,7 +21,7 @@ import org.eclipse.wst.server.core.IServer;
  * Since the eclipse console is a UI construct, no direct
  * references to the console classes may be done in a core plugin. 
  * Instead, the UI plugin should set a proper console handler
- * in the {@link OpenshiftCoreUIIntegration} class. 
+ * in the {@link ExpressCoreUIIntegration} class. 
  */
 public interface IConsoleUtility {
 	

@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IUser;
@@ -126,12 +126,12 @@ public class ExpressConnectionUtils {
 	 * 
 	 * @return the default host
 	 * 
-	 * @see ExpressPreferences#getDefaultHost()
+	 * @see ExpressCorePreferences#getDefaultHost()
 	 * @see IOpenShiftConfiguration#getLibraServer()
 	 */
 	public static String getDefaultHostUrl() {
 		try {
-			String defaultHost = ExpressPreferences.INSTANCE.getDefaultHost();
+			String defaultHost = ExpressCorePreferences.INSTANCE.getDefaultHost();
 			if (!StringUtils.isEmpty(defaultHost)) {
 				return defaultHost;
 			}

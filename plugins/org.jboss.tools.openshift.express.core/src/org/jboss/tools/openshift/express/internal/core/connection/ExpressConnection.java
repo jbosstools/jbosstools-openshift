@@ -29,7 +29,7 @@ import org.jboss.tools.openshift.express.client.ClientSystemProperties;
 import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.core.security.OpenShiftPasswordStorageKey;
 import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStore;
 import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStoreException;
@@ -224,7 +224,7 @@ public class ExpressConnection extends AbstractConnection {
 	}
 
 	private void setClientTimeout() {
-		int timeout = ExpressPreferences.INSTANCE
+		int timeout = ExpressCorePreferences.INSTANCE
 				.getClientReadTimeout(ClientSystemProperties.getReadTimeoutSeconds());
 		ClientSystemProperties.setReadTimeoutSeconds(timeout);
 	}
@@ -475,7 +475,7 @@ public class ExpressConnection extends AbstractConnection {
 	public void save() {
 		String username = getUsername();
 		if (!StringUtils.isEmpty(username)) {
-			ExpressPreferences.INSTANCE.saveLastUsername(username);
+			ExpressCorePreferences.INSTANCE.saveLastUsername(username);
 			saveOrClearPassword(username, getHost(), getPassword());
 		}
 	}

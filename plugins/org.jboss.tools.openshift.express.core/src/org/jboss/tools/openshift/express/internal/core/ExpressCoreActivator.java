@@ -11,10 +11,18 @@
 
 package org.jboss.tools.openshift.express.internal.core;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -43,8 +51,29 @@ public class ExpressCoreActivator extends BaseCorePlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         myContext = context;
+        loadConnections();
 	}
-
+    
+	private void loadConnections() {
+		for (String url : ExpressCorePreferences.INSTANCE.getConnections()) {
+			ConnectionsRegistrySingleton.getInstance().add(createConnection(url));
+		}
+	}
+	
+	private ExpressConnection createConnection(String url) {
+		try {
+			ConnectionURL connectionURL = ConnectionURL.forURL(url);
+			return new ExpressConnection(connectionURL.getUsername(), connectionURL.getScheme(), connectionURL.getHost(), null, null);
+		} catch (MalformedURLException e) {
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
+		} catch (UnsupportedEncodingException e) {
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
+		} catch (IllegalArgumentException e) {
+			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
+		}
+		return null;
+	}
+	
 	/**
 	 * Gets message from plugin.properties
 	 * @param key
