@@ -1,7 +1,6 @@
 package org.jboss.tools.openshift.egit.ui;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
 import org.osgi.framework.BundleContext;
 
 public class EGitUIActivator extends AbstractUIPlugin {
