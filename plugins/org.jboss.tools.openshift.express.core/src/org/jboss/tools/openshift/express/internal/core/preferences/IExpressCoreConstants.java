@@ -15,7 +15,7 @@ import com.openshift.client.IHttpClient;
 /**
  * @author Andre Dietisheim
  */
-public interface IExpressConstants {
+public interface IExpressCoreConstants {
 
 	/** the timeout that's the client's using when reading the OpenShift response */ 
 	public static final String CLIENT_READ_TIMEOUT = IHttpClient.SYSPROP_OPENSHIFT_READ_TIMEOUT;

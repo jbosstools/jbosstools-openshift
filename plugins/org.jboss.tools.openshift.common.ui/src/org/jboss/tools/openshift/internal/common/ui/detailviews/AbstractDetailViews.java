@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
@@ -38,6 +40,7 @@ public abstract class AbstractDetailViews {
 	public AbstractDetailViews(IObservableValue detailViewModel, Composite parent, DataBindingContext dbc) {
 		Assert.isLegal(parent != null && !parent.isDisposed());
 		this.parent = parent;
+		parent.addDisposeListener(onDispose());
 		Assert.isLegal(dbc != null);
 		this.dbc = dbc;
 		Assert.isLegal(detailViewModel != null && !detailViewModel.isDisposed());
@@ -49,7 +52,7 @@ public abstract class AbstractDetailViews {
 
 		detailViewModel.addValueChangeListener(onDetailViewModelChanged());
 		parent.setLayout(stackLayout);
-		createViewControls(parent, dbc);
+		createViewControls(parent, detailViewModel, dbc);
 		showView(null, currentView, dbc);
 	}
 
@@ -71,10 +74,8 @@ public abstract class AbstractDetailViews {
 
 	protected void showView(IObservableValue triggeringObservable, IDetailView view, DataBindingContext dbc) {
 		if (view == null
-				|| view.getControl() == null) {
-			return;
-		}
-		if (triggeringObservable == null) {
+				|| view.getControl() == null
+				|| triggeringObservable == null) {
 			return;
 		}
 		currentView.onInVisible(triggeringObservable, dbc);
@@ -83,10 +84,10 @@ public abstract class AbstractDetailViews {
 		parent.layout(true, true);
 	}
 
-	protected void createViewControls(Composite parent, DataBindingContext dbc) {
-		emptyView.createControls(parent, dbc);
+	protected void createViewControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
+		emptyView.createControls(parent, detailViewModel, dbc);
 		for (IDetailView detailView : getDetailViews()) {
-			detailView.createControls(parent, dbc);
+			detailView.createControls(parent, detailViewModel, dbc);
 		}
 	};
 
@@ -108,9 +109,27 @@ public abstract class AbstractDetailViews {
 		return view;
 	}
 	
+	private DisposeListener onDispose() {
+		return new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				dispose();
+			}
+		};
+	}
+
+	private void dispose() {
+		for (IDetailView view : getDetailViews()) {
+			if (view != null) {
+				view.dispose();
+			}
+		}
+	}
+
 	public class EmptyView extends BaseDetailsView {
 
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.NONE));
 			GridLayoutFactory.fillDefaults()
 					.margins(6, 6).spacing(6, 6).applyTo(container);
@@ -124,7 +143,7 @@ public abstract class AbstractDetailViews {
 	
 	public interface IDetailView {
 
-		public Composite createControls(Composite parent, DataBindingContext dbc);
+		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc);
 
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
 
@@ -134,5 +153,6 @@ public abstract class AbstractDetailViews {
 		
 		public boolean isViewFor(Object object);
 
+		public void dispose();
 	}
 }

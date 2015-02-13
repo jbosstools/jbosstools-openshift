@@ -47,7 +47,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.publish.LocalZippedModulePublish
 import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
+import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 /**
@@ -225,10 +225,10 @@ public class OpenShiftServerPublishMethod  {
 			if (uncommittedChanges) {
 				String remote = OpenShiftServerUtils.getRemoteName(server);
 				String applicationName = OpenShiftServerUtils.getApplicationName(server);
-				OpenshiftCoreUIIntegration.openCommitDialog(project, remote, applicationName, 
+				ExpressCoreUIIntegration.openCommitDialog(project, remote, applicationName, 
 						new PublishJob(applicationName, project, server));
 			} else {
-				if (OpenshiftCoreUIIntegration.requestApproval(
+				if (ExpressCoreUIIntegration.requestApproval(
 						getPushQuestion(project, server, subMonitor),
 						NLS.bind(OpenShiftServerMessages.publishTitle, project.getName()))) {
 					return push(project, server, subMonitor);
@@ -257,22 +257,22 @@ public class OpenShiftServerPublishMethod  {
 	private PushOperationResult push(IProject project, IServer server, IProgressMonitor monitor) throws CoreException {
 		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
 		Repository repository = EGitUtils.getRepository(project);
-		OpenshiftCoreUIIntegration.displayConsoleView(server);
+		ExpressCoreUIIntegration.displayConsoleView(server);
 		String remoteName = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
 		try {
 			return EGitUtils.push(
 					remoteName, repository, subMonitor,
-					OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
+					ExpressCoreUIIntegration.getConsoleOutputStream(server));
 		} catch (CoreException ce) {
 			// Comes if push has failed
 			subMonitor.worked(100);
 			if (isUpToDateError(ce)) {
-				OpenshiftCoreUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
+				ExpressCoreUIIntegration.appendToConsole(server, "\n\nRepository already uptodate.");
 				return null;
 			}
 
 			try {
-				if (OpenshiftCoreUIIntegration.requestApproval(
+				if (ExpressCoreUIIntegration.requestApproval(
 						"Error: '"
 								+ ce.getMessage()
 								+ "' occurred while pushing.\n\nIf the commit history is not correct on the remote repository, "
@@ -281,11 +281,11 @@ public class OpenShiftServerPublishMethod  {
 						"Attempt push force ?", false)) {
 					return EGitUtils.pushForce(
 							remoteName, repository, subMonitor,
-							OpenshiftCoreUIIntegration.getConsoleOutputStream(server));
+							ExpressCoreUIIntegration.getConsoleOutputStream(server));
 				} else {
 					// printing out variation of the standard git output
 					// meesage.
-					OpenshiftCoreUIIntegration.appendToConsole(
+					ExpressCoreUIIntegration.appendToConsole(
 									server,
 									"\n\nERROR: "
 											+ ce.getLocalizedMessage()
@@ -297,7 +297,7 @@ public class OpenShiftServerPublishMethod  {
 				return null;
 			} catch (CoreException ce2) {
 				if (isUpToDateError(ce)) {
-					OpenshiftCoreUIIntegration.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
+					ExpressCoreUIIntegration.appendToConsole(server, "\n(Forced push) Repository already uptodate.");
 					return null;
 				} else {
 					// even the push force failed, and we don't have a valid

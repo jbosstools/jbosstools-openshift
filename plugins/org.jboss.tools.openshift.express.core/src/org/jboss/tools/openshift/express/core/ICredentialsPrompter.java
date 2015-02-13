@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
  * references to the UI may be done in a core plugin. 
  * 
  * Instead, the UI plugin should set a proper handler
- * in the {@link OpenshiftCoreUIIntegration} class. 
+ * in the {@link ExpressCoreUIIntegration} class. 
  * 
  * @author Andre Dietisheim
  */
@@ -30,7 +30,8 @@ public interface ICredentialsPrompter {
 	 * authentication. 
 	 * 
 	 * @param connection  The connection
+	 * @return true if prompted for password; false otherwise
 	 */
-	public void promptAndAuthenticate(ExpressConnection connection);
+	public boolean promptAndAuthenticate(ExpressConnection connection);
 	
 }

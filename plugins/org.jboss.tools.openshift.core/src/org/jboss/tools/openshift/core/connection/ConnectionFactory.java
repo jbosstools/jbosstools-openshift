@@ -8,62 +8,56 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.connection;
-import java.io.IOException;
+package org.jboss.tools.openshift.core.connection;
+import java.net.MalformedURLException;
 
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
-import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
-
-import com.openshift.client.OpenShiftException;
-import com.openshift.client.configuration.OpenShiftConfiguration;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 
 /**
  * @author Andre Dietisheim
  */
-public class ExpressConnectionFactory implements IConnectionFactory {
+public class ConnectionFactory implements IConnectionFactory {
 
-	public ExpressConnectionFactory() {
+	public ConnectionFactory() {
 	}
 
 	@Override
 	public String getName() {
-		return "OpenShift 2";
+		return "OpenShift 3";
 	}
 
 	@Override
 	public String getId() {
-		return "org.jboss.tools.openshift.express.core.ConnectionFactory";
+		return "org.jboss.tools.openshift.core.ConnectionFactory";
 	}
 	
 	@Override
-	public ExpressConnection create(String url) {
-		return new ExpressConnection(url);
+	public Connection create(String url) {
+		try {
+			return new Connection(url);
+		} catch (MalformedURLException e) {
+			OpenShiftCoreActivator.pluginLog().logInfo(NLS.bind("Could not create OpenShift connection: Malformed url {0}", url), e);
+			return null;
+		}
 	}
 
 
 	@Override
 	public String getDefaultHost() {
-		try {
-			return new OpenShiftConfiguration().getLibraServer();
-		} catch (OpenShiftException e) {
-			ExpressCoreActivator.pluginLog().logError("Could not load default host.", e);
-			return null;
-		} catch (IOException e) {
-			ExpressCoreActivator.pluginLog().logError("Could not load default host.", e);
-			return null;
-		}
+		return null;
 	}
 
 	@Override
 	public boolean hasDefaultHost() {
-		return true;
+		return false;
 	}
 
 	@Override
 	public <T extends Class<? extends IConnection>> boolean canCreate(T clazz) {
-		return ExpressConnection.class.isAssignableFrom(clazz);
+		return Connection.class.isAssignableFrom(clazz);
 	}
-
 }

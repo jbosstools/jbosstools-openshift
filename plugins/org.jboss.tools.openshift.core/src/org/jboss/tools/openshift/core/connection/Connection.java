@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.List;
 
@@ -125,14 +126,20 @@ public class Connection  implements IConnection, IRefreshable {
 			return connection.getResponseCode() == 200;
 		} catch (MalformedURLException e) {
 			return false;
-		} catch (IOException e) {
+		} catch (SocketTimeoutException e) {
 			throw e;
+		} catch (IOException e) {
+			if (connection != null
+					// can throw IOException (ex. UnknownHostException)
+					&& connection.getResponseCode() != -1) {
+				return false;
+			} else {
+				throw e;
+			}
 		} finally {
 			if (connection != null) {
 				connection.disconnect();
 			}
 		}
 	}
-
-	
 }

@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.Diffs;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
@@ -42,17 +42,18 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_CONNECTION = "connection";
 	public static final String PROPERTY_CONNECTION_FACTORY = "connectionFactory";
 	public static final String PROPERTY_HOST = "host";
-	public static final String PROPERTY_CONNECTED = "connected";
+	public static final String PROPERTY_CONNECTION_CREATED = "connectionCreated";
 	public static final String PROPERTY_USE_DEFAULT_HOST = "useDefaultHost";
+	public static final String PROPERTY_CONNECTED = "connected";
 
-	final private IConnectionAwareModel wizardModel;
 	private IConnection connection;
-	private IStatus connected;
+	private IStatus connectionCreated;
 	private String host;
 	private boolean allowConnectionChange;
-	private final ConnectionsFactoryTracker connectionsFactory;
 	private IConnectionFactory connectionFactory;
 	private boolean useDefaultHost;
+	private final ConnectionsFactoryTracker connectionsFactory;
+	private final IConnectionAwareModel wizardModel;
 	
 	ConnectionWizardPageModel(IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		this.wizardModel = wizardModel;
@@ -65,18 +66,18 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void updateFrom(IConnection connection) {
-//		if (isCreateNewConnection(connection)) {
+		if (isNewConnection(connection)) {
 //			setUsername(getDefaultUsername());
-//			setUseDefaultServer(true);
 //			setDefaultHost();
+//			setUseDefaultServer(true);
 //			setPassword(null);
-//		} else {
+			} else {
 //			setUsername(connection.getUsername());
 //			setHost(connection.getHost());
 //			setUseDefaultServer(connection.isDefaultHost());
 //			setRememberPassword(connection.isRememberPassword());
 //			setPassword(connection.getPassword());
-//		}
+		}
 	}
 
 	protected String getDefaultUsername() {
@@ -94,15 +95,27 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 //		return username;
 	}
 
-	public void resetConnection() {
-		setConnection(null);
+	private boolean isNewConnection(IConnection connection) {
+		return connection instanceof NewConnectionMarker;
+	}
+
+	private void resetConnection(IStatus status) {
+		setConnection(null, status);
 	}
 
 	public void setConnection(IConnection connection) {
+		setConnection(connection, ValidationStatus.ok());
+	}
+	
+	private void setConnection(IConnection connection, IStatus connectionCreationStatus) {
 //		if (Diffs.equals(this.connection, connection)) {
 //			return;
 //		}
-//		updateFrom(connection);
+		if (connection != null) {
+			setConnectionFactory(connectionsFactory.getByConnection(connection.getClass()));
+		}
+		setConnectionCreated(connectionCreationStatus);
+		updateFrom(connection);
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 	}
 
@@ -114,7 +127,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		if (factory != null) {
 			setUseDefaultHost(connectionFactory.hasDefaultHost());
-			setConnection(null);
+			resetConnection(ValidationStatus.cancel("Please test your connection."));;
 		}
 	}
 
@@ -139,7 +152,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public void setHost(String host) {
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
-		resetConnected();
+		resetConnectionCreated();
 	}
 	
 	/**
@@ -170,18 +183,14 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 				try {
 					connection = connectionsFactory.create(host);
 					if (connection == null) {
-						setConnected(StatusFactory.errorStatus(
-								OpenShiftCommonUIActivator.PLUGIN_ID,
-								NLS.bind("The host at {0} is no OpenShift host", host)));
+						setConnectionCreated(StatusFactory.errorStatus(
+								OpenShiftCommonUIActivator.PLUGIN_ID, NLS.bind("The host at {0} is no OpenShift host", host)));
 					} else {
 						// switches <automatic> to detected type
 						setConnectionFactory(connectionsFactory.getByConnection(connection.getClass()));
 					}
 				} catch (IOException e) {
-					resetConnection();
-					setConnected(StatusFactory.errorStatus(
-							OpenShiftCommonUIActivator.PLUGIN_ID, NLS.bind("Could not connect to host at {0}.", host),
-							e));
+					resetConnection(ValidationStatus.error(NLS.bind("Could not connect to host at {0}.", host), e));
 				}
 			} else {
 				try {
@@ -190,39 +199,37 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 						connection = null;
 					}
 				} catch (IOException e) {
-					resetConnection();
-					setConnected(StatusFactory.errorStatus(
-							OpenShiftCommonUIActivator.PLUGIN_ID, NLS.bind("Could not connect to host at {0}.", host),
-							e));
+					resetConnection(ValidationStatus.error(NLS.bind("Could not connect to host at {0}.", host), e));
 				}
 			}
 		}
 
-			setConnection(connection);
+		setConnection(connection);
 	}
 	
 	public void setUseDefaultHost(boolean useDefaultHost) {
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
-		if (useDefaultHost) {
+		if (useDefaultHost
+				&& connectionFactory != null) {
 			setHost(connectionFactory.getDefaultHost());
 		}
-		resetConnected();
+		resetConnectionCreated();
 	}
 	
 	public boolean isUseDefaultHost() {
 		return useDefaultHost;
 	}
 
-	private void resetConnected() {
-		setConnected(null);
+	private void resetConnectionCreated() {
+		setConnectionCreated(null);
 	}
 
-	private void setConnected(IStatus status) {
-		firePropertyChange(PROPERTY_CONNECTED, this.connected, this.connected = status);
+	private void setConnectionCreated(IStatus status) {
+		firePropertyChange(PROPERTY_CONNECTION_CREATED, this.connectionCreated, this.connectionCreated = status);
 	}
 
-	public IStatus getConnected() {
-		return connected;
+	public IStatus getConnectionCreated() {
+		return connectionCreated;
 	}
 
 	public IStatus connect() {
@@ -232,56 +239,15 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 				connection.connect();
 			}
 //		} catch (NotFoundOpenShiftException e) {
-//			// connected user without domain
+//			// connectionCreated user without domain
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
 					NLS.bind("Unknown error, can not verify connection to host {0} - see Error Log for details", connection.getHost()));
 			OpenShiftCommonUIActivator.log(e);
 		}
-		setConnected(status);
 		return status;
 	}
 	
-	private IStatus tryConnection(boolean legacy){
-//		try {
-//			IConnection connection = null;
-//			if (isCreateNewConnection()
-//					|| isSelectedConnectionChanged()) {
-//				connection = createConnection(legacy);
-//			} else {
-//				connection = connection;
-//				connection.accept(new IConnectionVisitor() {
-//					@Override
-//					public void visit(KubernetesConnection connection) {
-//					}
-//					
-//					@Override
-//					public void visit(ExpressConnection connection) {
-//						connection.setRememberPassword(isRememberPassword());
-//					}
-//				});
-//			}
-//			connection.connect();
-//			this.newConnection = connection;
-//		} catch (OpenShiftTimeoutException e) {
-//			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-//					NLS.bind("Could not reach host at {0}. ExpressConnection timeouted.", host));
-//		} catch (InvalidCredentialsOpenShiftException e) {
-//			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-//					NLS.bind("The credentials for user {0} are not connected", username));
-//		} catch (OpenShiftException e) {
-//			OpenShiftCommonUIActivator.log(e);
-//			return StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, 
-//					NLS.bind("Unknown error, can not verify user {0} - see Error Log for details", username));
-//		}
-		return Status.OK_STATUS;
-	}
-	
-	private boolean isSelectedConnectionChanged() {
-		return false;
-//		return !password.equals(connection.getPassword());
-	}
-
 	/**
 	 * Updates the newConnection that this wizard operates on or creates a new one.
 	 * Will create a new newConnection if the wizard had no newConnection to operate

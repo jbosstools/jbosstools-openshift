@@ -10,12 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -25,12 +20,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.express.core.OpenshiftCoreUIIntegration;
+import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.SSLCertificateCallback;
@@ -56,42 +47,16 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		initCoreUIIntegration();
-        loadConnections();
 	}
 
 	protected void initCoreUIIntegration() {
 		/* 
 		 * TODO: replace by extension point
 		 */
-		OpenshiftCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
-		OpenshiftCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
-		OpenshiftCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());
-		OpenshiftCoreUIIntegration.getDefault().setSSLCertificateAuthorization(new SSLCertificateCallback());
-	}
-
-	
-	private void loadConnections() {
-		List<String> connectionUrls = new ArrayList<String>();
-		connectionUrls.addAll(Arrays.asList(ExpressPreferences.INSTANCE.getLegacyConnections()));
-		connectionUrls.addAll(Arrays.asList(ExpressPreferences.INSTANCE.getConnections()));
-
-		for (String url : connectionUrls) {
-		}
-		ConnectionsRegistrySingleton.getInstance();
-	}
-
-	private ExpressConnection createConnection(String url) {
-		try {
-			ConnectionURL connectionURL = ConnectionURL.forURL(url);
-			return new ExpressConnection(connectionURL.getUsername(), connectionURL.getScheme(), connectionURL.getHost(), null, null);
-		} catch (MalformedURLException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
-		} catch (UnsupportedEncodingException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
-		} catch (IllegalArgumentException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
-		}
-		return null;
+		ExpressCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
+		ExpressCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
+		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());
+		ExpressCoreUIIntegration.getDefault().setSSLCertificateAuthorization(new SSLCertificateCallback());
 	}
 
 	public void stop(BundleContext context) throws Exception {

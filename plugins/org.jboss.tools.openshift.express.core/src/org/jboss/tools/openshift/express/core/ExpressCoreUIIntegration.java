@@ -30,13 +30,13 @@ import com.openshift.client.IHttpClient.ISSLCertificateCallback;
  * 
  * @author Rob Stryker
  */
-public class OpenshiftCoreUIIntegration {
+public class ExpressCoreUIIntegration {
 	
 	 private static final String EGITUI_ID = 
 		      "org.jboss.tools.openshift.express.core.ui.egit";
 	 
 	// The singleton instance
-	private static OpenshiftCoreUIIntegration instance;
+	private static ExpressCoreUIIntegration instance;
 
 	private IConsoleUtility consoleUtil;
 	private IQuestionHandler questionHandler;
@@ -44,9 +44,9 @@ public class OpenshiftCoreUIIntegration {
 	private ISSLCertificateCallback sslCertificateCallback;
 	
 	// Access the singleton
-	public static OpenshiftCoreUIIntegration getDefault() {
+	public static ExpressCoreUIIntegration getDefault() {
 		if (instance == null)
-			instance = new OpenshiftCoreUIIntegration();
+			instance = new ExpressCoreUIIntegration();
 		return instance;
 	}
 		
@@ -94,6 +94,7 @@ public class OpenshiftCoreUIIntegration {
 		return Platform.getExtensionRegistry().getConfigurationElementsFor(name);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> T getConfigurationElement(IConfigurationElement[] configurations) throws CoreException {
 		T element = null;
 		if (configurations != null) {

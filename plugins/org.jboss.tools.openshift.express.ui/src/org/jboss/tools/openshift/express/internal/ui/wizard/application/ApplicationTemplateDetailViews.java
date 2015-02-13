@@ -41,7 +41,7 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.ContentProposalUtils;
@@ -71,11 +71,12 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		this.disabled = disabled;
 	}
 
-	protected void createViewControls(Composite parent, DataBindingContext dbc) {
-		downloadableCartridgeView.createControls(parent, dbc);
-		quickstartView.createControls(parent, dbc);
-		defaultView.createControls(parent, dbc);
-		emptyView.createControls(parent, dbc);
+	@Override
+	protected void createViewControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
+		downloadableCartridgeView.createControls(parent, detailViewModel, dbc);
+		quickstartView.createControls(parent, detailViewModel, dbc);
+		defaultView.createControls(parent, detailViewModel, dbc);
+		emptyView.createControls(parent, detailViewModel, dbc);
 	}
 
 	@Override
@@ -89,8 +90,8 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		private StyledText descriptionText;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
-			Composite container = setControl(super.createControls(parent, dbc));
+		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
+			Composite container = setControl(super.createControls(parent, detailViewModel, dbc));
 			GridLayoutFactory.fillDefaults()
 					.margins(8, 2).spacing(6, 2).applyTo(container);
 
@@ -138,7 +139,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		private Binding binding;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
@@ -171,7 +172,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 
 		private void createContentProposal(Text text) {
 			final ControlDecoration decoration = ContentProposalUtils.createContenProposalDecoration("History available", text);
-			ContentProposalUtils.createContentProposal(text, ExpressPreferences.INSTANCE.getDownloadableStandaloneCartUrls());
+			ContentProposalUtils.createContentProposal(text, ExpressCorePreferences.INSTANCE.getDownloadableStandaloneCartUrls());
 			text.addFocusListener(new FocusAdapter() {
 
 				@Override
@@ -279,7 +280,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		private IQuickstartApplicationTemplate template;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.margins(8, 2).numColumns(4).spacing(6, 2).applyTo(container);

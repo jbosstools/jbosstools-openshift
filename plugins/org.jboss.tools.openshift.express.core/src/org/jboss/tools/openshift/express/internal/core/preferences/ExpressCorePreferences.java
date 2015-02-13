@@ -26,7 +26,7 @@ import com.openshift.client.IApplication;
 /**
  * @author Andre Dietisheim
  */
-public class ExpressPreferences implements IExpressConstants {
+public class ExpressCorePreferences implements IExpressCoreConstants {
 
 	/** available connections */
 	public static final String CONNECTIONS = "org.jboss.tools.openshift.express.CONNECTION_NAMES";
@@ -46,18 +46,14 @@ public class ExpressPreferences implements IExpressConstants {
 
 	private static final String DEFAULT_TAIL_FILE_OPTIONS = "-f -n 100 */logs/*";
 
-	public static final ExpressPreferences INSTANCE = new ExpressPreferences();
+	public static final ExpressCorePreferences INSTANCE = new ExpressCorePreferences();
 
 	private final StringsPreferenceValue connectionsPreferenceValue = 
 			new StringsPreferenceValue('|', CONNECTIONS, ExpressCoreActivator.PLUGIN_ID);
-	private final StringsPreferenceValue legacyConnections = 
-			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, ExpressCoreActivator.PLUGIN_ID);
 
 	/* The following three keys are from the legacy UI plugin pref-store */
 	private final StringsPreferenceValue UI_connectionsPreferenceValue =
 			new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
-	private final StringsPreferenceValue UI_legacyConnections =
-			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, UI_PLUGIN_ID);
 
 	private final StringsPreferenceValue tailFileOptionsPreferenceValues;
 	private final Map<String, String> tailOptionsByUUID = new HashMap<String, String>();
@@ -68,7 +64,7 @@ public class ExpressPreferences implements IExpressConstants {
 	private final StringsPreferenceValue downloadableStandaloneCartUrls =
 			new StringsPreferenceValue('|', 10, DOWNLOADABLE_STANDALONECART_URLS, ExpressCoreActivator.PLUGIN_ID);;
 
-	private ExpressPreferences() {
+	private ExpressCorePreferences() {
 
 		this.tailFileOptionsPreferenceValues = 
 				new StringsPreferenceValue('|', TAIL_FILE_OPTIONS, ExpressCoreActivator.PLUGIN_ID);
@@ -239,15 +235,6 @@ public class ExpressPreferences implements IExpressConstants {
 
 	public void saveConnections(String[] connections) {
 		connectionsPreferenceValue.set(connections);
-	}
-
-	public String[] getLegacyConnections() {
-		String[] ret = legacyConnections.get();
-		return ret == null ? UI_legacyConnections.get() : ret;
-	}
-
-	public void saveLegacyConnections(String[] connections) {
-		legacyConnections.set(connections);
 	}
 
 	public void setClientReadTimeout(int timeout) {

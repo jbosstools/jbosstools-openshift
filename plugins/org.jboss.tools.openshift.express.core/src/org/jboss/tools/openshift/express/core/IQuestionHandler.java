@@ -18,7 +18,7 @@ package org.jboss.tools.openshift.express.core;
  * most likely done via a UI construct, no direct
  * references to the UI may be done in a core plugin. 
  * Instead, the UI plugin should set a proper handler
- * in the {@link OpenshiftCoreUIIntegration} class. 
+ * in the {@link ExpressCoreUIIntegration} class. 
  */
 public interface IQuestionHandler {
 	

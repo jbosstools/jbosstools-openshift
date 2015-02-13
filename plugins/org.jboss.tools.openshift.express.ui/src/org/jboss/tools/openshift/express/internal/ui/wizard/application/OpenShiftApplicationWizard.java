@@ -39,7 +39,7 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressPreferences;
+import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 import org.jboss.tools.openshift.express.internal.ui.WontOverwriteException;
@@ -212,7 +212,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		}
 		
 		String url = ((ICodeAnythingApplicationTemplate) template).getUrl();
-		ExpressPreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
+		ExpressCorePreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
 	}
 	
 	private boolean createServerAdapter() {

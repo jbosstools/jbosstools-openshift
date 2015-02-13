@@ -19,7 +19,7 @@ import java.util.Collection;
 public interface IConnectionsFactory {
 
 	
-	public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.connectionfactory.express";
+	public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.express.core.ConnectionFactory";
 	
 	/**
 	 * Creates a connections for the given host. Queries the connection

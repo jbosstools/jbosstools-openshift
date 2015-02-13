@@ -231,7 +231,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		
 		// connected status
 		final IObservableValue connectedStatusObservable =
-				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTED, IStatus.class).observe(pageModel);
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_CREATED, IStatus.class).observe(pageModel);
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			
 			@Override
@@ -305,9 +305,24 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
-//		event.doit = connect();
+		event.doit = connect();
 		if (!event.doit) {
 //			setInitialFocus();
+		}
+	}
+	
+	public boolean connect() {
+		try {
+			ConnectJob connectJob = new ConnectJob();
+			WizardUtils.runInWizard(
+					connectJob, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
+			return JobUtils.isOk(connectJob.getConnectionStatus());
+		} catch (InterruptedException e) {
+			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
+			return false;
+		} catch (InvocationTargetException e) {
+			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
+			return false;
 		}
 	}
 	
@@ -322,20 +337,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 //		} else {
 //			passwordCompositePasswordText.setFocus();
 //			passwordCompositePasswordText.selectAll();
-//		}
-//	}
-
-//	public boolean connect() {
-//		try {
-//			WizardUtils.runInWizard(
-//					new CreateConnectionJob(), new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
-//			return JobUtils.isOk(pageModel.getValid());
-//		} catch (InterruptedException e) {
-//			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
-//			return false;
-//		} catch (InvocationTargetException e) {
-//			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
-//			return false;
 //		}
 //	}
 
@@ -393,12 +394,16 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 		@Override
 		protected IStatus updateUI(IProgressMonitor monitor) {
-			if (!JobUtils.isOk(connectionStatus)) {
-				return Status.OK_STATUS;
-			}
-			pageModel.createOrUpdateConnection();
-
+//			if (!JobUtils.isOk(connectionStatus)) {
+//				return Status.OK_STATUS;
+//			}
+//			pageModel.createOrUpdateConnection();
+//
 			return Status.OK_STATUS;
+		}
+
+		public IStatus getConnectionStatus() {
+			return connectionStatus;
 		}
 	}
 }
