@@ -21,6 +21,7 @@ import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.osgi.framework.BundleContext;
@@ -60,10 +61,16 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 		}
 	}
 	
+	
 	private ExpressConnection createConnection(String url) {
 		try {
 			ConnectionURL connectionURL = ConnectionURL.forURL(url);
-			return new ExpressConnection(connectionURL.getUsername(), connectionURL.getScheme(), connectionURL.getHost(), null, null);
+			return new ExpressConnection(
+					connectionURL.getUsername(), 
+					connectionURL.getScheme(), 
+					connectionURL.getHost(), 
+					new LazyCredentialsPrompter(ExpressCoreUIIntegration.getDefault().getCredentialPrompter()), 
+					ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback());
 		} catch (MalformedURLException e) {
 			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
 		} catch (UnsupportedEncodingException e) {

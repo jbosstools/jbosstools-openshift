@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.test;
 
 import org.jboss.tools.openshift.express.test.core.EmbedCartridgeStrategyTest;
+import org.jboss.tools.openshift.express.test.core.LazyCredentialsPrompterTest;
 import org.jboss.tools.openshift.express.test.core.OpenShiftMarkerTest;
 import org.jboss.tools.openshift.express.test.core.StringsPreferenceValueTest;
 import org.jboss.tools.openshift.express.test.ui.ActionFilterAdapterFactoryTest;
@@ -32,6 +33,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		OpenShiftMavenProfileTests.class,
 		EmbedCartridgeStrategyTest.class,
 		ExpressExplorerContentProviderTest.class,
+		LazyCredentialsPrompterTest.class,
 		SSHUserConfigTest.class,
 //		ConnectionsModelTest.class,
 //		ConnectionTest.class,

@@ -30,7 +30,8 @@ public interface ICredentialsPrompter {
 	 * authentication. 
 	 * 
 	 * @param connection  The connection
+	 * @return true if prompted for password; false otherwise
 	 */
-	public void promptAndAuthenticate(ExpressConnection connection);
+	public boolean promptAndAuthenticate(ExpressConnection connection);
 	
 }

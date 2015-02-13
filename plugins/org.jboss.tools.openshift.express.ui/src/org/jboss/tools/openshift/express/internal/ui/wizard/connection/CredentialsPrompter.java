@@ -28,7 +28,7 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 	}
 	
 	@Override
-	public void promptAndAuthenticate(final ExpressConnection connection) {
+	public boolean promptAndAuthenticate(final ExpressConnection connection) {
 		Display.getDefault().syncExec(
 				new Runnable() {
 					public void run() {
@@ -43,6 +43,7 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 						WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
 					}
 				});
+		return true;
 	}
 
 }
