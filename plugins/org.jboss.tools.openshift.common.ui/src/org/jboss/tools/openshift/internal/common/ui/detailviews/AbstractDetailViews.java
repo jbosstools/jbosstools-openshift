@@ -52,7 +52,7 @@ public abstract class AbstractDetailViews {
 
 		detailViewModel.addValueChangeListener(onDetailViewModelChanged());
 		parent.setLayout(stackLayout);
-		createViewControls(parent, detailViewModel, dbc);
+		createViewControls(parent, dbc);
 		showView(null, currentView, dbc);
 	}
 
@@ -84,10 +84,10 @@ public abstract class AbstractDetailViews {
 		parent.layout(true, true);
 	}
 
-	protected void createViewControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
-		emptyView.createControls(parent, detailViewModel, dbc);
+	protected void createViewControls(Composite parent, DataBindingContext dbc) {
+		emptyView.createControls(parent, dbc);
 		for (IDetailView detailView : getDetailViews()) {
-			detailView.createControls(parent, detailViewModel, dbc);
+			detailView.createControls(parent, dbc);
 		}
 	};
 
@@ -129,7 +129,7 @@ public abstract class AbstractDetailViews {
 
 	public class EmptyView extends BaseDetailsView {
 
-		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.NONE));
 			GridLayoutFactory.fillDefaults()
 					.margins(6, 6).spacing(6, 6).applyTo(container);
@@ -143,7 +143,7 @@ public abstract class AbstractDetailViews {
 	
 	public interface IDetailView {
 
-		public Composite createControls(Composite parent, IObservableValue detailViewModel, DataBindingContext dbc);
+		public Composite createControls(Composite parent, DataBindingContext dbc);
 
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
 

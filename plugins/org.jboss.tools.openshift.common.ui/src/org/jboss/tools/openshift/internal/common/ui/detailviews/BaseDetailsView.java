@@ -21,11 +21,11 @@ public abstract class BaseDetailsView implements IDetailView {
 	private Composite control;
 
 	@Override
-	public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
+	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 	}
 
 	@Override
-	public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
+	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 	}
 
 	@Override
