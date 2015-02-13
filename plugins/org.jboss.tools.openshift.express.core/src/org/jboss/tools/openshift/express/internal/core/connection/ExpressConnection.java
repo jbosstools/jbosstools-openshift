@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.AbstractConnection;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
+import org.jboss.tools.openshift.common.core.connection.ICredentialsConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
@@ -56,7 +57,7 @@ import com.openshift.internal.client.utils.StreamUtils;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public class ExpressConnection extends AbstractConnection {
+public class ExpressConnection extends AbstractConnection implements ICredentialsConnection {
 
 	private String username;
 	private String password;
