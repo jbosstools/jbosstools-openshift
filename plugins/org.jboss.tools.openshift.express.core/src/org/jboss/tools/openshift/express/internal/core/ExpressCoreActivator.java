@@ -70,7 +70,7 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 					connectionURL.getScheme(), 
 					connectionURL.getHost(), 
 					new LazyCredentialsPrompter(ExpressCoreUIIntegration.getDefault().getCredentialPrompter()), 
-					ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback());
+					new LazySSLCertificateCallback(ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
 		} catch (MalformedURLException e) {
 			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", url), e);
 		} catch (UnsupportedEncodingException e) {
