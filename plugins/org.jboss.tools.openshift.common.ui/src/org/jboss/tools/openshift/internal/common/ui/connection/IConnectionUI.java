@@ -14,18 +14,16 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews.IDetailView;
 
 /**
- * A factory that can create connections
+ * A UI that can display/edit a given connection instance. All implementors are
+ * able to display different types of connections and are displayed by
+ * {@link ConnectionUIViews}
  * 
  * @author Andre Dietisheim
+ * 
+ * @see IConnection
+ * @see ConnectionUIViews
+ * @see IDetailView#isViewFor(Object)
  */
 public interface IConnectionUI<T extends IConnection> extends IDetailView {
-	
-	/**
-	 * Edits the given connection.
-	 * 
-	 * @param connection
-	 * @return
-	 */
-	public void updateConnection(T connection);
 
 }

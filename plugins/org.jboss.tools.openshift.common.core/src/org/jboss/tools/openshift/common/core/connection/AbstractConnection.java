@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2014 Red Hat, Inc.
+ * Copyright (c) 2012-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.core.connection;
 
+import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 
@@ -18,8 +19,10 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public abstract class AbstractConnection implements IConnection {
+public abstract class AbstractConnection extends ObservablePojo implements IConnection {
 
+	public static final String PROPERTY_HOST = "host";
+	
 	private String host;
 
 	protected AbstractConnection(String host) {
@@ -50,7 +53,9 @@ public abstract class AbstractConnection implements IConnection {
 	}
 
 	public String setHost(String host) {
-		this.host = UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS);
+		firePropertyChange(PROPERTY_HOST, 
+				this.host,
+				this.host = UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
 		return host;
 	}
 

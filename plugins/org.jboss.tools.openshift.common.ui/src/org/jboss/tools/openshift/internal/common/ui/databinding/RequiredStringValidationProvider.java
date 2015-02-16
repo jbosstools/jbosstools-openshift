@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.databinding;
 
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -29,26 +27,18 @@ public class RequiredStringValidationProvider extends MultiValidator {
 
 	public RequiredStringValidationProvider(IObservableValue value, String name) {
 		this.observableValue = value;
+		observableValue.getValue();
 		this.name = name;
 	}
 
 	@Override
 	protected IStatus validate() {
-		if (!(observableValue.getValue() instanceof String)) {
-			return ValidationStatus.cancel("You have to provide a " + name);
-		}
-		String string = (String) observableValue.getValue();
-		if (string.isEmpty()) {
+		Object value = observableValue.getValue();
+		if (!(value instanceof String)
+				|| ((String) value).isEmpty()) {
 			return ValidationStatus.cancel("You have to provide a " + name);
 		}
 		return ValidationStatus.ok();
-	}
-
-	@Override
-	public IObservableList getTargets() {
-		IObservableList targets = new WritableList();
-		targets.add(observableValue);
-		return targets;
 	}
 
 }		

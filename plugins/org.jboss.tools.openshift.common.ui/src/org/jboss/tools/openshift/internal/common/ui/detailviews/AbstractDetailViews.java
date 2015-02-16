@@ -68,18 +68,20 @@ public abstract class AbstractDetailViews {
 		};
 	}
 
-	protected void showView(IObservableValue triggeringObservable, DataBindingContext dbc) {
-		showView(triggeringObservable, getView(triggeringObservable), dbc);
+	protected void showView(IObservableValue detailViewsModel, DataBindingContext dbc) {
+		showView(detailViewsModel, getView(detailViewsModel), dbc);
 	}
 
-	protected void showView(IObservableValue triggeringObservable, IDetailView view, DataBindingContext dbc) {
+	protected void showView(IObservableValue detailViewsModel, IDetailView view, DataBindingContext dbc) {
 		if (view == null
 				|| view.getControl() == null
-				|| triggeringObservable == null) {
+				|| detailViewsModel == null
+				|| view.equals(currentView)) {
 			return;
 		}
-		currentView.onInVisible(triggeringObservable, dbc);
-		view.onVisible(triggeringObservable, dbc);
+		currentView.onInVisible(detailViewsModel, dbc);
+		this.currentView = view;
+		view.onVisible(detailViewsModel, dbc);
 		stackLayout.topControl = view.getControl();
 		parent.layout(true, true);
 	}
@@ -91,12 +93,12 @@ public abstract class AbstractDetailViews {
 		}
 	};
 
-	protected IDetailView getView(IObservableValue triggeringObservable) {
-		return getViewFor(triggeringObservable, getDetailViews());
+	protected IDetailView getView(IObservableValue detailViewsModel) {
+		return getViewFor(detailViewsModel, getDetailViews());
 	};
 
-	protected IDetailView getViewFor(IObservableValue triggeringObservable, IDetailView... detailViews) {
-		Object value = triggeringObservable.getValue();
+	protected IDetailView getViewFor(IObservableValue detailViewsModel, IDetailView... detailViews) {
+		Object value = detailViewsModel.getValue();
 		IDetailView view = emptyView;
 
 		for(IDetailView detailView : detailViews) {

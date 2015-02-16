@@ -19,13 +19,15 @@ package org.jboss.tools.openshift.common.core.connection;
  */
 public class AutomaticConnectionFactoryMarker implements IConnectionFactory {
 
-	private ConnectionsFactoryTracker connectionsFactory;
-
-	public AutomaticConnectionFactoryMarker() {
-		this.connectionsFactory = new ConnectionsFactoryTracker();
-		this.connectionsFactory.open();
+	private static final AutomaticConnectionFactoryMarker INSTANCE = new AutomaticConnectionFactoryMarker();
+	
+	public static AutomaticConnectionFactoryMarker getInstance() {
+		return INSTANCE;
 	}
-
+	
+	private AutomaticConnectionFactoryMarker() {
+	}
+	
 	@Override
 	public String getName() {
 		return "<Automatic>";

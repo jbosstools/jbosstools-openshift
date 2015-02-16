@@ -5,10 +5,10 @@ Bundle-SymbolicName: org.jboss.tools.openshift.client;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: %Bundle-Vendor
-Bundle-ClassPath: lib/commons-compress-1.8.1.jar,
+Bundle-ClassPath: lib/openshift-java-client-3.0.0-SNAPSHOT.jar,
+ lib/commons-compress-1.8.1.jar,
  lib/jboss-dmr-1.2.0.Final.jar,
  lib/log4j-1.2.17.jar,
- lib/openshift-java-client-3.0.0-SNAPSHOT.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/slf4j-log4j12-1.6.1.jar,
  .
@@ -82,7 +82,10 @@ Export-Package: com.openshift.client;
    com.openshift3.internal.client,
    com.openshift3.client.images,
    com.openshift3.client,
-   org.jboss.dmr"
+   org.jboss.dmr",
+ com.openshift3.internal.client.model.build,
+ com.openshift3.internal.client.model.properties,
+ com.openshift3.internal.util
 Import-Package: org.eclipse.debug.internal.core,
  org.eclipse.osgi.service.debug;version="1.2.0",
  org.osgi.framework;version="1.8.0",

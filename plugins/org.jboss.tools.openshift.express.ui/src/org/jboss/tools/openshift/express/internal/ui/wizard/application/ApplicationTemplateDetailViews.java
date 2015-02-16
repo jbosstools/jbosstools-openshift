@@ -52,6 +52,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
@@ -216,10 +217,7 @@ public class ApplicationTemplateDetailViews extends AbstractDetailViews {
 		
 		@Override
 		public void onInVisible(IObservableValue applicationTemplateObservable, DataBindingContext dbc) {
-			if (DisposeUtils.isDisposed(binding)) {
-				return;
-			}
-			binding.dispose();
+			DataBindingUtils.dispose(binding);
 		}
 
 

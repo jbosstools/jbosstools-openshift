@@ -59,6 +59,10 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class ExpressConnection extends AbstractConnection implements ICredentialsConnection {
 
+	private static final String PROPERTY_USERNAME = "username";
+	private static final String PROPERTY_PASSWORD = "password";
+	private static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+	
 	private String username;
 	private String password;
 	private IUser user;
@@ -120,7 +124,7 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
+		firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
 		clearUser();
 	}
 
@@ -130,7 +134,7 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
 		this.passwordLoaded = true;
 		clearUser();
 	}
@@ -166,7 +170,7 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 	}
 
 	public final void setRememberPassword(boolean rememberPassword) {
-		this.rememberPassword = rememberPassword;
+		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, this.rememberPassword, this.rememberPassword = rememberPassword);
 	}
 
 	public boolean canPromptForPassword() {

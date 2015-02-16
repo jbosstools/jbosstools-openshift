@@ -10,13 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.ValidationStatusProvider;
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -27,7 +23,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.IConnectionUI;
@@ -35,15 +30,17 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 
 /**
  * @author Andre Dietisheim
  */
 public class ExpressConnectionUI extends BaseDetailsView implements IConnectionUI<ExpressConnection> {
 
-	private DataBindingContext privateDbc;
 	private Text usernameText;
 	private Text passwordText;
+	private Binding usernameBinding;
+	private Binding passwordBinding;
 	
 	public ExpressConnectionUI() {
 	}
@@ -53,7 +50,7 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
-		
+
 		// username
 		Label rhLoginLabel = new Label(composite, SWT.NONE);
 		rhLoginLabel.setText("&Username:");
@@ -62,7 +59,7 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		this.usernameText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
-		
+
 		// password
 		Label passwordLabel = new Label(composite, SWT.NONE);
 		passwordLabel.setText("&Password:");
@@ -77,20 +74,24 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
 
-		DataBindingUtils.observeAndPrintValidationState("", dbc);
 		return composite;
 	}
 
 	@Override
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
-		createBindings(detailViewModel);
-		addValidationStatusProviders(privateDbc.getValidationStatusProviders(), dbc);
+		createBindings(detailViewModel, dbc);
+		System.err.println("onVisible: " + getClass().getSimpleName());
 	}
 
 	@Override
 	public void onInVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
-//		removeValidationStatusProviders(privateDbc.getValidationStatusProviders(), dbc);
-		disposeBindings(detailViewModel);
+		disposeBindings();
+		System.err.println("onInVisible: " + getClass().getSimpleName());
+	}
+
+	private void disposeBindings() {
+		DataBindingUtils.dispose(usernameBinding);
+		DataBindingUtils.dispose(passwordBinding);
 	}
 
 	@Override
@@ -99,52 +100,29 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 	}
 
 	@Override
-	public void updateConnection(ExpressConnection connection) {
+	public void dispose() {
+		disposeBindings();
 	}
 
-	private void createBindings(IObservableValue detailViewModel) {
-		this.privateDbc = new DataBindingContext();
-
+	private void createBindings(IObservableValue detailViewModel, DataBindingContext dbc) {
 		// username
-		Binding usernameBinding = ValueBindingBuilder
+		this.usernameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
 				.converting(new TrimmingStringConverter())
 				.validatingAfterConvert(new RequiredStringValidator("username"))
-				.to(PojoProperties.value(ExpressConnection.class, "username").observeDetail(detailViewModel))
-				.in(privateDbc);
-		ControlDecorationSupport
-				.create(usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+				.to(BeanProperties.value(ExpressConnection.class, "username").observeDetail(detailViewModel))
+				.in(dbc);
+		ControlDecorationSupport.create(
+				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		// password
-		Binding passwordBinding = ValueBindingBuilder
+		this.passwordBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
 				.converting(new TrimmingStringConverter())
 				.validatingAfterConvert(new RequiredStringValidator("password"))
-				.to(PojoProperties.value(ExpressConnection.class, "password").observeDetail(detailViewModel))
-				.in(privateDbc);
-		ControlDecorationSupport
-				.create(passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
-	}
-	
-	private void disposeBindings(IObservableValue detailsViewModel) {
-		privateDbc.dispose();
-	}
-	
-	protected void addValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<ValidationStatusProvider>(providers)) {
-			dbc.addValidationStatusProvider(provider);
-		}
-	}
-
-	protected void removeValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<ValidationStatusProvider>(providers)) {
-			dbc.removeValidationStatusProvider(provider);
-		}
-	}
-
-	@Override
-	public void dispose() {
-		privateDbc.dispose();
+				.to(BeanProperties.value(ExpressConnection.class, "password").observeDetail(detailViewModel))
+				.in(dbc);
+		ControlDecorationSupport.create(
+				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 }

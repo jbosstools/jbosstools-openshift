@@ -53,6 +53,7 @@ import org.jboss.tools.common.ui.databinding.StatusSeverity2BooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
@@ -83,7 +84,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	protected ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
-		super("Sign in to OpenShift", "Please provide your OpenShift credentials.", "Server Connection",
+		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection",
 				wizard);
 		this.pageModel = new ConnectionWizardPageModel(wizardModel, allowConnectionChange);
 		/*
@@ -162,7 +163,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 		});
-		connectionFactoriesViewer.setInput(pageModel.getConnectionFactories());
+		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
 		ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(connectionFactoriesViewer))
 				.to(BeanProperties.value(
@@ -170,7 +171,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 						.observe(pageModel))
 				.in(dbc);
 		
-		// use default server
+		// server
 		Button useDefaultServerCheckbox = new Button(parent, SWT.CHECK);
 		useDefaultServerCheckbox.setText("Use default Server");
 		GridDataFactory.fillDefaults()
@@ -180,8 +181,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(
 						ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST, IConnection.class).observe(pageModel))
 				.in(dbc);
-		
-		// server
+
 		Label serverLabel = new Label(parent, SWT.NONE);
 		serverLabel.setText("Server:");
 		GridDataFactory.fillDefaults()
@@ -229,23 +229,30 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.converting(new StatusSeverity2BooleanConverter(IStatus.OK))
 				.in(dbc);		
 		
-		// connected status
+		// connection creation error 
+		final IObservableValue connectionCreatedStatusObservable =
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_CREATION_ERROR, IStatus.class).observe(pageModel);
+		dbc.addValidationStatusProvider(new MultiValidator() {
+			
+			@Override
+			protected IStatus validate() {
+				return (IStatus) connectionCreatedStatusObservable.getValue();
+			}
+		});
+		
+		// connect error
 		final IObservableValue connectedStatusObservable =
-				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_CREATED, IStatus.class).observe(pageModel);
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECT_ERROR, IStatus.class).observe(pageModel);
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			
 			@Override
 			protected IStatus validate() {
 				IStatus connectedStatus = (IStatus) connectedStatusObservable.getValue();
-				if (connectedStatus == null) {
-					return ValidationStatus.cancel("Please either select an existing connection or provide a valid OpenShift host.");
-				} else {
-					return connectedStatus;
-				}
+				return connectedStatus;
 			}
 		});
-		
-		// connection details
+
+		// connection UIs
 		final Group connectionUIsContainer = new Group(parent, SWT.NONE);
 		connectionUIsContainer.setText("Authentication");
 		GridDataFactory.fillDefaults()
@@ -255,7 +262,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				, connectionUIsContainer
 				, dbc)
 		.createControls();
-		
 	}
 	
 	private SelectionListener onTestConnection() {
@@ -316,7 +322,12 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			ConnectJob connectJob = new ConnectJob();
 			WizardUtils.runInWizard(
 					connectJob, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
-			return JobUtils.isOk(connectJob.getConnectionStatus());
+			boolean connected = JobUtils.isOk(connectJob.getConnectionStatus());
+			if (connected) {
+				return saveConnection(pageModel.getConnection());
+			} else {
+				return false;
+			}
 		} catch (InterruptedException e) {
 			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
 			return false;
@@ -326,6 +337,13 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 	
+	private boolean saveConnection(IConnection connection) {
+		if (connection != null) {
+			ConnectionsRegistrySingleton.getInstance().add(connection);
+		}
+		return connection != null;
+	}
+
 //	private void setInitialFocus() {
 //		if (pageModel.isCreateNewConnection()) {
 //			if (connectionCompositeUsernameText.getText().isEmpty()) {

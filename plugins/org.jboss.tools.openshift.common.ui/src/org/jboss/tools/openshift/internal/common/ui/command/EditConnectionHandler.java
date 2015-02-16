@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.common.ui.command;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -34,6 +35,6 @@ public class EditConnectionHandler extends AbstractHandler {
 	protected Object openConnectionWizard(IConnection connection, ExecutionEvent event) {
 		final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection);
 		WizardUtils.openWizardDialog(connectToOpenShiftWizard, HandlerUtil.getActiveShell(event));
-		return null;
+		return Status.OK_STATUS;
 	}
 }

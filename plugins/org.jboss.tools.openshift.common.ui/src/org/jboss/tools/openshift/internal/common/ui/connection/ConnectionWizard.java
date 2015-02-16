@@ -49,8 +49,4 @@ public class ConnectionWizard extends Wizard {
 	public void addPages() {
 		addPage(page);
 	}
-	
-	public IConnection getConnection() {
-		return page.getConnection();
-	}
 }

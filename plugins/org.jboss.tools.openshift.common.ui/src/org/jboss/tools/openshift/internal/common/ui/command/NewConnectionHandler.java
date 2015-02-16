@@ -14,11 +14,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 
 /**
@@ -29,13 +26,7 @@ public class NewConnectionHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final ConnectionWizard connectionWizard = new ConnectionWizard(null);
-		int returnValue = WizardUtils.openWizardDialog(connectionWizard, HandlerUtil.getActiveShell(event));
-		if (returnValue == Dialog.OK) {
-			final IConnection connection = connectionWizard.getConnection();
-			if (connection != null) {
-				ConnectionsRegistrySingleton.getInstance().add(connection);
-			}
-		}
+		WizardUtils.openWizardDialog(connectionWizard, HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;
 	}
 }
