@@ -12,21 +12,26 @@ package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.jboss.tools.openshift.core.connection.Connection;
 
-/**
- * @author Xavier Coulon
- * @author Jeff Cantrill
- * 
- */
+import com.openshift3.client.model.IResource;
+
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-//		if (adapterType == IPropertySource.class) {
-//			if (adaptableObject instanceof IDeploymentConfig){
-//				return new DeploymentConfigPropertySource((DeploymentConfig) adaptableObject);
-//			}
-//		}
+		if (adapterType == IPropertySource.class) {
+			if(adaptableObject instanceof Connection){
+				return new ConnectionPropertySource((Connection) adaptableObject);
+			}
+			if(adaptableObject instanceof IResource){
+				IResource resource = (IResource) adaptableObject;
+				switch(resource.getKind()){
+				default:
+					return new DefaultResourcePropertySource(resource);
+				}
+			}
+		}
 		return null;
 	}
 

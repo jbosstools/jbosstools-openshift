@@ -112,12 +112,19 @@
 	<extension
 		point="org.eclipse.core.runtime.adapters">
 		<factory
-              adaptableType="com.openshift.internal.kube.Resource"
+              adaptableType="com.openshift3.client.model.IResource"
               class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
 			<adapter
 				type="org.eclipse.ui.views.properties.IPropertySource">
 			</adapter>
 		</factory>
+  <factory
+        adaptableType="org.jboss.tools.openshift.core.connection.Connection"
+        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
+     <adapter
+           type="org.eclipse.ui.views.properties.IPropertySource">
+     </adapter>
+  </factory>
 	</extension>
 	<!-- definitions -->
 	<extension
