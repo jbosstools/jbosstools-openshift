@@ -14,12 +14,12 @@ import com.openshift3.client.model.IResource;
 
 public class DefaultResourcePropertySource extends ResourcePropertySource {
 
-	protected DefaultResourcePropertySource(IResource resource) {
+	public DefaultResourcePropertySource(IResource resource) {
 		super(resource);
 	}
 
 	@Override
-	protected IPropertyDescriptor[] getResourcePropertyDescriptors() {
+	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return null;
 	}
 

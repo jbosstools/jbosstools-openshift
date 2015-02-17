@@ -62,6 +62,7 @@ Export-Package: com.openshift.client;
  com.openshift3.client.capability.server;uses:="com.openshift3.client.capability",
  com.openshift3.client.images,
  com.openshift3.client.model;uses:="com.openshift3.client.capability,com.openshift3.client.images,com.openshift3.client",
+ com.openshift3.client.model.build,
  com.openshift3.internal.client;
   uses:="com.openshift3.client.capability,
    com.openshift.client,
