@@ -16,6 +16,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift3.client.model.IBuildConfig;
 import com.openshift3.client.model.IResource;
+import com.openshift3.client.model.IService;
 
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 
@@ -29,6 +30,7 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 				IResource resource = (IResource) adaptableObject;
 				switch(resource.getKind()){
 				case BuildConfig: return new BuildConfigPropertySource((IBuildConfig)resource);
+				case Service: return new ServicePropertySource((IService) resource);
 				default:
 					return new DefaultResourcePropertySource(resource);
 				}
