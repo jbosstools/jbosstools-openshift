@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.openshift3.client.model.IBuildConfig;
+import com.openshift3.client.model.build.BuildTriggerType;
+import com.openshift3.client.model.build.IBuildTrigger;
 import com.openshift3.client.model.build.ICustomBuildStrategy;
 import com.openshift3.client.model.build.IDockerBuildStrategy;
 import com.openshift3.client.model.build.IGitBuildSource;
@@ -22,6 +25,7 @@ import com.openshift3.client.model.build.ISTIBuildStrategy;
 
 public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 	
+	private static final String TRIGGERS = "Triggers";
 	private static final String IMAGE = "Image";
 	private static final String ENVIRONMENT_VARIABLES = "Environment Variables";
 	private static final String STRATEGY = "Strategy";
@@ -36,6 +40,7 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		List<IPropertyDescriptor> all = new ArrayList<IPropertyDescriptor>();
+		all.addAll(getBuildTriggerPropertyDescriptors());
 		switch(config.getBuildStrategy().getType()){
 		case Custom:
 			all.addAll(getCustomPropertyDescriptors());
@@ -56,6 +61,13 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 		}
 		all.add(new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.OUTPUT_REPO_NAME, "Image Stream Name", "Output"));
 		return all.toArray(new IPropertyDescriptor[]{});
+	}
+
+	private List<IPropertyDescriptor> getBuildTriggerPropertyDescriptors() {
+		return Arrays.asList(new IPropertyDescriptor[]{
+				new ExtTextPropertyDescriptor(Ids.TRIGGERS_WEB, "Webhooks", TRIGGERS),
+				new ExtTextPropertyDescriptor(Ids.TRIGGERS_IMAGE_CHANGE, "Image Change", TRIGGERS)
+		});
 	}
 
 	private List<IPropertyDescriptor> getGitBuildSource() {
@@ -96,6 +108,17 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 				return config.<ISTIBuildStrategy>getBuildStrategy().getImage();
 			case STI_ENV:
 				return new KeyValuePropertySource(config.<ISTIBuildStrategy>getBuildStrategy().getEnvironmentVariables());
+			case TRIGGERS_IMAGE_CHANGE:
+				return new ImageChangePropertySource(config.getBuildTriggers());
+			case TRIGGERS_WEB:
+				List<String> webtriggers = new ArrayList<String>();
+				for (IBuildTrigger trigger : config.getBuildTriggers()) {
+					BuildTriggerType type = trigger.getType();
+					if(type == BuildTriggerType.generic || type == BuildTriggerType.github){
+						webtriggers.add(type.toString());
+					}
+				}
+				return StringUtils.join(webtriggers, ",");
 			default:
 			}
 		}
@@ -141,6 +164,8 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 		STI_ENV, 
 		SOURCE_TYPE, 
 		SOURCE_GIT_REF, 
-		SOURCE_URI
+		SOURCE_URI, 
+		TRIGGERS_WEB,
+		TRIGGERS_IMAGE_CHANGE
 	}
 }
