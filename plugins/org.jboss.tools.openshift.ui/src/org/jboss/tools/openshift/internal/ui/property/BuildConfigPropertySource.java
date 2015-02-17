@@ -54,6 +54,7 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 			break;
 		default:
 		}
+		all.add(new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.OUTPUT_REPO_NAME, "Image Stream Name", "Output"));
 		return all.toArray(new IPropertyDescriptor[]{});
 	}
 
@@ -80,6 +81,8 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 				return config.<IDockerBuildStrategy>getBuildStrategy().getContextDir();
 			case DOCKER_IMAGE:
 				return config.<IDockerBuildStrategy>getBuildStrategy().getBaseImage();
+			case OUTPUT_REPO_NAME:
+				return config.getOutputRepositoryName();
 			case SOURCE_TYPE:
 				return config.getBuildSource().getType();
 			case SOURCE_URI:
@@ -132,6 +135,7 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 		CUSTOM_ENV,
 		DOCKER_CONTEXT_DIR, 
 		DOCKER_IMAGE,
+		OUTPUT_REPO_NAME,
 		STI_SCRIPT_LOCATION,
 		STI_IMAGE,
 		STI_ENV, 
