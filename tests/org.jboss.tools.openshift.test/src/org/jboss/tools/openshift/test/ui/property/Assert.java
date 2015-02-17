@@ -21,10 +21,8 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 public class Assert {
 
-	public static void assertPropertyDescriptors(IPropertyDescriptor[] exp, IPropertyDescriptor[] act){
-		assertNotNull("Act is null", act);
-		assertEquals("The array lengths are not the same",exp.length, act.length);
-		List<String> actToString = new ArrayList<String>(exp.length);
+	public static void assertPropertyDescriptorsContains(IPropertyDescriptor[] exp, IPropertyDescriptor[] act){
+		List<String> actToString = new ArrayList<String>(act.length);
 		for (IPropertyDescriptor desc : act) {
 			actToString.add(propertyDescriptorToString(desc));
 		}
@@ -33,9 +31,17 @@ public class Assert {
 			assertTrue(String.format("Exp. property descriptor: %s", expString), actToString.contains(expString));
 		}
 	}
+
+	public static void assertPropertyDescriptorsEquals(IPropertyDescriptor[] exp, IPropertyDescriptor[] act){
+		assertNotNull("Act is null", act);
+		assertEquals("The array lengths are not the same",exp.length, act.length);
+		assertPropertyDescriptorsContains(exp, act);
+	}
 	
 	private static String propertyDescriptorToString(IPropertyDescriptor desc){
-		ToStringBuilder builder = new ToStringBuilder(desc, StandardToStringStyle.SIMPLE_STYLE);
-		return builder.toString();
+		return new ToStringBuilder(desc, StandardToStringStyle.SIMPLE_STYLE)
+		.append("category",desc.getCategory())
+		.append("id",desc.getId())
+		.append("displayname", desc.getDisplayName()).toString();
 	}
 }

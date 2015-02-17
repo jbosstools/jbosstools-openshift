@@ -22,9 +22,11 @@ import org.junit.runner.RunWith;
 
 import com.openshift3.client.images.DockerImageURI;
 import com.openshift3.client.model.IBuildConfig;
+import com.openshift3.client.model.build.BuildSourceType;
 import com.openshift3.client.model.build.BuildStrategyType;
 import com.openshift3.client.model.build.ICustomBuildStrategy;
 import com.openshift3.client.model.build.IDockerBuildStrategy;
+import com.openshift3.client.model.build.IGitBuildSource;
 import com.openshift3.client.model.build.ISTIBuildStrategy;
 
 import org.jboss.tools.openshift.internal.ui.property.BuildConfigPropertySource;
@@ -48,6 +50,8 @@ public class BuildConfigPropertySourceTest {
 		annotations.put("efg", "def");
 		
 		when(resource.getSourceURI()).thenReturn("git://foo.bar");
+		givenGitBuildSource();
+		givenSTIBuildStrategy();
 		source = new BuildConfigPropertySource(resource);
 	}
 	private IDockerBuildStrategy givenDockerbuBuildStrategy(){
@@ -83,6 +87,15 @@ public class BuildConfigPropertySourceTest {
 		return strategy;
 	}
 	
+	private IGitBuildSource givenGitBuildSource(){
+		IGitBuildSource source = mock(IGitBuildSource.class);
+		when(source.getType()).thenReturn(BuildSourceType.Git);
+		when(source.getRef()).thenReturn("altbranch");
+		when(source.getURI()).thenReturn("git://foo.bar");
+		when(resource.getBuildSource()).thenReturn(source);
+		return source;
+	}
+	
 	@Test
 	public void getSTIPropertyValues(){
 		ISTIBuildStrategy strategy = givenSTIBuildStrategy();
@@ -109,7 +122,7 @@ public class BuildConfigPropertySourceTest {
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.DOCKER_CONTEXT_DIR, "Context Dir", "Strategy"),
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.DOCKER_IMAGE, "Image", "Strategy")
 		};
-		assertPropertyDescriptors(exp, source.getResourcePropertyDescriptors());
+		assertPropertyDescriptorsContains(exp, source.getResourcePropertyDescriptors());
 	}
 	
 	@Test
@@ -122,7 +135,7 @@ public class BuildConfigPropertySourceTest {
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.STI_IMAGE, "Image", "Strategy"),
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.STI_ENV, "Environment Variables", "Strategy")
 		};
-		assertPropertyDescriptors(exp, source.getResourcePropertyDescriptors());
+		assertPropertyDescriptorsContains(exp, source.getResourcePropertyDescriptors());
 	}
 	
 	@Test
@@ -144,7 +157,28 @@ public class BuildConfigPropertySourceTest {
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.CUSTOM_IMAGE, "Image", "Strategy"),
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.CUSTOM_ENV, "Environment Variables", "Strategy")
 		};
-		assertPropertyDescriptors(exp, source.getResourcePropertyDescriptors());
+		assertPropertyDescriptorsContains(exp, source.getResourcePropertyDescriptors());
+	}
+	
+	@Test
+	public void getGitSourcePropertyValues(){
+		IGitBuildSource buildSource = givenGitBuildSource();
+		assertEquals(BuildSourceType.Git, source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_TYPE));
+		assertEquals(buildSource.getRef(), source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_GIT_REF));
+		assertEquals(buildSource.getURI(), source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_URI));
+	}
+	
+	@Test
+	public void getPropertyDescriptorForGitBuildSource(){
+		givenGitBuildSource();
+		
+		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
+				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.SOURCE_TYPE, "Type", "Source"),
+				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.SOURCE_GIT_REF, "Ref", "Source"),
+				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.SOURCE_URI, "URI", "Source")
+		};
+		assertPropertyDescriptorsContains(exp, source.getResourcePropertyDescriptors());
+		
 	}
 
 }
