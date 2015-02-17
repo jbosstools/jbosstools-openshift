@@ -49,6 +49,7 @@ public class BuildConfigPropertySourceTest {
 		annotations.put("xyz", "abc");
 		annotations.put("efg", "def");
 		
+		when(resource.getOutputRepositoryName()).thenReturn("outputrepo");
 		when(resource.getSourceURI()).thenReturn("git://foo.bar");
 		givenGitBuildSource();
 		givenSTIBuildStrategy();
@@ -97,6 +98,10 @@ public class BuildConfigPropertySourceTest {
 	}
 	
 	@Test
+	public void getOutputPropertyValues(){
+		assertEquals("outputrepo", resource.getOutputRepositoryName());
+	}
+	@Test
 	public void getSTIPropertyValues(){
 		ISTIBuildStrategy strategy = givenSTIBuildStrategy();
 		assertEquals(BuildStrategyType.STI, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
@@ -120,7 +125,8 @@ public class BuildConfigPropertySourceTest {
 		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.Type, "Type", "Strategy"),
 				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.DOCKER_CONTEXT_DIR, "Context Dir", "Strategy"),
-				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.DOCKER_IMAGE, "Image", "Strategy")
+				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.DOCKER_IMAGE, "Image", "Strategy"),
+				new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.OUTPUT_REPO_NAME, "Image Stream Name", "Output")
 		};
 		assertPropertyDescriptorsContains(exp, source.getResourcePropertyDescriptors());
 	}
@@ -180,5 +186,4 @@ public class BuildConfigPropertySourceTest {
 		assertPropertyDescriptorsContains(exp, source.getResourcePropertyDescriptors());
 		
 	}
-
 }
