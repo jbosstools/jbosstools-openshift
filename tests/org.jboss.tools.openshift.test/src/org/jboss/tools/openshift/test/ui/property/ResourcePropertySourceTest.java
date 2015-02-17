@@ -75,7 +75,7 @@ public class ResourcePropertySourceTest {
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "efg"), "efg", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "foo"), "foo", "Labels")
 		};
-		assertPropertyDescriptors(exp, source.getPropertyDescriptors());
+		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}
 	
 	private static class ResourcePropertySourceImpl extends ResourcePropertySource {
