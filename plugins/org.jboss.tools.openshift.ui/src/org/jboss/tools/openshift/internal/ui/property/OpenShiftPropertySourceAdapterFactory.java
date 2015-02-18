@@ -15,6 +15,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift3.client.model.IBuildConfig;
+import com.openshift3.client.model.IPod;
 import com.openshift3.client.model.IReplicationController;
 import com.openshift3.client.model.IResource;
 import com.openshift3.client.model.IService;
@@ -34,7 +35,10 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 					return new BuildConfigPropertySource((IBuildConfig)resource);
 				case ReplicationController: 
 					return new ReplicationControllerPropertySource((IReplicationController) resource);
-				case Service: return new ServicePropertySource((IService) resource);
+				case Service: 
+					return new ServicePropertySource((IService) resource);
+				case Pod:
+					return new PodPropertySource((IPod)resource);
 				default:
 					return new ResourcePropertySource<IResource>(resource);
 				}
