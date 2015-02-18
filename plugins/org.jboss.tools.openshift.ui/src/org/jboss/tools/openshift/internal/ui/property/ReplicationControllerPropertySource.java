@@ -12,33 +12,34 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
-import com.openshift3.client.model.IService;
+import com.openshift3.client.model.IReplicationController;
 
-public class ServicePropertySource extends ResourcePropertySource<IService>{
+public class ReplicationControllerPropertySource extends ResourcePropertySource<IReplicationController> {
 
-	public ServicePropertySource(IService resource) {
+	public ReplicationControllerPropertySource(IReplicationController resource) {
 		super(resource);
 	}
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
+				new TextPropertyDescriptor("replicas", "Replicas"),
 				new TextPropertyDescriptor("selector", "Selector"),
-				new TextPropertyDescriptor("port", "Port"),
-				new TextPropertyDescriptor("portalIp", "IP"),
-				new TextPropertyDescriptor("containerPort", "Container Port")
+				new TextPropertyDescriptor("images", "Image(s)"),
 		};
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if("portalIp".equals(id)) return getResource().getPortalIP();
-		if("containerPort".equals(id)) return getResource().getContainerPort();
-		if("selector".equals(id)){
-			return StringUtils.serialize(getResource().getSelector());
+		if("replicas".equals(id)){
+			return String.format("%s current / %s desired", getResource().getCurrentReplicaCount(), getResource().getDesiredReplicaCount());
 		}
-		if("port".equals(id))
-			return getResource().getPort();
+		if("selector".equals(id)){
+			return StringUtils.serialize(getResource().getReplicaSelector());
+		}
+		if("images".equals(id)){
+			return  org.apache.commons.lang.StringUtils.join(getResource().getImages(), ", ");
+		}
 		return super.getPropertyValue(id);
 	}
 	

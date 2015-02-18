@@ -23,25 +23,23 @@ import com.openshift3.client.model.build.IDockerBuildStrategy;
 import com.openshift3.client.model.build.IGitBuildSource;
 import com.openshift3.client.model.build.ISTIBuildStrategy;
 
-public class BuildConfigPropertySource extends DefaultResourcePropertySource {
+public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConfig> {
 	
 	private static final String TRIGGERS = "Triggers";
 	private static final String IMAGE = "Image";
 	private static final String ENVIRONMENT_VARIABLES = "Environment Variables";
 	private static final String STRATEGY = "Strategy";
 	private static final String SOURCE = "Source";
-	private IBuildConfig config;
 	
 	public BuildConfigPropertySource(IBuildConfig resource) {
 		super(resource);
-		this.config = resource;
 	}
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		List<IPropertyDescriptor> all = new ArrayList<IPropertyDescriptor>();
 		all.addAll(getBuildTriggerPropertyDescriptors());
-		switch(config.getBuildStrategy().getType()){
+		switch(getResource().getBuildStrategy().getType()){
 		case Custom:
 			all.addAll(getCustomPropertyDescriptors());
 			break;
@@ -53,7 +51,7 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 			break;
 		default:
 		}
-		switch(config.getBuildSource().getType()){
+		switch(getResource().getBuildSource().getType()){
 		case Git:
 			all.addAll(getGitBuildSource());
 			break;
@@ -82,37 +80,37 @@ public class BuildConfigPropertySource extends DefaultResourcePropertySource {
 	public Object getPropertyValue(Object id) {
 		if(id instanceof Ids){
 			switch((Ids)id){
-			case Type: return config.getBuildStrategy().getType();
+			case Type: return getResource().getBuildStrategy().getType();
 			case CUSTOM_EXPOSE_DOCKER_SOCKET:
-				return config.<ICustomBuildStrategy>getBuildStrategy().exposeDockerSocket();
+				return getResource().<ICustomBuildStrategy>getBuildStrategy().exposeDockerSocket();
 			case CUSTOM_ENV:
-				return new KeyValuePropertySource(config.<ICustomBuildStrategy>getBuildStrategy().getEnvironmentVariables());
+				return new KeyValuePropertySource(getResource().<ICustomBuildStrategy>getBuildStrategy().getEnvironmentVariables());
 			case CUSTOM_IMAGE:
-				return config.<ICustomBuildStrategy>getBuildStrategy().getImage();
+				return getResource().<ICustomBuildStrategy>getBuildStrategy().getImage();
 			case DOCKER_CONTEXT_DIR:
-				return config.<IDockerBuildStrategy>getBuildStrategy().getContextDir();
+				return getResource().<IDockerBuildStrategy>getBuildStrategy().getContextDir();
 			case DOCKER_IMAGE:
-				return config.<IDockerBuildStrategy>getBuildStrategy().getBaseImage();
+				return getResource().<IDockerBuildStrategy>getBuildStrategy().getBaseImage();
 			case OUTPUT_REPO_NAME:
-				return config.getOutputRepositoryName();
+				return getResource().getOutputRepositoryName();
 			case SOURCE_TYPE:
-				return config.getBuildSource().getType();
+				return getResource().getBuildSource().getType();
 			case SOURCE_URI:
-				return config.getSourceURI();
+				return getResource().getSourceURI();
 			case SOURCE_GIT_REF:
-				String ref = config.<IGitBuildSource>getBuildSource().getRef();
+				String ref = getResource().<IGitBuildSource>getBuildSource().getRef();
 				return "".equals(ref) ? "master" : ref;
 			case STI_SCRIPT_LOCATION: 
-				return config.<ISTIBuildStrategy>getBuildStrategy().getScriptsLocation();
+				return getResource().<ISTIBuildStrategy>getBuildStrategy().getScriptsLocation();
 			case STI_IMAGE:
-				return config.<ISTIBuildStrategy>getBuildStrategy().getImage();
+				return getResource().<ISTIBuildStrategy>getBuildStrategy().getImage();
 			case STI_ENV:
-				return new KeyValuePropertySource(config.<ISTIBuildStrategy>getBuildStrategy().getEnvironmentVariables());
+				return new KeyValuePropertySource(getResource().<ISTIBuildStrategy>getBuildStrategy().getEnvironmentVariables());
 			case TRIGGERS_IMAGE_CHANGE:
-				return new ImageChangePropertySource(config.getBuildTriggers());
+				return new ImageChangePropertySource(getResource().getBuildTriggers());
 			case TRIGGERS_WEB:
 				List<String> webtriggers = new ArrayList<String>();
-				for (IBuildTrigger trigger : config.getBuildTriggers()) {
+				for (IBuildTrigger trigger : getResource().getBuildTriggers()) {
 					BuildTriggerType type = trigger.getType();
 					if(type == BuildTriggerType.generic || type == BuildTriggerType.github){
 						webtriggers.add(type.toString());

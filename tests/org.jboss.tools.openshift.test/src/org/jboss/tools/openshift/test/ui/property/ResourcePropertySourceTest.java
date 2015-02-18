@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,12 +32,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ResourcePropertySourceTest {
 	
 	@Mock private IResource resource;
-	private ResourcePropertySourceImpl source;
+	private ResourcePropertySource<IResource> source;
 	
 	@Before
 	public void setup(){
 		Map<String, String> labels = new HashMap<String, String>();
 		labels.put("foo","bar");
+		labels.put("bar","bbar");
 		Map<String, String> annotations = new HashMap<String, String>();
 		annotations.put("xyz", "abc");
 		annotations.put("efg", "def");
@@ -51,7 +51,7 @@ public class ResourcePropertySourceTest {
 		when(resource.getCreationTimeStamp()).thenReturn("2014");
 		when(resource.getNamespace()).thenReturn("anamespace");
 
-		source = new ResourcePropertySourceImpl(resource);
+		source = new ResourcePropertySource<IResource>(resource);
 	}
 	
 	@Test
@@ -67,28 +67,15 @@ public class ResourcePropertySourceTest {
 	@Test
 	public void getPropertyDescriptor() {
 		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
-				new ExtTextPropertyDescriptor("name", "Name", "Basic"),
-				new ExtTextPropertyDescriptor("created", "Creation Timestamp", "Basic"),
-				new ExtTextPropertyDescriptor("namespace", "Namespace", "Basic"),
-				new ExtTextPropertyDescriptor("myprop", "a display nane", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Name, "Name", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Created, "Creation Timestamp", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Namespace, "Namespace", "Basic"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "xyz"), "xyz", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "efg"), "efg", "Annotations"),
-				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "foo"), "foo", "Labels")
+				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "foo"), "foo", "Labels"),
+				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "bar"), "bar", "Labels")
 		};
 		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}
-	
-	private static class ResourcePropertySourceImpl extends ResourcePropertySource {
-		protected ResourcePropertySourceImpl(IResource resource) {
-			super(resource);
-		}
 
-		@Override
-		protected  IPropertyDescriptor[] getResourcePropertyDescriptors() {
-			return new IPropertyDescriptor[]{
-					new TextPropertyDescriptor("myprop", "a display nane")
-			};
-		}
-
-	}
 }

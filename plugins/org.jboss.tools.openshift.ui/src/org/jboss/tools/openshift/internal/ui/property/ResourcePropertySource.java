@@ -18,16 +18,20 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.openshift3.client.model.IResource;
 
-public  class ResourcePropertySource implements IPropertySource {
+public class ResourcePropertySource<T extends IResource> implements IPropertySource {
 	
 	private static final String ANNOTATIONS = "Annotations";
 	private static final String CATEGORY = "Basic";
 	private static final String LABELS = "Labels";
 	
-	private IResource  resource;
+	private T  resource;
 	
-	protected ResourcePropertySource(IResource resource){
+	public ResourcePropertySource(T resource){
 		this.resource = resource;
+	}
+	
+	protected T getResource(){
+		return (T) resource;
 	}
 	/**
 	 * Retrieve the list of property descriptors that are specific to the given
@@ -51,8 +55,8 @@ public  class ResourcePropertySource implements IPropertySource {
 				new ExtTextPropertyDescriptor(Ids.Namespace, CATEGORY)
 		};
 		 List<IPropertyDescriptor> annotations = buildPropertyDescriptors(ANNOTATIONS, resource.getAnnotations());
-		 List<IPropertyDescriptor> labels = buildPropertyDescriptors(LABELS, resource.getLabels());
 		 common =  (IPropertyDescriptor[]) ArrayUtils.addAll(common, annotations.toArray());
+		 List<IPropertyDescriptor> labels = buildPropertyDescriptors(LABELS, resource.getLabels());
 		 common =  (IPropertyDescriptor[]) ArrayUtils.addAll(common, labels.toArray());
 		 return (IPropertyDescriptor[]) ArrayUtils.addAll(common, getResourcePropertyDescriptors());
 	}
