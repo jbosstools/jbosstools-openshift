@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.core.connection.Connection;
 
+import com.openshift3.client.model.IBuild;
 import com.openshift3.client.model.IBuildConfig;
 import com.openshift3.client.model.IImageRepository;
 import com.openshift3.client.model.IPod;
@@ -32,6 +33,8 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 			if(adaptableObject instanceof IResource){
 				IResource resource = (IResource) adaptableObject;
 				switch(resource.getKind()){
+				case Build:
+					return new BuildPropertySource((IBuild)resource);
 				case BuildConfig: 
 					return new BuildConfigPropertySource((IBuildConfig)resource);
 				case ImageRepository:
