@@ -64,22 +64,7 @@
 		point="org.eclipse.ui.menus">
 		<!-- openshift explorer context menu: new connection -->
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
-				<command
-					commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-					id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-					style="push">
-					<visibleWhen>
-						<with
-							variable="selection">
-							<iterate>
-								<instanceof
-									value="com.openshift.kube.Project">
-								</instanceof>
-							</iterate>
-						</with>
-					</visibleWhen>
-				</command>
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
 				   <command
          commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
          icon="icons/refresh.gif"
@@ -103,10 +88,10 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
-			<handler
-				class="org.jboss.tools.openshift.internal.ui.command.NewDeploymentHandler"
-				commandId="org.jboss.tools.openshift.ui.command.newdeploymentconfig">
-			</handler>
+		  <handler
+            class="org.jboss.tools.openshift.internal.ui.command.RefreshResourceHandler"
+            commandId="org.jboss.tools.openshift.ui.command.refresh.resource">
+          </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
