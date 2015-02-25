@@ -15,7 +15,6 @@ import java.util.Collection;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.swt.widgets.Composite;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews;
 
 /**
@@ -23,7 +22,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailVi
  */
 public class ConnectionUIViews extends AbstractDetailViews {
 
-	private Collection<IConnectionUI<IConnection>> connectionUIs;
+	private Collection<IConnectionUI> connectionUIs;
 
 	ConnectionUIViews(IObservableValue detailViewModel, Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, parent, dbc);
