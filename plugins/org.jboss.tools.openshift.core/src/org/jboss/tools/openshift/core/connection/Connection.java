@@ -170,6 +170,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			//TODO: NoAuthStrategy?
 			client.setAuthorizationStrategy(null);
 		}
-
 	}
+
 }
