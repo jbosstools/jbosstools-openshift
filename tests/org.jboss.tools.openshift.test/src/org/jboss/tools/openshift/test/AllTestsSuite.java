@@ -32,7 +32,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionTest.class,
 	ExtTextPropertyDescriptorTest.class,
 	//TODO add back in when tests exist
-//	ConnectionURLTest.class,
+	ConnectionURLTest.class,
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
 	ResourcePropertySourceTest.class,

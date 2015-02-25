@@ -19,29 +19,32 @@ import org.apache.commons.lang.builder.StandardToStringStyle;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
+/**
+ * @author Jeff Cantrill
+ */
 public class Assert {
 
-	public static void assertPropertyDescriptorsContains(IPropertyDescriptor[] exp, IPropertyDescriptor[] act){
-		List<String> actToString = new ArrayList<String>(act.length);
-		for (IPropertyDescriptor desc : act) {
-			actToString.add(propertyDescriptorToString(desc));
+	public static void assertPropertyDescriptorsContains(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual){
+		List<String> actualToString = new ArrayList<String>(actual.length);
+		for (IPropertyDescriptor descriptor : actual) {
+			actualToString.add(propertyDescriptorToString(descriptor));
 		}
-		for (IPropertyDescriptor desc : exp) {
-			String expString = propertyDescriptorToString(desc);
-			assertTrue(String.format("Exp. property descriptor: %s", expString), actToString.contains(expString));
+		for (IPropertyDescriptor desc : expected) {
+			String expectedString = propertyDescriptorToString(desc);
+			assertTrue(String.format("Expected property descriptor: %s", expectedString), actualToString.contains(expectedString));
 		}
 	}
 
-	public static void assertPropertyDescriptorsEquals(IPropertyDescriptor[] exp, IPropertyDescriptor[] act){
-		assertNotNull("Act is null", act);
-		assertEquals("The array lengths are not the same",exp.length, act.length);
-		assertPropertyDescriptorsContains(exp, act);
+	public static void assertPropertyDescriptorsEquals(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual){
+		assertNotNull("Actual value is null", actual);
+		assertEquals("The array lengths are not the same",expected.length, actual.length);
+		assertPropertyDescriptorsContains(expected, actual);
 	}
 	
-	private static String propertyDescriptorToString(IPropertyDescriptor desc){
-		return new ToStringBuilder(desc, StandardToStringStyle.SIMPLE_STYLE)
-		.append("category",desc.getCategory())
-		.append("id",desc.getId())
-		.append("displayname", desc.getDisplayName()).toString();
+	private static String propertyDescriptorToString(IPropertyDescriptor descriptor){
+		return new ToStringBuilder(descriptor, StandardToStringStyle.SIMPLE_STYLE)
+		.append("category",descriptor.getCategory())
+		.append("id",descriptor.getId())
+		.append("displayname", descriptor.getDisplayName()).toString();
 	}
 }

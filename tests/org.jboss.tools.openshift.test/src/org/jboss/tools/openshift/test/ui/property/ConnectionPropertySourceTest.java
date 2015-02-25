@@ -38,7 +38,7 @@ public class ConnectionPropertySourceTest {
 	@Test
 	public void getPropertyDescriptor() {
 		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
-				new TextPropertyDescriptor("Host", "Host")
+				new TextPropertyDescriptor("host", "Host")
 		};
 		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}
