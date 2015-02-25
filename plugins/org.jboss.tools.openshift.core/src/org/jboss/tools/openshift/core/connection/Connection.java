@@ -20,14 +20,6 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
 
-import com.openshift.client.IRefreshable;
-import com.openshift.client.OpenShiftException;
-import com.openshift3.client.IClient;
-import com.openshift3.client.ResourceKind;
-import com.openshift3.client.authorization.BearerTokenAuthorizationStrategy;
-import com.openshift3.client.model.IResource;
-import com.openshift3.internal.client.DefaultClient;
-
 public class Connection extends ObservablePojo implements IConnection, IRefreshable {
 
 	private final IClient client;
@@ -73,8 +65,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	private boolean authorize() {
-		setToken(authorizer.requestToken(client.getBaseURL().toString(), userName, password));
-		return getToken() != null;
+		token = authorizer.requestToken(client.getBaseURL().toString(), userName, password);
+		if(token != null){
+			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -154,18 +150,4 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return true;
 	}
 
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-		if (token != null) {
-			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
-		} else {
-			// TODO: NoAuthStrategy?
-			client.setAuthorizationStrategy(null);
-		}
-
-	}
 }
