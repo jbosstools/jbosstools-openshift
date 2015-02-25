@@ -82,10 +82,11 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			case Project:
 				IProject project = (IProject) resource;
 				String namespace = project.getNamespace();
+				String name = org.apache.commons.lang.StringUtils.defaultIfBlank(project.getDisplayName(), project.getName());
 				if(org.apache.commons.lang.StringUtils.isEmpty(namespace)){
-					return new StyledString(project.getDisplayName());
+					return new StyledString(name);
 				}
-				return style(project.getDisplayName(), String.format("ns: %s", namespace));
+				return style(name, String.format("ns: %s", namespace));
 			case ReplicationController:
 				IReplicationController rc = (IReplicationController) resource;
 				return (style(resource.getName(), String.format("selector: %s", StringUtils.serialize(rc.getReplicaSelector()))));

@@ -5,13 +5,17 @@ Bundle-SymbolicName: org.jboss.tools.openshift.core
 Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator
 Bundle-Vendor: %Bundle-Vendor
-Require-Bundle: org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",
- org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
- org.jboss.tools.common.core;bundle-version="3.6.0",
- org.eclipse.core.runtime
+Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
+ org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",
+ org.jboss.tools.common.core;bundle-version="3.7.0",
+ org.eclipse.core.runtime,
+ org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
+ org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
+ org.apache.commons.codec;bundle-version="1.6.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
+Export-Package: org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui, org.jboss.tools.openshift.test,org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui, org.jboss.tools.openshift.test,org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui, org.jboss.tools.openshift.test,org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.core.auth;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui, org.jboss.tools.openshift.test,org.jboss.tools.openshift.test"
 Service-Component: META-INF/connectionFactory.xml

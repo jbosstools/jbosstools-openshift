@@ -94,27 +94,32 @@ Export-Package: com.openshift.client;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui",
+   org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.test",
  com.openshift3.internal.client.model;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui",
+   org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.test",
  com.openshift3.internal.client.model.build;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui",
+   org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.test",
  com.openshift3.internal.client.model.properties;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui",
+   org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.test",
  com.openshift3.internal.util;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui"
+   org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.test"
 Import-Package: org.eclipse.debug.internal.core,
  org.eclipse.osgi.service.debug;version="1.2.0",
  org.osgi.framework;version="1.8.0",
