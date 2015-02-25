@@ -41,7 +41,7 @@ public class RemoveConnectionHandler extends AbstractHandler {
 
 									@Override
 									public String toString(IConnection connection) {
-										return toString(connection);
+										return connection.toString();
 									}
 								})
 						)
