@@ -44,7 +44,7 @@ public class ConnectionTest {
 	@Before
 	public void setup() throws Exception{
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8433"));
-		connection = new Connection(client);
+		connection = new Connection(client, null);
 	}
 	@Test
 	public void getResourceKindShouldCallClient(){

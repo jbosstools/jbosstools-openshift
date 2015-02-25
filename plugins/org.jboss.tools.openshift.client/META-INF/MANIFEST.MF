@@ -57,6 +57,7 @@ Export-Package: com.openshift.client;
  com.openshift.internal.client.ssh;uses:="com.openshift.client,com.jcraft.jsch",
  com.openshift.internal.client.utils,
  com.openshift3.client;uses:="com.openshift3.client.capability,com.openshift3.client.model,com.openshift3.internal.client.model",
+ com.openshift3.client.authorization,
  com.openshift3.client.capability,
  com.openshift3.client.capability.resources;uses:="com.openshift3.client.capability,com.openshift3.client.model",
  com.openshift3.client.capability.server;uses:="com.openshift3.client.capability",

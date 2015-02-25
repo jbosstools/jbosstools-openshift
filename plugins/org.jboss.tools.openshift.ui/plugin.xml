@@ -139,5 +139,11 @@
         name="Refresh">
   </command>
    </extension>
+   <extension
+         point="org.jboss.tools.openshift.common.ui.connectionUI">
+      <connectionUI
+            class="org.jboss.tools.openshift.internal.ui.wizard.connection.ConnectionDetailView">
+      </connectionUI>
+   </extension>
 
 </plugin>

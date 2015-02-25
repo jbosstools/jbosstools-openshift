@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.test;
 
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
+import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
@@ -36,7 +37,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
 	ResourcePropertySourceTest.class,
-	StringUtilsTest.class
+	StringUtilsTest.class,
+	URIUtilsTest.class
 })
 /**
  * @author Andre Dietisheim
