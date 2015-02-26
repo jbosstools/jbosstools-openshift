@@ -46,6 +46,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.authorizer = authorizer;
 	}
 	
+	@Override
 	public String getUsername(){
 		return this.userName;
 	}
@@ -70,12 +71,8 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	private boolean authorize() {
-		token = authorizer.requestToken(client.getBaseURL().toString(), userName, password);
-		if(token != null){
-			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
-			return true;
-		}
-		return false;
+		setToken(authorizer.requestToken(client.getBaseURL().toString(), userName, password));
+		return getToken() != null;
 	}
 
 	@Override
@@ -99,6 +96,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().hashCode());
+		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
 		return result;
 	}
 
@@ -111,6 +109,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		if (getClass() != obj.getClass())
 			return false;
 		Connection other = (Connection) obj;
+		if(userName == null){
+			if(other.userName != null)
+				return false;
+		}else if(!userName.equals(other.userName))
+			return false;
 		if (client == null) {
 			if (other.client != null)
 				return false;
@@ -148,4 +151,18 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return true;
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+		if(token != null){
+			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
+		}else{
+			//TODO: NoAuthStrategy?
+			client.setAuthorizationStrategy(null);
+		}
+
+	}
 }

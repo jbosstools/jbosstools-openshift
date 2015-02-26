@@ -23,4 +23,5 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.common.core;bundle-version="3.7.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openshift.client,
- org.jboss.tools.openshift.internal.common.ui
+ org.jboss.tools.openshift.internal.common.ui,
+ org.jboss.tools.openshift.internal.core.auth
