@@ -119,6 +119,7 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 		return user;
 	}
 
+	@Override
 	public String getUsername() {
 		return username;
 	}

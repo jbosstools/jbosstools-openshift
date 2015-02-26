@@ -11,14 +11,19 @@
 
 package org.jboss.tools.openshift.internal.core;
 
-import org.eclipse.core.runtime.Platform;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionSerializer;
+import org.jboss.tools.openshift.core.preferences.OpenShiftPreferences;
 import org.osgi.framework.BundleContext;
+
+import com.openshift.client.OpenShiftException;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -43,12 +48,39 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	    return myContext;
 	}
 
+	@Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
         myContext = context;
+        String[] connections = OpenShiftPreferences.getInstance().getConnections();
+        ConnectionSerializer serializer = new ConnectionSerializer();
+        for (String entry : connections) {
+        	try{
+        		ConnectionsRegistrySingleton.getInstance().add(serializer.deserialize(entry));
+    		}catch(OpenShiftException e){
+    			pluginLog().logError(String.format("Exception will trying to deserialize the connection '%s'", entry), e);
+    		}
+		}
+	}
+	
+
+    @Override
+	public void stop(BundleContext context) throws Exception {
+    	Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
+    	ConnectionSerializer serializer = new ConnectionSerializer();
+    	Collection<String> connections = new ArrayList<String>(all.size());
+    	for (Connection connection : all) {
+    		try{
+    			connections.add(serializer.serialize(connection));
+    		}catch(OpenShiftException e){
+    			pluginLog().logError(String.format("Exception will trying to serialize the connection '%s'",connection), e);
+    		}
+		}
+    	OpenShiftPreferences.getInstance().saveConnections(connections.toArray(new String []{}));
+		super.stop(context);
 	}
 
-    /**
+	/**
 	 * Get the IPluginLog for this plugin. This method 
 	 * helps to make logging easier, for example:
 	 * 

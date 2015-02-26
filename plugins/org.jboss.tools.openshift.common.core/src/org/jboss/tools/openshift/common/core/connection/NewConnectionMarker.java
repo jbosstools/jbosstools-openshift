@@ -85,4 +85,9 @@ public class NewConnectionMarker extends AbstractConnection {
 		return false;
 	}
 
+	@Override
+	public String getUsername() {
+		return null;
+	}
+
 }

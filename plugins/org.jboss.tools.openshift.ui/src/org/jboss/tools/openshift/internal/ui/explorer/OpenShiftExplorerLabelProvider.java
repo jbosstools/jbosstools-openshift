@@ -102,7 +102,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			return new StyledString(StringUtils.humanize(((ResourceGrouping) element).getKind().pluralize()));
 		}
 		if(element instanceof Connection){
-			return new StyledString(element.toString());
+			Connection conn = (Connection) element;
+			return style(conn.getUsername(), conn.toString());
 		}
 		return super.getStyledText(element);
 	}

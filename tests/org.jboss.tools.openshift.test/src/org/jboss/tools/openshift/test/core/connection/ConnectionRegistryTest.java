@@ -105,6 +105,11 @@ public class ConnectionRegistryTest {
 			// TODO Auto-generated method stub
 			return false;
 		}
+		@Override
+		public String getUsername() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		
 	}
 	static class OtherConnectionImpl implements IConnection{
@@ -152,6 +157,11 @@ public class ConnectionRegistryTest {
 		public boolean canConnect() throws IOException {
 			// TODO Auto-generated method stub
 			return false;
+		}
+		@Override
+		public String getUsername() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 		
 	}
