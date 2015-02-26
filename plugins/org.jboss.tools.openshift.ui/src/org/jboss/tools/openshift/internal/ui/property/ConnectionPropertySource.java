@@ -16,6 +16,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 public class ConnectionPropertySource implements IPropertySource {
 	
 	private static final String HOST = "host";
+	private static final String USERNAME = "username";
 	private IConnection connection;
 
 	public ConnectionPropertySource(IConnection connection) {
@@ -31,7 +32,8 @@ public class ConnectionPropertySource implements IPropertySource {
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor(HOST, "Host")
+				new TextPropertyDescriptor(HOST, "Host"),
+				new TextPropertyDescriptor(USERNAME, "User Name")
 		};
 	}
 
@@ -40,6 +42,8 @@ public class ConnectionPropertySource implements IPropertySource {
 		if(HOST.equals(id)){
 			return connection.toString();
 		}
+		if(USERNAME.equals(id))
+			return connection.getUsername();
 		return null;
 	}
 

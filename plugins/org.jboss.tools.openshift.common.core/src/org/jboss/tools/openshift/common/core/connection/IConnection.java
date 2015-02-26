@@ -22,6 +22,8 @@ public interface IConnection {
 	public boolean connect();
 
 	public String getHost();
+	
+	String getUsername();
 
 	public boolean isDefaultHost();
 

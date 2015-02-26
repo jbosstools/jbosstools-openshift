@@ -26,19 +26,22 @@ public class ConnectionPropertySourceTest {
 	
 	@Before
 	public void setup() throws Exception{
-		connection = new Connection("http://localhost:8080");
+		connection = new Connection("http://localhost:8080", null, null);
+		connection.setUsername("foo");
 		source = new ConnectionPropertySource(connection);
 	}
 	
 	@Test
 	public void getPropertyValue(){
 		assertEquals("http://localhost:8080", source.getPropertyValue("host"));
+		assertEquals("foo", source.getPropertyValue("username"));
 	}
 	
 	@Test
 	public void getPropertyDescriptor() {
 		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
-				new TextPropertyDescriptor("host", "Host")
+				new TextPropertyDescriptor("host", "Host"), 
+				new TextPropertyDescriptor("username", "User Name")
 		};
 		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}

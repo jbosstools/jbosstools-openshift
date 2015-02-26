@@ -35,7 +35,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 /**
  * @author Andre Dietisheim
  */
-public class ExpressConnectionUI extends BaseDetailsView implements IConnectionUI<ExpressConnection> {
+public class ExpressConnectionUI extends BaseDetailsView implements IConnectionUI {
 
 	private Text usernameText;
 	private Text passwordText;
@@ -80,13 +80,11 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 	@Override
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
 		createBindings(detailViewModel, dbc);
-		System.err.println("onVisible: " + getClass().getSimpleName());
 	}
 
 	@Override
 	public void onInVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
 		disposeBindings();
-		System.err.println("onInVisible: " + getClass().getSimpleName());
 	}
 
 	private void disposeBindings() {

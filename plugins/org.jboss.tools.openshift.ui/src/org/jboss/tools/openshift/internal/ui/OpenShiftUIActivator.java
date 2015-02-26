@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.internal.ui;
 
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
+import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
+import org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback;
 import org.osgi.framework.BundleContext;
 
 public class OpenShiftUIActivator extends BaseUIPlugin{
@@ -29,6 +31,7 @@ public class OpenShiftUIActivator extends BaseUIPlugin{
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		OpenShiftCoreUIIntegration.getInstance().setSSLCertificateAuthorization(new SSLCertificateCallback());
 	}
 
 	public void stop(BundleContext context) throws Exception {
