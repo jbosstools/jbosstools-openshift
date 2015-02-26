@@ -10,17 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core;
 
-import java.util.Collection;
-
-import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
-import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
-import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
-import org.jboss.tools.openshift.core.preferences.OpenShiftPreferences;
-import org.osgi.framework.BundleContext;
-
 public class OpenShiftCoreActivator extends BaseCorePlugin {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
