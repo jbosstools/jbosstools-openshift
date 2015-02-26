@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.test;
 
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
+import org.jboss.tools.openshift.test.core.LazySSLCertificateCallbackTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionPersistencyTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionSerializerTest;
@@ -38,6 +39,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ExtTextPropertyDescriptorTest.class,
 	//TODO add back in when tests exist
 	ConnectionURLTest.class,
+	LazySSLCertificateCallbackTest.class, 
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
 	ResourcePropertySourceTest.class,

@@ -29,7 +29,7 @@ public class ConnectionSerializerTest {
 	@Before
 	public void setup() throws Exception{
 		serializer = new ConnectionSerializer();
-		conn = new Connection("https://localhost:8442", null);
+		conn = new Connection("https://localhost:8442", null, null);
 		conn.setUsername("foo");
 		conn.setToken("abcdef");
 	}
