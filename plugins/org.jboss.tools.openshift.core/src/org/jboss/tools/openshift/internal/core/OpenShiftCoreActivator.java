@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
