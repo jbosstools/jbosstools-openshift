@@ -42,10 +42,10 @@ public class ConnectionPersistencyTest {
 	public void setup() throws Exception {
 		this.persistency = new ConnectionPersistency(preferences);
 
-		this.connection1 = new Connection("https://localhost:8442", null, null);
+		this.connection1 = new Connection("https://localhost:8442", null, null, null);
 		connection1.setUsername("foo");
 		connection1.setToken("bar");
-		this.connection2 = new Connection("https://localhost:8442", null, null);
+		this.connection2 = new Connection("https://localhost:8442", null, null, null);
 		connection2.setUsername("kung");
 		connection2.setToken("foo");
 

@@ -8,15 +8,14 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
+package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 /**
@@ -28,13 +27,13 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 	}
 	
 	@Override
-	public boolean promptAndAuthenticate(final ExpressConnection connection) {
+	public boolean promptAndAuthenticate(final IConnection connection) {
 		Display.getDefault().syncExec(
 				new Runnable() {
 					public void run() {
 						Shell shell = UIUtils.getShell();
 						if (shell == null) {
-							Logger.error("Could not open Credentials wizard: no shell available");
+							OpenShiftCommonUIActivator.log("Could not open Credentials wizard: no shell available", null);
 							return;
 						}
 						

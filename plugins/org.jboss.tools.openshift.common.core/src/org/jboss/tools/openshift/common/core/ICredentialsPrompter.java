@@ -8,9 +8,9 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.core;
+package org.jboss.tools.openshift.common.core;
 
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 /**
  * 
@@ -32,6 +32,6 @@ public interface ICredentialsPrompter {
 	 * @param connection  The connection
 	 * @return true if prompted for password; false otherwise
 	 */
-	public boolean promptAndAuthenticate(ExpressConnection connection);
+	public boolean promptAndAuthenticate(IConnection connection);
 	
 }

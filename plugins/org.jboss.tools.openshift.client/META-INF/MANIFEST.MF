@@ -18,6 +18,7 @@ Export-Package: com.openshift.client;
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
+ com.openshift.internal.client.httpclient,
  com.openshift.internal.client.utils;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,

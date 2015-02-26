@@ -17,8 +17,12 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.lang;bundle-version="2.6.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.jboss.tools.openshift.core,
- org.jboss.tools.openshift.core.auth,
+Export-Package: org.jboss.tools.openshift.core;
+ x-friends:="org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.core.auth;
+  x-friends:="org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.connection;
   x-friends:="org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.ui",

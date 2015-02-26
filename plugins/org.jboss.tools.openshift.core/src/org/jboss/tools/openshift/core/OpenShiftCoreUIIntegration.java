@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core;
 
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
+
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
 /**
@@ -24,6 +26,7 @@ public class OpenShiftCoreUIIntegration {
 	}
 	
 	private ISSLCertificateCallback sslCertificateCallback;
+	private ICredentialsPrompter credentialPrompter;
 	
 	public ISSLCertificateCallback getSSLCertificateCallback() {
 		return sslCertificateCallback;
@@ -31,5 +34,13 @@ public class OpenShiftCoreUIIntegration {
 	
 	public void setSSLCertificateAuthorization(ISSLCertificateCallback callback) {
 		this.sslCertificateCallback = callback;
+	}
+	
+	public ICredentialsPrompter getCredentialPrompter() {
+		return credentialPrompter;
+	}
+	
+	public void setCredentialPrompter(ICredentialsPrompter prompter) {
+		this.credentialPrompter = prompter;
 	}
 }

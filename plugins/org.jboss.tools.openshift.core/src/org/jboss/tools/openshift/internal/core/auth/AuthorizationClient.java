@@ -20,6 +20,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -40,6 +41,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
+import org.jboss.tools.openshift.core.auth.IAuthorizationContext;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.NoopSSLCertificateCallback;
@@ -50,6 +52,7 @@ import com.openshift.client.OpenShiftException;
 public class AuthorizationClient  implements IAuthorizationClient{
 
 	public static final String ACCESS_TOKEN = "access_token";
+	private static final String EXPIRES = "expires_in";
 	private SSLContext sslContext;
 	private X509HostnameVerifier hostnameVerifier = new AllowAllHostnameVerifier();
 	
@@ -57,12 +60,14 @@ public class AuthorizationClient  implements IAuthorizationClient{
 		setSSLCertificateCallback(new NoopSSLCertificateCallback());
 	}
 	
-	public String requestToken(final String baseURL, final String username, final String password){
+	@Override
+	public IAuthorizationContext getContext(final String baseURL, final String username, final String password){
 		CloseableHttpResponse response = null;
 		CloseableHttpClient client = null; 
 		try {
+			OpenShiftAuthorizationRedirectStrategy redirectStrategy = new OpenShiftAuthorizationRedirectStrategy();
 			client = HttpClients.custom()
-					.setRedirectStrategy(new OpenShiftAuthorizationRedirectStrategy())
+					.setRedirectStrategy(redirectStrategy)
 					.setDefaultCredentialsProvider(buildCredentialsProvider(username, password))
 					.setHostnameVerifier(hostnameVerifier)
 					.setSslcontext(sslContext)
@@ -74,7 +79,7 @@ public class AuthorizationClient  implements IAuthorizationClient{
 						.build()
 						);
 			response = client.execute(request);
-			return getAccessToken(response);
+			return createAuthorizationConext(response, redirectStrategy.isAuthorized());
 		} catch (URISyntaxException e) {
 			logWarn("", e);
 			throw new OpenShiftException(e,"");
@@ -90,9 +95,13 @@ public class AuthorizationClient  implements IAuthorizationClient{
 		}
 	}
 	
-	private String getAccessToken(CloseableHttpResponse response) {
+	private IAuthorizationContext createAuthorizationConext(CloseableHttpResponse response, boolean authorized) {
+		if(!authorized){
+			return new AuthorizationContext(IAuthorizationContext.AuthorizationType.Basic);
+		}
 		Header header = response.getFirstHeader("Location");
-		return splitFragment(header.getValue()).get(ACCESS_TOKEN);
+		Map<String, String> fragment = splitFragment(header.getValue());
+		return new AuthorizationContext(fragment.get(ACCESS_TOKEN), fragment.get(EXPIRES));
 	}
 
 	private void close(Closeable closer){

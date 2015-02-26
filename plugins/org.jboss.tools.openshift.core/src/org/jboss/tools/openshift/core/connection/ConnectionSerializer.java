@@ -17,6 +17,8 @@ import java.io.OutputStreamWriter;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.dmr.ModelNode;
+import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
+import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 
 import com.openshift.client.OpenShiftException;
 
@@ -82,7 +84,9 @@ public class ConnectionSerializer {
 	public Connection deserialize(InputStream is) {
 		try {
 			ModelNode node = ModelNode.fromJSONStream(is);
-			Connection conn = factory.create(node.get(URL).asString());
+			Connection conn = factory.create(
+					node.get(URL).asString(), 
+					new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
 			conn.setUsername(node.get(USERNAME).asString());
 			conn.setToken(StringUtils.defaultIfBlank(node.get(TOKEN).asString(), null));
 			return conn;

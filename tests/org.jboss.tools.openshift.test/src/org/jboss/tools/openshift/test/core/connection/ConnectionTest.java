@@ -44,7 +44,7 @@ public class ConnectionTest {
 	@Before
 	public void setup() throws Exception{
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8433"));
-		connection = new Connection(client, null, null);
+		connection = new Connection(client, null, null, null);
 	}
 	@Test
 	public void getResourceKindShouldCallClient(){
@@ -64,8 +64,8 @@ public class ConnectionTest {
 	
 	@Test
 	public void testNotEquals() throws Exception{
-		Connection one = new Connection("https://localhost:8443", null, null);
-		Connection two = new Connection("https://localhost:8443", null, null);
+		Connection one = new Connection("https://localhost:8443", null, null, null);
+		Connection two = new Connection("https://localhost:8443", null, null, null);
 		two.setUsername("foo");
 		
 		assertNotEquals("Exp. connections not to be equal unless they have same url and user", one,  two);
@@ -73,9 +73,9 @@ public class ConnectionTest {
 
 	@Test
 	public void testEquals() throws Exception{
-		Connection one = new Connection("https://localhost:8443", null, null);
+		Connection one = new Connection("https://localhost:8443", null, null, null);
 		one.setUsername("foo");
-		Connection two = new Connection("https://localhost:8443", null, null);
+		Connection two = new Connection("https://localhost:8443", null, null, null);
 		two.setUsername("foo");
 		
 		assertEquals("Exp. connections to be equal if they have same url and user", one,  two);

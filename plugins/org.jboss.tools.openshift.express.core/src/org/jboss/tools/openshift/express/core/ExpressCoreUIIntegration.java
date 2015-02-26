@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;

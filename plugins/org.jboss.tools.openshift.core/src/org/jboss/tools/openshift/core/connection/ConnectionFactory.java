@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.core.connection;
 import java.net.MalformedURLException;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
@@ -40,9 +41,14 @@ public class ConnectionFactory implements IConnectionFactory {
 	
 	@Override
 	public Connection create(String url) {
+		return create(url, null);
+	}		
+	
+	public Connection create(String url, ICredentialsPrompter credentialsPrompter) {
 		try {
 			return new Connection(url, 
 					new AuthorizationClient(), 
+					credentialsPrompter,
 					new LazySSLCertificateCallback(
 							OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback()));
 		} catch (MalformedURLException e) {
@@ -50,7 +56,6 @@ public class ConnectionFactory implements IConnectionFactory {
 			return null;
 		}
 	}
-
 
 	@Override
 	public String getDefaultHost() {

@@ -6,11 +6,10 @@
  * 
  * Contributors: Red Hat, Inc.
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core;
+package org.jboss.tools.openshift.core;
 
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 
 /**
  * A class to support deferred initialization where the actual provider may
@@ -33,7 +32,7 @@ public final class LazyCredentialsPrompter implements ICredentialsPrompter {
 	@Override
 	public final boolean promptAndAuthenticate(IConnection connection) {
 		if(prompter == null){
-			prompter = ExpressCoreUIIntegration.getDefault().getCredentialPrompter();
+			prompter = OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter();
 			if(prompter == null) return false;
 		}
 		return prompter.promptAndAuthenticate(connection);

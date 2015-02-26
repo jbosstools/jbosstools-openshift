@@ -16,13 +16,17 @@ import java.net.URL;
 import java.util.List;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
+import org.jboss.tools.openshift.core.auth.IAuthorizationContext;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.IRefreshable;
 import com.openshift.client.OpenShiftException;
+import com.openshift.internal.client.httpclient.UnauthorizedException;
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
 import com.openshift3.client.authorization.BearerTokenAuthorizationStrategy;
@@ -36,15 +40,17 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private String userName;
 	private String password;
 	private String token;
+	private ICredentialsPrompter credentialsPrompter;
 	
 	//TODO modify default client to take url and throw runtime exception
-	public Connection(String url, IAuthorizationClient authorizer, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
-		this(new DefaultClient(new URL(url), sslCertCallback), authorizer, sslCertCallback);
+	public Connection(String url, IAuthorizationClient authorizer, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
+		this(new DefaultClient(new URL(url), sslCertCallback), authorizer, credentialsPrompter, sslCertCallback);
 	}
 	
-	public Connection(IClient client, IAuthorizationClient authorizer, ISSLCertificateCallback sslCertCallback){
+	public Connection(IClient client, IAuthorizationClient authorizer,  ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback){
 		this.client = client;
 		this.authorizer = authorizer;
+		this.credentialsPrompter = credentialsPrompter;
 		if(this.authorizer != null){
 			authorizer.setSSLCertificateCallback(sslCertCallback);
 		}
@@ -69,15 +75,21 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public boolean connect() throws OpenShiftException {
-		if (authorize()) {
-			// initializeCapabilities();
+		if(getToken()  != null) return true;
+		if(authorize()){
+//			initializeCapabilities();
 			return true;
 		}
 		return false;
 	}
-
+	
 	private boolean authorize() {
-		setToken(authorizer.requestToken(client.getBaseURL().toString(), userName, password));
+		IAuthorizationContext context = authorizer.getContext(client.getBaseURL().toString(), userName, password);
+		if(!context.isAuthorized() && credentialsPrompter != null){
+			credentialsPrompter.promptAndAuthenticate(this);
+		}else{
+			setToken(context.getToken());
+		}
 		return getToken() != null;
 	}
 
@@ -149,7 +161,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return List<IResource>
 	 */
 	public <T extends IResource> List<T> get(ResourceKind kind) {
-		return client.list(kind);
+		try{
+			return client.list(kind);
+		}catch(UnauthorizedException e){
+			OpenShiftCoreActivator.pluginLog().logInfo("Unauthorized.  Trying again to reauthenticate");
+			setToken(null);//token must be invalid, make sure not to try with cache
+			if(connect()){
+				return client.list(kind);
+			}
+			throw e;
+		}
 	}
 
 	@Override
