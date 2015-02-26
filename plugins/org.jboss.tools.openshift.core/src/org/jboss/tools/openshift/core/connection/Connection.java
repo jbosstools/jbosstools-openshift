@@ -20,6 +20,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
 
+import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.IRefreshable;
 import com.openshift.client.OpenShiftException;
 import com.openshift3.client.IClient;
@@ -37,13 +38,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private String token;
 	
 	//TODO modify default client to take url and throw runtime exception
-	public Connection(String url, IAuthorizationClient authorizer) throws MalformedURLException{
-		this(new DefaultClient(new URL(url)), authorizer);
+	public Connection(String url, IAuthorizationClient authorizer, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
+		this(new DefaultClient(new URL(url), sslCertCallback), authorizer, sslCertCallback);
 	}
 	
-	public Connection(IClient client, IAuthorizationClient authorizer){
+	public Connection(IClient client, IAuthorizationClient authorizer, ISSLCertificateCallback sslCertCallback){
 		this.client = client;
 		this.authorizer = authorizer;
+		if(this.authorizer != null){
+			authorizer.setSSLCertificateCallback(sslCertCallback);
+		}
 	}
 	
 	@Override

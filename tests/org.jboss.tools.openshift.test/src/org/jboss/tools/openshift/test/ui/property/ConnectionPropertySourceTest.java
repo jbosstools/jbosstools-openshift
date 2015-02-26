@@ -26,7 +26,7 @@ public class ConnectionPropertySourceTest {
 	
 	@Before
 	public void setup() throws Exception{
-		connection = new Connection("http://localhost:8080", null);
+		connection = new Connection("http://localhost:8080", null, null);
 		connection.setUsername("foo");
 		source = new ConnectionPropertySource(connection);
 	}
