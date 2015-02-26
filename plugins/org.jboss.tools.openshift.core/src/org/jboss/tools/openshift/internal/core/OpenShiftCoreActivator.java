@@ -57,7 +57,6 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
         for (String entry : connections) {
         	try{
         		Connection connection = serializer.deserialize(entry);
-//        		connection.set
 				ConnectionsRegistrySingleton.getInstance().add(connection);
     		}catch(OpenShiftException e){
     			pluginLog().logError(String.format("Exception will trying to deserialize the connection '%s'", entry), e);

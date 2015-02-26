@@ -20,7 +20,7 @@ public interface IAuthorizationClient {
 	 * @param password
 	 * @return
 	 */
-	String requestToken(final String baseURL, final String username, final String password);
+	IAuthorizationContext getContext(final String baseURL, final String username, final String password);
 	
 	/**
 	 * Set the callback handler to use for certificate trust issues.

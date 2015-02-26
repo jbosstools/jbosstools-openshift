@@ -23,8 +23,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
-import org.jboss.tools.openshift.express.internal.ui.wizard.connection.CredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.ui.wizard.connection.SSLCertificateCallback;
+import org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter;
 import org.osgi.framework.BundleContext;
 
 /**
