@@ -24,5 +24,9 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="1.0.0",
  org.eclipse.ui.navigator;bundle-version="3.5.500"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.jboss.tools.openshift.internal.ui.explorer,
- org.jboss.tools.openshift.internal.ui.property
+Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.command;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.deployment;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.jobs;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.property;x-friends:="org.jboss.tools.openshift.test"
