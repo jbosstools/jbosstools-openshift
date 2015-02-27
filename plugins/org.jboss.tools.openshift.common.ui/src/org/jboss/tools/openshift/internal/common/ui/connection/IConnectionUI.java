@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews.IDetailView;
 
 /**
@@ -24,6 +23,6 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailVi
  * @see ConnectionUIViews
  * @see IDetailView#isViewFor(Object)
  */
-public interface IConnectionUI<T extends IConnection> extends IDetailView {
+public interface IConnectionUI extends IDetailView {
 
 }

@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.osgi.framework.Bundle;
 
 /**
@@ -30,7 +29,7 @@ public class ConnectionUIs {
 	private static final String CONNECTION_UI_EXTENSION = "org.jboss.tools.openshift.common.ui.connectionUI";
 	private static final String ATTRIBUTE_CLASS = "class";
 
-	private Collection<IConnectionUI<IConnection>> connectionUIs;
+	private Collection<IConnectionUI> connectionUIs;
 	
 	public static ConnectionUIs getInstance() {
 		return INSTANCE;
@@ -40,22 +39,22 @@ public class ConnectionUIs {
 		// inhibit instantiation
 	}
 
-	public Collection<IConnectionUI<IConnection>> getAll() {
+	public Collection<IConnectionUI> getAll() {
 		if (connectionUIs == null) {
 			this.connectionUIs = createConnectionUIs();
 		}
 		return connectionUIs;
 	}
 
-	private Collection<IConnectionUI<IConnection>> createConnectionUIs() {
-		List<IConnectionUI<IConnection>> connectionUIs = new ArrayList<IConnectionUI<IConnection>>();
+	private Collection<IConnectionUI> createConnectionUIs() {
+		List<IConnectionUI> connectionUIs = new ArrayList<IConnectionUI>();
 		IConfigurationElement[] config = 
 				Platform.getExtensionRegistry().getConfigurationElementsFor(CONNECTION_UI_EXTENSION);
 		for (IConfigurationElement extension : config) {
 			if (extension.getAttribute(ATTRIBUTE_CLASS) != null) {
 				String clazz = extension.getAttribute(ATTRIBUTE_CLASS);
 				Bundle bundle = Platform.getBundle(extension.getDeclaringExtension().getContributor().getName());
-				IConnectionUI<IConnection> connectionUI = createConnectionUI(clazz, bundle);
+				IConnectionUI connectionUI = createConnectionUI(clazz, bundle);
 				if (connectionUI != null) {
 					connectionUIs.add(connectionUI);
 				}
@@ -64,8 +63,7 @@ public class ConnectionUIs {
 		return connectionUIs;
 	}
 
-	@SuppressWarnings("unchecked")
-	private IConnectionUI<IConnection> createConnectionUI(final String clazzDefinition, final Bundle bundle) {
+	private IConnectionUI createConnectionUI(final String clazzDefinition, final Bundle bundle) {
 		try {
 			if (bundle == null) {
 				return null;
@@ -76,7 +74,7 @@ public class ConnectionUIs {
 					|| !IConnectionUI.class.isAssignableFrom(object.getClass())) {
 				return null;
 			}
-			return (IConnectionUI<IConnection>) object;
+			return (IConnectionUI) object;
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(
 					NLS.bind("Could not load class {0} in bundle {1}", clazzDefinition, bundle.getSymbolicName())); //$NON-NLS-1$

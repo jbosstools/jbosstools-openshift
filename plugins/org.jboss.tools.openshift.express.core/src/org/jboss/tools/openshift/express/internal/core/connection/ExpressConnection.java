@@ -21,13 +21,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.AbstractConnection;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ICredentialsConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
-import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
@@ -119,6 +119,7 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 		return user;
 	}
 
+	@Override
 	public String getUsername() {
 		return username;
 	}

@@ -11,8 +11,8 @@ package org.jboss.tools.openshift.express.test.core;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
-import org.jboss.tools.openshift.express.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.LazyCredentialsPrompter;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.junit.After;

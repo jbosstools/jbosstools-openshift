@@ -11,41 +11,84 @@
 package org.jboss.tools.openshift.core.connection;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.List;
 
+import org.jboss.tools.common.databinding.ObservablePojo;
+import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
+import org.jboss.tools.openshift.core.auth.IAuthorizationContext;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
+import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.IRefreshable;
 import com.openshift.client.OpenShiftException;
-import com.openshift.internal.client.utils.StreamUtils;
+import com.openshift.internal.client.httpclient.UnauthorizedException;
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
+import com.openshift3.client.authorization.BearerTokenAuthorizationStrategy;
 import com.openshift3.client.model.IResource;
 import com.openshift3.internal.client.DefaultClient;
 
-public class Connection  implements IConnection, IRefreshable {
+public class Connection extends ObservablePojo implements IConnection, IRefreshable {
 
 	private final IClient client;
+	private IAuthorizationClient authorizer;
+	private String userName;
+	private String password;
+	private String token;
+	private ICredentialsPrompter credentialsPrompter;
 	
-	public Connection(String url) throws MalformedURLException{
-		this(new DefaultClient(new URL(url)));
+	//TODO modify default client to take url and throw runtime exception
+	public Connection(String url, IAuthorizationClient authorizer, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
+		this(new DefaultClient(new URL(url), sslCertCallback), authorizer, credentialsPrompter, sslCertCallback);
 	}
 	
-	public Connection(IClient client){
+	public Connection(IClient client, IAuthorizationClient authorizer,  ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback){
 		this.client = client;
+		this.authorizer = authorizer;
+		this.credentialsPrompter = credentialsPrompter;
+		if(this.authorizer != null){
+			authorizer.setSSLCertificateCallback(sslCertCallback);
+		}
 	}
-
-//	@Override
+	
+	@Override
+	public String getUsername(){
+		return this.userName;
+	}
+	
+	public void setUsername(String userName){
+		this.userName = userName;
+	}
+	public String getPassword(){
+		return this.password;
+	}
+	public void setPassword(String password){
+		this.password = password;
+	}
+	
+	@Override
 	public boolean connect() throws OpenShiftException {
-//		authorize();
-//		initializeCapabilities();
-		return true;
+		if(getToken()  != null) return true;
+		if(authorize()){
+//			initializeCapabilities();
+			return true;
+		} 
+		return false;
+	}
+	
+	private boolean authorize() {
+		IAuthorizationContext context = authorizer.getContext(client.getBaseURL().toString(), userName, password);
+		if(!context.isAuthorized() && credentialsPrompter != null){
+			credentialsPrompter.promptAndAuthenticate(this);
+		}else{
+			setToken(context.getToken());
+		}
+		return getToken() != null;
 	}
 
 	@Override
@@ -69,6 +112,7 @@ public class Connection  implements IConnection, IRefreshable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().hashCode());
+		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
 		return result;
 	}
 
@@ -81,6 +125,11 @@ public class Connection  implements IConnection, IRefreshable {
 		if (getClass() != obj.getClass())
 			return false;
 		Connection other = (Connection) obj;
+		if(userName == null){
+			if(other.userName != null)
+				return false;
+		}else if(!userName.equals(other.userName))
+			return false;
 		if (client == null) {
 			if (other.client != null)
 				return false;
@@ -109,37 +158,36 @@ public class Connection  implements IConnection, IRefreshable {
 	 * @return List<IResource>
 	 */
 	public <T extends IResource> List<T> get(ResourceKind kind) {
-		return client.list(kind);
+		try{
+			return client.list(kind);
+		}catch(UnauthorizedException e){
+			OpenShiftCoreActivator.pluginLog().logInfo("Unauthorized.  Trying again to reauthenticate");
+			setToken(null);//token must be invalid, make sure not to try with cache
+			if(connect()){
+				return client.list(kind);
+			}
+			throw e;
+		}
 	}
 	
 	@Override
 	public boolean canConnect() throws IOException {
-		// TODO: move to client library
-		HttpURLConnection connection = null;
-		try {
-			connection = (HttpURLConnection) new URL(client.getBaseURL() + "/osapi").openConnection();
-			connection.setConnectTimeout(2 * 1000);
-			connection.setInstanceFollowRedirects(true);
-			connection.setRequestProperty("Accept", "application/json");
-			InputStream in = connection.getInputStream();
-			StreamUtils.readToString(in);
-			return connection.getResponseCode() == 200;
-		} catch (MalformedURLException e) {
-			return false;
-		} catch (SocketTimeoutException e) {
-			throw e;
-		} catch (IOException e) {
-			if (connection != null
-					// can throw IOException (ex. UnknownHostException)
-					&& connection.getResponseCode() != -1) {
-				return false;
-			} else {
-				throw e;
-			}
-		} finally {
-			if (connection != null) {
-				connection.disconnect();
-			}
+		client.getOpenShiftAPIVersion();
+		return true;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+		if(token != null){
+			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
+		}else{
+			//TODO: NoAuthStrategy?
+			client.setAuthorizationStrategy(null);
 		}
+
 	}
 }

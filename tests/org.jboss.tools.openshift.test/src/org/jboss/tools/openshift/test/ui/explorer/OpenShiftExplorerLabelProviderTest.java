@@ -142,6 +142,18 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 	
 	@Test
+	public void getStyledTextForAProjectWithoutDisplayName(){
+		String displayName = "The Display Name";
+		String namespace = "anamespace";
+		
+		IProject project = givenAResource(IProject.class, ResourceKind.Project);
+		when(project.getName()).thenReturn(displayName);
+		when(project.getNamespace()).thenReturn(namespace);
+
+		assertEquals(String.format("%s ns: %s", project.getName(), project.getNamespace()), provider.getStyledText(project).getString());
+	}
+
+	@Test
 	public void getStyledTextForAProject(){
 		String displayName = "The Display Name";
 		String namespace = "anamespace";
@@ -149,10 +161,10 @@ public class OpenShiftExplorerLabelProviderTest {
 		IProject project = givenAResource(IProject.class, ResourceKind.Project);
 		when(project.getDisplayName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
-
+		
 		assertEquals(String.format("%s ns: %s", project.getDisplayName(), project.getNamespace()), provider.getStyledText(project).getString());
 	}
-
+	
 	@Test
 	public void getStyledTextForAProjectWithoutNamespace(){
 		String displayName = "The Display Name";
@@ -175,8 +187,10 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForAConnection(){
-		Connection connection = new Connection(client);
-		assertEquals("Exp. a connection to display its base URL",client.getBaseURL().toString(), provider.getStyledText(connection).getString());
+		Connection connection = new Connection(client, null, null, null);
+		connection.setUsername("foo@bar.com");
+		String exp = String.format("foo@bar.com %s", client.getBaseURL().toString());
+		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}
 
 }

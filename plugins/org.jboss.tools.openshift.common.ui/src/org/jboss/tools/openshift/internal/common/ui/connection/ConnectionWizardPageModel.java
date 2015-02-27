@@ -303,8 +303,10 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	public IStatus connect() {
 		IStatus status = Status.OK_STATUS;
 		try {
-			if(connection != null) {
-				connection.connect();
+			if(connection != null && !connection.connect()) {
+				String message = String.format("Unable to connect to %s", connection.getHost());
+				OpenShiftCommonUIActivator.log(message, null);
+				status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, message);
 			}
 //		} catch (NotFoundOpenShiftException e) {
 //			// connectionCreationError user without domain
