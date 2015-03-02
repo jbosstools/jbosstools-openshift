@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -41,54 +43,54 @@ public class ConnectionURLTest {
 		assertEquals(schemeOnlyUrl, connectionURL.getScheme());
 		assertEquals(schemeOnlyUrl + URLEncoder.encode(username, "UTF-8") + '@', connectionURL.getUrl());
 	}
-//	
-//	@Test
-//	public void shouldCorrectMisplacedScheme() throws UnsupportedEncodingException, MalformedURLException {
-//		// pre-conditions
-//		String username = "adietish@redhat.com";
-//		String scheme = UrlUtils.SCHEME_HTTP;
-//		String host = "openshift.local";
-//		
-//		// operation
-//		ConnectionURL connectionUrl = ConnectionURL.forURL(URLEncoder.encode(username, "UTF-8") + '@' + scheme + host);
-//
-//		// verifications
-//		assertEquals(host, connectionUrl.getHost());
-//		assertFalse(connectionUrl.isDefaultHost());
-//		assertEquals(username, connectionUrl.getUsername());
-//		assertEquals(scheme, connectionUrl.getScheme());
-//	}
-//	
-//	@Test
-//	public void shouldCorrectMisplacedSchemeWithDefaultServer() throws UnsupportedEncodingException, MalformedURLException {
-//		// pre-conditions
-//		String username = "adietish@redhat.com";
-//		String scheme = UrlUtils.SCHEME_HTTP;
-//		
-//		// operation
-//		ConnectionURL connectionUrl = ConnectionURL.forURL(URLEncoder.encode(username, "UTF-8") + '@' + scheme);
-//
-//		// verifications
-//		assertEquals(null, connectionUrl.getHost());
-//		assertTrue(connectionUrl.isDefaultHost());
-//		assertEquals(username, connectionUrl.getUsername());
-//		assertEquals(scheme, connectionUrl.getScheme());
-//	}
-//
-//	@Test
-//	public void shouldGetForUsernameAndServer() throws UnsupportedEncodingException, MalformedURLException {
-//		// pre-conditions
-//		String username = "adietish@redhat.com";
-//		String server = "https://openshift.redhat.com";
-//		
-//		// operation
-//		ConnectionURL connectionUrl = ConnectionURL.forUsernameAndServer(username, server);
-//		
-//		// verifications
-//		assertEquals("openshift.redhat.com", connectionUrl.getHost());
-//		assertFalse(connectionUrl.isDefaultHost());
-//		assertEquals(username, connectionUrl.getUsername());
-//		assertEquals("https://", connectionUrl.getScheme());
-//	}
+	
+	@Test
+	public void shouldCorrectMisplacedScheme() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		String username = "adietish@redhat.com";
+		String scheme = UrlUtils.SCHEME_HTTP;
+		String host = "openshift.local";
+		
+		// operation
+		ConnectionURL connectionUrl = ConnectionURL.forURL(URLEncoder.encode(username, "UTF-8") + '@' + scheme + host);
+
+		// verifications
+		assertEquals(host, connectionUrl.getHost());
+		assertFalse(connectionUrl.isDefaultHost());
+		assertEquals(username, connectionUrl.getUsername());
+		assertEquals(scheme, connectionUrl.getScheme());
+	}
+	
+	@Test
+	public void shouldCorrectMisplacedSchemeWithDefaultServer() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		String username = "adietish@redhat.com";
+		String scheme = UrlUtils.SCHEME_HTTP;
+		
+		// operation
+		ConnectionURL connectionUrl = ConnectionURL.forURL(URLEncoder.encode(username, "UTF-8") + '@' + scheme);
+
+		// verifications
+		assertEquals(null, connectionUrl.getHost());
+		assertTrue(connectionUrl.isDefaultHost());
+		assertEquals(username, connectionUrl.getUsername());
+		assertEquals(scheme, connectionUrl.getScheme());
+	}
+
+	@Test
+	public void shouldGetForUsernameAndServer() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		String username = "adietish@redhat.com";
+		String server = "https://openshift.redhat.com";
+		
+		// operation
+		ConnectionURL connectionUrl = ConnectionURL.forUsernameAndHost(username, server);
+		
+		// verifications
+		assertEquals("openshift.redhat.com", connectionUrl.getHost());
+		assertFalse(connectionUrl.isDefaultHost());
+		assertEquals(username, connectionUrl.getUsername());
+		assertEquals("https://", connectionUrl.getScheme());
+	}
 
 }

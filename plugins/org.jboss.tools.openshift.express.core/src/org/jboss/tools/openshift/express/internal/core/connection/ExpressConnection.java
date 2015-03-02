@@ -36,6 +36,7 @@ import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordSt
 import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStoreException;
 
 import com.openshift.client.ApplicationScale;
+import com.openshift.client.ConnectionBuilder;
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 import com.openshift.client.IGearProfile;
@@ -44,7 +45,6 @@ import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.IQuickstart;
 import com.openshift.client.ISSHPublicKey;
 import com.openshift.client.IUser;
-import com.openshift.client.OpenShiftConnectionFactory;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
 import com.openshift.client.cartridge.ICartridge;
@@ -148,6 +148,12 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 	}
 
 	@Override
+	public String setHost(String host) {
+		clearUser();
+		return super.setHost(host);
+	}
+	
+	@Override
 	public String getScheme() {
 		if (isDefaultHost()) {
 			return UrlUtils.getScheme(ExpressConnectionUtils.getDefaultHostUrl());
@@ -213,17 +219,25 @@ public class ExpressConnection extends AbstractConnection implements ICredential
 			return promptForCredentials();
 		} else {
 			setClientTimeout();
-			IUser user = getUserForConnection();
+			IUser user = doCreateUser();
 			setUser(user);
 			return true;
 		}
 	}
 	
-	public IUser getUserForConnection(){
+	protected IUser doCreateUser() {
 		final String userId = ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
 
-		return new OpenShiftConnectionFactory()
-		.getConnection(userId, username, password, getHost(), sslCallback).getUser();
+		try {
+			return new ConnectionBuilder(getHost())
+				.credentials(username, password)
+				.clientId(userId)
+				.sslCertificateCallback(sslCallback)
+				.create()
+				.getUser();
+		} catch (IOException e) {
+			throw new OpenShiftException("Could not connect for user {0} - {1}", username, getHost());
+		}
 	}
 
 	private void setClientTimeout() {

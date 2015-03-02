@@ -15,6 +15,9 @@ import static org.junit.Assert.*;
 import org.jboss.tools.openshift.express.internal.ui.filters.SimplePropertyActionFilter;
 import org.junit.Test;
 
+/**
+ * @author Jeff Cantrill
+ */
 public class SimplePropertyActionFilterTest {
 
 	private SimplePropertyActionFilter filter = new SimplePropertyActionFilter();

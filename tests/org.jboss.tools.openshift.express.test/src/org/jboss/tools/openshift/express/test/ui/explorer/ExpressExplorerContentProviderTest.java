@@ -8,26 +8,28 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.ui.explorer;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
-import com.openshift.client.IUser;
-
-import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExpressExplorerContentProviderTest {
@@ -51,7 +53,6 @@ public class ExpressExplorerContentProviderTest {
 	@Test
 	public void getExplorerElementsReturnsDomainsForExpressConnections(){
 		ExpressConnection xpressConnection = spy(new ExpressConnection("", "http://localhost"));
-		doReturn(mock(IUser.class)).when(xpressConnection).getUserForConnection();
 		registry.add(xpressConnection);
 		List<IDomain> domains = Arrays.asList(domain);
 		doReturn(domains).when(xpressConnection).getDomains();
@@ -89,5 +90,4 @@ public class ExpressExplorerContentProviderTest {
 	public void testApplicationHasChildren() {
 		assertTrue("Exp. an IApplication to have children", provider.hasChildren(application));
 	}
-
 }

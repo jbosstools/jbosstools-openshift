@@ -7,10 +7,10 @@ Bundle-Version: 3.0.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator
 Require-Bundle: org.jboss.tools.openshift.express.client;bundle-version="[3.0.0,4.0.0)",
- org.jboss.tools.common.core;bundle-version="3.7.0",
+ org.jboss.tools.common.core;bundle-version="3.7.0";visibility:=reexport,
  org.jboss.tools.openshift.egit.core;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.foundation.core;bundle-version="1.1.0",
- org.jboss.tools.openshift.common.core;bundle-version="1.0.0",
+ org.jboss.tools.openshift.common.core;bundle-version="1.0.0";visibility:=reexport,
  org.eclipse.core.resources;bundle-version="3.8.100",
  org.eclipse.debug.core;bundle-version="3.8.0",
  org.jboss.ide.eclipse.as.core;bundle-version="3.0.0",
