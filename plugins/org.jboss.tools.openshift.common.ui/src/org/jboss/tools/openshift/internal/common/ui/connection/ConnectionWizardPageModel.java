@@ -234,11 +234,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 						factory, 
 						ValidationStatus.error(NLS.bind("Host at {0} is not an {1} host.", host, factory.getName())), 
 						Status.OK_STATUS);
-			}
-		} catch (IOException e) {
+			}	
+		} catch (Exception e) {
 			updateModel(null, 
 					factory, 
-					ValidationStatus.error(NLS.bind("Could not connect to host at {0}.", host), e), 
+					ValidationStatus.error(NLS.bind("Could not connect to host at {0}. Look into Eclipse logs for details.", host), e), 
 					Status.OK_STATUS);
 		}
 	}
