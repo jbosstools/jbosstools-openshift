@@ -35,19 +35,15 @@ public class ExpressCoreUIIntegration {
 	 private static final String EGITUI_ID = 
 		      "org.jboss.tools.openshift.express.core.ui.egit";
 	 
-	// The singleton instance
-	private static ExpressCoreUIIntegration instance;
+	private static ExpressCoreUIIntegration INSTANCE = new ExpressCoreUIIntegration();
 
 	private IConsoleUtility consoleUtil;
 	private IQuestionHandler questionHandler;
 	private ICredentialsPrompter credentialPrompter;
 	private ISSLCertificateCallback sslCertificateCallback;
 	
-	// Access the singleton
 	public static ExpressCoreUIIntegration getDefault() {
-		if (instance == null)
-			instance = new ExpressCoreUIIntegration();
-		return instance;
+		return INSTANCE;
 	}
 		
 	public ICredentialsPrompter getCredentialPrompter() {

@@ -10,14 +10,17 @@ package org.jboss.tools.openshift.core;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
+/**
+ * @author Rob Stryker
+ * @author Jeff Cantrill
+ * @author Andre Dietisheim
+ */
 public class OpenShiftCoreUIIntegration {
 
-	private static OpenShiftCoreUIIntegration instance;
+	private static OpenShiftCoreUIIntegration INSTANCE = new OpenShiftCoreUIIntegration();
 	
 	public static OpenShiftCoreUIIntegration getInstance(){
-		if(instance == null)
-			instance = new OpenShiftCoreUIIntegration();
-		return instance;
+		return INSTANCE;
 	}
 	
 	private ISSLCertificateCallback sslCertificateCallback;
@@ -26,7 +29,7 @@ public class OpenShiftCoreUIIntegration {
 		return sslCertificateCallback;
 	}
 	
-	public void setSSLCertificateAuthorization(ISSLCertificateCallback authorization) {
-		this.sslCertificateCallback = authorization;
+	public void setSSLCertificateAuthorization(ISSLCertificateCallback callback) {
+		this.sslCertificateCallback = callback;
 	}
 }
