@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.test;
 
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
+import org.jboss.tools.openshift.test.core.connection.ConnectionPersistencyTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionSerializerTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
@@ -31,6 +32,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	BuildConfigPropertySourceTest.class,
 	ConnectionPropertySourceTest.class,
 	ConnectionRegistryTest.class,
+	ConnectionPersistencyTest.class,
 	ConnectionSerializerTest.class,
 	ConnectionTest.class,
 	ExtTextPropertyDescriptorTest.class,

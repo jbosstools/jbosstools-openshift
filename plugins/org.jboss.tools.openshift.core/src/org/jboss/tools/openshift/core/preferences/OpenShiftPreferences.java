@@ -17,6 +17,8 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * @author Andre Dietisheim
  */
 public class OpenShiftPreferences {
+	
+	private static final OpenShiftPreferences INSTANCE = new OpenShiftPreferences();
 
 	/** available connections */
 	private static final String CONNECTIONS = "org.jboss.tools.openshift.core.connection.CONNECTION_NAMES";
@@ -24,18 +26,14 @@ public class OpenShiftPreferences {
 	private final StringsPreferenceValue connectionsPreferenceValue = 
 			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
 	
-	private static OpenShiftPreferences instance;
-	
 	public static OpenShiftPreferences getInstance(){
-		if(instance == null)
-			instance = new OpenShiftPreferences();
-		return instance;
+		return INSTANCE;
 	}
 
 	private OpenShiftPreferences() {
 	}
 
-	public String[] getConnections() {
+	public String[] loadConnections() {
 		return connectionsPreferenceValue.get();
 	}
 

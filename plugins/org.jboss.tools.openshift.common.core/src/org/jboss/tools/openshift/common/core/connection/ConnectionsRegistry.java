@@ -72,6 +72,12 @@ public class ConnectionsRegistry {
 		}
 	}
 
+	public void addAll(Collection<? extends IConnection> connections) {
+		for (IConnection connection : connections) {
+			add(connection);
+		}
+	}
+	
 	protected boolean add(ConnectionURL connectionUrl, IConnection connection) {
 		if (connectionsByUrl.containsKey(connectionUrl)) {
 			return false;
