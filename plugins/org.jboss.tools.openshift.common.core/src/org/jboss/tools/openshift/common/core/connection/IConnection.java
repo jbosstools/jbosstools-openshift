@@ -19,11 +19,9 @@ import java.io.IOException;
  */
 public interface IConnection {
 
-	public boolean connect();
-
 	public String getHost();
 	
-	String getUsername();
+	public String getUsername();
 
 	public boolean isDefaultHost();
 
@@ -34,4 +32,6 @@ public interface IConnection {
 	public void refresh();
 
 	public boolean canConnect() throws IOException;
+	
+	public boolean connect();
 }

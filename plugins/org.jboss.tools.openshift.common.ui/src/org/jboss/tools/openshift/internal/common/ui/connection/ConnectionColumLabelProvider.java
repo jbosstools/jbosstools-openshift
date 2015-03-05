@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.common.core.connection.ICredentialsConnection;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
  * @author Andre Dietisheim
@@ -32,8 +32,9 @@ public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 
 	private String createLabel(IConnection connection) {
 		StringBuilder builder = new StringBuilder();
-		if (ICredentialsConnection.class.isAssignableFrom(connection.getClass())) {
-			builder.append(((ICredentialsConnection) connection).getUsername()).append(" - ");
+		String username = connection.getUsername();
+		if (!StringUtils.isEmpty(username)) {
+			builder.append(connection.getUsername()).append(" - ");
 		}
 		builder.append(connection.getHost());
 		if (connection.isDefaultHost()) {

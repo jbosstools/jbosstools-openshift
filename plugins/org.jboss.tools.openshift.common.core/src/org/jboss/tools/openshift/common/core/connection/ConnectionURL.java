@@ -130,22 +130,13 @@ public class ConnectionURL {
 	
 	public static ConnectionURL forConnection(IConnection connection) 
 			throws UnsupportedEncodingException, MalformedURLException {
-		if (connection.isDefaultHost()
-				&& ICredentialsConnection.class.isAssignableFrom(connection.getClass())) {
-			return forUsername(((ICredentialsConnection) connection).getUsername());
+		if (connection.isDefaultHost()) {
+			return forUsername(connection.getUsername());
 		}
 		String host = getHost(connection);
 		String scheme = getScheme(connection);
-		String username = getUsername(connection);
+		String username = connection.getUsername();
 		return new ConnectionURL(username, host, scheme);
-	}
-
-	private static String getUsername(IConnection connection) {
-		String username = null;
-		if (ICredentialsConnection.class.isAssignableFrom(connection.getClass())) {
-			username = ((ICredentialsConnection) connection).getUsername();
-		}
-		return username;
 	}
 
 	private static String getHost(IConnection connection) {
