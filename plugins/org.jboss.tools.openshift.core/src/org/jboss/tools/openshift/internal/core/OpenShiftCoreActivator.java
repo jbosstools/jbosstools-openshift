@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
@@ -22,6 +21,9 @@ import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.jboss.tools.openshift.core.preferences.OpenShiftPreferences;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @author Andre Dietisheim
+ */
 public class OpenShiftCoreActivator extends BaseCorePlugin {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
@@ -68,6 +70,14 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 		return getDefault().pluginLogInternal();
 	}
 
+	public static void logError(String message, Throwable t) {
+		pluginLog().logError(message, t);
+	}
+	
+	public static void logWarning(String message, Throwable t) {
+		pluginLog().logWarning(message, t);
+	}
+	
 	/**
 	 * Get a status factory for this plugin
 	 * @return status factory

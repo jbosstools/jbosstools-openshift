@@ -329,10 +329,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				return false;
 			}
 		} catch (InterruptedException e) {
-			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
+			OpenShiftCommonUIActivator.log(NLS.bind("Failed to authenticate user on server at {1}", pageModel.getHost()), e);
 			return false;
 		} catch (InvocationTargetException e) {
-			OpenShiftCommonUIActivator.log("Failed to authenticate on OpenShift", e);
+			OpenShiftCommonUIActivator.log(NLS.bind("Failed to authenticate user on server at {1}", pageModel.getHost()), e);
 			return false;
 		}
 	}

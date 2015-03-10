@@ -40,6 +40,7 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
 import org.jboss.tools.openshift.core.auth.IAuthorizationContext;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -49,21 +50,21 @@ import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.OpenShiftException;
 
 @SuppressWarnings("restriction")
-public class AuthorizationClient  implements IAuthorizationClient{
+public class AuthorizationClient implements IAuthorizationClient {
 
 	public static final String ACCESS_TOKEN = "access_token";
 	private static final String EXPIRES = "expires_in";
 	private SSLContext sslContext;
 	private X509HostnameVerifier hostnameVerifier = new AllowAllHostnameVerifier();
-	
-	public AuthorizationClient(){
+
+	public AuthorizationClient() {
 		setSSLCertificateCallback(new NoopSSLCertificateCallback());
 	}
-	
+
 	@Override
-	public IAuthorizationContext getContext(final String baseURL, final String username, final String password){
+	public IAuthorizationContext getContext(final String baseURL, final String username, final String password) {
 		CloseableHttpResponse response = null;
-		CloseableHttpClient client = null; 
+		CloseableHttpClient client = null;
 		try {
 			OpenShiftAuthorizationRedirectStrategy redirectStrategy = new OpenShiftAuthorizationRedirectStrategy();
 			client = HttpClients.custom()
@@ -72,31 +73,28 @@ public class AuthorizationClient  implements IAuthorizationClient{
 					.setHostnameVerifier(hostnameVerifier)
 					.setSslcontext(sslContext)
 					.build();
-			HttpGet request = new HttpGet(
-					new URIBuilder(String.format("%s/oauth/authorize", baseURL))
-						.addParameter("response_type", "token")
-						.addParameter("client_id", "openshift-challenging-client")
-						.build()
-						);
+			HttpGet request =
+					new HttpGet(
+							new URIBuilder(String.format("%s/oauth/authorize", baseURL))
+									.addParameter("response_type", "token")
+									.addParameter("client_id", "openshift-challenging-client")
+									.build());
 			response = client.execute(request);
 			return createAuthorizationConext(response, redirectStrategy.isAuthorized());
 		} catch (URISyntaxException e) {
-			logWarn("", e);
-			throw new OpenShiftException(e,"");
+			throw new OpenShiftException(e, NLS.bind("Could not authorize user {0} on server at {1}", username, baseURL));
 		} catch (ClientProtocolException e) {
-			logWarn("", e);
-			throw new OpenShiftException(e,"");
+			throw new OpenShiftException(e, NLS.bind("Could not authorize user {0} on server at {1}", username, baseURL));
 		} catch (IOException e) {
-			logWarn("", e);
-			throw new OpenShiftException(e,"");
-		}finally{
+			throw new OpenShiftException(e, NLS.bind("Could not authorize user {0} on server at {1}", username, baseURL));
+		} finally {
 			close(response);
 			close(client);
 		}
 	}
-	
+
 	private IAuthorizationContext createAuthorizationConext(CloseableHttpResponse response, boolean authorized) {
-		if(!authorized){
+		if (!authorized) {
 			return new AuthorizationContext(IAuthorizationContext.AuthorizationType.Basic);
 		}
 		Header header = response.getFirstHeader("Location");
@@ -104,66 +102,62 @@ public class AuthorizationClient  implements IAuthorizationClient{
 		return new AuthorizationContext(fragment.get(ACCESS_TOKEN), fragment.get(EXPIRES));
 	}
 
-	private void close(Closeable closer){
-		if(closer == null) return;
+	private void close(Closeable closer) {
+		if (closer == null)
+			return;
 		try {
 			closer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	private CredentialsProvider buildCredentialsProvider(final String username, final String password){
+
+	private CredentialsProvider buildCredentialsProvider(final String username, final String password) {
 		CredentialsProvider provider = new BasicCredentialsProvider();
 		provider.setCredentials(
-				//TODO: limit scope on host?
+				// TODO: limit scope on host?
 				new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
 				new UsernamePasswordCredentials(username, password));
 		return provider;
 	}
-	
+
 	@Override
 	public void setSSLCertificateCallback(ISSLCertificateCallback callback) {
 		X509TrustManager trustManager = null;
-		if(callback != null){
+		if (callback != null) {
 			trustManager = createCallbackTrustManager(callback);
 		}
 		try {
 			this.sslContext = SSLContext.getInstance("TLS");
-			this.sslContext.init(null, new TrustManager [] {trustManager},null);
-		} catch (NoSuchAlgorithmException e){
-			logWarn("Could not install trust manager callback", e);
+			this.sslContext.init(null, new TrustManager[] { trustManager }, null);
+		} catch (NoSuchAlgorithmException e) {
+			OpenShiftCoreActivator.logWarning("Could not install trust manager callback", e);
 			this.sslContext = null;
-		}catch(KeyManagementException e) {
-			logWarn("Could not install trust manager callback", e);
+		} catch (KeyManagementException e) {
+			OpenShiftCoreActivator.logWarning("Could not install trust manager callback", e);
 			this.sslContext = null;
 		}
 	}
-	private void logWarn(String message){
-		logWarn(message, null);
-	}
-	private void logWarn(String message, Throwable e){
-		OpenShiftCoreActivator.pluginLog().logWarning(message,e);
-	}
-	//TODO REPLACE me with osjc impl
+
+	// TODO REPLACE me with osjc impl
 	private X509TrustManager createCallbackTrustManager(ISSLCertificateCallback sslAuthorizationCallback) {
 		X509TrustManager trustManager = null;
 		try {
 			trustManager = getCurrentTrustManager();
 			if (trustManager == null) {
-				logWarn("Could not install trust manager callback, no trustmanager was found.");
+				OpenShiftCoreActivator.logWarning("Could not install trust manager callback, no trustmanager was found.", null);
 			} else {
 				trustManager = new CallbackTrustManager(trustManager, sslAuthorizationCallback);
 			}
 		} catch (GeneralSecurityException e) {
-			logWarn("Could not install trust manager callback.", e);
+			OpenShiftCoreActivator.logWarning("Could not install trust manager callback.", e);
 		}
 		return trustManager;
 	}
-	
-	//TODO replace me with OSJC implementation
+
+	// TODO replace me with OSJC implementation
 	private X509TrustManager getCurrentTrustManager() throws NoSuchAlgorithmException, KeyStoreException {
-		TrustManagerFactory trustManagerFactory = 
+		TrustManagerFactory trustManagerFactory =
 				TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 		trustManagerFactory.init((KeyStore) null);
 
@@ -177,18 +171,18 @@ public class AuthorizationClient  implements IAuthorizationClient{
 		return x509TrustManager;
 	}
 
-	//TODO - Replace me with instance in OSJC
+	// TODO - Replace me with instance in OSJC
 	private static class CallbackTrustManager implements X509TrustManager {
 
 		private X509TrustManager trustManager;
 		private ISSLCertificateCallback callback;
 
-		private CallbackTrustManager(X509TrustManager currentTrustManager, ISSLCertificateCallback callback) 
+		private CallbackTrustManager(X509TrustManager currentTrustManager, ISSLCertificateCallback callback)
 				throws NoSuchAlgorithmException, KeyStoreException {
-			this.trustManager = currentTrustManager; 
+			this.trustManager = currentTrustManager;
 			this.callback = callback;
 		}
-		
+
 		public X509Certificate[] getAcceptedIssuers() {
 			return trustManager.getAcceptedIssuers();
 		}
@@ -207,6 +201,5 @@ public class AuthorizationClient  implements IAuthorizationClient{
 			trustManager.checkServerTrusted(chain, authType);
 		}
 	}
-	
-	
+
 }
