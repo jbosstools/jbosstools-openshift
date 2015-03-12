@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.tools.openshift.core.preferences.OpenShiftPreferences;
+import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.OpenShiftException;
@@ -26,9 +26,9 @@ import com.openshift.client.OpenShiftException;
 public class ConnectionPersistency {
 
 	private ConnectionSerializer serializer = new ConnectionSerializer();
-	private OpenShiftPreferences preferences;
+	private OpenShiftCorePreferences preferences;
 
-	public ConnectionPersistency(OpenShiftPreferences preferences) {
+	public ConnectionPersistency(OpenShiftCorePreferences preferences) {
 		this.preferences = preferences;
 	}
 
@@ -51,6 +51,11 @@ public class ConnectionPersistency {
 	}
 
 	public void save(Collection<Connection> connections) {
+		if (connections == null
+				|| connections.size() == 0) {
+			return;
+		}
+
 		List<String> serializedConnections = new ArrayList<String>(connections.size());
 		for (Connection connection : connections) {
 			addConnection(connection, serializer, serializedConnections);

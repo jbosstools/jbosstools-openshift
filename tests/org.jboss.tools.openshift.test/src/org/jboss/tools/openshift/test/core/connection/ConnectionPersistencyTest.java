@@ -13,12 +13,14 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
-import org.jboss.tools.openshift.core.preferences.OpenShiftPreferences;
+import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,9 +34,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ConnectionPersistencyTest {
 
 	@Mock
-	private OpenShiftPreferences preferences;
+	private OpenShiftCorePreferences preferences;
 	private ConnectionPersistency persistency;
-	private ArrayList<Connection> connections;
 	private Connection connection1;
 	private Connection connection2;
 
@@ -48,16 +49,32 @@ public class ConnectionPersistencyTest {
 		this.connection2 = new Connection("https://localhost:8442", null, null, null);
 		connection2.setUsername("kung");
 		connection2.setToken("foo");
-
-		this.connections = new ArrayList<Connection>();
-		connections.add(connection1);
-		connections.add(connection2);
 	}
 
 	@Test
 	public void shouldSaveConnections() {
 		// pre-condition
+		List<Connection> connections = new ArrayList<Connection>();
+		connections.add(connection1);
+		connections.add(connection2);
+		
+		// operations
+		persistency.save(connections);
 
+		// verification
+		verify(preferences).saveConnections(new String[] {
+				"{\"url\" : \"https://localhost:8442\", \"username\" : \"foo\", \"token\" : \"bar\"}",
+				"{\"url\" : \"https://localhost:8442\", \"username\" : \"kung\", \"token\" : \"foo\"}" });
+	}
+
+	@Test
+	public void shouldNotSaveBlankUserConnection() throws MalformedURLException {
+		// pre-condition
+		List<Connection> connections = new ArrayList<Connection>();
+		connections.add(connection1);
+		connections.add(new Connection("http://localhost:8080", null, null, null));
+		connections.add(connection2);
+		
 		// operations
 		persistency.save(connections);
 
@@ -83,6 +100,24 @@ public class ConnectionPersistencyTest {
 		assertContainsConnection(connection2, connections);
 	}
 
+	@Test
+	public void shouldNotLoadMalformedJson() {
+		// pre-condition
+		when(preferences.loadConnections()).thenReturn(new String[] {
+				"{\"url\" : \"https://localhost:8442\", \"username\" : \"foo\", \"token\" : \"bar\"}",
+				"{}}",
+				"{\"url\" : \"https://localhost:8442\", \"username\" : \"kung\", \"token\" : \"foo\"}"
+				});
+		
+		// operations
+		Collection<Connection> connections = persistency.load();
+
+		// verification
+		assertEquals(2, connections.size());
+		assertContainsConnection(connection1, connections);
+		assertContainsConnection(connection2, connections);
+	}
+	
 	private void assertContainsConnection(Connection connection, Collection<Connection> connections) {
 		for (Connection effectiveConnection : connections) {
 			if (effectiveConnection.equals(connection)) {

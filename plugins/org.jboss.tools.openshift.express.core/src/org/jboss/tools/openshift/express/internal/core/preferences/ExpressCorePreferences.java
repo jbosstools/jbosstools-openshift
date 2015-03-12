@@ -228,7 +228,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 				uuidsAndSnapshots.toArray(new String[uuidsAndSnapshots.size()]));
 	}
 
-	public String[] getConnections() {
+	public String[] loadConnections() {
 		String[] ret = connectionsPreferenceValue.get();
 		return ret == null ? UI_connectionsPreferenceValue.get() : ret;
 	}

@@ -15,6 +15,7 @@ import org.jboss.tools.openshift.express.test.core.LazyCredentialsPrompterTest;
 import org.jboss.tools.openshift.express.test.core.LazySSLCertificateCallbackTest;
 import org.jboss.tools.openshift.express.test.core.OpenShiftMarkerTest;
 import org.jboss.tools.openshift.express.test.core.StringsPreferenceValueTest;
+import org.jboss.tools.openshift.express.test.core.connection.ExpressConnectionPersistencyTest;
 import org.jboss.tools.openshift.express.test.core.connection.ExpressConnectionTest;
 import org.jboss.tools.openshift.express.test.core.connection.ExpressConnectionsRegistryTest;
 import org.jboss.tools.openshift.express.test.ui.ActionFilterAdapterFactoryTest;
@@ -41,6 +42,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		SSHUserConfigTest.class,
 		ExpressConnectionsRegistryTest.class,
 		ExpressConnectionTest.class,
+		ExpressConnectionPersistencyTest.class,
 		OpenShiftMarkerTest.class,
 		SimplePropertyActionFilterTest.class,
 		StringsPreferenceValueTest.class

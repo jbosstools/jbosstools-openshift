@@ -80,17 +80,13 @@ public class ExpressConnection extends AbstractConnection {
 		this(null, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, null);
 	}
 
-	public ExpressConnection(String username, String scheme, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
-		this(username, null, scheme, host, false, null, sslCallback);
-		this.passwordPrompter = prompter;
-	}
-
 	public ExpressConnection(String username, String host) {
 		this(username, null, host, false, null);
 	}
 
-	public ExpressConnection(String username, String password, boolean rememberPassword, ISSLCertificateCallback sslCallback) {
-		this(username, password, null, rememberPassword, sslCallback);
+	public ExpressConnection(String username, String scheme, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
+		this(username, null, scheme, host, false, null, sslCallback);
+		this.passwordPrompter = prompter;
 	}
 
 	public ExpressConnection(String username, String password, String host, boolean rememberPassword, ISSLCertificateCallback sslCallback) {
@@ -597,5 +593,36 @@ public class ExpressConnection extends AbstractConnection {
 				+ ", rememberPassword=" + rememberPassword
 				+ ", didPromptForPassword=" + didPromptForPassword 
 				+ ", passwordLoaded=" + passwordLoaded + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (!(obj instanceof ExpressConnection))
+			return false;
+		ExpressConnection other = (ExpressConnection) obj;
+		if (password == null) {
+			if (other.password != null)
+				return false;
+		} else if (!password.equals(other.password))
+			return false;
+		if (username == null) {
+			if (other.username != null)
+				return false;
+		} else if (!username.equals(other.username))
+			return false;
+		return true;
 	}
 }
