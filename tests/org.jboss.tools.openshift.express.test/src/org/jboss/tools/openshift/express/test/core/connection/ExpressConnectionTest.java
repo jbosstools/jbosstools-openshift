@@ -57,19 +57,6 @@ public class ExpressConnectionTest {
 	}
 
 	@Test
-	public void setHostShouldResetIsDefaultHost() {
-		// pre-conditions
-		ExpressConnection connection = new ExpressConnectionFake("fakeUser", null);
-		assertTrue(connection.isDefaultHost());
-
-		// operations
-		connection.setHost("http://www.redhat.com");
-
-		// verifications
-		assertFalse(connection.isDefaultHost());
-	}
-
-	@Test
 	public void shouldExtractUrlPortions() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
 		String scheme = UrlUtils.SCHEME_HTTP;
@@ -106,21 +93,6 @@ public class ExpressConnectionTest {
 
 		// operations
 		ExpressConnection connection = new ExpressConnectionFake("fakeUser", "openshift.redhat.com");
-
-		// verifications
-		assertNotNull(connection.getHost());
-		assertTrue(connection.getHost().startsWith(UrlUtils.HTTP));
-		assertNotNull(connection.getScheme());
-		assertTrue(connection.getScheme().startsWith(UrlUtils.HTTP));
-	}
-
-	@Test
-	public void shouldHaveHostWithSchemeAfterSetting() {
-		// pre-conditions
-		ExpressConnection connection = new ExpressConnectionFake("fakeUser", "openshift.redhat.com");
-
-		// operations
-		connection.setHost("jboss.com");
 
 		// verifications
 		assertNotNull(connection.getHost());
@@ -172,44 +144,30 @@ public class ExpressConnectionTest {
 	}
 
 	@Test
-	public void setHostShouldDisconnect() {
+	public void hasCodeShouldNotChangeUponUsernameChange() {
 		// pre-conditions
-		ExpressConnectionFake connection = new ExpressConnectionFake("fakeUser", "openshift.redhat.com");
-		connection.setConnected(true);
-		assertTrue(connection.isConnected());
-
+		ExpressConnection connection = new ExpressConnection("fakeUser", "openshift.redhat.com");
+		int hashCode = connection.hashCode();
+		
 		// operations
-		connection.setHost("fakeHost");
+		connection.setUsername("foobar");
 
 		// verifications
-		assertFalse(connection.isConnected());
+		assertEquals(hashCode, connection.hashCode());
 	}
 
 	@Test
-	public void shouldUpdate() {
+	public void hasCodeShouldNotChangeUponPasswordChange() {
 		// pre-conditions
-		ExpressConnectionFake connection = new ExpressConnectionFake("fakeUser", null);
-		connection.setRememberPassword(true);
-		connection.setConnected(true);
-		assertTrue(connection.isConnected());
-		assertTrue(connection.isDefaultHost());
-
-		String newUsername = "anotherUser";
-		String newHost = "http://www.redhat.com";
-		String newPassword = "1q2w3e";
-		ExpressConnection updatingConnection = new ExpressConnectionFake(newUsername, newHost);
-		updatingConnection.setPassword(newPassword);
-		updatingConnection.setRememberPassword(false);
-
+		ExpressConnection connection = new ExpressConnection("fakeUser", "openshift.redhat.com");
+		connection.setPassword("111111");
+		int hashCode = connection.hashCode();
+		
 		// operations
-		connection.update(updatingConnection);
+		connection.setPassword("22222");
 
 		// verifications
-		assertEquals(newUsername, connection.getUsername());
-		assertEquals(newHost, connection.getHost());
-		assertFalse(newUsername, connection.isDefaultHost());
-		assertEquals(newPassword, connection.getPassword());
-		assertFalse(connection.isRememberPassword());
-		assertFalse(connection.isConnected());
+		assertEquals(hashCode, connection.hashCode());
 	}
+
 }

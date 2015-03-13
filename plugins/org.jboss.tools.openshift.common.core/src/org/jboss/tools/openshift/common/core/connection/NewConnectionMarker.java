@@ -51,8 +51,6 @@ public class NewConnectionMarker extends AbstractConnection {
 
 	@Override
 	public void refresh() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -73,11 +71,6 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public String getScheme() {
 		return null;
-	}
-
-	@Override
-	public String setHost(String host) {
-		throw new UnsupportedOperationException();
 	}
 	
 	@Override

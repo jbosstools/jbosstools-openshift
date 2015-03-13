@@ -142,12 +142,6 @@ public class ExpressConnection extends AbstractConnection {
 		}
 		return super.getHost();
 	}
-
-	@Override
-	public String setHost(String host) {
-		clearUser();
-		return super.setHost(host);
-	}
 	
 	@Override
 	public String getScheme() {
@@ -261,21 +255,6 @@ public class ExpressConnection extends AbstractConnection {
 
 	protected void clearUser() {
 		this.user = null;
-	}
-
-	public void update(ExpressConnection connection) {
-		if (connection == null) {
-			return;
-		}
-		setUsername(connection.getUsername());
-		setPassword(connection.getPassword());
-		setRememberPassword(connection.isRememberPassword());
-		if (connection.isDefaultHost()) {
-			setHost(null);
-		} else {
-			setHost(connection.getHost());
-		}
-		setUser(connection.getUser());
 	}
 
 	private String updateUsername(IUser user) {
@@ -593,15 +572,6 @@ public class ExpressConnection extends AbstractConnection {
 				+ ", rememberPassword=" + rememberPassword
 				+ ", didPromptForPassword=" + didPromptForPassword 
 				+ ", passwordLoaded=" + passwordLoaded + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((password == null) ? 0 : password.hashCode());
-		result = prime * result + ((username == null) ? 0 : username.hashCode());
-		return result;
 	}
 
 	@Override

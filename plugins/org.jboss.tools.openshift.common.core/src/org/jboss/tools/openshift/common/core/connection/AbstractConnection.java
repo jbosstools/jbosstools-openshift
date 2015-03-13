@@ -20,8 +20,6 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
  * @author Andre Dietisheim
  */
 public abstract class AbstractConnection extends ObservablePojo implements IConnection {
-
-	public static final String PROPERTY_HOST = "host";
 	
 	private String host;
 
@@ -50,13 +48,6 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 
 	public String getScheme() {
 		return UrlUtils.getScheme(host);
-	}
-
-	public String setHost(String host) {
-		firePropertyChange(PROPERTY_HOST, 
-				this.host,
-				this.host = UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
-		return host;
 	}
 
 	public abstract boolean connect();
