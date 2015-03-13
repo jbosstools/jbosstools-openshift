@@ -41,6 +41,8 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 	private Text passwordText;
 	private Binding usernameBinding;
 	private Binding passwordBinding;
+	private Binding rememberPasswordBinding;
+	private Button rememberPasswordCheckBox;
 	
 	public ExpressConnectionUI() {
 	}
@@ -69,7 +71,7 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 
-		Button rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
+		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
 		rememberPasswordCheckBox.setText("&Save Password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
@@ -108,7 +110,7 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
 				.converting(new TrimmingStringConverter())
 				.validatingAfterConvert(new RequiredStringValidator("username"))
-				.to(BeanProperties.value(ExpressConnection.class, "username").observeDetail(detailViewModel))
+				.to(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_USERNAME).observeDetail(detailViewModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -118,7 +120,15 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
 				.converting(new TrimmingStringConverter())
 				.validatingAfterConvert(new RequiredStringValidator("password"))
-				.to(BeanProperties.value(ExpressConnection.class, "password").observeDetail(detailViewModel))
+				.to(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_PASSWORD).observeDetail(detailViewModel))
+				.in(dbc);
+		ControlDecorationSupport.create(
+				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		// remember password
+		this.rememberPasswordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
+				.to(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_REMEMBER_PASSWORD).observeDetail(detailViewModel))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());

@@ -58,9 +58,9 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class ExpressConnection extends AbstractConnection {
 
-	private static final String PROPERTY_USERNAME = "username";
-	private static final String PROPERTY_PASSWORD = "password";
-	private static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+	public static final String PROPERTY_USERNAME = "username";
+	public static final String PROPERTY_PASSWORD = "password";
+	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
 	
 	private String username;
 	private String password;
