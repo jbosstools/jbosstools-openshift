@@ -53,7 +53,7 @@ public abstract class AbstractDetailViews {
 		detailViewModel.addValueChangeListener(onDetailViewModelChanged());
 		parent.setLayout(stackLayout);
 		createViewControls(parent, dbc);
-		showView(null, currentView, dbc);
+		showView(detailViewModel, getView(detailViewModel), dbc);
 	}
 
 	protected abstract IDetailView[] getDetailViews();
