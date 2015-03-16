@@ -596,6 +596,13 @@
 	
 	<!-- New Domain -->
 	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			id="org.jboss.tools.openshift.express.ui.command.newdomain"
+			name="%openshift.command.domain.new">
+		</command>
+	</extension>
+	<extension
            point="org.eclipse.ui.handlers">
         <handler
               commandId="org.jboss.tools.openshift.express.ui.command.newdomain"
