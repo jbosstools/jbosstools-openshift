@@ -75,8 +75,7 @@ public abstract class AbstractDetailViews {
 	protected void showView(IObservableValue detailViewsModel, IDetailView view, DataBindingContext dbc) {
 		if (view == null
 				|| view.getControl() == null
-				|| detailViewsModel == null
-				|| view.equals(currentView)) {
+				|| detailViewsModel == null) {
 			return;
 		}
 		currentView.onInVisible(detailViewsModel, dbc);
