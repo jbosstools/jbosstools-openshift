@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
-import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews.IDetailView;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
 
 /**
  * A UI that can display/edit a given connection instance. All implementors are
  * able to display different types of connections and are displayed by
- * {@link ConnectionUIViews}
+ * {@link ConnectionEditorsStackedView}
  * 
  * @author Andre Dietisheim
  * 
  * @see IConnection
- * @see ConnectionUIViews
+ * @see ConnectionEditorsStackedView
  * @see IDetailView#isViewFor(Object)
  */
-public interface IConnectionUI extends IDetailView {
-
+public interface IConnectionEditor extends IDetailView {
 }

@@ -50,12 +50,11 @@ public class ExpressConnectionPersistency {
 			ExpressConnection connection =
 					new ExpressConnection(
 							connectionURL.getUsername(),
-							connectionURL.getScheme(),
-							connectionURL.getHost(),
-							new LazyCredentialsPrompter(ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
+							connectionURL.getHostWithScheme(),
+							new LazyCredentialsPrompter(
+									ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
 							new LazySSLCertificateCallback(
-									ExpressCoreUIIntegration.getDefault()
-									.getSSLCertificateCallback()));
+									ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
 			connections.add(connection);
 		} catch (MalformedURLException e) {
 			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);

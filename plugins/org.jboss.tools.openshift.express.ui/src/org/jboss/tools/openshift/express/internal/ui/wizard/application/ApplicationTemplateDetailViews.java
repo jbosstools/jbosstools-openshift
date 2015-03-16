@@ -51,7 +51,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -59,7 +59,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 /**
  * @author Andre Dietisheim
  */
-public class ApplicationTemplateDetailViews extends AbstractDetailViews {
+public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 
 	private final IDetailView defaultView = new DefaultView();
 	private final IDetailView downloadableCartridgeView = new CodeAnthingCartridgeView();

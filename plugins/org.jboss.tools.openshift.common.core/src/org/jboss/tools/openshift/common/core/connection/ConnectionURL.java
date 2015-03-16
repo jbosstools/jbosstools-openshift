@@ -55,6 +55,10 @@ public class ConnectionURL {
 		return host;
 	}
 
+	public String getHostWithScheme() {
+		return scheme + host;
+	}
+	
 	public boolean isDefaultHost() {
 		return StringUtils.isEmpty(host);
 	}

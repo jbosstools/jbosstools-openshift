@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.core.connection;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 
 /**
@@ -40,6 +43,7 @@ public class ConnectionsRegistry {
 	private IConnection recentConnection = null;
 	private Map<ConnectionURL, IConnection> connectionsByUrl = new HashMap<ConnectionURL, IConnection>();
 	private List<IConnectionsRegistryListener> listeners = new ArrayList<IConnectionsRegistryListener>();
+	private PropertyChangeListener connectionListener = new ConnectionListener();
 	
 	public ConnectionsRegistry() {
 	}
@@ -77,11 +81,12 @@ public class ConnectionsRegistry {
 			add(connection);
 		}
 	}
-	
+
 	protected boolean add(ConnectionURL connectionUrl, IConnection connection) {
 		if (connectionsByUrl.containsKey(connectionUrl)) {
 			return false;
 		}
+		addPropertyChangeListener(connection);
 		connectionsByUrl.put(connectionUrl, connection);
 		this.recentConnection = connection;
 		fireChange(connection, ADDED);
@@ -114,6 +119,8 @@ public class ConnectionsRegistry {
 				return false;
 			}
 			connectionsByUrl.remove(connectionUrl);
+			removePropertyChangeListener(connection);
+			
 			if (this.recentConnection == connection) {
 				this.recentConnection = null;
 			}
@@ -206,6 +213,36 @@ public class ConnectionsRegistry {
 
 	public IConnection setRecent(IConnection connection) {
 		return this.recentConnection = connection;
+	}
+	
+	private void addPropertyChangeListener(IConnection connection) {
+		if (!(connection instanceof ObservablePojo)) {
+			return;
+		}
+		
+		((ObservablePojo) connection).addPropertyChangeListener(connectionListener);;
+		
+	}
+	
+	private void removePropertyChangeListener(IConnection connection) {
+		if (!(connection instanceof ObservablePojo)) {
+			return;
+		}
+		
+		((ObservablePojo) connection).removePropertyChangeListener(connectionListener);;
+		
+	}
+
+	private class ConnectionListener implements PropertyChangeListener {
+
+		@Override
+		public void propertyChange(PropertyChangeEvent event) {
+			if (!(event.getSource() instanceof IConnection)) {
+				return;
+			}
+			fireConnectionChanged((IConnection) event.getSource());
+		}
+		
 	}
 	
 }

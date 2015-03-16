@@ -31,6 +31,13 @@ public class ConnectionsChange {
 	public IConnection getConnection() {
 		return notifiedConnection;
 	}
+	
+	public void reset() {
+		this.additionNotified = false;
+		this.removalNotified = false;
+		this.changeNotified = false;
+		this.notifiedConnection = null;
+	}
 
 	private class Listener implements IConnectionsRegistryListener {
 

@@ -22,48 +22,48 @@ import org.osgi.framework.Bundle;
 /**
  * @author Andre Dietisheim
  */
-public class ConnectionUIs {
+public class ConnectionEditorExtension {
 
-	private static ConnectionUIs INSTANCE = new ConnectionUIs();
+	private static ConnectionEditorExtension INSTANCE = new ConnectionEditorExtension();
 	
-	private static final String CONNECTION_UI_EXTENSION = "org.jboss.tools.openshift.common.ui.connectionUI";
+	private static final String CONNECTION_UI_EXTENSION = "org.jboss.tools.openshift.common.ui.connectionEditor";
 	private static final String ATTRIBUTE_CLASS = "class";
 
-	private Collection<IConnectionUI> connectionUIs;
+	private Collection<IConnectionEditor> connectionEditors;
 	
-	public static ConnectionUIs getInstance() {
+	public static ConnectionEditorExtension getInstance() {
 		return INSTANCE;
 	}
 	
-	private ConnectionUIs() {
+	private ConnectionEditorExtension() {
 		// inhibit instantiation
 	}
 
-	public Collection<IConnectionUI> getAll() {
-		if (connectionUIs == null) {
-			this.connectionUIs = createConnectionUIs();
+	public Collection<IConnectionEditor> getAll() {
+		if (connectionEditors == null) {
+			this.connectionEditors = createConnectionEditors();
 		}
-		return connectionUIs;
+		return connectionEditors;
 	}
 
-	private Collection<IConnectionUI> createConnectionUIs() {
-		List<IConnectionUI> connectionUIs = new ArrayList<IConnectionUI>();
+	private Collection<IConnectionEditor> createConnectionEditors() {
+		List<IConnectionEditor> connectionEditors = new ArrayList<IConnectionEditor>();
 		IConfigurationElement[] config = 
 				Platform.getExtensionRegistry().getConfigurationElementsFor(CONNECTION_UI_EXTENSION);
 		for (IConfigurationElement extension : config) {
 			if (extension.getAttribute(ATTRIBUTE_CLASS) != null) {
 				String clazz = extension.getAttribute(ATTRIBUTE_CLASS);
 				Bundle bundle = Platform.getBundle(extension.getDeclaringExtension().getContributor().getName());
-				IConnectionUI connectionUI = createConnectionUI(clazz, bundle);
-				if (connectionUI != null) {
-					connectionUIs.add(connectionUI);
+				IConnectionEditor connectionEditor = createConnectionUI(clazz, bundle);
+				if (connectionEditor != null) {
+					connectionEditors.add(connectionEditor);
 				}
 			}
 		}
-		return connectionUIs;
+		return connectionEditors;
 	}
 
-	private IConnectionUI createConnectionUI(final String clazzDefinition, final Bundle bundle) {
+	private IConnectionEditor createConnectionUI(final String clazzDefinition, final Bundle bundle) {
 		try {
 			if (bundle == null) {
 				return null;
@@ -71,10 +71,10 @@ public class ConnectionUIs {
 			Class<?> clazz = bundle.loadClass(clazzDefinition);
 			Object object = clazz.newInstance();
 			if (object == null
-					|| !IConnectionUI.class.isAssignableFrom(object.getClass())) {
+					|| !IConnectionEditor.class.isAssignableFrom(object.getClass())) {
 				return null;
 			}
-			return (IConnectionUI) object;
+			return (IConnectionEditor) object;
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(
 					NLS.bind("Could not load class {0} in bundle {1}", clazzDefinition, bundle.getSymbolicName())); //$NON-NLS-1$

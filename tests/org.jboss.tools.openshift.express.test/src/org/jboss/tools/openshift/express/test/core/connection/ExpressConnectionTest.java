@@ -15,11 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URLEncoder;
-
-import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
@@ -54,37 +49,6 @@ public class ExpressConnectionTest {
 		// verifications
 		assertFalse(connection.isDefaultHost());
 		assertEquals(ExpressConnectionUtils.getDefaultHostUrl(), connection.getHost());
-	}
-
-	@Test
-	public void shouldExtractUrlPortions() throws UnsupportedEncodingException, MalformedURLException {
-		// pre-conditions
-		String scheme = UrlUtils.SCHEME_HTTP;
-		String username = "adietish@redhat.com";
-		String password = "12345";
-		String server = "openshift.redhat.com";
-
-		// operations
-		ConnectionURL connectionUrl = ConnectionURL.forURL(scheme + URLEncoder.encode(username, "UTF-8") + ":"
-				+ password + "@" + server);
-		ExpressConnection connection = new ExpressConnectionFake(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost());
-
-		// verifications
-		assertEquals(scheme, connection.getScheme());
-		assertEquals(username, connection.getUsername());
-		assertEquals(scheme + server, connection.getHost());
-	}
-
-	@Test
-	public void shouldAllowPortInUrl() throws UnsupportedEncodingException, MalformedURLException {
-		// pre-conditions
-
-		// operations
-		ConnectionURL connectionUrl = ConnectionURL.forURL("http://adietish%40redhat.com@localhost:8081");
-		ExpressConnection connection = new ExpressConnectionFake(connectionUrl.getUsername(), connectionUrl.getScheme(), connectionUrl.getHost());
-
-		// verifications
-		assertEquals("http://localhost:8081", connection.getHost());
 	}
 
 	@Test

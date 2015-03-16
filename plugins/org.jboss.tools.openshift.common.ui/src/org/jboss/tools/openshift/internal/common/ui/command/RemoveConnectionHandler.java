@@ -33,15 +33,15 @@ public class RemoveConnectionHandler extends AbstractHandler {
 		IConnection[] connections = UIUtils.getElements(HandlerUtil.getCurrentSelection(event), IConnection.class);
 		if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event)
 				, "Remove connection"
-				, NLS.bind("You are about to remove the connection(s):\n{0}.\n\n"
-						+ "Do you want to continue?",
+				, NLS.bind("You are about to remove the connection(s):\n{0}\n\n"
+						+ "Do you want to continue?\n\n",
 						StringUtils.toString(
 								Arrays.asList(connections),
 								new StringUtils.ToStringConverter<IConnection>() {
 
 									@Override
 									public String toString(IConnection connection) {
-										return connection.toString();
+										return "\n" + connection.toString();
 									}
 								})
 						)

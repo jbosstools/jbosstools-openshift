@@ -129,9 +129,9 @@
 		</command>
 	</extension>
 	<extension
-		point="org.jboss.tools.openshift.common.ui.connectionUI">
+		point="org.jboss.tools.openshift.common.ui.connectionEditor">
 		<connectionUI
-			class="org.jboss.tools.openshift.internal.ui.wizard.connection.ConnectionDetailView">
+			class="org.jboss.tools.openshift.internal.ui.wizard.connection.ConnectionEditor">
 		</connectionUI>
 	</extension>
 </plugin>

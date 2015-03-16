@@ -11,11 +11,14 @@
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.observable.Observables;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -24,7 +27,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -35,6 +40,9 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -49,14 +57,12 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
-import org.jboss.tools.common.ui.databinding.StatusSeverity2BooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.AutomaticConnectionFactoryMarker;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
-import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
@@ -64,8 +70,6 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
-import org.jboss.tools.openshift.internal.common.ui.viewer.AbstractLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
@@ -78,6 +82,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	protected static final String OPENSHIFT_EXPRESS_SIGNUP_URL = "https://openshift.redhat.com/app/user/new/express"; //$NON-NLS-1$
 
 	private final ConnectionWizardPageModel pageModel;
+
+	private ConnectionEditorsStackedView connectionEditors;
 
 	public ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel) {
 		this(wizard, wizardModel, true);
@@ -125,23 +131,12 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 						new IsNotNullValidator(
 								ValidationStatus.cancel("You have to select or create a new connection.")))
 				.to(BeanProperties.value(
-						ConnectionWizardPageModel.PROPERTY_CONNECTION, IConnection.class)
+						ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, IConnection.class)
 						.observe(pageModel))
-				.converting(new Converter(IConnection.class, IConnection.class) {
-
-					@Override
-					public Object convert(Object fromObject) {
-						if (!pageModel.getConnections().contains(fromObject)) {
-							// return <New Connection> if new connection is selected in model
-							return NewConnectionMarker.getInstance();
-						} else {
-							return fromObject;
-						}
-					}})
 				.in(dbc);
 		ControlDecorationSupport
 				.create(selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
+		
 		// server type
 		Label connectionFactoryLabel = new Label(parent, SWT.NONE);
 		connectionFactoryLabel.setText("Server type:");
@@ -164,13 +159,14 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
+		final IViewerObservableValue selectedServerType = ViewerProperties.singleSelection().observe(connectionFactoriesViewer);
 		ValueBindingBuilder
-				.bind(ViewerProperties.singleSelection().observe(connectionFactoriesViewer))
+				.bind(selectedServerType)
 				.to(BeanProperties.value(
 						ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY, IConnection.class)
 						.observe(pageModel))
 				.in(dbc);
-		
+
 		// server
 		Button useDefaultServerCheckbox = new Button(parent, SWT.CHECK);
 		useDefaultServerCheckbox.setText("Use default Server");
@@ -209,36 +205,61 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport
 				.create(serverBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		// check server type enablement
+		final IObservableValue connectionFactory = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
+		final IObservableValue serverValidity = serverBinding.getValidationStatus();
+		IObservableValue checkServerTypeEnabled = new ComputedValue(Boolean.class) {
+			
+			@Override
+			protected Object calculate() {
+				return connectionFactory.getValue() instanceof AutomaticConnectionFactoryMarker
+						&& serverValidity.getValue() instanceof IStatus
+							&& ((IStatus) serverValidity.getValue()).isOK();
+			}
+		};
+
+		serverText.addKeyListener(onSeverEnterPressed(checkServerTypeEnabled));
+		
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(serverText))
 				.notUpdatingParticipant()
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST).observe(pageModel))
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
-		
-		// test connection
-		Button testConnectionButton = new Button(parent, SWT.PUSH);
-		testConnectionButton.setText("Test Connection");
-		testConnectionButton.addSelectionListener(onTestConnection());
+
+		// check server type
+		Button checkServerTypeButton = new Button(parent, SWT.PUSH);
+		checkServerTypeButton.setText("Check Server Type");
+		checkServerTypeButton.addSelectionListener(onCheckServerType());
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).hint(140, SWT.DEFAULT).applyTo(testConnectionButton);
+				.align(SWT.FILL, SWT.FILL).hint(160, SWT.DEFAULT).applyTo(checkServerTypeButton);
+		final ISWTObservableValue checkServerTypeButtonEnablement = WidgetProperties.enabled().observe(checkServerTypeButton);
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(testConnectionButton))
+				.bind(checkServerTypeButtonEnablement)
 				.notUpdatingParticipant()
-				.to(serverBinding.getValidationStatus())
-				.converting(new StatusSeverity2BooleanConverter(IStatus.OK))
-				.in(dbc);		
-		
-		// connection creation error 
-		final IObservableValue connectionCreatedStatusObservable =
-				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_CREATION_ERROR, IStatus.class).observe(pageModel);
-		dbc.addValidationStatusProvider(new MultiValidator() {
-			
+				.to(checkServerTypeEnabled)
+				.in(dbc);
+
+		MultiValidator serverTypeValidator = new MultiValidator() {
+
 			@Override
 			protected IStatus validate() {
-				return (IStatus) connectionCreatedStatusObservable.getValue();
+				if (selectedServerType.getValue() == null
+						|| selectedServerType.getValue() instanceof AutomaticConnectionFactoryMarker) {
+					return ValidationStatus.cancel("You have to check your server type.");
+				}
+				return ValidationStatus.ok();
 			}
-		});
+
+			@Override
+			public IObservableList getTargets() {
+				return Observables.staticObservableList(Arrays.asList(selectedServerType, checkServerTypeButtonEnablement));
+			}
+		};
+		dbc.addValidationStatusProvider(serverTypeValidator);
+		ControlDecorationSupport
+				.create(serverTypeValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
 		// connect error
 		final IObservableValue connectedStatusObservable =
@@ -247,30 +268,48 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			
 			@Override
 			protected IStatus validate() {
-				IStatus connectedStatus = (IStatus) connectedStatusObservable.getValue();
-				return connectedStatus;
+				return (IStatus) connectedStatusObservable.getValue();
 			}
 		});
 
-		// connection UIs
-		final Group connectionUIsContainer = new Group(parent, SWT.NONE);
-		connectionUIsContainer.setText("Authentication");
+		// connection editors
+		final Group connectionEditorsContainer = new Group(parent, SWT.NONE);
+		connectionEditorsContainer.setText("Authentication");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(connectionUIsContainer);
-		new ConnectionUIViews(
+				.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(connectionEditorsContainer);
+		this.connectionEditors = new ConnectionEditorsStackedView(
 				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION).observe(pageModel)
-				, connectionUIsContainer
-				, dbc)
-		.createControls();
+				, connectionEditorsContainer
+				, dbc);
+		connectionEditors.createControls();
 	}
-	
-	private SelectionListener onTestConnection() {
+
+	private KeyListener onSeverEnterPressed(final IObservableValue checkServerTypeEnabled) {
+		return new KeyAdapter() {
+			
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.character == SWT.CR 
+						&& Boolean.TRUE.equals(checkServerTypeEnabled.getValue())) {
+					try {
+						WizardUtils.runInWizard(new CreateConnectionFactoryJob(), new DelegatingProgressMonitor(), getContainer());
+					} catch (InvocationTargetException e) {
+						// intentional catch
+					} catch (InterruptedException e) {
+						// intentional catch
+					}
+				}
+			}
+		};
+	}
+
+	private SelectionListener onCheckServerType() {
 		return new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				try {
-					WizardUtils.runInWizard(new CreateConnectionJob(), new DelegatingProgressMonitor(), getContainer());
+					WizardUtils.runInWizard(new CreateConnectionFactoryJob(), new DelegatingProgressMonitor(), getContainer());
 				} catch (InvocationTargetException e) {
 					// intentional catch
 				} catch (InterruptedException e) {
@@ -324,7 +363,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					connectJob, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
 			boolean connected = JobUtils.isOk(connectJob.getConnectionStatus());
 			if (connected) {
-				return saveConnection(pageModel.getConnection());
+				return pageModel.saveConnection();
 			} else {
 				return false;
 			}
@@ -337,13 +376,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 	
-	private boolean saveConnection(IConnection connection) {
-		if (connection != null) {
-			ConnectionsRegistrySingleton.getInstance().add(connection);
-		}
-		return connection != null;
-	}
-
 //	private void setInitialFocus() {
 //		if (pageModel.isCreateNewConnection()) {
 //			if (connectionCompositeUsernameText.getText().isEmpty()) {
@@ -367,35 +399,25 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
 	}
 
-	private class ServerLabelProvider extends AbstractLabelProvider {
-		@Override
-		public String getText(Object element) {
-			if (!(element instanceof String)) {
-				return null;
-			}
-			return (String) element;
-		}
-	}
-
 	@Override
 	public void dispose() {
 		pageModel.dispose();
 	}
 	
-	private class CreateConnectionJob extends AbstractDelegatingMonitorJob {
+	private class CreateConnectionFactoryJob extends AbstractDelegatingMonitorJob {
 
-		private CreateConnectionJob() {
+		private CreateConnectionFactoryJob() {
 			super(NLS.bind("Connecting to host {0}...", pageModel.getHost()));
 		}
 
 		@Override
 		protected IStatus doRun(IProgressMonitor monitor) {
-			pageModel.createConnection();
+			pageModel.createConnectionFactory();
 			return Status.OK_STATUS;
 		}
 	}
 	
-	private class ConnectJob extends UIUpdatingJob {
+	private class ConnectJob extends AbstractDelegatingMonitorJob {
 
 		private IStatus connectionStatus;
 
@@ -404,19 +426,9 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		}
 
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+		protected IStatus doRun(IProgressMonitor monitor) {
 			connectionStatus = pageModel.connect();
 			monitor.done();
-			return Status.OK_STATUS;
-		}
-
-		@Override
-		protected IStatus updateUI(IProgressMonitor monitor) {
-//			if (!JobUtils.isOk(connectionStatus)) {
-//				return Status.OK_STATUS;
-//			}
-//			pageModel.createOrUpdateConnection();
-//
 			return Status.OK_STATUS;
 		}
 

@@ -35,7 +35,7 @@ import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCa
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -45,7 +45,7 @@ import com.openshift.client.cartridge.ICartridge;
 /**
  * @author Andre Dietisheim
  */
-public class CartridgeDetailViews extends AbstractDetailViews {
+public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 	private IObservableValue canModifyCartridges;
 

@@ -73,8 +73,8 @@ public class ExpressExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 
 	private StyledString createStyledString(ExpressConnection connection) {
-		String name = connection.getUsername();
-		String host = connection.getHost();
+		String name = StringUtils.null2emptyString(connection.getUsername());
+		String host = StringUtils.null2emptyString(connection.getHost());
 		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
 		if (connection.isDefaultHost()) {
 			builder.append(' ').append(DEFAULT_MARKER);

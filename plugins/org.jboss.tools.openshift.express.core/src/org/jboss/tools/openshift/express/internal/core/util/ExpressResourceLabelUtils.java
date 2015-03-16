@@ -46,10 +46,12 @@ public class ExpressResourceLabelUtils {
 			return null;
 		}
 
-		StringBuilder builder = new StringBuilder(connection.getUsername());
-		builder
-			.append(" at ")
-			.append(connection.getHost());
+		StringBuilder builder = new StringBuilder();
+		builder.append(StringUtils.null2emptyString(connection.getUsername()));
+		if (!StringUtils.isEmpty(connection.getUsername())) {
+			builder.append(" at ");
+		}
+		builder.append(connection.getHost());
 		if (connection.isDefaultHost()) {
 			builder.append(" (default)");
 		}

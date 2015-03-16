@@ -16,12 +16,19 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
+import org.eclipse.core.databinding.observable.IObservable;
 
 /**
  * @author Andre Dietisheim
  */
 public class DataBindingUtils {
 
+	public static void dispose(IObservable observable) {
+		if (observable != null) {
+			observable.dispose();
+		}
+	}
+	
 	/**
 	 * Adds the given status providers to the given data binding context.
 	 * 

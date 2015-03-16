@@ -64,7 +64,7 @@ public class AutomaticConnectionFactoryMarker implements IConnectionFactory {
 	}
 
 	@Override
-	public <T extends Class<? extends IConnection>> boolean canCreate(T clazz) {
+	public <T extends IConnection> boolean canCreate(Class<T> clazz) {
 		return false;
 	}
 

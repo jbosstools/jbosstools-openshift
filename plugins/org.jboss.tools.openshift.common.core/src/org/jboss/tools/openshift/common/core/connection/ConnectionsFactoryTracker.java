@@ -36,6 +36,16 @@ public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactor
 	}
 
 	@Override
+	public IConnectionFactory getFactory(String host) throws IOException {
+		IConnectionsFactory service = getService();
+		if (service == null) {
+			return null;
+		}
+
+		return service.getFactory(host);
+	}
+
+	@Override
 	public IConnectionFactory getById(String id) {
 		IConnectionsFactory service = getService();
 		if (service == null) {
@@ -56,7 +66,7 @@ public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactor
 	}
 
 	@Override
-	public <T extends Class<? extends IConnection>> IConnectionFactory getByConnection(T clazz) {
+	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz) {
 		IConnectionsFactory service = getService();
 		if (service == null) {
 			return null;

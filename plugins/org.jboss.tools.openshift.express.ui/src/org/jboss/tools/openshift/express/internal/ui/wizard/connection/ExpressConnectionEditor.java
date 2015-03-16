@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.internal.common.ui.connection.IConnectionUI;
+import org.jboss.tools.openshift.internal.common.ui.connection.IConnectionEditor;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
@@ -35,16 +35,19 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 /**
  * @author Andre Dietisheim
  */
-public class ExpressConnectionUI extends BaseDetailsView implements IConnectionUI {
+public class ExpressConnectionEditor extends BaseDetailsView implements IConnectionEditor {
 
 	private Text usernameText;
-	private Text passwordText;
 	private Binding usernameBinding;
+	private IObservableValue usernameObservable;
+	private Text passwordText;
 	private Binding passwordBinding;
-	private Binding rememberPasswordBinding;
+	private IObservableValue rememberPasswordObservable;
 	private Button rememberPasswordCheckBox;
+	private Binding rememberPasswordBinding;
+	private IObservableValue passwordObservable;
 	
-	public ExpressConnectionUI() {
+	public ExpressConnectionEditor() {
 	}
 
 	@Override
@@ -81,6 +84,9 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 
 	@Override
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
+		if (detailViewModel.getValue() == null) {
+			return;
+		}
 		createBindings(detailViewModel, dbc);
 	}
 
@@ -89,9 +95,55 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 		disposeBindings();
 	}
 
+	private void createBindings(IObservableValue detailViewModel, DataBindingContext dbc) {
+		// username
+		this.usernameObservable = 
+				BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_USERNAME).observeDetail(detailViewModel);
+		this.usernameBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
+				.converting(new TrimmingStringConverter())
+				.validatingAfterConvert(new RequiredStringValidator("username"))
+				.to(usernameObservable)
+				.in(dbc);
+		ControlDecorationSupport.create(
+				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		// password
+		this.passwordObservable = 
+				BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_PASSWORD).observeDetail(detailViewModel);
+		this.passwordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
+				.converting(new TrimmingStringConverter())
+				.validatingAfterConvert(new RequiredStringValidator("password"))
+				.to(passwordObservable)
+				.in(dbc);
+		ControlDecorationSupport.create(
+				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		// remember password
+		this.rememberPasswordObservable = 
+				BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_REMEMBER_PASSWORD).observeDetail(detailViewModel);
+		this.rememberPasswordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
+				.to(rememberPasswordObservable)
+				.in(dbc);
+		ControlDecorationSupport.create(
+				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+	}
+
 	private void disposeBindings() {
 		DataBindingUtils.dispose(usernameBinding);
+		this.usernameBinding = null;
+		DataBindingUtils.dispose(usernameObservable);
+		this.usernameObservable = null;
 		DataBindingUtils.dispose(passwordBinding);
+		this.passwordBinding = null;
+		DataBindingUtils.dispose(passwordObservable);
+		this.passwordObservable = null;
+		DataBindingUtils.dispose(rememberPasswordBinding);
+		this.rememberPasswordBinding = null;
+		DataBindingUtils.dispose(rememberPasswordObservable);
+		this.rememberPasswordObservable = null;
 	}
 
 	@Override
@@ -102,35 +154,5 @@ public class ExpressConnectionUI extends BaseDetailsView implements IConnectionU
 	@Override
 	public void dispose() {
 		disposeBindings();
-	}
-
-	private void createBindings(IObservableValue detailViewModel, DataBindingContext dbc) {
-		// username
-		this.usernameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("username"))
-				.to(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_USERNAME).observeDetail(detailViewModel))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
-		// password
-		this.passwordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("password"))
-				.to(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_PASSWORD).observeDetail(detailViewModel))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
-		// remember password
-		this.rememberPasswordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
-				.to(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_REMEMBER_PASSWORD).observeDetail(detailViewModel))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 }

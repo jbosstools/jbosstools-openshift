@@ -92,5 +92,35 @@ public class ConnectionURLTest {
 		assertEquals(username, connectionUrl.getUsername());
 		assertEquals("https://", connectionUrl.getScheme());
 	}
+	
+	@Test
+	public void shouldAllowPortInUrl() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+
+		// operations
+		ConnectionURL connectionUrl = ConnectionURL.forURL("http://adietish%40redhat.com@localhost:8081");
+
+		// verifications
+		assertEquals("http://localhost:8081", connectionUrl.getHostWithScheme());
+	}
+	
+	@Test
+	public void shouldExtractUrlPortions() throws UnsupportedEncodingException, MalformedURLException {
+		// pre-conditions
+		String scheme = UrlUtils.SCHEME_HTTP;
+		String username = "adietish@redhat.com";
+		String password = "12345";
+		String server = "openshift.redhat.com";
+
+		// operations
+		ConnectionURL connectionUrl = ConnectionURL.forURL(
+				scheme + URLEncoder.encode(username, "UTF-8") + ":" + password + "@" + server);
+
+		// verifications
+		assertEquals(scheme, connectionUrl.getScheme());
+		assertEquals(username, connectionUrl.getUsername());
+		assertEquals(server, connectionUrl.getHost());
+		assertEquals(scheme + server, connectionUrl.getHostWithScheme());
+	}
 
 }

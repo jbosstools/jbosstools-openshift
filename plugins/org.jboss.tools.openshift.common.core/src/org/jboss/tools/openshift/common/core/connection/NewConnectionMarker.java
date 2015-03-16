@@ -83,4 +83,25 @@ public class NewConnectionMarker extends AbstractConnection {
 		return null;
 	}
 
+	@Override
+	public void setUsername(String username) {
+	}
+
+	@Override
+	public String getPassword() {
+		return null;
+	}
+
+	@Override
+	public void setPassword(String password) {
+	}
+
+	@Override
+	public IConnection clone() {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void update(IConnection connection) {
+	}
 }

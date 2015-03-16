@@ -26,6 +26,7 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 import com.openshift.client.IRefreshable;
 import com.openshift.client.OpenShiftException;
+import com.openshift.internal.client.httpclient.NotFoundException;
 import com.openshift.internal.client.httpclient.UnauthorizedException;
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
@@ -35,13 +36,14 @@ import com.openshift3.internal.client.DefaultClient;
 
 public class Connection extends ObservablePojo implements IConnection, IRefreshable {
 
-	private final IClient client;
+	private IClient client;
 	private IAuthorizationClient authorizer;
 	private String userName;
 	private String password;
 	private String token;
 	private ICredentialsPrompter credentialsPrompter;
-	
+	private ISSLCertificateCallback sslCertificateCallback;
+
 	//TODO modify default client to take url and throw runtime exception
 	public Connection(String url, IAuthorizationClient authorizer, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
 		this(new DefaultClient(new URL(url), sslCertCallback), authorizer, credentialsPrompter, sslCertCallback);
@@ -51,9 +53,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.client = client;
 		this.authorizer = authorizer;
 		this.credentialsPrompter = credentialsPrompter;
+		// TODO: how can authorizer not be bull at this point?
 		if(this.authorizer != null){
 			authorizer.setSSLCertificateCallback(sslCertCallback);
 		}
+		this.sslCertificateCallback = sslCertCallback;
 	}
 	
 	@Override
@@ -61,14 +65,17 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return this.userName;
 	}
 
+	@Override
 	public void setUsername(String userName) {
 		this.userName = userName;
 	}
 
+	@Override
 	public String getPassword() {
 		return this.password;
 	}
 
+	@Override
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -119,6 +126,30 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	@Override
+	public IConnection clone() {
+		Connection connection = new Connection(client, authorizer, credentialsPrompter, sslCertificateCallback);
+		connection.setUsername(userName);
+		connection.setPassword(password);
+		connection.setToken(token);
+		return connection;
+	}
+	
+	@Override
+	public void update(IConnection connection) {
+		if (!(connection instanceof Connection)) {
+			throw new UnsupportedOperationException();
+		}
+		Connection otherConnection = (Connection) connection;
+		this.client = otherConnection.client; 
+		this.authorizer = otherConnection.authorizer;
+		this.credentialsPrompter = otherConnection.credentialsPrompter;
+		this.sslCertificateCallback = otherConnection.sslCertificateCallback;
+		this.userName = otherConnection.userName;
+		this.password = otherConnection.password;
+		this.token = otherConnection.token;
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -127,10 +158,10 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		if (getClass() != obj.getClass())
 			return false;
 		Connection other = (Connection) obj;
-		if(userName == null){
-			if(other.userName != null)
+		if (userName == null) {
+			if (other.userName != null)
 				return false;
-		}else if(!userName.equals(other.userName))
+		} else if (!userName.equals(other.userName))
 			return false;
 		if (client == null) {
 			if (other.client != null)
@@ -161,12 +192,13 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return List<IResource>
 	 */
 	public <T extends IResource> List<T> get(ResourceKind kind) {
-		try{
+		try {
 			return client.list(kind);
-		}catch(UnauthorizedException e){
+		} catch (UnauthorizedException e) {
 			OpenShiftCoreActivator.pluginLog().logInfo("Unauthorized.  Trying again to reauthenticate");
-			setToken(null);//token must be invalid, make sure not to try with cache
-			if(connect()){
+			setToken(null);// token must be invalid, make sure not to try with
+							// cache
+			if (connect()) {
 				return client.list(kind);
 			}
 			throw e;
@@ -175,8 +207,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public boolean canConnect() throws IOException {
-		client.getOpenShiftAPIVersion();
-		return true;
+		try {
+			client.getOpenShiftAPIVersion();
+			return true;
+		} catch (NotFoundException e) {
+			return false;
+		}
 	}
 
 	public String getToken() {
@@ -185,12 +221,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	public void setToken(String token) {
 		this.token = token;
-		if(token != null){
+		if (token != null) {
 			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
-		}else{
-			//TODO: NoAuthStrategy?
+		} else {
+			// TODO: NoAuthStrategy?
 			client.setAuthorizationStrategy(null);
 		}
 	}
-
 }

@@ -33,6 +33,15 @@ public interface IConnectionsFactory {
 	public IConnection create(String host) throws IOException;
 
 	/**
+	 * Returns a connection factory that can create connections for the given host.
+	 * 
+	 * @param host the host to get a factory for
+	 * @return the connection factory
+	 * @throws IOException
+	 */
+	public IConnectionFactory getFactory(String host) throws IOException;
+	
+	/**
 	 * Returns all connection factories that are registered to this composite
 	 * factory.
 	 * 
@@ -55,6 +64,6 @@ public interface IConnectionsFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	public <T extends Class<? extends IConnection>> IConnectionFactory getByConnection(T clazz);
+	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz);
 
 }

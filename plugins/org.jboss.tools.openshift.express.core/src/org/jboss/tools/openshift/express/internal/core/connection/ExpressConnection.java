@@ -24,6 +24,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.AbstractConnection;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.express.client.ClientSystemProperties;
@@ -33,6 +34,7 @@ import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePr
 import org.jboss.tools.openshift.express.internal.core.security.OpenShiftPasswordStorageKey;
 import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStore;
 import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStoreException;
+import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.ConnectionBuilder;
@@ -58,10 +60,6 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class ExpressConnection extends AbstractConnection {
 
-	public static final String PROPERTY_USERNAME = "username";
-	public static final String PROPERTY_PASSWORD = "password";
-	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
-	
 	private String username;
 	private String password;
 	private IUser user;
@@ -71,12 +69,8 @@ public class ExpressConnection extends AbstractConnection {
 	private boolean passwordLoaded;
 	private ICredentialsPrompter passwordPrompter;
 	private ISSLCertificateCallback sslCallback;
-	
-	public ExpressConnection() {
-		this(null, null, null, null, false, null, null);
-	}
 
-	protected ExpressConnection(String host) {
+	public ExpressConnection(String host) {
 		this(null, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, null);
 	}
 
@@ -84,17 +78,13 @@ public class ExpressConnection extends AbstractConnection {
 		this(username, null, host, false, null);
 	}
 
-	public ExpressConnection(String username, String scheme, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
-		this(username, null, scheme, host, false, null, sslCallback);
+	public ExpressConnection(String username, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
+		this(username, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, sslCallback);
 		this.passwordPrompter = prompter;
 	}
 
 	public ExpressConnection(String username, String password, String host, boolean rememberPassword, ISSLCertificateCallback sslCallback) {
-		this(username, password, host, rememberPassword, null, sslCallback);
-	}
-	
-	protected ExpressConnection(String username, String password, String host, boolean rememberPassword, IUser user, ISSLCertificateCallback sslCallback) {
-		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, user, sslCallback);
+		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, null, sslCallback);
 	}
 
 	protected ExpressConnection(String username, String password, String scheme, String host, boolean rememberPassword, IUser user, ISSLCertificateCallback sslCallback) {
@@ -110,25 +100,24 @@ public class ExpressConnection extends AbstractConnection {
 		this.user = user;
 	}
 
-	private IUser getUser() {
-		return user;
-	}
-
 	@Override
 	public String getUsername() {
 		return username;
 	}
 
+	@Override
 	public void setUsername(String username) {
 		firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
 		clearUser();
 	}
 
+	@Override
 	public String getPassword() {
 		loadPassword();
 		return password;
 	}
 
+	@Override
 	public void setPassword(String password) {
 		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
 		this.passwordLoaded = true;
@@ -555,6 +544,17 @@ public class ExpressConnection extends AbstractConnection {
 			}
 		}
 	}
+
+	@Override
+	public IConnection clone() {
+		return new ExpressConnection(getUsername(), getPassword(), getScheme(), getHost(), isRememberPassword(), null, sslCallback);
+	}
+
+	@Override
+	public void update(IConnection connection) {
+		setUsername(connection.getUsername());
+		setPassword(connection.getPassword());
+	}
 	
 	@Override
 	public ConnectionType getType() {
@@ -563,15 +563,7 @@ public class ExpressConnection extends AbstractConnection {
 
 	@Override
 	public String toString() {
-		return "ExpressConnection ["
-				+ "username=" + username 
-				+ ", password=" + password 
-				+ ", host=" + getHost() 
-				+ ", user="	+ user 
-				+ ", isDomainLoaded=" + isDomainLoaded  
-				+ ", rememberPassword=" + rememberPassword
-				+ ", didPromptForPassword=" + didPromptForPassword 
-				+ ", passwordLoaded=" + passwordLoaded + "]";
+		return ExpressResourceLabelUtils.toString(this);
 	}
 
 	@Override

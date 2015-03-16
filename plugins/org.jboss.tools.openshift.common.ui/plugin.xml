@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.jboss.tools.openshift.common.ui.connectionUI" name="Connection" schema="schema/org.jboss.tools.openshift.ui.connection.exsd"/>
+	<extension-point 
+		id="org.jboss.tools.openshift.common.ui.connectionEditor" 
+		name="ConnectionEditor" 
+		schema="schema/org.jboss.tools.openshift.ui.connectionEditor.exsd"/>
     
     <!-- OpenShift Explorer view -->
     <extension

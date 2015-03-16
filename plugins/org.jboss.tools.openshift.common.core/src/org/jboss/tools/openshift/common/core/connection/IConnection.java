@@ -19,9 +19,19 @@ import java.io.IOException;
  */
 public interface IConnection {
 
+	public static final String PROPERTY_USERNAME = "username";
+	public static final String PROPERTY_PASSWORD = "password";
+	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+
 	public String getHost();
 	
 	public String getUsername();
+
+	public void setUsername(String username);
+
+	public String getPassword();
+
+	public void setPassword(String password);
 
 	public boolean isDefaultHost();
 
@@ -34,4 +44,8 @@ public interface IConnection {
 	public boolean canConnect() throws IOException;
 	
 	public boolean connect();
+	
+	public IConnection clone();
+
+	public void update(IConnection connection);
 }

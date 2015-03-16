@@ -67,7 +67,7 @@ public class StringUtils {
 		int i = 0;
 		for(T element : elements) {
 			builder.append(converter.toString(element));
-			if (i + 1 < elements.size()) {
+			if (++i < elements.size()) {
 				builder.append(", ");
 			}
 		}

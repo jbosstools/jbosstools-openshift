@@ -1822,9 +1822,9 @@
     </command>
  </extension>
  <extension
-       point="org.jboss.tools.openshift.common.ui.connectionUI">
+       point="org.jboss.tools.openshift.common.ui.connectionEditor">
     <connectionUI
-          class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionUI">
+          class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionEditor">
     </connectionUI>
  </extension>
 </plugin>

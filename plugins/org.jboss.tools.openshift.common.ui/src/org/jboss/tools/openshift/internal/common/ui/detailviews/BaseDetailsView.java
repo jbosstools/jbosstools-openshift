@@ -14,7 +14,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractDetailViews.IDetailView;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
 
 public abstract class BaseDetailsView implements IDetailView {
 

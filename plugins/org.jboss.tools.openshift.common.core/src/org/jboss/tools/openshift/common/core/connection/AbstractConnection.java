@@ -53,6 +53,9 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 	public abstract boolean connect();
 	
 	public abstract boolean isConnected();
+	
+	@Override
+	public abstract IConnection clone();
 
 	@Override
 	public int hashCode() {

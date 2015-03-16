@@ -41,6 +41,17 @@ public class ConnectionsFactory implements IConnectionsFactory {
 		return null;
 	}
 	
+	@Override
+	public IConnectionFactory getFactory(String host) throws IOException {
+		for (IConnectionFactory factory : connectionFactories) {
+			IConnection connection = factory.create(host);
+			if (connection.canConnect()) {
+				return factory;
+			}
+		}
+		return null;
+	}
+	
 	public void addConnectionFactory(IConnectionFactory factory) {
 		connectionFactories.add(factory);
 	}
@@ -66,7 +77,7 @@ public class ConnectionsFactory implements IConnectionsFactory {
 	}
 	
 	@Override
-	public <T extends Class<? extends IConnection>> IConnectionFactory getByConnection(T clazz) {
+	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz) {
 		if (clazz == null) {
 			return null;
 		}

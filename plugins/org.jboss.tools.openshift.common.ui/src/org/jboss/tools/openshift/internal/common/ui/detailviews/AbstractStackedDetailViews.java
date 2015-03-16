@@ -27,7 +27,7 @@ import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 /**
  * @author Andre Dietisheim
  */
-public abstract class AbstractDetailViews {
+public abstract class AbstractStackedDetailViews {
 
 	protected final IDetailView emptyView = new EmptyView();
 	
@@ -37,7 +37,7 @@ public abstract class AbstractDetailViews {
 	private DataBindingContext dbc;
 	private IObservableValue detailViewModel;
 
-	public AbstractDetailViews(IObservableValue detailViewModel, Composite parent, DataBindingContext dbc) {
+	public AbstractStackedDetailViews(IObservableValue detailViewModel, Composite parent, DataBindingContext dbc) {
 		Assert.isLegal(parent != null && !parent.isDisposed());
 		this.parent = parent;
 		parent.addDisposeListener(onDispose());
@@ -126,6 +126,10 @@ public abstract class AbstractDetailViews {
 				view.dispose();
 			}
 		}
+	}
+	
+	protected IDetailView getCurrentView() {
+		return currentView;
 	}
 
 	public class EmptyView extends BaseDetailsView {

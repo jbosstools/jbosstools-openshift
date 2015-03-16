@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,15 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -40,22 +40,21 @@ public class ConnectionRegistryTest {
 	public void setUp() {
 		this.registry = new ConnectionsRegistry();
 		this.change = new ConnectionsChange(registry);
-		this.connection = new OneConnectionImpl("http://localhost:8081", "http://");
+		this.connection = new OneConnectionImpl("http://localhost:8081");
 	}
 	
 	@Test
 	public void getForAConnectionTypeShouldReturnACollectionOfTheRightType(){
 		// pre-condition
 		OneConnectionImpl [] ones = new OneConnectionImpl[] { 
-				new OneConnectionImpl("localhost:8080", "http://"), 
-				new OneConnectionImpl("localhost:8081", "http://")};
-		OtherConnectionImpl [] others = new OtherConnectionImpl[]{ 
-				new OtherConnectionImpl("localhost:9080", "http://"), 
-				new OtherConnectionImpl("localhost:9081", "http://")};
-		registry.add(ones[0]);
-		registry.add(others[0]);
+				new OneConnectionImpl("http://localhost:8080"), 
+				new OneConnectionImpl("http://localhost:8081")};
+		registry.addAll(Arrays.asList(ones));
 		registry.add(ones[1]);
-		registry.add(others[1]);
+		OtherConnectionImpl [] others = new OtherConnectionImpl[]{ 
+				new OtherConnectionImpl("http://localhost:9080"), 
+				new OtherConnectionImpl("http://localhost:9081")};
+		registry.addAll(Arrays.asList(others));
 		
 		// operation
 		Collection<OneConnectionImpl> allOneConnections = registry.getAll(OneConnectionImpl.class);
@@ -72,109 +71,18 @@ public class ConnectionRegistryTest {
 		}
 	}
 	
-	static class OneConnectionImpl implements IConnection {
-		String host;
-		String scheme;
-		String username;
+	static class OneConnectionImpl extends ConnectionFake {
 
-		OneConnectionImpl(String host, String scheme) {
-			this.host = host;
-			this.scheme = scheme;
+		OneConnectionImpl(String host) {
+			super(host);
 		}
-
-		@Override
-		public boolean connect() {
-			return false;
-		}
-
-		@Override
-		public String getHost() {
-			return host;
-		}
-
-		@Override
-		public boolean isDefaultHost() {
-			return false;
-		}
-
-		@Override
-		public String getScheme() {
-			return scheme;
-		}
-
-		@Override
-		public ConnectionType getType() {
-			return null;
-		}
-
-		@Override
-		public void refresh() {
-		}
-
-		@Override
-		public boolean canConnect() throws IOException {
-			return false;
-		}
-
-		@Override
-		public String getUsername() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
 	}
 
-	static class OtherConnectionImpl implements IConnection {
+	static class OtherConnectionImpl extends ConnectionFake {
 
-		String host;
-		String scheme;
-		String username;
-
-		OtherConnectionImpl(String host, String schem) {
-			this.host = host;
-			this.scheme = schem;
+		OtherConnectionImpl(String host) {
+			super(host);
 		}
-
-		@Override
-		public boolean connect() {
-			return false;
-		}
-
-		@Override
-		public String getHost() {
-			return host;
-		}
-
-		@Override
-		public boolean isDefaultHost() {
-			return false;
-		}
-
-		@Override
-		public String getScheme() {
-			return scheme;
-		}
-
-		@Override
-		public ConnectionType getType() {
-			return null;
-		}
-
-		@Override
-		public void refresh() {
-		}
-
-		@Override
-		public boolean canConnect() throws IOException {
-			return false;
-		}
-
-		@Override
-		public String getUsername() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
 	}
 
 	@Test
@@ -214,6 +122,34 @@ public class ConnectionRegistryTest {
 		// verifications
 		assertTrue(change.isAdditionNotified());
 		assertEquals(connection, change.getConnection());
+	}
+
+	@Test
+	public void shouldNotifyConnectionChange() {
+		// pre-conditions
+		registry.add(connection);
+
+		// operations
+		connection.setUsername("foo");
+
+		// verifications
+		assertTrue(change.isChangeNotified());
+		assertEquals(connection, change.getConnection());
+	}
+
+	@Test
+	public void shouldNotNotifyConnectionChangeAfterRemoval() {
+		// pre-conditions
+		registry.add(connection);
+		registry.remove(connection);
+		change.reset();
+
+		// operations
+		connection.setUsername("foo");
+
+		// verifications
+		assertFalse(change.isChangeNotified());
+		assertTrue(change.getConnection() == null);
 	}
 
 	@Test
@@ -314,8 +250,8 @@ public class ConnectionRegistryTest {
 		int numOfConnections = registry.getAll().size();
 
 		registry.add(connection);
-		registry.add(new OneConnectionImpl("http://www.jboss.org", "https://"));
-		registry.add(new OtherConnectionImpl("http://openshift.redhat.com", "http://"));
+		registry.add(new OneConnectionImpl("https://www.jboss.org"));
+		registry.add(new OtherConnectionImpl("http://openshift.redhat.com"));
 
 		// operations
 		int numOfConnectionsAfterAddition = registry.getAll().size();

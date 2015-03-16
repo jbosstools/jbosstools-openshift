@@ -22,7 +22,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@SuppressWarnings("restriction")
+/**
+ * @author Jeff Cantrill
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class LazyCredentialsPrompterTest {
 
@@ -36,7 +38,7 @@ public class LazyCredentialsPrompterTest {
 	@Before
 	public void setup(){
 		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(null);
-		connection = new ExpressConnection();
+		connection = new ExpressConnection(null, null);
 		when(defaultPrompter.promptAndAuthenticate(any(ExpressConnection.class))).thenReturn(true);
 		when(altPrompter.promptAndAuthenticate(any(ExpressConnection.class))).thenReturn(true);
 	}
