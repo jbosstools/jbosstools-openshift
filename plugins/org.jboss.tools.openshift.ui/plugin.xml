@@ -1,115 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.navigator.viewer">
-      <viewerContentBinding
-            viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
-         <includes>
-            <contentExtension
-                  isRoot="true"
-                  pattern="org.jboss.tools.openshift.ui.explorer.navigatorContent">
-            </contentExtension>
-         </includes>
-      </viewerContentBinding>
-   </extension>
-   <extension
-         point="org.eclipse.ui.navigator.navigatorContent">
-      <navigatorContent
-            contentProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider"
-            id="org.jboss.tools.openshift.ui.explorer.navigatorContent"
-            labelProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider"
-            name="org.jboss.tools.openshift.ui.explorer.navigatorContent">
-         <possibleChildren>
-            <or>
-               <instanceof
-                     value="com.openshift3.client.model.IProject">
-               </instanceof>
-               <instanceof
-                     value="com.openshift3.client.model.IService">
-               </instanceof>
-               <instanceof
-                     value="com.openshift3.client.model.IPod">
-               </instanceof>
-               <instanceof
-                     value="com.openshift3.client.model.IReplicationController">
-               </instanceof>
-               <instanceof
-                     value="com.openshift3.client.model.IBuildConfig">
-               </instanceof>
-               <instanceof
-                     value="com.openshift3.client.model.IDeploymentConfig">
-               </instanceof>
-               <instanceof
-                     value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping">
-               </instanceof>
-            </or>
-         </possibleChildren>
-         <triggerPoints>
-            <or>
-               <instanceof
-                     value="org.jboss.tools.openshift.core.connection.Connection">
-               </instanceof>
-               <instanceof
-                     value="com.openshift3.client.model.IProject">
-               </instanceof>
-               <instanceof
-                     value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping">
-               </instanceof>
-            </or>
-         </triggerPoints>
-      </navigatorContent>
+	<extension
+		point="org.eclipse.ui.navigator.viewer">
+		<viewerContentBinding
+			viewerId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+			<includes>
+				<contentExtension
+					isRoot="true"
+					pattern="org.jboss.tools.openshift.ui.explorer.navigatorContent">
+				</contentExtension>
+			</includes>
+		</viewerContentBinding>
+	</extension>
+	<extension
+		point="org.eclipse.ui.navigator.navigatorContent">
+		<navigatorContent
+			contentProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider"
+			id="org.jboss.tools.openshift.ui.explorer.navigatorContent"
+			labelProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider"
+			name="org.jboss.tools.openshift.ui.explorer.navigatorContent">
+			<possibleChildren>
+				<or>
+					<instanceof
+						value="com.openshift3.client.model.IProject" />
+					<instanceof
+						value="com.openshift3.client.model.IService" />
+					<instanceof
+						value="com.openshift3.client.model.IPod" />
+					<instanceof
+						value="com.openshift3.client.model.IReplicationController" />
+					<instanceof
+						value="com.openshift3.client.model.IBuildConfig" />
+					<instanceof
+						value="com.openshift3.client.model.IDeploymentConfig" />
+					<instanceof
+						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
+				</or>
+			</possibleChildren>
+			<triggerPoints>
+				<or>
+					<instanceof
+						value="org.jboss.tools.openshift.core.connection.Connection" />
+					<instanceof
+						value="com.openshift3.client.model.IProject" />
+					<instanceof
+						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
+				</or>
+			</triggerPoints>
+		</navigatorContent>
 	</extension>
 	<extension
 		point="org.eclipse.ui.menus">
 		<!-- openshift explorer context menu: new connection -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
-				   <command
-         commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
-         icon="icons/refresh.gif"
-         id="org.jboss.tools.openshift.ui.command.refresh.resource"
-         style="push"
-         tooltip="Refresh the resource">
-      <visibleWhen>
-         <and>
-            <count
-                  value="1">
-            </count>
-            <iterate>
-               <instanceof
-                     value="com.openshift.client.IRefreshable">
-               </instanceof>
-            </iterate>
-         </and>
-      </visibleWhen>
-   </command>
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
+				icon="icons/refresh.gif"
+				id="org.jboss.tools.openshift.ui.command.refresh.resource"
+				style="push"
+				tooltip="Refresh the resource">
+				<visibleWhen>
+					<and>
+						<count
+							value="1">
+						</count>
+						<iterate>
+							<instanceof
+								value="com.openshift.client.IRefreshable" />
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
 		</menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
-		  <handler
-            class="org.jboss.tools.openshift.internal.ui.command.RefreshResourceHandler"
-            commandId="org.jboss.tools.openshift.ui.command.refresh.resource">
-          </handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.command.RefreshResourceHandler"
+			commandId="org.jboss.tools.openshift.ui.command.refresh.resource">
+		</handler>
 	</extension>
 	<!-- adapters -->
 	<extension
 		point="org.eclipse.core.runtime.adapters">
 		<factory
-              adaptableType="com.openshift3.client.model.IResource"
-              class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
+			adaptableType="com.openshift3.client.model.IResource"
+			class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
 			<adapter
 				type="org.eclipse.ui.views.properties.IPropertySource">
-			</adapter>
-		</factory>
-  <factory
-        adaptableType="org.jboss.tools.openshift.core.connection.Connection"
-        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
-     <adapter
-           type="org.eclipse.ui.views.properties.IPropertySource">
-     </adapter>
-  </factory>
+		</adapter>
+	</factory>
+	<factory
+		adaptableType="org.jboss.tools.openshift.core.connection.Connection"
+		class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
+		<adapter
+			type="org.eclipse.ui.views.properties.IPropertySource">
+		</adapter>
+	</factory>
 	</extension>
 	<!-- definitions -->
 	<extension
@@ -125,25 +114,24 @@
 						value="1" />
 					<or>
 						<instanceof
-							value="com.openshift.kube.Project"/>
+							value="com.openshift3.client.model.IProject"/>
 					</or>
 				</iterate>
 			</with>
 		</definition>
 	</extension>
-   <extension
-         point="org.eclipse.ui.commands">
-           <command
-        description="Refresh the Resource"
-        id="org.jboss.tools.openshift.ui.command.refresh.resource"
-        name="Refresh">
-  </command>
-   </extension>
-   <extension
-         point="org.jboss.tools.openshift.common.ui.connectionUI">
-      <connectionUI
-            class="org.jboss.tools.openshift.internal.ui.wizard.connection.ConnectionDetailView">
-      </connectionUI>
-   </extension>
-
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			description="Refresh the Resource"
+			id="org.jboss.tools.openshift.ui.command.refresh.resource"
+			name="Refresh">
+		</command>
+	</extension>
+	<extension
+		point="org.jboss.tools.openshift.common.ui.connectionUI">
+		<connectionUI
+			class="org.jboss.tools.openshift.internal.ui.wizard.connection.ConnectionDetailView">
+		</connectionUI>
+	</extension>
 </plugin>
