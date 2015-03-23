@@ -2,3 +2,9 @@ target/
 bin/
 .metadata
 .settings
+
+.project
+.plugins/.project
+
+tests/org.jboss.tools.openshift.test/.project
+tests/org.jboss.tools.openshift.test/.classpath
