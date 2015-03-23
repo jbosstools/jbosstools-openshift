@@ -20,8 +20,6 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.core.auth.IAuthorizationClient;
-import org.jboss.tools.openshift.core.auth.IAuthorizationContext;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
@@ -32,6 +30,8 @@ import com.openshift.internal.client.httpclient.UnauthorizedException;
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
 import com.openshift3.client.authorization.BearerTokenAuthorizationStrategy;
+import com.openshift3.client.authorization.IAuthorizationClient;
+import com.openshift3.client.authorization.IAuthorizationContext;
 import com.openshift3.client.model.IResource;
 import com.openshift3.internal.client.DefaultClient;
 

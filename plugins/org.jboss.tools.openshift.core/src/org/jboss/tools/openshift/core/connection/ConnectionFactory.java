@@ -18,7 +18,8 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.core.auth.AuthorizationClient;
+
+import com.openshift3.client.authorization.AuthorizationClientFactory;
 
 
 /**
@@ -47,7 +48,7 @@ public class ConnectionFactory implements IConnectionFactory {
 	public Connection create(String url, ICredentialsPrompter credentialsPrompter) {
 		try {
 			return new Connection(url, 
-					new AuthorizationClient(), 
+					new AuthorizationClientFactory().create(), 
 					credentialsPrompter,
 					new LazySSLCertificateCallback(
 							OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback()));
