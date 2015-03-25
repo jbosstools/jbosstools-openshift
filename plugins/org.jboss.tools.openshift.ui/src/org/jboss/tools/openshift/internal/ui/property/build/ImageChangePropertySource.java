@@ -6,7 +6,7 @@
  * 
  * Contributors: Red Hat, Inc.
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.property;
+package org.jboss.tools.openshift.internal.ui.property.build;
 
 import java.util.List;
 

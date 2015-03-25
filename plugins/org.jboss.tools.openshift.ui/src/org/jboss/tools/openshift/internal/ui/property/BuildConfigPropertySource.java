@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.jboss.tools.openshift.internal.ui.property.build.ImageChangePropertySource;
+import org.jboss.tools.openshift.internal.ui.property.build.WebHooksPropertySource;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.build.BuildTriggerType;
@@ -109,14 +110,7 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 			case TRIGGERS_IMAGE_CHANGE:
 				return new ImageChangePropertySource(getResource().getBuildTriggers());
 			case TRIGGERS_WEB:
-				List<String> webtriggers = new ArrayList<String>();
-				for (IBuildTrigger trigger : getResource().getBuildTriggers()) {
-					BuildTriggerType type = trigger.getType();
-					if(type == BuildTriggerType.generic || type == BuildTriggerType.github){
-						webtriggers.add(type.toString());
-					}
-				}
-				return StringUtils.join(webtriggers, ",");
+				return new WebHooksPropertySource(getResource().getBuildTriggers());
 			default:
 			}
 		}

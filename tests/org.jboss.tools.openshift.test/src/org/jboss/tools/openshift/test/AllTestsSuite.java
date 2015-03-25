@@ -20,10 +20,11 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
-import org.jboss.tools.openshift.test.ui.property.BuildConfigPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.ConnectionPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
 import org.jboss.tools.openshift.test.ui.property.ResourcePropertySourceTest;
+import org.jboss.tools.openshift.test.ui.property.build.BuildConfigPropertySourceTest;
+import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -44,7 +45,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	OpenShiftExplorerLabelProviderTest.class,
 	ResourcePropertySourceTest.class,
 	StringUtilsTest.class,
-	URIUtilsTest.class
+	URIUtilsTest.class,
+	WebhooksPropertySourceTest.class
 })
 /**
  * @author Andre Dietisheim
