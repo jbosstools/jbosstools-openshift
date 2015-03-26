@@ -82,24 +82,40 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.connectionFactory = getDefaultConnectionFactory(connectionsFactory);
 		this.connectError = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
-		this.useDefaultHost = true;
-		IConnection wizardConnection = wizardModel.getConnection();
-		if (wizardConnection == null) {
-			this.selectedConnection = NewConnectionMarker.getInstance();
-			this.host = connectionFactory.getDefaultHost();
-			this.connection = this.connectionFactory.create(host);
+		IConnection editedConnection = wizardModel.getConnection();
+		if (editedConnection == null) {
+			initNewConnection();
 		} else {
-			this.selectedConnection = wizardConnection;
-			this.host = wizardConnection.getHost();
-			this.connection = wizardConnection.clone();
-			addConnectionListener(connection, this.connection, this.connectionChangeListener);
+			initEditConnection(editedConnection);
 		}
 	}
 
 	private IConnectionFactory getDefaultConnectionFactory(IConnectionsFactory connectionsFactory) {
-		return connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
+		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
+		if (factory == null) {
+			factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
+		}
+		return factory;
 	}
 	
+	private void initEditConnection(IConnection connection) {
+		this.selectedConnection = connection;
+		this.host = connection.getHost();
+		this.connection = connection.clone();
+		this.useDefaultHost = connection.isDefaultHost();
+		addConnectionListener(connection, null, this.connectionChangeListener);
+	}
+
+	private void initNewConnection() {
+		this.selectedConnection = NewConnectionMarker.getInstance();
+		if (connectionFactory != null) {
+			this.host = connectionFactory.getDefaultHost();
+			this.connection = connectionFactory.create(host);
+			this.useDefaultHost = connectionFactory.hasDefaultHost();
+			addConnectionListener(connection, null, this.connectionChangeListener);
+		}
+	}
+
 	private void update(IConnection selectedConnection, IConnection connection, IConnectionFactory factory, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
 		factory = updateFactory(selectedConnection, factory);
 		connection = updateConnection(selectedConnection, connection, factory);
@@ -210,14 +226,6 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return selectedConnection;
 	}
 
-	public void setConnection(IConnection connection) {
-		setConnection(connection, true);
-	}
-	
-	private void setConnection(IConnection connection, boolean updateModel) {
-		update(selectedConnection, connection, connectionFactory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
-	}
-
 	public IConnection getConnection() {
 		return connection;
 	}
@@ -246,7 +254,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setHost(String host) {
-		update(selectedConnection, connection, connectionFactory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory.create(host), connectionFactory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
 	
 	/**

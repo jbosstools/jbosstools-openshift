@@ -18,8 +18,11 @@ import java.util.Collection;
  */
 public interface IConnectionsFactory {
 
-	
+	/** connection factory for v2 OpenShift */
 	public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.express.core.ConnectionFactory";
+
+	/** connection factory for v3 OpenShift */
+	public static final String CONNECTIONFACTORY_OPENSHIFT_ID = "org.jboss.tools.openshift.core.ConnectionFactory";
 	
 	/**
 	 * Creates a connections for the given host. Queries the connection

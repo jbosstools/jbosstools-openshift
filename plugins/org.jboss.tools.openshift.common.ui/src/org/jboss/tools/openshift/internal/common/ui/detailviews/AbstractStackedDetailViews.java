@@ -106,7 +106,7 @@ public abstract class AbstractStackedDetailViews {
 				break;
 			}
 		}
-		
+
 		return view;
 	}
 	
