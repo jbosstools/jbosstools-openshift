@@ -102,7 +102,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public String getHost() {
-		return client.getBaseURL().getHost();
+		return client.getBaseURL().toString();
 	}
 
 	@Override
@@ -173,7 +173,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public void refresh() {
-		this.connect();
+		connect();
 	}
 
 	@Override
