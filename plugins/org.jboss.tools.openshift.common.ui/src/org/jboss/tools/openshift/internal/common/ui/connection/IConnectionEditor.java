@@ -25,4 +25,5 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
  * @see IDetailView#isViewFor(Object)
  */
 public interface IConnectionEditor extends IDetailView {
+	
 }

@@ -68,16 +68,16 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 	private IObservableValue disabled;
 
 	ApplicationTemplateDetailViews(IObservableValue detailViewModel, IObservableValue disabled, Composite parent, DataBindingContext dbc) {
-		super(detailViewModel, parent, dbc);
+		super(detailViewModel, null, parent, dbc);
 		this.disabled = disabled;
 	}
 
 	@Override
-	protected void createViewControls(Composite parent, DataBindingContext dbc) {
-		downloadableCartridgeView.createControls(parent, dbc);
-		quickstartView.createControls(parent, dbc);
-		defaultView.createControls(parent, dbc);
-		emptyView.createControls(parent, dbc);
+	protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
+		downloadableCartridgeView.createControls(parent, context, dbc);
+		quickstartView.createControls(parent, context, dbc);
+		defaultView.createControls(parent, context, dbc);
+		emptyView.createControls(parent, context, dbc);
 	}
 
 	@Override
@@ -91,8 +91,8 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 		private StyledText descriptionText;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
-			Composite container = setControl(super.createControls(parent, dbc));
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
+			Composite container = setControl(super.createControls(parent, context, dbc));
 			GridLayoutFactory.fillDefaults()
 					.margins(8, 2).spacing(6, 2).applyTo(container);
 
@@ -140,7 +140,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 		private Binding binding;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
@@ -278,7 +278,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 		private IQuickstartApplicationTemplate template;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.margins(8, 2).numColumns(4).spacing(6, 2).applyTo(container);

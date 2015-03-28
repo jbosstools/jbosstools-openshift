@@ -10,15 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,17 +30,14 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
-import org.jboss.tools.openshift.internal.common.ui.utils.ObservablePojoUtils;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
  */
-class ConnectionWizardPageModel extends ObservableUIPojo {
+public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_SELECTED_CONNECTION = "selectedConnection";
-	public static final String PROPERTY_CONNECTION = "connection";
 	public static final String PROPERTY_CONNECTION_FACTORY = "connectionFactory";
 	public static final String PROPERTY_CONNECTION_FACTORY_ERROR = "connectionFactoryError";
 	public static final String PROPERTY_HOST = "host";
@@ -61,15 +54,15 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	private IConnectionFactory connectionFactory;
 	private boolean useDefaultHost;
 	private ConnectionsFactoryTracker connectionsFactory;
-	private IConnectionAwareModel wizardModel;
 	private IStatus connectError;
-	private PropertyChangeListener connectionChangeListener = onConnectionChanged();
+	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
+	private Collection<IConnection> allConnections;
 	
-	ConnectionWizardPageModel(IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
-		this.wizardModel = wizardModel;
+	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange) {
+		this.allConnections = allConnections;
 		this.allowConnectionChange = allowConnectionChange;
 		this.connectionsFactory = createConnectionsFactory();
-		init(wizardModel);
+		init(editedConnection);
 	}
 
 	private ConnectionsFactoryTracker createConnectionsFactory() {
@@ -78,11 +71,9 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return connectionsFactory;
 	}
 	
-	private void init(IConnectionAwareModel wizardModel) {
-		this.connectionFactory = getDefaultConnectionFactory(connectionsFactory);
+	private void init(IConnection editedConnection) {
 		this.connectError = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
-		IConnection editedConnection = wizardModel.getConnection();
 		if (editedConnection == null) {
 			initNewConnection();
 		} else {
@@ -100,41 +91,41 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	private void initEditConnection(IConnection connection) {
 		this.selectedConnection = connection;
+		this.connectionFactory = connectionsFactory.getByConnection(connection.getClass());
 		this.host = connection.getHost();
-		this.connection = connection.clone();
 		this.useDefaultHost = connection.isDefaultHost();
-		addConnectionListener(connection, null, this.connectionChangeListener);
 	}
 
 	private void initNewConnection() {
 		this.selectedConnection = NewConnectionMarker.getInstance();
+		this.connectionFactory = getDefaultConnectionFactory(connectionsFactory);
 		if (connectionFactory != null) {
 			this.host = connectionFactory.getDefaultHost();
 			this.connection = connectionFactory.create(host);
 			this.useDefaultHost = connectionFactory.hasDefaultHost();
-			addConnectionListener(connection, null, this.connectionChangeListener);
 		}
 	}
 
-	private void update(IConnection selectedConnection, IConnection connection, IConnectionFactory factory, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
-		factory = updateFactory(selectedConnection, factory);
-		connection = updateConnection(selectedConnection, connection, factory);
-		String host = updateHost(connection, factory);
-		useDefaultHost = updateUseDefaultHost(useDefaultHost, connection, factory);
+	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
+		factory = updateFactory(factory, selectedConnection);
+		host = updateHost(host, selectedConnection, factory);
+		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
-		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 		
 		setConnectionFactoryError(connectionFactoryError);
 		setConnectError(connectError);
 	}
 
-	private IConnectionFactory updateFactory(IConnection selectedConnection, IConnectionFactory factory) {
-		if (selectedConnection != null
-				&& !selectedConnection.equals(this.selectedConnection)) {
+	private IConnectionFactory updateFactory(IConnectionFactory factory, IConnection selectedConnection) {
+		if (selectedConnection instanceof NewConnectionMarker) {
+			return factory;
+		}
+		
+		if (!selectedConnection.equals(this.selectedConnection)) {
 			// selectedConnection changed
 			if (!(selectedConnection instanceof NewConnectionMarker)) {
 				factory = connectionsFactory.getByConnection(selectedConnection.getClass());
@@ -143,12 +134,11 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory;
 	}
 
-	private String updateHost(IConnection connection, IConnectionFactory factory) {
-		String host = this.host;
-		if (connection != null
-				&& !connection.equals(this.connection)) {
+	private String updateHost(String host, IConnection selectedConnection, IConnectionFactory factory) {
+		if (!(selectedConnection instanceof NewConnectionMarker)
+				&& !selectedConnection.equals(this.selectedConnection)) {
 			// connection changed
-			host = connection.getHost();
+			host = selectedConnection.getHost();
 		} else if (factory != null
 				&& !factory.equals(connectionFactory)) {
 			// factory changed
@@ -161,57 +151,19 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 		return host;
 	}
 
-	private boolean updateUseDefaultHost(boolean useDefaultHost, IConnection connection, IConnectionFactory factory) {
+	private boolean updateUseDefaultHost(boolean useDefaultHost, IConnection selectedConnection, IConnectionFactory factory) {
 		if (factory != null
 				&& !factory.equals(connectionFactory)) {
 			// connection factory changed
 			if (useDefaultHost) {
 				useDefaultHost = factory.hasDefaultHost();
 			}
-		} else if (connection != null
-				&& !connection.equals(this.connection)) {
+		} else if (selectedConnection != null
+				&& !selectedConnection.equals(this.selectedConnection)) {
 				// connection changed
-				useDefaultHost = connection.isDefaultHost();
+				useDefaultHost = selectedConnection.isDefaultHost();
 		};
 		return useDefaultHost;
-	}
-	
-	private IConnection updateConnection(IConnection selectedConnection, IConnection connection, IConnectionFactory factory) {
-		if (!Diffs.equals(selectedConnection, this.selectedConnection)) {
-			// selected connection changed
-			if (selectedConnection instanceof NewConnectionMarker) {
-				if (factory instanceof AutomaticConnectionFactoryMarker
-						|| factory == null) {
-					connection = null;
-				} else {
-					connection = factory.create(getHost());
-				}
-			} else {
-				connection = selectedConnection.clone();
-			}
-		}
-		
-		if (!Diffs.equals(connection, this.connection)
-				&& connection != null) {
-			addConnectionListener(connection, this.connection, this.connectionChangeListener);
-		}
-		return connection;
-	}
-	
-	private void addConnectionListener(IConnection newConnection, IConnection oldConnection, PropertyChangeListener listener) {
-		ObservablePojoUtils.removePropertyChangeListener(listener, oldConnection);
-		ObservablePojoUtils.addPropertyChangeListener(listener, newConnection);
-	}
-
-	private PropertyChangeListener onConnectionChanged() {
-		return new PropertyChangeListener() {
-
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				// reset connection error
-				setConnectError(Status.OK_STATUS);
-			}
-		};
 	}
 
 	private boolean isNewConnection() {
@@ -219,7 +171,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setSelectedConnection(IConnection selectedConnection) {
-		update(selectedConnection, connection, connectionFactory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
 
 	public IConnection getSelectedConnection() {
@@ -231,21 +183,21 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setConnectionFactory(IConnectionFactory factory) {
-		update(NewConnectionMarker.getInstance(), null, factory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(NewConnectionMarker.getInstance(), factory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
 	
 	public IConnectionFactory getConnectionFactory() {
 		return connectionFactory;
 	}
 	
-	public Collection<IConnection> getConnections() {
+	public Collection<IConnection> getAllConnections() {
 		if (allowConnectionChange) {
 			List<IConnection> connections = new ArrayList<IConnection>();
 			connections.add(NewConnectionMarker.getInstance());
-			connections.addAll(ConnectionsRegistrySingleton.getInstance().getAll());
+			connections.addAll(allConnections);
 			return connections;
 		} else {
-			return Collections.singletonList(connection);
+			return Collections.singletonList(selectedConnection);
 		}
 	}
 
@@ -254,7 +206,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setHost(String host) {
-		update(selectedConnection, connectionFactory.create(host), connectionFactory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
 	
 	/**
@@ -277,39 +229,38 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	 * @param host
 	 *            the host to get the connection for.
 	 */
-	private IConnectionFactory createConnectionFactory(String host, IConnectionsFactory connectionsFactory) {
+	private void createConnectionFactory(String host, IConnectionsFactory connectionsFactory) {
 		if (StringUtils.isEmpty(host)
 				|| connectionsFactory == null) {
-			return null;
+			return;
 		}
 		
-		IConnectionFactory factory = null;
 		try {
-			factory = connectionsFactory.getFactory(host);
+			IConnectionFactory factory = connectionsFactory.getFactory(host);
 			if (factory != null) {
 				update(NewConnectionMarker.getInstance(),
-						factory.create(host),
 						factory,
+						host, 
 						useDefaultHost,
 						Status.OK_STATUS,
 						Status.OK_STATUS);
 			} else {
 				update(selectedConnection,
-						connection,
 						connectionFactory,
+						host, 
 						useDefaultHost,
 						ValidationStatus.error(NLS.bind("The host at {0} is no OpenShift host", host)),
 						Status.OK_STATUS);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
+			// TODO: catch specific exceptions
 			update(selectedConnection,
-					connection,
 					connectionFactory,
+					host, 
 					useDefaultHost,
 					ValidationStatus.error(NLS.bind("Could not connect to host at {0}.", host), e),
 					Status.OK_STATUS);
 		}
-		return factory;
 	}
 	
 	private void setConnectionFactoryError(IStatus status) {
@@ -321,7 +272,7 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setUseDefaultHost(boolean useDefaultHost) {
-		update(selectedConnection, connection, connectionFactory, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
 	
 	public boolean isUseDefaultHost() {
@@ -334,7 +285,8 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public IStatus connect() {
 		IStatus status = Status.OK_STATUS;
-		try {			
+		try {
+			this.connection = createConnection();
 			if(connection != null 
 					&& !connection.connect()) {
 				String message = String.format("Unable to connect to %s", connection.getHost());
@@ -343,13 +295,38 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			}
 //		} catch (NotFoundOpenShiftException e) {
 //			// connectionFactoryError user without domain
+//		} catch (Exception e) {
+//			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
+//					NLS.bind("Unknown error, can not verify connection to host {0} - see Error Log for details", connection.getHost()));
+//			OpenShiftCommonUIActivator.log(e);
+//		}
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					NLS.bind("Unknown error, can not verify connection to host {0} - see Error Log for details", connection.getHost()));
+					NLS.bind("Could not authenticate user {0} to host {1}", connection.getUsername(), connection.getHost()));
 			OpenShiftCommonUIActivator.log(e);
 		}
-		update(selectedConnection, connection, connectionFactory, useDefaultHost, Status.OK_STATUS, status);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
 		return status;
+	}
+	
+	private IConnection createConnection() {
+		if (connectionFactory == null) {
+			return null;
+		}
+		
+		IConnection connection = connectionFactory.create(getHost());
+		if (connection == null) {
+			return null;
+		}
+		
+		if (connectionAuthenticationProvider != null) {
+			connectionAuthenticationProvider.update(connection);
+		}
+		return connection;
+	}
+
+	public void resetConnectError() {
+		setConnectError(Status.OK_STATUS);
 	}
 	
 	private void setConnectError(IStatus status) {
@@ -387,7 +364,6 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public void dispose() {
 		connectionsFactory.close();
-		ObservablePojoUtils.removePropertyChangeListener(this.connectionChangeListener, this.connection);
 	}
 	
 	/**
@@ -408,5 +384,15 @@ class ConnectionWizardPageModel extends ObservableUIPojo {
 			getSelectedConnection().update(connection);
 		}
 		return true;
+	}
+
+	public void setConnectionAuthenticationProvider(IConnectionAuthenticationProvider authenticationProvider) {
+		this.connectionAuthenticationProvider = authenticationProvider;
+	}
+
+	public interface IConnectionAuthenticationProvider {
+
+		public IConnection update(IConnection connection);
+
 	}
 }

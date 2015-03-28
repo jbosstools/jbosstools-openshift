@@ -34,13 +34,15 @@ public abstract class AbstractStackedDetailViews {
 	private Composite parent;
 	private IDetailView currentView = emptyView;
 	private final StackLayout stackLayout = new StackLayout();
+	private Object context;
 	private DataBindingContext dbc;
 	private IObservableValue detailViewModel;
 
-	public AbstractStackedDetailViews(IObservableValue detailViewModel, Composite parent, DataBindingContext dbc) {
+	public AbstractStackedDetailViews(IObservableValue detailViewModel, Object context, Composite parent, DataBindingContext dbc) {
 		Assert.isLegal(parent != null && !parent.isDisposed());
 		this.parent = parent;
 		parent.addDisposeListener(onDispose());
+		this.context = context;
 		Assert.isLegal(dbc != null);
 		this.dbc = dbc;
 		Assert.isLegal(detailViewModel != null && !detailViewModel.isDisposed());
@@ -48,17 +50,16 @@ public abstract class AbstractStackedDetailViews {
 	}
 
 	public void createControls() {
-		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(), detailViewModel, parent);
+		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(detailViewModel), detailViewModel, parent);
 
-		detailViewModel.addValueChangeListener(onDetailViewModelChanged());
 		parent.setLayout(stackLayout);
-		createViewControls(parent, dbc);
+		createViewControls(parent, context, dbc);
 		showView(detailViewModel, getView(detailViewModel), dbc);
 	}
 
 	protected abstract IDetailView[] getDetailViews();
 	
-	private IValueChangeListener onDetailViewModelChanged() {
+	private IValueChangeListener onDetailViewModelChanged(final IObservableValue detailViewsModel) {
 		return new IValueChangeListener() {
 
 			@Override
@@ -85,10 +86,10 @@ public abstract class AbstractStackedDetailViews {
 		parent.layout(true, true);
 	}
 
-	protected void createViewControls(Composite parent, DataBindingContext dbc) {
-		emptyView.createControls(parent, dbc);
+	protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
+		emptyView.createControls(parent, context, dbc);
 		for (IDetailView detailView : getDetailViews()) {
-			detailView.createControls(parent, dbc);
+			detailView.createControls(parent, context, dbc);
 		}
 	};
 
@@ -134,7 +135,7 @@ public abstract class AbstractStackedDetailViews {
 
 	public class EmptyView extends BaseDetailsView {
 
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.NONE));
 			GridLayoutFactory.fillDefaults()
 					.margins(6, 6).spacing(6, 6).applyTo(container);
@@ -148,7 +149,7 @@ public abstract class AbstractStackedDetailViews {
 	
 	public interface IDetailView {
 
-		public Composite createControls(Composite parent, DataBindingContext dbc);
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc);
 
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
 

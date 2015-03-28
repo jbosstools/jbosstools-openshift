@@ -51,7 +51,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 	public CartridgeDetailViews(IObservableValue detailViewModel, IObservableValue canModifyCartridges, 	
 			Composite parent, DataBindingContext dbc) {
-		super(detailViewModel, parent, dbc);
+		super(detailViewModel, null, parent, dbc);
 		this.canModifyCartridges = canModifyCartridges;
 	}
 
@@ -70,8 +70,8 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		private StyledText description;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
-			Composite container = setControl(super.createControls(parent, dbc));
+		public Composite createControls(Composite parent, Object context,DataBindingContext dbc) {
+			Composite container = setControl(super.createControls(parent, context, dbc));
 			GridLayoutFactory.fillDefaults()
 					.margins(10, 10).spacing(10, 10).applyTo(container);
 
@@ -118,7 +118,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		private StyledText url;
 
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.margins(10, 10).spacing(10, 10).applyTo(container);
@@ -170,7 +170,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		private Binding binding;
 		
 		@Override
-		public Composite createControls(Composite parent, DataBindingContext dbc) {
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);

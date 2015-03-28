@@ -26,7 +26,7 @@ public class ConnectionEditorExtension {
 
 	private static ConnectionEditorExtension INSTANCE = new ConnectionEditorExtension();
 	
-	private static final String CONNECTION_UI_EXTENSION = "org.jboss.tools.openshift.common.ui.connectionEditor";
+	private static final String CONNECTION_EDITORS_EXTENSION = "org.jboss.tools.openshift.common.ui.connectionEditor";
 	private static final String ATTRIBUTE_CLASS = "class";
 
 	private Collection<IConnectionEditor> connectionEditors;
@@ -49,7 +49,7 @@ public class ConnectionEditorExtension {
 	private Collection<IConnectionEditor> createConnectionEditors() {
 		List<IConnectionEditor> connectionEditors = new ArrayList<IConnectionEditor>();
 		IConfigurationElement[] config = 
-				Platform.getExtensionRegistry().getConfigurationElementsFor(CONNECTION_UI_EXTENSION);
+				Platform.getExtensionRegistry().getConfigurationElementsFor(CONNECTION_EDITORS_EXTENSION);
 		for (IConfigurationElement extension : config) {
 			if (extension.getAttribute(ATTRIBUTE_CLASS) != null) {
 				String clazz = extension.getAttribute(ATTRIBUTE_CLASS);
