@@ -33,6 +33,7 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 
 	private String getHost(String scheme, String host) {
 		if (StringUtils.isEmpty(host)) {
+			// empty host == default host
 			return host;
 		}
 		

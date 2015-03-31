@@ -81,14 +81,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	private IConnectionFactory getDefaultConnectionFactory(IConnectionsFactory connectionsFactory) {
-		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
-		if (factory == null) {
-			factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
-		}
-		return factory;
-	}
-	
 	private void initEditConnection(IConnection connection) {
 		this.selectedConnection = connection;
 		this.connectionFactory = connectionsFactory.getByConnection(connection.getClass());
@@ -106,6 +98,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
+	private IConnectionFactory getDefaultConnectionFactory(IConnectionsFactory connectionsFactory) {
+		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
+		if (factory == null) {
+			factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
+		}
+		return factory;
+	}
+	
 	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
 		factory = updateFactory(factory, selectedConnection);
 		host = updateHost(host, selectedConnection, factory);

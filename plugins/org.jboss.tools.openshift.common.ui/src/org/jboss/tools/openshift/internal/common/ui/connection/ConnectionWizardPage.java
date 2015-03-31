@@ -72,6 +72,7 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.HttpsTextAdapter;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
@@ -183,7 +184,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		serverLabel.setText("Server:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
-		Text serverUrlText = new Text(parent, SWT.BORDER);
+		final Text serverUrlText = new Text(parent, SWT.BORDER);
+		new HttpsTextAdapter().addTo(serverUrlText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serverUrlText);
 		final IObservableValue serverUrlTextObservable = WidgetProperties.text(SWT.Modify).observe(serverUrlText);
