@@ -10,29 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.jboss.tools.openshift.core.connection.Connection;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift3.client.IClient;
 import com.openshift3.client.ResourceKind;
 import com.openshift3.client.model.IProject;
-import com.openshift3.client.model.IResource;
 
 /**
+ * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -43,7 +43,7 @@ public class ConnectionTest {
 	
 	@Before
 	public void setup() throws Exception{
-		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8433"));
+		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
 		connection = new Connection(client, null, null, null);
 	}
 	@Test
@@ -54,31 +54,44 @@ public class ConnectionTest {
 		assertArrayEquals("Exp. to get projects from the client",projects.toArray(), connection.get(ResourceKind.Project).toArray());
 	}
 	@Test
-	public void testGetHost() {
-		assertEquals("localhost", connection.getHost());
+	public void getHostShouldReturnHost() {
+		assertEquals("https://localhost:8443", connection.getHost());
 	}
 	@Test
-	public void testGetScheme() {
+	public void getSchemeShouldReturnScheme() {
 		assertEquals("https", connection.getScheme());
 	}
 	
 	@Test
-	public void testNotEquals() throws Exception{
-		Connection one = new Connection("https://localhost:8443", null, null, null);
+	public void shouldNotEqualsIfDifferentUser() throws Exception {
 		Connection two = new Connection("https://localhost:8443", null, null, null);
 		two.setUsername("foo");
-		
-		assertNotEquals("Exp. connections not to be equal unless they have same url and user", one,  two);
+
+		assertNotEquals("Exp. connections not to be equal unless they have same url and user", connection, two);
 	}
 
 	@Test
-	public void testEquals() throws Exception{
-		Connection one = new Connection("https://localhost:8443", null, null, null);
-		one.setUsername("foo");
+	public void shouldNotEqualsIfDifferentScheme() throws Exception {
+		Connection two = new Connection("http://localhost:8443", null, null, null);
+
+		assertNotEquals("Exp. connections not to be equal unless they have same url and user", connection, two);
+	}
+
+	@Test
+	public void shouldNotEqualsIfDifferentHost() throws Exception {
+		Connection two = new Connection("https://openshift.redhat.com:8443", null, null, null);
+		two.setUsername("foo");
+
+		assertNotEquals("Exp. connections not to be equal unless they have same url and user", connection, two);
+	}
+
+	@Test
+	public void shouldEqualsIfSameUrlAndUser() throws Exception{
+		connection.setUsername("foo");
 		Connection two = new Connection("https://localhost:8443", null, null, null);
 		two.setUsername("foo");
 		
-		assertEquals("Exp. connections to be equal if they have same url and user", one,  two);
+		assertEquals("Exp. connections to be equal if they have same url and user", connection,  two);
 	}
 	
 //	@Test
