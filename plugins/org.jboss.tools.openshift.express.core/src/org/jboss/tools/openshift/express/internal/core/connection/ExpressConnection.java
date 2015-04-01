@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
@@ -552,9 +553,15 @@ public class ExpressConnection extends AbstractConnection {
 
 	@Override
 	public void update(IConnection connection) {
-		setUsername(connection.getUsername());
-		setPassword(connection.getPassword());
-		setRememberPassword(connection.isRememberPassword());
+		Assert.isLegal(connection instanceof ExpressConnection);
+		
+		ExpressConnection otherConnection = (ExpressConnection) connection; 
+		setUsername(otherConnection.getUsername());
+		setPassword(otherConnection.getPassword());
+		setRememberPassword(otherConnection.isRememberPassword());
+		setUser(otherConnection.user);
+		this.sslCallback = otherConnection.sslCallback;
+		
 	}
 	
 	@Override

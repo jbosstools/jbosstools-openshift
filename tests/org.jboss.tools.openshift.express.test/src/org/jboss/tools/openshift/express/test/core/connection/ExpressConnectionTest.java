@@ -138,7 +138,7 @@ public class ExpressConnectionTest {
 	@Test
 	public void cloneShouldCreateIdenticalConnection() {
 		// pre-conditions
-		ExpressConnection connection = new ExpressConnection("foo", "openshift.redhat.com");
+		ExpressConnection connection = new ExpressConnection("foo", "https://openshift.redhat.com");
 		connection.setPassword("bar");
 		
 		// operations
@@ -152,4 +152,30 @@ public class ExpressConnectionTest {
 		assertEquals(connection.getHost(), clonedConnection.getHost());
 	}
 
+	@Test
+	public void updateShouldUpdateConnection() {
+		// pre-conditions
+		ExpressConnectionFake updatedConnection = new ExpressConnectionFake("foo", "https://openshift.redhat.com");
+		updatedConnection.setPassword("bar");
+		updatedConnection.setRememberPassword(true);
+		updatedConnection.setConnected(false);
+
+		ExpressConnectionFake updatingConnection = new ExpressConnectionFake("bar", "http://localhost:8443");
+		updatingConnection.setPassword("foo");
+		updatingConnection.setRememberPassword(false);
+		updatingConnection.setConnected(true);
+		
+		// operations
+		updatedConnection.update(updatingConnection);
+
+		// verifications
+		assertEquals(updatingConnection.getUsername(), updatedConnection.getUsername());
+		assertEquals(updatingConnection.getPassword(), updatedConnection.getPassword());
+		assertEquals(updatingConnection.isRememberPassword(), updatedConnection.isRememberPassword());
+		assertTrue(updatedConnection.isConnected());
+
+		// host cannot be updated (is immutable)!
+		assertEquals("https://openshift.redhat.com", updatedConnection.getHost());
+
+	}
 }

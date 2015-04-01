@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
@@ -148,9 +149,8 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	@Override
 	public void update(IConnection connection) {
-		if (!(connection instanceof Connection)) {
-			throw new UnsupportedOperationException();
-		}
+		Assert.isLegal(connection instanceof Connection);
+		
 		Connection otherConnection = (Connection) connection;
 		this.client = otherConnection.client; 
 		this.authorizer = otherConnection.authorizer;
