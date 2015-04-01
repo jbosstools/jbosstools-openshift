@@ -40,6 +40,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private IAuthorizationClient authorizer;
 	private String userName;
 	private String password;
+	private boolean rememberPassword;
 	private String token;
 	private ICredentialsPrompter credentialsPrompter;
 	private ISSLCertificateCallback sslCertificateCallback;
@@ -67,7 +68,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public void setUsername(String userName) {
-		this.userName = userName;
+		firePropertyChange(PROPERTY_USERNAME, this.userName, this.userName = userName);
 	}
 
 	@Override
@@ -77,9 +78,19 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public void setPassword(String password) {
-		this.password = password;
+		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
 	}
 
+	@Override
+	public void setRememberPassword(boolean rememberPassword) {
+		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, this.rememberPassword, this.rememberPassword = rememberPassword);
+	}
+	
+	@Override
+	public boolean isRememberPassword() {
+		return rememberPassword;
+	}
+	
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(getToken()  != null) return true;
@@ -130,6 +141,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		Connection connection = new Connection(client, authorizer, credentialsPrompter, sslCertificateCallback);
 		connection.setUsername(userName);
 		connection.setPassword(password);
+		connection.setRememberPassword(rememberPassword);
 		connection.setToken(token);
 		return connection;
 	}
@@ -146,6 +158,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.sslCertificateCallback = otherConnection.sslCertificateCallback;
 		this.userName = otherConnection.userName;
 		this.password = otherConnection.password;
+		this.rememberPassword = otherConnection.rememberPassword;
 		this.token = otherConnection.token;
 	}
 	

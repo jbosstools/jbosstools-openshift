@@ -33,6 +33,10 @@ public interface IConnection {
 
 	public void setPassword(String password);
 
+	public void setRememberPassword(boolean rememberPassword);
+	
+	public boolean isRememberPassword();
+	
 	public boolean isDefaultHost();
 
 	public String getScheme();

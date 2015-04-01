@@ -59,6 +59,11 @@ public class ConnectionFake extends AbstractConnection {
 	}
 
 	@Override
+	public boolean isRememberPassword() {
+		return false;
+	}
+	
+	@Override
 	public boolean isDefaultHost() {
 		return false;
 	}
@@ -85,5 +90,11 @@ public class ConnectionFake extends AbstractConnection {
 	@Override
 	public void update(IConnection connection) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setRememberPassword(boolean rememberPassword) {
+		// TODO Auto-generated method stub
+		
 	}
 }

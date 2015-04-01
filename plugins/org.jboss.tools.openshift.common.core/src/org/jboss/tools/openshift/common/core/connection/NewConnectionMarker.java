@@ -97,6 +97,15 @@ public class NewConnectionMarker extends AbstractConnection {
 	}
 
 	@Override
+	public void setRememberPassword(boolean rememberPassword) {
+	}
+
+	@Override
+	public boolean isRememberPassword() {
+		return false;
+	}
+
+	@Override
 	public IConnection clone() {
 		throw new UnsupportedOperationException();
 	}

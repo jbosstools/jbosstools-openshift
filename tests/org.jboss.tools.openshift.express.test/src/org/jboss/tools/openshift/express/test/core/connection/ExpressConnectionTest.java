@@ -15,6 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
@@ -132,6 +133,23 @@ public class ExpressConnectionTest {
 
 		// verifications
 		assertEquals(hashCode, connection.hashCode());
+	}
+	
+	@Test
+	public void cloneShouldCreateIdenticalConnection() {
+		// pre-conditions
+		ExpressConnection connection = new ExpressConnection("foo", "openshift.redhat.com");
+		connection.setPassword("bar");
+		
+		// operations
+		IConnection clonedConnection = connection.clone();
+
+		// verifications
+		assertTrue(clonedConnection instanceof ExpressConnection);
+		assertEquals(connection.getUsername(), clonedConnection.getUsername());
+		assertEquals(connection.getPassword(), clonedConnection.getPassword());
+		assertEquals(connection.isRememberPassword(), clonedConnection.isRememberPassword());
+		assertEquals(connection.getHost(), clonedConnection.getHost());
 	}
 
 }

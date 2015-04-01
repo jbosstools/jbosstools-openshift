@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.test.core.connection;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,14 +88,32 @@ public class ConnectionTest {
 	}
 
 	@Test
-	public void shouldEqualsIfSameUrlAndUser() throws Exception{
+	public void shouldEqualsIfSameUrlAndUser() throws Exception {
 		connection.setUsername("foo");
 		Connection two = new Connection("https://localhost:8443", null, null, null);
 		two.setUsername("foo");
-		
-		assertEquals("Exp. connections to be equal if they have same url and user", connection,  two);
+
+		assertEquals("Exp. connections to be equal if they have same url and user", connection, two);
 	}
-	
+
+	@Test
+	public void cloneShouldCreateIdenticalConnection() throws Exception {
+		// pre-conditions
+		Connection connection = new Connection("https://localhost:8443", null, null, null);
+		connection.setPassword("foo");
+		connection.setPassword("bar");
+		
+		// operations
+		IConnection clonedConnection = connection.clone();
+
+		// verifications
+		assertTrue(clonedConnection instanceof Connection);
+		assertEquals(connection.getUsername(), clonedConnection.getUsername());
+		assertEquals(connection.getPassword(), clonedConnection.getPassword());
+		assertEquals(connection.isRememberPassword(), clonedConnection.isRememberPassword());
+		assertEquals(connection.getHost(), clonedConnection.getHost());
+	}
+
 //	@Test
 //	public void nullHostShouldBeDefaultHost() {
 //		// pre-conditions

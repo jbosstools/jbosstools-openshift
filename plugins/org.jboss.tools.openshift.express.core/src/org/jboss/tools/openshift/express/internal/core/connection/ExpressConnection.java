@@ -554,6 +554,7 @@ public class ExpressConnection extends AbstractConnection {
 	public void update(IConnection connection) {
 		setUsername(connection.getUsername());
 		setPassword(connection.getPassword());
+		setRememberPassword(connection.isRememberPassword());
 	}
 	
 	@Override
