@@ -27,7 +27,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.ApplicationBuilder;
@@ -63,8 +63,8 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 			final IGearProfile gear, String initialGitUrl, Map<String, String> environmentVariables, Collection<ICartridge> cartridges, IDomain domain) {
 		super(NLS.bind(
 				(cartridges == null ?
-						OpenShiftExpressUIMessages.CREATING_APPLICATION
-						: OpenShiftExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
+						ExpressUIMessages.CREATING_APPLICATION
+						: ExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
 				, name));
 		this.name = name;
 		this.scale = scale;
@@ -104,7 +104,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		} catch (Exception e) {
 			safeRefreshDomain();
 			return ExpressUIActivator.createErrorStatus(
-					OpenShiftExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, StringUtils.nullToEmptyString(name));
+					ExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, StringUtils.nullToEmptyString(name));
 		}
 	}
 
@@ -169,7 +169,7 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 										name)
 								, MessageDialog.QUESTION
 								, new String[] { "Keep trying",
-										OpenShiftExpressUIMessages.BTN_CLOSE_WIZARD }
+										ExpressUIMessages.BTN_CLOSE_WIZARD }
 								, MessageDialog.QUESTION);
 				// style &= SWT.SHEET;
 				// dialog.setShellStyle(dialog.getShellStyle() | style);

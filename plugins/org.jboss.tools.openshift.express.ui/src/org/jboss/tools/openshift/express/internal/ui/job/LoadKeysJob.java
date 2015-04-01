@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 
 import com.openshift.client.IOpenShiftSSHKey;
 import com.openshift.client.OpenShiftException;
@@ -43,7 +43,7 @@ public class LoadKeysJob extends Job {
 			this.keys = user.getSSHKeys();
 			return Status.OK_STATUS; 
 		}catch(OpenShiftException ex){
-			return ExpressUIActivator.createErrorStatus(OpenShiftExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, ex);
+			return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, ex);
 		}
 	}
 	

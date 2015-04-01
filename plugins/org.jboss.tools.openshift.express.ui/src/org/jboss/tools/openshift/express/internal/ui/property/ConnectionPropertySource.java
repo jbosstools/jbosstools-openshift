@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.OpenShiftException;
@@ -66,7 +66,7 @@ public class ConnectionPropertySource implements IPropertySource {
 	public Object getPropertyValue(Object id) {
 		try {
 			if (!connection.isConnected() && !connection.canPromptForPassword()) {
-				return OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL;
+				return ExpressUIMessages.USER_NOT_CONNECTED_LABEL;
 			}
 
 			boolean requiresConnect = !connection.isConnected() && connection.canPromptForPassword();

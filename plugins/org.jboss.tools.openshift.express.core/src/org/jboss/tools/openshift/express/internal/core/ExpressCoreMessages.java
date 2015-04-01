@@ -13,15 +13,15 @@ package org.jboss.tools.openshift.express.internal.core;
 
 import org.eclipse.osgi.util.NLS;
 
-public class OpenShiftExpressCoreMessages extends NLS {
+public class ExpressCoreMessages extends NLS {
 
-	private static final String BUNDLE_NAME = OpenShiftExpressCoreMessages.class.getName();
+	private static final String BUNDLE_NAME = ExpressCoreMessages.class.getName();
 
 	static {
-		NLS.initializeMessages(BUNDLE_NAME, OpenShiftExpressCoreMessages.class);
+		NLS.initializeMessages(BUNDLE_NAME, ExpressCoreMessages.class);
 	}
 
-	private OpenShiftExpressCoreMessages() {
+	private ExpressCoreMessages() {
 		// Do not instantiate
 	}
 

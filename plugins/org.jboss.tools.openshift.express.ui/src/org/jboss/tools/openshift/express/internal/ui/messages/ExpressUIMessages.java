@@ -2,15 +2,15 @@ package org.jboss.tools.openshift.express.internal.ui.messages;
 
 import org.eclipse.osgi.util.NLS;
 
-public class OpenShiftExpressUIMessages extends NLS {
+public class ExpressUIMessages extends NLS {
 
-	private static final String BUNDLE_NAME = OpenShiftExpressUIMessages.class.getName();
+	private static final String BUNDLE_NAME = ExpressUIMessages.class.getName();
 
 	static {
-		NLS.initializeMessages(BUNDLE_NAME, OpenShiftExpressUIMessages.class);
+		NLS.initializeMessages(BUNDLE_NAME, ExpressUIMessages.class);
 	}
 
-	private OpenShiftExpressUIMessages() {
+	private ExpressUIMessages() {
 		// Do not instantiate
 	}
 

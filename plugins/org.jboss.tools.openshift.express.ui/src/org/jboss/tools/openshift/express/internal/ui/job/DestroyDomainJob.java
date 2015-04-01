@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IDomain;
@@ -33,7 +33,7 @@ public class DestroyDomainJob extends AbstractDelegatingMonitorJob {
 	private boolean force;
 
 	public DestroyDomainJob(final IDomain domain, final boolean force) {
-		super(NLS.bind(OpenShiftExpressUIMessages.DESTROYING_DOMAIN, domain.getId()));
+		super(NLS.bind(ExpressUIMessages.DESTROYING_DOMAIN, domain.getId()));
 		this.domain = domain;
 		this.force = force;
 	}

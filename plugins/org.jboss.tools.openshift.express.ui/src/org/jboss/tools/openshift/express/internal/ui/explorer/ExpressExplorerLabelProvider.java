@@ -16,7 +16,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 
@@ -63,9 +63,9 @@ public class ExpressExplorerLabelProvider extends BaseExplorerLabelProvider {
 		} else if (element instanceof IEmbeddedCartridge) {
 			return createStyledString((IEmbeddedCartridge) element);
 		} else if (element instanceof BaseExplorerContentProvider.LoadingStub) {
-			return new StyledString(OpenShiftExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
+			return new StyledString(ExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
 		} else if (element instanceof BaseExplorerContentProvider.NotConnectedUserStub) {
-			return new StyledString(OpenShiftExpressUIMessages.USER_NOT_CONNECTED_LABEL);
+			return new StyledString(ExpressUIMessages.USER_NOT_CONNECTED_LABEL);
 		} else if (element instanceof OpenShiftException) {
 			return new StyledString(((OpenShiftException) element).getMessage());
 		}

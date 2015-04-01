@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 import com.openshift.client.IApplication;
@@ -40,7 +40,7 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 	private List<IEmbeddedCartridge> addedCartridges;
 
 	public EmbedCartridgesJob(List<ICartridge> selectedCartridges, IApplication application) {
-		super(NLS.bind(OpenShiftExpressUIMessages.ADDING_REMOVING_CARTRIDGES, application.getName()));
+		super(NLS.bind(ExpressUIMessages.ADDING_REMOVING_CARTRIDGES, application.getName()));
 		this.selectedCartridges = selectedCartridges;
 		this.application = application;
 	}

@@ -21,7 +21,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
@@ -39,14 +39,14 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 	private Shell shell;
 
 	public WaitForApplicationJob(IApplication application, Shell shell) {
-		super(NLS.bind(OpenShiftExpressUIMessages.WAITING_FOR_REACHABLE, application.getName()));
+		super(NLS.bind(ExpressUIMessages.WAITING_FOR_REACHABLE, application.getName()));
 		this.shell = shell;
 		this.application = application;
 	}
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
-		Logger.debug(OpenShiftExpressUIMessages.WAITING_FOR_REACHABLE);
+		Logger.debug(ExpressUIMessages.WAITING_FOR_REACHABLE);
 		try {
 			while (!application.waitForAccessible(APP_REACHABLE_TIMEOUT)) {
 				if (monitor.isCanceled()) {
@@ -58,7 +58,7 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 							IStatus.CANCEL,
 							ExpressUIActivator.PLUGIN_ID,
 							TIMEOUTED,
-							NLS.bind(OpenShiftExpressUIMessages.APPLICATION_NOT_ANSWERING, application.getName()),
+							NLS.bind(ExpressUIMessages.APPLICATION_NOT_ANSWERING, application.getName()),
 							null);
 				}
 			}
@@ -79,11 +79,11 @@ public class WaitForApplicationJob extends AbstractDelegatingMonitorJob {
 						new MessageDialog(shell
 								, NLS.bind("Waiting for application {0}", application.getName())
 								, shell.getDisplay().getSystemImage(SWT.ICON_QUESTION)
-								, NLS.bind(OpenShiftExpressUIMessages.APPLICATION_NOT_ANSWERING_CONTINUE_WAITING,
+								, NLS.bind(ExpressUIMessages.APPLICATION_NOT_ANSWERING_CONTINUE_WAITING,
 										application.getName())
 								, MessageDialog.QUESTION
-								, new String[] { OpenShiftExpressUIMessages.BTN_KEEP_WAITING,
-										OpenShiftExpressUIMessages.BTN_CLOSE_WIZARD }
+								, new String[] { ExpressUIMessages.BTN_KEEP_WAITING,
+										ExpressUIMessages.BTN_CLOSE_WIZARD }
 								, MessageDialog.QUESTION);
 				// style &= SWT.SHEET;
 				// dialog.setShellStyle(dialog.getShellStyle() | style);

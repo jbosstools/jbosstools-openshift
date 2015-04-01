@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.messages.OpenShiftExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftTimeoutException;
@@ -25,11 +25,11 @@ import com.openshift.client.OpenShiftTimeoutException;
 public class RestartApplicationJob extends AbstratApplicationJob {
 
 	public RestartApplicationJob(IApplication application) {
-		super(new ApplicationProvider(application), NLS.bind(OpenShiftExpressUIMessages.RESTARTING_APPLICATION, application.getName()));
+		super(new ApplicationProvider(application), NLS.bind(ExpressUIMessages.RESTARTING_APPLICATION, application.getName()));
 	}
 
 	public RestartApplicationJob(LoadApplicationJob applicationJob) {
-		super(new ApplicationProvider(applicationJob), NLS.bind(OpenShiftExpressUIMessages.RESTARTING_APPLICATION, ""));
+		super(new ApplicationProvider(applicationJob), NLS.bind(ExpressUIMessages.RESTARTING_APPLICATION, ""));
 	}
 
 	@Override
