@@ -16,6 +16,7 @@ import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.DisposeEvent;
@@ -23,6 +24,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 
 /**
  * @author Andre Dietisheim
@@ -108,6 +110,10 @@ public abstract class AbstractStackedDetailViews {
 			}
 		}
 
+		if (view == null) {
+			OpenShiftCommonCoreActivator.pluginLog().logWarning(NLS.bind("No view found to display value {0}", value));
+		}
+		
 		return view;
 	}
 	
