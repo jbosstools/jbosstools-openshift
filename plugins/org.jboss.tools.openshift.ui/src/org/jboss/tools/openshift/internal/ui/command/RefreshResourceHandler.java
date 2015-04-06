@@ -24,8 +24,8 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import com.openshift.client.IRefreshable;
-import com.openshift.client.OpenShiftException;
+import org.jboss.tools.openshift.common.core.IRefreshable;
+import com.openshift.restclient.OpenShiftException;
 
 /**
  * @author Jeff Cantrill

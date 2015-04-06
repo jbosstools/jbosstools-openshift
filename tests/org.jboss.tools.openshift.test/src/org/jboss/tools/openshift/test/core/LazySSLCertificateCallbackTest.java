@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.openshift.client.IHttpClient.ISSLCertificateCallback;
+import com.openshift.restclient.ISSLCertificateCallback;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LazySSLCertificateCallbackTest {

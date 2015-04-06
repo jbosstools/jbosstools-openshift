@@ -23,17 +23,17 @@
 			<possibleChildren>
 				<or>
 					<instanceof
-						value="com.openshift3.client.model.IProject" />
+						value="com.openshift.restclient.model.IProject" />
 					<instanceof
-						value="com.openshift3.client.model.IService" />
+						value="com.openshift.restclient.model.IService" />
 					<instanceof
-						value="com.openshift3.client.model.IPod" />
+						value="com.openshift.restclient.model.IPod" />
 					<instanceof
-						value="com.openshift3.client.model.IReplicationController" />
+						value="com.openshift.restclient.model.IReplicationController" />
 					<instanceof
-						value="com.openshift3.client.model.IBuildConfig" />
+						value="com.openshift.restclient.model.IBuildConfig" />
 					<instanceof
-						value="com.openshift3.client.model.IDeploymentConfig" />
+						value="com.openshift.restclient.model.IDeploymentConfig" />
 					<instanceof
 						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>
@@ -43,7 +43,7 @@
 					<instanceof
 						value="org.jboss.tools.openshift.core.connection.Connection" />
 					<instanceof
-						value="com.openshift3.client.model.IProject" />
+						value="com.openshift.restclient.model.IProject" />
 					<instanceof
 						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>
@@ -68,7 +68,7 @@
 						</count>
 						<iterate>
 							<instanceof
-								value="com.openshift.client.IRefreshable" />
+								value="org.jboss.tools.openshift.common.core.IRefreshable" />
 						</iterate>
 					</and>
 				</visibleWhen>
@@ -86,7 +86,7 @@
 	<extension
 		point="org.eclipse.core.runtime.adapters">
 		<factory
-			adaptableType="com.openshift3.client.model.IResource"
+			adaptableType="com.openshift.restclient.model.IResource"
 			class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
 			<adapter
 				type="org.eclipse.ui.views.properties.IPropertySource">
@@ -114,14 +114,14 @@
 						value="1" />
 					<or>
 						<instanceof
-							value="com.openshift3.client.model.IProject"/>
+							value="com.openshift.restclient.model.IProject"/>
 					</or>
 				</iterate>
 			</with>
 		</definition>
 	</extension>
 	<extension
-		point="org.eclipse.ui.commands">
+       point="org.eclipse.ui.commands">
 		<command
 			description="Refresh the Resource"
 			id="org.jboss.tools.openshift.ui.command.refresh.resource"

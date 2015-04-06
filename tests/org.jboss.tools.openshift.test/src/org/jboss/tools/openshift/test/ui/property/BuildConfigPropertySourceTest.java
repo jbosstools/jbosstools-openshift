@@ -20,14 +20,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.openshift3.client.images.DockerImageURI;
-import com.openshift3.client.model.IBuildConfig;
-import com.openshift3.client.model.build.BuildSourceType;
-import com.openshift3.client.model.build.BuildStrategyType;
-import com.openshift3.client.model.build.ICustomBuildStrategy;
-import com.openshift3.client.model.build.IDockerBuildStrategy;
-import com.openshift3.client.model.build.IGitBuildSource;
-import com.openshift3.client.model.build.ISTIBuildStrategy;
+import com.openshift.restclient.images.DockerImageURI;
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.build.BuildSourceType;
+import com.openshift.restclient.model.build.BuildStrategyType;
+import com.openshift.restclient.model.build.ICustomBuildStrategy;
+import com.openshift.restclient.model.build.IDockerBuildStrategy;
+import com.openshift.restclient.model.build.IGitBuildSource;
+import com.openshift.restclient.model.build.ISTIBuildStrategy;
 
 import org.jboss.tools.openshift.internal.ui.property.BuildConfigPropertySource;
 import org.jboss.tools.openshift.internal.ui.property.KeyValuePropertySource;

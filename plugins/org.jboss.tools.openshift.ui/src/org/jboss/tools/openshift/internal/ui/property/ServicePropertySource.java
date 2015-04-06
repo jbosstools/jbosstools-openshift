@@ -12,7 +12,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
-import com.openshift3.client.model.IService;
+import com.openshift.restclient.model.IService;
 
 public class ServicePropertySource extends ResourcePropertySource<IService>{
 

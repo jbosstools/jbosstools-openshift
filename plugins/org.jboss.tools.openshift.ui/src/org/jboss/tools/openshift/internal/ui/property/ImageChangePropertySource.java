@@ -14,9 +14,9 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-import com.openshift3.client.model.build.BuildTriggerType;
-import com.openshift3.client.model.build.IBuildTrigger;
-import com.openshift3.client.model.build.IImageChangeTrigger;
+import com.openshift.restclient.model.build.BuildTriggerType;
+import com.openshift.restclient.model.build.IBuildTrigger;
+import com.openshift.restclient.model.build.IImageChangeTrigger;
 
 public class ImageChangePropertySource implements IPropertySource {
 	

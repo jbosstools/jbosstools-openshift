@@ -8,8 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
-import com.openshift3.client.ResourceKind;
-import com.openshift3.client.model.IProject;
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IProject;
 
 /**
  * A UI class to facilitate grouping like resources

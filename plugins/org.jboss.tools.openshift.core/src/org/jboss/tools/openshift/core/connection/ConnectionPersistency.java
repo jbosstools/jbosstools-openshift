@@ -17,7 +17,7 @@ import java.util.List;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
-import com.openshift.client.OpenShiftException;
+import com.openshift.restclient.OpenShiftException;
 
 /**
  * @author Jeff Cantrill

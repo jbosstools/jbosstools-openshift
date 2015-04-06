@@ -4,7 +4,7 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLSession;
 
-import com.openshift.client.IHttpClient.ISSLCertificateCallback;
+import com.openshift.restclient.ISSLCertificateCallback;
 
 public class LazySSLCertificateCallback implements ISSLCertificateCallback {
 
