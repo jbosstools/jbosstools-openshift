@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.core.connection.ConnectionSerializer;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.openshift.client.OpenShiftException;
+import com.openshift.restclient.OpenShiftException;
 
 public class ConnectionSerializerTest {
 

@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.core.connection;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -20,20 +19,20 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
-import com.openshift.client.IHttpClient.ISSLCertificateCallback;
-import com.openshift.client.IRefreshable;
-import com.openshift.client.OpenShiftException;
+import com.openshift.restclient.ISSLCertificateCallback;
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.internal.client.httpclient.NotFoundException;
 import com.openshift.internal.client.httpclient.UnauthorizedException;
-import com.openshift3.client.IClient;
-import com.openshift3.client.ResourceKind;
-import com.openshift3.client.authorization.BearerTokenAuthorizationStrategy;
-import com.openshift3.client.authorization.IAuthorizationClient;
-import com.openshift3.client.authorization.IAuthorizationContext;
-import com.openshift3.client.model.IResource;
-import com.openshift3.internal.client.DefaultClient;
+import com.openshift.restclient.ClientFactory;
+import com.openshift.restclient.IClient;
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.authorization.BearerTokenAuthorizationStrategy;
+import com.openshift.restclient.authorization.IAuthorizationClient;
+import com.openshift.restclient.authorization.IAuthorizationContext;
+import com.openshift.restclient.model.IResource;
 
 public class Connection extends ObservablePojo implements IConnection, IRefreshable {
 
@@ -48,7 +47,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	//TODO modify default client to take url and throw runtime exception
 	public Connection(String url, IAuthorizationClient authorizer, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
-		this(new DefaultClient(new URL(url), sslCertCallback), authorizer, credentialsPrompter, sslCertCallback);
+		this(new ClientFactory().create(url, sslCertCallback), authorizer, credentialsPrompter, sslCertCallback);
 	}
 	
 	public Connection(IClient client, IAuthorizationClient authorizer,  ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback){

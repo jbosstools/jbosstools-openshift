@@ -15,13 +15,13 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
-import com.openshift3.client.model.IBuildConfig;
-import com.openshift3.client.model.build.BuildTriggerType;
-import com.openshift3.client.model.build.IBuildTrigger;
-import com.openshift3.client.model.build.ICustomBuildStrategy;
-import com.openshift3.client.model.build.IDockerBuildStrategy;
-import com.openshift3.client.model.build.IGitBuildSource;
-import com.openshift3.client.model.build.ISTIBuildStrategy;
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.build.BuildTriggerType;
+import com.openshift.restclient.model.build.IBuildTrigger;
+import com.openshift.restclient.model.build.ICustomBuildStrategy;
+import com.openshift.restclient.model.build.IDockerBuildStrategy;
+import com.openshift.restclient.model.build.IGitBuildSource;
+import com.openshift.restclient.model.build.ISTIBuildStrategy;
 
 public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConfig> {
 	

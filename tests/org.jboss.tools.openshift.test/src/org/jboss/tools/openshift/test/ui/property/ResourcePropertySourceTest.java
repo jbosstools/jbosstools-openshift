@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.openshift3.client.model.IResource;
+import com.openshift.restclient.model.IResource;
 
 import org.jboss.tools.openshift.internal.ui.property.PrefixPropertySourceKey;
 import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;

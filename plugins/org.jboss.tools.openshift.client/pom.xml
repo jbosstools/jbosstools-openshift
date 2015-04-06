@@ -11,7 +11,7 @@
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
-		<openshift-java-client.version>3.0.0-SNAPSHOT</openshift-java-client.version>
+		<openshift-restclient-java.version>1.0.0-SNAPSHOT</openshift-restclient-java.version>
 		<jboss-dmr.version>1.2.0.Final</jboss-dmr.version>
 		<commons-compress.version>1.8.1</commons-compress.version>
 		<log4j.version>1.2.17</log4j.version>
@@ -46,8 +46,8 @@
 					<artifactItems>
 						<artifactItem>
 							<groupId>com.openshift</groupId>
-							<artifactId>openshift-java-client</artifactId>
-							<version>${openshift-java-client.version}</version>
+							<artifactId>openshift-restclient-java</artifactId>
+							<version>${openshift-restclient-java.version}</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.jboss</groupId>
@@ -146,8 +146,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.openshift</groupId>
-			<artifactId>openshift-java-client</artifactId>
-			<version>${openshift-java-client.version}</version>
+			<artifactId>openshift-restclient-java</artifactId>
+			<version>${openshift-restclient-java.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss</groupId>

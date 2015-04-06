@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
-import com.openshift3.client.authorization.AuthorizationClientFactory;
+import com.openshift.restclient.authorization.AuthorizationClientFactory;
 
 
 /**

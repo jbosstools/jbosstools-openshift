@@ -20,7 +20,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 
-import com.openshift.client.OpenShiftException;
+import com.openshift.restclient.OpenShiftException;
 
 /**
  * Utility class to serialize and deserialize a connection. The connection

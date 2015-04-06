@@ -27,18 +27,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.openshift3.client.IClient;
-import com.openshift3.client.ResourceKind;
-import com.openshift3.client.images.DockerImageURI;
-import com.openshift3.client.model.IBuild;
-import com.openshift3.client.model.IBuildConfig;
-import com.openshift3.client.model.IDeploymentConfig;
-import com.openshift3.client.model.IImageRepository;
-import com.openshift3.client.model.IPod;
-import com.openshift3.client.model.IProject;
-import com.openshift3.client.model.IReplicationController;
-import com.openshift3.client.model.IResource;
-import com.openshift3.client.model.IService;
+import com.openshift.restclient.IClient;
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.images.DockerImageURI;
+import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 
 @RunWith(MockitoJUnitRunner.class)
 /*

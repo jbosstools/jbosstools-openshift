@@ -16,7 +16,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.openshift3.client.model.IResource;
+import com.openshift.restclient.model.IResource;
 
 public class ResourcePropertySource<T extends IResource> implements IPropertySource {
 	
