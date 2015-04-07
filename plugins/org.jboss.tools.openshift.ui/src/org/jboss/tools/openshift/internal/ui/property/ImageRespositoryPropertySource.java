@@ -11,7 +11,7 @@ package org.jboss.tools.openshift.internal.ui.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-import com.openshift3.client.model.IImageRepository;
+import com.openshift.restclient.model.IImageRepository;
 
 public class ImageRespositoryPropertySource extends ResourcePropertySource<IImageRepository> {
 

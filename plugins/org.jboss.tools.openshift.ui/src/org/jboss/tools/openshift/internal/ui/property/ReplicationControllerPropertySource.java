@@ -12,7 +12,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
-import com.openshift3.client.model.IReplicationController;
+import com.openshift.restclient.model.IReplicationController;
 
 public class ReplicationControllerPropertySource extends ResourcePropertySource<IReplicationController> {
 

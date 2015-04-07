@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.openshift.client;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: %Bundle-Vendor
-Bundle-ClassPath: lib/openshift-java-client-3.0.0-SNAPSHOT.jar,
+Bundle-ClassPath: lib/openshift-restclient-java-1.0.0-SNAPSHOT.jar,
  lib/commons-compress-1.8.1.jar,
  lib/jboss-dmr-1.2.0.Final.jar,
  lib/log4j-1.2.17.jar,
@@ -14,6 +14,8 @@ Bundle-ClassPath: lib/openshift-java-client-3.0.0-SNAPSHOT.jar,
  lib/httpclient-4.3.6.jar,
  lib/httpcore-4.3.3.jar,
  lib/commons-codec-1.6.jar,
+ lib/commons-lang-2.6.jar,
+ lib/commons-io-2.1.jar,
  .
 Export-Package: com.openshift.client;
   x-friends:="org.jboss.tools.openshift.core,
@@ -22,103 +24,49 @@ Export-Package: com.openshift.client;
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
  com.openshift.internal.client.httpclient,
- com.openshift.internal.client.utils;
+ com.openshift.restclient;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client;
+ com.openshift.restclient.authorization;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client.authorization;
+ com.openshift.restclient.capability;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client.capability;
+ com.openshift.restclient.capability.resources;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client.capability.resources;
+ com.openshift.restclient.capability.server;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client.capability.server;
+ com.openshift.restclient.images;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client.images;
+ com.openshift.restclient.model;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,
    org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.test",
- com.openshift3.client.model;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.client.model.build;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.client;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.client.builders;
-  x-friends:="org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
- com.openshift3.internal.client.capability.resources;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.client.capability.server;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.client.model;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.client.model.build;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.client.model.properties;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift3.internal.util;
+ com.openshift.restclient.model.build;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.common.core,

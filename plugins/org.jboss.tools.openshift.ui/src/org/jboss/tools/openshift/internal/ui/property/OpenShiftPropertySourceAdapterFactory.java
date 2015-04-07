@@ -14,13 +14,13 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.core.connection.Connection;
 
-import com.openshift3.client.model.IBuild;
-import com.openshift3.client.model.IBuildConfig;
-import com.openshift3.client.model.IImageRepository;
-import com.openshift3.client.model.IPod;
-import com.openshift3.client.model.IReplicationController;
-import com.openshift3.client.model.IResource;
-import com.openshift3.client.model.IService;
+import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 

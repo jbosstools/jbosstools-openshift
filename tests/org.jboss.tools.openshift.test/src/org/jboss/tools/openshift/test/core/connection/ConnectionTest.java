@@ -29,9 +29,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.openshift3.client.IClient;
-import com.openshift3.client.ResourceKind;
-import com.openshift3.client.model.IProject;
+import com.openshift.restclient.IClient;
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IProject;
 
 /**
  * @author Jeff Cantrill

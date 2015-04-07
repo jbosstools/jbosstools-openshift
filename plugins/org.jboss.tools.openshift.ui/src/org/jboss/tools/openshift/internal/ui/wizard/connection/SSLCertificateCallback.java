@@ -41,7 +41,7 @@ import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
-import com.openshift.client.IHttpClient.ISSLCertificateCallback;
+import com.openshift.restclient.ISSLCertificateCallback;
 
 /**
  * @author André Dietisheim

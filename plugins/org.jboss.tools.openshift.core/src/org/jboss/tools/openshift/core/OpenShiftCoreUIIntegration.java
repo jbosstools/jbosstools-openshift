@@ -10,7 +10,7 @@ package org.jboss.tools.openshift.core;
 
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 
-import com.openshift.client.IHttpClient.ISSLCertificateCallback;
+import com.openshift.restclient.ISSLCertificateCallback;
 
 /**
  * @author Rob Stryker

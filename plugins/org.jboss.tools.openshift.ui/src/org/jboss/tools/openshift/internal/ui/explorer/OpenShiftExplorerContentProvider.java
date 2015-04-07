@@ -16,9 +16,9 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 
-import com.openshift3.client.OpenShiftException;
-import com.openshift3.client.ResourceKind;
-import com.openshift3.client.model.IProject;
+import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IProject;
 
 /**
  * Contributes OpenShift v3 specific content to the OpenShift explorer view

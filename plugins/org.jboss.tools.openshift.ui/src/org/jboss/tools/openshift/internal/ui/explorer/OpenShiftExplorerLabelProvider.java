@@ -18,15 +18,15 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
-import com.openshift3.client.model.IBuild;
-import com.openshift3.client.model.IBuildConfig;
-import com.openshift3.client.model.IDeploymentConfig;
-import com.openshift3.client.model.IImageRepository;
-import com.openshift3.client.model.IPod;
-import com.openshift3.client.model.IProject;
-import com.openshift3.client.model.IReplicationController;
-import com.openshift3.client.model.IResource;
-import com.openshift3.client.model.IService;
+import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 
 public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider { 
 
