@@ -57,7 +57,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	private IObservableValue rememberPasswordObservable;
 	private Button rememberPasswordCheckBox;
 	private Binding rememberPasswordBinding;
-	private Binding connectionRememberPasswordObservable;
+	private Binding connectionRememberPasswordBinding;
 	
 	public ExpressConnectionEditor() {
 	}
@@ -166,7 +166,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 				.in(dbc);
 		
 		// remember password
-		this.connectionRememberPasswordObservable = ValueBindingBuilder
+		this.connectionRememberPasswordBinding = ValueBindingBuilder
 				.bind(rememberPasswordObservable)
 				.notUpdating(
 						BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_REMEMBER_PASSWORD)
@@ -201,7 +201,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 		DataBindingUtils.dispose(passwordBinding);
 		DataBindingUtils.dispose(connectionPasswordBinding);
 		DataBindingUtils.dispose(rememberPasswordBinding);
-		DataBindingUtils.dispose(connectionRememberPasswordObservable);
+		DataBindingUtils.dispose(connectionRememberPasswordBinding);
 	}
 
 	@Override

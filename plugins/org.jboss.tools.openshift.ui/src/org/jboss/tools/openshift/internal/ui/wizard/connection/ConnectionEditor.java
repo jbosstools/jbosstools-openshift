@@ -135,10 +135,8 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		DataBindingUtils.dispose(usernameBinding);
-		DataBindingUtils.dispose(usernameObservable);
 		DataBindingUtils.dispose(connectionUsernameBinding);
 		DataBindingUtils.dispose(passwordBinding);
-		DataBindingUtils.dispose(passwordObservable);
 		DataBindingUtils.dispose(connectionPasswordBinding);
 	}
 
