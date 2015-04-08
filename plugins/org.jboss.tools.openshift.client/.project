@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.jboss.tools.openshift.egit.test</name>
+	<name>org.jboss.tools.openshift.client</name>
 	<comment></comment>
 	<projects>
 	</projects>
