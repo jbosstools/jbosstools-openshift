@@ -31,6 +31,7 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -53,7 +54,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
@@ -72,7 +72,7 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.utils.HttpsTextAdapter;
+import org.jboss.tools.openshift.internal.common.ui.utils.HttpsPrefixingAdapter;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
@@ -184,18 +184,21 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		serverLabel.setText("Server:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
-		final Text serverUrlText = new Text(parent, SWT.BORDER);
-		new HttpsTextAdapter().addTo(serverUrlText);
+		Combo serversCombo = new Combo(parent, SWT.BORDER);
+		new HttpsPrefixingAdapter().addTo(serversCombo);
+		ComboViewer serversViewer = new ComboViewer(serversCombo);
+		serversViewer.setContentProvider(new ObservableListContentProvider());
+		serversViewer.setInput(BeanProperties.list(ConnectionWizardPageModel.PROPERTY_ALL_HOSTS).observe(pageModel));
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serverUrlText);
-		final IObservableValue serverUrlTextObservable = WidgetProperties.text(SWT.Modify).observe(serverUrlText);
+				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serversCombo);
+		final IObservableValue serverUrlObservable = WidgetProperties.text().observe(serversCombo);
 		Binding serverUrlBinding = ValueBindingBuilder
-				.bind(serverUrlTextObservable)
+				.bind(serverUrlObservable)
 				.validatingAfterGet(new IValidator() {
 
 					@Override
 					public IStatus validate(Object value) {
-						if (!(value instanceof String) 
+						if (!(value instanceof String)
 								|| StringUtils.isEmpty((String) value)) {
 							return ValidationStatus.cancel("Please provide an url to an OpenShift server.");
 						} else if (!UrlUtils.isValid((String) value)) {
@@ -223,10 +226,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		};
 
-		serverUrlText.addKeyListener(onSeverEnterPressed(checkServerTypeEnabled));
+		serversCombo.addKeyListener(onSeverEnterPressed(checkServerTypeEnabled));
 		
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(serverUrlText))
+				.bind(WidgetProperties.enabled().observe(serversCombo))
 				.notUpdatingParticipant()
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST).observe(pageModel))
 				.converting(new InvertingBooleanConverter())
@@ -290,7 +293,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public IObservableList getTargets() {
 				return Observables.staticObservableList(
-						Collections.<IObservableValue> singletonList(serverUrlTextObservable));
+						Collections.<IObservableValue> singletonList(serverUrlObservable));
 			}
 		};
 		dbc.addValidationStatusProvider(connectionFactoryValidator);

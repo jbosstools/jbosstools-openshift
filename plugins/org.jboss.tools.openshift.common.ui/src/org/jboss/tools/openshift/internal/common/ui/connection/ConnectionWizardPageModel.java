@@ -42,6 +42,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_CONNECTION_FACTORY_ERROR = "connectionFactoryError";
 	public static final String PROPERTY_HOST = "host";
 	public static final String PROPERTY_USE_DEFAULT_HOST = "useDefaultHost";
+	public static final String PROPERTY_ALL_HOSTS = "allHosts";
 	public static final String PROPERTY_CONNECT_ERROR = "connectError";
 
 	/** the connection that the user wants to edit */
@@ -53,6 +54,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private boolean allowConnectionChange;
 	private IConnectionFactory connectionFactory;
 	private boolean useDefaultHost;
+	private Collection<String> allHosts;
 	private ConnectionsFactoryTracker connectionsFactory;
 	private IStatus connectError;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
@@ -60,9 +62,24 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange) {
 		this.allConnections = allConnections;
+		this.allHosts = createAllHosts(allConnections);
 		this.allowConnectionChange = allowConnectionChange;
 		this.connectionsFactory = createConnectionsFactory();
 		init(editedConnection);
+	}
+
+	private Collection<String> createAllHosts(Collection<IConnection> allConnections) {
+		List<String> allHosts = new ArrayList<String>();
+		if (allConnections == null) {
+			return allHosts;
+		}
+		
+		for (IConnection connection : allConnections) {
+			if (!StringUtils.isEmpty(connection.getHost())) {
+				allHosts.add(connection.getHost());
+			}
+		}
+		return allHosts;
 	}
 
 	private ConnectionsFactoryTracker createConnectionsFactory() {
@@ -279,6 +296,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return useDefaultHost;
 	}
 
+	public void setAllHosts(Collection<String> allHosts) {
+		firePropertyChange(PROPERTY_ALL_HOSTS, this.allHosts, this.allHosts = allHosts);
+	}
+	
+	public Collection<String> getAllHosts() {
+		return allHosts;
+	}
+	
 	public IStatus getConnectionCreationError() {
 		return connectionFactoryError;
 	}
