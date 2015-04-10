@@ -28,6 +28,9 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
+/**
+ * @author jeff.cantrill
+ */
 public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider { 
 
 	@Override

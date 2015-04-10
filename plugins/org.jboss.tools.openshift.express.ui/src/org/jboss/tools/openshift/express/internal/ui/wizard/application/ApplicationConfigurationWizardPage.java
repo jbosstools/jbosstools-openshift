@@ -73,12 +73,9 @@ import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabel
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildVisibilityAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
 import org.jboss.tools.openshift.express.internal.ui.wizard.OkButtonWizardDialog;
-import org.jboss.tools.openshift.express.internal.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.domain.ManageDomainsWizard;
@@ -89,9 +86,12 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2Boolea
 import org.jboss.tools.openshift.internal.common.ui.databinding.MultiConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.viewer.AbstractLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IDomain;

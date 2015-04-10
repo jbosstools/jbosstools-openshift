@@ -40,10 +40,11 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
-@RunWith(MockitoJUnitRunner.class)
-/*
+/**
  * Skipping getImage tests as they can't be run headless
+ * @author jeff.cantrill
  */
+@RunWith(MockitoJUnitRunner.class)
 public class OpenShiftExplorerLabelProviderTest {
 
 	private OpenShiftExplorerLabelProvider provider;

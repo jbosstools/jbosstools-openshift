@@ -32,6 +32,9 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
+/**
+ * @author jeff.cantrill
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class OpenShiftExplorerContentProviderTest {
 
