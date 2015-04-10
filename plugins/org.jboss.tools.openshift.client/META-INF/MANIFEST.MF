@@ -17,13 +17,7 @@ Bundle-ClassPath: lib/openshift-restclient-java-1.0.0-SNAPSHOT.jar,
  lib/commons-lang-2.6.jar,
  lib/commons-io-2.1.jar,
  .
-Export-Package: com.openshift.client;
-  x-friends:="org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.ui,
-   org.jboss.tools.openshift.common.core,
-   org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.test",
- com.openshift.internal.client.httpclient,
+Export-Package: com.openshift.internal.restclient.http,
  com.openshift.restclient;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.ui,

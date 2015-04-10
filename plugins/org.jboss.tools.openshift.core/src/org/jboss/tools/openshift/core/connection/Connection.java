@@ -24,8 +24,8 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.internal.client.httpclient.NotFoundException;
-import com.openshift.internal.client.httpclient.UnauthorizedException;
+import com.openshift.internal.restclient.http.NotFoundException;
+import com.openshift.internal.restclient.http.UnauthorizedException;
 import com.openshift.restclient.ClientFactory;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
