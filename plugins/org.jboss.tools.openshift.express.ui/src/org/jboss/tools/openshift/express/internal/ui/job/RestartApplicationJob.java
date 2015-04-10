@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftTimeoutException;

@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.ui.messages.ExpressUIMessages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 
 import com.openshift.client.OpenShiftException;

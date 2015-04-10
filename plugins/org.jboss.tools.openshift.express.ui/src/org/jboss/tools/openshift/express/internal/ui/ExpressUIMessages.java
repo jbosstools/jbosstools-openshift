@@ -85,4 +85,40 @@ public class ExpressUIMessages extends NLS {
 	public static String OpenShiftServerWizardCouldNotLoadDomains;
 	public static String OpenShiftServerWizardFetchingDomainsAndApplications;
 
+	public static String CREATING_APPLICATION;
+	public static String CREATING_APPLICATION_WITH_EMBEDDED;
+	public static String COULD_NOT_CREATE_APPLICATION;
+	public static String DESTROYING_DOMAIN;
+	public static String WAITING_FOR_REACHABLE;
+	public static String APPLICATION_NOT_ANSWERING;
+	public static String APPLICATION_NOT_ANSWERING_CONTINUE_WAITING;
+	public static String BTN_KEEP_WAITING;
+	public static String BTN_CLOSE_WIZARD;
+	public static String RESTARTING_APPLICATION;
+	
+	public static String ADDING_REMOVING_CARTRIDGES;
+	
+	public static String USER_NOT_CONNECTED_LABEL;
+	public static String LOADING_USER_APPLICATIONS_LABEL;
+	
+	public static String MANAGE_SSH_KEYS_WIZARD_PAGE;
+	public static String MANAGE_SSH_KEYS_WIZARD_PAGE_DESCRIPTION;
+	public static String SSH_PUBLIC_KEYS_GROUP;
+	public static String ADD_EXISTING_BUTTON;
+	public static String NEW_BUTTON;
+	public static String REMOVE_BUTTON;
+	public static String REFRESH_BUTTON;
+	
+	public static String SSH_PREFS_LINK;
+	public static String REMOVE_SSH_KEY_DIALOG_TITLE;
+	public static String REMOVE_SSH_KEY_QUESTION;
+	public static String REMOVE_SSH_KEY_JOB;
+	public static String REFRESH_SSH_KEYS_JOB;
+
+	public static String REFRESH_VIEWER_JOB;
+
+	public static String COULD_NOT_REMOVE_SSH_KEY;
+	public static String COULD_NOT_LOAD_SSH_KEYS;
+	public static String COULD_NOT_REFRESH_SSH_KEYS;
+	public static String COULD_NOT_REFRESH_VIEWER;
 }

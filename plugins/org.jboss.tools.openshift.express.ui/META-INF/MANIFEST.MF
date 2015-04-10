@@ -64,7 +64,6 @@ Export-Package: org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jb
  org.jboss.tools.openshift.express.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.filters;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.job;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.ui.messages;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.portforward;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.preferences;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.property;x-friends:="org.jboss.tools.openshift.express.test",

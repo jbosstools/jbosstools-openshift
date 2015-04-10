@@ -37,7 +37,6 @@ import org.eclipse.ui.part.PageBook;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
-import org.jboss.tools.openshift.internal.common.ui.CommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 
@@ -120,7 +119,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 
 		Link link = new Link(composite, SWT.NONE);
-		link.setText(CommonUIMessages.NoConnectionsAreAvailable);
+		link.setText("No connections are available. Create a new connection with the <a>New Connection Wizard...</a>");
 		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(link);
 		link.addSelectionListener(onExplanationClicked(connectionsPane, link));
