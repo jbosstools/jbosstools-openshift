@@ -41,12 +41,12 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ApplicationConfigurationWizardPageModel;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.cartridge.ICartridge;

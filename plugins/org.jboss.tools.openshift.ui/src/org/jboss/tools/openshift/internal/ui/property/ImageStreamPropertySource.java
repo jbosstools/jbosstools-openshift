@@ -13,6 +13,9 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.openshift.restclient.model.IImageStream;
 
+/**
+ * @author jeff.cantrill
+ */
 public class ImageStreamPropertySource extends ResourcePropertySource<IImageStream> {
 
 	private static final String REGISTRY = "registry";

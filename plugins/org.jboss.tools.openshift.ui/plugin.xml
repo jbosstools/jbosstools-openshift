@@ -56,11 +56,11 @@
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
 			<command
-				commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
-				icon="icons/refresh.gif"
-				id="org.jboss.tools.openshift.ui.command.refresh.resource"
-				style="push"
-				tooltip="Refresh the resource">
+         commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
+         icon="icons/refresh.gif"
+         id="org.jboss.tools.openshift.ui.command.refresh.resource"
+         style="push"
+         tooltip="Refresh the resource">
 				<visibleWhen>
 					<and>
 						<count
@@ -74,6 +74,29 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.application.new"
+           id="org.jboss.tools.openshift.ui.command.application.new"
+           style="push"
+           tooltip="Create a new application">
+        <visibleWhen
+              checkEnabled="false">
+           <and>
+              <count
+                    value="1">
+              </count>
+              <iterate>
+                 <instanceof
+                       value="com.openshift.restclient.model.IProject">
+                 </instanceof>
+              </iterate>
+           </and>
+        </visibleWhen>
+     </command>
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -81,6 +104,10 @@
 			class="org.jboss.tools.openshift.internal.ui.command.RefreshResourceHandler"
 			commandId="org.jboss.tools.openshift.ui.command.refresh.resource">
 		</handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.command.NewApplicationHandler"
+        commandId="org.jboss.tools.openshift.ui.command.application.new">
+  </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -127,6 +154,11 @@
 			id="org.jboss.tools.openshift.ui.command.refresh.resource"
 			name="Refresh">
 		</command>
+  <command
+        description="Create a new application from a template"
+        id="org.jboss.tools.openshift.ui.command.application.new"
+        name="Application">
+  </command>
 	</extension>
 	<extension
 		point="org.jboss.tools.openshift.common.ui.connectionEditor">

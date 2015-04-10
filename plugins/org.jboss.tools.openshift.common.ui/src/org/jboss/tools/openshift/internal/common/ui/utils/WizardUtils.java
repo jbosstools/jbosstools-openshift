@@ -54,6 +54,12 @@ public class WizardUtils {
 		return dialog;
 	}
 
+	/**
+	 * Open the wizard with the given shell as a parent
+	 * @param wizard
+	 * @param shell
+	 * @return true if the user clicks 'OK'; false otherwise
+	 */
 	public static boolean openWizard(IWorkbenchWizard wizard, Shell shell) {
 		ISelectionService selectionService = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
 		ISelection selection = selectionService.getSelection();

@@ -14,6 +14,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.internal.common.ui.ImageRepository;
 
+/**
+ * @author jeff.cantrill
+ */
 public class OpenShiftImages {
 
 	private static final String ICONS_FOLDER = "icons/";
@@ -30,4 +33,5 @@ public class OpenShiftImages {
 	public static final Image GEAR_IMG = repo.getImage("gear.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor LAYER = repo.create("layer.png"); //$NON-NLS-1$ 
 	public static final Image LAYER_IMG = repo.getImage("layer.png"); //$NON-NLS-1$ 
+
 }

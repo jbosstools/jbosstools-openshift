@@ -22,6 +22,8 @@ import com.openshift.restclient.model.IProject;
 
 /**
  * Contributes OpenShift v3 specific content to the OpenShift explorer view
+ * 
+ * @author jeff.cantrill
  */
 public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider{
 	

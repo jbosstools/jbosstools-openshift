@@ -23,4 +23,6 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.logging;bundle-version="1.1.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openshift.client,
+ org.jboss.tools.common.ui,
+ org.jboss.tools.common.ui.databinding,
  org.jboss.tools.openshift.internal.common.ui

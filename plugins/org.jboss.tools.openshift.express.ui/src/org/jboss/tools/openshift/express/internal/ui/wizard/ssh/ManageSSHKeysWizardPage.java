@@ -46,10 +46,10 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadKeysJob;
 import org.jboss.tools.openshift.express.internal.ui.utils.SSHUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.express.internal.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.IOpenShiftSSHKey;
