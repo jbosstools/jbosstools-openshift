@@ -28,6 +28,8 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	protected IObservableValue selectedConnection;
 	protected IValueChangeListener changeListener;
 	protected IConnectionAuthenticationProvider connectionAuthenticationProvider;
+	protected boolean visible;
+	private IValueChangeListener connectionChangedListener;
 	
 	public BaseConnectionEditor() {
 	}
@@ -36,9 +38,9 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 		this.pageModel = (ConnectionWizardPageModel) context;
 		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION).observe(pageModel);
-		this.changeListener = onValueChanged(pageModel);
+		this.changeListener = createDetailViewChangedListener(pageModel);
 		this.connectionAuthenticationProvider = createConnectionAuthenticationProvider(pageModel);
-		
+
 		return createControls(parent, pageModel, dbc);
 	}
 
@@ -48,7 +50,9 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 
 	@Override
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
+		this.visible = true;
 		pageModel.setConnectionAuthenticationProvider(connectionAuthenticationProvider);
+		this.connectionChangedListener = addSelectedConnectionChangedListener(selectedConnection);
 		onVisible(detailViewModel, pageModel, dbc);
 	}
 
@@ -56,17 +60,47 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	
 	@Override
 	public void onInVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
+		this.visible = false;
 		pageModel.setConnectionAuthenticationProvider(null);
+		removeConnectionChangedListener(connectionChangedListener, selectedConnection);
+		this.connectionChangedListener = null;
 		onInVisible(detailViewModel, pageModel, dbc);
 	}
 
 	protected abstract void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc);
 
-	protected IValueChangeListener onValueChanged(final ConnectionWizardPageModel pageModel) {
+	protected abstract void onSelectedConnectionChanged(IObservableValue selectedConnection);
+
+	private IValueChangeListener addSelectedConnectionChangedListener(final IObservableValue selectedConnection) {
+		IValueChangeListener listener = new IValueChangeListener() {
+			
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				onSelectedConnectionChanged(selectedConnection);
+			}
+		};
+		selectedConnection.addValueChangeListener(listener);
+		return listener;
+	}
+	
+	private void removeConnectionChangedListener(final IValueChangeListener connectionChangedListener, final IObservableValue selectedConnection) {
+		if (selectedConnection == null 
+				|| selectedConnection.isDisposed()
+				|| connectionChangedListener == null) {
+			return;
+		}
+		
+		selectedConnection.removeValueChangeListener(connectionChangedListener);
+	}
+	
+	protected IValueChangeListener createDetailViewChangedListener(final ConnectionWizardPageModel pageModel) {
 		return new IValueChangeListener() {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
+				if (!visible) {
+					return;
+				}
 				pageModel.resetConnectError();
 			}
 		};

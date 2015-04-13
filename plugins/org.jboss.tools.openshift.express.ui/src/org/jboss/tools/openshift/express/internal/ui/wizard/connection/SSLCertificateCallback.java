@@ -86,7 +86,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 	public boolean allowHostname(String hostname, SSLSession sslSession) {
 		return true;
 	}
-	
+
 	private class SSLCertificateDialog extends TitleAreaDialog {
 
 		private X509Certificate[] certificateChain;

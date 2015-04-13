@@ -10,7 +10,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.Assert;
@@ -46,11 +45,9 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private Text usernameText;
 	private IObservableValue usernameObservable;
 	private Binding usernameBinding;
-	private Binding connectionUsernameBinding;
 	private Text passwordText;
 	private IObservableValue passwordObservable;
 	private Binding passwordBinding;
-	private Binding connectionPasswordBinding;
 	
 	@Override
 	public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
@@ -84,7 +81,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	@Override
 	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		bindInternalModelToSelectedConnection(selectedConnection, dbc);
+		updateFrom(selectedConnection);
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
@@ -111,35 +108,27 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		passwordObservable.addValueChangeListener(changeListener);
 	}
 
-	private void bindInternalModelToSelectedConnection(IObservableValue selectedConnection, DataBindingContext dbc) {
-		if (selectedConnection.getValue() == null
-				|| selectedConnection.getValue() instanceof NewConnectionMarker) {
-			return;
-		}
-
-		// username
-		this.connectionUsernameBinding = ValueBindingBuilder
-				.bind(usernameObservable)
-				.notUpdating(BeanProperties.value(Connection.class, Connection.PROPERTY_USERNAME)
-						.observeDetail(selectedConnection))
-				.in(dbc);
-		
-		// password
-		this.connectionPasswordBinding = ValueBindingBuilder
-				.bind(passwordObservable)
-				.notUpdating(BeanProperties.value(Connection.class, Connection.PROPERTY_PASSWORD)
-						.observeDetail(selectedConnection))
-				.in(dbc);
-	}
-	
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
-		DataBindingUtils.dispose(usernameBinding);
-		DataBindingUtils.dispose(connectionUsernameBinding);
-		DataBindingUtils.dispose(passwordBinding);
-		DataBindingUtils.dispose(connectionPasswordBinding);
+		disposeBindings();
 	}
 
+	@Override
+	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
+		updateFrom(selectedConnection);
+	}
+	
+	private void updateFrom(IObservableValue selectedConnectionObservable) {
+		if (selectedConnectionObservable.getValue() instanceof Connection) {
+			Connection selectedConnection = (Connection) selectedConnectionObservable.getValue();
+			usernameObservable.setValue(selectedConnection.getUsername());
+			passwordObservable.setValue(selectedConnection.getPassword());
+		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
+			usernameObservable.setValue("");
+			passwordObservable.setValue("");
+		}
+	}
+	
 	@Override
 	public boolean isViewFor(Object object) {
 		return object instanceof ConnectionFactory;
@@ -148,6 +137,22 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	@Override
 	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
 		return new ConnectionAuthenticationProvider();
+	}
+	
+	@Override
+	public void dispose() {
+		disposeBindings();
+		disposeObservables();
+	}
+
+	private void disposeBindings() {
+		DataBindingUtils.dispose(usernameBinding);
+		DataBindingUtils.dispose(passwordBinding);
+	}
+
+	private void disposeObservables() {
+		DataBindingUtils.dispose(usernameObservable);
+		DataBindingUtils.dispose(passwordObservable);
 	}
 	
 	private class ConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {

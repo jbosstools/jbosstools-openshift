@@ -13,8 +13,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.connection;
 import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.Assert;
@@ -49,15 +47,12 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	private Text usernameText;
 	private IObservableValue usernameObservable;
 	private Binding usernameBinding;
-	private Binding connectionUsernameBinding;
 	private Text passwordText;
 	private IObservableValue passwordObservable;
 	private Binding passwordBinding;
-	private Binding connectionPasswordBinding;
 	private IObservableValue rememberPasswordObservable;
 	private Button rememberPasswordCheckBox;
 	private Binding rememberPasswordBinding;
-	private Binding connectionRememberPasswordBinding;
 	
 	public ExpressConnectionEditor() {
 	}
@@ -103,7 +98,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	@Override
 	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(detailViewModel, dbc);
-		bindInternalModelToSelectedConnection(selectedConnection, dbc);
+		updateFrom(selectedConnection);
 	}
 
 	@Override
@@ -112,10 +107,6 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	}
 
 	private void bindWidgetsToInternalModel(IObservableValue detailViewModel, DataBindingContext dbc) {
-		if (detailViewModel.getValue() == null) {
-			return;
-		}
-
 		// username
 		this.usernameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
@@ -145,44 +136,22 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 	
-	private void bindInternalModelToSelectedConnection(IObservableValue selectedConnection, DataBindingContext dbc) {
-		if (selectedConnection.getValue() == null
-				|| selectedConnection.getValue() instanceof NewConnectionMarker) {
-			return;
+	@Override
+	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
+		updateFrom(selectedConnection);
+	}
+	
+	private void updateFrom(IObservableValue selectedConnectionObservable) {
+		if (selectedConnectionObservable.getValue() instanceof ExpressConnection) {
+			ExpressConnection selectedConnection = (ExpressConnection) selectedConnectionObservable.getValue();
+			usernameObservable.setValue(selectedConnection.getUsername());
+			passwordObservable.setValue(selectedConnection.getPassword());
+			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
+		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
+			usernameObservable.setValue("");
+			passwordObservable.setValue("");
+			rememberPasswordObservable.setValue(false);
 		}
-
-		// username
-		this.connectionUsernameBinding = ValueBindingBuilder
-				.bind(usernameObservable)
-				.notUpdating(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_USERNAME)
-						.observeDetail(selectedConnection))
-				.in(dbc);
-		
-		// password
-		this.connectionPasswordBinding = ValueBindingBuilder
-				.bind(passwordObservable)
-				.notUpdating(BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_PASSWORD)
-						.observeDetail(selectedConnection))
-				.in(dbc);
-		
-		// remember password
-		this.connectionRememberPasswordBinding = ValueBindingBuilder
-				.bind(rememberPasswordObservable)
-				.notUpdating(
-						BeanProperties.value(ExpressConnection.class, ExpressConnection.PROPERTY_REMEMBER_PASSWORD)
-								.observeDetail(selectedConnection))
-				.converting(new Converter(Boolean.class, Boolean.class) {
-
-					@Override
-					public Object convert(Object fromObject) {
-						if (fromObject == null) {
-							return Boolean.FALSE;
-						} else {
-							return fromObject;
-						}
-					}
-
-				}).in(dbc);
 	}
 
 	@Override
@@ -197,11 +166,8 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 
 	private void disposeBindings() {
 		DataBindingUtils.dispose(usernameBinding);
-		DataBindingUtils.dispose(connectionUsernameBinding);
 		DataBindingUtils.dispose(passwordBinding);
-		DataBindingUtils.dispose(connectionPasswordBinding);
 		DataBindingUtils.dispose(rememberPasswordBinding);
-		DataBindingUtils.dispose(connectionRememberPasswordBinding);
 	}
 
 	@Override
@@ -218,7 +184,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 			final ExpressConnection expressConnection = (ExpressConnection) connection;
 			// might be called from job, switch to display thread to access observables
 			Display.getDefault().syncExec(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					expressConnection.setUsername((String) usernameObservable.getValue());
