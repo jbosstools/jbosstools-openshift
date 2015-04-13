@@ -38,7 +38,7 @@ public class LazyCredentialsPrompterTest {
 	@Before
 	public void setup(){
 		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(null);
-		connection = new ExpressConnection(null, null);
+		connection = new ExpressConnection((String) null, (String) null);
 		when(defaultPrompter.promptAndAuthenticate(any(ExpressConnection.class))).thenReturn(true);
 		when(altPrompter.promptAndAuthenticate(any(ExpressConnection.class))).thenReturn(true);
 	}

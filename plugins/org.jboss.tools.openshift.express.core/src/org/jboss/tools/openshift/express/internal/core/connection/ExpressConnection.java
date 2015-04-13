@@ -71,10 +71,10 @@ public class ExpressConnection extends AbstractConnection {
 	private ICredentialsPrompter passwordPrompter;
 	private ISSLCertificateCallback sslCallback;
 
-	public ExpressConnection(String host) {
-		this(null, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, null);
+	public ExpressConnection(String host, ISSLCertificateCallback callback) {
+		this(null, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, callback);
 	}
-
+	
 	public ExpressConnection(String username, String host) {
 		this(username, null, host, false, null);
 	}
@@ -163,6 +163,10 @@ public class ExpressConnection extends AbstractConnection {
 		return this.didPromptForPassword == false;
 	}
 
+	public void setSSLCertificateCallback(ISSLCertificateCallback callback) {
+		this.sslCallback = callback;
+	}
+	
 	/**
 	 * Connects to OpenShift. Will do nothing if this user is already
 	 * connected.

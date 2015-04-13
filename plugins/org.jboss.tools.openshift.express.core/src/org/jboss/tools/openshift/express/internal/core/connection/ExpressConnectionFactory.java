@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
+import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 import com.openshift.client.OpenShiftException;
@@ -39,7 +40,7 @@ public class ExpressConnectionFactory implements IConnectionFactory {
 	
 	@Override
 	public ExpressConnection create(String url) {
-		return new ExpressConnection(url);
+		return new ExpressConnection(url, ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback());
 	}
 
 
