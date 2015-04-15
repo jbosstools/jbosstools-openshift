@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionSerializerTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
+import org.jboss.tools.openshift.test.core.securtiy.SecureStorageTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.property.ConnectionPropertySourceTest;
@@ -46,7 +47,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	ResourcePropertySourceTest.class,
 	StringUtilsTest.class,
 	URIUtilsTest.class,
-	WebhooksPropertySourceTest.class
+	WebhooksPropertySourceTest.class,
+	SecureStorageTest.class
 })
 /**
  * @author Andre Dietisheim

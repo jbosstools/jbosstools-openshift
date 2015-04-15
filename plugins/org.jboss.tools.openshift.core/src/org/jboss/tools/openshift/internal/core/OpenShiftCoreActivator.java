@@ -47,14 +47,14 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         this.context = context;
-        Collection<Connection> connections = new ConnectionPersistency(OpenShiftCorePreferences.getInstance()).load();
+        Collection<Connection> connections = new ConnectionPersistency(OpenShiftCorePreferences.INSTANCE).load();
         ConnectionsRegistrySingleton.getInstance().addAll(connections);
 	}
 
     @Override
 	public void stop(BundleContext context) throws Exception {
     	Collection<Connection> connections = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
-		new ConnectionPersistency(OpenShiftCorePreferences.getInstance()).save(connections);
+		new ConnectionPersistency(OpenShiftCorePreferences.INSTANCE).save(connections);
     	super.stop(context);
 	}
 

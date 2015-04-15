@@ -17,17 +17,21 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
+import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.common.core.IRefreshable;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
-import com.openshift.restclient.ISSLCertificateCallback;
-import com.openshift.restclient.OpenShiftException;
 import com.openshift.internal.restclient.http.NotFoundException;
 import com.openshift.internal.restclient.http.UnauthorizedException;
 import com.openshift.restclient.ClientFactory;
 import com.openshift.restclient.IClient;
+import com.openshift.restclient.ISSLCertificateCallback;
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.BearerTokenAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationClient;
@@ -36,16 +40,22 @@ import com.openshift.restclient.model.IResource;
 
 public class Connection extends ObservablePojo implements IConnection, IRefreshable {
 
+	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
+	private static final String SECURE_STORAGE_PASSWORD = "password";
+	private static final String SECURE_STORAGE_TOKEN = "token";
+	
 	private IClient client;
 	private IAuthorizationClient authorizer;
-	private String userName;
+	private String username;
 	private String password;
+	private boolean passwordLoaded;
 	private boolean rememberPassword;
 	private String token;
+	private boolean tokenLoaded;
 	private ICredentialsPrompter credentialsPrompter;
 	private ISSLCertificateCallback sslCertificateCallback;
 
-	//TODO modify default client to take url and throw runtime exception
+	//TODO modify default client to take url and throw lib specific exception
 	public Connection(String url, IAuthorizationClient authorizer, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
 		this(new ClientFactory().create(url, sslCertCallback), authorizer, credentialsPrompter, sslCertCallback);
 	}
@@ -54,7 +64,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.client = client;
 		this.authorizer = authorizer;
 		this.credentialsPrompter = credentialsPrompter;
-		// TODO: how can authorizer not be bull at this point?
+		// TODO: how can authorizer not be null at this point?
 		if(this.authorizer != null){
 			authorizer.setSSLCertificateCallback(sslCertCallback);
 		}
@@ -63,22 +73,37 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	@Override
 	public String getUsername(){
-		return this.userName;
+		return username;
 	}
 
 	@Override
 	public void setUsername(String userName) {
-		firePropertyChange(PROPERTY_USERNAME, this.userName, this.userName = userName);
+		firePropertyChange(PROPERTY_USERNAME, this.username, this.username = userName);
 	}
 
 	@Override
 	public String getPassword() {
-		return this.password;
+		loadPassword();
+		return password;
+	}
+
+	/**
+	 * Attempts to load the password from the secure storage, only at first time
+	 * it is called.
+	 */
+	private void loadPassword() {
+		if (StringUtils.isEmpty(password)
+				&& !passwordLoaded) {
+			this.password = load(SECURE_STORAGE_PASSWORD, getSecureStore(getHost(), getUsername()));
+			this.passwordLoaded = true;
+			this.rememberPassword = (password != null);
+		}
 	}
 
 	@Override
 	public void setPassword(String password) {
 		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
+		this.passwordLoaded = true;
 	}
 
 	@Override
@@ -91,21 +116,64 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return rememberPassword;
 	}
 	
+	public void save() {
+		saveOrClear(SECURE_STORAGE_PASSWORD, getPassword(), isRememberPassword(), getSecureStore(getHost(), getUsername()));
+		saveOrClear(SECURE_STORAGE_TOKEN, getToken(), isRememberPassword(), getSecureStore(getHost(), getUsername()));
+	}
+
+	private String load(String id, SecureStore store) {
+		String value = null;
+		if (store != null) {
+			try {
+				value = store.get(id);
+			} catch (SecureStoreException e) {
+				OpenShiftCoreActivator.pluginLog().logError(e.getMessage(), e);
+			}
+		}
+		return value;
+	}
+
+	private void saveOrClear(String id, String value, boolean saveOrClear, SecureStore store) {
+		if (store != null) {
+			try {
+				if (saveOrClear
+						&& !StringUtils.isEmpty(value)) {
+					store.put(id, value);
+				} else {
+					store.remove(id);
+				}
+			} catch (SecureStoreException e) {
+				//ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
+			}
+		}
+	}
+	
+	/**
+	 * Returns a secure store for the current host and username
+	 */
+	private SecureStore getSecureStore(final String host, final String username) {
+		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
+	}
+
+
 	@Override
 	public boolean connect() throws OpenShiftException {
-		if(getToken()  != null) return true;
-		if(authorize()){
-//			initializeCapabilities();
+		if (getToken() != null) {
+			save();
 			return true;
+		} else if (authorize()) {
+			save();
+			return true;
+		} else {
+			return false;
 		}
-		return false;
 	}
 	
 	private boolean authorize() {
-		IAuthorizationContext context = authorizer.getContext(client.getBaseURL().toString(), userName, password);
-		if(!context.isAuthorized() && credentialsPrompter != null){
+		IAuthorizationContext context = authorizer.getContext(client.getBaseURL().toString(), username, password);
+		if (!context.isAuthorized() && credentialsPrompter != null) {
 			credentialsPrompter.promptAndAuthenticate(this);
-		}else{
+		} else {
 			setToken(context.getToken());
 		}
 		return getToken() != null;
@@ -132,14 +200,14 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().hashCode());
-		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
 	}
 
 	@Override
 	public IConnection clone() {
 		Connection connection = new Connection(client, authorizer, credentialsPrompter, sslCertificateCallback);
-		connection.setUsername(userName);
+		connection.setUsername(username);
 		connection.setPassword(password);
 		connection.setRememberPassword(rememberPassword);
 		connection.setToken(token);
@@ -155,32 +223,10 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.authorizer = otherConnection.authorizer;
 		this.credentialsPrompter = otherConnection.credentialsPrompter;
 		this.sslCertificateCallback = otherConnection.sslCertificateCallback;
-		this.userName = otherConnection.userName;
+		this.username = otherConnection.username;
 		this.password = otherConnection.password;
 		this.rememberPassword = otherConnection.rememberPassword;
 		this.token = otherConnection.token;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Connection other = (Connection) obj;
-		if (userName == null) {
-			if (other.userName != null)
-				return false;
-		} else if (!userName.equals(other.userName))
-			return false;
-		if (client == null) {
-			if (other.client != null)
-				return false;
-		} else if (!client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
-			return false;
-		return true;
 	}
 
 	@Override
@@ -228,16 +274,52 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	public String getToken() {
+		loadToken();
 		return token;
 	}
 
+	/**
+	 * Loads the token from the secure storage if it's not been loaded nor set yet. 
+	 */
+	private void loadToken() {
+		if (StringUtils.isEmpty(token)
+				&& !tokenLoaded) {
+			this.token = load(SECURE_STORAGE_TOKEN, getSecureStore(getHost(), getUsername()));
+			this.tokenLoaded = true;
+		}
+	}
+	
 	public void setToken(String token) {
 		this.token = token;
-		if (token != null) {
+		this.tokenLoaded = true;
+		if (!StringUtils.isEmpty(token)) {
 			client.setAuthorizationStrategy(new BearerTokenAuthorizationStrategy(token));
 		} else {
 			// TODO: NoAuthStrategy?
 			client.setAuthorizationStrategy(null);
 		}
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Connection other = (Connection) obj;
+		if (username == null) {
+			if (other.username != null)
+				return false;
+		} else if (!username.equals(other.username))
+			return false;
+		if (client == null) {
+			if (other.client != null)
+				return false;
+		} else if (!client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
+			return false;
+		return true;
+	}
+
 }

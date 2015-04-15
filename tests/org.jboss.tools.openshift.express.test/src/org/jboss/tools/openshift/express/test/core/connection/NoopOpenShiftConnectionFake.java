@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.test.core;
+package org.jboss.tools.openshift.express.test.core.connection;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

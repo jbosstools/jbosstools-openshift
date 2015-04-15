@@ -101,11 +101,6 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 		updateFrom(selectedConnection);
 	}
 
-	@Override
-	public void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
-		disposeBindings();
-	}
-
 	private void bindWidgetsToInternalModel(IObservableValue detailViewModel, DataBindingContext dbc) {
 		// username
 		this.usernameBinding = ValueBindingBuilder
@@ -136,6 +131,11 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 	
+	@Override
+	public void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+		disposeBindings();
+	}
+
 	@Override
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		updateFrom(selectedConnection);

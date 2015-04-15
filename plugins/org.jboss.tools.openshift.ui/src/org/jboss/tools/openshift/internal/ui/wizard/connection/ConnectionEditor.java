@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -18,6 +19,7 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -38,6 +40,9 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 /**
  * Detail view used in the common Connection Wizard to
  * support establishing connections to v3 instance of OpenShift
+ * 
+ * @author Jeff Cantrill
+ * @author Andre Dietisheim
  *
  */
 public class ConnectionEditor extends BaseConnectionEditor {
@@ -48,7 +53,10 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private Text passwordText;
 	private IObservableValue passwordObservable;
 	private Binding passwordBinding;
-	
+	private IObservableValue rememberPasswordObservable;
+	private Button rememberPasswordCheckBox;
+	private Binding rememberPasswordBinding;
+
 	@Override
 	public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
@@ -75,6 +83,13 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 		this.passwordObservable = new WritableValue(null, String.class);
 		
+		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
+		rememberPasswordCheckBox.setText("&Save Password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
+		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
+		rememberPasswordObservable.addValueChangeListener(changeListener);
+
 		return composite;
 	}
 	
@@ -106,6 +121,14 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		ControlDecorationSupport.create(
 				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		passwordObservable.addValueChangeListener(changeListener);
+
+		// remember password
+		this.rememberPasswordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
+				.to(rememberPasswordObservable)
+				.in(dbc);
+		ControlDecorationSupport.create(
+				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 	}
 
 	@Override
@@ -123,9 +146,11 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			Connection selectedConnection = (Connection) selectedConnectionObservable.getValue();
 			usernameObservable.setValue(selectedConnection.getUsername());
 			passwordObservable.setValue(selectedConnection.getPassword());
+			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
 		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
 			usernameObservable.setValue("");
 			passwordObservable.setValue("");
+			rememberPasswordObservable.setValue(false);
 		}
 	}
 	
@@ -142,19 +167,14 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	@Override
 	public void dispose() {
 		disposeBindings();
-		disposeObservables();
 	}
 
 	private void disposeBindings() {
 		DataBindingUtils.dispose(usernameBinding);
 		DataBindingUtils.dispose(passwordBinding);
+		DataBindingUtils.dispose(rememberPasswordBinding);
 	}
 
-	private void disposeObservables() {
-		DataBindingUtils.dispose(usernameObservable);
-		DataBindingUtils.dispose(passwordObservable);
-	}
-	
 	private class ConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {
 
 		@Override
@@ -169,6 +189,8 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				public void run() {
 					connection.setUsername((String) usernameObservable.getValue());
 					connection.setPassword((String) passwordObservable.getValue());
+					connection.setRememberPassword(
+							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
 				}
 			});
 

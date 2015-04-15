@@ -88,7 +88,8 @@ public class ConnectionSerializer {
 					node.get(URL).asString(), 
 					new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
 			conn.setUsername(node.get(USERNAME).asString());
-			conn.setToken(StringUtils.defaultIfBlank(node.get(TOKEN).asString(), null));
+			// token is stored in secure storage
+			//conn.setToken(StringUtils.defaultIfBlank(node.get(TOKEN).asString(), null));
 			return conn;
 		} catch (IOException e) {
 			throw new OpenShiftException(e, "There was an error deserializing the connection");

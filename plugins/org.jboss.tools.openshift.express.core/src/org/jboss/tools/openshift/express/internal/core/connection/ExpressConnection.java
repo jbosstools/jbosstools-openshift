@@ -32,10 +32,10 @@ import org.jboss.tools.openshift.express.client.ClientSystemProperties;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
-import org.jboss.tools.openshift.express.internal.core.security.OpenShiftPasswordStorageKey;
-import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStore;
-import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStoreException;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
+import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.ConnectionBuilder;
@@ -61,6 +61,13 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class ExpressConnection extends AbstractConnection {
 
+	private static final String SECURE_STORAGE_PASSWORD = "pass";
+
+	/*
+	 * Hard-code the openshift UI activator id, due to backwards compatability issues
+	 */
+	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.express.ui";
+	
 	private String username;
 	private String password;
 	private IUser user;
@@ -279,8 +286,9 @@ public class ExpressConnection extends AbstractConnection {
 			throws OpenShiftException {
 		if (connect()) {
 			return domain.createApplication(applicationName, standaloneCartridge, scale, gearProfile);
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -295,36 +303,41 @@ public class ExpressConnection extends AbstractConnection {
 	public IDomain createDomain(String id) throws OpenShiftException {
 		if (connect()) {
 			return user.createDomain(id);
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public List<IStandaloneCartridge> getStandaloneCartridges() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getStandaloneCartridges();
+		} else {
+			return null;
 		}
-		return null;
 	}
 	
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getEmbeddableCartridges();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public List<ICartridge> getCartridges() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getCartridges();
+		} else {
+			return null;
 		}
-		return null;
 	}
 	
 	public List<IQuickstart> getQuickstarts() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getQuickstarts();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 
@@ -346,8 +359,9 @@ public class ExpressConnection extends AbstractConnection {
 	public IDomain getDefaultDomain() throws OpenShiftException {
 		if (connect()) {
 			return user.getDefaultDomain();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public IDomain getDomain(String id) throws OpenShiftException {
@@ -362,22 +376,24 @@ public class ExpressConnection extends AbstractConnection {
 	public IDomain getFirstDomain() throws OpenShiftException {
 		if (!connect()) {
 			return null;
+		} else {
+			List<IDomain> domains = getDomains();
+			if (domains == null
+					|| domains.isEmpty()) {
+				return null;
+			}
+			return domains.get(0);
 		}
-		List<IDomain> domains = getDomains();
-		if (domains == null
-				|| domains.isEmpty()) {
-			return null;
-		}
-		return domains.get(0);
 	}
 	
 	public List<IDomain> getDomains() throws OpenShiftException {
 		if (!connect()) {
 			return Collections.emptyList();
+		} else {
+			List<IDomain> domains = user.getDomains();
+			isDomainLoaded = true;
+			return domains;
 		}
-		List<IDomain> domains = user.getDomains();
-		isDomainLoaded = true;
-		return domains;
 	}
 
 	public void destroy(IDomain domain, boolean force) {
@@ -400,15 +416,17 @@ public class ExpressConnection extends AbstractConnection {
 	public boolean hasDomain() throws OpenShiftException {
 		if (connect()) {
 			return user.hasDomain();
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	public boolean hasSSHKeys() throws OpenShiftException {
 		if (connect()) {
 			return !user.getSSHKeys().isEmpty();
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	public void refresh() throws OpenShiftException {
@@ -425,37 +443,42 @@ public class ExpressConnection extends AbstractConnection {
 	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException{
 		if (connect()) {
 			return user.getSSHKeys();
+		} else {
+			return Collections.emptyList();
 		}
-		return Collections.emptyList();
 	}
 
 	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException,
 			OpenShiftException {
 		if (connect()) {
 			return user.getSSHKeyByPublicKey(publicKey);
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public IOpenShiftSSHKey putSSHKey(String name, ISSHPublicKey key) throws OpenShiftException {
 		if (connect()) {
 			return user.putSSHKey(name, key);
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public boolean hasSSHKeyName(String name) throws OpenShiftException {
 		if (connect()) {
 			return user.hasSSHKeyName(name);
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	public boolean hasSSHPublicKey(String publicKey) {
 		if (connect()) {
 			return user.hasSSHPublicKey(publicKey);
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	public void save() {
@@ -467,29 +490,29 @@ public class ExpressConnection extends AbstractConnection {
 	}
 
 	private void saveOrClearPassword(String username, String host, String password) {
-		SecurePasswordStore store = getSecureStore(host, username);
+		SecureStore store = getSecureStore(host, username);
 		if (store != null
 				&& !StringUtils.isEmpty(username)) {
 			try {
 				if (isRememberPassword()
 						&& !StringUtils.isEmpty(password)) {
-					store.setPassword(password);
+					store.put(SECURE_STORAGE_PASSWORD, password);
 				} else {
-					store.remove();
+					store.remove(SECURE_STORAGE_PASSWORD);
 				}
-			} catch (SecurePasswordStoreException e) {
+			} catch (SecureStoreException e) {
 				//ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 		}
 	}
 
-	private String getPassword(SecurePasswordStore store) {
+	private String getPassword(SecureStore store) {
 		String password = null;
 		if (store != null
 				&& !StringUtils.isEmpty(getUsername())) {
 			try {
-				password = store.getPassword();
-			} catch (SecurePasswordStoreException e) {
+				password = store.get(SECURE_STORAGE_PASSWORD);
+			} catch (SecureStoreException e) {
 				ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 		}
@@ -497,15 +520,10 @@ public class ExpressConnection extends AbstractConnection {
 	}
 
 	/**
-	 * Return a secure store or <code>null</code> if platform is not found
+	 * Returns a secure store for the current host and username
 	 */
-	private SecurePasswordStore getSecureStore(final String platform, final String username) {
-		if (platform == null) {
-			return null;
-		}
-		final OpenShiftPasswordStorageKey key = new OpenShiftPasswordStorageKey(platform, username);
-		SecurePasswordStore store = new SecurePasswordStore(key);
-		return store;
+	private SecureStore getSecureStore(final String host, final String username) {
+		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
 	}
 
 	public String getId() {

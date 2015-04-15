@@ -8,12 +8,12 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.security;
+package org.jboss.tools.openshift.internal.common.core.security;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordStore.IStorageKey;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStoreKey;
 
 
 /**
@@ -22,29 +22,26 @@ import org.jboss.tools.openshift.express.internal.core.security.SecurePasswordSt
  * @author Andre Dietisheim
  *
  */
-public class OpenShiftPasswordStorageKey implements IStorageKey {
+public class OpenShiftSecureStorageKey implements IStoreKey {
 
 	private static final char SEPARATOR = '/';
 	private static final Pattern SCHEME_PATTERN = Pattern.compile(".+://(.*)"); 
 	
-	/*
-	 * Hard-code the openshift UI activator id, due to backwards compatability issues
-	 */
-	private static final String PREFERNCES_BASEKEY = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
-
-	private String platform;
+	private String baseKey;
+	private String host;
 	private String userName;
 
-	public OpenShiftPasswordStorageKey(String platform, String userName) {
-		this.platform = stripScheme(platform);
+	public OpenShiftSecureStorageKey(String baseKey, String host, String userName) {
+		this.baseKey = baseKey;
+		this.host = stripScheme(host);
 		this.userName = userName;
 	}
 
 	@Override
 	public String getKey() {
-		return new StringBuilder(PREFERNCES_BASEKEY)
+		return new StringBuilder(baseKey)
 				.append(SEPARATOR)
-				.append(platform)
+				.append(host)
 				.append(SEPARATOR)
 				.append(userName)
 				.toString();
@@ -61,12 +58,12 @@ public class OpenShiftPasswordStorageKey implements IStorageKey {
 	}
 	
 	@Override
-	public boolean equals(IStorageKey key) {
-		if (!key.getClass().isAssignableFrom(OpenShiftPasswordStorageKey.class)) {
+	public boolean equals(Object key) {
+		if (!key.getClass().isAssignableFrom(OpenShiftSecureStorageKey.class)) {
 			return false;
 		}
-		OpenShiftPasswordStorageKey openshiftKey = (OpenShiftPasswordStorageKey) key;
+		OpenShiftSecureStorageKey openshiftKey = (OpenShiftSecureStorageKey) key;
 		return (userName != null && openshiftKey.userName != null && userName.equals(openshiftKey.userName)) 
-				&& (platform != null && openshiftKey.platform != null && platform.equals(openshiftKey.platform));
+				&& (host != null && openshiftKey.host != null && host.equals(openshiftKey.host));
 	}
 }
