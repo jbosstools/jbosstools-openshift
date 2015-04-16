@@ -18,7 +18,6 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionPersistency;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -49,7 +48,7 @@ public class ExpressCoreActivator extends BaseCorePlugin {
         myContext = context;
 
         ConnectionsRegistrySingleton.getInstance().addAll(
-        		new ExpressConnectionPersistency(ExpressCorePreferences.INSTANCE).load());
+        		new ExpressConnectionPersistency().load());
     }
 
 	/**
@@ -83,7 +82,7 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		new ExpressConnectionPersistency(ExpressCorePreferences.INSTANCE).save(
+		new ExpressConnectionPersistency().save(
 				ConnectionsRegistrySingleton.getInstance().getAll(ExpressConnection.class));
 		
 		super.stop(context);

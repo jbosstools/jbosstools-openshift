@@ -15,7 +15,6 @@ import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
 import org.jboss.tools.openshift.test.core.LazySSLCertificateCallbackTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionPersistencyTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
-import org.jboss.tools.openshift.test.core.connection.ConnectionSerializerTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.securtiy.SecureStorageTest;
@@ -36,7 +35,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionPropertySourceTest.class,
 	ConnectionRegistryTest.class,
 	ConnectionPersistencyTest.class,
-	ConnectionSerializerTest.class,
 	ConnectionTest.class,
 	ExtTextPropertyDescriptorTest.class,
 	//TODO add back in when tests exist

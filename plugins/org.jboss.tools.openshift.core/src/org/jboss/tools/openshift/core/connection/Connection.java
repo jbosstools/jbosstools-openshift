@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
@@ -192,7 +193,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public String getScheme() {
-		return client.getBaseURL().getProtocol();
+		return client.getBaseURL().getProtocol() + UrlUtils.SCHEME_SEPARATOR;
 	}
 
 	@Override

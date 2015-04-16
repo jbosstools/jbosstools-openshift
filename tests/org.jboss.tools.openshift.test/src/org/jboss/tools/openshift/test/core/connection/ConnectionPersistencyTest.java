@@ -8,51 +8,49 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
-import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author Andre Dietisheim
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ConnectionPersistencyTest {
 
-	@Mock
-	private OpenShiftCorePreferences preferences;
-	private ConnectionPersistency persistency;
 	private Connection connection1;
 	private Connection connection2;
 
 	@Before
 	public void setup() throws Exception {
-		this.persistency = new ConnectionPersistency(preferences);
-
 		this.connection1 = new Connection("https://localhost:8442", null, null, null);
 		connection1.setUsername("foo");
 		connection1.setToken("bar");
-		this.connection2 = new Connection("https://localhost:8442", null, null, null);
-		connection2.setUsername("kung");
+		this.connection2 = new Connection("https://localhost:8443", null, null, null);
+		connection2.setUsername("bar");
 		connection2.setToken("foo");
 	}
 
 	@Test
 	public void shouldSaveConnections() {
+
+		ConnectionPersistency persistency = new ConnectionPersistency() {
+
+			@Override
+			protected void persist(String[] connections) {
+				// verification
+				assertArrayEquals(new String[] {	"https://foo@localhost:8442", "https://bar@localhost:8443" }, connections);
+			}
+			
+		};
 		// pre-condition
 		List<Connection> connections = new ArrayList<Connection>();
 		connections.add(connection1);
@@ -60,37 +58,22 @@ public class ConnectionPersistencyTest {
 		
 		// operations
 		persistency.save(connections);
-
-		// verification
-		verify(preferences).saveConnections(new String[] {
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"foo\", \"token\" : \"bar\"}",
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"kung\", \"token\" : \"foo\"}" });
-	}
-
-	@Test
-	public void shouldNotSaveBlankUserConnection() throws MalformedURLException {
-		// pre-condition
-		List<Connection> connections = new ArrayList<Connection>();
-		connections.add(connection1);
-		connections.add(new Connection("http://localhost:8080", null, null, null));
-		connections.add(connection2);
-		
-		// operations
-		persistency.save(connections);
-
-		// verification
-		verify(preferences).saveConnections(new String[] {
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"foo\", \"token\" : \"bar\"}",
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"kung\", \"token\" : \"foo\"}" });
 	}
 
 	@Test
 	public void shouldLoadConnections() {
+
 		// pre-condition
-		when(preferences.loadConnections()).thenReturn(new String[] {
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"foo\", \"token\" : \"bar\"}",
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"kung\", \"token\" : \"foo\"}" });
-		
+		ConnectionPersistency persistency = new ConnectionPersistency() {
+
+			@Override
+			protected String[] loadPersisted() {
+				return new String[] {
+						"https://foo@localhost:8442",
+						"https://bar@localhost:8443" };
+				}
+		};
+
 		// operations
 		Collection<Connection> connections = persistency.load();
 
@@ -101,13 +84,18 @@ public class ConnectionPersistencyTest {
 	}
 
 	@Test
-	public void shouldNotLoadMalformedJson() {
+	public void shouldNotLoadMalformedUrl() {
 		// pre-condition
-		when(preferences.loadConnections()).thenReturn(new String[] {
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"foo\", \"token\" : \"bar\"}",
-				"{}}",
-				"{\"url\" : \"https://localhost:8442\", \"username\" : \"kung\", \"token\" : \"foo\"}"
-				});
+		ConnectionPersistency persistency = new ConnectionPersistency() {
+
+			@Override
+			protected String[] loadPersisted() {
+				return new String[] {
+						"https://foo@localhost:8442",
+						"@bingobongo",
+						"https://bar@localhost:8443" };
+				}
+		};
 		
 		// operations
 		Collection<Connection> connections = persistency.load();
@@ -125,5 +113,4 @@ public class ConnectionPersistencyTest {
 			}
 		}
 		fail(String.format("Could not find connection %s in connections %s.", connection, connections));
-	}
-}
+	}}

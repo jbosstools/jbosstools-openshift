@@ -10,13 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.connection;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.connection.AbstractConnectionPersistency;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
@@ -27,65 +21,31 @@ import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePr
 /**
  * @author Andre Dietisheim
  */
-public class ExpressConnectionPersistency {
+public class ExpressConnectionPersistency extends AbstractConnectionPersistency<ExpressConnection> {
 
-	private ExpressCorePreferences preferences;
-
-	public ExpressConnectionPersistency(ExpressCorePreferences preferences) {
-		this.preferences = preferences;
+	@Override
+	protected String[] loadPersisted() {
+		return ExpressCorePreferences.INSTANCE.loadConnections();
 	}
 
-	public Collection<ExpressConnection> load() {
-		List<ExpressConnection> connections = new ArrayList<ExpressConnection>();
-		String[] persistedConnections = preferences.loadConnections();
-        for (String connectionUrl : persistedConnections) {
-        	addConnection(connectionUrl, connections);
-		}
-        return connections;
+	@Override
+	protected void persist(String[] connections) {
+		ExpressCorePreferences.INSTANCE.saveConnections(connections);
 	}
 
-	private void addConnection(String connectionUrl, List<ExpressConnection> connections) {
-		try {
-			ConnectionURL connectionURL = ConnectionURL.forURL(connectionUrl);
-			ExpressConnection connection =
-					new ExpressConnection(
-							connectionURL.getUsername(),
-							connectionURL.getHostWithScheme(),
-							new LazyCredentialsPrompter(
-									ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
-							new LazySSLCertificateCallback(
-									ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
-			connections.add(connection);
-		} catch (MalformedURLException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
-		} catch (UnsupportedEncodingException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
-		} catch (IllegalArgumentException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
-		}
+	@Override
+	protected void logError(String message, Exception e) {
+		ExpressCoreActivator.pluginLog().logError(message, e);
 	}
 
-	public void save(Collection<ExpressConnection> connections) {
-		if (connections == null
-				|| connections.size() == 0) {
-			return;
-		}
-
-		List<String> serializedConnections = new ArrayList<String>(connections.size());
-		for (ExpressConnection connection : connections) {
-			addConnection(connection, serializedConnections);
-		}
-		preferences.saveConnections(serializedConnections.toArray(new String[serializedConnections.size()]));
-	}
-
-	private void addConnection(ExpressConnection connection, List<String> serializedConnections) {
-		try {
-			ConnectionURL connectionURL = ConnectionURL.forConnection(connection);
-			serializedConnections.add(connectionURL.toString());
-		} catch (MalformedURLException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()), e);
-		} catch (UnsupportedEncodingException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()), e);
-		}
+	@Override
+	protected ExpressConnection createConnection(ConnectionURL connectionURL) {
+		return new ExpressConnection(
+				connectionURL.getUsername(),
+				connectionURL.getHostWithScheme(),
+				new LazyCredentialsPrompter(
+						ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
+				new LazySSLCertificateCallback(
+						ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
 	}
 }

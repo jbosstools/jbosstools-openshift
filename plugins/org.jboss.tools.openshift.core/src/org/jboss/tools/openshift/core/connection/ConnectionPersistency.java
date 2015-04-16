@@ -10,66 +10,40 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import org.jboss.tools.openshift.common.core.connection.AbstractConnectionPersistency;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
+import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-
-import com.openshift.restclient.OpenShiftException;
 
 /**
  * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
-public class ConnectionPersistency {
+public class ConnectionPersistency extends AbstractConnectionPersistency<Connection>{
 
-	private ConnectionSerializer serializer = new ConnectionSerializer();
-	private OpenShiftCorePreferences preferences;
-
-	public ConnectionPersistency(OpenShiftCorePreferences preferences) {
-		this.preferences = preferences;
+	@Override
+	protected String[] loadPersisted() {
+		return OpenShiftCorePreferences.INSTANCE.loadConnections();
 	}
 
-	public Collection<Connection> load() {
-		List<Connection> connections = new ArrayList<Connection>();
-		String[] persistedConnections = preferences.loadConnections();
-        for (String persistedConnection : persistedConnections) {
-        	addConnection(persistedConnection, serializer, connections);
-		}
-        return connections;
-	}
-	
-	private void addConnection(String serializedConnection, ConnectionSerializer serializer, List<Connection> connections) {
-		try {
-			connections.add(serializer.deserialize(serializedConnection));
-		} catch (OpenShiftException e) {
-			OpenShiftCoreActivator.pluginLog().logError(
-					String.format("Could not deserialize the connection '%s'", serializedConnection), e);
-		}
+	@Override
+	protected void persist(String[] connections) {
+		OpenShiftCorePreferences.INSTANCE.saveConnections(connections);
 	}
 
-	public void save(Collection<Connection> connections) {
-		if (connections == null
-				|| connections.size() == 0) {
-			return;
-		}
+	@Override
+	protected void logError(String message, Exception e) {
+		OpenShiftCoreActivator.pluginLog().logError(message, e);
+	}
 
-		List<String> serializedConnections = new ArrayList<String>(connections.size());
-		for (Connection connection : connections) {
-			addConnection(connection, serializer, serializedConnections);
-		}
-		preferences.saveConnections(serializedConnections.toArray(new String[] {}));
+	@Override
+	protected Connection createConnection(ConnectionURL connectionURL) {
+		Connection connection = new ConnectionFactory().create(
+				connectionURL.getHostWithScheme(),
+				new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
+				connection.setUsername(connectionURL.getUsername());
+				return connection;
 	}
-	
-	private void addConnection(Connection connection, ConnectionSerializer serializer, Collection<String> serializedConnections) {
-		try {
-			serializedConnections.add(serializer.serialize(connection));
-		} catch (OpenShiftException e) {
-			OpenShiftCoreActivator.pluginLog().logError(
-					String.format("Could not serialize the connection '%s'", connection), e);
-		}
-	}
-	
 }

@@ -8,10 +8,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.test.core.connection;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,35 +18,34 @@ import java.util.List;
 
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionPersistency;
-import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author Andre Dietisheim
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ExpressConnectionPersistencyTest {
 
-	@Mock
-	private ExpressCorePreferences preferences;
-	private ExpressConnectionPersistency persistency;
 	private ExpressConnection connection1;
 	private ExpressConnection connection2;
 
 	@Before
 	public void setup() throws Exception {
-		this.persistency = new ExpressConnectionPersistency(preferences);
-
 		this.connection1 = new ExpressConnection("foo", "https://localhost:8442");
 		this.connection2 = new ExpressConnection("bar", "https://localhost:8443");
 	}
 
 	@Test
 	public void shouldSaveConnections() {
+		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+
+			@Override
+			protected void persist(String[] connections) {
+				// verification
+				assertArrayEquals(new String[] {	"https://foo@localhost:8442", "https://bar@localhost:8443" }, connections);
+			}
+			
+		};
 		// pre-condition
 		List<ExpressConnection> connections = new ArrayList<ExpressConnection>();
 		connections.add(connection1);
@@ -55,20 +53,20 @@ public class ExpressConnectionPersistencyTest {
 		
 		// operations
 		persistency.save(connections);
-
-		// verification
-		verify(preferences).saveConnections(new String[] {
-				"https://foo@localhost:8442",
-				"https://bar@localhost:8443" });
 	}
 
 	@Test
 	public void shouldLoadConnections() {
 		// pre-condition
-		when(preferences.loadConnections()).thenReturn(new String[] {
-				"https://foo@localhost:8442",
-				"https://bar@localhost:8443" });
+		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
+			@Override
+			protected String[] loadPersisted() {
+				return new String[] {
+						"https://foo@localhost:8442",
+						"https://bar@localhost:8443" };
+				}
+		};
 		// operations
 		Collection<ExpressConnection> connections = persistency.load();
 
@@ -81,10 +79,16 @@ public class ExpressConnectionPersistencyTest {
 	@Test
 	public void shouldNotLoadMalformedUrl() {
 		// pre-condition
-		when(preferences.loadConnections()).thenReturn(new String[] {
-				"https://foo@localhost:8442",
-				"@bingobongo",
-				"https://bar@localhost:8443" });
+		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+
+			@Override
+			protected String[] loadPersisted() {
+				return new String[] {
+						"https://foo@localhost:8442",
+						"@bingobongo",
+						"https://bar@localhost:8443" };
+				}
+		};
 		
 		// operations
 		Collection<ExpressConnection> connections = persistency.load();

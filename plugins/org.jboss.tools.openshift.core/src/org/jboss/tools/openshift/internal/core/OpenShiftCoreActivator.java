@@ -18,7 +18,6 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
-import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -47,14 +46,14 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         this.context = context;
-        Collection<Connection> connections = new ConnectionPersistency(OpenShiftCorePreferences.INSTANCE).load();
+        Collection<Connection> connections = new ConnectionPersistency().load();
         ConnectionsRegistrySingleton.getInstance().addAll(connections);
 	}
 
     @Override
 	public void stop(BundleContext context) throws Exception {
     	Collection<Connection> connections = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
-		new ConnectionPersistency(OpenShiftCorePreferences.INSTANCE).save(connections);
+		new ConnectionPersistency().save(connections);
     	super.stop(context);
 	}
 
