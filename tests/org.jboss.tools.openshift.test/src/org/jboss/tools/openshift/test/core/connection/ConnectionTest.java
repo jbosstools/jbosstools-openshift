@@ -61,7 +61,7 @@ public class ConnectionTest {
 	}
 	@Test
 	public void getSchemeShouldReturnScheme() {
-		assertEquals("https", connection.getScheme());
+		assertEquals("https://", connection.getScheme());
 	}
 	
 	@Test
