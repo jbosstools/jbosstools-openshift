@@ -148,8 +148,8 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			passwordObservable.setValue(selectedConnection.getPassword());
 			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
 		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
-			usernameObservable.setValue("");
-			passwordObservable.setValue("");
+			usernameObservable.setValue(null);
+			passwordObservable.setValue(null);
 			rememberPasswordObservable.setValue(false);
 		}
 	}

@@ -110,8 +110,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.connectionFactory = getDefaultConnectionFactory(connectionsFactory);
 		if (connectionFactory != null) {
 			this.host = connectionFactory.getDefaultHost();
-			this.connection = connectionFactory.create(host);
 			this.useDefaultHost = connectionFactory.hasDefaultHost();
+			if(host != null)
+				this.connection = connectionFactory.create(host);
 		}
 	}
 
