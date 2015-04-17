@@ -45,8 +45,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	ResourcePropertySourceTest.class,
 	StringUtilsTest.class,
 	URIUtilsTest.class,
-	WebhooksPropertySourceTest.class,
-	SecureStorageTest.class
+	WebhooksPropertySourceTest.class
+	// triggers secure storage prompt
+	//SecureStorageTest.class
 })
 /**
  * @author Andre Dietisheim
