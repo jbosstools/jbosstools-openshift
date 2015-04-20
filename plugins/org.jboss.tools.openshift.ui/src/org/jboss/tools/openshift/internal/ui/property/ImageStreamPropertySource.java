@@ -11,24 +11,26 @@ package org.jboss.tools.openshift.internal.ui.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IImageStream;
 
-public class ImageRespositoryPropertySource extends ResourcePropertySource<IImageRepository> {
+public class ImageStreamPropertySource extends ResourcePropertySource<IImageStream> {
 
-	public ImageRespositoryPropertySource(IImageRepository resource) {
+	private static final String REGISTRY = "registry";
+
+	public ImageStreamPropertySource(IImageStream resource) {
 		super(resource);
 	}
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("registry", "Registry")
+				new TextPropertyDescriptor(REGISTRY, "Registry")
 		};
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if("registry".equals(id)){
+		if(REGISTRY.equals(id)){
 			return getResource().getDockerImageRepository();
 		}
 		return super.getPropertyValue(id);

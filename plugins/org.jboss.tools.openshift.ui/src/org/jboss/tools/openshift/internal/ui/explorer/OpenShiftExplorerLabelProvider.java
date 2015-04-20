@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
@@ -40,7 +40,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			switch (resource.getKind()) {
 			case BuildConfig:
 				return OpenShiftImages.BUILDCONFIG_IMG;
-			case ImageRepository:
+			case ImageStream:
 				return OpenShiftImages.LAYER_IMG;
 			case Pod:
 				return OpenShiftImages.BLOCKS_IMG;
@@ -68,8 +68,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			case DeploymentConfig:
 				IDeploymentConfig config = (IDeploymentConfig) resource;
 				return style(config.getName(), String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())));
-			case ImageRepository:
-				IImageRepository repo = (IImageRepository) resource;
+			case ImageStream:
+				IImageStream repo = (IImageStream) resource;
 				return style(repo.getName(), repo.getDockerImageRepository().toString());
 			case Pod:
 				IPod pod = (IPod) resource;

@@ -16,7 +16,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
-import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
@@ -37,8 +37,8 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 					return new BuildPropertySource((IBuild)resource);
 				case BuildConfig: 
 					return new BuildConfigPropertySource((IBuildConfig)resource);
-				case ImageRepository:
-					return new ImageRespositoryPropertySource((IImageRepository) resource);
+				case ImageStream:
+					return new ImageStreamPropertySource((IImageStream) resource);
 				case Pod:
 					return new PodPropertySource((IPod)resource);
 				case ReplicationController: 
