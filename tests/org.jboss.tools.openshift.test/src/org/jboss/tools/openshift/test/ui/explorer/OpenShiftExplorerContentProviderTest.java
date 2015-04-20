@@ -75,7 +75,7 @@ public class OpenShiftExplorerContentProviderTest {
 				new ResourceGrouping(ResourceKind.Pod, project),
 				new ResourceGrouping(ResourceKind.ReplicationController, project),
 				new ResourceGrouping(ResourceKind.Build, project),
-				new ResourceGrouping(ResourceKind.ImageRepository, project),
+				new ResourceGrouping(ResourceKind.ImageStream, project),
 		};
 		
 		Object[] children = provider.getChildren(project);
