@@ -111,8 +111,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (connectionFactory != null) {
 			this.host = connectionFactory.getDefaultHost();
 			this.useDefaultHost = connectionFactory.hasDefaultHost();
-			if(host != null)
+			if (host != null) {
 				this.connection = connectionFactory.create(host);
+			}
 		}
 	}
 
@@ -126,8 +127,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
 		factory = updateFactory(factory, selectedConnection);
-		host = updateHost(host, selectedConnection, factory);
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
+		host = updateHost(host, useDefaultHost, selectedConnection, factory);
 
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
@@ -152,13 +153,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory;
 	}
 
-	private String updateHost(String host, IConnection selectedConnection, IConnectionFactory factory) {
+	private String updateHost(String host, boolean useDefaultHost, IConnection selectedConnection, IConnectionFactory factory) {
 		if (!(selectedConnection instanceof NewConnectionMarker)
 				&& !selectedConnection.equals(this.selectedConnection)) {
 			// connection changed
 			host = selectedConnection.getHost();
-		} else if (factory != null
-				&& !factory.equals(connectionFactory)) {
+		} else if (factory != null) {
 			// factory changed
 			if (useDefaultHost
 					&& !StringUtils.isEmpty(factory.getDefaultHost())) {
