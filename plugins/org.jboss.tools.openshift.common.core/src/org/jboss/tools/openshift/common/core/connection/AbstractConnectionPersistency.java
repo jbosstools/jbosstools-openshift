@@ -46,8 +46,7 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 	}
 
 	public void save(Collection<C> connections) {
-		if (connections == null
-				|| connections.size() == 0) {
+		if (connections == null) {
 			return;
 		}
 
