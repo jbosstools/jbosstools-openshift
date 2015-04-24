@@ -42,6 +42,8 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueWizard;
 import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueWizardModelBuilder;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
+import org.jboss.tools.openshift.internal.ui.validator.LabelKeyValidator;
+import org.jboss.tools.openshift.internal.ui.validator.LabelValueValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.application.IResourceLabelsPageModel.Label;
 
 /**
@@ -145,8 +147,8 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 						.description("Edit the resource label.")
 						.keyLabel(LABEL)
 						.groupLabel(LABEL)
-						.keyAfterConvertValidator(null)
-						.valueAfterConvertValidator(null)
+						.keyAfterConvertValidator(new LabelKeyValidator())
+						.valueAfterConvertValidator(new LabelValueValidator())
 						.build();
 				OkCancelButtonWizardDialog dialog =
 						new OkCancelButtonWizardDialog(getShell(),
@@ -168,8 +170,8 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 						.description("Add a resource label.")
 						.keyLabel(LABEL)
 						.groupLabel(LABEL)
-						.keyAfterConvertValidator(null)
-						.valueAfterConvertValidator(null)
+						.keyAfterConvertValidator(new LabelKeyValidator())
+						.valueAfterConvertValidator(new LabelValueValidator())
 						.build();
 				OkCancelButtonWizardDialog dialog =
 						new OkCancelButtonWizardDialog(getShell(),

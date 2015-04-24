@@ -28,6 +28,8 @@ import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
 import org.jboss.tools.openshift.test.ui.property.ResourcePropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.build.BuildConfigPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTest;
+import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
+import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -42,6 +44,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionURLTest.class,
 	CreateApplicationFromTemplateJobTest.class,
 	ExtTextPropertyDescriptorTest.class,
+	LabelKeyValidatorTest.class,
+	LabelValueValidatorTest.class, 
 	LazySSLCertificateCallbackTest.class, 
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,
