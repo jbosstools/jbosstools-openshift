@@ -106,11 +106,4 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 		return value;
 	}
 
-//	public boolean isExistingName(String name) {
-//		EnvironmentVariableItem variable = allVariablesModel.getVariable(name);
-//		return variable != null
-//				// ignore only if editing current one (not other one)
-//				&& !variable.equals(this.variable);
-//	}
-
 }
