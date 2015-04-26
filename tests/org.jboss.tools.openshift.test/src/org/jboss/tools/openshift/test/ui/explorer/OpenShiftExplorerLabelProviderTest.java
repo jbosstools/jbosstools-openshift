@@ -33,7 +33,7 @@ import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IImageRepository;
+import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
@@ -115,7 +115,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 	@Test
 	public void getStyledTextForAnImageRepository(){
-		IImageRepository repo = givenAResource(IImageRepository.class, ResourceKind.ImageRepository);
+		IImageStream repo = givenAResource(IImageStream.class, ResourceKind.ImageStream);
 		when(repo.getDockerImageRepository())
 			.thenReturn(new DockerImageURI("127.0.0.1", "foo", "bar"));
 		assertEquals(repo.getName() +" " + repo.getDockerImageRepository(), provider.getStyledText(repo).getString());
