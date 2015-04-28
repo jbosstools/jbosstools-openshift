@@ -69,7 +69,6 @@ public class NewApplicationWizardModel
 
 	@Override
 	public Collection<ITemplate> getTemplates() {
-		
 		return project.accept(new CapabilityVisitor<IProjectTemplateList,  Collection<ITemplate>>() {
 
 			@Override
