@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.internal.common.ui.ImageRepository;
 
@@ -20,7 +25,8 @@ import org.jboss.tools.openshift.internal.common.ui.ImageRepository;
 public class OpenShiftImages {
 
 	private static final String ICONS_FOLDER = "icons/";
-
+	private static final String ICON_NAME_PREFIX = "icon-";
+	
 	private static final ImageRepository repo =
 			new ImageRepository(
 					ICONS_FOLDER, OpenShiftUIActivator.getDefault(), OpenShiftUIActivator.getDefault().getImageRegistry());
@@ -34,4 +40,22 @@ public class OpenShiftImages {
 	public static final ImageDescriptor LAYER = repo.create("layer.png"); //$NON-NLS-1$ 
 	public static final Image LAYER_IMG = repo.getImage("layer.png"); //$NON-NLS-1$ 
 
+	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<String, ImageDescriptor>();
+
+	/**
+	 * Get an image to represent an application image (e.g. template details)
+	 * @param name
+	 * @return the image
+	 */
+	public static final Image getAppImage(String name) {
+		if(name.startsWith(ICON_NAME_PREFIX)) {
+			name = name.substring(ICON_NAME_PREFIX.length());
+		}
+		final String imagePath = NLS.bind("apps/{0}.png", name);
+		if(!descriptorsByName.containsKey(name)) {
+			descriptorsByName.put(name, repo.create(imagePath));
+		}
+		return (Image) ObjectUtils.defaultIfNull(repo.getImage(imagePath), BLOCKS_IMG);
+	}
+	
 }

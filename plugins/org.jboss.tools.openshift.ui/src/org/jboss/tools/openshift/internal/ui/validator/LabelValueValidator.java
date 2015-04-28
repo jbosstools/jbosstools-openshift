@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.IStatus;
 /**
  * Validate label values confirm to the format accepted
  * by OpenShift
+ * 
+ * @author Jeff Cantrill
  */
 public class LabelValueValidator implements IValidator {
 

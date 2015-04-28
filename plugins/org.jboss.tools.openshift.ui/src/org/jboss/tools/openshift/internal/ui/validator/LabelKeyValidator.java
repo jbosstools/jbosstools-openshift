@@ -17,7 +17,8 @@ import org.eclipse.core.runtime.IStatus;
 /**
  * Validates label keys conform to the format that
  * is accepted by OpenShift
- * @author jeff.cantrill
+ * 
+ * @author Jeff Cantrill
  */
 public class LabelKeyValidator extends LabelValueValidator {
 	
