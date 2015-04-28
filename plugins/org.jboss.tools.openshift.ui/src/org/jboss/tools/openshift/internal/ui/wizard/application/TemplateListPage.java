@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -23,8 +24,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
@@ -52,8 +55,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.spacing(2, 2)
 			.applyTo(parent);
 		
+		Composite applicationTemplatesTreeComposite = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+				.span(2, 1)
+				.align(SWT.FILL, SWT.FILL)
+				.grab(true, true)
+				.applyTo(applicationTemplatesTreeComposite);
+		GridLayoutFactory.fillDefaults().spacing(2, 2).applyTo(applicationTemplatesTreeComposite);
+		
 		// the list of templates
-		TreeViewer viewer = createTemplatesViewer(parent, dbc);
+		TreeViewer viewer = createTemplatesViewer(applicationTemplatesTreeComposite, dbc);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
 				.hint(400, 180)
@@ -66,7 +77,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.to(modelObservable)
 			.in(dbc);
 		viewer.setSelection(null);
-
+		
+		//details
+		final Group detailsContainer = new Group(applicationTemplatesTreeComposite, SWT.NONE);
+		detailsContainer.setText("Details");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL)
+				.hint(SWT.DEFAULT, 106)
+				.applyTo(detailsContainer);
+		
+		new TemplateDetailViews(modelObservable, null, detailsContainer, dbc).createControls();;
 	}
 
 	private TreeViewer createTemplatesViewer(Composite parent, DataBindingContext dbc) {
@@ -75,12 +95,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			@Override
 			public void update(ViewerCell cell) {
 				Object element = cell.getElement();
-				StyledString text = new StyledString();
 				if(element instanceof ITemplate) {
 					ITemplate template = (ITemplate) element;
-					text.append(template.getName());
+					StyledString text = new StyledString(template.getName());
+					if(template.isAnnotatedWith("tags")) {
+						String [] tags = template.getAnnotation("tags").split(",");
+						text.append(NLS.bind(" ({0})", StringUtils.join(tags, ", ")), StyledString.DECORATIONS_STYLER);
+					}
+					cell.setText(text.toString());
+					cell.setStyleRanges(text.getStyleRanges());
 				}
-				cell.setText(text.toString());
 				super.update(cell);
 			}
 		});
