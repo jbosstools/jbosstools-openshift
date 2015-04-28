@@ -58,17 +58,13 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createTable(dialogArea);
-		fillApplicationDetailsTable(viewer);
+		viewer.setInput(resources);
 
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
 
 		return dialogArea;
-	}
-	
-	private void fillApplicationDetailsTable(final TreeViewer viewer) {
-		viewer.setInput(resources);
 	}
 	
 	private TreeViewer createTable(Composite parent) {
@@ -78,10 +74,10 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		tableContainer.setLayout(treeLayout);
-		TreeViewer viewer = new TreeViewer(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		final TreeViewer viewer = new TreeViewer(tableContainer, SWT.BORDER  | SWT.V_SCROLL | SWT.H_SCROLL);
 		viewer.setContentProvider(new ResourceSummaryContentProvider());
 		viewer.setLabelProvider(new ResourceSummaryLabelProvider());
-
+		
 		return viewer;
 	}
 	

@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.securtiy.SecureStorageTest;
+import org.jboss.tools.openshift.test.ui.application.AnnotationTagViewerFilterTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
@@ -28,12 +29,15 @@ import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
 import org.jboss.tools.openshift.test.ui.property.ResourcePropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.build.BuildConfigPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTest;
+import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
+import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	AnnotationTagViewerFilterTest.class,
 	BuildConfigPropertySourceTest.class,
 	ConnectionPropertySourceTest.class,
 	ConnectionRegistryTest.class,
@@ -42,6 +46,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionURLTest.class,
 	CreateApplicationFromTemplateJobTest.class,
 	ExtTextPropertyDescriptorTest.class,
+	LabelKeyValidatorTest.class,
+	LabelValueValidatorTest.class, 
 	LazySSLCertificateCallbackTest.class, 
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,
