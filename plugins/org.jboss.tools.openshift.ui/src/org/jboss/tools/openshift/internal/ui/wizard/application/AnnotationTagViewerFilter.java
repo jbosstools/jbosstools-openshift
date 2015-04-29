@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateListPage.ITextControl;
+import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateListPage.TemplateNode;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.ITags;
@@ -33,6 +34,7 @@ public class AnnotationTagViewerFilter extends ViewerFilter {
 
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
+		if(element instanceof TemplateNode) return true;
 		if(!(element instanceof IResource)) {
 			return false;
 		}

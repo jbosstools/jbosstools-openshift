@@ -10,6 +10,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.application;
 
 import java.util.Map;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -18,6 +19,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
@@ -53,7 +55,7 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 	
 	private class TemplateDetailView extends EmptyView {
 		private Binding binding;
-		private StyledText txtName;
+		private StyledText txtProvider;
 		private StyledText txtDescription;
 		private CLabel classIcon;
 		
@@ -82,11 +84,11 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 				.applyTo(txtDescription);
 
 			//name
-			this.txtName = new StyledText(container, SWT.READ_ONLY);
-			UIUtils.setTransparent(txtName);
+			this.txtProvider = new StyledText(container, SWT.READ_ONLY);
+			UIUtils.setTransparent(txtProvider);
 			GridDataFactory.fillDefaults()
 					.span(3, 1)
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(txtName);
+					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(txtProvider);
 			
 			return container;
 		}
@@ -94,14 +96,14 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		@Override
 		public void onVisible(IObservableValue templateObservable, DataBindingContext dbc) {
 			Object value = templateObservable.getValue();
-			if (!(value instanceof ITemplate) || DisposeUtils.isDisposed(txtName)) {
+			if (!(value instanceof ITemplate) || DisposeUtils.isDisposed(txtProvider)) {
 				return;
 			}
 			ITemplate template = (ITemplate) value;
 			if(template.isAnnotatedWith("provider")) {
-				txtName.setText("Provider: " + template.getAnnotation("provider"));
+				txtProvider.setText("Provider: " + template.getAnnotation("provider"));
 			}else {
-				txtName.setText("");
+				txtProvider.setText("");
 			}
 			Map<String, String> annotations = template.getAnnotations();
 			addTextFor("description", annotations, txtDescription);
@@ -109,11 +111,12 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		}
 		
 		private void updateImage(String iconClass) {
-			classIcon.setImage(OpenShiftImages.getAppImage(iconClass));
+			Image image = iconClass == null ? null : OpenShiftImages.getAppImage(iconClass);
+			classIcon.setImage(image);
 		}
 
 		private void addTextFor(String annotation, Map<String, String> annotations,  StyledText text) {
-			text.setText(annotations.get(annotation));
+			text.setText((String)ObjectUtils.defaultIfNull(annotations.get(annotation),""));
 		}
 
 		@Override
