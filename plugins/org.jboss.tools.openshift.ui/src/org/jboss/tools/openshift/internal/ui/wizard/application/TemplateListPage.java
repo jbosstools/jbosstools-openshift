@@ -10,7 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -21,13 +26,9 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -38,8 +39,11 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
-import com.openshift.restclient.capability.resources.ITags;
+import com.openshift.restclient.capability.ICapability;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
 
 /**
@@ -94,7 +98,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			@Override
 			protected IStatus validate() {
-				if(modelObservable.getValue() ==null) {
+				Object value = modelObservable.getValue();
+				if(value == null || value instanceof TemplateNode) {
 					return ValidationStatus.cancel("Please select a template to create your application.");
 				}
 				return ValidationStatus.ok();
@@ -123,28 +128,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	private TreeViewer createTemplatesViewer(Composite parent, final Text txtFilter) {
 		TreeViewer viewer = 	new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		viewer.setLabelProvider(new StyledCellLabelProvider() {
-			@Override
-			public void update(ViewerCell cell) {
-				Object element = cell.getElement();
-				if(element instanceof ITemplate) {
-					ITemplate template = (ITemplate) element;
-					final StyledString text = new StyledString(template.getName());
-					template.accept(new CapabilityVisitor<ITags, Object>() {
-
-						@Override
-						public Object visit(ITags capability) {
-							text.append(NLS.bind(" ({0})", StringUtils.join(capability.getTags(), ", ")), StyledString.DECORATIONS_STYLER);
-							return null;
-						}
-					}, null);
-					cell.setText(text.toString());
-					cell.setStyleRanges(text.getStyleRanges());
-				}
-				super.update(cell);
-			}
-		});
-		viewer.setContentProvider(new TemplateListPageTreeContentProvider());
+		viewer.setLabelProvider(new TemplateListPageLabelProvier());
+		viewer.setContentProvider(new TemplateListPageContentProvider());
 		viewer.addFilter(new AnnotationTagViewerFilter( new ITextControl() {
 			@Override
 			public String getText() {
@@ -155,7 +140,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		return viewer;
 	}
 	
-	private class TemplateListPageTreeContentProvider implements ITreeContentProvider{
+	private static class TemplateListPageContentProvider implements ITreeContentProvider{
 		
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -167,7 +152,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		
 		@Override
 		public boolean hasChildren(Object node) {
-			return false;
+			return (node instanceof TemplateNode);
 		}
 		
 		@Override
@@ -177,13 +162,131 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		
 		@Override
 		public Object[] getElements(Object node) {
-			return model.getTemplates().toArray();
+			if(!(node instanceof Collection)) return null;
+			@SuppressWarnings("unchecked")
+			Collection<ITemplate> templates = (Collection<ITemplate>)node;
+			Map<String, TemplateNode> namespaces = new HashMap<String, TemplateNode>();
+			for (ITemplate template : templates) {
+				if(!namespaces.containsKey(template.getNamespace())) {
+					namespaces.put(template.getNamespace(), new TemplateNode(template.getNamespace()));
+				}
+				namespaces.get(template.getNamespace()).getItems().add(template);
+			}
+			return namespaces.values().toArray();
 		}
 		
 		@Override
 		public Object[] getChildren(Object node) {
+			if(!(node instanceof TemplateNode)) return null;
+			return ((TemplateNode) node).getItems().toArray();
+		}
+	}
+	
+	public static class TemplateNode implements ITemplate {
+		
+		private String name;
+		private Collection<IResource> resources = new ArrayList<IResource>();
+		
+		public TemplateNode(String name) {
+			this.name = name;
+		}
+		
+		public Collection<IResource> getItems(){
+			return this.resources;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+
+		@Override
+		public Set<Class<? extends ICapability>> getCapabilities() {
 			return null;
 		}
+
+		@Override
+		public ResourceKind getKind() {
+			return null;
+		}
+
+		@Override
+		public String getApiVersion() {
+			return null;
+		}
+
+		@Override
+		public String getCreationTimeStamp() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public void setName(String name) {
+		}
+
+		@Override
+		public String getNamespace() {
+			return null;
+		}
+
+		@Override
+		public void setNamespace(String namespace) {
+		}
+
+		@Override
+		public Map<String, String> getLabels() {
+			return new HashMap<String, String>();
+		}
+
+		@Override
+		public void addLabel(String key, String value) {
+		}
+
+		@Override
+		public boolean isAnnotatedWith(String key) {
+			return false;
+		}
+
+		@Override
+		public String getAnnotation(String key) {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> getAnnotations() {
+			return new HashMap<String, String>();
+		}
+
+		@Override
+		public <T extends ICapability> T getCapability(Class<T> capability) {
+			return null;
+		}
+
+		@Override
+		public boolean supports(Class<? extends ICapability> capability) {
+			return false;
+		}
+
+		@Override
+		public <T extends ICapability, R> R accept(
+				CapabilityVisitor<T, R> visitor, R unsupportedCapabililityValue) {
+			return unsupportedCapabililityValue;
+		}
+
+		@Override
+		public Map<String, IParameter> getParameters() {
+			return new HashMap<String, IParameter>();
+		}
+
+		@Override
+		public void updateParameterValues(Collection<IParameter> parameters) {
+		}
+		
 	}
 	
 	public interface ITextControl {

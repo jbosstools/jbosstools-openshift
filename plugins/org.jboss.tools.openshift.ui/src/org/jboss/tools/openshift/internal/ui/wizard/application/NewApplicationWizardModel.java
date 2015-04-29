@@ -73,7 +73,9 @@ public class NewApplicationWizardModel
 
 			@Override
 			public  Collection<ITemplate> visit(IProjectTemplateList capability) {
-				return capability.getTemplates();
+				Collection<ITemplate> templates = capability.getTemplates();
+				templates.addAll(capability.getCommonTemplates());
+				return templates;
 			}
 		}, new ArrayList<ITemplate>());
 		
