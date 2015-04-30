@@ -30,6 +30,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
 
 /**
  * @author Andre Dietisheim
@@ -59,9 +60,11 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private IStatus connectError;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
+	private IConnectionAwareModel wizardModel;
 	
-	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange) {
+	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange, IConnectionAwareModel wizardModel) {
 		this.allConnections = allConnections;
+		this.wizardModel = wizardModel;
 		this.allHosts = createAllHosts(allConnections);
 		this.allowConnectionChange = allowConnectionChange;
 		this.connectionsFactory = createConnectionsFactory();
@@ -313,11 +316,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		try {
 			this.connection = createConnection();
-			if(connection != null 
-					&& !connection.connect()) {
-				String message = String.format("Unable to connect to %s", connection.getHost());
-				OpenShiftCommonUIActivator.log(message, null);
-				status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, message);
+			if(connection != null) {
+				if (connection.connect()) {
+					wizardModel.setConnection(connection);
+				} else {
+					String message = String.format("Unable to connect to %s", connection.getHost());
+					OpenShiftCommonUIActivator.log(message, null);
+					status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, message);
+				}
 			}
 //		} catch (NotFoundOpenShiftException e) {
 //			// connectionFactoryError user without domain

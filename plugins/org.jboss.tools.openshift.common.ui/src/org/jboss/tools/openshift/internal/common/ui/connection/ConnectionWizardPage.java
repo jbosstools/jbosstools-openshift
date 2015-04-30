@@ -94,7 +94,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	protected ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection",
 				wizard);
-		this.pageModel = new ConnectionWizardPageModel(wizardModel.getConnection(), ConnectionsRegistrySingleton.getInstance().getAll(), allowConnectionChange);
+		this.pageModel = new ConnectionWizardPageModel(wizardModel.getConnection(), ConnectionsRegistrySingleton.getInstance().getAll(), allowConnectionChange, wizardModel);
 		/*
 		 * JBIDE-12999: ensure EclipseAuthenticator is installed and overrides
 		 * NetAuthenticator

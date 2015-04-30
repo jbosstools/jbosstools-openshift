@@ -22,7 +22,6 @@ import org.jboss.tools.openshift.express.internal.core.QuickstartNameComparator;
 import org.jboss.tools.openshift.express.internal.core.cartridges.CartridgeNameComparator;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ApplicationTemplateCategory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.CartridgeApplicationTemplate;
@@ -66,7 +65,6 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 			new ApplicationTemplateCategory("Quickstarts", 
 					"A quick way to try out a new technology with code and libraries preconfigured. "
 					+ "You are responsible for updating core libraries for security updates");
-	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 
 	protected ApplicationTemplateWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
@@ -76,6 +74,13 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	private void setupWizardModelListeners(OpenShiftApplicationWizardModel wizardModel) {
+		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_CONNECTION,
+				new PropertyChangeListener() {
+
+					public void propertyChange(PropertyChangeEvent event) {
+						setResourcesLoaded(false);
+					}
+				});
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_DOMAIN,
 				new PropertyChangeListener() {
 
@@ -89,6 +94,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 						setExistingApplicationsFor((List<IDomain>) newValue);
 					}
 				});
+
 		new PojoEventBridge()
 			.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
 			.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
@@ -98,7 +104,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public ExpressConnection getConnection() {
-		return wizardModel.getLegacyConnection();
+		return wizardModel.getExpressConnection();
 	}
 
 	public String[] getExistingApplicationNames() {
@@ -214,7 +220,10 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadResources() throws OpenShiftException {
-		ExpressConnection connection = getConnection();
+		loadResources(getConnection());
+	}
+
+	protected void loadResources(final ExpressConnection connection) throws OpenShiftException {
 		if (!wizardModel.isValid(connection)) {
 			return;
 		}

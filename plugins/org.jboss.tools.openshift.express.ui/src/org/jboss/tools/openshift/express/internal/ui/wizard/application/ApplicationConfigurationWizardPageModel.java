@@ -20,7 +20,6 @@ import java.util.Set;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.utils.OpenShiftUserPreferencesProvider;
 import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 
@@ -68,7 +67,6 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	private String existingApplicationName;
 	private boolean resourcesLoaded = false;
 	private ICartridge selectedCartridge;
-	private OpenShiftUserPreferencesProvider openShiftUserPreferencesProvider = new OpenShiftUserPreferencesProvider();
 
 	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
@@ -120,7 +118,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public ExpressConnection getConnection() {
-		return wizardModel.getLegacyConnection();
+		return wizardModel.getExpressConnection();
 	}
 
 	public ApplicationScale getScale() {

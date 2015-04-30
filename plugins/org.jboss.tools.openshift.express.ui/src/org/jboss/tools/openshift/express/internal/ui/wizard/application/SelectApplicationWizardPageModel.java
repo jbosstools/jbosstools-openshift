@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
@@ -46,8 +47,12 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private void refreshDomains() {
-		wizardModel.getLegacyConnection().refresh();
-		wizardModel.setDomains(loadDomains());
+		ExpressConnection connection = wizardModel.getExpressConnection();
+		if (connection == null) {
+			return;
+		}
+		connection.refresh();
+		wizardModel.setDomains(loadDomains(connection));
 	}
 
 	public List<IDomain> getDomains() throws OpenShiftException {
@@ -64,17 +69,20 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadOpenShiftResources() {
-		loadDomains();
+		loadDomains(wizardModel.getExpressConnection());
 	}
 
-	protected List<IDomain> loadDomains() {
-		List<IDomain> domains = wizardModel.getLegacyConnection().getDomains();
+	protected List<IDomain> loadDomains(ExpressConnection connection) {
+		if (connection == null) {
+			return Collections.emptyList();
+		}
+		List<IDomain> domains = connection.getDomains();
 		wizardModel.setDomains(domains);
 		return domains;
 	}
 	
 	public ExpressConnection getConnection() {
-		return wizardModel.getLegacyConnection();
+		return wizardModel.getExpressConnection();
 	}
 
 	public void clearSelectedApplication() {

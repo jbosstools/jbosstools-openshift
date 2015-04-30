@@ -70,7 +70,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		setDomain(domain);
 		setApplication(application);
 		setUseExistingApplication(useExistingApplication);
-		setLegacyConnection(connection);
+		setConnection(connection);
 		setEnvironmentVariables(new LinkedHashMap<String, String>());
 	}
 
@@ -98,7 +98,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getRemoteName()
 				, getRepositoryFile()
 				, getMarkers()
-				, getLegacyConnection())
+				, getExpressConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -139,7 +139,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getApplication()
 				, getRemoteName()
 				, getMarkers()
-				, getLegacyConnection())
+				, (ExpressConnection) getConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -181,7 +181,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getApplication()
 				, getRemoteName()
 				, getMarkers()
-				, getLegacyConnection())
+				, getExpressConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -231,7 +231,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	public void setDefaultDomainIfRequired() {
 		Assert.isNotNull(getConnection());
 		if (!hasDomain()) {
-			setDomain(getLegacyConnection().getDefaultDomain());
+			setDomain(getExpressConnection().getDefaultDomain());
 		}
 	}
 
@@ -536,15 +536,25 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public ExpressConnection setLegacyConnection(ExpressConnection connection) {
-		update(connection);
+	public IConnection setConnection(IConnection connection) {
+		if (connection instanceof ExpressConnection) {
+			update((ExpressConnection) connection);
+		}
 		setProperty(PROP_CONNECTION, connection);
 		return connection;
 	}
 	
 	@Override
-	public ExpressConnection getLegacyConnection() {
+	public IConnection getConnection() {
 		return getProperty(PROP_CONNECTION);
+	}
+
+	public ExpressConnection getExpressConnection() {
+		IConnection connection = getConnection();
+		if (!(connection instanceof ExpressConnection)) {
+			return null;
+		}
+		return (ExpressConnection) connection;
 	}
 
 	protected IServer setServerAdapter(IServer server) {
@@ -632,16 +642,6 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		Boolean binaryValue = (Boolean) getProperty(name);
 		return binaryValue != null 
 				&& binaryValue.booleanValue();
-	}
-
-	@Override
-	public IConnection getConnection() {
-		return getLegacyConnection();
-	}
-
-	@Override
-	public IConnection setConnection(IConnection connection) {
-		throw new RuntimeException(String.format("Method not implemented for connection type: %s", connection.getClass().getCanonicalName()));
 	}
 
 }
