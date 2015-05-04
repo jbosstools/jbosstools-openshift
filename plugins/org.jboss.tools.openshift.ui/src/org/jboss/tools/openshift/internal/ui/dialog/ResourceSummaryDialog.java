@@ -15,6 +15,8 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -33,11 +35,22 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 
 	private Collection<IResource> resources;
 	private String message;
+	private String dialogTitle;
+	private IStyledLabelProvider labelProvider;
+	private ITreeContentProvider contentProvider;
 
-	public ResourceSummaryDialog(Shell parentShell, Collection<IResource> resources, String message) {
+	public ResourceSummaryDialog(Shell parentShell, 
+			Collection<IResource> resources, 
+			String dialogTitle,
+			String message, 
+			IStyledLabelProvider labelProvider, 
+			ITreeContentProvider contetProvider) {
 		super(parentShell);
+		this.dialogTitle = dialogTitle;
 		this.resources = resources;
 		this.message = message;
+		this.labelProvider = labelProvider;
+		this.contentProvider = contetProvider;
 	}
 
 	@Override
@@ -75,14 +88,14 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		tableContainer.setLayout(treeLayout);
 		final TreeViewer viewer = new TreeViewer(tableContainer, SWT.BORDER  | SWT.V_SCROLL | SWT.H_SCROLL);
-		viewer.setContentProvider(new ResourceSummaryContentProvider());
-		viewer.setLabelProvider(new ResourceSummaryLabelProvider());
+		viewer.setContentProvider(contentProvider);
+		viewer.setLabelProvider(labelProvider);
 		
 		return viewer;
 	}
 	
 	private void setupDialog(Composite parent) {
-		parent.getShell().setText("Create Application Summary");
+		parent.getShell().setText(dialogTitle);
 		setTitle(message);
 		setTitleImage(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 		setDialogHelpAvailable(false);

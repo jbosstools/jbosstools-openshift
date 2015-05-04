@@ -16,6 +16,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
@@ -55,7 +56,6 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 	
 	private class TemplateDetailView extends EmptyView {
 		private Binding binding;
-		private StyledText txtProvider;
 		private StyledText txtDescription;
 		private CLabel classIcon;
 		
@@ -82,13 +82,6 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 				.grab(true, true)
 				.span(3, 1)
 				.applyTo(txtDescription);
-
-			//name
-			this.txtProvider = new StyledText(container, SWT.READ_ONLY);
-			UIUtils.setTransparent(txtProvider);
-			GridDataFactory.fillDefaults()
-					.span(3, 1)
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(txtProvider);
 			
 			return container;
 		}
@@ -96,14 +89,13 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		@Override
 		public void onVisible(IObservableValue templateObservable, DataBindingContext dbc) {
 			Object value = templateObservable.getValue();
-			if (!(value instanceof ITemplate) || DisposeUtils.isDisposed(txtProvider)) {
+			txtDescription.setText("");
+			if (!(value instanceof ITemplate) || DisposeUtils.isDisposed(txtDescription)) {
 				return;
 			}
 			ITemplate template = (ITemplate) value;
 			if(template.isAnnotatedWith("provider")) {
-				txtProvider.setText("Provider: " + template.getAnnotation("provider"));
-			}else {
-				txtProvider.setText("");
+				txtDescription.append(NLS.bind("Provider: {0} \n", template.getAnnotation("provider")));
 			}
 			Map<String, String> annotations = template.getAnnotations();
 			addTextFor("description", annotations, txtDescription);
@@ -116,7 +108,7 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		}
 
 		private void addTextFor(String annotation, Map<String, String> annotations,  StyledText text) {
-			text.setText((String)ObjectUtils.defaultIfNull(annotations.get(annotation),""));
+			text.append((String)ObjectUtils.defaultIfNull(annotations.get(annotation),""));
 		}
 
 		@Override
