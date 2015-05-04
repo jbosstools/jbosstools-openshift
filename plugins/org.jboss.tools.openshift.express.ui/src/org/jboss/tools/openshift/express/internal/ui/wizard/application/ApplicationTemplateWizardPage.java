@@ -383,7 +383,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		applicationTemplatesViewer.addFilter(new ApplicationTemplateViewerFilter(filterText));
 		applicationTemplatesViewer.setInput(pageModel);
 		return applicationTemplatesViewer;
-	}
+	}	
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {

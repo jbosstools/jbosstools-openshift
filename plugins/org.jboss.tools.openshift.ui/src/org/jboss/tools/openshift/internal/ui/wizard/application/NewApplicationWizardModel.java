@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateList;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
 
@@ -34,7 +36,8 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  */
 public class NewApplicationWizardModel 
-		extends ObservableUIPojo implements ITemplateListPageModel, ITemplateParametersPageModel, IResourceLabelsPageModel {
+		extends ObservablePojo 
+		implements IResourceDetailsModel, ITemplateListPageModel, ITemplateParametersPageModel, IResourceLabelsPageModel {
 
 	private IProject project;
 	private ITemplate template;
@@ -44,16 +47,26 @@ public class NewApplicationWizardModel
 	private Collection<String> readonlyLabels = Arrays.asList(new String [] {"template"});
 	private List<Label> labels;
 	private Label selectedLabel;
-
+	private Collection<IResource> items = new ArrayList<IResource>(); 
+	
 	public NewApplicationWizardModel(IProject project) {
 		this.project = project;
 	}
 
 	@Override
+	public Collection<IResource> getItems() {
+		return items;
+	}
+	private void setItems(Collection<IResource> items) {
+		firePropertyChange(PROPERTY_ITEMS, this.items, this.items = items);
+	}
+	
+	@Override
 	public void setTemplate(ITemplate template) {
 		firePropertyChange(PROPERTY_TEMPLATE, this.template,this.template = template);
 		if(template == null) return;
 		setParameters(new ArrayList<IParameter>(template.getParameters().values()));
+		setItems(template.getItems());
 		
 		setLabels(template.getLabels());
 	}

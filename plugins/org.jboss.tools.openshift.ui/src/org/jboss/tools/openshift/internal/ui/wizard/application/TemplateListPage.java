@@ -18,10 +18,12 @@ import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -32,12 +34,16 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -123,7 +129,41 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.hint(SWT.DEFAULT, 106)
 				.applyTo(detailsContainer);
 		
-		new TemplateDetailViews(modelObservable, null, detailsContainer, dbc).createControls();;
+		new TemplateDetailViews(modelObservable, null, detailsContainer, dbc).createControls();
+		
+		// details button
+		Button btnDetails = new Button(parent, SWT.NONE);
+		btnDetails.setText("Details...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).grab(false, false)
+				.applyTo(btnDetails);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnDetails))
+				.notUpdatingParticipant()
+				.to(modelObservable)
+				.converting(new Converter(ITemplate.class, Boolean.class) {
+					@Override
+					public Object convert(Object value) {
+						if(value == null || value instanceof TemplateNode) {
+							return Boolean.FALSE;
+						}
+						return Boolean.TRUE;
+					}
+				})
+				.in(dbc);
+		btnDetails.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				final String message = "The following resources will be created by using this template:";
+				new ResourceSummaryDialog(getShell(), 
+						model.getTemplate().getItems(), 
+						"Template Details",
+						message, 
+						new ResourceDetailsLabelProvider(), new ResourceDetailsContentProvider()).open();
+			}
+			
+		});
 	}
 
 	private TreeViewer createTemplatesViewer(Composite parent, final Text txtFilter) {

@@ -23,7 +23,9 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvider;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
+import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 
 /**
@@ -71,7 +73,7 @@ public class NewApplicationWizard extends Wizard implements IImportWizard, INewW
 						@Override
 						public void run() {
 							final String message = NLS.bind("Results of creating the resources from the {0} template.", model.getTemplate().getName());
-							new ResourceSummaryDialog(getShell(), job.getResources(), message).open();
+							new ResourceSummaryDialog(getShell(), job.getResources(), "Create Application Summary",message, new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider()).open();
 						}
 					});
 				}
