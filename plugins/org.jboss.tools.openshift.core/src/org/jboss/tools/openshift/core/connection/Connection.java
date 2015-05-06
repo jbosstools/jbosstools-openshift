@@ -37,6 +37,8 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.BearerTokenAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationClient;
 import com.openshift.restclient.authorization.IAuthorizationContext;
+import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
 
 public class Connection extends ObservablePojo implements IConnection, IRefreshable {
@@ -263,6 +265,17 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			throw e;
 		}
 	}
+	
+	/**
+	 * Delete the resource from the namespace it is associated with.  The delete operation 
+	 * return silently regardless if successful or not
+	 * 
+	 * @param resource
+	 * @throws OpenShiftException
+	 */
+	public void delete(IResource resource) {
+		client.delete(resource);
+	}
 
 	@Override
 	public boolean canConnect() throws IOException {
@@ -321,6 +334,17 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		} else if (!client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
 			return false;
 		return true;
+	}
+
+	public boolean ownsResource(IResource resource) {
+		IClient client =  resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
+
+			@Override
+			public IClient visit(IClientCapability capability) {
+				return capability.getClient();
+			}
+		}, null);
+		return this.client == client;
 	}
 
 }
