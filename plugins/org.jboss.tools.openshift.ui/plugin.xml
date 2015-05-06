@@ -74,40 +74,73 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.application.new"
-           id="org.jboss.tools.openshift.ui.command.application.new"
-           style="push"
-           tooltip="Create a new application">
-        <visibleWhen
-              checkEnabled="false">
-           <and>
-              <count
-                    value="1">
-              </count>
-              <iterate>
-                 <instanceof
-                       value="com.openshift.restclient.model.IProject">
-                 </instanceof>
-              </iterate>
-           </and>
-        </visibleWhen>
-     </command>
-  </menuContribution>
+		<!-- openshift explorer context menu: new connection -->
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.resource.delete"
+				id="org.jboss.tools.openshift.ui.command.resource.delete"
+				style="push"
+				tooltip="Delete the resource">
+				<visibleWhen>
+					<and>
+						<count
+							value="1">
+						</count>
+						<iterate>
+							<and>
+								<instanceof
+									value="com.openshift.restclient.model.IResource" />
+								<not>
+									<instanceof
+										value="com.openshift.restclient.model.IProject" />
+								</not>
+							</and>
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
+			<separator
+				name="org.jboss.tools.openshift.ui.delete.separator"
+					visible="true">
+			</separator>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.application.new"
+				id="org.jboss.tools.openshift.ui.command.application.new"
+				style="push"
+				tooltip="Create a new application">
+				<visibleWhen
+					checkEnabled="false">
+					<and>
+						<count
+							value="1" />
+						<iterate>
+							<instanceof
+								value="com.openshift.restclient.model.IProject" />
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
+		</menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
-			class="org.jboss.tools.openshift.internal.ui.command.RefreshResourceHandler"
+			class="org.jboss.tools.openshift.internal.ui.handler.RefreshResourceHandler"
 			commandId="org.jboss.tools.openshift.ui.command.refresh.resource">
 		</handler>
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.command.NewApplicationHandler"
-        commandId="org.jboss.tools.openshift.ui.command.application.new">
-  </handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.NewApplicationHandler"
+			commandId="org.jboss.tools.openshift.ui.command.application.new">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler"
+			commandId="org.jboss.tools.openshift.ui.command.resource.delete">
+		</handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -155,9 +188,14 @@
 			name="Refresh">
 		</command>
 		<command
-        	description="Create a new application from a template"
-        	id="org.jboss.tools.openshift.ui.command.application.new"
+			description="Create a new application from a template"
+			id="org.jboss.tools.openshift.ui.command.application.new"
 			name="Application">
+		</command>
+		<command
+			description="Delete the Resource"
+			id="org.jboss.tools.openshift.ui.command.resource.delete"
+			name="Delete Resource...">
 		</command>
 	</extension>
 

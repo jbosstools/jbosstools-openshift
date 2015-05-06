@@ -10,16 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -27,11 +25,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 
 /**
  * @author Jeff Cantrill
@@ -48,6 +51,38 @@ public class ConnectionTest {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
 		connection = new Connection(client, null, null, null);
 	}
+
+	@Test
+	public void ownsResourceShouldReturnTrueWhenClientsAreSame() {
+		Map<String, Object> mocks = givenAResourceThatAcceptsAVisitorForIClientCapability(client);
+		assertTrue(connection.ownsResource((IResource)mocks.get("resource")));
+	}
+
+	@Test
+	public void ownsResourceShouldReturnFalseWhenClientsAreDifferent() {
+		IClient diffClient = mock(IClient.class);
+		Map<String, Object> mocks = givenAResourceThatAcceptsAVisitorForIClientCapability(diffClient);
+		assertFalse(connection.ownsResource((IResource)mocks.get("resource")));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> givenAResourceThatAcceptsAVisitorForIClientCapability(IClient client){
+		final IClientCapability capability = mock(IClientCapability.class);
+		when(capability.getClient()).thenReturn(client);
+		IResource resource = mock(IResource.class);
+		when(resource.accept(any(CapabilityVisitor.class), any())).thenAnswer(new Answer<IClient>() {
+			@Override
+			public IClient answer(InvocationOnMock invocation) throws Throwable {
+				CapabilityVisitor<IClientCapability, IClient> visitor = (CapabilityVisitor<IClientCapability, IClient>)invocation.getArguments()[0];
+				return visitor.visit(capability);
+			}
+		});
+		Map<String, Object> mocks = new HashMap<String, Object>();
+		mocks.put("capability", capability);
+		mocks.put("resource", resource);
+		return mocks;
+	}
+	
 	@Test
 	public void getResourceKindShouldCallClient(){
 		List<IProject> projects = Arrays.asList(mock(IProject.class));
