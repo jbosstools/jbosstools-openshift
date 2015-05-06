@@ -39,6 +39,7 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * Skipping getImage tests as they can't be run headless
@@ -67,6 +68,17 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(build.getStatus()).thenReturn("Running");
 		
 		assertEquals(String.format("%s Running", build.getName()), provider.getStyledText(build).getString());
+	}
+	
+	@Test
+	public void getStyledTextForARoute() {
+		IRoute route = givenAResource(IRoute.class, ResourceKind.Route);
+		when(route.getHost()).thenReturn("www.example.com");
+		when(route.getPath()).thenReturn("");
+		assertEquals(String.format("%s www.example.com", route.getName()), provider.getStyledText(route).getString());
+
+		when(route.getPath()).thenReturn("/foo");
+		assertEquals(String.format("%s www.example.com/foo", route.getName()), provider.getStyledText(route).getString());
 	}
 	
 	@Test

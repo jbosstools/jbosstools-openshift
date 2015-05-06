@@ -27,6 +27,7 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author jeff.cantrill
@@ -90,6 +91,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 					return new StyledString(name);
 				}
 				return style(name, String.format("ns: %s", namespace));
+			case Route:
+				IRoute route = (IRoute) resource;
+				return style(route.getName(), String.format("%s%s", route.getHost(),route.getPath()));
 			case ReplicationController:
 				IReplicationController rc = (IReplicationController) resource;
 				return (style(resource.getName(), String.format("selector: %s", StringUtils.serialize(rc.getReplicaSelector()))));

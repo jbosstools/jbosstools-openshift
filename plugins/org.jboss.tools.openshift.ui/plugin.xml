@@ -22,18 +22,9 @@
 			name="org.jboss.tools.openshift.ui.explorer.navigatorContent">
 			<possibleChildren>
 				<or>
-					<instanceof
-						value="com.openshift.restclient.model.IProject" />
-					<instanceof
-						value="com.openshift.restclient.model.IService" />
-					<instanceof
-						value="com.openshift.restclient.model.IPod" />
-					<instanceof
-						value="com.openshift.restclient.model.IReplicationController" />
-					<instanceof
-						value="com.openshift.restclient.model.IBuildConfig" />
-					<instanceof
-						value="com.openshift.restclient.model.IDeploymentConfig" />
+     <instanceof
+           value="com.openshift.restclient.model.IResource">
+     </instanceof>
 					<instanceof
 						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>

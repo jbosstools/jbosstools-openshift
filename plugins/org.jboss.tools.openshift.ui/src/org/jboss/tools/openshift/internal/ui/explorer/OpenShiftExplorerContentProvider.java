@@ -29,7 +29,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	
 	private static final ResourceKind [] groupings = new ResourceKind [] {
 		ResourceKind.BuildConfig, ResourceKind.DeploymentConfig, ResourceKind.Service, ResourceKind.Pod,
-		ResourceKind.ReplicationController, ResourceKind.Build, ResourceKind.ImageStream
+		ResourceKind.ReplicationController, ResourceKind.Build, ResourceKind.ImageStream, ResourceKind.Route
 	};
 
 	/**

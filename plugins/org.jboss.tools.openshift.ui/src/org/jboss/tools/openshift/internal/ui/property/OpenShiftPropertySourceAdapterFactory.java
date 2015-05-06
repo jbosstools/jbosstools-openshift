@@ -21,6 +21,7 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 
@@ -43,6 +44,8 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 					return new PodPropertySource((IPod)resource);
 				case ReplicationController: 
 					return new ReplicationControllerPropertySource((IReplicationController) resource);
+				case Route:
+					return new RoutePropertySource((IRoute) resource);
 				case Service: 
 					return new ServicePropertySource((IService) resource);
 				default:
