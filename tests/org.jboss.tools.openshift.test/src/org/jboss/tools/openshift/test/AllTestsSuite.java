@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTe
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
+import org.jboss.tools.openshift.test.ui.explorer.ResourceGroupingTest;
 import org.jboss.tools.openshift.test.ui.job.CreateApplicationFromTemplateJobTest;
 import org.jboss.tools.openshift.test.ui.property.ConnectionPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
@@ -52,6 +53,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
+	ResourceGroupingTest.class,
 	ResourcePropertySourceTest.class,
 	StringUtilsTest.class,
 	TemplateParameterColumnLabelProviderTest.class,
