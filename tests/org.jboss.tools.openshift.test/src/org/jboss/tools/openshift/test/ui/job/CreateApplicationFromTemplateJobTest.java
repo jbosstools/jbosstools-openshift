@@ -29,7 +29,6 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
-import com.openshift.restclient.model.IConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
@@ -48,7 +47,6 @@ public class CreateApplicationFromTemplateJobTest {
 	private Collection<IParameter> parameters = new ArrayList<IParameter>();
 	
 	private CreateApplicationFromTemplateJobRunner job;
-	private IConfig config;
 	private Collection<IResource> resources = new ArrayList<IResource>();
 	
 	@SuppressWarnings("unchecked")
@@ -78,8 +76,8 @@ public class CreateApplicationFromTemplateJobTest {
 		resources.add(resource);
 		resources.add(status);
 		
-		when(capability.process(template)).thenReturn(config);
-		when(capability.apply(config)).thenReturn(resources);
+		when(capability.process(template)).thenReturn(template);
+		when(capability.apply(template)).thenReturn(resources);
 
 		IStatus result = job.runMe();
 
@@ -91,8 +89,8 @@ public class CreateApplicationFromTemplateJobTest {
 	 */
 	@Test
 	public void shouldReturnInfoStatusWhenAllResourcesCreatedWithoutErrors() {
-		when(capability.process(template)).thenReturn(config);
-		when(capability.apply(config)).thenReturn(resources);
+		when(capability.process(template)).thenReturn(template);
+		when(capability.apply(template)).thenReturn(resources);
 		
 		IStatus result = job.runMe();
 		

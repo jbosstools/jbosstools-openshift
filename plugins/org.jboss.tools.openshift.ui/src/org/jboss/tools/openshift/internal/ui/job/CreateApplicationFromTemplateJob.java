@@ -21,7 +21,6 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
-import com.openshift.restclient.model.IConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
@@ -41,7 +40,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	private Collection<IResource> resources;
 
 	public CreateApplicationFromTemplateJob(IProject project, ITemplate template, Collection<IParameter> parameters, Collection<Label> labels) {
-		super("Create Application From Template");
+		super("Create Application From Template Job");
 		this.project = project;
 		this.template = template;
 		this.labels = labels;
@@ -61,9 +60,9 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 			public IStatus visit(IProjectTemplateProcessing capability) {
 				
 				try {
-					IConfig config = capability.process(template);
+					ITemplate processed = capability.process(template);
 					
-					resources = capability.apply(config);
+					resources = capability.apply(processed);
 					return handleResponse(resources);
 				}catch(OpenShiftException e) {
 					String message = e.getMessage();
