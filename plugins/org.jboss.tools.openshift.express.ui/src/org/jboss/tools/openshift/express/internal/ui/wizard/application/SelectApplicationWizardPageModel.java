@@ -47,7 +47,7 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private void refreshDomains() {
-		ExpressConnection connection = wizardModel.getExpressConnection();
+		ExpressConnection connection = wizardModel.getConnection();
 		if (connection == null) {
 			return;
 		}
@@ -69,7 +69,7 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void loadOpenShiftResources() {
-		loadDomains(wizardModel.getExpressConnection());
+		loadDomains(wizardModel.getConnection());
 	}
 
 	protected List<IDomain> loadDomains(ExpressConnection connection) {
@@ -82,7 +82,7 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public ExpressConnection getConnection() {
-		return wizardModel.getExpressConnection();
+		return wizardModel.getConnection();
 	}
 
 	public void clearSelectedApplication() {

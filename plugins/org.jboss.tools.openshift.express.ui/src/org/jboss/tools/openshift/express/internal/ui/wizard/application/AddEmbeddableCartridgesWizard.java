@@ -42,7 +42,7 @@ public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<Embed
 										new ArrayList<ICartridge>(wizardModel.getAvailableEmbeddableCartridges())))
 						, new NewApplicationProperties(wizardModel)
 						, wizardModel.getDomain()
-						, wizardModel.getExpressConnection()
+						, wizardModel.getConnection()
 				));
 	}
 

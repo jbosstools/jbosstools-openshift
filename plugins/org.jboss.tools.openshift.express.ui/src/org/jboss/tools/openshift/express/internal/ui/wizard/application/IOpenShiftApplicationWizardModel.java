@@ -30,7 +30,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IQuickstartApplicationTemplate;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;
@@ -43,7 +43,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author André Dietisheim
  */
-public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel, IObservablePojo {
+public interface IOpenShiftApplicationWizardModel extends IConnectionAware<ExpressConnection>, IObservablePojo {
 
 	public static final String PROP_APPLICATION = "application";
 	public static final String PROP_APPLICATION_NAME = "applicationName";
@@ -72,8 +72,6 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAwareModel,
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
 	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
-	
-	public ExpressConnection getExpressConnection();
 	
 	/**
 	 * Imports the project that the user has chosen into the workspace.

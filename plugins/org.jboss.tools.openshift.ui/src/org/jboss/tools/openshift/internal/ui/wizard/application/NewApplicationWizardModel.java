@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateList;
@@ -48,7 +47,7 @@ public class NewApplicationWizardModel
 	private List<Label> labels;
 	private Label selectedLabel;
 	private Collection<IResource> items = new ArrayList<IResource>(); 
-	
+
 	public NewApplicationWizardModel(IProject project) {
 		this.project = project;
 	}
@@ -57,24 +56,24 @@ public class NewApplicationWizardModel
 	public Collection<IResource> getItems() {
 		return items;
 	}
+
 	private void setItems(Collection<IResource> items) {
 		firePropertyChange(PROPERTY_ITEMS, this.items, this.items = items);
 	}
-	
+
 	@Override
 	public void setTemplate(ITemplate template) {
 		firePropertyChange(PROPERTY_TEMPLATE, this.template,this.template = template);
 		if(template == null) return;
 		setParameters(new ArrayList<IParameter>(template.getParameters().values()));
 		setItems(template.getItems());
-		
 		setLabels(template.getLabels());
 	}
-	
+
 	public IProject getProject() {
 		return this.project;
 	}
-	
+
 	@Override
 	public ITemplate getTemplate() {
 		return this.template;
@@ -98,7 +97,7 @@ public class NewApplicationWizardModel
 	public List<IParameter> getParameters() {
 		return parameters;
 	}
-	
+
 	@Override
 	public void setParameters(List<IParameter> parameters) {
 		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = parameters);
@@ -142,7 +141,7 @@ public class NewApplicationWizardModel
 	public Collection<String> getReadOnlyLabels() {
 		return readonlyLabels;
 	}
-	
+
 	@Override
 	public void setSelectedLabel(Label label) {
 		firePropertyChange(PROPERTY_SELECTED_LABEL, this.selectedLabel, this.selectedLabel = label);
@@ -183,7 +182,5 @@ public class NewApplicationWizardModel
 		this.labels.add(new Label(key, value));
 		fireIndexedPropertyChange(PROPERTY_LABELS, this.labels.size(), old, Collections.unmodifiableList(labels));
 	}
-	
-	
 
 }

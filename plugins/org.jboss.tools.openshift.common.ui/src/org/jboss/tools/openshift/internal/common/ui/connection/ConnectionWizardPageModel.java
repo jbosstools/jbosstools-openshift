@@ -30,7 +30,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
 /**
  * @author Andre Dietisheim
@@ -60,9 +60,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private IStatus connectError;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
-	private IConnectionAwareModel wizardModel;
+	private IConnectionAware<IConnection> wizardModel;
 	
-	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange, IConnectionAwareModel wizardModel) {
+	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
 		this.allConnections = allConnections;
 		this.wizardModel = wizardModel;
 		this.allHosts = createAllHosts(allConnections);
@@ -103,6 +103,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	private void initEditConnection(IConnection connection) {
 		this.selectedConnection = connection;
+		this.connection = connection.clone();
 		this.connectionFactory = connectionsFactory.getByConnection(connection.getClass());
 		this.host = connection.getHost();
 		this.useDefaultHost = connection.isDefaultHost();
@@ -306,10 +307,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	public Collection<String> getAllHosts() {
 		return allHosts;
-	}
-	
-	public IStatus getConnectionCreationError() {
-		return connectionFactoryError;
 	}
 
 	public IStatus connect() {

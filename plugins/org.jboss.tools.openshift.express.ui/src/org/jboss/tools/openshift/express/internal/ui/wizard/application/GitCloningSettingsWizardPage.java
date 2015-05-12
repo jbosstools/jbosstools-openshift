@@ -29,7 +29,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -69,7 +68,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  * @author Xavier Coulon
  * 
  */
-public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage implements IWizardPage {
+public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 	private GitCloningSettingsWizardPageModel pageModel;
 	private IOpenShiftApplicationWizardModel wizardModel;

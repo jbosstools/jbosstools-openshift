@@ -24,15 +24,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.ui.IImportWizard;
-import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
@@ -54,7 +50,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
-import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -67,12 +63,12 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  * 
- * @see NewOpenShiftApplicationWizard
+ * @see NewApplicationNewWizard
  * @see ImportOpenShiftApplicationWizard
  */
-public abstract class OpenShiftApplicationWizard extends Wizard implements IImportWizard, INewWizard {
+public abstract class OpenShiftApplicationWizard extends Wizard implements IConnectionAwareWizard<ExpressConnection> {
 
-	private final boolean showCredentialsPage;
+//	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
 	OpenShiftApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
@@ -80,7 +76,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
 		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
-		this.showCredentialsPage = showCredentialsPage;
+//		this.showCredentialsPage = showCredentialsPage;
 	}
 
 	protected void openError(final String title, final String message) {
@@ -107,14 +103,10 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 	}
 
 	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-	}
-
-	@Override
 	public void addPages() {
-		if (showCredentialsPage) {
-			addPage(new ConnectionWizardPage(this, model));
-		}
+//		if (showCredentialsPage) {
+//			addPage(new ConnectionWizardPage(this, model));
+//		}
 		addPage(new ApplicationTemplateWizardPage(this, model));
 		addPage(new ApplicationConfigurationWizardPage(this, model));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));
@@ -138,7 +130,7 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 					return false;
 				}
 
-				new FireExpressConnectionsChangedJob(model.getExpressConnection()).schedule();
+				new FireExpressConnectionsChangedJob(model.getConnection()).schedule();
 				saveCodeAnythingUrl();
 			}
 
@@ -164,8 +156,8 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			// dont open error-dialog, the jobs will do if they fail
 			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
 			if (model.getConnection() != null) {
-				new JobChainBuilder(new RefreshConnectionJob(model.getExpressConnection()))
-					.runWhenDone(new FireExpressConnectionsChangedJob(model.getExpressConnection()))
+				new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
+					.runWhenDone(new FireExpressConnectionsChangedJob(model.getConnection()))
 					.schedule();
 			}
 			return false;
@@ -388,5 +380,20 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IImpo
 			return null;
 		}
 
+	}
+
+	@Override
+	public ExpressConnection setConnection(ExpressConnection connection) {
+		return model.setConnection(connection);
+	}
+
+	@Override
+	public ExpressConnection getConnection() {
+		return model.getConnection();
+	}
+
+	@Override
+	public boolean hasConnection() {
+		return model.hasConnection();
 	}
 }

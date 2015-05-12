@@ -42,7 +42,7 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 						, alternativeCartridges
 						, new NewApplicationProperties(wizardModel)
 						, wizardModel.getDomain()
-						, wizardModel.getExpressConnection()));
+						, wizardModel.getConnection()));
 	}
 
 	@Override

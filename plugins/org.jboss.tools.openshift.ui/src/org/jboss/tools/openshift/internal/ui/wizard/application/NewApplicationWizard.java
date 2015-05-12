@@ -14,14 +14,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IImportWizard;
-import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.common.ui.JobUtils;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvider;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
@@ -34,29 +32,29 @@ import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJo
  * 
  * @author jeff.cantrill
  */
-public class NewApplicationWizard extends Wizard implements IImportWizard, INewWizard {
+public class NewApplicationWizard extends Wizard implements IConnectionAwareWizard<Connection> {
 	
 	private NewApplicationWizardModel model;
 
+	public NewApplicationWizard() {
+		this(null);
+	}
+	
 	public NewApplicationWizard(NewApplicationWizardModel model) {
 		setWindowTitle("New OpenShift Application");
 		this.model = model;
 	}
-	
+
 	@Override
 	public void addPages() {
 		addPage(new TemplateListPage(this, model));
 		addPage(new TemplateParametersPage(this, model));
 		addPage(new ResourceLabelsPage(this, model));
 	}
-	
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-	}
-	
+
 	@Override
 	public boolean performFinish() {
-		
+
 		final CreateApplicationFromTemplateJob job = new CreateApplicationFromTemplateJob(
 				model.getProject(),
 				model.getTemplate(),
@@ -85,17 +83,35 @@ public class NewApplicationWizard extends Wizard implements IImportWizard, INewW
 					job, 
 					job.getDelegatingProgressMonitor(), 
 					getContainer());
-			return handleJobStatus(status, job);
+			return handleJobStatus(status);
 		} catch (Exception e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
-			return handleJobStatus(new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,"Error trying to create a new application from a template",e), job);
+			return handleJobStatus(new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,"Error trying to create a new application from a template",e));
 		}
 	}
-	
-	private boolean handleJobStatus(IStatus status, final CreateApplicationFromTemplateJob job) {
+
+	private boolean handleJobStatus(IStatus status) {
 		if (!JobUtils.isOk(status) && !JobUtils.isWarning(status)) {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public Connection getConnection() {
+		// TODO implement so that it can react to connection changes
+		return null;
+	}
+
+	@Override
+	public boolean hasConnection() {
+		// TODO implement so that it can react to connection changes
+		return false;
+	}
+
+	@Override
+	public Connection setConnection(Connection connection) {
+		// TODO implement so that it can react to connection changes
+		return null;
 	}
 }

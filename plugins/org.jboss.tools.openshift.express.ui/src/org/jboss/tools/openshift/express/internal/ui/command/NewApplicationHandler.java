@@ -15,8 +15,8 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
@@ -50,7 +50,7 @@ public class NewApplicationHandler extends AbstractHandler {
 		return null;
 	}
 
-	private void open(IWorkbenchWizard wizard, Shell shell) {
+	private void open(IWizard wizard, Shell shell) {
 		try {
 			WizardUtils.openWizard(wizard, shell);
 		} catch (NullPointerException e) {

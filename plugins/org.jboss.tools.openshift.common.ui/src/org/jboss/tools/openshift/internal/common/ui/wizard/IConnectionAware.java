@@ -8,36 +8,19 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.connection;
+package org.jboss.tools.openshift.internal.common.ui.wizard;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
 /**
  * @author Andre Dietisheim
  */
-public class ConnectionWizardModel implements IConnectionAware<IConnection> {
+public interface IConnectionAware<C extends IConnection> {
+
+	public C getConnection();
+
+	public boolean hasConnection();
 	
-	protected IConnection connection;
-
-	public ConnectionWizardModel(final IConnection connection) {
-		this.connection = connection;
-	}
-	
-	@Override
-	public IConnection getConnection() {
-		return connection;
-	}
-
-	@Override
-	public IConnection setConnection(IConnection connection) {
-		this.connection = connection;
-		return connection;
-	}
-
-	@Override
-	public boolean hasConnection() {
-		return getConnection() != null;
-	}
+	public C setConnection(C connection);
 
 }

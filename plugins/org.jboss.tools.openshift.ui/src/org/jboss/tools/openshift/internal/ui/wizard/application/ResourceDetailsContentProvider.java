@@ -36,7 +36,6 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ResourceDetailsContentProvider implements ITreeContentProvider{
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] getChildren(Object node) {
 		if(node instanceof IResource) {

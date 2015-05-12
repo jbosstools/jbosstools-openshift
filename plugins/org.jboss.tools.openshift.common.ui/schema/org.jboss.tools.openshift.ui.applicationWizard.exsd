@@ -3,7 +3,7 @@
 <schema targetNamespace="org.jboss.tools.openshift.common.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.jboss.tools.openshift.common.ui" id="org.jboss.tools.openshift.ui.connectionEditor" name="ConnectionEditor"/>
+         <meta.schema plugin="org.jboss.tools.openshift.common.ui" id="org.jboss.tools.openshift.ui.applicationWizard" name="ApplicationWizard"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="connectionEditor"/>
+            <element ref="applicationWizard"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +47,7 @@
       </complexType>
    </element>
 
-   <element name="connectionEditor">
+   <element name="applicationWizard">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -55,7 +55,17 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.jboss.tools.openshift.internal.common.ui.connection.IConnectionEditor"/>
+                  <meta.attribute kind="java" basedOn=":org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="connection" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.jboss.tools.openshift.common.core.connection.IConnection"/>
                </appinfo>
             </annotation>
          </attribute>

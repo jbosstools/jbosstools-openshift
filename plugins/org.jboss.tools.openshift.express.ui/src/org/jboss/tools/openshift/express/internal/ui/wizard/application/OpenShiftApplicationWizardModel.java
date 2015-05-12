@@ -32,7 +32,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
@@ -98,7 +97,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getRemoteName()
 				, getRepositoryFile()
 				, getMarkers()
-				, getExpressConnection())
+				, getConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -181,7 +180,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 				, getApplication()
 				, getRemoteName()
 				, getMarkers()
-				, getExpressConnection())
+				, getConnection())
 				.execute(monitor);
 		setProject(project);
 		return project;
@@ -231,7 +230,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	public void setDefaultDomainIfRequired() {
 		Assert.isNotNull(getConnection());
 		if (!hasDomain()) {
-			setDomain(getExpressConnection().getDefaultDomain());
+			setDomain(getConnection().getDefaultDomain());
 		}
 	}
 
@@ -536,25 +535,14 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public IConnection setConnection(IConnection connection) {
-		if (connection instanceof ExpressConnection) {
-			update((ExpressConnection) connection);
-		}
+	public ExpressConnection setConnection(ExpressConnection connection) {
 		setProperty(PROP_CONNECTION, connection);
 		return connection;
 	}
 	
 	@Override
-	public IConnection getConnection() {
+	public ExpressConnection getConnection() {
 		return getProperty(PROP_CONNECTION);
-	}
-
-	public ExpressConnection getExpressConnection() {
-		IConnection connection = getConnection();
-		if (!(connection instanceof ExpressConnection)) {
-			return null;
-		}
-		return (ExpressConnection) connection;
 	}
 
 	protected IServer setServerAdapter(IServer server) {

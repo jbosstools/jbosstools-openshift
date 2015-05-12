@@ -104,7 +104,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public ExpressConnection getConnection() {
-		return wizardModel.getExpressConnection();
+		return wizardModel.getConnection();
 	}
 
 	public String[] getExistingApplicationNames() {

@@ -16,21 +16,30 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
+import org.jboss.tools.openshift.internal.common.ui.utils.ExtensionUtils;
 
 /**
  * @author Andre Dietisheim
  */
 public class ConnectionEditorsStackedView extends AbstractStackedDetailViews {
 
+	private static final String CONNECTION_EDITORS_EXTENSION = "org.jboss.tools.openshift.ui.connectionEditor";
+	private static final String ATTRIBUTE_CLASS = "class";
+
 	private Collection<IConnectionEditor> connectionEditors;
 
 	ConnectionEditorsStackedView(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, pageModel, parent, dbc);
-		this.connectionEditors = ConnectionEditorExtension.getInstance().getAll();
+		this.connectionEditors = getConnectionEditors();
 	}
 
 	@Override
 	protected IDetailView[] getDetailViews() {
 		return connectionEditors.toArray(new IConnectionEditor[connectionEditors.size()]);
 	}
+	
+	private Collection<IConnectionEditor> getConnectionEditors() {
+		return ExtensionUtils.getExtensions(CONNECTION_EDITORS_EXTENSION, ATTRIBUTE_CLASS);
+	}
+
 }

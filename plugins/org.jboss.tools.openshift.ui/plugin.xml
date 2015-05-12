@@ -154,16 +154,28 @@
 			id="org.jboss.tools.openshift.ui.command.refresh.resource"
 			name="Refresh">
 		</command>
-  <command
-        description="Create a new application from a template"
-        id="org.jboss.tools.openshift.ui.command.application.new"
-        name="Application">
-  </command>
+		<command
+        	description="Create a new application from a template"
+        	id="org.jboss.tools.openshift.ui.command.application.new"
+			name="Application">
+		</command>
 	</extension>
+
+	<!-- editor for express connections -->
 	<extension
-		point="org.jboss.tools.openshift.common.ui.connectionEditor">
-		<connectionUI
+		point="org.jboss.tools.openshift.ui.connectionEditor">
+		<connectionEditor
 			class="org.jboss.tools.openshift.internal.ui.wizard.connection.ConnectionEditor">
-		</connectionUI>
+		</connectionEditor>
 	</extension>
+
+	<!-- application wizard for connections -->
+	<!-- TODO: implement NewApplicationWizard so that it can react to connection changes -->
+	<!-- <extension
+		point="org.jboss.tools.openshift.ui.applicationWizard">
+		<applicationWizard
+			class="org.jboss.tools.openshift.internal.ui.wizard.application.NewApplicationWizard"
+			connection="org.jboss.tools.openshift.core.connection.Connection">
+    	</applicationWizard>
+    </extension> -->
 </plugin>

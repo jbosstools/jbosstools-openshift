@@ -8,52 +8,6 @@
 		</egitui>
 	</extension>
 	
-	<!-- new wizard: new application -->
-	<extension
-		point="org.eclipse.ui.newWizards">
-		<category
-			id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-			name="OpenShift">
-		</category>
-		<wizard
-			category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-			class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard"
-			icon="icons/openshift-logo-white-icon.png"
-			id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
-			name="OpenShift Application"
-			project="true">
-			<description>Create a new OpenShift Application</description>
-		</wizard>
-	</extension>
-
-	<!-- jboss perspective: new openshift application wizard -->
-	<extension
-		point="org.eclipse.ui.perspectiveExtensions">
-		<perspectiveExtension
-			targetID="org.jboss.tools.common.ui.JBossPerspective">
-			<newWizardShortcut
-				id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard">
-			</newWizardShortcut>
-		</perspectiveExtension>
-	</extension>
-
-	<!-- import wizard: import application -->
-   <extension
-          point="org.eclipse.ui.importWizards">
-      <category
-            id="org.jboss.tools.openshift.express.ui.wizard.importCategory"
-            name="OpenShift">
-      </category>
-      <wizard
-            category="org.jboss.tools.openshift.express.ui.wizard.importCategory"
-            class="org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard"
-            icon="icons/openshift-logo-white-icon.png"
-            id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
-            name="Existing OpenShift Application">
-            <description>Import an existing OpenShift Application</description>
-      </wizard>
-    </extension>  
-	
 	<extension
 		point="org.eclipse.wst.server.ui.serverImages">
 		<image
@@ -1791,40 +1745,50 @@
 			category="org.jboss.tools.common.model.ui.MainPreferencePage">
 		</page>
 	</extension>
- <extension
-       point="org.eclipse.ui.decorators">
-    <decorator
-          icon="icons/scaleable_overlay.png"
-          id="org.jboss.tools.openshift.express.ui.scalabledecorator"
-          label="Scalable Application"
-          lightweight="true"
-          location="TOP_RIGHT"
-          state="true">
-       <enablement>
-          <and>
-             <objectClass
-                   name="com.openshift.client.IApplication">
-             </objectClass>
-             <objectState
-                   name="applicationScale"
-                   value="SCALE">
-             </objectState>
-          </and>
+	<extension
+		point="org.eclipse.ui.decorators">
+		<decorator
+			icon="icons/scaleable_overlay.png"
+			id="org.jboss.tools.openshift.express.ui.scalabledecorator"
+			label="Scalable Application"
+			lightweight="true"
+			location="TOP_RIGHT"
+			state="true">
+			<enablement>
+				<and>
+					<objectClass
+						name="com.openshift.client.IApplication">
+					</objectClass>
+					<objectState
+						name="applicationScale"
+						value="SCALE">
+					</objectState>
+				</and>
+			</enablement>
+		</decorator>
+	</extension>
+	<extension
+		point="org.eclipse.ui.commands">
+			<command
+				id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
+				name="%openshift.command.deploymentconfig.new">
+			</command>
+	</extension>
 
-       </enablement>
-    </decorator>
- </extension>
- <extension
-       point="org.eclipse.ui.commands">
-    <command
-          id="org.jboss.tools.openshift.ui.command.newdeploymentconfig"
-          name="%openshift.command.deploymentconfig.new">
-    </command>
- </extension>
- <extension
-       point="org.jboss.tools.openshift.common.ui.connectionEditor">
-    <connectionUI
-          class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionEditor">
-    </connectionUI>
+	<!-- editor for express connections -->
+	<extension
+		point="org.jboss.tools.openshift.ui.connectionEditor">
+		<connectionEditor
+			class="org.jboss.tools.openshift.express.internal.ui.wizard.connection.ExpressConnectionEditor">
+		</connectionEditor>
+	</extension>
+
+	<!-- application wizard for express connections -->
+	<extension
+		point="org.jboss.tools.openshift.ui.applicationWizard">
+		<applicationWizard
+			class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard"
+			connection="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
+    </applicationWizard>
  </extension>
 </plugin>

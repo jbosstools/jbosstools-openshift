@@ -74,7 +74,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidat
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.HttpsPrefixingAdapter;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareModel;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
 /**
  * @author Andre Dietisheim
@@ -87,11 +87,11 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	private final ConnectionWizardPageModel pageModel;
 	private ConnectionEditorsStackedView connectionEditors;
 
-	public ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel) {
+	public ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
 		this(wizard, wizardModel, true);
 	}
 
-	protected ConnectionWizardPage(IWizard wizard, IConnectionAwareModel wizardModel, boolean allowConnectionChange) {
+	protected ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel, boolean allowConnectionChange) {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection",
 				wizard);
 		this.pageModel = new ConnectionWizardPageModel(wizardModel.getConnection(), ConnectionsRegistrySingleton.getInstance().getAll(), allowConnectionChange, wizardModel);
@@ -384,7 +384,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 //			setInitialFocus();
 		}
 	}
-	
+
 	public boolean connect() {
 		try {
 			ConnectJob connectJob = new ConnectJob();
@@ -431,6 +431,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	public void dispose() {
 		pageModel.dispose();
+	}
+
+	protected ConnectionWizardPageModel getModel() {
+		return pageModel;
 	}
 	
 	private class CreateConnectionFactoryJob extends AbstractDelegatingMonitorJob {

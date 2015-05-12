@@ -1,11 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+
+	<!-- new wizard: new application -->
+	<extension
+		point="org.eclipse.ui.newWizards">
+		<category
+			id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
+			name="OpenShift">
+		</category>
+		<wizard
+			category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
+			class="org.jboss.tools.openshift.common.ui.wizard.NewApplicationNewWizard"
+			icon="icons/openshift-logo-white-icon.png"
+			id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
+			name="OpenShift Application"
+			project="true">
+			<description>Create a new OpenShift Application</description>
+		</wizard>
+	</extension>
+
+	<!-- jboss perspective: new openshift application wizard -->
+	<extension
+		point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension
+			targetID="org.jboss.tools.common.ui.JBossPerspective">
+			<newWizardShortcut
+				id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard">
+			</newWizardShortcut>
+		</perspectiveExtension>
+	</extension>
+
+	<!-- connection editor extension point -->
 	<extension-point 
-		id="org.jboss.tools.openshift.common.ui.connectionEditor" 
+		id="org.jboss.tools.openshift.ui.connectionEditor" 
 		name="ConnectionEditor" 
 		schema="schema/org.jboss.tools.openshift.ui.connectionEditor.exsd"/>
     
+	<!-- application wizard extension point -->
+	<extension-point 
+		id="org.jboss.tools.openshift.ui.applicationWizard" 
+		name="ApplicationWizard" 
+		schema="schema/org.jboss.tools.openshift.ui.applicationWizard.exsd"/>
+
     <!-- OpenShift Explorer view -->
     <extension
         point="org.eclipse.ui.views">
