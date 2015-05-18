@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.test.ui.application;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
@@ -42,12 +44,24 @@ public class NewApplicationWizardModelTest {
 	private ITemplate template;
 	@Mock
 	private IProject project;
+	@Mock
+	private IResourceFactory factory;
 	
 	@Before
-	public void setup() {
-		model = new NewApplicationWizardModel(project);
+	public void setup() throws Exception {
+		model = spy(new NewApplicationWizardModel(project, factory));
+		doReturn(mock(InputStream.class)).when(model).createInputStream(anyString());
 	}
 	
+	@Test
+	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
+		when(factory.create(any(InputStream.class))).thenReturn(template);
+		model.setTemplateFileName("theFileName");
+		
+		verify(factory).create(any(InputStream.class));
+		assertEquals(template, model.getTemplate());
+	}
+
 	@Test
 	public void setTemplateShouldCopyParametersAndLabels() {
 		Map<String, IParameter> parameters = givenTheTemplateHasParameters();

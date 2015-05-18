@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +24,9 @@ import java.util.Map.Entry;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 
+import com.openshift.restclient.IResourceFactory;
+import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateList;
 import com.openshift.restclient.model.IProject;
@@ -40,6 +46,7 @@ public class NewApplicationWizardModel
 
 	private IProject project;
 	private ITemplate template;
+	private ITemplate uploadedTemplate;
 	private List<IParameter> parameters = new ArrayList<IParameter>();
 	private IParameter selectedParameter;
 	private HashMap<String, String> originalValueMap;
@@ -47,9 +54,13 @@ public class NewApplicationWizardModel
 	private List<Label> labels;
 	private Label selectedLabel;
 	private Collection<IResource> items = new ArrayList<IResource>(); 
-
-	public NewApplicationWizardModel(IProject project) {
+	private boolean uploadTemplate = true;
+	private String templateFilename;
+	private IResourceFactory resourceFactory;
+	
+	public NewApplicationWizardModel(IProject project, IResourceFactory resourceFactory) {
 		this.project = project;
+		this.resourceFactory = resourceFactory;
 	}
 
 	@Override
@@ -181,6 +192,44 @@ public class NewApplicationWizardModel
 		List<Label> old = new ArrayList<Label>(this.labels);
 		this.labels.add(new Label(key, value));
 		fireIndexedPropertyChange(PROPERTY_LABELS, this.labels.size(), old, Collections.unmodifiableList(labels));
+	}
+
+	@Override
+	public void setUseUploadTemplate(boolean uploadTemplate) {
+		firePropertyChange(PROPERTY_USE_UPLOAD_TEMPLATE, this.uploadTemplate, this.uploadTemplate = uploadTemplate);
+		setTemplate(uploadedTemplate);
+	}
+
+	@Override
+	public boolean isUseUploadTemplate() {
+		return this.uploadTemplate;
+	}
+
+	@Override
+	public void setTemplateFileName(String name) {
+		try {
+			uploadedTemplate = resourceFactory.create(createInputStream(name));
+			setTemplate(uploadedTemplate);
+		} catch (FileNotFoundException e) {
+			name = "";
+			setTemplate(null);
+			throw new OpenShiftException(e, "Unable to find the file to upload");
+		}catch (ResourceFactoryException e) {
+			name = "";
+			setTemplate(null);
+			throw e;
+		}finally {
+			firePropertyChange(PROPERTY_TEMPLATE_FILENAME, this.templateFilename, this.templateFilename = name);
+		}
+	}
+	
+	public InputStream createInputStream(String fileName) throws FileNotFoundException {
+		return new FileInputStream(fileName);
+	}
+
+	@Override
+	public String getTemplateFileName() {
+		return this.templateFilename;
 	}
 
 }

@@ -29,11 +29,11 @@ public class ConnectionsRegistryUtil {
 	}
 	
 	/**
-	 * Retrieve the connection for the given resource or null
-	 * if its not found
+	 * Retrieve the connection for the given resource
 	 * 
 	 * @param resource
 	 * @return a connection
+	 * @throws ConnectionNotFoundException  if the connection can't be found
 	 */
 	public static Connection getConnectionFor(IResource resource) {
 		Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
@@ -42,6 +42,6 @@ public class ConnectionsRegistryUtil {
 				return connection;
 			}
 		}
-		return null;
+		throw new ConnectionNotFoundException(resource);
 	}
 }

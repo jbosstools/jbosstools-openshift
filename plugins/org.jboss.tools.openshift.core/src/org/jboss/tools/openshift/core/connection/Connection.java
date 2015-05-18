@@ -31,6 +31,7 @@ import com.openshift.internal.restclient.http.NotFoundException;
 import com.openshift.internal.restclient.http.UnauthorizedException;
 import com.openshift.restclient.ClientFactory;
 import com.openshift.restclient.IClient;
+import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
@@ -72,6 +73,15 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			authorizer.setSSLCertificateCallback(sslCertCallback);
 		}
 		this.sslCertificateCallback = sslCertCallback;
+	}
+	
+	/**
+	 * Retrieve the resoruce factory associated with this connection
+	 * for stubbing versioned resources supported by th server
+	 * @return an {@link IResourceFactory}
+	 */
+	public IResourceFactory getResourceFactory() {
+		return client.getResourceFactory();
 	}
 	
 	@Override

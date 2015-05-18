@@ -10,27 +10,32 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.SelectObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -38,13 +43,17 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 
+import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.ICapability;
@@ -60,6 +69,7 @@ import com.openshift.restclient.model.template.ITemplate;
 public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	public ITemplateListPageModel model;
+	private Text txtUploadedFileName;
 	
 	public TemplateListPage(IWizard wizard, ITemplateListPageModel model) {
 		super("Select template", "Templates choices may be reduced to a smaller list by typing the name of a tag in the text field.", "templateList", wizard);
@@ -69,10 +79,100 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults()
-			.numColumns(1)
+			.numColumns(2)
 			.margins(10, 6)
 			.spacing(2, 2)
 			.applyTo(parent);
+		
+		// upload template
+		SelectObservableValue uploadTemplate = new SelectObservableValue();
+		ValueBindingBuilder
+			.bind(uploadTemplate)
+			.to(BeanProperties.value(
+					ITemplateListPageModel.PROPERTY_USE_UPLOAD_TEMPLATE).observe(model))
+			.in(dbc);
+		
+		createUploadControls(parent, uploadTemplate, dbc);
+		
+		createServerTemplateControls(parent, uploadTemplate, dbc);
+		model.setUseUploadTemplate(false);
+	}
+
+	private void createUploadControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
+		// upload  app radio
+		Button btnUploadTemplate = new Button(parent, SWT.RADIO);
+		btnUploadTemplate.setText("Use a template from my local file system:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.span(2, 1)
+				.grab(true, false)
+				.applyTo(btnUploadTemplate);
+
+		uploadTemplate.addOption(Boolean.TRUE, WidgetProperties.selection().observe(btnUploadTemplate));
+
+		// uploaded file name
+		this.txtUploadedFileName = new Text(parent, SWT.BORDER);
+		txtUploadedFileName.setEnabled(false);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.applyTo(txtUploadedFileName);
+		IObservableValue uploadedFilenameTextObservable = WidgetProperties.text(SWT.Modify).observe(txtUploadedFileName);
+		ValueBindingBuilder
+				.bind(uploadedFilenameTextObservable)
+				.to(BeanProperties.value(
+						ITemplateListPageModel.PROPERTY_TEMPLATE_FILENAME).observe(model))
+				.in(dbc);
+
+		// browse button
+		Button btnBrowseFiles = new Button(parent, SWT.NONE);
+		btnBrowseFiles.setText("Browse...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).grab(false, false)
+				.applyTo(btnBrowseFiles);
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnBrowseFiles))
+				.notUpdatingParticipant()
+				.to(uploadTemplate)
+				.in(dbc);
+		btnBrowseFiles.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+				if(StringUtils.isNotBlank(model.getTemplateFileName())) {
+					File file = new File(model.getTemplateFileName());
+					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
+				}
+				String file;
+				do{
+					file = dialog.open();
+					if(file != null) {
+						try {
+							model.setTemplateFileName(file);
+							return;
+						}catch(ResourceFactoryException | ClassCastException err) {
+							OpenShiftUIActivator.getDefault().getLogger().logError(err);
+							MessageDialog.openError(getShell(), "Upload template exception", NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.  Please check your workspace logs for additional details.", file));
+						}
+					}
+				}while(file != null);
+			}
+		});
+	}
+	
+	private void createServerTemplateControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
+		// existing app radio
+		Button btnServerTemplate = new Button(parent, SWT.RADIO);
+		btnServerTemplate.setText("Use a template from the server:");
+		GridDataFactory.fillDefaults()
+				.span(2, 1)
+				.indent(0,8)
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.applyTo(btnServerTemplate);
+
+		uploadTemplate.addOption(Boolean.FALSE, WidgetProperties.selection().observe(btnServerTemplate));
 		
 		Composite treeComposite = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -87,6 +187,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(txtTemplateFilter);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(txtTemplateFilter))
+			.notUpdatingParticipant()
+			.to(uploadTemplate)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);		
 		
 		// the list of templates
 		final TreeViewer viewer = createTemplatesViewer(treeComposite, txtTemplateFilter);
@@ -94,7 +200,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
 				.hint(400, 180)
 				.applyTo(viewer.getControl());
-		final IObservableValue viewObservable = ViewerProperties.singleSelection().observe(viewer);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(viewer.getControl()))
+			.notUpdatingParticipant()
+			.to(uploadTemplate)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		
+		IObservableValue viewObservable = ViewerProperties.singleSelection().observe(viewer);
 		final IObservableValue modelObservable = BeanProperties.value(
 				ITemplateListPageModel.PROPERTY_TEMPLATE).observe(model);
 		ValueBindingBuilder
@@ -165,7 +278,6 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			
 		});
 	}
-
 	private TreeViewer createTemplatesViewer(Composite parent, final Text txtFilter) {
 		TreeViewer viewer = 	new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		viewer.setLabelProvider(new TemplateListPageLabelProvier());

@@ -23,7 +23,9 @@ import com.openshift.restclient.model.template.ITemplate;
 public interface ITemplateListPageModel {
 	
 	static final String PROPERTY_TEMPLATE = "template";
-
+	static final String PROPERTY_TEMPLATE_FILENAME = "templateFileName";
+	static final String PROPERTY_USE_UPLOAD_TEMPLATE = "useUploadTemplate";
+	
 	/**
 	 * Get the collection of templates
 	 * @return
@@ -42,4 +44,15 @@ public interface ITemplateListPageModel {
 	 */
 	ITemplate getTemplate();
 	
+	/**
+	 * use the template that is uploaded
+	 * 
+	 * @param uploadTemplate
+	 */
+	void setUseUploadTemplate(boolean uploadTemplate);
+	
+	boolean isUseUploadTemplate();
+	
+	void setTemplateFileName(String name);
+	String getTemplateFileName();
 }
