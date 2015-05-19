@@ -64,6 +64,9 @@ public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider,
 		if (element instanceof BaseExplorerContentProvider.LoadingStub) {
 			return new StyledString("Loading...");
 		}
+		if(element instanceof Exception) {
+			return new StyledString(((Exception)element).getLocalizedMessage());
+		}
 		return new StyledString(element.toString());
 	}
 	

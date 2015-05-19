@@ -58,8 +58,11 @@
 							value="1">
 						</count>
 						<iterate>
-							<instanceof
-								value="org.jboss.tools.openshift.common.core.IRefreshable" />
+       <or>
+          <instanceof
+                value="org.jboss.tools.openshift.common.core.IRefreshable">
+          </instanceof>
+       </or>
 						</iterate>
 					</and>
 				</visibleWhen>

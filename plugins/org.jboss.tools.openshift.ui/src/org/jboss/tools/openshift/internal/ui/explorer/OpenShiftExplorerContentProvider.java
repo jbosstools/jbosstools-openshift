@@ -11,6 +11,7 @@ package org.jboss.tools.openshift.internal.ui.explorer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -45,19 +46,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		return null;
 	}
 	
-	@Override
-	public Object[] getChildren(Object parentElement){
-		if(parentElement instanceof IProject){
-			IProject project = (IProject) parentElement;
-			List<ResourceGrouping> groups = new ArrayList<ResourceGrouping>(groupings.length);
-			for (ResourceKind kind : groupings) {
-				groups.add(new ResourceGrouping(kind, project));
-			}
-			return groups.toArray();
-		}
-		return super.getChildren(parentElement);
-	}
-	
 	/**
 	 * Called to obtain the children of any element in the tree viewer
 	 */
@@ -68,8 +56,24 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				Connection connection = (Connection) parentElement;
 				return connection.get(ResourceKind.Project).toArray();
 			}
+			if(parentElement instanceof IProject){
+				IProject project = (IProject) parentElement;
+				List<ResourceGrouping> groups = new ArrayList<ResourceGrouping>(groupings.length);
+				for (ResourceKind kind : groupings) {
+					final ResourceGrouping grouping = new ResourceGrouping(kind, project);
+					grouping.setRefreshable(new IRefreshable() {
+						@Override
+						public void refresh() {
+							refreshViewerObject(grouping);
+						}
+					});
+					groups.add(grouping);
+				}
+				return groups.toArray();
+			}
 			if(parentElement instanceof ResourceGrouping){
-				return ((ResourceGrouping) parentElement).getResources();
+				ResourceGrouping group = (ResourceGrouping) parentElement;
+				return group.getProject().getResources(group.getKind()).toArray();
 			}
 		}catch(OpenShiftException e){
 			addException(parentElement, e);
