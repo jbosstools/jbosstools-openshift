@@ -60,12 +60,6 @@ public class OpenShiftExplorerContentProviderTest {
 		ResourceGrouping group = new ResourceGrouping(ResourceKind.Service, project);
 		return group;
 	}
-	@Test
-	public void getChildrenForResourceGroupReturnsResources(){
-		ResourceGrouping group = givenAResourceGroup();
-		
-		assertArrayEquals("Exp. to get the resources associated with a group", group.getResources(), provider.getChildrenFor(group));
-	}
 	
 	@Test
 	public void getChildrenForProjectReturnsResourceGroups(){
@@ -82,7 +76,7 @@ public class OpenShiftExplorerContentProviderTest {
 				new ResourceGrouping(ResourceKind.Route, project),
 		};
 		
-		Object[] children = provider.getChildren(project);
+		Object[] children = provider.getChildrenFor(project);
 		assertArrayEquals("Exp. to get a set of resource groups for a project", groups, children);
 	}
 	

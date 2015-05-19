@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.common.ui.explorer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 /**
  * Base content provider to hold common logic for OpenShift Explorer contributions
@@ -34,9 +36,8 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	private StructuredViewer viewer;
 
 	// Keep track of what's loading and what's finished
-	private List<Object> loadedElements = new ArrayList<Object>();
-	private List<Object> loadingElements = new ArrayList<Object>();
-	private Map<Object, Exception> errors = new HashMap<Object, Exception>();
+	private Map<Object, LoadingStub> loadedElements = new HashMap<Object, LoadingStub>();
+	private Map<Object, LoadingStub> loadingElements = new HashMap<Object, LoadingStub>();
 	
 	/**
 	 * Get the root elements for the explorer.  This should provide what
@@ -71,7 +72,6 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		// A refresh on the whole model... clear our cache
 		loadedElements.clear();
 		loadingElements.clear();
-		errors.clear();
 		return getExplorerElements(parentElement);
 	}
 	/**
@@ -80,6 +80,9 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
+		if(loadedElements.containsKey(parentElement)) {
+			return loadedElements.remove(parentElement).getChildren();
+		}
 		return loadChildren(parentElement);
 	}
 	
@@ -89,7 +92,9 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	 * @param e
 	 */
 	protected final void addException(Object element, Exception e){
-		errors.put(element, e);
+		if(loadingElements.containsKey(element)) {
+			loadingElements.get(element).add(e);
+		}
 	}
 	
 	/**
@@ -97,46 +102,50 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	 * @return
 	 */
 	protected final Object[] loadChildren(Object parentElement) {
-		if (!loadedElements.contains(parentElement)) {
-			if (!loadingElements.contains(parentElement)) {
+		if (!loadedElements.containsKey(parentElement)) {
+			if (!loadingElements.containsKey(parentElement)) {
 				// Load the data
-				launchLoadingJob(parentElement);
+				return new Object[] {launchLoadingJob(parentElement)};
 			}
-			// return a stub object that says loading...
-			return new Object[] { new LoadingStub() };
-		}
-		Exception ose = errors.get(parentElement);
-		if (ose != null) {
-			return new Object[] { ose };
 		}
 		return getChildrenFor(parentElement);
 	}
 
-	private void launchLoadingJob(final Object element) {
+	private LoadingStub launchLoadingJob(final Object element) {
+		final LoadingStub stub = new LoadingStub();
 		Job job = new Job(MSG_LOADING_RESOURCES) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(MSG_LOADING_RESOURCES, IProgressMonitor.UNKNOWN);
-				monitor.worked(1);
-				// Get the actual children, with the delay
-				loadingElements.add(element);
-				getChildrenFor(element);
-				loadedElements.add(element);
-				loadingElements.remove(element);
-				refreshViewerObject(element);
-				monitor.done();
-				return Status.OK_STATUS;
+				try {
+					monitor.beginTask(MSG_LOADING_RESOURCES, IProgressMonitor.UNKNOWN);
+					monitor.worked(1);
+					// Get the actual children, with the delay
+					loadingElements.put(element, stub);
+					stub.addChildren(getChildrenFor(element));
+					return Status.OK_STATUS;
+				}catch(Exception e) {
+					addException(element, e);
+					return new Status(Status.ERROR,OpenShiftCommonUIActivator.PLUGIN_ID, "There was an error retrieving children in the OpenShift explorer", e);
+				}finally {
+					loadedElements.put(element, stub);
+					loadingElements.remove(element);
+					monitor.done();
+					refreshViewerObject(element);
+				}
 			}
 		};
 		job.setPriority(Job.LONG);
 		job.schedule();
+		return stub;
 	}
 
-	private void refreshViewerObject(final Object object) {
+	protected void refreshViewerObject(final Object object) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				viewer.refresh(object);
+				synchronized (viewer) {
+					viewer.refresh(object);
+				}
 			}
 		});
 	}
@@ -151,6 +160,24 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	}
 
 	public static class LoadingStub {
+		
+		private List<Object> children = new ArrayList<Object>();
+
+		public LoadingStub() {
+		}
+		
+		public void add(Exception e) {
+			children.add(e);
+		}
+
+		public Object[] getChildren() {
+			return this.children.toArray();
+		}
+		
+		public void addChildren(Object[] children) {
+			this.children.addAll(Arrays.asList(children));
+		}
+
 	}
 
 	public static class NotConnectedUserStub {

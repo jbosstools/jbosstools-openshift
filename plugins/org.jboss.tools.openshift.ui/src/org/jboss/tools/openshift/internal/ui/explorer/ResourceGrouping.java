@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
+import org.jboss.tools.openshift.common.core.IRefreshable;
+
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 
@@ -15,9 +17,10 @@ import com.openshift.restclient.model.IProject;
  * A UI class to facilitate grouping like resources
  * in the explorer view
  */
-public class ResourceGrouping{
+public class ResourceGrouping implements IRefreshable{
 	private IProject project;
 	private ResourceKind kind;
+	private IRefreshable refreshable;
 
 	/**
 	 * 
@@ -28,13 +31,16 @@ public class ResourceGrouping{
 		this.kind = kind;
 		this.project = project;
 	}
-
+	public void setRefreshable(IRefreshable refreshable) {
+		this.refreshable = refreshable;
+	}
+	
+	public IProject getProject() {
+		return this.project;
+	}
+	
 	public ResourceKind getKind() {
 		return this.kind;
-	}
-
-	public Object[] getResources() {
-		return project.getResources(kind).toArray();
 	}
 
 	@Override
@@ -70,6 +76,12 @@ public class ResourceGrouping{
 		} else if (!kind.equals(other.kind))
 			return false;
 		return true;
+	}
+
+	@Override
+	public void refresh() {
+		if(refreshable == this || refreshable == null) return;
+		this.refreshable.refresh();
 	}
 
 }
