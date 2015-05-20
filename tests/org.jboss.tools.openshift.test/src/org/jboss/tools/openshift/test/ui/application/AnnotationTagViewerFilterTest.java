@@ -55,9 +55,17 @@ public class AnnotationTagViewerFilterTest {
 	}
 	
 	@Test
-	public void resourcesThatAreNotAnnotatedShouldReturnFalse() {
+	public void resourcesThatAreNotAnnotatedShouldReturnFalseWhenTheFilterIsNotEmpty() {
 		whenResourceDoesNotSupportITagCapability();
+		when(control.getText()).thenReturn("foobar");
 		assertFalse(filter.select(null, null, resource));
+	}
+
+	@Test
+	public void resourcesThatAreNotAnnotatedShouldReturnTrueWhenTheFilterIsEmpty() {
+		whenResourceDoesNotSupportITagCapability();
+		when(control.getText()).thenReturn(" ");
+		assertTrue(filter.select(null, null, resource));
 	}
 	
 	@Test

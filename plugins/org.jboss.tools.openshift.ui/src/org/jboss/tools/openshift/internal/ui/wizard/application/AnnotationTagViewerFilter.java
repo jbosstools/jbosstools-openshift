@@ -39,6 +39,9 @@ public class AnnotationTagViewerFilter extends ViewerFilter {
 			return false;
 		}
 		IResource resource = (IResource) element;
+		if(StringUtils.isBlank(filterText.getText())) {
+			return true;
+		}
 		return resource.accept(new CapabilityVisitor<ITags, Boolean>() {
 			@Override
 			public Boolean visit(ITags capability) {
