@@ -34,7 +34,7 @@ public class ImportApplicationHandler extends AbstractHandler {
 			return ExpressUIActivator.createCancelStatus("Could not find the application to import");
 		}
 		WizardUtils.openWizard(
-				new ImportOpenShiftApplicationWizard(application, false),
+				new ImportOpenShiftApplicationWizard(application),
 				HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;
 	}

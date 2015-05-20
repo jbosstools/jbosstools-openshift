@@ -204,10 +204,10 @@
 	<!-- application wizard for connections -->
 	<!-- TODO: implement NewApplicationWizard so that it can react to connection changes -->
 	<!-- <extension
-		point="org.jboss.tools.openshift.ui.applicationWizard">
-		<applicationWizard
+		point="org.jboss.tools.openshift.ui.newApplicationWizard">
+		<newApplicationWizard
 			class="org.jboss.tools.openshift.internal.ui.wizard.application.NewApplicationWizard"
 			connection="org.jboss.tools.openshift.core.connection.Connection">
-    	</applicationWizard>
+    	</newApplicationWizard>
     </extension> -->
 </plugin>

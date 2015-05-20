@@ -19,7 +19,7 @@ public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard
 	 * Constructor invoked via File->Import
 	 */
 	public ImportOpenShiftApplicationWizard() {
-		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class), null, null, null, true, true,
+		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class), null, null, null, true, 
 				"Import OpenShift Application");
 	}
 
@@ -27,14 +27,14 @@ public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard
 	 * Constructor invoked via Server adapter wizard "Import application"
 	 */
 	public ImportOpenShiftApplicationWizard(ExpressConnection connection, IApplication application) {
-		super(connection, application.getDomain(), application, null, true, false, "Import OpenShift Application");
+		super(connection, application.getDomain(), application, null, true, "Import OpenShift Application");
 	}
 
 	/**
 	 * Constructor invoked via OpenShift Explorer context menu
 	 */
-	public ImportOpenShiftApplicationWizard(IApplication application, boolean showCredentialsPage) {
+	public ImportOpenShiftApplicationWizard(IApplication application) {
 		super(ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance()),
-				application.getDomain(), application, null, true, showCredentialsPage, "Import OpenShift Application");
+				application.getDomain(), application, null, true, "Import OpenShift Application");
 	}
 }

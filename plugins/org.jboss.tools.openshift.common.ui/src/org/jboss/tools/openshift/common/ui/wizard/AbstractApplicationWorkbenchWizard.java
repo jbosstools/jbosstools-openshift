@@ -18,14 +18,10 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.ui.IImportWizard;
-import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
@@ -42,9 +38,9 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
  * @author Andre Dietisheim
  * 
  */
-public class NewApplicationNewWizard extends Wizard implements IImportWizard, INewWizard {
+public abstract class AbstractApplicationWorkbenchWizard extends Wizard {
 	
-	private final class DelegatingConnectionWizardPage extends ConnectionWizardPage {
+	protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
 		
 		private IObservableValue validationStatus;
 
@@ -98,7 +94,7 @@ public class NewApplicationNewWizard extends Wizard implements IImportWizard, IN
 				return null;
 			}
 
-			IConnectionAwareWizard<IConnection> wizard = wizardsByConnection.get(connection.getClass());
+			IConnectionAwareWizard<IConnection> wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
 			if (wizard == null) {
 				return null;
 			}
@@ -118,28 +114,34 @@ public class NewApplicationNewWizard extends Wizard implements IImportWizard, IN
 			if (connection == null) {
 				return false;
 			}
-			IWizard wizard = wizardsByConnection.get(connection.getClass());
+			IWizard wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
 			if (wizard == null) {
 				setErrorMessage(NLS.bind("No application wizard for {0} connections present.", getModel().getConnectionFactory().getName()));
 			}
 			return wizard != null;
 		}
-
 	}
 
-	private static final String APPLICATION_WIZARD_EXTENSION = "org.jboss.tools.openshift.ui.applicationWizard";
 	private static final String ATTRIBUTE_CLASS = "class";
 	private static final String ATTRIBUTE_CONNECTION = "connection";
 
 	private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection;
 
-	public NewApplicationNewWizard() {
-		this.wizardsByConnection = getApplicationWizards();
+	protected IConnectionAwareWizard<IConnection> getWizard(Class<? extends IConnection> connectionClass) {
+		return getWizards().get(connectionClass);
 	}
 
-	private HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> getApplicationWizards() {
+	private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> getWizards() {
+		if (wizardsByConnection == null) {
+			this.wizardsByConnection = createWizards(getWizardsExtensionId());
+		}
+		
+		return wizardsByConnection;
+	}
+	
+	protected Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> createWizards(String extensionId) {
 		HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection = new HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>>();
- 		for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(APPLICATION_WIZARD_EXTENSION)) {
+ 		for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(extensionId)) {
 			createWizard(wizardsByConnection, configuration);
 		}
 		return wizardsByConnection;
@@ -164,10 +166,6 @@ public class NewApplicationNewWizard extends Wizard implements IImportWizard, IN
 	}
 
 	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-	}
-
-	@Override
 	public boolean performFinish() {
 		return false;
 	}
@@ -176,4 +174,7 @@ public class NewApplicationNewWizard extends Wizard implements IImportWizard, IN
 	public void addPages() {
 		addPage(new DelegatingConnectionWizardPage(this, new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection())));
 	}
+
+	protected abstract String getWizardsExtensionId();
+
 }

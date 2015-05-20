@@ -3,7 +3,7 @@
 <schema targetNamespace="org.jboss.tools.openshift.common.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.jboss.tools.openshift.common.ui" id="org.jboss.tools.openshift.ui.applicationWizard" name="ApplicationWizard"/>
+         <meta.schema plugin="org.jboss.tools.openshift.common.ui" id="org.jboss.tools.openshift.ui.newApplicationWizard" name="ApplicationWizard"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="applicationWizard"/>
+            <element ref="newApplicationWizard"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +47,7 @@
       </complexType>
    </element>
 
-   <element name="applicationWizard">
+   <element name="newApplicationWizard">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>

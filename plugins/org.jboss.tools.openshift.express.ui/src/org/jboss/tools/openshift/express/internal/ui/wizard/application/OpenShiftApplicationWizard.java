@@ -63,20 +63,18 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  * 
- * @see NewApplicationNewWizard
+ * @see NewApplicationWorkbenchWizard
  * @see ImportOpenShiftApplicationWizard
  */
 public abstract class OpenShiftApplicationWizard extends Wizard implements IConnectionAwareWizard<ExpressConnection> {
 
-//	private final boolean showCredentialsPage;
 	private final OpenShiftApplicationWizardModel model;
 
 	OpenShiftApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
-			boolean useExistingApplication, boolean showCredentialsPage, String wizardTitle) {
+			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
 		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
-//		this.showCredentialsPage = showCredentialsPage;
 	}
 
 	protected void openError(final String title, final String message) {
@@ -104,9 +102,6 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IConn
 
 	@Override
 	public void addPages() {
-//		if (showCredentialsPage) {
-//			addPage(new ConnectionWizardPage(this, model));
-//		}
 		addPage(new ApplicationTemplateWizardPage(this, model));
 		addPage(new ApplicationConfigurationWizardPage(this, model));
 		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));

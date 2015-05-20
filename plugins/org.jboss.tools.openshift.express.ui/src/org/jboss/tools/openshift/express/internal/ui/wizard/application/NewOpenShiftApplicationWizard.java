@@ -31,7 +31,7 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 */
 	public NewOpenShiftApplicationWizard() {
 		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class),
-				null, null, null, false, true, "New OpenShift Application");
+				null, null, null, false, "New OpenShift Application");
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 */
 	public NewOpenShiftApplicationWizard(IProject project) {
 		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class),
-				null, null, project, false, true, "New OpenShift Application");
+				null, null, project, false, "New OpenShift Application");
 	}
 
 	/**
@@ -47,13 +47,13 @@ public class NewOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
 	 */
 	public NewOpenShiftApplicationWizard(IDomain domain) {
 		super(ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance()),
-				domain, null, null, false, false, "New OpenShift Application");
+				domain, null, null, false, "New OpenShift Application");
 	}
 
 	/**
 	 * Constructor invoked via OpenShift Explorer context menu
 	 */
 	public NewOpenShiftApplicationWizard(ExpressConnection connection) {
-		super(connection, connection.getDefaultDomain(), null, null, false, false, "New OpenShift Application");
+		super(connection, connection.getDefaultDomain(), null, null, false, "New OpenShift Application");
 	}
 }

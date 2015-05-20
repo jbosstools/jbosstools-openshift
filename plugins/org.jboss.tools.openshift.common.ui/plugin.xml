@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
 
-	<!-- new wizard: new application -->
+	<!-- new workbench wizard: new openshift application -->
 	<extension
 		point="org.eclipse.ui.newWizards">
 		<category
@@ -11,12 +11,29 @@
 		</category>
 		<wizard
 			category="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.category"
-			class="org.jboss.tools.openshift.common.ui.wizard.NewApplicationNewWizard"
+			class="org.jboss.tools.openshift.common.ui.wizard.NewApplicationWorkbenchWizard"
 			icon="icons/openshift-logo-white-icon.png"
 			id="org.jboss.ide.eclipse.as.openshift.express.ui.wizard.createNewApplicationWizard"
 			name="OpenShift Application"
 			project="true">
 			<description>Create a new OpenShift Application</description>
+		</wizard>
+	</extension>
+
+	<!-- import workbench wizard: import openshift application -->
+	<extension
+		point="org.eclipse.ui.importWizards">
+		<category
+			id="org.jboss.tools.openshift.express.ui.wizard.importCategory"
+			name="OpenShift">
+		</category>
+		<wizard
+			category="org.jboss.tools.openshift.express.ui.wizard.importCategory"
+			class="org.jboss.tools.openshift.common.ui.wizard.ImportApplicationWorkbenchWizard"
+			icon="icons/openshift-logo-white-icon.png"
+			id="org.jboss.tools.openshift.express.ui.importExistingApplicationWizard"
+			name="Existing OpenShift Application">
+			<description>Import an existing OpenShift Application</description>
 		</wizard>
 	</extension>
 
@@ -37,11 +54,17 @@
 		name="ConnectionEditor" 
 		schema="schema/org.jboss.tools.openshift.ui.connectionEditor.exsd"/>
     
-	<!-- application wizard extension point -->
+	<!-- new application wizard extension point -->
 	<extension-point 
-		id="org.jboss.tools.openshift.ui.applicationWizard" 
-		name="ApplicationWizard" 
-		schema="schema/org.jboss.tools.openshift.ui.applicationWizard.exsd"/>
+		id="org.jboss.tools.openshift.ui.newApplicationWizard" 
+		name="NewApplicationWizard" 
+		schema="schema/org.jboss.tools.openshift.ui.newApplicationWizard.exsd"/>
+
+	<!-- import application wizard extension point -->
+	<extension-point 
+		id="org.jboss.tools.openshift.ui.importApplicationWizard" 
+		name="ImportApplicationWizard" 
+		schema="schema/org.jboss.tools.openshift.ui.importApplicationWizard.exsd"/>
 
     <!-- OpenShift Explorer view -->
     <extension

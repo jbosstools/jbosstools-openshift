@@ -1783,12 +1783,22 @@
 		</connectionEditor>
 	</extension>
 
-	<!-- application wizard for express connections -->
+	<!-- new application wizard for express connections -->
 	<extension
-		point="org.jboss.tools.openshift.ui.applicationWizard">
-		<applicationWizard
+		point="org.jboss.tools.openshift.ui.newApplicationWizard">
+		<newApplicationWizard
 			class="org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard"
 			connection="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
-    </applicationWizard>
- </extension>
+		</newApplicationWizard>
+	</extension>
+
+	<!-- import application wizard for express connections -->
+	<extension	
+		point="org.jboss.tools.openshift.ui.importApplicationWizard">
+		<importApplicationWizard
+			class="org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard"
+			connection="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection">
+		</importApplicationWizard>
+	</extension>
+
 </plugin>
