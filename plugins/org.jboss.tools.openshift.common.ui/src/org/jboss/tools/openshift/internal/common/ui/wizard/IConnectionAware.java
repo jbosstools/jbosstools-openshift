@@ -22,5 +22,11 @@ public interface IConnectionAware<C extends IConnection> {
 	public boolean hasConnection();
 	
 	public C setConnection(C connection);
+	
+	/**
+	 * A context that is useful to connection editors
+	 * @return
+	 */
+	Object getContext();
 
 }

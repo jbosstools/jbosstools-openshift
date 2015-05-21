@@ -317,21 +317,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 				if (connection.connect()) {
 					wizardModel.setConnection(connection);
 				} else {
-					String message = String.format("Unable to connect to %s", connection.getHost());
+					String message = NLS.bind("Unable to connect to {0}", connection.getHost());
 					OpenShiftCommonUIActivator.log(message, null);
 					status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, message);
 				}
 			}
-//		} catch (NotFoundOpenShiftException e) {
-//			// connectionFactoryError user without domain
-//		} catch (Exception e) {
-//			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-//					NLS.bind("Unknown error, can not verify connection to host {0} - see Error Log for details", connection.getHost()));
-//			OpenShiftCommonUIActivator.log(e);
-//		}
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					NLS.bind("Could not authenticate user {0} to host {1}", connection.getUsername(), connection.getHost()));
+					NLS.bind("Unable to verify connection. The credentials or auth scheme might be incorrect. {0}", e.getMessage()));
 			OpenShiftCommonUIActivator.log(e);
 		}
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
@@ -423,5 +416,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 		public IConnection update(IConnection connection);
 
+	}
+	
+	public Object getContext() {
+		return wizardModel.getContext();
 	}
 }

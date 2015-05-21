@@ -31,10 +31,10 @@ public class ConnectionPersistencyTest {
 
 	@Before
 	public void setup() throws Exception {
-		this.connection1 = new Connection("https://localhost:8442", null, null, null);
+		this.connection1 = new Connection("https://localhost:8442", null, null);
 		connection1.setUsername("foo");
 		connection1.setToken("bar");
-		this.connection2 = new Connection("https://localhost:8443", null, null, null);
+		this.connection2 = new Connection("https://localhost:8443", null, null);
 		connection2.setUsername("bar");
 		connection2.setToken("foo");
 	}

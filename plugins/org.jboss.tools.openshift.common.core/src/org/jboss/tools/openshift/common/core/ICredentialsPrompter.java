@@ -32,6 +32,6 @@ public interface ICredentialsPrompter {
 	 * @param connection  The connection
 	 * @return true if prompted for password; false otherwise
 	 */
-	public boolean promptAndAuthenticate(IConnection connection);
+	public boolean promptAndAuthenticate(IConnection connection, Object context);
 	
 }

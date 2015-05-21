@@ -172,7 +172,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		addPage(new DelegatingConnectionWizardPage(this, new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection())));
+		addPage(new DelegatingConnectionWizardPage(this, new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), null)));
 	}
 
 	protected abstract String getWizardsExtensionId();

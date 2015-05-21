@@ -9,7 +9,6 @@
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
-import java.net.MalformedURLException;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
@@ -19,7 +18,9 @@ import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
-import com.openshift.restclient.authorization.AuthorizationClientFactory;
+import com.openshift.restclient.ClientFactory;
+import com.openshift.restclient.IClient;
+import com.openshift.restclient.OpenShiftException;
 
 
 /**
@@ -47,12 +48,13 @@ public class ConnectionFactory implements IConnectionFactory {
 	
 	public Connection create(String url, ICredentialsPrompter credentialsPrompter) {
 		try {
-			return new Connection(url, 
-					new AuthorizationClientFactory().create(), 
+			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback(
+					OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
+			IClient client = new ClientFactory().create(url, sslCertCallback);
+			return new Connection(client, 
 					credentialsPrompter,
-					new LazySSLCertificateCallback(
-							OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback()));
-		} catch (MalformedURLException e) {
+					sslCertCallback);
+		} catch (OpenShiftException e) {
 			OpenShiftCoreActivator.pluginLog().logInfo(NLS.bind("Could not create OpenShift connection: Malformed url {0}", url), e);
 			return null;
 		}

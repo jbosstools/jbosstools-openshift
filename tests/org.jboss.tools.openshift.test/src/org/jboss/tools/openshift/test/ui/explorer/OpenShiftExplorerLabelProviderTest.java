@@ -200,7 +200,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForAConnection(){
-		Connection connection = new Connection(client, null, null, null);
+		Connection connection = new Connection(client, null, null);
 		connection.setUsername("foo@bar.com");
 		String exp = String.format("foo@bar.com %s", client.getBaseURL().toString());
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());

@@ -43,4 +43,5 @@ public class OpenShiftCoreUIIntegration {
 	public void setCredentialPrompter(ICredentialsPrompter prompter) {
 		this.credentialPrompter = prompter;
 	}
+
 }

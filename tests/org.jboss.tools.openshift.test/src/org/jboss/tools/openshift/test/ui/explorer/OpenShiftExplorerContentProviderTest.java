@@ -48,7 +48,7 @@ public class OpenShiftExplorerContentProviderTest {
 	public void setup() throws Exception{
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8442")); 
 		registry = new ConnectionsRegistry();
-		connection = new Connection(client, null, null, null);
+		connection = new Connection(client, null, null);
 		registry.add(connection);
 		provider = new OpenShiftExplorerContentProvider();
 	}

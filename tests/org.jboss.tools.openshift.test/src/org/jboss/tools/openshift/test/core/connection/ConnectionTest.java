@@ -49,7 +49,7 @@ public class ConnectionTest {
 	@Before
 	public void setup() throws Exception{
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
-		connection = new Connection(client, null, null, null);
+		connection = new Connection(client, null, null);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class ConnectionTest {
 	
 	@Test
 	public void shouldNotEqualsIfDifferentUser() throws Exception {
-		Connection two = new Connection("https://localhost:8443", null, null, null);
+		Connection two = new Connection("https://localhost:8443", null, null);
 		two.setUsername("foo");
 
 		assertNotEquals("Exp. connections not to be equal unless they have same url and user", connection, two);
@@ -109,14 +109,14 @@ public class ConnectionTest {
 
 	@Test
 	public void shouldNotEqualsIfDifferentScheme() throws Exception {
-		Connection two = new Connection("http://localhost:8443", null, null, null);
+		Connection two = new Connection("http://localhost:8443", null, null);
 
 		assertNotEquals("Exp. connections not to be equal unless they have same url and user", connection, two);
 	}
 
 	@Test
 	public void shouldNotEqualsIfDifferentHost() throws Exception {
-		Connection two = new Connection("https://openshift.redhat.com:8443", null, null, null);
+		Connection two = new Connection("https://openshift.redhat.com:8443", null, null);
 		two.setUsername("foo");
 
 		assertNotEquals("Exp. connections not to be equal unless they have same url and user", connection, two);
@@ -125,7 +125,7 @@ public class ConnectionTest {
 	@Test
 	public void shouldEqualsIfSameUrlAndUser() throws Exception {
 		connection.setUsername("foo");
-		Connection two = new Connection("https://localhost:8443", null, null, null);
+		Connection two = new Connection("https://localhost:8443", null, null);
 		two.setUsername("foo");
 
 		assertEquals("Exp. connections to be equal if they have same url and user", connection, two);
@@ -134,7 +134,7 @@ public class ConnectionTest {
 	@Test
 	public void cloneShouldCreateIdenticalConnection() throws Exception {
 		// pre-conditions
-		Connection connection = new Connection("https://localhost:8443", null, null, null);
+		Connection connection = new Connection("https://localhost:8443", null, null);
 		connection.setPassword("foo");
 		connection.setPassword("bar");
 		
