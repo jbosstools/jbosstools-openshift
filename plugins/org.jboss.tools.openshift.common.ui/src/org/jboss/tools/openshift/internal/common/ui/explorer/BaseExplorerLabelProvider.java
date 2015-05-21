@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.explorer;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -65,7 +66,7 @@ public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider,
 			return new StyledString("Loading...");
 		}
 		if(element instanceof Exception) {
-			return new StyledString(((Exception)element).getLocalizedMessage());
+			return new StyledString(((Exception)element).getMessage());
 		}
 		return new StyledString(element.toString());
 	}

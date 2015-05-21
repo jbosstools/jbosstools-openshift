@@ -44,6 +44,12 @@ public class NewApplicationWizard extends Wizard implements IConnectionAwareWiza
 		setWindowTitle("New OpenShift Application");
 		this.model = model;
 	}
+	
+	@Override
+	public Object getContext() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public void addPages() {

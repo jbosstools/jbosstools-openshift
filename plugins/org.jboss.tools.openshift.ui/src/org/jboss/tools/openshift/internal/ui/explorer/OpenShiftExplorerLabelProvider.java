@@ -110,7 +110,11 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		}
 		if(element instanceof Connection){
 			Connection conn = (Connection) element;
-			return style(conn.getUsername(), conn.toString());
+			String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), conn.getToken());
+			if(prefix == null) {
+				prefix = "<unknown user>";
+			}
+			return style(prefix, conn.toString());
 		}
 		return super.getStyledText(element);
 	}

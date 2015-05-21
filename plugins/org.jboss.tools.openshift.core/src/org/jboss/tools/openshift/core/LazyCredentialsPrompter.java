@@ -30,12 +30,12 @@ public final class LazyCredentialsPrompter implements ICredentialsPrompter {
 	 * Prompt for authentication.
 	 */
 	@Override
-	public final boolean promptAndAuthenticate(IConnection connection) {
+	public final boolean promptAndAuthenticate(IConnection connection, Object context) {
 		if(prompter == null){
 			prompter = OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter();
 			if(prompter == null) return false;
 		}
-		return prompter.promptAndAuthenticate(connection);
+		return prompter.promptAndAuthenticate(connection, context);
 	}
 
 }

@@ -102,6 +102,12 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 		setProject(project);
 		return project;
 	}
+	
+	@Override
+	public Object getContext() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/**
 	 * Enables the user chosen, unshared project to be used on the chosen

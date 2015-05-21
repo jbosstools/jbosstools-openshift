@@ -76,7 +76,12 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IConn
 		setNeedsProgressMonitor(true);
 		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
 	}
-
+	
+	@Override
+	public Object getContext() {
+		return null;
+	}
+	
 	protected void openError(final String title, final String message) {
 		getShell().getDisplay().syncExec(new Runnable() {
 

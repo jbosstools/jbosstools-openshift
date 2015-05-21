@@ -273,7 +273,7 @@ public class ExpressConnection extends AbstractConnection {
 			return false;
 		}
 		try {
-			passwordPrompter.promptAndAuthenticate(this);
+			passwordPrompter.promptAndAuthenticate(this, null);
 			didPromptForPassword = true;
 		} catch (Exception e) {
 			ExpressCoreActivator.pluginLog().logError("Failed to retrieve User's password", e);

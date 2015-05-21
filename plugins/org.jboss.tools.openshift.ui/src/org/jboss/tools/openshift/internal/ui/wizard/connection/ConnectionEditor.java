@@ -8,34 +8,43 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
-import org.apache.commons.lang.BooleanUtils;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
-import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionFactory;
 import org.jboss.tools.openshift.internal.common.ui.connection.BaseConnectionEditor;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
-import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
+import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
+
+import com.openshift.restclient.authorization.IAuthorizationContext;
 
 /**
  * Detail view used in the common Connection Wizard to
@@ -47,155 +56,187 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
  */
 public class ConnectionEditor extends BaseConnectionEditor {
 
-	private Text usernameText;
-	private IObservableValue usernameObservable;
-	private Binding usernameBinding;
-	private Text passwordText;
-	private IObservableValue passwordObservable;
-	private Binding passwordBinding;
-	private IObservableValue rememberPasswordObservable;
-	private Button rememberPasswordCheckBox;
-	private Binding rememberPasswordBinding;
 
+	private static final String PROPERTY_SELECTED_DETAIL_VIEW = "selectedDetailView";
+	
+	private Map<String,IConnectionEditorDetailView> detailViews = new HashMap<String, IConnectionEditorDetailView>();
+	private ConnectionEditorStackedDetailViews stackedViews ;
+	private DetailViewModel detailViewModel = new DetailViewModel();
+	private IConnectionEditorDetailView defaultDetailView;
+
+	private Button chkRememberToken;
+	private IObservableValue rememberTokenObservable;
+
+	private Binding rememberTokenBinding;
+
+	private IObservableValue authTypeObservable;
+
+	private Binding selectedAuthTypeBinding;
+
+	private ComboViewer cmbViewerAuthType;
+	
+	private class DetailViewModel extends ObservablePojo{
+		private IConnectionEditorDetailView selectedDetailView;
+		
+		public IConnectionEditorDetailView getSelectedDetailView() {
+			return this.selectedDetailView;
+		}
+		public void  setSelectedDetailView(IConnectionEditorDetailView view) {
+			this.selectedDetailView = view;
+		}
+		public void setSelectedConnection(IObservableValue selectedConnection) {
+			Connection connection = (Connection) selectedConnection.getValue();
+			rememberTokenObservable.setValue(connection.isRememberPassword());
+			setSelectedDetailView(detailViews.get(connection.getAuthScheme()));
+		}
+	}
+	
+	private class ConnectionEditorStackedDetailViews extends AbstractStackedDetailViews{
+
+		public ConnectionEditorStackedDetailViews(IObservableValue detailViewModel, Object context, Composite parent,
+				DataBindingContext dbc) {
+			super(detailViewModel, context, parent, dbc);
+		}
+
+		@Override
+		protected IDetailView[] getDetailViews() {
+			return detailViews.values().toArray(new IConnectionEditorDetailView[detailViews.size()]);
+		}
+		
+	}
+	
 	@Override
 	public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
-
-		// username
-		Label usernameLabel = new Label(composite, SWT.NONE);
-		usernameLabel.setText("&Username:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(usernameLabel);
-		this.usernameText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
-		this.usernameObservable = new WritableValue(null, String.class);
 		
-		// password
-		Label passwordLabel = new Label(composite, SWT.NONE);
-		passwordLabel.setText("&Password:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
-		this.passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
-		this.passwordObservable = new WritableValue(null, String.class);
-		
-		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
-		rememberPasswordCheckBox.setText("&Save Password (could trigger secure storage login)");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
-		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
-		rememberPasswordObservable.addValueChangeListener(changeListener);
+		//remember token
+		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		rememberTokenObservable.addValueChangeListener(changeListener);
 
+		//detail views
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(pageModel, changeListener, pageModel.getContext(), rememberTokenObservable));
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable));
+		defaultDetailView = detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH);
+		
+		// auth type
+		Label lblAuthType = new Label(composite, SWT.NONE);
+		lblAuthType.setText("Protocol:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(lblAuthType);
+		Combo cmbAuthType = new Combo(composite, SWT.DEFAULT);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(cmbAuthType);
+		cmbViewerAuthType = new ComboViewer(cmbAuthType);
+		cmbViewerAuthType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbViewerAuthType.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return element.toString();
+			}
+			
+		});
+		cmbViewerAuthType.setInput(detailViews.values());
+		authTypeObservable = BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class)
+				.observe(detailViewModel);
+	
+
+		//connection detail views
+		final Composite detailsContainer = new Composite(composite, SWT.None);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(detailsContainer);
+		stackedViews = new ConnectionEditorStackedDetailViews(
+				authTypeObservable,
+				pageModel, 
+				detailsContainer, 
+				dbc);
+		stackedViews.createControls(false);
+		
+		//remember token
+		this.chkRememberToken = new Button(composite, SWT.CHECK);
+		chkRememberToken.setText("&Save Token (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(chkRememberToken);
+		
 		return composite;
 	}
 	
 	@Override
-	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+	public void onVisible(IObservableValue detailViewModelObservable, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		updateFrom(selectedConnection);
+		authTypeObservable.setValue(defaultDetailView);
 	}
-
-	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
-		// username
-		this.usernameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("username"))
-				.to(usernameObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		usernameObservable.addValueChangeListener(changeListener);
-
-		// password
-		this.passwordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("password"))
-				.to(passwordObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		passwordObservable.addValueChangeListener(changeListener);
-
-		// remember password
-		this.rememberPasswordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
-				.to(rememberPasswordObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-	}
-
+	
 	@Override
-	public void onInVisible(IObservableValue detailsViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+	public void onInVisible(IObservableValue detailViewModelObservable, DataBindingContext dbc) {
+		detailViewModel.getSelectedDetailView().onInVisible(detailViewModelObservable, dbc);
 		disposeBindings();
 	}
 
+	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
+		//auth protocol
+		selectedAuthTypeBinding = ValueBindingBuilder
+				.bind(ViewerProperties.singleSelection().observe(cmbViewerAuthType))
+				.validatingAfterGet(
+						new IsNotNullValidator(
+								ValidationStatus.cancel("Please select an authorization protocol.")))
+				.to(authTypeObservable)
+				.in(dbc);
+		ControlDecorationSupport
+				.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
+		// remember password
+		this.rememberTokenBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(chkRememberToken))
+				.to(rememberTokenObservable)
+				.in(dbc);
+		ControlDecorationSupport.create(
+				rememberTokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+	}
+
+	@Override
+	public void onInVisible(IObservableValue detailsViewModelObservable, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+		detailViewModel.getSelectedDetailView().onInVisible(detailsViewModelObservable, dbc);
+		disposeBindings();
+	}
+
+	private void disposeBindings() {
+		DataBindingUtils.dispose(rememberTokenBinding);
+		DataBindingUtils.dispose(selectedAuthTypeBinding);
+		for (IDetailView view : stackedViews.getDetailViews()) {
+			view.dispose();
+		}			
+		
+	}
+	
 	@Override
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
-		updateFrom(selectedConnection);
+		IConnection conn = (IConnection) selectedConnection.getValue();
+		if(!(conn instanceof Connection)) return;
+		detailViewModel.setSelectedConnection(selectedConnection);
 	}
-	
-	private void updateFrom(IObservableValue selectedConnectionObservable) {
-		if (selectedConnectionObservable.getValue() instanceof Connection) {
-			Connection selectedConnection = (Connection) selectedConnectionObservable.getValue();
-			usernameObservable.setValue(selectedConnection.getUsername());
-			passwordObservable.setValue(selectedConnection.getPassword());
-			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
-		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
-			usernameObservable.setValue(null);
-			passwordObservable.setValue(null);
-			rememberPasswordObservable.setValue(false);
-		}
-	}
-	
+
 	@Override
 	public boolean isViewFor(Object object) {
 		return object instanceof ConnectionFactory;
 	}
 	
-	@Override
-	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
-		return new ConnectionAuthenticationProvider();
+	private IConnectionEditorDetailView getDetailView() {
+		return detailViewModel.getSelectedDetailView();
 	}
 	
 	@Override
-	public void dispose() {
-		disposeBindings();
+	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
+		return new ConnectionAuthenticationProviderProxy();
 	}
-
-	private void disposeBindings() {
-		DataBindingUtils.dispose(usernameBinding);
-		DataBindingUtils.dispose(passwordBinding);
-		DataBindingUtils.dispose(rememberPasswordBinding);
-	}
-
-	private class ConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {
-
+	
+	private class  ConnectionAuthenticationProviderProxy implements IConnectionAuthenticationProvider {
 		@Override
-		public IConnection update(IConnection conn) {
-			Assert.isLegal(conn instanceof Connection);
-			
-			final Connection connection = (Connection) conn;
-			// might be called from job, switch to display thread to access observables
-			Display.getDefault().syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					connection.setUsername((String) usernameObservable.getValue());
-					connection.setPassword((String) passwordObservable.getValue());
-					connection.setRememberPassword(
-							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
-				}
-			});
-
-			return connection;
+		public IConnection update(IConnection connection) {
+			return getDetailView().getConnectionAuthenticationProvider().update(connection);
 		}
 		
 	}
+
 }

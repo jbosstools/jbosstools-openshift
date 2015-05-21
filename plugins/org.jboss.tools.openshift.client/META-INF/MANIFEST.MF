@@ -11,8 +11,6 @@ Bundle-ClassPath: lib/openshift-restclient-java-1.0.0-SNAPSHOT.jar,
  lib/log4j-1.2.17.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/slf4j-log4j12-1.6.1.jar,
- lib/httpclient-4.3.6.jar,
- lib/httpcore-4.3.3.jar,
  lib/commons-codec-1.6.jar,
  lib/commons-lang-2.6.jar,
  lib/commons-io-2.1.jar,
@@ -27,10 +25,13 @@ Export-Package: com.openshift.internal.restclient.http,
  com.openshift.restclient.model,
  com.openshift.restclient.model.build,
  com.openshift.restclient.model.route,
- com.openshift.restclient.model.template
+ com.openshift.restclient.model.template,
+ com.openshift.restclient.model.user
 Import-Package: org.apache.commons.logging,
  org.eclipse.debug.internal.core,
  org.eclipse.osgi.service.debug;version="1.2.0",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
+Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
+ org.apache.httpcomponents.httpcore;bundle-version="4.3.3"

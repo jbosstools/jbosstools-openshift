@@ -50,13 +50,17 @@ public abstract class AbstractStackedDetailViews {
 		Assert.isLegal(detailViewModel != null && !detailViewModel.isDisposed());
 		this.detailViewModel = detailViewModel;
 	}
-
 	public void createControls() {
+		createControls(true);
+	}
+
+	public void createControls(boolean showView) {
 		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(detailViewModel), detailViewModel, parent);
 
 		parent.setLayout(stackLayout);
 		createViewControls(parent, context, dbc);
-		showView(detailViewModel, getView(detailViewModel), dbc);
+		if(showView)
+			showView(detailViewModel, getView(detailViewModel), dbc);
 	}
 
 	protected abstract IDetailView[] getDetailViews();

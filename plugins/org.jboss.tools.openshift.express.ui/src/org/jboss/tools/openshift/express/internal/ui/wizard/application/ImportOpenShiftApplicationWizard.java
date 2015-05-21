@@ -37,4 +37,9 @@ public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard
 		super(ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance()),
 				application.getDomain(), application, null, true, "Import OpenShift Application");
 	}
+
+	@Override
+	public Object getContext() {
+		return null;
+	}
 }
