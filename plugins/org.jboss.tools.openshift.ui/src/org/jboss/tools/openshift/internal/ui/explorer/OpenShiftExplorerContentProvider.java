@@ -29,8 +29,14 @@ import com.openshift.restclient.model.IProject;
 public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider{
 	
 	private static final ResourceKind [] groupings = new ResourceKind [] {
-		ResourceKind.BuildConfig, ResourceKind.DeploymentConfig, ResourceKind.Service, ResourceKind.Pod,
-		ResourceKind.ReplicationController, ResourceKind.Build, ResourceKind.ImageStream, ResourceKind.Route
+		ResourceKind.BuildConfig, 
+		ResourceKind.DeploymentConfig, 
+		ResourceKind.Service, 
+		ResourceKind.Pod,
+		ResourceKind.ReplicationController, 
+		ResourceKind.Build, 
+		ResourceKind.ImageStream, 
+		ResourceKind.Route
 	};
 
 	/**
@@ -42,8 +48,11 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		if(parentElement instanceof ConnectionsRegistry){
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
 			return registry.getAll(Connection.class).toArray();
+		} else if (parentElement instanceof Connection) {
+			return ((Connection) parentElement).get(ResourceKind.Project).toArray();
+		} else {
+			return new Object[0];
 		}
-		return null;
 	}
 	
 	/**
@@ -55,8 +64,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
 				return connection.get(ResourceKind.Project).toArray();
-			}
-			if(parentElement instanceof IProject){
+			} else if (parentElement instanceof IProject) {
 				IProject project = (IProject) parentElement;
 				List<ResourceGrouping> groups = new ArrayList<ResourceGrouping>(groupings.length);
 				for (ResourceKind kind : groupings) {
@@ -70,12 +78,11 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 					groups.add(grouping);
 				}
 				return groups.toArray();
-			}
-			if(parentElement instanceof ResourceGrouping){
+			} else if (parentElement instanceof ResourceGrouping) {
 				ResourceGrouping group = (ResourceGrouping) parentElement;
 				return group.getProject().getResources(group.getKind()).toArray();
 			}
-		}catch(OpenShiftException e){
+		} catch (OpenShiftException e) {
 			addException(parentElement, e);
 		}
 		return new Object[0];

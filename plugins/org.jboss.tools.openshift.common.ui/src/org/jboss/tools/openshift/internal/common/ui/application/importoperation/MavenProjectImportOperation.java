@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project;
+package org.jboss.tools.openshift.internal.common.ui.application.importoperation;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,7 +28,6 @@ import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.express.internal.ui.ImportFailedException;
 
 /**
  * @author Andre Dietisheim <adietish@redhat.com>

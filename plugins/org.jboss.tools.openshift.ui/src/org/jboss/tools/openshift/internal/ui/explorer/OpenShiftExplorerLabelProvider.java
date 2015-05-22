@@ -36,10 +36,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		if(element instanceof ResourceGrouping){
+		if (element instanceof ResourceGrouping) {
 			return OpenShiftCommonImages.FOLDER;
-		}
-		if(element instanceof IResource){
+		} else if (element instanceof IResource) {
 			IResource resource = (IResource) element;
 			switch (resource.getKind()) {
 			case BuildConfig:
@@ -53,15 +52,16 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			case Service:
 				return OpenShiftImages.GEAR_IMG;
 			default:
-				 return OpenShiftCommonImages.FILE;
+				return OpenShiftCommonImages.FILE;
 			}
+		} else {
+			return super.getImage(element);
 		}
-		return super.getImage(element);
 	}
 
 	@Override
 	public StyledString getStyledText(Object element) {
-		if(element instanceof IResource){
+		if (element instanceof IResource) {
 			IResource resource = (IResource)element;
 			switch (resource.getKind()) {
 			case Build:
@@ -105,10 +105,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				break;
 			}
 		}
-		if(element instanceof ResourceGrouping){
+		if (element instanceof ResourceGrouping) {
 			return new StyledString(StringUtils.humanize(((ResourceGrouping) element).getKind().pluralize()));
-		}
-		if(element instanceof Connection){
+		} else if (element instanceof Connection) {
 			Connection conn = (Connection) element;
 			String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), "<unknown user>");
 			if(prefix == null) {

@@ -75,7 +75,6 @@ Export-Package: org.jboss.tools.openshift.express.internal.ui;x-friends:="org.jb
  org.jboss.tools.openshift.express.internal.ui.wizard.application;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.application.details;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation;x-friends:="org.jboss.tools.openshift.express.test",
- org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.application.template;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.connection;x-friends:="org.jboss.tools.openshift.express.test",
  org.jboss.tools.openshift.express.internal.ui.wizard.domain;x-friends:="org.jboss.tools.openshift.express.test",

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation.project;
+package org.jboss.tools.openshift.internal.common.ui.application.importoperation;
 
 import java.io.File;
 

@@ -703,7 +703,7 @@
            point="org.eclipse.ui.handlers">
         <handler
               commandId="org.jboss.tools.openshift.express.ui.command.importapplication"
-              class="org.jboss.tools.openshift.express.internal.ui.command.ImportApplicationHandler">
+              class="org.jboss.tools.openshift.internal.ui.handler.ImportApplicationHandler">
      	</handler>
     </extension>
 	<!-- openshift explorer: import application -->

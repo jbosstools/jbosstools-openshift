@@ -41,8 +41,8 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
-import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.ExpressException;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.OpenShiftException;

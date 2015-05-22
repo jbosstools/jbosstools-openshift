@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,12 +8,11 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.wizard.application.importoperation;
+package org.jboss.tools.openshift.internal.ui.wizard.application.importoperation;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
@@ -23,29 +22,26 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
+import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.MavenProjectImportOperation;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.WontOverwriteException;
 
-import com.openshift.client.IApplication;
-import com.openshift.client.OpenShiftException;
+import com.openshift.restclient.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class ImportNewProject extends AbstractImportApplicationOperation {
+public class ImportNewProject {
 
 	private File cloneDestination;
+	private String gitUrl;
 
-	public ImportNewProject(String projectName, IApplication application, String remoteName,
-			File cloneDestination, List<IOpenShiftMarker> markers, ExpressConnection connection) {
-		super(projectName, application, remoteName, markers, connection);
+	public ImportNewProject(String gitUrl, File cloneDestination) {
+		this.gitUrl = gitUrl;
 		this.cloneDestination = cloneDestination;
 	}
 
@@ -63,7 +59,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
-	public IProject execute(IProgressMonitor monitor)
+	public void execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
 		if (cloneDestinationExists()) {
@@ -74,17 +70,9 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		}
 
 		File repositoryFolder =
-				cloneRepository(getApplication(), getRemoteName(), cloneDestination, true, monitor);
+				cloneRepository(gitUrl, cloneDestination, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
-		// TODO: handle multiple projects (is this really possible?)
-		IProject project = getSettingsProject(importedProjects);
-		addToModified(setupGitIgnore(project, monitor));
-		addSettingsFile(project, monitor);
-		addToModified(setupMarkers(project, monitor));
-		//server adapter will commit when publishing
-		//addAndCommitModifiedResource(project, monitor);
-		return getSettingsProject(importedProjects);
 	}
 	
 	/**
@@ -120,6 +108,41 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		}
 	}
 
+	/**
+	 * Clones the repository of the selected OpenShift application to the user
+	 * provided path.
+	 * 
+	 * @param application
+	 *            the application to clone
+	 * @param remoteName
+	 *            the name of the remote repo to clone
+	 * @param destination
+	 *            the destination to clone to
+	 * @param addToRepoView
+	 *            if true, the clone repo will get added to the (egit)
+	 *            repositories view
+	 * @param monitor
+	 *            the monitor to report progress to
+	 * 
+	 * @return the location of the cloned repository
+	 * @throws OpenShiftException
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 * @throws URISyntaxException
+	 * 
+	 * @see AbstractImportApplicationOperation#getApplication()
+	 * @see #getRepositoryPath()
+	 */
+	protected File cloneRepository(String gitUrl, File destination, IProgressMonitor monitor)
+			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+		monitor.subTask(NLS.bind("Cloning  {0}...", gitUrl));
+		EGitUIUtils.ensureEgitUIIsStarted();
+		EGitUtils.cloneRepository(
+					gitUrl, Constants.DEFAULT_REMOTE_NAME, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+		return destination;
+	}
+
+	
 	protected File getCloneDestination() {
 		return cloneDestination;
 	}

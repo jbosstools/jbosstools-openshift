@@ -51,7 +51,7 @@ import com.openshift.client.IApplication;
  */
 public class SelectApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
-	private static final String COMMON_VIEWER_ID = "org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPage";
+	private static final String COMMON_VIEWER_ID = "org.jboss.tools.openshift.internal.common.core.application.importoperation.ui.wizard.application.SelectApplicationWizardPage";
 	private final SelectApplicationWizardPageModel pageModel;
 	private TreeViewer applicationsTreeViewer;
 

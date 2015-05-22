@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2014-2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,14 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.commons.io.IOUtils;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter;
@@ -52,6 +49,10 @@ public class OpenShiftUIActivator extends BaseUIPlugin{
 
 	public static OpenShiftUIActivator getDefault() {
 		return plugin;
+	}
+	
+	public static StatusFactory statusFactory() {
+		return getDefault().statusFactoryInternal();
 	}
 	
 	/**

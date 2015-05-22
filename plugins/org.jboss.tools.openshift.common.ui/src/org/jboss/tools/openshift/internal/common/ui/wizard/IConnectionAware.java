@@ -17,6 +17,8 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  */
 public interface IConnectionAware<C extends IConnection> {
 
+	public static final String PROPERTY_CONNECTION = "connection";
+
 	public C getConnection();
 
 	public boolean hasConnection();

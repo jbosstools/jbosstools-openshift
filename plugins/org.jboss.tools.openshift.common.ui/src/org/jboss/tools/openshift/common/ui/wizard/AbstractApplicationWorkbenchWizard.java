@@ -122,7 +122,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			}
 			IWizard wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
 			if (wizard == null) {
-				setErrorMessage(NLS.bind("No application wizard for {0} connections present.", getModel().getConnectionFactory().getName()));
+				setErrorMessage(NLS.bind("No wizard for {0} connections present.", getModel().getConnectionFactory().getName()));
 			}
 			return wizard != null;
 		}
