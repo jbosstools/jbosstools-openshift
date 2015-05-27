@@ -17,7 +17,7 @@ import com.openshift.restclient.model.IProject;
  * A UI class to facilitate grouping like resources
  * in the explorer view
  */
-public class ResourceGrouping implements IRefreshable{
+public class ResourceGrouping implements IRefreshable {
 	private IProject project;
 	private ResourceKind kind;
 	private IRefreshable refreshable;
@@ -49,39 +49,35 @@ public class ResourceGrouping implements IRefreshable{
 	}
 
 	@Override
+	public void refresh() {
+		if(refreshable == this || refreshable == null) return;
+		this.refreshable.refresh();
+	}
+	
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((kind == null) ? 0 : kind.hashCode());
+		result = prime * result + ((project == null) ? 0 : project.hashCode());
 		return result;
 	}
-
-	/**
-	 * Resource Groupings are considered equal if they have
-	 * the same title.  The contained resources is not
-	 * considered
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof ResourceGrouping))
 			return false;
 		ResourceGrouping other = (ResourceGrouping) obj;
-		if (kind == null) {
-			if (other.kind != null)
+		if (kind != other.kind)
+			return false;
+		if (project == null) {
+			if (other.project != null)
 				return false;
-		} else if (!kind.equals(other.kind))
+		} else if (!project.equals(other.project))
 			return false;
 		return true;
 	}
-
-	@Override
-	public void refresh() {
-		if(refreshable == this || refreshable == null) return;
-		this.refreshable.refresh();
-	}
-
 }

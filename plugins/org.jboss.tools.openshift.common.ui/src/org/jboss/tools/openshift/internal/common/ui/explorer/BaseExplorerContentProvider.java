@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.internal.common.ui.explorer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 /**
@@ -36,8 +35,8 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	private StructuredViewer viewer;
 
 	// Keep track of what's loading and what's finished
-	private Map<Object, LoadingStub> loadedElements = new HashMap<Object, LoadingStub>();
-	private Map<Object, LoadingStub> loadingElements = new HashMap<Object, LoadingStub>();
+	private Map<Object, LoadingStub> loadedElements = new ConcurrentHashMap<Object, LoadingStub>();
+	private Map<Object, LoadingStub> loadingElements = new ConcurrentHashMap<Object, LoadingStub>();
 	
 	/**
 	 * Get the root elements for the explorer.  This should provide what
@@ -113,6 +112,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 
 	private LoadingStub launchLoadingJob(final Object element) {
 		final LoadingStub stub = new LoadingStub();
+		loadingElements.put(element, stub);
 		Job job = new Job(MSG_LOADING_RESOURCES) {
 
 			@Override
@@ -121,13 +121,13 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 					monitor.beginTask(MSG_LOADING_RESOURCES, IProgressMonitor.UNKNOWN);
 					monitor.worked(1);
 					// Get the actual children, with the delay
-					loadingElements.put(element, stub);
 					stub.addChildren(getChildrenFor(element));
 					return Status.OK_STATUS;
-				}catch(Exception e) {
+				} catch (Exception e) {
 					addException(element, e);
-					return new Status(Status.ERROR,OpenShiftCommonUIActivator.PLUGIN_ID, "There was an error retrieving children in the OpenShift explorer", e);
-				}finally {
+					return new Status(Status.ERROR, OpenShiftCommonUIActivator.PLUGIN_ID,
+							"There was an error retrieving children in the OpenShift explorer", e);
+				} finally {
 					loadedElements.put(element, stub);
 					loadingElements.remove(element);
 					monitor.done();
@@ -141,7 +141,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	}
 
 	protected void refreshViewerObject(final Object object) {
-		Display.getDefault().asyncExec(new Runnable() {
+		viewer.getControl().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
 					viewer.refresh(object);
