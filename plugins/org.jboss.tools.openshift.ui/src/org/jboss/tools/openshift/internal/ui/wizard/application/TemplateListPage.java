@@ -378,16 +378,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		}
 
 		@Override
-		public void setName(String name) {
-		}
-
-		@Override
 		public String getNamespace() {
 			return null;
-		}
-
-		@Override
-		public void setNamespace(String namespace) {
 		}
 
 		@Override
