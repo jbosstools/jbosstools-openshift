@@ -24,7 +24,13 @@ Require-Bundle: org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Bundle-Vendor
-Export-Package: org.jboss.tools.openshift.internal.common.ui;
+Export-Package: org.jboss.tools.openshift.common.ui.wizard;
+  x-friends:="org.jboss.tools.openshift.core,
+   org.jboss.tools.openshift.express.test,
+   org.jboss.tools.openshift.express.ui,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.internal.common.ui;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,

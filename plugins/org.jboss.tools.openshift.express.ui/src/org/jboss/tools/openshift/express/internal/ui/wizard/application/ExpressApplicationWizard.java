@@ -24,11 +24,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
@@ -50,6 +53,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 
 import com.openshift.client.IApplication;
@@ -64,13 +68,13 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  * @author Xavier Coulon
  * 
  * @see NewApplicationWorkbenchWizard
- * @see ImportOpenShiftApplicationWizard
+ * @see ImportExpressApplicationWizard
  */
-public abstract class OpenShiftApplicationWizard extends Wizard implements IConnectionAwareWizard<ExpressConnection> {
+public abstract class ExpressApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<ExpressConnection> {
 
 	private final OpenShiftApplicationWizardModel model;
 
-	OpenShiftApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
+	ExpressApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
 			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
@@ -396,4 +400,30 @@ public abstract class OpenShiftApplicationWizard extends Wizard implements IConn
 	public boolean hasConnection() {
 		return model.hasConnection();
 	}
+
+	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		updateModel(selection, getModel());
+	}
+
+	private void updateModel(IStructuredSelection selection, IOpenShiftApplicationWizardModel model) {
+		IDomain domain = UIUtils.getFirstElement(selection, IDomain.class);
+		if (domain != null) {
+			model.setDomain(domain);
+		} else {
+			ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
+			if (connection != null) {
+				model.setConnection(connection);
+			} else {
+				/**
+				 * PackageExplorer Configure->New OpenShift Application
+				 */
+				IProject project = UIUtils.getFirstElement(selection, IProject.class);
+				if (project != null) {
+					model.setProject(project);
+				}
+			}
+		}
+	}
+
 }

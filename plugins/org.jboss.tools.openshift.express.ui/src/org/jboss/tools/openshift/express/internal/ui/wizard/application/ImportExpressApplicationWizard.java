@@ -13,12 +13,12 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  * 
  */
-public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard {
+public class ImportExpressApplicationWizard extends ExpressApplicationWizard {
 
 	/**
 	 * Constructor invoked via File->Import
 	 */
-	public ImportOpenShiftApplicationWizard() {
+	public ImportExpressApplicationWizard() {
 		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class), null, null, null, true, 
 				"Import OpenShift Application");
 	}
@@ -26,14 +26,14 @@ public class ImportOpenShiftApplicationWizard extends OpenShiftApplicationWizard
 	/**
 	 * Constructor invoked via Server adapter wizard "Import application"
 	 */
-	public ImportOpenShiftApplicationWizard(ExpressConnection connection, IApplication application) {
+	public ImportExpressApplicationWizard(ExpressConnection connection, IApplication application) {
 		super(connection, application.getDomain(), application, null, true, "Import OpenShift Application");
 	}
 
 	/**
 	 * Constructor invoked via OpenShift Explorer context menu
 	 */
-	public ImportOpenShiftApplicationWizard(IApplication application) {
+	public ImportExpressApplicationWizard(IApplication application) {
 		super(ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance()),
 				application.getDomain(), application, null, true, "Import OpenShift Application");
 	}

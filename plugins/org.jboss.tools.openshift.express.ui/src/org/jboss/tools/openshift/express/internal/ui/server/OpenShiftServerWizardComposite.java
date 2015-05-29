@@ -83,9 +83,9 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.viewer.ApplicationColumnLabelProvider;
 import org.jboss.tools.openshift.express.internal.ui.viewer.DomainColumnLabelProvider;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
-import org.jboss.tools.openshift.express.internal.ui.wizard.application.OpenShiftApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewExpressApplicationWizard;
+import org.jboss.tools.openshift.express.internal.ui.wizard.application.ExpressApplicationWizard;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -335,11 +335,11 @@ public class OpenShiftServerWizardComposite {
 	protected SelectionAdapter onClickCreateOrImport() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				OpenShiftApplicationWizard wizard = null;
+				ExpressApplicationWizard wizard = null;
 				if(application != null){
-					wizard = new ImportOpenShiftApplicationWizard(connection, application);
+					wizard = new ImportExpressApplicationWizard(connection, application);
 				}else{
-					wizard = new NewOpenShiftApplicationWizard(connection);
+					wizard = new NewExpressApplicationWizard(connection);
 				}
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 				dialog.create();

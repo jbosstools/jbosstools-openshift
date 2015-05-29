@@ -18,10 +18,13 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
@@ -38,7 +41,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
  * @author Andre Dietisheim
  * 
  */
-public abstract class AbstractApplicationWorkbenchWizard extends Wizard {
+public abstract class AbstractApplicationWorkbenchWizard extends Wizard implements IWorkbenchWizard {
 	
 	protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
 		
@@ -101,6 +104,9 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard {
 
 			if (wizard.getPageCount() == 0) {
 				// initialize wizard
+				if (wizard instanceof IWorkbenchWizard) {
+					((IWorkbenchWizard) wizard).init(workbench, selection);
+				}
 				wizard.addPages();
 			}
 			return wizard;
@@ -126,6 +132,14 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard {
 	private static final String ATTRIBUTE_CONNECTION = "connection";
 
 	private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection;
+	private IWorkbench workbench;
+	private IStructuredSelection selection;
+
+	protected AbstractApplicationWorkbenchWizard(String title) {
+		setWindowTitle(title);
+		setNeedsProgressMonitor(true);
+		setForcePreviousAndNextButtons(true);
+	}
 
 	protected IConnectionAwareWizard<IConnection> getWizard(Class<? extends IConnection> connectionClass) {
 		return getWizards().get(connectionClass);
@@ -176,5 +190,11 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard {
 	}
 
 	protected abstract String getWizardsExtensionId();
+
+	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		this.workbench = workbench;
+		this.selection = selection;
+	}
 
 }

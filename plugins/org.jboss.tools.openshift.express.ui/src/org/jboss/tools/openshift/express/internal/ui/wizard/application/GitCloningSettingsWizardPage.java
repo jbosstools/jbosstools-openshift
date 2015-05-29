@@ -80,7 +80,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 	private RemoteNameValidationStatusProvider remoteNameValidator;
 	private Link sshLink;
 
-	public GitCloningSettingsWizardPage(OpenShiftApplicationWizard wizard,
+	public GitCloningSettingsWizardPage(ExpressApplicationWizard wizard,
 			IOpenShiftApplicationWizardModel wizardModel) {
 		super(
 				"Import an existing OpenShift application",

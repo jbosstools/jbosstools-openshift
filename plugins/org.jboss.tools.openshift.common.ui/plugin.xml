@@ -124,7 +124,19 @@
 			</options>
 		</viewer>
 	</extension>
-	
+
+	<!-- openshift explorer: "New" submenu -->
+	<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.new">
+	    	<menu
+	           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new"
+	           label="%openshift.menu.expressConsoleView.new">
+			</menu>
+		</menuContribution>
+	</extension>
+
 	<!-- openshift explorer view: toolbar/new connection -->
 	<extension
 		point="org.eclipse.ui.menus">
@@ -259,4 +271,59 @@
           </command>
         </menuContribution>
     </extension>
+
+	<!-- New Application -->
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			id="org.jboss.tools.openshift.common.ui.command.newapplication"
+			name="%openshift.command.application.new">
+		</command>
+	</extension>
+	<extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              commandId="org.jboss.tools.openshift.common.ui.command.newapplication"
+              class="org.jboss.tools.openshift.internal.common.ui.command.NewApplicationHandler">
+     	</handler>
+    </extension>
+
+	<!-- configure OpenShift application -->
+	<!-- project explorer: configure OpenShift application -->
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+    		locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+			<command
+				commandId="org.jboss.tools.openshift.common.ui.command.newapplication"
+				icon="icons/openshift-new.png"
+				label="%openshift.menu.configureNewOpenShiftApplication"
+				mnemonic="A">
+				<visibleWhen 
+					checkEnabled="false">
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false">
+								<adapt
+            						type="org.eclipse.core.resources.IProject">
+									<and>
+			 							<test
+			 								forcePluginActivation="true"
+				    	       				property="org.jboss.tools.openshift.express.isOpenShiftProject" value="false"/>			 							
+				    	       			<test
+			 								forcePluginActivation="true"
+				    	       				property="org.jboss.tools.openshift.express.ifSharedIsEGit" value="true"/>
+				    	       			<test
+			 								forcePluginActivation="true"
+				    	       				property="org.jboss.tools.openshift.express.isInternalRSE" value="false"/>
+				    	       		</and>
+								</adapt>
+			           		</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+
 </plugin>

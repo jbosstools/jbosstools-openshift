@@ -10,9 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.ui.wizard;
 
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
 
 /**
  * A wizard to create a new OpenShift application.
@@ -22,15 +20,14 @@ import org.eclipse.ui.IWorkbench;
  */
 public class NewApplicationWorkbenchWizard extends AbstractApplicationWorkbenchWizard implements INewWizard {
 	
+	public NewApplicationWorkbenchWizard() {
+		super("New OpenShift Application");
+	}
+
 	private static final String NEW_APPLICATION_WIZARD_EXTENSION = "org.jboss.tools.openshift.ui.newApplicationWizard";
 
 	@Override
 	protected String getWizardsExtensionId() {
 		return NEW_APPLICATION_WIZARD_EXTENSION;
 	}
-
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-	}
-
 }

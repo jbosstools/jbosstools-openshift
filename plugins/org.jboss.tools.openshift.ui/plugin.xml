@@ -22,9 +22,9 @@
 			name="org.jboss.tools.openshift.ui.explorer.navigatorContent">
 			<possibleChildren>
 				<or>
-     <instanceof
-           value="com.openshift.restclient.model.IResource">
-     </instanceof>
+					<instanceof
+						value="com.openshift.restclient.model.IResource">
+					</instanceof>
 					<instanceof
 						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>
@@ -43,26 +43,22 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.menus">
-		<!-- openshift explorer context menu: new connection -->
+		<!-- openshift explorer context menu: refresh resource -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
 			<command
-         commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
-         icon="icons/refresh.gif"
-         id="org.jboss.tools.openshift.ui.command.refresh.resource"
-         style="push"
-         tooltip="Refresh the resource">
+				commandId="org.jboss.tools.openshift.ui.command.refresh.resource"
+				icon="icons/refresh.gif"
+				id="org.jboss.tools.openshift.ui.command.refresh.resource"
+				style="push"
+				tooltip="Refresh the resource">
 				<visibleWhen>
 					<and>
 						<count
-							value="1">
-						</count>
+							value="1" />
 						<iterate>
-       <or>
-          <instanceof
-                value="org.jboss.tools.openshift.common.core.IRefreshable">
-          </instanceof>
-       </or>
+							<instanceof
+								value="org.jboss.tools.openshift.common.core.IRefreshable" />
 						</iterate>
 					</and>
 				</visibleWhen>
@@ -104,7 +100,6 @@
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
 			<command
 				commandId="org.jboss.tools.openshift.ui.command.application.new"
-				id="org.jboss.tools.openshift.ui.command.application.new"
 				style="push"
 				tooltip="Create a new application">
 				<visibleWhen
