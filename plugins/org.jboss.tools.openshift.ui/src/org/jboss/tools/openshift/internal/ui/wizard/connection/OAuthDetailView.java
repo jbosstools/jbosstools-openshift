@@ -30,10 +30,15 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.browser.ProgressAdapter;
+import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -58,6 +63,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringVa
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ClientFactory;
@@ -266,8 +272,13 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private class OAuthDialog extends Dialog implements IJobChangeListener{
 		
 		private String loadingHtml;
+		private static final String ABOUT_BLANK = "about:blank";
+		private static final int TIMEOUT = 1000 * 15; //seconds
 		private String url;
+		private String location = ABOUT_BLANK;
 		private Browser browser;
+		private boolean showTimeoutException = true;
+		private int aboutBlankCount = 0;
 		
 		OAuthDialog(Shell parentShell, String url) {
 			super(parentShell);
@@ -296,7 +307,13 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		protected Point getInitialSize() {
 			return new Point(500, 700);
 		}
-
+		
+		private synchronized boolean showTimeoutException() {
+			return showTimeoutException;
+		}
+		private synchronized String getLocation() {
+			return location;
+		}
 
 		@Override
 		protected Control createDialogArea(Composite parent) {
@@ -306,6 +323,44 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			browser = new Browser(container, SWT.BORDER);
 			browser.setText(loadingHtml);
 			setURL(url);
+			final Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+					if(!DisposeUtils.isDisposed(browser)) {
+						browser.stop();
+						if(showTimeoutException()) {
+							close();
+							MessageDialog.openError(getShell(), "Timed Out", "Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.");
+						}
+					}
+				}
+			};
+			browser.addLocationListener(new LocationAdapter() {
+
+				@Override
+				public void changed(LocationEvent event) {
+					synchronized (this) {
+						location = event.location;
+					}
+				}
+			});
+			browser.addProgressListener(new ProgressAdapter() {
+				
+				@Override
+				public void completed(ProgressEvent event) {
+					synchronized (this) {
+						if(aboutBlankCount == 0) {
+							aboutBlankCount++;
+							return;
+						}
+						if(!ABOUT_BLANK.equals(getLocation())) {
+							showTimeoutException = false;
+						}
+						getShell().getDisplay().timerExec(1, runnable);
+					}
+				}
+			});
+			getShell().getDisplay().timerExec(TIMEOUT, runnable);
 			
 			return container;
 		}
