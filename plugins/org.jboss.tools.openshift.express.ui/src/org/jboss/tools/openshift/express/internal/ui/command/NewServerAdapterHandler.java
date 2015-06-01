@@ -28,6 +28,7 @@ import org.eclipse.wst.server.ui.internal.wizard.fragment.ModifyModulesWizardFra
 import org.eclipse.wst.server.ui.internal.wizard.fragment.NewServerWizardFragment;
 import org.eclipse.wst.server.ui.internal.wizard.fragment.TasksWizardFragment;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
@@ -35,7 +36,6 @@ import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUti
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.server.BehaviorTaskModelUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
@@ -70,7 +70,7 @@ public class NewServerAdapterHandler extends AbstractHandler {
 						application.getName()));
 			}
 			BehaviorTaskModelUtil.put(connection, wizard.getTaskModel());
-			WizardUtils.openWizard(400, 700, wizard, HandlerUtil.getActiveShell(event));
+			WizardUtils.openWizardDialog(400, 700, wizard, HandlerUtil.getActiveShell(event));
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
 			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not create OpenShift server adapter for application {0}", application.getName()), e);

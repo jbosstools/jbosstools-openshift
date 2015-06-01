@@ -369,7 +369,7 @@ public class OpenShiftServerWizardComposite {
 			return;
 		}
 		IWizard wizard = ((IWizardPage) handle).getWizard();
-		org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(wizard);
+		WizardUtils.close(wizard);
 	}
 
 	private ISelectionChangedListener onSelectDeployProject() {

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.express.internal.ui.job.DestroyDomainJob;
@@ -43,7 +44,6 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
@@ -154,7 +154,7 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WizardUtils.openWizard(new NewDomainWizard(pageModel.getConnection()), getShell());
+				WizardUtils.openWizardDialog(new NewDomainWizard(pageModel.getConnection()), getShell());
 			}
 		};
 	}
@@ -164,7 +164,7 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WizardUtils.openWizard(new EditDomainWizard(pageModel.getSelectedDomain()), getShell());
+				WizardUtils.openWizardDialog(new EditDomainWizard(pageModel.getSelectedDomain()), getShell());
 			}
 		};
 	}

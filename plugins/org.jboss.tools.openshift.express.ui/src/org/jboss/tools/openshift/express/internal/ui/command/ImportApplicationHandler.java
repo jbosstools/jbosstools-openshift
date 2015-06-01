@@ -15,10 +15,10 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.ImportOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IApplication;
 
@@ -33,7 +33,7 @@ public class ImportApplicationHandler extends AbstractHandler {
 		if (application == null) {
 			return ExpressUIActivator.createCancelStatus("Could not find the application to import");
 		}
-		WizardUtils.openWizard(
+		WizardUtils.openWizardDialog(
 				new ImportOpenShiftApplicationWizard(application),
 				HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;

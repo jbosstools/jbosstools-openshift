@@ -390,7 +390,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		if (!ensureHasDomain()
 				|| !ensureHasSSHKeys()) {
 			dispose();
-			org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(getWizard());
+			WizardUtils.close(getWizard());
 			return;
 		}
 

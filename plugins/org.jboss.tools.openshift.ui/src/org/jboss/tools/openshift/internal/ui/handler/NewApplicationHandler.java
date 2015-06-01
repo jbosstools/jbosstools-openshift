@@ -15,11 +15,11 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionNotFoundException;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.application.NewApplicationWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.application.NewApplicationWizardModel;
@@ -43,7 +43,7 @@ public class NewApplicationHandler extends AbstractHandler{
 			Connection connection = ConnectionsRegistryUtil.getConnectionFor(project);
 			NewApplicationWizardModel model = new NewApplicationWizardModel(project, connection.getResourceFactory());
 			NewApplicationWizard wizard = new NewApplicationWizard(model);
-			WizardUtils.openWizard(wizard, HandlerUtil.getActiveShell(event));
+			WizardUtils.openWizardDialog(wizard, HandlerUtil.getActiveShell(event));
 		}catch(ConnectionNotFoundException e) {
 			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to find the connection", e);
 		}
