@@ -28,6 +28,7 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
@@ -38,7 +39,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -273,12 +273,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			this.url = url;
 		}
 
-
-//		@Override
-//		protected Button createButton(Composite parent, int id, String label,
-//				boolean defaultButton) {
-//			return null;
-//		}
+		
+		
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID, "Close", true);
+		}
 
 		@Override
 		protected boolean isResizable() {
@@ -326,7 +326,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		@Override
 		public void done(final IJobChangeEvent event) {
 			if(event.getJob() instanceof AuthDetailsJob) {
-				Display.getDefault().asyncExec(new Runnable() {
+				getShell().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						AuthDetailsJob job = (AuthDetailsJob)event.getJob();
