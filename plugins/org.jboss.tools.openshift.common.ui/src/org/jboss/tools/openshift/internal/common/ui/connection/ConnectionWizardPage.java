@@ -11,15 +11,10 @@
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.Observables;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -28,7 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -47,7 +41,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -61,7 +54,6 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.common.core.connection.AutomaticConnectionFactoryMarker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
@@ -213,20 +205,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport
 				.create(serverUrlBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		// check server type enablement
-		final IObservableValue connectionFactory = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
-		final IObservableValue serverValidity = serverUrlBinding.getValidationStatus();
-		IObservableValue checkServerTypeEnabled = new ComputedValue(Boolean.class) {
-			
-			@Override
-			protected Object calculate() {
-				return connectionFactory.getValue() instanceof AutomaticConnectionFactoryMarker
-						&& serverValidity.getValue() instanceof IStatus
-							&& ((IStatus) serverValidity.getValue()).isOK();
-			}
-		};
-
-		serversCombo.addKeyListener(onSeverEnterPressed(checkServerTypeEnabled));
+		serversCombo.addKeyListener(onSeverEnterPressed());
 		
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(serversCombo))
@@ -235,40 +214,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.converting(new InvertingBooleanConverter())
 				.in(dbc);
 
-		// check server type
-		Button checkServerTypeButton = new Button(parent, SWT.PUSH);
-		checkServerTypeButton.setText("Check Server Type");
-		checkServerTypeButton.addSelectionListener(onCheckServerType());
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).hint(160, SWT.DEFAULT).applyTo(checkServerTypeButton);
-		final ISWTObservableValue checkServerTypeButtonEnablement = WidgetProperties.enabled().observe(checkServerTypeButton);
-		ValueBindingBuilder
-				.bind(checkServerTypeButtonEnablement)
-				.notUpdatingParticipant()
-				.to(checkServerTypeEnabled)
-				.in(dbc);
-
-		// check server type requirement
-		MultiValidator serverTypeValidator = new MultiValidator() {
-
-			@Override
-			protected IStatus validate() {
-				if (selectedServerType.getValue() == null
-						|| selectedServerType.getValue() instanceof AutomaticConnectionFactoryMarker) {
-					return ValidationStatus.cancel("You have to provide a valid url to an OpenShift server and check its type.");
-				}
-				return ValidationStatus.ok();
-			}
-
-			@Override
-			public IObservableList getTargets() {
-				return Observables.staticObservableList(Arrays.asList(selectedServerType, checkServerTypeButtonEnablement));
-			}
-		};
-		dbc.addValidationStatusProvider(serverTypeValidator);
-		ControlDecorationSupport
-				.create(serverTypeValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
 		// connect error
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			
@@ -279,26 +224,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 						.observe(pageModel).getValue();
 			}
 		});
-
-		// check server type error
-		MultiValidator connectionFactoryValidator = new MultiValidator() {
-			
-			@Override
-			protected IStatus validate() {
-				return (IStatus) BeanProperties
-						.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY_ERROR, IStatus.class)
-						.observe(pageModel).getValue();
-			}
-
-			@Override
-			public IObservableList getTargets() {
-				return Observables.staticObservableList(
-						Collections.<IObservableValue> singletonList(serverUrlObservable));
-			}
-		};
-		dbc.addValidationStatusProvider(connectionFactoryValidator);
-		ControlDecorationSupport
-				.create(connectionFactoryValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		// connection editors
 		final Group connectionEditorsContainer = new Group(parent, SWT.NONE);
@@ -313,13 +238,12 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		connectionEditors.createControls();
 	}
 
-	private KeyListener onSeverEnterPressed(final IObservableValue checkServerTypeEnabled) {
+	private KeyListener onSeverEnterPressed() {
 		return new KeyAdapter() {
 			
 			@Override
 			public void keyReleased(KeyEvent event) {
-				if (event.character == SWT.CR 
-						&& Boolean.TRUE.equals(checkServerTypeEnabled.getValue())) {
+				if (event.character == SWT.CR ) {
 					try {
 						WizardUtils.runInWizard(new CreateConnectionFactoryJob(), new DelegatingProgressMonitor(), getContainer());
 					} catch (InvocationTargetException e) {
@@ -327,22 +251,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					} catch (InterruptedException e) {
 						// intentional catch
 					}
-				}
-			}
-		};
-	}
-
-	private SelectionListener onCheckServerType() {
-		return new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				try {
-					WizardUtils.runInWizard(new CreateConnectionFactoryJob(), new DelegatingProgressMonitor(), getContainer());
-				} catch (InvocationTargetException e) {
-					// intentional catch
-				} catch (InterruptedException e) {
-					// intentional catch
 				}
 			}
 		};
