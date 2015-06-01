@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
-import org.jboss.tools.openshift.common.core.connection.AutomaticConnectionFactoryMarker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -324,7 +323,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			}
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					NLS.bind("Unable to verify connection. The credentials or auth scheme might be incorrect. {0}", e.getMessage()));
+					NLS.bind("The server type, credentials, or auth scheme might be incorrect. {0}", e.getMessage()));
 			OpenShiftCommonUIActivator.log(e);
 		}
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
@@ -379,7 +378,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public Collection<IConnectionFactory> getAllConnectionFactories() {
 		List<IConnectionFactory> connectionFactories = new ArrayList<IConnectionFactory>();
-		connectionFactories.add(AutomaticConnectionFactoryMarker.getInstance());
 		connectionFactories.addAll(connectionsFactory.getAll());
 		return connectionFactories;
 	}
