@@ -448,10 +448,10 @@ public class TestRepository {
 			tw = TreeWalk.forPath(repository, path, rw.parseTree(headId));
 			return tw != null;
 		} finally {
-			rw.release();
+			rw.close();
 			rw.dispose();
 			if (tw != null)
-				tw.release();
+				tw.close();
 		}
 	}
 
