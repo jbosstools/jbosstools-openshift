@@ -20,12 +20,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.snapshot.RestoreSnapshotWizard;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IApplication;
 
@@ -69,7 +69,7 @@ public class RestoreSnapshotHandler extends AbstractHandler {
 	}
 
 	private void openRestoreSnapshotWizard(IApplication application, Shell shell) {
-		WizardUtils.openWizard(
+		WizardUtils.openWizardDialog(
 				new RestoreSnapshotWizard(application), shell);									
 	}
 }

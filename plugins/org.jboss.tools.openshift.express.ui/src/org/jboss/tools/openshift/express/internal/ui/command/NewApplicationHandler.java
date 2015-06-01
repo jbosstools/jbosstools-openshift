@@ -18,10 +18,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.NewOpenShiftApplicationWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils;
 
 import com.openshift.client.IDomain;
 
@@ -52,7 +52,7 @@ public class NewApplicationHandler extends AbstractHandler {
 
 	private void open(IWizard wizard, Shell shell) {
 		try {
-			WizardUtils.openWizard(wizard, shell);
+			WizardUtils.openWizardDialog(wizard, shell);
 		} catch (NullPointerException e) {
 			// swallow NPE that's caused by cancelling ssh keys / domain wizard
 			// https://issues.jboss.org/browse/JBIDE-14575

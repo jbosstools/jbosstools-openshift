@@ -358,7 +358,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 						OPENSHIFT_EXPRESS_SIGNUP_URL, 
 						OpenShiftCommonUIActivator.PLUGIN_ID, 
 						OpenShiftCommonUIActivator.getDefault().getLog());
-				org.jboss.tools.openshift.internal.common.ui.utils.WizardUtils.close(getWizard());;
+				WizardUtils.close(getWizard());;
 			}
 		};
 	}
