@@ -10,12 +10,21 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.apache.commons.io.IOUtils;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback;
 import org.osgi.framework.BundleContext;
+
+import com.openshift.restclient.OpenShiftException;
 
 public class OpenShiftUIActivator extends BaseUIPlugin{
 
@@ -43,5 +52,22 @@ public class OpenShiftUIActivator extends BaseUIPlugin{
 
 	public static OpenShiftUIActivator getDefault() {
 		return plugin;
+	}
+	
+	/**
+	 * Get an inputstream for a file
+	 * @param file
+	 * @return
+	 * @throws OpenShiftException if unable to read the file;
+	 */
+	public InputStream getPluginFile(String file) {
+		URL url;
+		try {
+			url = new URL(plugin.getBundle().getEntry("/"), file);
+			return url.openStream();
+		} catch (Exception e) {
+			getLogger().logError(e);
+			throw new OpenShiftException(e,"Exception trying to load plugin file: {0}", file) ;
+		}
 	}
 }
