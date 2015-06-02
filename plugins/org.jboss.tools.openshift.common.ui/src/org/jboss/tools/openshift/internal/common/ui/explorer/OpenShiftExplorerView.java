@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.explorer;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
@@ -45,7 +49,8 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
  * @author Andre Dietisheim
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsRegistryListener {
-
+	
+	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
 	private Control connectionsPane;
 	private Control explanationsPane;
 	private PageBook pageBook;
@@ -97,8 +102,10 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	@Override
-	public void connectionChanged(IConnection connection) {
-		refreshViewer(connection);
+	public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+		if(!PROPERTY_BLACKLIST.contains(property)) {
+			refreshViewer(connection);
+		}
 	}
 
 	@Override
@@ -209,5 +216,6 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 			return (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
 		}
 	}
+
 
 }

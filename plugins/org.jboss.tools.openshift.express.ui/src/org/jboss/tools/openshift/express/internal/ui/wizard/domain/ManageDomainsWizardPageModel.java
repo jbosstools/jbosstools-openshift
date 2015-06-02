@@ -58,7 +58,7 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 			}
 			
 			@Override
-			public void connectionChanged(IConnection connection) {
+			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 
 				if(ConnectionType.Express == connection.getType()){
 					setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update

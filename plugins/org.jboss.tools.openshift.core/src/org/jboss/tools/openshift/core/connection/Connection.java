@@ -37,6 +37,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.BasicAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.IAuthorizationStrategy;
+import com.openshift.restclient.authorization.ResourceForbiddenException;
 import com.openshift.restclient.authorization.TokenAuthorizationStrategy;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -294,19 +295,26 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * Get a list of resource types
 	 * 
 	 * @return List<IResource>
+	 * @throws OpenShiftException
 	 */
 	public <T extends IResource> List<T> get(ResourceKind kind) {
 		try {
 			return client.list(kind);
 		} catch (UnauthorizedException e) {
-			OpenShiftCoreActivator.pluginLog().logInfo("Unauthorized.  Trying again to reauthenticate");
-			setToken(null);// token must be invalid, make sure not to try with
-							// cache
-			if (connect()) {
-				return client.list(kind);
-			}
-			throw e;
+			return retryList("Unauthorized.  Trying to reauthenticate", e, kind);
+		} catch (ResourceForbiddenException e) {
+			return retryList("Resource forbidden.  Trying to reauthenticate",e, kind);
 		}
+	}
+	
+	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, ResourceKind kind){
+		OpenShiftCoreActivator.pluginLog().logInfo(message);
+		setToken(null);// token must be invalid, make sure not to try with
+		// cache
+		if (connect()) {
+			return client.list(kind);
+		}
+		throw e;
 	}
 	
 	/**

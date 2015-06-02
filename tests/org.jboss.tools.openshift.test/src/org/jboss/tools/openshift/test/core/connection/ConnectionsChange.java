@@ -11,6 +11,21 @@ public class ConnectionsChange {
 	private boolean additionNotified;
 	private boolean removalNotified;
 	private boolean changeNotified;
+	private String property;
+	public String getProperty() {
+		return property;
+	}
+
+	public Object getOldValue() {
+		return oldValue;
+	}
+
+	public Object getNewValue() {
+		return newValue;
+	}
+
+	private Object oldValue;
+	private Object newValue;
 
 	public ConnectionsChange(ConnectionsRegistry registry) {
 		registry.addListener(new Listener());
@@ -54,9 +69,12 @@ public class ConnectionsChange {
 		}
 
 		@Override
-		public void connectionChanged(IConnection connection) {
+		public void connectionChanged(IConnection connection, String eventProperty, Object eventOldValue, Object eventNewValue) {
 			changeNotified = true;
 			notifiedConnection = connection;
+			property = eventProperty;
+			oldValue = eventOldValue;
+			newValue = eventNewValue;
 		}
 	}
 }
