@@ -135,6 +135,9 @@ public class ConnectionRegistryTest {
 		// verifications
 		assertTrue(change.isChangeNotified());
 		assertEquals(connection, change.getConnection());
+		assertEquals("username", change.getProperty());
+		assertEquals(null, change.getOldValue());
+		assertEquals("foo", change.getNewValue());
 	}
 
 	@Test

@@ -35,6 +35,9 @@ public interface IConnectionsRegistryListener {
 	/**
 	 * Be alerted that a connection has been changed
 	 * @param connection
+	 * @param the name of the property
+	 * @param the old value of the property
+	 * @param the new value of the property
 	 */
-	public void connectionChanged(IConnection connection);
+	public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue);
 }

@@ -106,10 +106,14 @@ public class ConnectionsRegistry {
 
 	// TODO: dont allow/require external trigger to changer notification
 	public void fireConnectionChanged(IConnection connection) {
+		fireConnectionChanged(connection, null, null, null);
+	}
+	// TODO: dont allow/require external trigger to changer notification
+	public void fireConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 		if (connection == null) {
 			return;
 		}
-		fireChange(connection, CHANGED);
+		fireChange(connection, CHANGED, property, oldValue, newValue);
 	}
 
 	public boolean remove(IConnection connection) {
@@ -134,6 +138,9 @@ public class ConnectionsRegistry {
 	}
 
 	private void fireChange(IConnection  connection, int event) {
+		fireChange(connection, event, null, null, null);
+	}
+	private void fireChange(IConnection  connection, int event, String property, Object oldValue, Object newValue) {
 		if (connection == null) {
 			return;
 		}
@@ -148,7 +155,7 @@ public class ConnectionsRegistry {
 				l.connectionRemoved(connection);
 				break;
 			case CHANGED:
-				l.connectionChanged(connection);
+				l.connectionChanged(connection, property, oldValue, newValue);
 				break;
 
 			default:
@@ -240,7 +247,7 @@ public class ConnectionsRegistry {
 			if (!(event.getSource() instanceof IConnection)) {
 				return;
 			}
-			fireConnectionChanged((IConnection) event.getSource());
+			fireConnectionChanged((IConnection) event.getSource(), event.getPropertyName(), event.getOldValue(), event.getNewValue());
 		}
 		
 	}
