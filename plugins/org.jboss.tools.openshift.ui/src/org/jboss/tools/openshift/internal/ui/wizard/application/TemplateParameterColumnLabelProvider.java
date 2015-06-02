@@ -8,7 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
-import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 
 import com.openshift.restclient.model.template.IParameter;
@@ -23,7 +24,12 @@ public class TemplateParameterColumnLabelProvider implements IColumnLabelProvide
 
 	@Override
 	public String getValue(IParameter param) {
-		return StringUtils.defaultIfBlank(param.getValue(), GENERATED);
+		boolean hasGenerator = isNotBlank(param.getGeneratorName());
+		boolean hasValue = isNotBlank(param.getValue());
+		if(hasGenerator) {
+			return hasValue ? param.getValue() : GENERATED;
+		}
+		return defaultIfBlank(param.getValue(), "");
 	}
 
 }
