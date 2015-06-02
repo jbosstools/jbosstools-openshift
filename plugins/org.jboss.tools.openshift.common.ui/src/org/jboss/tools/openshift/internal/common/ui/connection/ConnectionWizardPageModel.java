@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
@@ -230,59 +229,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
 	
-	/**
-	 * Creates a connection factory for the host present in this model and stores it in this model. If
-	 * the given host is empty or <code>null</code> no connection is created.
-	 * Does blocking remote http calls.
-	 * 
-	 * @param host
-	 *            the host to get the connection for.
-	 */
-	public void createConnectionFactory() {
-		createConnectionFactory(host, connectionsFactory);
-	}
 
-	/**
-	 * Creates a connection factory for the given host and stores it in this model. If
-	 * the given host is empty or <code>null</code> no connection is created.
-	 * Does blocking remote http calls.
-	 * 
-	 * @param host
-	 *            the host to get the connection for.
-	 */
-	private void createConnectionFactory(String host, IConnectionsFactory connectionsFactory) {
-		if (StringUtils.isEmpty(host)
-				|| connectionsFactory == null) {
-			return;
-		}
-		
-		try {
-			IConnectionFactory factory = connectionsFactory.getFactory(host);
-			if (factory != null) {
-				update(NewConnectionMarker.getInstance(),
-						factory,
-						host, 
-						useDefaultHost,
-						Status.OK_STATUS,
-						Status.OK_STATUS);
-			} else {
-				update(selectedConnection,
-						connectionFactory,
-						host, 
-						useDefaultHost,
-						ValidationStatus.error(NLS.bind("The host at {0} is no OpenShift host", host)),
-						Status.OK_STATUS);
-			}
-		} catch (Exception e) {
-			// TODO: catch specific exceptions
-			update(selectedConnection,
-					connectionFactory,
-					host, 
-					useDefaultHost,
-					ValidationStatus.error(NLS.bind("Could not connect to host at {0}.", host), e),
-					Status.OK_STATUS);
-		}
-	}
 	
 	private void setConnectionFactoryError(IStatus status) {
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY_ERROR, this.connectionFactoryError, this.connectionFactoryError = status);

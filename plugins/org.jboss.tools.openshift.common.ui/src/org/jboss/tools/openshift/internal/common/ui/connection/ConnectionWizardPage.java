@@ -36,9 +36,6 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -205,8 +202,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport
 				.create(serverUrlBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		serversCombo.addKeyListener(onSeverEnterPressed());
-		
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(serversCombo))
 				.notUpdatingParticipant()
@@ -236,24 +231,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				, connectionEditorsContainer
 				, dbc);
 		connectionEditors.createControls();
-	}
-
-	private KeyListener onSeverEnterPressed() {
-		return new KeyAdapter() {
-			
-			@Override
-			public void keyReleased(KeyEvent event) {
-				if (event.character == SWT.CR ) {
-					try {
-						WizardUtils.runInWizard(new CreateConnectionFactoryJob(), new DelegatingProgressMonitor(), getContainer());
-					} catch (InvocationTargetException e) {
-						// intentional catch
-					} catch (InterruptedException e) {
-						// intentional catch
-					}
-				}
-			}
-		};
 	}
 
 	protected SelectionAdapter onSignupLinkClicked() {
@@ -343,19 +320,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 	protected ConnectionWizardPageModel getModel() {
 		return pageModel;
-	}
-	
-	private class CreateConnectionFactoryJob extends AbstractDelegatingMonitorJob {
-
-		private CreateConnectionFactoryJob() {
-			super(NLS.bind("Connecting to host {0}...", pageModel.getHost()));
-		}
-
-		@Override
-		protected IStatus doRun(IProgressMonitor monitor) {
-			pageModel.createConnectionFactory();
-			return Status.OK_STATUS;
-		}
 	}
 	
 	private class ConnectJob extends AbstractDelegatingMonitorJob {
