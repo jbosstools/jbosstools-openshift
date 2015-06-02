@@ -142,7 +142,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				final IParameter param = getSelectedParameter();
-				InputDialog dialog = new InputDialog(getShell(), "Edit Template Parameter", NLS.bind("Enter a value for {0}", param.getName()), param.getValue(), null);
+				InputDialog dialog = new InputDialog(getShell(), "Edit Template Parameter", NLS.bind("Enter a value for {0}.\n{1}", param.getName(), param.getDescription()), param.getValue(), null) ;
 				if(InputDialog.OK == dialog.open()){
 					model.updateParameterValue(param, dialog.getValue());
 					viewer.refresh();

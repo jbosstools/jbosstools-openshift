@@ -30,8 +30,20 @@ public class TemplateParameterColumnLabelProviderTest {
 	private TemplateParameterColumnLabelProvider provider = new TemplateParameterColumnLabelProvider();
 	
 	@Test
-	public void parametersWithNoValueAndAGeneratorShouldReturnGenerated() {
+	public void parametersWithBlankValueAndNoGeneratorShouldReturnBlank() {
+		assertEquals("", provider.getValue(param));
+	}
+
+	@Test
+	public void parametersWithBlankValueAndAGeneratorShouldReturnGenerated() {
+		when(param.getGeneratorName()).thenReturn("expression");
 		assertEquals("(generated)", provider.getValue(param));
+	}
+
+	@Test
+	public void parametersWithAValueAndNoGeneratorShouldReturnTheValue() {
+		when(param.getValue()).thenReturn("abc123");
+		assertEquals("abc123", provider.getValue(param));
 	}
 	
 	@Test
