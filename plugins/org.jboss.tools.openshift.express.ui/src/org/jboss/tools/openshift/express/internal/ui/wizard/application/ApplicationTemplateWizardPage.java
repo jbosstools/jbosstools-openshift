@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Field;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -28,6 +29,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -379,11 +381,48 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		ObservableListTreeContentProvider contentProvider =
 				new ObservableListTreeContentProvider(childrenProperty.listFactory(), null);
 		applicationTemplatesViewer.setContentProvider(contentProvider);
-		applicationTemplatesViewer.setLabelProvider(new ApplicationTemplateViewLabelProvider());
+		StyledCellLabelProvider labelProvider = new ApplicationTemplateViewLabelProvider();
+		// a workaround for https://issues.jboss.org/browse/JBIDE-19853
+		if (isGTK3()) {
+			labelProvider.setOwnerDrawEnabled(false);
+		}
+		applicationTemplatesViewer.setLabelProvider(labelProvider);
 		applicationTemplatesViewer.addFilter(new ApplicationTemplateViewerFilter(filterText));
 		applicationTemplatesViewer.setInput(pageModel);
 		return applicationTemplatesViewer;
 	}	
+
+	public static boolean isGTK3() {
+		if (Platform.WS_GTK.equals(Platform.getWS())) {
+			try {
+				Class<?> clazz = Class.forName("org.eclipse.swt.internal.gtk.OS"); //$NON-NLS-1$
+				Field field = clazz.getDeclaredField("GTK3"); //$NON-NLS-1$
+				boolean gtk3 = field.getBoolean(field);
+				return gtk3;
+			} catch (ClassNotFoundException e) {
+				return isGTK3Env();
+			} catch (NoSuchFieldException e) {
+				return false;
+			} catch (SecurityException e) {
+				return isGTK3Env();
+			} catch (IllegalArgumentException e) {
+				return isGTK3Env();
+			} catch (IllegalAccessException e) {
+				return isGTK3Env();
+			}
+		}
+		return false;
+	}
+
+	private static final String SWT_GTK3 = "SWT_GTK3"; //$NON-NLS-1$
+
+	private static boolean isGTK3Env() {
+		String gtk3 = System.getProperty(SWT_GTK3);
+		if (gtk3 == null) {
+			gtk3 = System.getenv(SWT_GTK3);
+		}
+		return !"0".equals(gtk3); //$NON-NLS-1$
+	}
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
