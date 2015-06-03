@@ -15,9 +15,13 @@ import java.util.Collection;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
+import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -48,6 +52,24 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
         this.context = context;
         Collection<Connection> connections = new ConnectionPersistency().load();
         ConnectionsRegistrySingleton.getInstance().addAll(connections);
+        ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
+        	
+        	//@TODO I think we need to handle the cleanup case where a connection
+            //username changes since username is what makes up part of the
+        	//the key that is saved which seems to apply to secure values
+        	//and preference values
+        	
+        	
+			@Override
+			public void connectionRemoved(IConnection connection) {
+				if(!(connection instanceof Connection)) return;
+				ConnectionURL url = ConnectionURL.safeForConnection(connection);
+				if(url != null) {
+					OpenShiftCorePreferences.INSTANCE.removeAuthScheme(url.toString());
+				}
+			}
+        	
+        });
 	}
 
     @Override

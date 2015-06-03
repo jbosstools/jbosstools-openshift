@@ -44,6 +44,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -86,11 +87,14 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private IAuthorizationDetails authDetails;
 	private Link tokenRequestLink;
 	private ConnectionWizardPageModel pageModel;
+	private Button chkRememberToken;
 
-	public OAuthDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable) {
+
+	public OAuthDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable, Button chkRememberToken) {
 		this.pageModel = pageModel;
 		this.rememberTokenObservable = rememberTokenObservable;
 		this.changeListener = changeListener;
+		this.chkRememberToken = chkRememberToken;
 		if(context instanceof IAuthorizationDetails) {
 			this.authDetails = (IAuthorizationDetails)context;
 		}
@@ -125,6 +129,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
+		chkRememberToken.setText("&Save Token (could trigger secure storage login)");
 	}
 	
 	@Override
@@ -150,12 +155,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	}
 	
 	@Override
-	public void setSelectedConnection(IObservableValue selectedConnectionObservable) {
-		if (selectedConnectionObservable.getValue() instanceof Connection) {
-			Connection connection = (Connection) selectedConnectionObservable.getValue();
+	public void setSelectedConnection(IConnection selectedConnection) {
+		if (selectedConnection instanceof Connection) {
+			Connection connection = (Connection) selectedConnection;
 			tokenObservable.setValue(connection.getToken());
-			rememberTokenObservable.setValue(connection.isRememberPassword());
-		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
+			rememberTokenObservable.setValue(connection.isRememberToken());
+		} else if (selectedConnection instanceof NewConnectionMarker) {
 			tokenObservable.setValue(null);
 			rememberTokenObservable.setValue(Boolean.FALSE);
 		}
@@ -259,9 +264,9 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				
 				@Override
 				public void run() {
-					connection.setAuthType(IAuthorizationContext.AUTHSCHEME_OAUTH);
+					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_OAUTH);
 					connection.setToken((String)tokenObservable.getValue());
-					connection.setRememberPassword((boolean)rememberTokenObservable.getValue());
+					connection.setRememberToken((boolean)rememberTokenObservable.getValue());
 				}
 			});
 			return connection;

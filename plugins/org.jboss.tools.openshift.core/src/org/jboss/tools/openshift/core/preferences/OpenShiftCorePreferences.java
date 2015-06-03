@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.preferences;
 
+import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
@@ -22,6 +24,7 @@ public class OpenShiftCorePreferences {
 
 	/** available connections */
 	private static final String CONNECTIONS = "org.jboss.tools.openshift.core.connection.CONNECTION_NAMES";
+	private static final String CONNECTION_AUTH_PREFIX = "org.jboss.tools.openshift.core.connection.auth";
 
 	private final StringsPreferenceValue connectionsPreferenceValue = 
 			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
@@ -35,5 +38,21 @@ public class OpenShiftCorePreferences {
 
 	public void saveConnections(String[] connections) {
 		connectionsPreferenceValue.set(connections);
+	}
+	
+	public void saveAuthScheme(String connectionURL, String scheme) {
+		createPreferenceValue(connectionURL).set(scheme);
+	}
+
+	public void removeAuthScheme(String connectionURL) {
+		createPreferenceValue(connectionURL).remove();
+	}
+	
+	public String loadScheme(String connectionURL) {
+		return createPreferenceValue(connectionURL).get();
+	}
+	
+	private StringPreferenceValue createPreferenceValue(String connectionURL) {
+		return new StringPreferenceValue(NLS.bind("{0}.{1}",CONNECTION_AUTH_PREFIX,connectionURL), OpenShiftCoreActivator.PLUGIN_ID);
 	}
 }

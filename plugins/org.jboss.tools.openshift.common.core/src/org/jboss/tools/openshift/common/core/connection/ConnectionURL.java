@@ -17,9 +17,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils.UrlPortions;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 
 /**
  * An url-alike connection identifier that holds all relevant part for an
@@ -141,6 +143,24 @@ public class ConnectionURL {
 		String scheme = getScheme(connection);
 		String username = connection.getUsername();
 		return new ConnectionURL(username, host, scheme);
+	}
+
+	/**
+	 * The ConnectionURL of the connection.
+	 * For cases we want to ignore the exceptions;
+	 * 
+	 * @param connection
+	 * @return the value or null if there is an exception
+	 */
+	public static ConnectionURL safeForConnection(IConnection connection) { 
+		try {
+			return forConnection(connection);
+		} catch (MalformedURLException e) {
+			OpenShiftCommonCoreActivator.pluginLog().logError(NLS.bind("Unable to getConnectionURL for connection {0}@{1}", connection.getUsername(), connection.getHost()), e);
+		} catch (UnsupportedEncodingException e) {
+			OpenShiftCommonCoreActivator.pluginLog().logError(NLS.bind("Unable to getConnectionURL for connection {0}@{1}", connection.getUsername(), connection.getHost()), e);
+		}
+		return null;
 	}
 
 	private static String getHost(IConnection connection) {
