@@ -62,18 +62,13 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private Map<String,IConnectionEditorDetailView> detailViews = new HashMap<String, IConnectionEditorDetailView>();
 	private ConnectionEditorStackedDetailViews stackedViews ;
 	private DetailViewModel detailViewModel = new DetailViewModel();
-	private IConnectionEditorDetailView defaultDetailView;
 
 	private Button chkRememberToken;
-	private IObservableValue rememberTokenObservable;
-
-	private Binding rememberTokenBinding;
-
-	private IObservableValue authTypeObservable;
-
-	private Binding selectedAuthTypeBinding;
-
 	private ComboViewer cmbViewerAuthType;
+	private IObservableValue rememberTokenObservable;
+	private IObservableValue authTypeObservable;
+	private Binding rememberTokenBinding;
+	private Binding selectedAuthTypeBinding;
 	
 	private class DetailViewModel extends ObservablePojo{
 		private IConnectionEditorDetailView selectedDetailView;
@@ -81,13 +76,20 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		public IConnectionEditorDetailView getSelectedDetailView() {
 			return this.selectedDetailView;
 		}
+		@SuppressWarnings("unused")
 		public void  setSelectedDetailView(IConnectionEditorDetailView view) {
 			this.selectedDetailView = view;
 		}
-		public void setSelectedConnection(IObservableValue selectedConnection) {
-			Connection connection = (Connection) selectedConnection.getValue();
-			rememberTokenObservable.setValue(connection.isRememberPassword());
-			setSelectedDetailView(detailViews.get(connection.getAuthScheme()));
+		
+		public void setSelectedConnection(IConnection conn) {
+			if(conn instanceof Connection) {
+				Connection connection = (Connection) conn;
+				authTypeObservable.setValue(detailViews.get(connection.getAuthScheme()));
+				getDetailView().setSelectedConnection(connection);
+			}else {
+				rememberTokenObservable.setValue(Boolean.FALSE);
+				authTypeObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
+			}
 		}
 	}
 	
@@ -110,16 +112,18 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
-		
+
 		//remember token
 		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
-		rememberTokenObservable.addValueChangeListener(changeListener);
+		this.chkRememberToken = new Button(parent, SWT.CHECK); //parent is reset further down
 
 		//detail views
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(pageModel, changeListener, pageModel.getContext(), rememberTokenObservable));
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable));
-		defaultDetailView = detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH);
-		
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
+
+		authTypeObservable = BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class)
+				.observe(detailViewModel);
+
 		// auth type
 		Label lblAuthType = new Label(composite, SWT.NONE);
 		lblAuthType.setText("Protocol:");
@@ -138,8 +142,6 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			
 		});
 		cmbViewerAuthType.setInput(detailViews.values());
-		authTypeObservable = BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class)
-				.observe(detailViewModel);
 	
 
 		//connection detail views
@@ -154,10 +156,11 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		stackedViews.createControls(false);
 		
 		//remember token
-		this.chkRememberToken = new Button(composite, SWT.CHECK);
-		chkRememberToken.setText("&Save Token (could trigger secure storage login)");
+		this.chkRememberToken.setParent(composite);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(chkRememberToken);
+
+		
 		
 		return composite;
 	}
@@ -165,7 +168,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	@Override
 	public void onVisible(IObservableValue detailViewModelObservable, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		authTypeObservable.setValue(defaultDetailView);
+		detailViewModel.setSelectedConnection(pageModel.getSelectedConnection());
 	}
 	
 	@Override
@@ -186,13 +189,12 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		ControlDecorationSupport
 				.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
-		// remember password
+		// remember token
 		this.rememberTokenBinding = ValueBindingBuilder
 				.bind(WidgetProperties.selection().observe(chkRememberToken))
 				.to(rememberTokenObservable)
 				.in(dbc);
-		ControlDecorationSupport.create(
-				rememberTokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
 	}
 
 	@Override
@@ -214,7 +216,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		IConnection conn = (IConnection) selectedConnection.getValue();
 		if(!(conn instanceof Connection)) return;
-		detailViewModel.setSelectedConnection(selectedConnection);
+		detailViewModel.setSelectedConnection((Connection)conn);
 	}
 
 	@Override

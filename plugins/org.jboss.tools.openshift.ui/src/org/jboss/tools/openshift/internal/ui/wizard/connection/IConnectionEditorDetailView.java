@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
-import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
 
@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
  */
  interface IConnectionEditorDetailView extends IDetailView {
 	 
-	 void setSelectedConnection(IObservableValue selectedConnection);
+	 void setSelectedConnection(IConnection selectedConnection);
 	 
 	 IConnectionAuthenticationProvider  getConnectionAuthenticationProvider();
 }

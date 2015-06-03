@@ -22,6 +22,7 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -51,14 +52,14 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	private IObservableValue passwordObservable;
 	private Binding passwordBinding;
 	private IObservableValue rememberPasswordObservable;
-//	private Button rememberPasswordCheckBox;
-//	private Binding rememberPasswordBinding;
 	private IValueChangeListener changeListener;
 	private IConnectionAuthenticationProvider connectionAuthProvider;
+	private Button chkRememberToken;
 	
-	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context, IObservableValue rememberPasswordObservable) {
+	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context, IObservableValue rememberPasswordObservable, Button chkRememberToken) {
 		this.changeListener = changeListener;
 		this.rememberPasswordObservable = rememberPasswordObservable;
+		this.chkRememberToken = chkRememberToken;
 	}
 	
 	@Override
@@ -86,13 +87,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 		this.passwordObservable = new WritableValue(null, String.class);
-//		
-//		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
-//		rememberPasswordCheckBox.setText("&Save Password (could trigger secure storage login)");
-//		GridDataFactory.fillDefaults()
-//				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
-//		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
-//		rememberPasswordObservable.addValueChangeListener(changeListener);
 
 		return composite;
 	}
@@ -106,19 +100,19 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
+		chkRememberToken.setText("&Save Password (could trigger secure storage login)");
 	}
 	
 	@Override
-	public void setSelectedConnection(IObservableValue selectedConnectionObservable) {
-		if (selectedConnectionObservable.getValue() instanceof Connection) {
-			Connection selectedConnection = (Connection) selectedConnectionObservable.getValue();
+	public void setSelectedConnection(IConnection conn) {
+		if (conn instanceof Connection) {
+			Connection selectedConnection = (Connection) conn;
 			usernameObservable.setValue(selectedConnection.getUsername());
 			passwordObservable.setValue(selectedConnection.getPassword());
 			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
-		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
+		} else if (conn instanceof NewConnectionMarker) {
 			usernameObservable.setValue(null);
 			passwordObservable.setValue(null);
-			rememberPasswordObservable.setValue(false);
 		}
 	}
 
@@ -149,14 +143,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		ControlDecorationSupport.create(
 				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		passwordObservable.addValueChangeListener(changeListener);
-
-//		// remember password
-//		this.rememberPasswordBinding = ValueBindingBuilder
-//				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
-//				.to(rememberPasswordObservable)
-//				.in(dbc);
-//		ControlDecorationSupport.create(
-//				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
 		connectionAuthProvider = new ConnectionAuthenticationProvider();
 	}
@@ -169,7 +155,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	private void disposeBindings() {
 		DataBindingUtils.dispose(usernameBinding);
 		DataBindingUtils.dispose(passwordBinding);
-//		DataBindingUtils.dispose(rememberPasswordBinding);
 	}
 	
 	@Override
@@ -197,10 +182,12 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 				
 				@Override
 				public void run() {
-					connection.setAuthType(IAuthorizationContext.AUTHSCHEME_BASIC);
+					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
 					connection.setUsername((String) usernameObservable.getValue());
 					connection.setPassword((String) passwordObservable.getValue());
 					connection.setRememberPassword(
+							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
+					connection.setRememberToken(
 							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
 				}
 			});

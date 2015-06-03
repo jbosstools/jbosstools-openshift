@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -19,9 +21,11 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
@@ -50,18 +54,20 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private static final String SECURE_STORAGE_PASSWORD = "password";
 	private static final String SECURE_STORAGE_TOKEN = "token";
 	private static final String SECURE_STORAGE_AUTHSCHEME = "authtype";
+
+	public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
 	
 	private IClient client;
 	private String username;
 	private String password;
-	private boolean passwordLoaded;
-	private boolean rememberPassword;
 	private String token;
+	private boolean passwordLoaded;
 	private boolean tokenLoaded;
+	private boolean rememberPassword;
+	private boolean rememberToken;
 	private ICredentialsPrompter credentialsPrompter;
 	private ISSLCertificateCallback sslCertificateCallback;
 	private String authScheme;
-	private boolean authLoaded;
 
 	//TODO modify default client to take url and throw lib specific exception
 	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
@@ -123,24 +129,34 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	public void setRememberPassword(boolean rememberPassword) {
 		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, this.rememberPassword, this.rememberPassword = rememberPassword);
 	}
-	
+
 	@Override
 	public boolean isRememberPassword() {
 		return rememberPassword;
+		
+	}
+
+	public boolean isRememberToken() {
+		return rememberToken;
+		
+	}
+	
+	public void setRememberToken(boolean rememberToken) {
+		firePropertyChange(PROPERTY_REMEMBER_TOKEN, this.rememberToken, this.rememberToken = rememberToken);
 	}
 	
 	public void save() {
-		saveOrClear(SECURE_STORAGE_PASSWORD, getPassword(), isRememberPassword(), getSecureStore(getHost(), getUsername()));
-		saveOrClear(SECURE_STORAGE_TOKEN, getToken(), isRememberPassword(), getSecureStore(getHost(), getUsername()));
-		saveOrClear(SECURE_STORAGE_AUTHSCHEME, getAuthScheme(), isRememberPassword(), getSecureStore(getHost(), getUsername()));
+		//not using getters here because for save there should be no reason
+		//to trigger a load from storage.
+		saveOrClear(SECURE_STORAGE_PASSWORD, this.password, isRememberPassword(), getSecureStore(getHost(), getUsername()));
+		saveOrClear(SECURE_STORAGE_TOKEN, this.token, isRememberToken(), getSecureStore(getHost(), getUsername()));
+		ConnectionURL url = ConnectionURL.safeForConnection(this);
+		if(url != null) {
+			OpenShiftCorePreferences.INSTANCE.saveAuthScheme(url.toString(), getAuthScheme());
+		}
 	}
 
 	public String getAuthScheme() {
-		if (StringUtils.isEmpty(this.authScheme)
-				&& !authLoaded) {
-			this.authScheme = load(SECURE_STORAGE_AUTHSCHEME, getSecureStore(getHost(), getUsername()));
-			this.authLoaded = true;
-		}
 		return org.apache.commons.lang.StringUtils.defaultIfBlank(this.authScheme, IAuthorizationContext.AUTHSCHEME_OAUTH);
 	}
 
@@ -208,21 +224,22 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	private void updateCredentials(IAuthorizationContext context) {
 		if(IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(this.getAuthScheme())){
-			setUsername(org.apache.commons.lang.StringUtils.defaultIfBlank(context.getUser().getFullName(), context.getUser().getName()));
+			setUsername(context.getUser().getName());
 		}
 	}
 	
 	private IAuthorizationStrategy getAuthorizationStrategy() {
-		if(IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(getAuthScheme())){
-			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
-		}
-		if(IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
+		final String scheme = getAuthScheme();
+		if(isNotBlank(getToken())) {
 			return new TokenAuthorizationStrategy(getToken());
+		}
+		if(IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)){
+			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
 		}
 		return null;
 	}
 
-	public void setAuthType(String scheme) {
+	public void setAuthScheme(String scheme) {
 		firePropertyChange(SECURE_STORAGE_AUTHSCHEME, this.authScheme, this.authScheme = scheme);
 	}
 
@@ -258,7 +275,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		connection.setPassword(password);
 		connection.setRememberPassword(rememberPassword);
 		connection.setToken(token);
-		connection.setAuthType(authScheme);
+		connection.setAuthScheme(authScheme);
 		return connection;
 	}
 	
@@ -299,6 +316,9 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 */
 	public <T extends IResource> List<T> get(ResourceKind kind) {
 		try {
+			if(client.getAuthorizationStrategy() == null) {
+				client.setAuthorizationStrategy(getAuthorizationStrategy());
+			}
 			return client.list(kind);
 		} catch (UnauthorizedException e) {
 			return retryList("Unauthorized.  Trying to reauthenticate", e, kind);
@@ -350,11 +370,13 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		if (StringUtils.isEmpty(token) && !tokenLoaded) {
 			tokenLoaded = true;
 			setToken(load(SECURE_STORAGE_TOKEN, getSecureStore(getHost(), getUsername())));
+			this.rememberToken = isNotBlank(token); //potential conflict with load password?
 		}
 	}
 	
 	public void setToken(String token) {
 		firePropertyChange(SECURE_STORAGE_TOKEN, token, this.token = token);
+		this.tokenLoaded = true;
 	}
 	
 	@Override
