@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.application;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.Field;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -29,7 +28,6 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -74,6 +72,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.express.internal.ui.utils.GTK3Utils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
@@ -383,7 +382,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		applicationTemplatesViewer.setContentProvider(contentProvider);
 		StyledCellLabelProvider labelProvider = new ApplicationTemplateViewLabelProvider();
 		// a workaround for https://issues.jboss.org/browse/JBIDE-19853
-		if (isGTK3()) {
+		if (GTK3Utils.isRunning()) {
 			labelProvider.setOwnerDrawEnabled(false);
 		}
 		applicationTemplatesViewer.setLabelProvider(labelProvider);
@@ -391,38 +390,6 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		applicationTemplatesViewer.setInput(pageModel);
 		return applicationTemplatesViewer;
 	}	
-
-	public static boolean isGTK3() {
-		if (Platform.WS_GTK.equals(Platform.getWS())) {
-			try {
-				Class<?> clazz = Class.forName("org.eclipse.swt.internal.gtk.OS"); //$NON-NLS-1$
-				Field field = clazz.getDeclaredField("GTK3"); //$NON-NLS-1$
-				boolean gtk3 = field.getBoolean(field);
-				return gtk3;
-			} catch (ClassNotFoundException e) {
-				return isGTK3Env();
-			} catch (NoSuchFieldException e) {
-				return false;
-			} catch (SecurityException e) {
-				return isGTK3Env();
-			} catch (IllegalArgumentException e) {
-				return isGTK3Env();
-			} catch (IllegalAccessException e) {
-				return isGTK3Env();
-			}
-		}
-		return false;
-	}
-
-	private static final String SWT_GTK3 = "SWT_GTK3"; //$NON-NLS-1$
-
-	private static boolean isGTK3Env() {
-		String gtk3 = System.getProperty(SWT_GTK3);
-		if (gtk3 == null) {
-			gtk3 = System.getenv(SWT_GTK3);
-		}
-		return !"0".equals(gtk3); //$NON-NLS-1$
-	}
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
