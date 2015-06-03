@@ -187,6 +187,8 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 					connection.setPassword((String) passwordObservable.getValue());
 					connection.setRememberPassword(
 							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
+					connection.setRememberToken(
+							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
 				}
 			});
 

@@ -230,11 +230,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	private IAuthorizationStrategy getAuthorizationStrategy() {
 		final String scheme = getAuthScheme();
+		if(isNotBlank(getToken())) {
+			return new TokenAuthorizationStrategy(getToken());
+		}
 		if(IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)){
 			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
-		}
-		if(IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
-			return new TokenAuthorizationStrategy(getToken());
 		}
 		return null;
 	}
