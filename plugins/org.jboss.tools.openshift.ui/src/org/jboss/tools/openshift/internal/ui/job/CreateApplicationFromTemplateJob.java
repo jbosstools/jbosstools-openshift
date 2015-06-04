@@ -73,7 +73,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 				}
 			}
 		},
-		new Status(IStatus.INFO, OpenShiftUIActivator.PLUGIN_ID, "Template Processing Capability is Unsupported.", null));
+		new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Template processing is unsupported for this client and server combination.", null));
 		
 		
 		return status;
