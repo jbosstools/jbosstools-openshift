@@ -227,7 +227,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(connectionEditorsContainer);
 		this.connectionEditors = new ConnectionEditorsStackedView(
 				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel)
-				, pageModel
+				, this
 				, connectionEditorsContainer
 				, dbc);
 		connectionEditors.createControls();
@@ -318,7 +318,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		pageModel.dispose();
 	}
 
-	protected ConnectionWizardPageModel getModel() {
+	public ConnectionWizardPageModel getModel() {
 		return pageModel;
 	}
 	

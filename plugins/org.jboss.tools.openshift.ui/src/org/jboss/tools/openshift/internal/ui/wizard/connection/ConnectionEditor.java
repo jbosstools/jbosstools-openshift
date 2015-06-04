@@ -25,6 +25,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -118,7 +119,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		this.chkRememberToken = new Button(parent, SWT.CHECK); //parent is reset further down
 
 		//detail views
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
 
 		authTypeObservable = BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class)

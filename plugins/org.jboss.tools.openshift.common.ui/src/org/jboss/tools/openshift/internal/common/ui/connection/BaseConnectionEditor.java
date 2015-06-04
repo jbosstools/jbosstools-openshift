@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
  */
 public abstract class BaseConnectionEditor extends BaseDetailsView implements IConnectionEditor {
 
+	protected ConnectionWizardPage wizardPage;
 	protected ConnectionWizardPageModel pageModel;
 	protected IObservableValue selectedConnection;
 	protected IValueChangeListener changeListener;
@@ -36,7 +37,8 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 
 	@Override
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
-		this.pageModel = (ConnectionWizardPageModel) context;
+		this.wizardPage = (ConnectionWizardPage) context;
+		this.pageModel = wizardPage.getModel();
 		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION).observe(pageModel);
 		this.changeListener = createDetailViewChangedListener(pageModel);
 		this.connectionAuthenticationProvider = createConnectionAuthenticationProvider(pageModel);

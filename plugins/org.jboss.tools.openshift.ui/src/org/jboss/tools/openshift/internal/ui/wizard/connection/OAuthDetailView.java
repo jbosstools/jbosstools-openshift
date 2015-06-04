@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
@@ -34,13 +36,14 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -53,6 +56,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -91,8 +95,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private ConnectionWizardPageModel pageModel;
 	private Button chkRememberToken;
 
+	private IWizard wizard;
 
-	public OAuthDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable, Button chkRememberToken) {
+
+	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable, Button chkRememberToken) {
+		this.wizard = wizard;
 		this.pageModel = pageModel;
 		this.rememberTokenObservable = rememberTokenObservable;
 		this.changeListener = changeListener;
@@ -196,40 +203,36 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 
 		@Override
 		public void widgetSelected(SelectionEvent e) {
-			BusyIndicator.showWhile(Display.getDefault(), new Runnable(){      
-				public void run(){ 
-					try {
-						AuthDetailsJob job = null;
-						if(StringUtils.isBlank(link)) {
-							job = new AuthDetailsJob();
-							job.setPriority(Job.SHORT);
-							job.schedule();
-						}
-						job.addJobChangeListener(new JobChangeAdapter() {
+			if(!StringUtils.isBlank(link)) {
+				return;
+			}
+			if (StringUtils.isBlank(pageModel.getHost())) {
+				return;
+			}
+			
+			Job job = new AuthDetailsJob(pageModel.getHost());
+			job.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(final IJobChangeEvent event) {
+					if(event.getJob() instanceof AuthDetailsJob) {
+						shell.getDisplay().asyncExec(new Runnable() {
 							@Override
-							public void done(final IJobChangeEvent event) {
-								if(event.getJob() instanceof AuthDetailsJob) {
-									shell.getDisplay().asyncExec(new Runnable() {
-										@Override
-										public void run() {
-											AuthDetailsJob job = (AuthDetailsJob)event.getJob();
-											final IAuthorizationDetails details = job.getDetails();
-											if(details != null) {
-												new BrowserUtility().checkedCreateExternalBrowser(details.getRequestTokenLink(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-											}else {
-												IStatus result = job.getResult();
-												showErrorDialog(shell,result.getException());
-											}
-										}
-									});
+							public void run() {
+								AuthDetailsJob job = (AuthDetailsJob)event.getJob();
+								final IAuthorizationDetails details = job.getDetails();
+								if(details != null) {
+									new BrowserUtility().checkedCreateExternalBrowser(details.getRequestTokenLink(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 								}
 							}
 						});
-					}catch(Exception e) {
-						showErrorDialog(shell,e);
 					}
 				}
 			});
+			try {
+				WizardUtils.runInWizard(job, wizard.getContainer());
+			} catch (InvocationTargetException | InterruptedException ex) {
+				showErrorDialog(shell,ex);
+			}
 		}
 
 	}
@@ -250,9 +253,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private class AuthDetailsJob extends Job{
 		
 		private IAuthorizationDetails details;
+		private String host;
 		
-		public AuthDetailsJob() {
-			super("RetrieveAuthorizationDetailsJob");
+		public AuthDetailsJob(String host) {
+			super(NLS.bind("Retrieve authorization details from {0}...", host));
+			this.host = host;
 		}
 
 		public IAuthorizationDetails getDetails() {
@@ -262,8 +267,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IClient client = new ClientFactory().create(pageModel.getHost(), OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
-				details = client.getAuthorizationDetails(pageModel.getHost());
+				IClient client = new ClientFactory().create(host, OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
+				details = client.getAuthorizationDetails(host);
 			}catch(Exception e) {
 				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to retrieve the authentication details", e);
 			}
