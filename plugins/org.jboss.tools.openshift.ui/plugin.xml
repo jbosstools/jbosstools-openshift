@@ -284,5 +284,49 @@
 			</command>
 		</menuContribution>
 	</extension>
+
+	<!-- Open In Browser -->
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			id="org.jboss.tools.openshift.ui.command.openInBrowser"
+			name="Web Browser">
+		</command>
+	</extension>
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler
+              commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
+              class="org.jboss.tools.openshift.internal.ui.handler.OpenInWebBrowserHandler">
+    	</handler>
+	</extension>
+	<extension
+		point="org.eclipse.ui.menus">
+		<!-- openshift explorer: open in browser -->
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.showIn">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
+				icon="icons/open-browser.gif"
+				label="Web Browser"
+				mnemonic="B">
+					<visibleWhen>
+						<with
+							variable="selection">
+							<count value="1"/>
+							<iterate
+								ifEmpty="false">
+								<or>
+									<instanceof
+										value="com.openshift.restclient.model.route.IRoute" />
+									<instanceof
+										value="com.openshift.restclient.model.IProject" />
+								</or>
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+        </menuContribution>
+    </extension>
     
 </plugin>

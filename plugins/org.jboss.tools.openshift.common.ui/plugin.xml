@@ -137,6 +137,18 @@
 		</menuContribution>
 	</extension>
 
+	<!-- openshift explorer: "Show In" submenu -->
+	<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
+	    	<menu
+	           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.showIn"
+	           label="%openshift.menu.expressConsoleView.showIn">
+			</menu>
+		</menuContribution>
+	</extension>
+
 	<!-- openshift explorer view: toolbar/new connection -->
 	<extension
 		point="org.eclipse.ui.menus">
