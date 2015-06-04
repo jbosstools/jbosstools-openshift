@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
@@ -53,6 +54,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
@@ -203,9 +205,26 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 							job.setPriority(Job.SHORT);
 							job.schedule();
 						}
-						OAuthDialog dialog = new OAuthDialog(shell, link);
-						job.addJobChangeListener(dialog);
-						dialog.open();
+						job.addJobChangeListener(new JobChangeAdapter() {
+							@Override
+							public void done(final IJobChangeEvent event) {
+								if(event.getJob() instanceof AuthDetailsJob) {
+									shell.getDisplay().asyncExec(new Runnable() {
+										@Override
+										public void run() {
+											AuthDetailsJob job = (AuthDetailsJob)event.getJob();
+											final IAuthorizationDetails details = job.getDetails();
+											if(details != null) {
+												new BrowserUtility().checkedCreateExternalBrowser(details.getRequestTokenLink(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+											}else {
+												IStatus result = job.getResult();
+												showErrorDialog(shell,result.getException());
+											}
+										}
+									});
+								}
+							}
+						});
 					}catch(Exception e) {
 						showErrorDialog(shell,e);
 					}
@@ -274,6 +293,10 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		
 	}
 	
+	/*
+	 * Leaving for now as we may need this if we are ever able
+	 * to progammatically get the token
+	 */
 	private class OAuthDialog extends Dialog implements IJobChangeListener{
 		
 		private String loadingHtml;
@@ -347,6 +370,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 					synchronized (this) {
 						location = event.location;
 					}
+					
 				}
 			});
 			browser.addProgressListener(new ProgressAdapter() {
