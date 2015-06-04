@@ -230,13 +230,13 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	private IAuthorizationStrategy getAuthorizationStrategy() {
 		final String scheme = getAuthScheme();
-		if(isNotBlank(getToken())) {
+		if(IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
 			return new TokenAuthorizationStrategy(getToken());
 		}
 		if(IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)){
 			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
 		}
-		return null;
+		throw new OpenShiftException("Authschme '%s' is not supported.", scheme);
 	}
 
 	public void setAuthScheme(String scheme) {
