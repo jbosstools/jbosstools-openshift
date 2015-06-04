@@ -12,13 +12,12 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
-import org.jboss.tools.common.util.StringUtil;
+import org.jboss.tools.openshift.internal.common.ui.viewer.GTK3WorkaroundStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.ui.wizard.application.ResourceDetailsContentProvider.ResourceProperty;
 
 import com.openshift.restclient.model.IResource;
@@ -26,7 +25,7 @@ import com.openshift.restclient.model.IResource;
 /**
  * @author jeff.cantrill
  */
-public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implements IStyledLabelProvider {
+public class ResourceDetailsLabelProvider extends GTK3WorkaroundStyledCellLabelProvider implements IStyledLabelProvider {
 
 	@Override
 	public void update(ViewerCell cell) {

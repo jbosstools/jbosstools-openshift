@@ -43,7 +43,6 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -72,7 +71,6 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.GTK3Utils;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
@@ -84,6 +82,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils.IWidgetVisitor;
+import org.jboss.tools.openshift.internal.common.ui.viewer.GTK3WorkaroundStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 
@@ -380,12 +379,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		ObservableListTreeContentProvider contentProvider =
 				new ObservableListTreeContentProvider(childrenProperty.listFactory(), null);
 		applicationTemplatesViewer.setContentProvider(contentProvider);
-		StyledCellLabelProvider labelProvider = new ApplicationTemplateViewLabelProvider();
-		// a workaround for https://issues.jboss.org/browse/JBIDE-19853
-		if (GTK3Utils.isRunning()) {
-			labelProvider.setOwnerDrawEnabled(false);
-		}
-		applicationTemplatesViewer.setLabelProvider(labelProvider);
+		applicationTemplatesViewer.setLabelProvider(new ApplicationTemplateViewLabelProvider());
 		applicationTemplatesViewer.addFilter(new ApplicationTemplateViewerFilter(filterText));
 		applicationTemplatesViewer.setInput(pageModel);
 		return applicationTemplatesViewer;
@@ -582,7 +576,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private class ApplicationTemplateViewLabelProvider extends StyledCellLabelProvider {
+	private class ApplicationTemplateViewLabelProvider extends GTK3WorkaroundStyledCellLabelProvider {
 		@Override
 		public void update(ViewerCell cell) {
 			Object element = cell.getElement();
