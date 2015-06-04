@@ -96,17 +96,17 @@ public class ImportApplicationWizard extends Wizard implements IConnectionAwareW
 		} else {
 			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
 			if (resource != null) {
-				setModelConnection(ConnectionsRegistryUtil.getConnectionFor(resource));
+				setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(resource));
 				model.setSelectedItem(resource);
 			} else {
 				IProject project = UIUtils.getFirstElement(selection, IProject.class);
 				if (project != null) {
-					setModelConnection(ConnectionsRegistryUtil.getConnectionFor(project));
+					setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(project));
 					model.setSelectedItem(project);
 				} else {
 					ResourceGrouping grouping = UIUtils.getFirstElement(selection, ResourceGrouping.class);
 					if (grouping != null) {
-						setModelConnection(ConnectionsRegistryUtil.getConnectionFor(grouping.getProject()));
+						setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(grouping.getProject()));
 						model.setSelectedItem(grouping.getProject());
 					}
 				}

@@ -36,12 +36,21 @@ public class ConnectionsRegistryUtil {
 	 * @throws ConnectionNotFoundException  if the connection can't be found
 	 */
 	public static Connection getConnectionFor(IResource resource) {
+		Connection connection = safeGetConnectionFor(resource);
+		if(connection == null) {
+				throw new ConnectionNotFoundException(resource);
+		}
+		return connection;
+	}
+
+	public static Connection safeGetConnectionFor(IResource resource) {
 		Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
 		for (Connection connection : all) {
 			if(connection.ownsResource(resource)) {
 				return connection;
 			}
 		}
-		throw new ConnectionNotFoundException(resource);
+		return null;
 	}
+
 }

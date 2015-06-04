@@ -105,6 +105,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			if (wizard.getPageCount() == 0) {
 				// initialize wizard
 				if (wizard instanceof IWorkbenchWizard) {
+					// init for package explorer/Configure->New/Import OpenShift application
 					((IWorkbenchWizard) wizard).init(workbench, selection);
 				}
 				wizard.addPages();
