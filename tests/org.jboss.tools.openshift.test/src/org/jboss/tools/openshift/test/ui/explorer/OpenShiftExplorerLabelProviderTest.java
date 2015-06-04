@@ -205,5 +205,11 @@ public class OpenShiftExplorerLabelProviderTest {
 		String exp = String.format("foo@bar.com %s", client.getBaseURL().toString());
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}
+	@Test
+	public void getStyledTextForAConnectionWithoutUserName(){
+		Connection connection = new Connection(client, null, null);
+		String exp = String.format("<unknown user> %s", client.getBaseURL().toString());
+		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
+	}
 
 }

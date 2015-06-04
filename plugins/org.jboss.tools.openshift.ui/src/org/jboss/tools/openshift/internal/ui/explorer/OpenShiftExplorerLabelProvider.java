@@ -110,7 +110,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		}
 		if(element instanceof Connection){
 			Connection conn = (Connection) element;
-			String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), conn.getToken());
+			String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), "<unknown user>");
 			if(prefix == null) {
 				prefix = "<unknown user>";
 			}
