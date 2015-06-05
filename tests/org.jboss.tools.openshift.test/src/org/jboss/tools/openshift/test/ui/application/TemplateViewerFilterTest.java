@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 
-import org.jboss.tools.openshift.internal.ui.wizard.application.AnnotationTagViewerFilter;
+import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateViewerFilter;
 import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateListPage.ITextControl;
 import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateListPage.TemplateNode;
 import org.junit.Before;
@@ -32,18 +32,26 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AnnotationTagViewerFilterTest {
+public class TemplateViewerFilterTest {
 
 	@Mock private IResource resource;
 	@Mock private ITextControl control;
 	@Mock private ITags capability;
-	private AnnotationTagViewerFilter filter;
+	private TemplateViewerFilter filter;
 	
 	@Before
 	public void setUp() throws Exception {
-		filter = new AnnotationTagViewerFilter(control);
+		when(resource.getName()).thenReturn("the-resource-name-mongo");
+		whenResourceDoesNotSupportITagCapability();
+		filter = new TemplateViewerFilter(control);
 	}
-
+	
+	@Test
+	public void elementsThatMatchTheNameShouldReturnTrue() {
+		when(control.getText()).thenReturn("resource");
+		assertTrue(filter.select(null, null, resource));
+	}
+	
 	@Test
 	public void elementsThatAreNotResourcesOrNodesShouldReturnFalse() {
 		assertFalse(filter.select(null, null, new Object()));

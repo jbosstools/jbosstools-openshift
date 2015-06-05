@@ -19,16 +19,16 @@ import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.model.IResource;
 
 /**
- * Filter a viewer of resources by tag if the
- * resource is annotated with tags
+ * Filter a list of templates by name or if
+ * they have a tag annotation
  * 
  * @author jeff.cantrill
  */
-public class AnnotationTagViewerFilter extends ViewerFilter {
+public class TemplateViewerFilter extends ViewerFilter {
 	
 	private ITextControl filterText;
 	
-	public AnnotationTagViewerFilter(ITextControl txtFilter) {
+	public TemplateViewerFilter(ITextControl txtFilter) {
 		this.filterText = txtFilter;
 	}
 
@@ -38,15 +38,19 @@ public class AnnotationTagViewerFilter extends ViewerFilter {
 		if(!(element instanceof IResource)) {
 			return false;
 		}
+		final String text = filterText.getText();
+		if(StringUtils.isBlank(text)) {
+			return true;
+		}
 		IResource resource = (IResource) element;
-		if(StringUtils.isBlank(filterText.getText())) {
+		if(resource.getName().contains(text)) {
 			return true;
 		}
 		return resource.accept(new CapabilityVisitor<ITags, Boolean>() {
 			@Override
 			public Boolean visit(ITags capability) {
 				String tags = StringUtils.join(capability.getTags(),",");
-				return tags.contains(filterText.getText());
+				return tags.contains(text);
 			}
 		}, Boolean.FALSE);
 	}
