@@ -283,7 +283,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		TreeViewer viewer = 	new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		viewer.setLabelProvider(new TemplateListPageLabelProvier());
 		viewer.setContentProvider(new TemplateListPageContentProvider());
-		viewer.addFilter(new AnnotationTagViewerFilter( new ITextControl() {
+		viewer.addFilter(new TemplateViewerFilter( new ITextControl() {
 			@Override
 			public String getText() {
 				return txtFilter.getText();
