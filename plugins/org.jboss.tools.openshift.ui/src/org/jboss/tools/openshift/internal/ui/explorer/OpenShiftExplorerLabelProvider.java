@@ -85,12 +85,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				return style(pod.getName(), podQualifiedText);
 			case Project:
 				IProject project = (IProject) resource;
-				String namespace = project.getNamespace();
 				String name = org.apache.commons.lang.StringUtils.defaultIfBlank(project.getDisplayName(), project.getName());
-				if(org.apache.commons.lang.StringUtils.isEmpty(namespace)){
-					return new StyledString(name);
-				}
-				return style(name, String.format("ns: %s", namespace));
+				return style(name, "");
 			case Route:
 				IRoute route = (IRoute) resource;
 				return style(route.getName(), String.format("%s%s", route.getHost(),route.getPath()));
@@ -119,9 +115,13 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 
 	private StyledString style(String baseText, String qualifiedText) {
-		return new StyledString(baseText)
-			.append(" ")
-			.append(qualifiedText, StyledString.QUALIFIER_STYLER);
+		StyledString value = new StyledString(baseText);
+		if(org.apache.commons.lang.StringUtils.isNotBlank(qualifiedText)) {
+			value.append(" ")
+				.append(qualifiedText, StyledString.QUALIFIER_STYLER);
+			
+		}
+		return value;
 	}
 
 }
