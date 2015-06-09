@@ -78,7 +78,7 @@ public class NewApplicationWizardModel
 		if(template == null) return;
 		setParameters(new ArrayList<IParameter>(template.getParameters().values()));
 		setItems(template.getItems());
-		setLabels(template.getLabels());
+		setLabels(template.getObjectLabels());
 	}
 
 	public IProject getProject() {
