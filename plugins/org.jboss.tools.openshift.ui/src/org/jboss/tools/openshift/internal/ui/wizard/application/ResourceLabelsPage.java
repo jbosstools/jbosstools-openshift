@@ -147,7 +147,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 						.description("Edit the resource label.")
 						.keyLabel(LABEL)
 						.groupLabel(LABEL)
-						.keyAfterConvertValidator(new LabelKeyValidator())
+						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
 						.valueAfterConvertValidator(new LabelValueValidator())
 						.build();
 				OkCancelButtonWizardDialog dialog =
@@ -170,7 +170,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 						.description("Add a resource label.")
 						.keyLabel(LABEL)
 						.groupLabel(LABEL)
-						.keyAfterConvertValidator(new LabelKeyValidator())
+						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
 						.valueAfterConvertValidator(new LabelValueValidator())
 						.build();
 				OkCancelButtonWizardDialog dialog =
