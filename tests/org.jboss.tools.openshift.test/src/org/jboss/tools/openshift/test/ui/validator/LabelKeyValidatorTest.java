@@ -10,23 +10,39 @@ package org.jboss.tools.openshift.test.ui.validator;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.internal.ui.validator.LabelKeyValidator;
+import org.junit.Before;
 import org.junit.Test;
 
 public class LabelKeyValidatorTest {
 	
 	private static final IStatus PASS = ValidationStatus.ok();
 	
-	private LabelKeyValidator validator = new LabelKeyValidator();
-	private final IStatus FAIL = validator.getFailedStatus();
+	private LabelKeyValidator validator;
+	private IStatus FAIL;
+	
+	@Before
+	public void setup() {
+		Collection<String> readonly = Arrays.asList("readonlykey");
+		validator = new LabelKeyValidator(readonly);
+		FAIL = validator.getFailedStatus();
+	}
 	
 	@Test
 	public void nullValueShouldBeInvalid() {
 		assertFailure(null);
 	}
-
+	
+	@Test
+	public void readonlyKeyShouldBeInvalid() {
+		assertStatus(ValidationStatus.error("some error message"), "readonlykey");
+	}
+	
 	@Test
 	public void emptyValueShouldBeInvalid() {
 		assertFailure("");
@@ -86,6 +102,10 @@ public class LabelKeyValidatorTest {
 	
 	private void assertFailure(String value) {
 		assertEquals(FAIL, validator.validate(value));
+	}
+	
+	private void assertStatus(IStatus status, String value) {
+		assertEquals(status.getSeverity(), validator.validate(value).getSeverity());
 	}
 
 	private void assertPass(String value) {
