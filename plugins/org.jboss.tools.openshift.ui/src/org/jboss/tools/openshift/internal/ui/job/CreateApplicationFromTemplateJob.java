@@ -51,7 +51,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	protected IStatus doRun(IProgressMonitor monitor) {
 		template.updateParameterValues(parameters);
 		for (Label label : labels) {
-			template.addLabel(label.getName(), label.getValue());
+			template.addObjectLabel(label.getName(), label.getValue());
 		}
 		
 		IStatus status = project.accept(new CapabilityVisitor<IProjectTemplateProcessing, IStatus>() {
