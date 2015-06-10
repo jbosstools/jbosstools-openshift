@@ -263,6 +263,7 @@
 				<command
                 	commandId="org.jboss.tools.openshift.ui.command.importapplication"
                 	icon="icons/application_import.gif"
+					label="%openshift.command.application.import"
                 	mnemonic="A">
 					<visibleWhen>
 						<with
