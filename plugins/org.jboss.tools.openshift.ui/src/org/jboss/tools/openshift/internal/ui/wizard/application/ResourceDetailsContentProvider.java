@@ -91,6 +91,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		properties.add(new ResourceProperty("strategy", buildStrategy.getType().toString()));
 		switch(buildStrategy.getType()) {
 		case STI:
+		case Source:
 			ISTIBuildStrategy sti = (ISTIBuildStrategy) buildStrategy;
 			properties.add(new ResourceProperty("builder image", sti.getImage().toString()));
 			break;
