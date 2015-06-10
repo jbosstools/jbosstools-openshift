@@ -66,7 +66,7 @@ public class BuildConfigPropertySourceTest {
 	
 	private ISTIBuildStrategy givenSTIBuildStrategy(){
 		ISTIBuildStrategy strategy  = mock(ISTIBuildStrategy.class);
-		when(strategy.getType()).thenReturn(BuildStrategyType.STI);
+		when(strategy.getType()).thenReturn(BuildStrategyType.Source);
 		when(strategy.getScriptsLocation()).thenReturn("scriptlocation");
 		when(strategy.getImage()).thenReturn(new DockerImageURI("foobar"));
 		Map<String, String> env = new HashMap<String, String>();
@@ -104,7 +104,7 @@ public class BuildConfigPropertySourceTest {
 	@Test
 	public void getSTIPropertyValues(){
 		ISTIBuildStrategy strategy = givenSTIBuildStrategy();
-		assertEquals(BuildStrategyType.STI, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
+		assertEquals(BuildStrategyType.Source, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
 		assertEquals(strategy.getScriptsLocation(),  source.getPropertyValue(BuildConfigPropertySource.Ids.STI_SCRIPT_LOCATION));
 		assertEquals(strategy.getImage(), source.getPropertyValue(BuildConfigPropertySource.Ids.STI_IMAGE));
 		assertEquals(new KeyValuePropertySource(strategy.getEnvironmentVariables()), source.getPropertyValue(BuildConfigPropertySource.Ids.STI_ENV));

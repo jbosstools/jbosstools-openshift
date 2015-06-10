@@ -163,7 +163,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(project.getName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
 
-		assertEquals(String.format("%s ns: %s", project.getName(), project.getNamespace()), provider.getStyledText(project).getString());
+		assertEquals(project.getName(), provider.getStyledText(project).getString());
 	}
 
 	@Test
@@ -175,21 +175,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(project.getDisplayName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
 		
-		assertEquals(String.format("%s ns: %s", project.getDisplayName(), project.getNamespace()), provider.getStyledText(project).getString());
-	}
-	
-	@Test
-	public void getStyledTextForAProjectWithoutNamespace(){
-		String displayName = "The Display Name";
-		String namespace = "";
-		
-		IProject project = givenAResource(IProject.class, ResourceKind.Project);
-		when(project.getDisplayName()).thenReturn(displayName);
-		when(project.getNamespace()).thenReturn(namespace);
-		
-		StyledString exp = new StyledString(displayName);
-		StyledString actual = provider.getStyledText(project);
-		assertEquals(exp.getString(), actual.getString());
+		assertEquals(project.getDisplayName(), provider.getStyledText(project).getString());
 	}
 	
 	@Test
