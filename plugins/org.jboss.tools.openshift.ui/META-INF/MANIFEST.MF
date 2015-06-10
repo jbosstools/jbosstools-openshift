@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.openshift.ui;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator
 Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
