@@ -48,6 +48,7 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 			all.addAll(getDockerPropertyDescriptors());
 			break;
 		case STI:
+		case Source:
 			all.addAll(getSTIPropertyDescriptors());
 			break;
 		default:
