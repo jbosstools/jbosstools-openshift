@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 
 /**
  * @author Andre Dietisheim
@@ -35,13 +36,21 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
 	private void addConnection(String connectionUrl, List<C> connections) {
 		try {
-			connections.add(createConnection(ConnectionURL.forURL(connectionUrl)));
+			connections.add(createConnection(createConnectionURL(connectionUrl)));
 		} catch (MalformedURLException e) {
 			logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
 		} catch (UnsupportedEncodingException e) {
 			logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
 		} catch (IllegalArgumentException e) {
 			logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
+		}
+	}
+
+	private ConnectionURL createConnectionURL(String connectionUrl) throws UnsupportedEncodingException, MalformedURLException {
+		if (UrlUtils.hasScheme(connectionUrl)) {
+			return ConnectionURL.forURL(connectionUrl);
+		} else {
+			return ConnectionURL.forUsername(connectionUrl);
 		}
 	}
 

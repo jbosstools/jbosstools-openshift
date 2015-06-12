@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.connection;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.jboss.tools.openshift.common.core.connection.AbstractConnectionPersistency;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
@@ -25,7 +26,9 @@ public class ExpressConnectionPersistency extends AbstractConnectionPersistency<
 
 	@Override
 	protected String[] loadPersisted() {
-		return ExpressCorePreferences.INSTANCE.loadConnections();
+		return (String[]) ArrayUtils.addAll(
+				ExpressCorePreferences.INSTANCE.loadConnections(), 
+				ExpressCorePreferences.INSTANCE.loadLegacyConnections());
 	}
 
 	@Override
