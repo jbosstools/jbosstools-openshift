@@ -325,7 +325,36 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			return retryList("Resource forbidden.  Trying to reauthenticate",e, kind);
 		}
 	}
+
+	/**
+	 * Get or refresh a resource
+	 * 
+	 * @return List<IResource>
+	 * @throws OpenShiftException
+	 */
+	public <T extends IResource> T get(IResource resource) {
+		try {
+			if(client.getAuthorizationStrategy() == null) {
+				client.setAuthorizationStrategy(getAuthorizationStrategy());
+			}
+			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
+		} catch (UnauthorizedException e) {
+			return retryGet("Unauthorized.  Trying to reauthenticate", e, resource);
+		} catch (ResourceForbiddenException e) {
+			return retryGet("Resource forbidden.  Trying to reauthenticate",e, resource);
+		}
+	}
 	
+	private <T extends IResource> T retryGet(String message, OpenShiftException e, IResource resource){
+		OpenShiftCoreActivator.pluginLog().logInfo(message);
+		setToken(null);// token must be invalid, make sure not to try with
+		// cache
+		if (connect()) {
+			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
+		}
+		throw e;
+	}
+
 	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind){
 		OpenShiftCoreActivator.pluginLog().logInfo(message);
 		setToken(null);// token must be invalid, make sure not to try with

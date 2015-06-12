@@ -57,11 +57,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				IResource resource = (IResource)oldValue;
 				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
 			}else {
-<<<<<<< HEAD
 				refreshViewer(newValue);
-=======
-				//change
->>>>>>> [JBIDE-20043] Do not collapse tree when deleting a resource
 			}
 		}else{
 			super.handleConnectionChanged(connection, property, oldValue, newValue);
