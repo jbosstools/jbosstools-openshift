@@ -51,6 +51,9 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	private final StringsPreferenceValue connectionsPreferenceValue = 
 			new StringsPreferenceValue('|', CONNECTIONS, ExpressCoreActivator.PLUGIN_ID);
 
+	private final StringsPreferenceValue legacyConnectionsPreferenceValue = 
+			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, ExpressCoreActivator.PLUGIN_ID);
+	
 	/* The following three keys are from the legacy UI plugin pref-store */
 	private final StringsPreferenceValue UI_connectionsPreferenceValue =
 			new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
@@ -231,6 +234,10 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	public String[] loadConnections() {
 		String[] ret = connectionsPreferenceValue.get();
 		return ret == null ? UI_connectionsPreferenceValue.get() : ret;
+	}
+	
+	public String[] loadLegacyConnections() {
+		return legacyConnectionsPreferenceValue.get();
 	}
 
 	public void saveConnections(String[] connections) {
