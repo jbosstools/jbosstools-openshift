@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -44,16 +45,22 @@ import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -221,7 +228,10 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 								AuthDetailsJob job = (AuthDetailsJob)event.getJob();
 								final IAuthorizationDetails details = job.getDetails();
 								if(details != null) {
-									new BrowserUtility().checkedCreateExternalBrowser(details.getRequestTokenLink(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+									OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
+									job.addJobChangeListener(dialog);
+									dialog.open();
+									//new BrowserUtility().checkedCreateExternalBrowser(details.getRequestTokenLink(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 								}
 							}
 						});
@@ -270,6 +280,9 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				IClient client = new ClientFactory().create(host, OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 				details = client.getAuthorizationDetails(host);
 			}catch(Exception e) {
+				if (e.getCause() instanceof ConnectTimeoutException) {
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.", e);
+				}
 				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to retrieve the authentication details", e);
 			}
 			return ValidationStatus.OK_STATUS;
@@ -305,13 +318,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private class OAuthDialog extends Dialog implements IJobChangeListener{
 		
 		private String loadingHtml;
-		private static final String ABOUT_BLANK = "about:blank";
-		private static final int TIMEOUT = 1000 * 15; //seconds
 		private String url;
-		private String location = ABOUT_BLANK;
 		private Browser browser;
-		private boolean showTimeoutException = true;
-		private int aboutBlankCount = 0;
 		
 		OAuthDialog(Shell parentShell, String url) {
 			super(parentShell);
@@ -323,8 +331,6 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			}
 		}
 
-		
-		
 		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 			createButton(parent, IDialogConstants.OK_ID, "Close", true);
@@ -340,62 +346,42 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		protected Point getInitialSize() {
 			return new Point(500, 700);
 		}
-		
-		private synchronized boolean showTimeoutException() {
-			return showTimeoutException;
-		}
-		private synchronized String getLocation() {
-			return location;
-		}
 
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite container = (Composite) super.createDialogArea(parent);
-			container.setLayout(new FillLayout());
+			container.setLayout(new GridLayout());
+			
+			GridData data = new GridData();
+			data.horizontalAlignment = GridData.FILL;
+			data.verticalAlignment = GridData.FILL;
+			data.grabExcessHorizontalSpace = true;
+			data.grabExcessVerticalSpace = true;
+			container.setLayoutData(data);
 			
 			browser = new Browser(container, SWT.BORDER);
 			browser.setText(loadingHtml);
-			setURL(url);
-			final Runnable runnable = new Runnable() {
-				@Override
-				public void run() {
-					if(!DisposeUtils.isDisposed(browser)) {
-						browser.stop();
-						if(showTimeoutException()) {
-							close();
-							MessageDialog.openError(getShell(), "Timed Out", "Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.");
-						}
-					}
+			browser.setLayoutData(data);
+			
+			final ProgressBar progressBar = new ProgressBar(container, SWT.NONE);
+			data = new GridData();
+			data.horizontalAlignment = GridData.FILL;
+			progressBar.setLayoutData(data);
+			
+			ProgressListener progressListener = new ProgressListener() {
+				public void changed(ProgressEvent event) {
+					if (event.total <= 0) return;                            
+					int ratio = event.current * 100 / event.total;
+					progressBar.setSelection(ratio);;
+				}
+
+				public void completed(ProgressEvent event) {
+					progressBar.setSelection(0);
 				}
 			};
-			browser.addLocationListener(new LocationAdapter() {
-
-				@Override
-				public void changed(LocationEvent event) {
-					synchronized (this) {
-						location = event.location;
-					}
-					
-				}
-			});
-			browser.addProgressListener(new ProgressAdapter() {
-				
-				@Override
-				public void completed(ProgressEvent event) {
-					synchronized (this) {
-						if(aboutBlankCount == 0) {
-							aboutBlankCount++;
-							return;
-						}
-						if(!ABOUT_BLANK.equals(getLocation())) {
-							showTimeoutException = false;
-						}
-						getShell().getDisplay().timerExec(1, runnable);
-					}
-				}
-			});
-			getShell().getDisplay().timerExec(TIMEOUT, runnable);
+			browser.addProgressListener(progressListener);
 			
+			setURL(url);
 			return container;
 		}
 		
