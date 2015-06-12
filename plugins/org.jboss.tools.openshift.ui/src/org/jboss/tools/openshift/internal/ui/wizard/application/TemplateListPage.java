@@ -55,8 +55,10 @@ import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 
 import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.UnsupportedVersionException;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.ICapability;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
@@ -68,6 +70,7 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
+	private static final String MSG_UPLOAD_TEMPLATE_EX = "Upload template exception";
 	public ITemplateListPageModel model;
 	private Text txtUploadedFileName;
 	
@@ -151,9 +154,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						try {
 							model.setTemplateFileName(file);
 							return;
-						}catch(ResourceFactoryException | ClassCastException err) {
+						}catch(ClassCastException err) {
 							OpenShiftUIActivator.getDefault().getLogger().logError(err);
-							MessageDialog.openError(getShell(), "Upload template exception", NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.  Please check your workspace logs for additional details.", file));
+							MessageDialog.openError(getShell(), MSG_UPLOAD_TEMPLATE_EX, NLS.bind("The file \"{0}\" is not an OpenShift template.", file));
+						}catch(UnsupportedVersionException err) {
+							OpenShiftUIActivator.getDefault().getLogger().logError(err);
+							MessageDialog.openError(getShell(), MSG_UPLOAD_TEMPLATE_EX, err.getMessage());
+						}catch(ResourceFactoryException err) {
+							OpenShiftUIActivator.getDefault().getLogger().logError(err);
+							MessageDialog.openError(getShell(), MSG_UPLOAD_TEMPLATE_EX, NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file));
 						}
 					}
 				}while(file != null);
@@ -429,6 +438,18 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		@Override
 		public void updateParameterValues(Collection<IParameter> parameters) {
+		}
+
+		@Override
+		public Map<String, String> getObjectLabels() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void addObjectLabel(String key, String value) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}
