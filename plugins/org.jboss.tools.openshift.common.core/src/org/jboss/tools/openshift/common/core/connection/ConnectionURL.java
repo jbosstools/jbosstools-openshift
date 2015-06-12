@@ -58,6 +58,9 @@ public class ConnectionURL {
 	}
 
 	public String getHostWithScheme() {
+		if (isDefaultHost()) {
+			return null;
+		}
 		return scheme + host;
 	}
 	
@@ -115,7 +118,7 @@ public class ConnectionURL {
 		if (StringUtils.isEmpty(username)) {
 			throw new IllegalArgumentException("Username is empty");
 		}
-		return new ConnectionURL(username, null, null);
+		return new ConnectionURL(username, null, UrlUtils.SCHEME_HTTPS);
 	}
 
 	public static ConnectionURL forHost(String host) {
@@ -215,19 +218,22 @@ public class ConnectionURL {
 			return url;
 		}
 
-		if (StringUtils.isEmpty(matcher.group(4))) {
+		if (StringUtils.isEmpty(matcher.group(4))
+				&& !StringUtils.isEmpty(matcher.group(3))) {
 			// adietish%40redhat.com@http://
 			return new StringBuilder(matcher.group(3))
 					.append(matcher.group(2))
 					.append('@')
 					.toString();
-		} else {
+		} else if (!StringUtils.isEmpty(matcher.group(3))) {
 			// adietish%40redhat.com@https://openshift.redhat.com
 			return new StringBuilder(matcher.group(3))
 					.append(matcher.group(2))
 					.append('@')
 					.append(matcher.group(4))
 					.toString();
+		} else {
+			return url;
 		}
 	}
 }
