@@ -214,7 +214,7 @@ public class NewApplicationWizardModel
 			name = "";
 			setTemplate(null);
 			throw new OpenShiftException(e, "Unable to find the file to upload");
-		}catch (ResourceFactoryException e) {
+		}catch (ResourceFactoryException | ClassCastException e) {
 			name = "";
 			setTemplate(null);
 			throw e;
