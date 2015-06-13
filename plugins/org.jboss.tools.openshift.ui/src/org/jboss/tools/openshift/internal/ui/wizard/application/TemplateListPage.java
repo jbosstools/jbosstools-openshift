@@ -430,6 +430,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		@Override
 		public void updateParameterValues(Collection<IParameter> parameters) {
 		}
+
+		@Override
+		public Map<String, String> getObjectLabels() {
+			return null;
+		}
+
+		@Override
+		public void addObjectLabel(String key, String value) {
+		}
 		
 	}
 	
