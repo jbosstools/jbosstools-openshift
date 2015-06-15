@@ -57,6 +57,7 @@ import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.ICapability;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
@@ -429,6 +430,20 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		@Override
 		public void updateParameterValues(Collection<IParameter> parameters) {
+		}
+
+		@Override
+		public IProject getProject() {
+			return null;
+		}
+
+		@Override
+		public void addObjectLabel(String arg0, String arg1) {
+		}
+
+		@Override
+		public Map<String, String> getObjectLabels() {
+			return null;
 		}
 		
 	}
