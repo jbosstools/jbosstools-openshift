@@ -45,7 +45,6 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			Collection<ResourceProperty> properties = new ArrayList<ResourceProperty>();
 			properties.add(new ResourceProperty("labels", resource.getLabels()));
 			switch(resource.getKind()) {
-<<<<<<< HEAD
 			case ResourceKind.BUILD_CONFIG:
 				getBuildConfigChildren(properties, (IBuildConfig) resource); 
 				break;
@@ -59,21 +58,6 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 				getRouteChildren(properties, (IRoute) resource); 
 				break;
 			case ResourceKind.IMAGE_STREAM:
-=======
-			case ResourceKind.BuildConfig:
-				getBuildConfigChildren(properties, (IBuildConfig) resource); 
-				break;
-			case ResourceKind.DeploymentConfig:
-				getDeploymentConfigChildren(properties, (IDeploymentConfig) resource); 
-				break;
-			case ResourceKind.Service:
-				getServiceChildren(properties, (IService) resource); 
-				break;
-			case ResourceKind.Route:
-				getRouteChildren(properties, (IRoute) resource); 
-				break;
-			case ResourceKind.ImageStream:
->>>>>>> [JBIDE-20076] Replace enums to coincide with changes from OSJC-140
 				getImageStreamChildren(properties, (IImageStream) resource); 
 				break;
 			default:
