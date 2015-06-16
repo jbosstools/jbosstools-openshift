@@ -97,6 +97,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private Text txtToken;
 	private IValueChangeListener changeListener;
 	private IObservableValue rememberTokenObservable;
+	private IObservableValue authSchemeObservable;
 	private IAuthorizationDetails authDetails;
 	private Link tokenRequestLink;
 	private ConnectionWizardPageModel pageModel;
@@ -105,10 +106,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private IWizard wizard;
 
 
-	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable, Button chkRememberToken) {
+
+	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable, Button chkRememberToken, IObservableValue authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
 		this.rememberTokenObservable = rememberTokenObservable;
+		this.authSchemeObservable = authSchemeObservable;
 		this.changeListener = changeListener;
 		this.chkRememberToken = chkRememberToken;
 		if(context instanceof IAuthorizationDetails) {
@@ -228,10 +231,15 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 								AuthDetailsJob job = (AuthDetailsJob)event.getJob();
 								final IAuthorizationDetails details = job.getDetails();
 								if(details != null) {
-									OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
-									job.addJobChangeListener(dialog);
-									dialog.open();
-									//new BrowserUtility().checkedCreateExternalBrowser(details.getRequestTokenLink(), OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+									//TODO fix this to handle other authschemes
+									if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
+										MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
+										authSchemeObservable.setValue(details.getScheme());
+									}else {
+									    OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
+									    job.addJobChangeListener(dialog);
+									    dialog.open();
+									}
 								}
 							}
 						});

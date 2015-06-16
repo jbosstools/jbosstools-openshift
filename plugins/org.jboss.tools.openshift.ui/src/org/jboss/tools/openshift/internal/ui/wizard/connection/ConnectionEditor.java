@@ -67,7 +67,8 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private Button chkRememberToken;
 	private ComboViewer cmbViewerAuthType;
 	private IObservableValue rememberTokenObservable;
-	private IObservableValue authTypeObservable;
+	private IObservableValue detailViewObservable;
+	private IObservableValue authSchemeObservable;
 	private Binding rememberTokenBinding;
 	private Binding selectedAuthTypeBinding;
 	
@@ -82,14 +83,18 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			this.selectedDetailView = view;
 		}
 		
+		public void setAuthScheme(String scheme) {
+			detailViewObservable.setValue(detailViews.get(scheme));
+		}
+		
 		public void setSelectedConnection(IConnection conn) {
 			if(conn instanceof Connection) {
 				Connection connection = (Connection) conn;
-				authTypeObservable.setValue(detailViews.get(connection.getAuthScheme()));
+				detailViewObservable.setValue(detailViews.get(connection.getAuthScheme()));
 				getDetailView().setSelectedConnection(connection);
 			}else {
 				rememberTokenObservable.setValue(Boolean.FALSE);
-				authTypeObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
+				detailViewObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
 			}
 		}
 	}
@@ -118,12 +123,14 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
 		this.chkRememberToken = new Button(parent, SWT.CHECK); //parent is reset further down
 
-		//detail views
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
-
-		authTypeObservable = BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class)
+		detailViewObservable = BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class)
 				.observe(detailViewModel);
+		authSchemeObservable = BeanProperties.value("authScheme", String.class)
+				.observe(detailViewModel);
+		
+		//detail views
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken, authSchemeObservable));
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable, chkRememberToken));
 
 		// auth type
 		Label lblAuthType = new Label(composite, SWT.NONE);
@@ -150,7 +157,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(detailsContainer);
 		stackedViews = new ConnectionEditorStackedDetailViews(
-				authTypeObservable,
+				detailViewObservable,
 				pageModel, 
 				detailsContainer, 
 				dbc);
@@ -185,7 +192,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				.validatingAfterGet(
 						new IsNotNullValidator(
 								ValidationStatus.cancel("Please select an authorization protocol.")))
-				.to(authTypeObservable)
+				.to(detailViewObservable)
 				.in(dbc);
 		ControlDecorationSupport
 				.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
