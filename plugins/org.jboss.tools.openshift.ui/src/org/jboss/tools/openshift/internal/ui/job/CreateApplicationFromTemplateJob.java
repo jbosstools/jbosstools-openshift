@@ -86,7 +86,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	private IStatus handleResponse(Collection<IResource> resources) {
 		int severity = IStatus.OK;
 		for (IResource resource : resources) {
-			if(resource.getKind() == ResourceKind.Status) {
+			if(resource.getKind() == ResourceKind.STATUS) {
 				severity = IStatus.WARNING;
 				break;
 			}

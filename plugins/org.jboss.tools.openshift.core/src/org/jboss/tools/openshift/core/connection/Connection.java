@@ -37,7 +37,6 @@ import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.BasicAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.IAuthorizationStrategy;
@@ -314,7 +313,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return List<IResource>
 	 * @throws OpenShiftException
 	 */
-	public <T extends IResource> List<T> get(ResourceKind kind) {
+	public <T extends IResource> List<T> get(String kind) {
 		try {
 			if(client.getAuthorizationStrategy() == null) {
 				client.setAuthorizationStrategy(getAuthorizationStrategy());
@@ -327,7 +326,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}
 	}
 	
-	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, ResourceKind kind){
+	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind){
 		OpenShiftCoreActivator.pluginLog().logInfo(message);
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache

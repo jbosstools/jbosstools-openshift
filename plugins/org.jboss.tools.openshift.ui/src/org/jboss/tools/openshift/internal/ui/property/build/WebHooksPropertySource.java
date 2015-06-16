@@ -16,6 +16,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
+import com.openshift.restclient.model.build.BuildTriggerType;
 import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.IWebhookTrigger;
 
@@ -24,8 +25,8 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
  */
 public class WebHooksPropertySource implements IPropertySource{
 
-	private static final String GITHUB = "github";
-	private static final String GENERIC = "generic";
+	private static final String GITHUB = "GitHub";
+	private static final String GENERIC = "Generic";
 	
 	private IWebhookTrigger genericTrigger;
 	private IWebhookTrigger gitTrigger;
@@ -33,10 +34,12 @@ public class WebHooksPropertySource implements IPropertySource{
 	public WebHooksPropertySource(Collection<IBuildTrigger> triggers ){
 		for (IBuildTrigger trigger : triggers) {
 			switch(trigger.getType()){
-			case generic:
+			case BuildTriggerType.generic:
+			case BuildTriggerType.GENERIC:
 				genericTrigger = (IWebhookTrigger) trigger;
 				break;
-			case github:
+			case BuildTriggerType.github:
+			case BuildTriggerType.GITHUB:
 				gitTrigger = (IWebhookTrigger) trigger;
 				break;
 			default:

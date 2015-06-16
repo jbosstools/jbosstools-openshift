@@ -56,24 +56,24 @@ public class OpenShiftExplorerContentProviderTest {
 	private ResourceGrouping givenAResourceGroup(){
 		ArrayList<IResource> resources = new ArrayList<IResource>();
 		resources.add(mock(IService.class));
-		when(project.getResources(ResourceKind.Service)).thenReturn(resources);
-		ResourceGrouping group = new ResourceGrouping(ResourceKind.Service, project);
+		when(project.getResources(ResourceKind.SERVICE)).thenReturn(resources);
+		ResourceGrouping group = new ResourceGrouping(ResourceKind.SERVICE, project);
 		return group;
 	}
 	
 	@Test
 	public void getChildrenForProjectReturnsResourceGroups(){
-		when(project.getResources(any(ResourceKind.class))).thenReturn(new ArrayList<IResource>());
+		when(project.getResources(anyString())).thenReturn(new ArrayList<IResource>());
 
 		ResourceGrouping [] groups = new ResourceGrouping[]{
-				new ResourceGrouping(ResourceKind.BuildConfig, project),
-				new ResourceGrouping(ResourceKind.DeploymentConfig, project),
-				new ResourceGrouping(ResourceKind.Service, project),
-				new ResourceGrouping(ResourceKind.Pod, project),
-				new ResourceGrouping(ResourceKind.ReplicationController, project),
-				new ResourceGrouping(ResourceKind.Build, project),
-				new ResourceGrouping(ResourceKind.ImageStream, project),
-				new ResourceGrouping(ResourceKind.Route, project),
+				new ResourceGrouping(ResourceKind.BUILD_CONFIG, project),
+				new ResourceGrouping(ResourceKind.DEPLOYMENT_CONFIG, project),
+				new ResourceGrouping(ResourceKind.SERVICE, project),
+				new ResourceGrouping(ResourceKind.POD, project),
+				new ResourceGrouping(ResourceKind.REPLICATION_CONTROLLER, project),
+				new ResourceGrouping(ResourceKind.BUILD, project),
+				new ResourceGrouping(ResourceKind.IMAGE_STREAM, project),
+				new ResourceGrouping(ResourceKind.ROUTE, project),
 		};
 		
 		Object[] children = provider.getChildrenFor(project);
@@ -83,7 +83,7 @@ public class OpenShiftExplorerContentProviderTest {
 	@Test
 	public void getChildrenForConnectionReturnsProjects(){
 		List<IProject> projects = Arrays.asList(new IProject[]{project});
-		when(client.<IProject>list(ResourceKind.Project)).thenReturn(projects);
+		when(client.<IProject>list(ResourceKind.PROJECT)).thenReturn(projects);
 		
 		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  provider.getChildrenFor(connection));
 	}

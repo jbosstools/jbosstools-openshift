@@ -30,8 +30,8 @@ public class WebhooksPropertySourceTest {
 		WebHooksPropertySource source = new WebHooksPropertySource(triggers);
 		IPropertyDescriptor[] propertyDescriptors = source.getPropertyDescriptors();
 		assertEquals("Exp. descripter for each webhook only", 2, propertyDescriptors.length);
-		assertEquals("generic", propertyDescriptors[0].getId());
-		assertEquals("github", propertyDescriptors[1].getId());
+		assertEquals("Generic", propertyDescriptors[0].getId());
+		assertEquals("GitHub", propertyDescriptors[1].getId());
 	}
 	
 	private List<IBuildTrigger> givenBuildTriggers(){
@@ -40,9 +40,9 @@ public class WebhooksPropertySourceTest {
 				mock(IBuildTrigger.class),
 				mock(IWebhookTrigger.class)
 		});
-		when(triggers.get(0).getType()).thenReturn(BuildTriggerType.generic);
-		when(triggers.get(1).getType()).thenReturn(BuildTriggerType.imageChange);
-		when(triggers.get(2).getType()).thenReturn(BuildTriggerType.github);
+		when(triggers.get(0).getType()).thenReturn(BuildTriggerType.GENERIC);
+		when(triggers.get(1).getType()).thenReturn(BuildTriggerType.IMAGE_CHANGE);
+		when(triggers.get(2).getType()).thenReturn(BuildTriggerType.GITHUB);
 		return triggers;
 	}
 

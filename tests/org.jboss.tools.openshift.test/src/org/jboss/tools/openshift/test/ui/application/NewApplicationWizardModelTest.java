@@ -65,7 +65,7 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setTemplateShouldCopyParametersAndLabels() {
 		Map<String, IParameter> parameters = givenTheTemplateHasParameters();
-		HashMap<String, String> labels = givenTheTemplateHasLabels();
+		HashMap<String, String> labels = givenTheTemplateHasObjectLabels();
 		Collection<IResourceLabelsPageModel.Label> modelLabels = new ArrayList<IResourceLabelsPageModel.Label>();
 		for (Entry<String, String> label : labels.entrySet()) {
 			modelLabels.add(new IResourceLabelsPageModel.Label(label.getKey(), label.getValue()));
@@ -76,10 +76,10 @@ public class NewApplicationWizardModelTest {
 		assertArrayEquals(modelLabels.toArray(), model.getLabels().toArray());
 	}
 	
-	private HashMap<String, String> givenTheTemplateHasLabels() {
+	private HashMap<String, String> givenTheTemplateHasObjectLabels() {
 		HashMap<String, String> labels = new HashMap<String, String>();
 		labels.put("abc", "xyz");
-		when(template.getLabels()).thenReturn(labels);
+		when(template.getObjectLabels()).thenReturn(labels);
 		return labels;
 	}
 

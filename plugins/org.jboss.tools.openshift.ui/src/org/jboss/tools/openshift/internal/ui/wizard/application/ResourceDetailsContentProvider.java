@@ -17,11 +17,13 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
@@ -43,19 +45,19 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			Collection<ResourceProperty> properties = new ArrayList<ResourceProperty>();
 			properties.add(new ResourceProperty("labels", resource.getLabels()));
 			switch(resource.getKind()) {
-			case BuildConfig:
+			case ResourceKind.BUILD_CONFIG:
 				getBuildConfigChildren(properties, (IBuildConfig) resource); 
 				break;
-			case DeploymentConfig:
+			case ResourceKind.DEPLOYMENT_CONFIG:
 				getDeploymentConfigChildren(properties, (IDeploymentConfig) resource); 
 				break;
-			case Service:
+			case ResourceKind.SERVICE:
 				getServiceChildren(properties, (IService) resource); 
 				break;
-			case Route:
+			case ResourceKind.ROUTE:
 				getRouteChildren(properties, (IRoute) resource); 
 				break;
-			case ImageStream:
+			case ResourceKind.IMAGE_STREAM:
 				getImageStreamChildren(properties, (IImageStream) resource); 
 				break;
 			default:
@@ -90,16 +92,16 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		IBuildStrategy buildStrategy = config.getBuildStrategy();
 		properties.add(new ResourceProperty("strategy", buildStrategy.getType().toString()));
 		switch(buildStrategy.getType()) {
-		case STI:
-		case Source:
+		case BuildStrategyType.STI:
+		case BuildStrategyType.SOURCE:
 			ISTIBuildStrategy sti = (ISTIBuildStrategy) buildStrategy;
 			properties.add(new ResourceProperty("builder image", sti.getImage().toString()));
 			break;
-		case Docker:
+		case BuildStrategyType.DOCKER:
 			IDockerBuildStrategy docker = (IDockerBuildStrategy) buildStrategy;
 			properties.add(new ResourceProperty("base image", docker.getBaseImage().toString()));
 			break;
-		case Custom:
+		case BuildStrategyType.CUSTOM:
 			ICustomBuildStrategy custom = (ICustomBuildStrategy) buildStrategy;
 			properties.add(new ResourceProperty("builder image", custom.getImage().toString()));
 			break;

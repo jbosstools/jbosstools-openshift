@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.core.connection.Connection;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IImageStream;
@@ -34,19 +35,19 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 			if(adaptableObject instanceof IResource){
 				IResource resource = (IResource) adaptableObject;
 				switch(resource.getKind()){
-				case Build:
+				case ResourceKind.BUILD:
 					return new BuildPropertySource((IBuild)resource);
-				case BuildConfig: 
+				case ResourceKind.BUILD_CONFIG: 
 					return new BuildConfigPropertySource((IBuildConfig)resource);
-				case ImageStream:
+				case ResourceKind.IMAGE_STREAM:
 					return new ImageStreamPropertySource((IImageStream) resource);
-				case Pod:
+				case ResourceKind.POD:
 					return new PodPropertySource((IPod)resource);
-				case ReplicationController: 
+				case ResourceKind.REPLICATION_CONTROLLER: 
 					return new ReplicationControllerPropertySource((IReplicationController) resource);
-				case Route:
+				case ResourceKind.ROUTE:
 					return new RoutePropertySource((IRoute) resource);
-				case Service: 
+				case ResourceKind.SERVICE: 
 					return new ServicePropertySource((IService) resource);
 				default:
 					return new ResourcePropertySource<IResource>(resource);

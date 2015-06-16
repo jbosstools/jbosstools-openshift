@@ -378,7 +378,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		}
 
 		@Override
-		public ResourceKind getKind() {
+		public String getKind() {
 			return null;
 		}
 

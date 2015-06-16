@@ -17,8 +17,8 @@ import org.jboss.tools.openshift.internal.ui.property.build.ImageChangePropertyS
 import org.jboss.tools.openshift.internal.ui.property.build.WebHooksPropertySource;
 
 import com.openshift.restclient.model.IBuildConfig;
-import com.openshift.restclient.model.build.BuildTriggerType;
-import com.openshift.restclient.model.build.IBuildTrigger;
+import com.openshift.restclient.model.build.BuildSourceType;
+import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
@@ -41,20 +41,20 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 		List<IPropertyDescriptor> all = new ArrayList<IPropertyDescriptor>();
 		all.addAll(getBuildTriggerPropertyDescriptors());
 		switch(getResource().getBuildStrategy().getType()){
-		case Custom:
+		case BuildStrategyType.CUSTOM:
 			all.addAll(getCustomPropertyDescriptors());
 			break;
-		case Docker:
+		case BuildStrategyType.DOCKER:
 			all.addAll(getDockerPropertyDescriptors());
 			break;
-		case STI:
-		case Source:
+		case BuildStrategyType.STI:
+		case BuildStrategyType.SOURCE:
 			all.addAll(getSTIPropertyDescriptors());
 			break;
 		default:
 		}
 		switch(getResource().getBuildSource().getType()){
-		case Git:
+		case BuildSourceType.GIT:
 			all.addAll(getGitBuildSource());
 			break;
 		default:
