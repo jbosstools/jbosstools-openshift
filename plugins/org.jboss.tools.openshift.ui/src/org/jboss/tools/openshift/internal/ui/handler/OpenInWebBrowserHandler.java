@@ -50,7 +50,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						this.routes = project.getResources(ResourceKind.Route);
+						this.routes = project.getResources(ResourceKind.ROUTE);
 						return Status.OK_STATUS;
 					}
 

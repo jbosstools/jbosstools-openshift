@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -41,15 +42,15 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		} else if (element instanceof IResource) {
 			IResource resource = (IResource) element;
 			switch (resource.getKind()) {
-			case BuildConfig:
+			case ResourceKind.BUILD_CONFIG:
 				return OpenShiftImages.BUILDCONFIG_IMG;
-			case ImageStream:
+			case ResourceKind.IMAGE_STREAM:
 				return OpenShiftImages.LAYER_IMG;
-			case Pod:
+			case ResourceKind.POD:
 				return OpenShiftImages.BLOCKS_IMG;
-			case Project:
+			case ResourceKind.PROJECT:
 				return OpenShiftCommonImages.GLOBE_IMG;
-			case Service:
+			case ResourceKind.SERVICE:
 				return OpenShiftImages.GEAR_IMG;
 			default:
 				return OpenShiftCommonImages.FILE;
@@ -64,18 +65,18 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		if (element instanceof IResource) {
 			IResource resource = (IResource)element;
 			switch (resource.getKind()) {
-			case Build:
+			case ResourceKind.BUILD:
 				IBuild build = (IBuild)resource;
 				return style(resource.getName(), build.getStatus());
-			case BuildConfig:
+			case ResourceKind.BUILD_CONFIG:
 				return style(resource.getName(), ((IBuildConfig) resource).getSourceURI());
-			case DeploymentConfig:
+			case ResourceKind.DEPLOYMENT_CONFIG:
 				IDeploymentConfig config = (IDeploymentConfig) resource;
 				return style(config.getName(), String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())));
-			case ImageStream:
+			case ResourceKind.IMAGE_STREAM:
 				IImageStream repo = (IImageStream) resource;
 				return style(repo.getName(), repo.getDockerImageRepository().toString());
-			case Pod:
+			case ResourceKind.POD:
 				IPod pod = (IPod) resource;
 				String labels = StringUtils.serialize(pod.getLabels());
 				if(StringUtils.isEmpty(labels)){
@@ -83,17 +84,17 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				}
 				String podQualifiedText = String.format("labels: %s", labels);
 				return style(pod.getName(), podQualifiedText);
-			case Project:
+			case ResourceKind.PROJECT:
 				IProject project = (IProject) resource;
 				String name = org.apache.commons.lang.StringUtils.defaultIfBlank(project.getDisplayName(), project.getName());
 				return style(name, "");
-			case Route:
+			case ResourceKind.ROUTE:
 				IRoute route = (IRoute) resource;
 				return style(route.getName(), String.format("%s%s", route.getHost(),route.getPath()));
-			case ReplicationController:
+			case ResourceKind.REPLICATION_CONTROLLER:
 				IReplicationController rc = (IReplicationController) resource;
 				return (style(resource.getName(), String.format("selector: %s", StringUtils.serialize(rc.getReplicaSelector()))));
-			case Service:
+			case ResourceKind.SERVICE:
 				IService service = (IService) resource;
 				String serviceQualifiedText = String.format("selector: %s", StringUtils.serialize(service.getSelector()));
 				return style(service.getName(), serviceQualifiedText);
@@ -102,7 +103,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			}
 		}
 		if (element instanceof ResourceGrouping) {
-			return new StyledString(StringUtils.humanize(((ResourceGrouping) element).getKind().pluralize()));
+			return new StyledString(StringUtils.humanize(((ResourceGrouping) element).getKind() + "s"));
 		} else if (element instanceof Connection) {
 			Connection conn = (Connection) element;
 			String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), "<unknown user>");

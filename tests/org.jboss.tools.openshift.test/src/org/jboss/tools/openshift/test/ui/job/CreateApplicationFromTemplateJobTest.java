@@ -70,9 +70,9 @@ public class CreateApplicationFromTemplateJobTest {
 	@Test
 	public void shouldNotifyAndReturnWarningStatusWhenResourcesAlreadyExist() {
 		IResource resource = mock(IResource.class);
-		when(resource.getKind()).thenReturn(ResourceKind.ImageStream);
+		when(resource.getKind()).thenReturn(ResourceKind.IMAGE_STREAM);
 		IResource status = mock(com.openshift.restclient.model.IStatus.class);
-		when(status.getKind()).thenReturn(ResourceKind.Status);
+		when(status.getKind()).thenReturn(ResourceKind.STATUS);
 		resources.add(resource);
 		resources.add(status);
 		
@@ -97,7 +97,7 @@ public class CreateApplicationFromTemplateJobTest {
 		assertEquals(IStatus.OK, result.getSeverity());
 		assertEquals(resources, job.getResources());
 		verify(template).updateParameterValues(anyCollectionOf(IParameter.class));
-		verify(template).addLabel(anyString(), anyString());
+		verify(template).addObjectLabel(anyString(), anyString());
 	}
 	
 	/*

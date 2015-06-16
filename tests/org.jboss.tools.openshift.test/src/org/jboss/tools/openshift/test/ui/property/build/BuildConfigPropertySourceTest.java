@@ -58,7 +58,7 @@ public class BuildConfigPropertySourceTest {
 	private IDockerBuildStrategy givenDockerbuBuildStrategy(){
 		IDockerBuildStrategy strategy = mock(IDockerBuildStrategy.class);
 		when(strategy.getBaseImage()).thenReturn(new DockerImageURI("foobar"));
-		when(strategy.getType()).thenReturn(BuildStrategyType.Docker);
+		when(strategy.getType()).thenReturn(BuildStrategyType.DOCKER);
 		when(strategy.getContextDir()).thenReturn("thepathway");
 		when(resource.getBuildStrategy()).thenReturn(strategy);
 		return strategy;
@@ -66,7 +66,7 @@ public class BuildConfigPropertySourceTest {
 	
 	private ISTIBuildStrategy givenSTIBuildStrategy(){
 		ISTIBuildStrategy strategy  = mock(ISTIBuildStrategy.class);
-		when(strategy.getType()).thenReturn(BuildStrategyType.Source);
+		when(strategy.getType()).thenReturn(BuildStrategyType.SOURCE);
 		when(strategy.getScriptsLocation()).thenReturn("scriptlocation");
 		when(strategy.getImage()).thenReturn(new DockerImageURI("foobar"));
 		Map<String, String> env = new HashMap<String, String>();
@@ -78,7 +78,7 @@ public class BuildConfigPropertySourceTest {
 	
 	private ICustomBuildStrategy givenCustomBuildStrategy(){
 		ICustomBuildStrategy strategy = mock(ICustomBuildStrategy.class);
-		when(strategy.getType()).thenReturn(BuildStrategyType.Custom);
+		when(strategy.getType()).thenReturn(BuildStrategyType.CUSTOM);
 		Map<String, String> env = new HashMap<String, String>();
 		env.put("foo", "bar");
 		when(strategy.getEnvironmentVariables()).thenReturn(env);
@@ -90,7 +90,7 @@ public class BuildConfigPropertySourceTest {
 	
 	private IGitBuildSource givenGitBuildSource(){
 		IGitBuildSource source = mock(IGitBuildSource.class);
-		when(source.getType()).thenReturn(BuildSourceType.Git);
+		when(source.getType()).thenReturn(BuildSourceType.GIT);
 		when(source.getRef()).thenReturn("altbranch");
 		when(source.getURI()).thenReturn("git://foo.bar");
 		when(resource.getBuildSource()).thenReturn(source);
@@ -104,7 +104,7 @@ public class BuildConfigPropertySourceTest {
 	@Test
 	public void getSTIPropertyValues(){
 		ISTIBuildStrategy strategy = givenSTIBuildStrategy();
-		assertEquals(BuildStrategyType.Source, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
+		assertEquals(BuildStrategyType.SOURCE, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
 		assertEquals(strategy.getScriptsLocation(),  source.getPropertyValue(BuildConfigPropertySource.Ids.STI_SCRIPT_LOCATION));
 		assertEquals(strategy.getImage(), source.getPropertyValue(BuildConfigPropertySource.Ids.STI_IMAGE));
 		assertEquals(new KeyValuePropertySource(strategy.getEnvironmentVariables()), source.getPropertyValue(BuildConfigPropertySource.Ids.STI_ENV));
@@ -113,7 +113,7 @@ public class BuildConfigPropertySourceTest {
 	@Test
 	public void getDockerPropertyValues(){
 		IDockerBuildStrategy strategy = givenDockerbuBuildStrategy();
-		assertEquals(BuildStrategyType.Docker, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
+		assertEquals(BuildStrategyType.DOCKER, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
 		assertEquals(strategy.getBaseImage(), source.getPropertyValue(BuildConfigPropertySource.Ids.DOCKER_IMAGE));
 		assertEquals(strategy.getContextDir(), source.getPropertyValue(BuildConfigPropertySource.Ids.DOCKER_CONTEXT_DIR));
 	}
@@ -147,7 +147,7 @@ public class BuildConfigPropertySourceTest {
 	@Test
 	public void getCustomPropertyValues(){
 		ICustomBuildStrategy strategy = givenCustomBuildStrategy();
-		assertEquals(BuildStrategyType.Custom, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
+		assertEquals(BuildStrategyType.CUSTOM, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
 		assertEquals(strategy.getImage(), source.getPropertyValue(BuildConfigPropertySource.Ids.CUSTOM_IMAGE));
 		assertEquals(strategy.exposeDockerSocket(), source.getPropertyValue(BuildConfigPropertySource.Ids.CUSTOM_EXPOSE_DOCKER_SOCKET));
 		assertEquals(new KeyValuePropertySource(strategy.getEnvironmentVariables()), source.getPropertyValue(BuildConfigPropertySource.Ids.CUSTOM_ENV));
@@ -169,7 +169,7 @@ public class BuildConfigPropertySourceTest {
 	@Test
 	public void getGitSourcePropertyValues(){
 		IGitBuildSource buildSource = givenGitBuildSource();
-		assertEquals(BuildSourceType.Git, source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_TYPE));
+		assertEquals(BuildSourceType.GIT, source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_TYPE));
 		assertEquals(buildSource.getRef(), source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_GIT_REF));
 		assertEquals(buildSource.getURI(), source.getPropertyValue(BuildConfigPropertySource.Ids.SOURCE_URI));
 	}

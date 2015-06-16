@@ -146,7 +146,7 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public boolean select(Viewer viewer, Object parent, Object element) {
 				return element instanceof IProject 
-						|| (element instanceof ResourceGrouping && ((ResourceGrouping) element).getKind() == ResourceKind.BuildConfig)
+						|| (element instanceof ResourceGrouping && ((ResourceGrouping) element).getKind() == ResourceKind.BUILD_CONFIG)
 						|| element instanceof IBuildConfig;
 			}
 		} });

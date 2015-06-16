@@ -28,15 +28,15 @@ import com.openshift.restclient.model.IProject;
  */
 public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider{
 	
-	private static final ResourceKind [] groupings = new ResourceKind [] {
-		ResourceKind.BuildConfig, 
-		ResourceKind.DeploymentConfig, 
-		ResourceKind.Service, 
-		ResourceKind.Pod,
-		ResourceKind.ReplicationController, 
-		ResourceKind.Build, 
-		ResourceKind.ImageStream, 
-		ResourceKind.Route
+	private static final String [] groupings = new String [] {
+		ResourceKind.BUILD_CONFIG, 
+		ResourceKind.DEPLOYMENT_CONFIG, 
+		ResourceKind.SERVICE, 
+		ResourceKind.POD,
+		ResourceKind.REPLICATION_CONTROLLER, 
+		ResourceKind.BUILD, 
+		ResourceKind.IMAGE_STREAM, 
+		ResourceKind.ROUTE
 	};
 
 	/**
@@ -49,7 +49,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
 			return registry.getAll(Connection.class).toArray();
 		} else if (parentElement instanceof Connection) {
-			return ((Connection) parentElement).get(ResourceKind.Project).toArray();
+			return ((Connection) parentElement).get(ResourceKind.PROJECT).toArray();
 		} else {
 			return new Object[0];
 		}
@@ -63,11 +63,11 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		try{
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
-				return connection.get(ResourceKind.Project).toArray();
+				return connection.get(ResourceKind.PROJECT).toArray();
 			} else if (parentElement instanceof IProject) {
 				IProject project = (IProject) parentElement;
 				List<ResourceGrouping> groups = new ArrayList<ResourceGrouping>(groupings.length);
-				for (ResourceKind kind : groupings) {
+				for (String kind : groupings) {
 					final ResourceGrouping grouping = new ResourceGrouping(kind, project);
 					grouping.setRefreshable(new IRefreshable() {
 						@Override

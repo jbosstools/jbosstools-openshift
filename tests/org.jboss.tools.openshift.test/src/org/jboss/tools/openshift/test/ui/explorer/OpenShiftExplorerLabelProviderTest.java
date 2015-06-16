@@ -56,7 +56,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
 		provider = new OpenShiftExplorerLabelProvider();
 	}
-	private <T extends IResource> T givenAResource(Class<T> klass, ResourceKind kind){
+	private <T extends IResource> T givenAResource(Class<T> klass, String kind){
 		T resource = mock(klass);
 		when(resource.getKind()).thenReturn(kind);
 		when(resource.getName()).thenReturn("someName");
@@ -64,7 +64,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 	@Test
 	public void getStyledTextForABuild(){
-		IBuild build = givenAResource(IBuild.class, ResourceKind.Build);
+		IBuild build = givenAResource(IBuild.class, ResourceKind.BUILD);
 		when(build.getStatus()).thenReturn("Running");
 		
 		assertEquals(String.format("%s Running", build.getName()), provider.getStyledText(build).getString());
@@ -72,7 +72,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForARoute() {
-		IRoute route = givenAResource(IRoute.class, ResourceKind.Route);
+		IRoute route = givenAResource(IRoute.class, ResourceKind.ROUTE);
 		when(route.getHost()).thenReturn("www.example.com");
 		when(route.getPath()).thenReturn("");
 		assertEquals(String.format("%s www.example.com", route.getName()), provider.getStyledText(route).getString());
@@ -83,7 +83,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForAReplicationController(){
-		IReplicationController rc = givenAResource(IReplicationController.class, ResourceKind.ReplicationController);
+		IReplicationController rc = givenAResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER);
 		Map<String, String> selector = new HashMap<String, String>();
 		selector.put("foo", "bar");
 		when(rc.getReplicaSelector()).thenReturn(selector);
@@ -93,7 +93,7 @@ public class OpenShiftExplorerLabelProviderTest {
 
 	@Test
 	public void getStyledTextForAPod(){
-		IPod pod = givenAResource(IPod.class, ResourceKind.Pod);
+		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
 		when(pod.getIP()).thenReturn("172.17.2.226");
 		Map<String, String> labels = new HashMap<String, String>();
 		labels.put("foo", "bar");
@@ -105,7 +105,7 @@ public class OpenShiftExplorerLabelProviderTest {
 
 	@Test
 	public void getStyledTextForAPodWithoutLabels(){
-		IPod pod = givenAResource(IPod.class, ResourceKind.Pod);
+		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
 		when(pod.getIP()).thenReturn("172.17.2.226");
 		Map<String, String> labels = new HashMap<String, String>();
 		when(pod.getLabels()).thenReturn(labels);
@@ -115,7 +115,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForAService(){
-		IService service = givenAResource(IService.class, ResourceKind.Service);
+		IService service = givenAResource(IService.class, ResourceKind.SERVICE);
 		when(service.getPortalIP()).thenReturn("172.17.2.226");
 		when(service.getPort()).thenReturn(5432);
 		when(service.getContainerPort()).thenReturn(3306);
@@ -128,7 +128,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 	@Test
 	public void getStyledTextForAnImageRepository(){
-		IImageStream repo = givenAResource(IImageStream.class, ResourceKind.ImageStream);
+		IImageStream repo = givenAResource(IImageStream.class, ResourceKind.IMAGE_STREAM);
 		when(repo.getDockerImageRepository())
 			.thenReturn(new DockerImageURI("127.0.0.1", "foo", "bar"));
 		assertEquals(repo.getName() +" " + repo.getDockerImageRepository(), provider.getStyledText(repo).getString());
@@ -136,7 +136,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForADeploymentConfig(){
-		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DeploymentConfig);
+		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
 		Map<String, String> selector = new HashMap<String, String>();
 		selector.put("name", "foo");
 		selector.put("deployment", "bar");
@@ -147,7 +147,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForABuildConfig(){
-		IBuildConfig buildConfig = givenAResource(IBuildConfig.class, ResourceKind.BuildConfig);
+		IBuildConfig buildConfig = givenAResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG);
 		when(buildConfig.getSourceURI()).thenReturn("git://somplace.com/foo/bar.git");
 		
 		StyledString actual = provider.getStyledText(buildConfig);
@@ -159,7 +159,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		String displayName = "The Display Name";
 		String namespace = "anamespace";
 		
-		IProject project = givenAResource(IProject.class, ResourceKind.Project);
+		IProject project = givenAResource(IProject.class, ResourceKind.PROJECT);
 		when(project.getName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
 
@@ -171,7 +171,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		String displayName = "The Display Name";
 		String namespace = "anamespace";
 		
-		IProject project = givenAResource(IProject.class, ResourceKind.Project);
+		IProject project = givenAResource(IProject.class, ResourceKind.PROJECT);
 		when(project.getDisplayName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
 		
@@ -180,7 +180,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	
 	@Test
 	public void getStyledTextForResourceGrouping(){
-		ResourceGrouping grouping = new ResourceGrouping(ResourceKind.Service, mock(IProject.class));
+		ResourceGrouping grouping = new ResourceGrouping(ResourceKind.SERVICE, mock(IProject.class));
 		assertEquals("Services", provider.getStyledText(grouping).getString());
 	}
 	

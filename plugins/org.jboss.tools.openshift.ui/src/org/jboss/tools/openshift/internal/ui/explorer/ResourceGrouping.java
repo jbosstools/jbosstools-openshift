@@ -19,7 +19,7 @@ import com.openshift.restclient.model.IProject;
  */
 public class ResourceGrouping implements IRefreshable {
 	private IProject project;
-	private ResourceKind kind;
+	private String kind;
 	private IRefreshable refreshable;
 
 	/**
@@ -27,7 +27,7 @@ public class ResourceGrouping implements IRefreshable {
 	 * @param title            The title to display
 	 * @param resources   The resource of this grouping
 	 */
-	public ResourceGrouping(ResourceKind kind, IProject project) {
+	public ResourceGrouping(String kind, IProject project) {
 		this.kind = kind;
 		this.project = project;
 	}
@@ -39,7 +39,7 @@ public class ResourceGrouping implements IRefreshable {
 		return this.project;
 	}
 	
-	public ResourceKind getKind() {
+	public String getKind() {
 		return this.kind;
 	}
 
