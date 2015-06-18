@@ -28,7 +28,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -70,7 +70,6 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
-	private static final String MSG_UPLOAD_TEMPLATE_EX = "Upload template exception";
 	public ITemplateListPageModel model;
 	private Text txtUploadedFileName;
 	
@@ -147,25 +146,37 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					File file = new File(model.getTemplateFileName());
 					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
 				}
-				String file;
-				do{
+				String file = null;
+				do {
 					file = dialog.open();
-					if(file != null) {
+					if (file != null) {
 						try {
 							model.setTemplateFileName(file);
 							return;
-						}catch(ClassCastException err) {
-							OpenShiftUIActivator.getDefault().getLogger().logError(err);
-							MessageDialog.openError(getShell(), MSG_UPLOAD_TEMPLATE_EX, NLS.bind("The file \"{0}\" is not an OpenShift template.", file));
-						}catch(UnsupportedVersionException err) {
-							OpenShiftUIActivator.getDefault().getLogger().logError(err);
-							MessageDialog.openError(getShell(), MSG_UPLOAD_TEMPLATE_EX, err.getMessage());
-						}catch(ResourceFactoryException err) {
-							OpenShiftUIActivator.getDefault().getLogger().logError(err);
-							MessageDialog.openError(getShell(), MSG_UPLOAD_TEMPLATE_EX, NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file));
+						} catch (ClassCastException ex) {
+							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
+							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
+							ErrorDialog.openError(getShell(), "Template Error",
+									NLS.bind("The file \"{0}\" is not an OpenShift template.", 
+											file),
+									status);
+						} catch (UnsupportedVersionException ex) {
+							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
+							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
+							ErrorDialog.openError(getShell(), "Template Error", 
+									NLS.bind("The file \"{0}\" is a template in a version that we do not support.", 
+											file),
+									status);
+						} catch (ResourceFactoryException ex) {
+							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
+							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
+							ErrorDialog.openError(getShell(), "Template Error",
+									NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.",
+											file),
+									status);
 						}
 					}
-				}while(file != null);
+				} while (file != null);
 			}
 		});
 	}
