@@ -63,7 +63,7 @@ public class CreateSSHSessionJob extends Job {
 			this.validSession = application.hasSSHSession();
 			return Status.OK_STATUS;
 		} catch (OpenShiftSSHOperationException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application));
+			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application.getName()));
 		}
 	}
 
