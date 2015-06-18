@@ -9,12 +9,12 @@
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.common.ui.viewer.GTK3WorkaroundStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateListPage.TemplateNode;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -27,7 +27,7 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author jeff.cantrill
  *
  */
-public class TemplateListPageLabelProvier  extends StyledCellLabelProvider{
+public class TemplateListPageLabelProvier  extends GTK3WorkaroundStyledCellLabelProvider{
 	
 	@Override
 	public void update(ViewerCell cell) {
