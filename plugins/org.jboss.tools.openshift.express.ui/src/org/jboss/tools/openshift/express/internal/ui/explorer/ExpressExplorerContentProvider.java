@@ -26,6 +26,19 @@ import com.openshift.client.OpenShiftException;
  */
 public class ExpressExplorerContentProvider extends BaseExplorerContentProvider {
 
+	
+	@Override
+	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+		if(!(connection instanceof ExpressConnection)) return;
+		super.handleConnectionChanged(connection, property, oldValue, newValue);
+	}
+	
+	@Override
+	protected void handleConnectionRemoved(IConnection connection) {
+		if(!(connection instanceof ExpressConnection)) return;
+		super.handleConnectionRemoved(connection);
+	}
+
 	/**
 	 * Called to obtain the root elements of the tree viewer, the connections
 	 */

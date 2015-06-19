@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -44,7 +45,7 @@ public class DeleteResourceJob extends AbstractDelegatingMonitorJob {
 			Connection connection = ConnectionsRegistryUtil.getConnectionFor(resource);
 			if(connection != null) {
 				connection.delete(resource);
-				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
 			}
 			return Status.OK_STATUS;
 		}catch(OpenShiftException e) {

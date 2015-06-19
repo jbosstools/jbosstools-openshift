@@ -453,15 +453,19 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		@Override
 		public Map<String, String> getObjectLabels() {
+			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public void addObjectLabel(String key, String value) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
 		public IProject getProject() {
+			// TODO Auto-generated method stub
 			return null;
 		}
 		
