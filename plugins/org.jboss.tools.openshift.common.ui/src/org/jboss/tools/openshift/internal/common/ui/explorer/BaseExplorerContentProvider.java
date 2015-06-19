@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.internal.common.ui.explorer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,8 +23,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 /**
@@ -31,8 +36,11 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 public abstract class BaseExplorerContentProvider implements ITreeContentProvider {
 
 	private static final String MSG_LOADING_RESOURCES = "Loading OpenShift resources...";
+	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
 
-	private StructuredViewer viewer;
+	private TreeViewer viewer;
+	private ConnectionsRegistry input;
+	private IConnectionsRegistryListener connectionListener = new ConnectionsRegistryListener();
 
 	// Keep track of what's loading and what's finished
 	private Map<Object, LoadingStub> loadedElements = new ConcurrentHashMap<Object, LoadingStub>();
@@ -60,9 +68,40 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer = (StructuredViewer) viewer;
+		this.viewer = (TreeViewer) viewer;
+		if(input != null && connectionListener != null) {
+			input.removeListener(connectionListener);
+		}
+		if(newInput instanceof ConnectionsRegistry) {
+			input = (ConnectionsRegistry) newInput;
+			if(connectionListener != null) {
+				input.addListener(connectionListener);
+			}
+		}
 	}
-
+	
+	/**
+	 * Allow subclasses the opportunity to handle the connection changed event
+	 * @param connection
+	 * @param property
+	 * @param oldValue
+	 * @param newValue
+	 */
+	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+		refreshViewer(connection);
+	}
+	
+	/**
+	 * Allow subclasses the opportunity to handle the connection removed event
+	 * @param connection
+	 * @param property
+	 * @param oldValue
+	 * @param newValue
+	 */
+	protected void handleConnectionRemoved(IConnection connection) {
+		refreshViewer(null);
+	}
+	
 	/**
 	 * Called to obtain the root elements of the tree viewer, the connections
 	 */
@@ -131,7 +170,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 					loadedElements.put(element, stub);
 					loadingElements.remove(element);
 					monitor.done();
-					refreshViewerObject(element);
+					refreshViewer(element);
 				}
 			}
 		};
@@ -140,11 +179,15 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		return stub;
 	}
 
-	protected void refreshViewerObject(final Object object) {
+	protected void refreshViewer(final Object object) {
 		viewer.getControl().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
-					viewer.refresh(object);
+					if(object != null) {
+						viewer.refresh(object);
+					}else {
+						viewer.refresh();
+					}
 				}
 			}
 		});
@@ -158,7 +201,25 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	@Override
 	public void dispose() {
 	}
-
+	
+	private class ConnectionsRegistryListener implements IConnectionsRegistryListener{
+		@Override
+		public void connectionAdded(IConnection connection) {
+			refreshViewer(null);
+		}
+		
+		@Override
+		public void connectionRemoved(IConnection connection) {
+			refreshViewer(null);
+		}
+		
+		@Override
+		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+			if(!PROPERTY_BLACKLIST.contains(property)) {
+				handleConnectionChanged(connection, property, oldValue, newValue);
+			}
+		}
+	}
 	public static class LoadingStub {
 		
 		private List<Object> children = new ArrayList<Object>();

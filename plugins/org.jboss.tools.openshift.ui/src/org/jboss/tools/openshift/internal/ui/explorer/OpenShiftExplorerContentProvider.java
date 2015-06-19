@@ -9,17 +9,22 @@
 package org.jboss.tools.openshift.internal.ui.explorer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionProperties;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 
 /**
  * Contributes OpenShift v3 specific content to the OpenShift explorer view
@@ -38,6 +43,50 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		ResourceKind.IMAGE_STREAM, 
 		ResourceKind.ROUTE
 	};
+	
+	private Map<IProject, List<ResourceGrouping>> groupMap = new HashMap<IProject, List<ResourceGrouping>>();
+	
+	@Override
+	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+		if(!(connection instanceof Connection))return;
+		if(ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
+			if(oldValue == null) {
+				//add
+			}else if(newValue == null) {
+				//delete
+				IResource resource = (IResource)oldValue;
+				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
+			}else {
+				refreshViewer(newValue);
+			}
+		}else{
+			super.handleConnectionChanged(connection, property, oldValue, newValue);
+		}
+	}
+	
+	@Override
+	protected void handleConnectionRemoved(IConnection connection) {
+		if(!(connection instanceof Connection))return;
+		for (IProject project : groupMap.keySet()) {
+			Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
+			if(connection.equals(conn)) {
+				groupMap.remove(project);
+				break;
+			}
+		}
+		super.handleConnectionRemoved(connection);
+	}
+
+
+
+	private void refreshGrouping(List<ResourceGrouping> groupings, String kind) {
+		for (ResourceGrouping group : groupings) {
+			if(kind.equals(group.getKind())){
+				group.refresh();
+				break;
+			}
+		}
+	}
 
 	/**
 	 * Called to obtain the root elements of the tree viewer,
@@ -72,11 +121,12 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 					grouping.setRefreshable(new IRefreshable() {
 						@Override
 						public void refresh() {
-							refreshViewerObject(grouping);
+							refreshViewer(grouping);
 						}
 					});
 					groups.add(grouping);
 				}
+				groupMap.put(project, groups);
 				return groups.toArray();
 			} else if (parentElement instanceof ResourceGrouping) {
 				ResourceGrouping group = (ResourceGrouping) parentElement;

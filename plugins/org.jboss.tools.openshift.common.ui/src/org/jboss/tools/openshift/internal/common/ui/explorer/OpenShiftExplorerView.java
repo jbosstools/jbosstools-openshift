@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.explorer;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -28,7 +25,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
@@ -42,7 +38,6 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
-import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 
 /**
  * @author Xavier Coulon
@@ -50,7 +45,6 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsRegistryListener {
 	
-	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
 	private Control connectionsPane;
 	private Control explanationsPane;
 	private PageBook pageBook;
@@ -64,7 +58,6 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	protected CommonViewer createCommonViewer(Composite parent) {
 		CommonViewer viewer = super.createCommonViewer(parent);
 		new OpenShiftExplorerContextsHandler(viewer);
-		ConnectionsRegistrySingleton.getInstance().addListener(this);
 		return viewer;
 	}
 
@@ -74,38 +67,18 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		super.dispose();
 	}
 
-	public void refreshViewer(final IConnection connection) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				CommonViewer viewer = getCommonViewer();
-				if (DisposeUtils.isDisposed(viewer)) {
-					return;
-				}
-				if (connection != null) {
-					viewer.refresh(connection);
-				} else {
-					viewer.refresh();
-				}
-				showConnectionsOrExplanations(connectionsPane, explanationsPane);
-			}
-		});
-	}
-
 	@Override
 	public void connectionAdded(IConnection connection) {
-		refreshViewer(null);
+		showConnectionsOrExplanations(connectionsPane, explanationsPane);
 	}
 
 	@Override
 	public void connectionRemoved(IConnection connection) {
-		refreshViewer(null);
+		showConnectionsOrExplanations(connectionsPane, explanationsPane);
 	}
 
 	@Override
 	public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-		if(!PROPERTY_BLACKLIST.contains(property)) {
-			refreshViewer(connection);
-		}
 	}
 
 	@Override
@@ -118,6 +91,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		this.connectionsPane = getCommonViewer().getControl();
 		this.explanationsPane = createExplanationPane(connectionsPane, pageBook, toolkit);
 		showConnectionsOrExplanations(connectionsPane, explanationsPane);
+		ConnectionsRegistrySingleton.getInstance().addListener(this);
 	}
 
 	private Control createExplanationPane(Control connectionsPane, PageBook pageBook, FormToolkit kit) {
