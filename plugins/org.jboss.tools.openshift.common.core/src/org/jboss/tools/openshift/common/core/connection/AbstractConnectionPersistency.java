@@ -36,7 +36,10 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
 	private void addConnection(String connectionUrl, List<C> connections) {
 		try {
-			connections.add(createConnection(createConnectionURL(connectionUrl)));
+			C connection = createConnection(createConnectionURL(connectionUrl));
+			if (connection != null) {
+				connections.add(connection);
+			}
 		} catch (MalformedURLException e) {
 			logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
 		} catch (UnsupportedEncodingException e) {

@@ -43,8 +43,12 @@ public class ConnectionPersistency extends AbstractConnectionPersistency<Connect
 		Connection connection = new ConnectionFactory().create(
 				connectionURL.getHostWithScheme(),
 				new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
-		connection.setUsername(connectionURL.getUsername());
-		connection.setAuthScheme(OpenShiftCorePreferences.INSTANCE.loadScheme(connectionURL.toString()));
-		return connection;
+		if (connection == null) {
+			return null;
+		} else {
+			connection.setUsername(connectionURL.getUsername());
+			connection.setAuthScheme(OpenShiftCorePreferences.INSTANCE.loadScheme(connectionURL.toString()));
+			return connection;
+		}
 	}
 }
