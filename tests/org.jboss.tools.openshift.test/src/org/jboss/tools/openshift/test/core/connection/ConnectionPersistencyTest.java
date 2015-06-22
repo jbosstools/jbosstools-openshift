@@ -10,6 +10,7 @@ package org.jboss.tools.openshift.test.core.connection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -106,6 +108,29 @@ public class ConnectionPersistencyTest {
 		assertContainsConnection(connection2, connections);
 	}
 	
+	@Ignore("no default server for OpenShift v3 yet")
+	@Test
+	public void shouldLoadUsernamesAsDefaultHostConnection() {	
+		// pre-condition
+		ConnectionPersistency persistency = new ConnectionPersistency() {
+
+			@Override
+			protected String[] loadPersisted() {
+				return new String[] {
+						"bingobongo@redhat.com" };
+				}
+		};
+		
+		// operations
+		Collection<Connection> connections = persistency.load();
+
+		// verification
+		assertEquals(1, connections.size());
+		Connection connection = connections.iterator().next();
+		assertTrue(connection.isDefaultHost());
+		assertEquals("bingobongo@redhat.com", connection.getUsername());
+	}
+
 	private void assertContainsConnection(Connection connection, Collection<Connection> connections) {
 		for (Connection effectiveConnection : connections) {
 			if (effectiveConnection.equals(connection)) {

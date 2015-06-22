@@ -10,6 +10,7 @@ package org.jboss.tools.openshift.express.test.core.connection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class ExpressConnectionPersistencyTest {
 	}
 
 	@Test
-	public void shouldNotLoadMalformedUrl() {
+	public void shouldNotLoadMalformedUrl() {	
 		// pre-condition
 		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
@@ -85,7 +86,7 @@ public class ExpressConnectionPersistencyTest {
 			protected String[] loadPersisted() {
 				return new String[] {
 						"https://foo@localhost:8442",
-						"@bingobongo",
+						"htp://bingobongo",
 						"https://bar@localhost:8443" };
 				}
 		};
@@ -99,6 +100,28 @@ public class ExpressConnectionPersistencyTest {
 		assertContainsConnection(connection2, connections);
 	}
 	
+	@Test
+	public void shouldLoadUsernamesAsDefaultHostConnection() {	
+		// pre-condition
+		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+
+			@Override
+			protected String[] loadPersisted() {
+				return new String[] {
+						"bingobongo@redhat.com" };
+				}
+		};
+		
+		// operations
+		Collection<ExpressConnection> connections = persistency.load();
+
+		// verification
+		assertEquals(1, connections.size());
+		ExpressConnection connection = connections.iterator().next();
+		assertTrue(connection.isDefaultHost());
+		assertEquals("bingobongo@redhat.com", connection.getUsername());
+	}
+
 	private void assertContainsConnection(ExpressConnection connection, Collection<ExpressConnection> connections) {
 		for (ExpressConnection effectiveConnection : connections) {
 			if (effectiveConnection.equals(connection)) {

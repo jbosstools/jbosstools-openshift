@@ -35,7 +35,7 @@ import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivat
  */
 public class ConnectionURL {
 
-	private static final Pattern MALFORMED_URL_PATTERN = Pattern.compile("(https?://)?([^@]+)@(https?://)?(.*)");
+	private static final Pattern MALFORMED_URL_PATTERN = Pattern.compile("(https?://)?([^@]+)?@(https?://)?(.*)");
 	
 	private String username;
 	private String host;

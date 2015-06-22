@@ -51,8 +51,10 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
 	private ConnectionURL createConnectionURL(String connectionUrl) throws UnsupportedEncodingException, MalformedURLException {
 		if (UrlUtils.hasScheme(connectionUrl)) {
+			// full url with username and host 
 			return ConnectionURL.forURL(connectionUrl);
 		} else {
+			// username only
 			return ConnectionURL.forUsername(connectionUrl);
 		}
 	}
