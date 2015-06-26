@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.application;
 
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IBuildConfig;
 
@@ -20,12 +21,19 @@ import com.openshift.restclient.model.IBuildConfig;
  */
 public interface IBuildConfigPageModel extends IConnectionAware<Connection> {
 	
-	public String PROPERTY_SELECTED_ITEM = "selectedItem";
+	public static final String PROPERTY_SELECTED_ITEM = "selectedItem";
+	public static final String PROPERTY_BUILDCONFIGS_TREEROOT = "buildConfigsTreeRoot";
 
 	public Object getSelectedItem();
 
 	public void setSelectedItem(Object selectedItem);
 	
 	public IBuildConfig getSelectedBuildConfig();
+
+	public void loadBuildConfigs();
+
+	public void setBuildConfigsTreeRoot(ObservableTreeItem root);
+
+	public ObservableTreeItem getBuildConfigsTreeRoot();
 
 }

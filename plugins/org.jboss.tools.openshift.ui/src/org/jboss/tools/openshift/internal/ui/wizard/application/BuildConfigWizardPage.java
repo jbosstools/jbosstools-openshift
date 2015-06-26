@@ -10,22 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
+import org.eclipse.core.databinding.property.list.IListProperty;
+import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -35,15 +42,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.navigator.CommonViewer;
-import org.eclipse.ui.navigator.INavigatorContentService;
-import org.eclipse.ui.navigator.NavigatorContentServiceFactory;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
+import org.jboss.tools.openshift.internal.ui.treeitem.BuildConfigTreeItem;
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
+import org.jboss.tools.openshift.internal.ui.treeitem.ProjectTreeItem;
 
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 
@@ -52,13 +60,10 @@ import com.openshift.restclient.model.IProject;
  */
 public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 
-	private static final String COMMON_VIEWER_ID = "org.jboss.tools.openshift.ui.wizard.application.BuildConfigViewer";
-
 	public IBuildConfigPageModel model;
-	private TreeViewer buildConfigsViewer;
 
 	public BuildConfigWizardPage(IWizard wizard, IBuildConfigPageModel model) {
-		super("Select Build Config", "Choose the build config that will be used to import into Eclipse", "", wizard);
+		super("Select Build Config", "Choose the build config that will be used to import a projct to Eclipse", "", wizard);
 		this.model = model;
 	}
 
@@ -77,15 +82,38 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(existingApplicationsGroup);
 
 		// build configs tree
-		this.buildConfigsViewer = createBuildConfigsViewer(existingApplicationsGroup, dbc);
+		TreeViewer buildConfigsViewer = createBuildConfigsViewer(existingApplicationsGroup, dbc);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 200).span(1, 2).applyTo(buildConfigsViewer.getControl());
-		BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONNECTION).observe(model)
-				.addValueChangeListener(onConnectionChanged(buildConfigsViewer));
 		final IObservableValue selectedItem = BeanProperties.value(IBuildConfigPageModel.PROPERTY_SELECTED_ITEM).observe(model);
 		Binding selectedBuildConfigBinding = ValueBindingBuilder
-				.bind(ViewerProperties.singlePostSelection().observe(buildConfigsViewer))
-				.to(selectedItem).in(dbc);
+				.bind(ViewerProperties.singleSelection().observe(buildConfigsViewer))
+				.converting(new Converter(ObservableTreeItem.class, Object.class) {
+					
+					@Override
+					public Object convert(Object fromObject) {
+						if (!(fromObject instanceof ObservableTreeItem)) {
+							return fromObject;
+						} else {
+							return ((ObservableTreeItem) fromObject).getModel();
+						}
+					}
+				})
+				.to(selectedItem)
+				.converting(new Converter(Object.class, ObservableTreeItem.class) {
+					
+					@Override
+					public Object convert(Object fromObject) {
+							if (fromObject instanceof IProject) {
+								return new ProjectTreeItem(fromObject);
+							} else if (fromObject instanceof IBuildConfig) {
+								return new BuildConfigTreeItem(fromObject);
+							} else {
+								return fromObject;
+							}
+					}
+				})
+				.in(dbc);
 		dbc.addValidationStatusProvider(new MultiValidator() {
 
 			@Override
@@ -95,19 +123,20 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 				} else {
 					return ValidationStatus.ok();
 				}
-				
 			}
 		});
+		BeanProperties.value(IBuildConfigPageModel.PROPERTY_BUILDCONFIGS_TREEROOT).observe(model)
+				.addValueChangeListener(onTreeRootChanged(buildConfigsViewer, model));
 		
-		ControlDecorationSupport.create(selectedBuildConfigBinding, SWT.LEFT | SWT.TOP, null,
-				new RequiredControlDecorationUpdater(true));
+		ControlDecorationSupport.create(
+				selectedBuildConfigBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
 		// refresh button
 		Button refreshButton = new Button(existingApplicationsGroup, SWT.PUSH);
 		refreshButton.setText("&Refresh");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).hint(100, SWT.DEFAULT).applyTo(refreshButton);
-		refreshButton.addSelectionListener(onRefresh());
+		refreshButton.addSelectionListener(onRefresh(buildConfigsViewer, model));
 		
 		// filler
 		Label fillerLabel = new Label(existingApplicationsGroup, SWT.NONE);
@@ -115,46 +144,60 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.FILL).grab(false, true).applyTo(fillerLabel);
 	}
 
-	private SelectionListener onRefresh() {
+	private TreeViewer createBuildConfigsViewer(Composite parent, DataBindingContext dbc) {
+		TreeViewer buildConfigsViewer =
+				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+		IListProperty childrenProperty = new MultiListProperty(
+				new IListProperty[] { 
+						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN)
+						});
+		ObservableListTreeContentProvider contentProvider =
+				new ObservableListTreeContentProvider(childrenProperty.listFactory(), null);
+		buildConfigsViewer.setContentProvider(contentProvider);
+		buildConfigsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
+		buildConfigsViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
+		buildConfigsViewer.setComparator(new ViewerComparator());
+		return buildConfigsViewer;
+
+	}
+	
+	private SelectionListener onRefresh(final TreeViewer viewer, final IBuildConfigPageModel model) {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				buildConfigsViewer.setInput(model.getConnection());
+				viewer.setInput(model.getBuildConfigsTreeRoot());
+				loadBuildConfigs(model);
+				viewer.expandAll();
 			}
 		};
 	}
 
-	private IValueChangeListener onConnectionChanged(final TreeViewer viewer) {
+	private IValueChangeListener onTreeRootChanged(final TreeViewer viewer, final IBuildConfigPageModel model) {
 		return new IValueChangeListener() {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				viewer.setInput(event.diff.getNewValue());
+				viewer.setInput(model.getBuildConfigsTreeRoot());
+				loadBuildConfigs(model);
+				viewer.expandAll();
 			}
 		};
 	}
 
-	protected TreeViewer createBuildConfigsViewer(Composite parent, DataBindingContext dbc) {
-		CommonViewer commonViewer = new CommonViewer(COMMON_VIEWER_ID, parent,
-				SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		INavigatorContentService contentService = NavigatorContentServiceFactory.INSTANCE
-				.createContentService(COMMON_VIEWER_ID, commonViewer);
-		contentService.createCommonContentProvider();
-		contentService.createCommonLabelProvider();
-		commonViewer.setFilters(new ViewerFilter[] { new ViewerFilter() {
-			@Override
-			public boolean select(Viewer viewer, Object parent, Object element) {
-				return element instanceof IProject 
-						|| (element instanceof ResourceGrouping && ((ResourceGrouping) element).getKind() == ResourceKind.BUILD_CONFIG)
-						|| element instanceof IBuildConfig;
-			}
-		} });
-		return commonViewer;
-	}
+	private void loadBuildConfigs(final IBuildConfigPageModel model) {
+		try {
+			AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob("Loading build configs...") {
 
-	@Override
-	protected void onPageActivated(DataBindingContext dbc) {
-		buildConfigsViewer.setInput(model.getConnection());
+				@Override
+				protected IStatus doRun(IProgressMonitor monitor) {
+					model.loadBuildConfigs();
+					return Status.OK_STATUS;
+				}
+			};
+			WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
+		} catch (InvocationTargetException | InterruptedException e) {
+			// intentionnally swallowed
+		}
 	}
 }

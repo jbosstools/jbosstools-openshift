@@ -220,6 +220,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 			}
 		}
 	}
+	
 	public static class LoadingStub {
 		
 		private List<Object> children = new ArrayList<Object>();
@@ -232,7 +233,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		}
 
 		public Object[] getChildren() {
-			return this.children.toArray();
+			return children.toArray();
 		}
 		
 		public void addChildren(Object[] children) {

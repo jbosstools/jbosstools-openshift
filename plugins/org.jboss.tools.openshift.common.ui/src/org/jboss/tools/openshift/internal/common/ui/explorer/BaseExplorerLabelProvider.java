@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.explorer;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -21,7 +20,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
-import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 
 public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
 

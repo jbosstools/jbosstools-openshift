@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.Path;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
+import org.jboss.tools.openshift.internal.ui.treeitem.ConnectionTreeItem;
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IBuildConfig;
 
@@ -30,12 +32,14 @@ public class ImportApplicationWizardModel
 	implements IBuildConfigPageModel, IGitCloningPageModel {
 
 	private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("([^\\/\\.git]+)(\\.git)?$");
-	
+
 	private Connection connection;
 	private Object selectedItem;
 	private String repoPath;
 	private boolean useDefaultRepoPath;
 	private String projectName;
+
+	private ObservableTreeItem buildConfigsTreeRoot;
 	
 	ImportApplicationWizardModel() {
 		this.useDefaultRepoPath = true;
@@ -48,10 +52,14 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public IBuildConfig getSelectedBuildConfig() {
-		if (!(selectedItem instanceof IBuildConfig)) {
+		return getBuildConfig(selectedItem);
+	}
+
+	private IBuildConfig getBuildConfig(Object item) {
+		if (!(item instanceof IBuildConfig)) {
 			return null;
 		}
-		return (IBuildConfig) selectedItem;
+		return (IBuildConfig) item;
 	}
 
 	public String getGitUrl() {
@@ -66,7 +74,7 @@ public class ImportApplicationWizardModel
 	@Override
 	public void setSelectedItem(Object selectedItem) {
 		firePropertyChange(PROPERTY_SELECTED_ITEM, this.selectedItem, this.selectedItem = selectedItem);
-		setProjectName(getSelectedBuildConfig());
+		setProjectName(getBuildConfig(selectedItem));
 	}
 	
 	@Override
@@ -106,6 +114,10 @@ public class ImportApplicationWizardModel
 	}
 
 	private void setProjectName(IBuildConfig config) {
+		setProjectName(getProjectName(config));
+	}
+
+	private String getProjectName(IBuildConfig config) {
 		String projectName = null;
 		if (config != null) {
 			Matcher matcher = PROJECT_NAME_PATTERN.matcher(config.getSourceURI());
@@ -114,7 +126,7 @@ public class ImportApplicationWizardModel
 				projectName = matcher.group(1);
 			}
 		}
-		setProjectName(projectName);
+		return projectName;
 	}
 
 	@Override
@@ -140,12 +152,38 @@ public class ImportApplicationWizardModel
 	@Override
 	public Connection setConnection(Connection connection) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+		setBuildConfigsTreeRoot(connection);
 		return this.connection;
+	}
+
+	private void setBuildConfigsTreeRoot(Connection connection) {
+		ObservableTreeItem buildConfigTreeRoot = new ConnectionTreeItem(connection);
+		setBuildConfigsTreeRoot(buildConfigTreeRoot);
+	}
+
+	@Override
+	public void setBuildConfigsTreeRoot(ObservableTreeItem root) {
+		firePropertyChange(PROPERTY_BUILDCONFIGS_TREEROOT, this.buildConfigsTreeRoot, this.buildConfigsTreeRoot = root);
+	}
+	
+	@Override
+	public void loadBuildConfigs() {
+		if (buildConfigsTreeRoot == null) {
+			if (connection == null) {
+				return;
+			}
+			setBuildConfigsTreeRoot(connection);
+		}
+		buildConfigsTreeRoot.load();
+	}
+	
+	@Override
+	public ObservableTreeItem getBuildConfigsTreeRoot() {
+		return this.buildConfigsTreeRoot;
 	}
 
 	@Override
 	public Object getContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

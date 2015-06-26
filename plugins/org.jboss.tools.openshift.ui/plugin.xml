@@ -23,8 +23,7 @@
 			<possibleChildren>
 				<or>
 					<instanceof
-						value="com.openshift.restclient.model.IResource">
-					</instanceof>
+						value="com.openshift.restclient.model.IResource" />
 					<instanceof
 						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>
@@ -221,30 +220,6 @@
     	</importApplicationWizard>
     </extension>
 
-   	<!-- Select build config common navigator -->
-	<extension point="org.eclipse.ui.navigator.viewer">
-		<viewer
-			viewerId="org.jboss.tools.openshift.ui.wizard.application.BuildConfigViewer">
-		</viewer>
-		<viewerContentBinding
-				viewerId="org.jboss.tools.openshift.ui.wizard.application.BuildConfigViewer">
-			<includes>
-				<contentExtension
-					pattern="org.jboss.tools.openshift.ui.wizard.application.BuildConfigViewerContent"
-					isRoot="false">
-				</contentExtension>
-			</includes>
-		</viewerContentBinding>
-	</extension>
-	<extension point="org.eclipse.ui.navigator.navigatorContent">
-		<navigatorContent
-			id="org.jboss.tools.openshift.ui.wizard.application.BuildConfigViewerContent"
-			name="Select BuildConfig Viewer Content"
-			contentProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider"
-			labelProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider">
-			<triggerPoints></triggerPoints>
-		</navigatorContent>
-	</extension>
     
     <!-- Import Application -->
     <extension
