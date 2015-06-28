@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
@@ -180,7 +181,11 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	}
 
 	protected void refreshViewer(final Object object) {
-		viewer.getControl().getDisplay().asyncExec(new Runnable() {
+		Control control = viewer.getControl();
+		if(control.isDisposed()) {
+			return;
+		}
+		control.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
 					if(object != null) {
@@ -200,6 +205,9 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 
 	@Override
 	public void dispose() {
+		if(input != null) {
+			input.removeListener(connectionListener);
+		}
 	}
 	
 	private class ConnectionsRegistryListener implements IConnectionsRegistryListener{
