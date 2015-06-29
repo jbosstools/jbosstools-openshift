@@ -212,6 +212,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		}
 
 		@Override
+		public void widgetDefaultSelected(SelectionEvent e) {
+			widgetDefaultSelected(e);
+		}
+
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			if(!StringUtils.isBlank(link)) {
 				return;
