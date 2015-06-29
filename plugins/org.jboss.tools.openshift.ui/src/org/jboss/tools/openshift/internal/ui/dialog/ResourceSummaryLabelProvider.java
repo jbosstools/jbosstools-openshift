@@ -84,7 +84,7 @@ public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILab
 	}
 	
 	private boolean isFailedStatus(IResource resource) {
-		return resource.getKind() == ResourceKind.STATUS && ((IStatus) resource).isFailure(); 
+		return ResourceKind.STATUS.equals(resource.getKind()) && ((IStatus) resource).isFailure(); 
 	}
 
 }
