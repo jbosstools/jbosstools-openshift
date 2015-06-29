@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -21,14 +24,12 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.core.job.FireConnectionsChangedJob;
-import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.job.IResourcesModel;
+import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
@@ -63,20 +64,26 @@ public class RefreshResourceHandler extends AbstractHandler{
 	}
 
 	private void refresh(final Object element) {
+		Job job;
+		if(element instanceof IResource) {
+			job = createRefreshResourceJob(element);
+		}else {
+			job = createRefreshRefreshableJob(element);
+		}
+		job.schedule();
+	}
+	
+	private Job createRefreshRefreshableJob(final Object element) {
 		final IConnection connection = getConnection(element);
-		Job job = new AbstractDelegatingMonitorJob(LOADING_OPEN_SHIFT_INFORMATIONS) {
+		return new AbstractDelegatingMonitorJob(LOADING_OPEN_SHIFT_INFORMATIONS) {
 
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
-					Object newValue = null;
 					monitor.beginTask(LOADING_OPEN_SHIFT_INFORMATIONS, IProgressMonitor.UNKNOWN);
 					if (element instanceof IRefreshable) {
 						((IRefreshable) element).refresh();
 						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
-					}else if(connection != null && element instanceof IResource) { 
-						newValue = ((Connection)connection).get((IResource)element);
-						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, element, newValue);
 					}
 				} catch (OpenShiftException e) {
 					OpenShiftCommonUIActivator.getDefault().getLogger().logError(FAILED_TO_REFRESH_ELEMENT, e);
@@ -87,7 +94,15 @@ public class RefreshResourceHandler extends AbstractHandler{
 				return Status.OK_STATUS;
 			}
 		};
-		job.schedule();
+	}
+	
+	private Job createRefreshResourceJob(final Object element) {
+		return new RefreshResourcesJob(new IResourcesModel() {
+			@Override
+			public Collection<IResource> getResources() {
+				return Arrays.asList(new IResource[] {(IResource) element});
+			}
+		}, false);
 	}
 	
 	private IConnection getConnection(final Object resource) {

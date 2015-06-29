@@ -37,6 +37,7 @@ import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.BasicAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.IAuthorizationStrategy;
@@ -333,7 +334,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return List<IResource>
 	 * @throws OpenShiftException
 	 */
-	public <T extends IResource> T get(IResource resource) {
+	public <T extends IResource> T getResource(IResource resource) {
 		try {
 			if(client.getAuthorizationStrategy() == null) {
 				client.setAuthorizationStrategy(getAuthorizationStrategy());

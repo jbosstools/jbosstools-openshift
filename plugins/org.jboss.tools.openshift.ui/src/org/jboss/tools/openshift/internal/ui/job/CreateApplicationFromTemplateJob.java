@@ -31,7 +31,7 @@ import com.openshift.restclient.model.template.ITemplate;
  * 
  * @author jeff.cantrill
  */
-public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJob {
+public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJob implements IResourcesModel {
 
 	private IProject project;
 	private ITemplate template;
@@ -79,6 +79,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 		return status;
 	}
 	
+	@Override
 	public Collection<IResource> getResources(){
 		return resources;
 	}
