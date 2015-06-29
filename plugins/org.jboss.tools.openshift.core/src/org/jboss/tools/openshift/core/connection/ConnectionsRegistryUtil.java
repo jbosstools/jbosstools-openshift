@@ -42,7 +42,12 @@ public class ConnectionsRegistryUtil {
 		}
 		return connection;
 	}
-
+	
+	/**
+	 * Retrieve the connection for the given resources
+	 * @param resource
+	 * @return the connection or null if not found
+	 */
 	public static Connection safeGetConnectionFor(IResource resource) {
 		Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
 		for (Connection connection : all) {
