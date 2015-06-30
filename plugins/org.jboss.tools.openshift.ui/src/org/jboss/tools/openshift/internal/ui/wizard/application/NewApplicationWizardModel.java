@@ -164,6 +164,7 @@ public class NewApplicationWizardModel
 	}
 
 	private void setLabels(Map<String, String> labelMap) {
+		if(labelMap == null) return;
 		List<Label> labels =  new ArrayList<Label>(labelMap.size());
 		for (Entry<String,String> entry : labelMap.entrySet()) {
 			labels.add(new Label(entry.getKey(), entry.getValue()));
