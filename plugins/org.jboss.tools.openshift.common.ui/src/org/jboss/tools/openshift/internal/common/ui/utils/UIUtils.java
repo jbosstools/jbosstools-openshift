@@ -24,7 +24,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
@@ -45,7 +44,6 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 /**
  * @author André Dietisheim
@@ -279,29 +277,4 @@ public class UIUtils {
 		return searchText;
 
 	}
-	
-	/**
-	 * Causes the given StyledText to be transparent. Uses a transparent
-	 * background image (since SWT flags wont work for StyledText) or sets the
-	 * widget to the default widget background color. Different strategies are
-	 * used for the different platforms.
-	 * 
-	 * @param styledText
-	 *            the styled text widget that shall get transparent background
-	 * 
-	 * @see Control#setBackgroundImage(org.eclipse.swt.graphics.Image)
-	 * @see StyledText
-	 */
-	public static void setTransparent(StyledText styledText) {
-		if (Platform.WS_COCOA.equals(Platform.getWS())) {
-			// MacOS has no default widget background in groups (JBIDE-16913)
-			styledText.setBackgroundImage(OpenShiftCommonImages.TRANSPARENT_PIXEL_IMG);
-		} else {
-			// RHEL 6.5 cannot display transparent pixels in images (neither
-			// png, gif, bmp, etc.)
-			// Win8 cannot display transparent pixels in images (JBIDE-18704)
-			styledText.setBackground(styledText.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		}
-	}
-	
 }

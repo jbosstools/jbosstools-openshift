@@ -38,6 +38,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.cartridge.ICartridge;
@@ -77,14 +78,14 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 			// nameLabel			
 			this.nameLabel = new StyledText(container, SWT.READ_ONLY);
-			UIUtils.setTransparent(nameLabel);
+			StyledTextUtils.setTransparent(nameLabel);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
 
 			// description
 			this.description = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			description.setAlwaysShowScrollBars(false);
-			UIUtils.setTransparent(description);
+			StyledTextUtils.setTransparent(description);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(description);
 			return container;
@@ -125,13 +126,13 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 			// name
 			this.name = new StyledText(container, SWT.READ_ONLY);
-			UIUtils.setTransparent(name);
+			StyledTextUtils.setTransparent(name);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
 			// url
 			this.url = new StyledText(container, SWT.WRAP | SWT.READ_ONLY);
-			UIUtils.setTransparent(url);
+			StyledTextUtils.setTransparent(url);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(url);
 
@@ -177,14 +178,14 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 			// name
 			this.name = new StyledText(container, SWT.READ_ONLY);
-			UIUtils.setTransparent(name);
+			StyledTextUtils.setTransparent(name);
 			GridDataFactory.fillDefaults()
 					.span(2,1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
 			// description
 			this.description = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			description.setAlwaysShowScrollBars(false);
-			UIUtils.setTransparent(description);
+			StyledTextUtils.setTransparent(description);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(description);
 

@@ -64,6 +64,4 @@ public class ExpressImages {
 	public static final Image SECURITY_UPDATES_IMG = repo.getImage("security-updates.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor NO_SECURITY_UPDATES = repo.create("no-security-updates.png"); //$NON-NLS-1$ 
 	public static final Image NO_SECURITY_UPDATES_IMG = repo.getImage("no-security-updates.png"); //$NON-NLS-1$ 
-	public static final ImageDescriptor TRANSPARENT_PIXEL = repo.create("transparent_pixel.png"); //$NON-NLS-1$ 
-	public static final Image TRANSPARENT_PIXEL_IMG = repo.getImage("transparent_pixel.png"); //$NON-NLS-1$}
 }

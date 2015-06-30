@@ -44,6 +44,7 @@ public class OpenShiftCommonImages {
 	public static final ImageDescriptor OK = repo.create("pficon-ok.png"); //$NON-NLS-1$ 
 	public static final Image OK_IMG = repo.getImage("pficon-ok.png"); //$NON-NLS-1$ 
 
+	public static final ImageDescriptor TRANSPARENT_PIXEL = repo.create("transparent_pixel.png"); //$NON-NLS-1$ 
 	public static final Image TRANSPARENT_PIXEL_IMG = repo.getImage("transparent_pixel.png"); //$NON-NLS-1$}
 
 	

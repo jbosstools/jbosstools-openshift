@@ -86,6 +86,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2Boolea
 import org.jboss.tools.openshift.internal.common.ui.databinding.MultiConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
@@ -570,7 +571,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				.setText("Your application will start with an exact copy of the code and configuration "
 						+ "provided in this Git repository instead of the default application.");
 		sourceCodeExplanationText.setEnabled(false);
-		UIUtils.setTransparent(sourceCodeExplanationText);
+		StyledTextUtils.setTransparent(sourceCodeExplanationText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
 		ValueBindingBuilder

@@ -54,7 +54,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 
 /**
  * @author Andre Dietisheim
@@ -99,14 +99,14 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 			// nameLink
 			this.nameText = new StyledText(container, SWT.READ_ONLY);
 			nameText.setAlwaysShowScrollBars(false);
-			UIUtils.setTransparent(nameText);
+			StyledTextUtils.setTransparent(nameText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
 			// summaryText
 			this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			descriptionText.setAlwaysShowScrollBars(false);
-			UIUtils.setTransparent(descriptionText);
+			StyledTextUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
 			return container;
@@ -147,14 +147,14 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 
 			// nameLink
 			this.nameText = new StyledText(container, SWT.READ_ONLY);
-			UIUtils.setTransparent(nameText);
+			StyledTextUtils.setTransparent(nameText);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
 
 			// summaryText
 			this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			descriptionText.setAlwaysShowScrollBars(false);
-			UIUtils.setTransparent(descriptionText);
+			StyledTextUtils.setTransparent(descriptionText);
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
 
@@ -301,7 +301,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 			// summaryText
 			this.summaryText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			summaryText.setAlwaysShowScrollBars(false);
-			UIUtils.setTransparent(summaryText);
+			StyledTextUtils.setTransparent(summaryText);
 			GridDataFactory.fillDefaults()
 					.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT).applyTo(summaryText);
 			return container;

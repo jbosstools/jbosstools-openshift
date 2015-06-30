@@ -51,7 +51,7 @@ import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUti
 import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 import com.openshift.client.cartridge.IEmbeddableCartridge;
@@ -104,7 +104,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 				.margins(6, 6).applyTo(descriptionGroup);
 		StyledText descriptionText = new StyledText(descriptionGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 		descriptionText.setAlwaysShowScrollBars(false);
-		UIUtils.setTransparent(descriptionText);
+		StyledTextUtils.setTransparent(descriptionText);
 		GridDataFactory.fillDefaults()
 				.hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionText);
 		dbc.bindSet(
