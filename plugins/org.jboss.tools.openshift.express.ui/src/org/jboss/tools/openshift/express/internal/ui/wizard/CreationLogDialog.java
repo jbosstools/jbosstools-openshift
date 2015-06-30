@@ -33,8 +33,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.BrowserUtil;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
+import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 
 /**
  * @author André Dietisheim
@@ -139,8 +140,8 @@ public class CreationLogDialog extends TitleAreaDialog {
 		}
 		appendTitle(logEntry.getName(), builder, styles);
 		appendLog(logEntry, builder, styles);
+		
 	}
-
 	private void appendLog(LogEntry logEntry, StringBuilder builder, List<StyleRange> styles) {
 		String log = logEntry.getLog();
 		if (logEntry.isTimeouted) {
@@ -171,19 +172,9 @@ public class CreationLogDialog extends TitleAreaDialog {
 						new UrlLink(linkStart, linkStop, url);
 				links.add(linkEntry);
 
-				StyleRange linkStyle = createLinkStyleRange(linkStart, linkStop);
+				StyleRange linkStyle = StyledTextUtils.createLinkStyle(linkStart, linkStop, getShell());
 				styles.add(linkStyle);
 			}
-	}
-
-	private StyleRange createLinkStyleRange(int start, int stop) {
-		StyleRange styleRange = new StyleRange();
-		styleRange.start = start;
-		styleRange.length = stop - start;
-		styleRange.fontStyle = SWT.UNDERLINE_LINK;
-		styleRange.underline = true;
-		styleRange.foreground = getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-		return styleRange;
 	}
 
 	private void appendTitle(String title, StringBuilder builder, List<StyleRange> styles) {

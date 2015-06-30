@@ -41,31 +41,24 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.LocationAdapter;
-import org.eclipse.swt.browser.LocationEvent;
-import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
@@ -77,7 +70,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringVa
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ClientFactory;
@@ -99,7 +92,6 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private IObservableValue rememberTokenObservable;
 	private IObservableValue authSchemeObservable;
 	private IAuthorizationDetails authDetails;
-	private Link tokenRequestLink;
 	private ConnectionWizardPageModel pageModel;
 	private Button chkRememberToken;
 
@@ -125,12 +117,15 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).spacing(10, 10).applyTo(composite);
 		
-		tokenRequestLink = new Link(composite, SWT.WRAP);
+		StyledText tokenRequestLink = new StyledText(composite, SWT.WRAP);
+		StyledTextUtils.setTransparent(tokenRequestLink);
+		StyledTextUtils.setLinkText(MSG_TOKEN, tokenRequestLink);
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(tokenRequestLink);
-		tokenRequestLink.setText(MSG_TOKEN);
-		tokenRequestLink.addSelectionListener(new AuthLinkHandler(parent.getShell(), authDetails));
-		
+		if(authDetails != null) {
+			authDetails.getRequestTokenLink();
+		}
+		tokenRequestLink.addListener(SWT.MouseDown, onRetrieveLinkClicked(parent.getShell()));
 		//token
 		Label lblAuthType = new Label(composite, SWT.NONE);
 		lblAuthType.setText("Token");
@@ -200,59 +195,49 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		return IAuthorizationContext.AUTHSCHEME_OAUTH;
 	}
 	
-	private class AuthLinkHandler extends SelectionAdapter{
-		private String link = "";
-		private Shell shell;
+	private Listener onRetrieveLinkClicked(final Shell shell) {
+		return new Listener() {
 
-		AuthLinkHandler(Shell shell, IAuthorizationDetails details){
-			this.shell = shell;
-			if(details != null) {
-				details.getRequestTokenLink();
-			}
-		}
-
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			if(!StringUtils.isBlank(link)) {
-				return;
-			}
-			if (StringUtils.isBlank(pageModel.getHost())) {
-				return;
-			}
-			
-			Job job = new AuthDetailsJob(pageModel.getHost());
-			job.addJobChangeListener(new JobChangeAdapter() {
-				@Override
-				public void done(final IJobChangeEvent event) {
-					if(event.getJob() instanceof AuthDetailsJob) {
-						shell.getDisplay().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								AuthDetailsJob job = (AuthDetailsJob)event.getJob();
-								final IAuthorizationDetails details = job.getDetails();
-								if(details != null) {
-									//TODO fix this to handle other authschemes
-									if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
-										MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
-										authSchemeObservable.setValue(details.getScheme());
-									}else {
-									    OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
-									    job.addJobChangeListener(dialog);
-									    dialog.open();
+			@Override
+			public void handleEvent(Event event) {
+				if (StringUtils.isBlank(pageModel.getHost())) {
+					return;
+				}
+				
+				Job job = new AuthDetailsJob(pageModel.getHost());
+				job.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(final IJobChangeEvent event) {
+						if(event.getJob() instanceof AuthDetailsJob) {
+							shell.getDisplay().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									AuthDetailsJob job = (AuthDetailsJob)event.getJob();
+									final IAuthorizationDetails details = job.getDetails();
+									if(details != null) {
+										//TODO fix this to handle other authschemes
+										if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
+											MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
+											authSchemeObservable.setValue(details.getScheme());
+										}else {
+										    OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
+										    job.addJobChangeListener(dialog);
+										    dialog.open();
+										}
 									}
 								}
-							}
-						});
+							});
+						}
 					}
-				}
-			});
-			try {
-				WizardUtils.runInWizard(job, wizard.getContainer());
-			} catch (InvocationTargetException | InterruptedException ex) {
-				showErrorDialog(shell,ex);
+				});
+				try {
+					WizardUtils.runInWizard(job, wizard.getContainer());
+				} catch (InvocationTargetException | InterruptedException ex) {
+					showErrorDialog(shell,ex);
+				}				
 			}
-		}
-
+			
+		};
 	}
 	
 	private void showErrorDialog(final Shell shell, final Throwable e) {

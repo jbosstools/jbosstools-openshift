@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
 import com.openshift.restclient.model.template.ITemplate;
@@ -76,7 +76,7 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 			this.txtDescription = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			txtDescription.setAlwaysShowScrollBars(false);
 			txtDescription.setWordWrap(true);
-			UIUtils.setTransparent(txtDescription);
+			StyledTextUtils.setTransparent(txtDescription);
 			GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.FILL)
 				.grab(true, true)
