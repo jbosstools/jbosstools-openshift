@@ -44,7 +44,7 @@ public class DeleteResourceJob extends AbstractDelegatingMonitorJob {
 			monitor.beginTask("Delete Resource", IProgressMonitor.UNKNOWN);
 			Connection connection = ConnectionsRegistryUtil.getConnectionFor(resource);
 			if(connection != null) {
-				connection.delete(resource);
+				connection.deleteResource(resource);
 				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
 			}
 			return Status.OK_STATUS;

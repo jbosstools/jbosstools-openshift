@@ -309,13 +309,26 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return client.getBaseURL().toString();
 	}
 
+	public <T extends IResource> T createResource(T resource) {
+		try {
+			if(client.getAuthorizationStrategy() == null) {
+				client.setAuthorizationStrategy(getAuthorizationStrategy());
+			}
+			return client.create(resource);
+		} catch (UnauthorizedException e) {
+			return retryCreate("Unauthorized.  Trying to reauthenticate", e, resource);
+		} catch (ResourceForbiddenException e) {
+			return retryCreate("Resource forbidden.  Trying to reauthenticate",e, resource);
+		}
+	}
+
 	/**
 	 * Get a list of resource types
 	 * 
 	 * @return List<IResource>
 	 * @throws OpenShiftException
 	 */
-	public <T extends IResource> List<T> get(String kind) {
+	public <T extends IResource> List<T> getResources(String kind) {
 		try {
 			if(client.getAuthorizationStrategy() == null) {
 				client.setAuthorizationStrategy(getAuthorizationStrategy());
@@ -357,6 +370,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		throw e;
 	}
 
+	private <T extends IResource>  T retryCreate(String message, OpenShiftException e, T resource){
+		OpenShiftCoreActivator.pluginLog().logInfo(message);
+		setToken(null);// token must be invalid, make sure not to try with
+		// cache
+		if (connect()) {
+			return client.create(resource);
+		}
+		throw e;
+	}
+
 	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind){
 		OpenShiftCoreActivator.pluginLog().logInfo(message);
 		setToken(null);// token must be invalid, make sure not to try with
@@ -374,7 +397,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @param resource
 	 * @throws OpenShiftException
 	 */
-	public void delete(IResource resource) {
+	public void deleteResource(IResource resource) {
 		client.delete(resource);
 	}
 

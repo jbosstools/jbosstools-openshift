@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 
 import java.util.Map;
 
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 
 /**
  * @author Martes G Wigglesworth

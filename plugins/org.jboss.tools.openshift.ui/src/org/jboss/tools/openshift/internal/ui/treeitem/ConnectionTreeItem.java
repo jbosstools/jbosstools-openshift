@@ -31,7 +31,7 @@ public class ConnectionTreeItem extends ObservableTreeItem {
 		if (!(getModel() instanceof Connection)) {
 			return Collections.emptyList();
 		}
-		return ((Connection) getModel()).get(ResourceKind.PROJECT);
+		return ((Connection) getModel()).getResources(ResourceKind.PROJECT);
 	}
 
 	@Override

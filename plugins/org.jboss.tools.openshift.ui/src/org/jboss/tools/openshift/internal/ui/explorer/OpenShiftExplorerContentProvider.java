@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.databinding.observable.Diffs;
+import org.eclipse.core.databinding.observable.list.ListDiff;
+import org.eclipse.core.databinding.observable.list.ListDiffVisitor;
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -56,14 +59,43 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
 			}else if(oldValue != null && newValue == null) {
 				//delete
-				IResource resource = (IResource)oldValue;
+				IResource resource = (IResource) oldValue;
 				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
 			}else {
 				refreshViewer(newValue);
 			}
+		}else if(ConnectionProperties.PROPERTY_PROJECTS.equals(property)){
+			handleProjectChanges((Connection) connection, oldValue, newValue);
 		}else{
 			super.handleConnectionChanged(connection, property, oldValue, newValue);
 		}
+	}
+	
+	//TODO: Handle updates to a project when needed.  Back-end doesnt support edit of resources(most?) now
+	@SuppressWarnings("unchecked")
+	private void handleProjectChanges(Connection connection, Object oldValue, Object newValue) {
+		List<IProject> newProjects = (List<IProject>) newValue;
+		List<IProject> oldProjects = (List<IProject>) oldValue;
+		final List<IProject> added = new ArrayList<IProject>();
+		final List<IProject> removed = new ArrayList<IProject>();
+		ListDiff diffs = Diffs.computeListDiff(oldProjects, newProjects);
+		diffs.accept(new ListDiffVisitor() {
+			
+			@Override
+			public void handleRemove(int index, Object element) {
+				IProject project = (IProject) element;
+				removed.add(project);
+				groupMap.remove(project);
+			}
+			
+			@Override
+			public void handleAdd(int index, Object element) {
+				IProject project = (IProject) element;
+				added.add(project);
+			}
+		});
+		removeChildrenFromViewer(connection, removed.toArray());
+		addChildrenToViewer(connection, added.toArray());
 	}
 	
 	@Override
@@ -100,7 +132,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
 			return registry.getAll(Connection.class).toArray();
 		} else if (parentElement instanceof Connection) {
-			return ((Connection) parentElement).get(ResourceKind.PROJECT).toArray();
+			return ((Connection) parentElement).getResources(ResourceKind.PROJECT).toArray();
 		} else {
 			return new Object[0];
 		}
@@ -114,7 +146,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		try{
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
-				return connection.get(ResourceKind.PROJECT).toArray();
+				return connection.getResources(ResourceKind.PROJECT).toArray();
 			} else if (parentElement instanceof IProject) {
 				IProject project = (IProject) parentElement;
 				List<ResourceGrouping> groups = new ArrayList<ResourceGrouping>(groupings.length);

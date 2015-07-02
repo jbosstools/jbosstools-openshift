@@ -32,9 +32,10 @@ public class LabelKeyValidator extends LabelValueValidator {
 			+ " with a maximum length of 63 characters, with the '-' character allowed anywhere except the first or last character. A domain is a sequence of names "
 			+ "separated by the '.' character with a maximum length of 253 characters.";
 	
+	private final IStatus FAILED = ValidationStatus.error(failureMessage);
+	
 	public LabelKeyValidator(Collection<String> readonlykeys) {
 		this.readonlykeys = readonlykeys != null ? readonlykeys : new ArrayList<String>(0);
-		FAILED = ValidationStatus.error(failureMessage);
 	}
 	
 	@Override
