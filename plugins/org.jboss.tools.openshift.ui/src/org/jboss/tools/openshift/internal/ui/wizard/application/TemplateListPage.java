@@ -54,7 +54,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 
 import com.openshift.restclient.ResourceFactoryException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.UnsupportedVersionException;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.ICapability;
@@ -467,6 +466,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		public IProject getProject() {
 			// TODO Auto-generated method stub
 			return null;
+		}
+
+		@Override
+		public void setAnnoation(String key, String value) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}

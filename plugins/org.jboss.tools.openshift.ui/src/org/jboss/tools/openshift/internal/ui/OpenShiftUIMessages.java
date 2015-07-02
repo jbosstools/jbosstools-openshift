@@ -8,16 +8,25 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.core.connection;
+package org.jboss.tools.openshift.internal.ui;
+
+import org.eclipse.osgi.util.NLS;
 
 /**
- * Property IDs for handling connection change events
- * 
+ * UI static message
  * @author jeff.cantrill
  *
  */
-public interface ConnectionProperties {
+public class OpenShiftUIMessages extends NLS {
+	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages"; //$NON-NLS-1$
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, OpenShiftUIMessages.class);
+	}
 	
-	static final String PROPERTY_RESOURCE = "openshift.resource";
-	static final String PROPERTY_PROJECTS = "openshift.projects";
+	private OpenShiftUIMessages() {
+	}
+	
+	public static String Name;
+	public static String DisplayName;
+	public static String Description;
 }

@@ -24,13 +24,11 @@ public class LabelKeyValidatorTest {
 	private static final IStatus PASS = ValidationStatus.ok();
 	
 	private LabelKeyValidator validator;
-	private IStatus FAIL;
 	
 	@Before
 	public void setup() {
 		Collection<String> readonly = Arrays.asList("readonlykey");
 		validator = new LabelKeyValidator(readonly);
-		FAIL = validator.getFailedStatus();
 	}
 	
 	@Test
@@ -100,17 +98,44 @@ public class LabelKeyValidatorTest {
 		assertPass("abcd.efgk-123/abc123");
 	}
 	
-	private void assertFailure(String value) {
-		assertEquals(FAIL, validator.validate(value));
-	}
-	
 	private void assertStatus(IStatus status, String value) {
 		assertEquals(status.getSeverity(), validator.validate(value).getSeverity());
 	}
 
-	private void assertPass(String value) {
-		assertEquals(PASS, validator.validate(value));
+	protected void assertFailure(String value) {
+		IStatus act = validator.validate(value);
+		assertEquals(String.format("Expected to receive ERROR status but got %s", getStatus(act.getSeverity())),IStatus.ERROR, act.getSeverity());
 	}
 
+	protected void assertCancel(String value) {
+		IStatus act = validator.validate(value);
+		assertEquals(String.format("CANCEL to receive ERROR status but got %s", getStatus(act.getSeverity())),IStatus.CANCEL, act.getSeverity());
+	}
+
+	protected void assertPass(String value) {
+		assertEquals(PASS, validator.validate(value));
+	}
+	
+	protected String getStatus(int severity) {
+		String status = null;
+		switch(severity) {
+		case IStatus.OK:
+			status = "OK";
+			break;
+		case IStatus.CANCEL:
+			status = "CANCEL";
+			break;
+		case IStatus.ERROR:
+			status = "ERROR";
+			break;
+		case IStatus.WARNING:
+			status = "WARNING";
+			break;
+		case IStatus.INFO:
+			status = "INFO";
+			break;
+		}
+		return status;
+	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,31 +8,33 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.ui.command;
+package org.jboss.tools.openshift.internal.ui.handler;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.common.ui.wizard.OkButtonWizardDialog;
-import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ManageSSHKeysWizard;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
 /**
- * @author Andre Dietisheim
+ * @author jeff.cantrill
  */
-public class ManageSSHKeysHandler extends AbstractHandler {
+public class ManageProjectsHandler extends AbstractHandler {
 
-	/**
-	 * the command has been executed, so extract extract the needed information
-	 * from the application context.
-	 */
+	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ExpressConnection.class);
-		if (connection != null) {
-			new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), new ManageSSHKeysWizard(connection)).open();
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		final Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+		if(connection == null) {
+			return null;
 		}
+		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event),
+				new ManageProjectsWizard(connection)).open();
 		return null;
 	}
+
 }

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.portforward;
 
-import org.jboss.tools.openshift.express.internal.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IApplication;
 

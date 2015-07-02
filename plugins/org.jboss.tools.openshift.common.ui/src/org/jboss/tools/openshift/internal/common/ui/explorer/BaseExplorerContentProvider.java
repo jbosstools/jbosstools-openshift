@@ -179,13 +179,37 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		job.schedule();
 		return stub;
 	}
-
-	protected void refreshViewer(final Object object) {
+	
+	private void asyncViewerRefresh(final Runnable runner) {
 		Control control = viewer.getControl();
 		if(control.isDisposed()) {
 			return;
 		}
-		control.getDisplay().asyncExec(new Runnable() {
+		control.getDisplay().asyncExec(runner);
+	}
+	
+	protected void addChildrenToViewer(final Object parent, final Object [] objects) {
+		asyncViewerRefresh(new Runnable() {
+			public void run() {
+				synchronized (viewer) {
+					viewer.add(parent,objects);
+				}
+			}
+		});
+	}
+
+	protected void removeChildrenFromViewer(final Object parent, final Object [] objects) {
+		asyncViewerRefresh(new Runnable() {
+			public void run() {
+				synchronized (viewer) {
+					viewer.remove(parent, objects);
+				}
+			}
+		});
+	}
+
+	protected void refreshViewer(final Object object) {
+		asyncViewerRefresh(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
 					if(object != null) {
