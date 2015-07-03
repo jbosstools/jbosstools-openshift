@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.Assert;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
@@ -448,6 +449,9 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	public boolean ownsResource(IResource resource) {
+		if (resource == null) {
+			return false;
+		}
 		IClient client =  resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
 
 			@Override
@@ -455,7 +459,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 				return capability.getClient();
 			}
 		}, null);
-		return this.client == client;
+		return ObjectUtils.equals(this.client, client);
 	}
 
 }

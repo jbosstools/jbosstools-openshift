@@ -266,20 +266,19 @@
 	</extension>
 
 	<!-- application wizard for connections -->
-	<!-- TODO: implement NewApplicationWizard so that it can react to connection changes -->
-	<!-- <extension
+	<extension
 		point="org.jboss.tools.openshift.ui.newApplicationWizard">
 		<newApplicationWizard
-			class="org.jboss.tools.openshift.internal.ui.wizard.application.NewApplicationWizard"
+			class="org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizard"
 			connection="org.jboss.tools.openshift.core.connection.Connection">
     	</newApplicationWizard>
-    </extension> -->
+    </extension>
     
 	<!-- import wizard application -->
 	<extension
 		point="org.jboss.tools.openshift.ui.importApplicationWizard">
 		<importApplicationWizard
-			class="org.jboss.tools.openshift.internal.ui.wizard.application.ImportApplicationWizard"
+			class="org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard"
 			connection="org.jboss.tools.openshift.core.connection.Connection">
     	</importApplicationWizard>
     </extension>

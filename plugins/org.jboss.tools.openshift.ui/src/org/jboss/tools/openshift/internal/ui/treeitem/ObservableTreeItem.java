@@ -22,16 +22,22 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
  * @author Andre Dietisheim
  *
  */
-public abstract class ObservableTreeItem extends ObservableUIPojo {
+public class ObservableTreeItem extends ObservableUIPojo {
 
 	public static final String PROPERTY_CHILDREN = "children";
 
 	private List<ObservableTreeItem> children = new ArrayList<>();
 
 	private Object model;
+	private IModelFactory factory;
 
 	public ObservableTreeItem(Object model) {
+		this(model, null);
+	}
+
+	public ObservableTreeItem(Object model, IModelFactory factory) {
 		this.model = model;
+		this.factory = factory;
 	}
 
 	public List<ObservableTreeItem> getChildren() {
@@ -55,7 +61,11 @@ public abstract class ObservableTreeItem extends ObservableUIPojo {
 	}
 
 	protected List<? extends Object> loadChildren() {
-		return Collections.emptyList();
+		if (factory != null) {
+			return factory.createChildren(model);
+		} else {
+			return Collections.emptyList();
+		}
 	}
 
 	protected List<ObservableTreeItem> createTreeItems(List<?> children) {
@@ -69,8 +79,9 @@ public abstract class ObservableTreeItem extends ObservableUIPojo {
 		return items;
 	}
 
-	abstract protected ObservableTreeItem createChildItem(Object model);
-
+	protected ObservableTreeItem createChildItem(Object model) {
+		return new ObservableTreeItem(model, this.factory);
+	}
 
 	@Override
 	public int hashCode() {

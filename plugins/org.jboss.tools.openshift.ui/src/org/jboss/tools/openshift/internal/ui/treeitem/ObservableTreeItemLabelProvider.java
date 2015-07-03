@@ -10,11 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.treeitem;
 
+import org.apache.commons.lang.ObjectUtils;
+import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
-import org.jboss.tools.openshift.internal.common.ui.viewer.GTK3WorkaroundStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 
 /**
@@ -23,7 +25,9 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
  * 
  * @author Andre Dietisheim
  */
-public class ObservableTreeItemLabelProvider extends GTK3WorkaroundStyledCellLabelProvider {
+public class ObservableTreeItemLabelProvider 
+	extends BaseLabelProvider 
+	implements IStyledLabelProvider, ILabelProvider {
 
 	private OpenShiftExplorerLabelProvider explorerLabelProvider;
 
@@ -32,34 +36,36 @@ public class ObservableTreeItemLabelProvider extends GTK3WorkaroundStyledCellLab
 	}
 
 	@Override
-	public void update(ViewerCell cell) {
-		Object element = cell.getElement();
-		if (!(element instanceof ObservableTreeItem)) {
-			return;
+	public Image getImage(Object element) {
+		if (element == null
+				|| !(element instanceof ObservableTreeItem)) {
+			return null;
 		}
-		ObservableTreeItem item = (ObservableTreeItem) element;
-		StyledString styledText = explorerLabelProvider.getStyledText(item.getModel());
-		cell.setText(styledText.getString());
-		cell.setStyleRanges(styledText.getStyleRanges());
-		Image image = explorerLabelProvider.getImage(item.getModel());
-		cell.setImage(image);
+		return explorerLabelProvider.getImage(((ObservableTreeItem) element).getModel());
 	}
 
 	@Override
-	public void addListener(ILabelProviderListener listener) {
-	}
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
+	public StyledString getStyledText(Object element) {
+		if (element == null) {
+			return null;
+		} else if (!(element instanceof ObservableTreeItem)) {
+			return new StyledString(ObjectUtils.toString(element));
+		}
+		return explorerLabelProvider.getStyledText(((ObservableTreeItem) element).getModel());
 	}
 
 	@Override
 	public void removeListener(ILabelProviderListener listener) {
+	}
+
+	@Override
+	public String getText(Object element) {
+		if (element == null) {
+			return null;
+		} else if (!(element instanceof ObservableTreeItem)) {
+			return ObjectUtils.toString(element);
+		}
+		return explorerLabelProvider.getText(((ObservableTreeItem) element).getModel());
 	}
 
 }

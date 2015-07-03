@@ -11,7 +11,7 @@ package org.jboss.tools.openshift.test.ui.application;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import org.jboss.tools.openshift.internal.ui.wizard.application.TemplateParameterColumnLabelProvider;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterColumnLabelProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

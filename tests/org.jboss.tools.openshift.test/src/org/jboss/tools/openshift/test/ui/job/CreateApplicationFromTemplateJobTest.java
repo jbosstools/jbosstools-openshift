@@ -16,7 +16,7 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
-import org.jboss.tools.openshift.internal.ui.wizard.application.IResourceLabelsPageModel.Label;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageModel.Label;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

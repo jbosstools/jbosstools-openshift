@@ -20,6 +20,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
+ org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
 Service-Component: META-INF/connectionFactory.xml
 

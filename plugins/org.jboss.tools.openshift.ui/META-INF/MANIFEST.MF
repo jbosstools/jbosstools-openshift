@@ -40,6 +40,6 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.property;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.property.build;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.validator;x-friends:="org.jboss.tools.openshift.test",
- org.jboss.tools.openshift.internal.ui.wizard.application;x-friends:="org.jboss.tools.openshift.test"
+ org.jboss.tools.openshift.internal.ui.wizard.newapp;x-friends:="org.jboss.tools.openshift.test"
 Import-Package: org.apache.commons.io,
  org.eclipse.jface.text

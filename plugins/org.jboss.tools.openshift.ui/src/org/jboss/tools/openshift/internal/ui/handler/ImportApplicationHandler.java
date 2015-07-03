@@ -16,7 +16,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.internal.ui.wizard.application.ImportApplicationWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
 /**
  * @author Andre Dietisheim

@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jboss.tools.openshift.internal.ui.wizard.application.IResourceLabelsPageModel;
-import org.jboss.tools.openshift.internal.ui.wizard.application.NewApplicationWizardModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,8 +49,12 @@ public class NewApplicationWizardModelTest {
 	
 	@Before
 	public void setup() throws Exception {
-		model = spy(new NewApplicationWizardModel(project, factory));
-		doReturn(mock(InputStream.class)).when(model).createInputStream(anyString());
+		NewApplicationWizardModel model = new NewApplicationWizardModel();
+		model.setProject(project);
+		model.setResourceFactory(factory);
+
+		this.model = spy(model);
+		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString());
 	}
 	
 	@Test

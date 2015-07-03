@@ -105,7 +105,7 @@ public abstract class AbstractStackedDetailViews {
 
 	protected IDetailView getViewFor(IObservableValue detailViewsModel, IDetailView... detailViews) {
 		Object value = detailViewsModel.getValue();
-		IDetailView view = emptyView;
+		IDetailView view = createControls(emptyView);
 
 		for(IDetailView detailView : detailViews) {
 			if (detailView.isViewFor(value)) {
@@ -118,6 +118,16 @@ public abstract class AbstractStackedDetailViews {
 			OpenShiftCommonCoreActivator.pluginLog().logWarning(NLS.bind("No view found to display value {0}", value));
 		}
 		
+		return view;
+	}
+	
+	private IDetailView createControls(IDetailView view) {
+		if (view == null) {
+			return null;
+		}
+		if (view.getControl() == null) {
+			view.createControls(parent, view, dbc);
+		}
 		return view;
 	}
 	

@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.securtiy.SecureStorageTest;
-import org.jboss.tools.openshift.test.ui.application.TemplateViewerFilterTest;
+import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
@@ -38,7 +38,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	TemplateViewerFilterTest.class,
+	TemplateFilterTest.class,
 	BuildConfigPropertySourceTest.class,
 	ConnectionPropertySourceTest.class,
 	ConnectionRegistryTest.class,
