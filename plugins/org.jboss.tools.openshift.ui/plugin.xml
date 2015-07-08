@@ -44,7 +44,7 @@
 		point="org.eclipse.ui.menus">
 		<!-- openshift explorer context menu: refresh resource -->
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
 			<command
 				commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
 				icon="icons/refresh.gif"
@@ -71,7 +71,7 @@
 		</menuContribution>
 		<!-- openshift explorer context menu: new connection -->
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
 			<command
 				commandId="org.jboss.tools.openshift.ui.command.resource.delete"
 				id="org.jboss.tools.openshift.ui.command.resource.delete"
@@ -142,6 +142,31 @@
         </visibleWhen>
      </command>
   </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.portforwarding"
+           id="org.jboss.tools.openshift.ui.explorer.command.portforwarding"
+           tooltip="The openshift binary must be set in user preferences in order to use port forwarding">
+			<visibleWhen>
+				<with
+					variable="selection">
+					<and>
+						<count
+							value="1">
+						</count>
+		                <iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.restclient.model.IPod" />
+						</iterate>
+					</and>
+				</with>
+			</visibleWhen>
+     </command>
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -161,6 +186,10 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.RefreshResourceHandler"
 			commandId="org.jboss.tools.openshift.ui.command.resource.refresh">
 		</handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.PortForwardingHandler"
+        commandId="org.jboss.tools.openshift.ui.command.portforwarding">
+  </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -222,6 +251,10 @@
 			id="org.jboss.tools.openshift.ui.command.resource.refresh"
 			name="Refresh">
 		</command>
+  <command
+        id="org.jboss.tools.openshift.ui.command.portforwarding"
+        name="%openshift.command.application.portforwarding">
+  </command>
 	</extension>
 
 	<!-- editor for express connections -->
@@ -341,5 +374,14 @@
 			</command>
         </menuContribution>
     </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          category="org.jboss.tools.common.model.ui.MainPreferencePage"
+          class="org.jboss.tools.openshift.internal.ui.preferences.OpenShiftPreferencePage"
+          id="org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage"
+          name="%openshift.preferences.page.title">
+    </page>
+ </extension>
     
 </plugin>

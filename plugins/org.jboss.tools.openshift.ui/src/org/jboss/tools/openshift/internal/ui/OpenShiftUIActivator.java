@@ -13,11 +13,15 @@ package org.jboss.tools.openshift.internal.ui;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback;
 import org.osgi.framework.BundleContext;
 
@@ -28,6 +32,8 @@ public class OpenShiftUIActivator extends BaseUIPlugin{
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
 
 	private static OpenShiftUIActivator plugin;
+
+	private IPreferenceStore corePreferenceStore;
 	
 	public OpenShiftUIActivator() {
 	}
@@ -71,4 +77,17 @@ public class OpenShiftUIActivator extends BaseUIPlugin{
 			throw new OpenShiftException(e,"Exception trying to load plugin file: {0}", file) ;
 		}
 	}
+	
+	/**
+	 * Retrieve the preferencestore
+	 * @return 
+	 */
+    public IPreferenceStore getCorePreferenceStore() {
+        // Create the preference store lazily.
+        if (corePreferenceStore == null) {
+        	this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, OpenShiftCoreActivator.PLUGIN_ID);
+
+        }
+        return corePreferenceStore;
+    }
 }

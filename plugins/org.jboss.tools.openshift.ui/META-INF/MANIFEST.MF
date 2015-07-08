@@ -27,13 +27,16 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.apache.commons.io;bundle-version="2.0.1",
  org.eclipse.jface.text;bundle-version="3.10.0",
  org.apache.httpcomponents.httpclient,
- org.apache.commons.collections;bundle-version="3.2.0"
+ org.apache.commons.collections;bundle-version="3.2.0",
+ org.eclipse.ui.console;bundle-version="3.6.0",
+ org.eclipse.jdt.launching;bundle-version="3.8.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.handler;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.job;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.portforwading;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.property;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.property.build;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.validator;x-friends:="org.jboss.tools.openshift.test",

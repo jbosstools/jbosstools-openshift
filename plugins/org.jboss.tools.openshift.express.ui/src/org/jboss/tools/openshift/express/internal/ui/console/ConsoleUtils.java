@@ -20,22 +20,13 @@ import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleListener;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.ide.eclipse.as.ui.UIUtil;
 import org.jboss.tools.openshift.express.core.IConsoleUtility;
 import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
 
@@ -48,26 +39,12 @@ import com.openshift.client.IApplication;
 public class ConsoleUtils implements IConsoleUtility {
 
 	/**
-	 * Constant key set into the created message console attributes to mark the
-	 * given console as an 'openshift' one.
-	 */
-	public static final String CONSOLE_TYPE_KEY = "ConsoleType";
-
-	/**
-	 * Constant value set into the created message console attributes to mark
-	 * the given console as an 'openshift' one.
-	 */
-	public static final String CONSOLE_TYPE_VALUE = "OpenShiftTailConsole";
-
-	/**
 	 * Registers the given listener as a console listener.
 	 * 
 	 * @param consoleListener
 	 */
 	public static void registerConsoleListener(IConsoleListener consoleListener) {
-		ConsolePlugin plugin = ConsolePlugin.getDefault();
-		IConsoleManager consoleManager = plugin.getConsoleManager();
-		consoleManager.addConsoleListener(consoleListener);
+		org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils.registerConsoleListener(consoleListener);
 	}
 
 	/**
@@ -82,19 +59,7 @@ public class ConsoleUtils implements IConsoleUtility {
 	 * @return the message console (found or created)
 	 */
 	public static MessageConsole findMessageConsole(String name) {
-		ConsolePlugin plugin = ConsolePlugin.getDefault();
-		IConsoleManager consoleManager = plugin.getConsoleManager();
-		IConsole[] existing = consoleManager.getConsoles();
-		for (int i = 0; i < existing.length; i++) {
-			if (name.equals(existing[i].getName())) {
-				return (MessageConsole) existing[i];
-			}
-		}
-		// no console found, so create a new one
-		MessageConsole console = new MessageConsole(name, null);
-		console.setAttribute(CONSOLE_TYPE_KEY, CONSOLE_TYPE_VALUE);
-		consoleManager.addConsoles(new IConsole[] { console });
-		return console;
+		return org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils.findMessageConsole(name);
 	}
 
 	public static void displayConsoleView(IServer server) {
@@ -133,30 +98,7 @@ public class ConsoleUtils implements IConsoleUtility {
 	 * @param console the console to display
 	 */
 	public static void displayConsoleView(final IConsole console) {
-		UIUtils.ensureDisplayExec(new Runnable() {
-
-			@Override
-			public void run() {
-				IWorkbenchPart part = null;
-				try {
-					part = UIUtil.bringViewToFront(IConsoleConstants.ID_CONSOLE_VIEW);
-					if (part == null) {
-						Logger.warn("Could not open console, " + IConsoleConstants.ID_CONSOLE_VIEW + " was not found");
-						return;
-					}
-					final IConsoleView view = (IConsoleView) part.getAdapter(IConsoleView.class);
-					if (view == null) {
-						return;
-					}
-					view.display(console);
-				} catch (PartInitException e) {
-					Logger.warn("Could not open console view", e);
-				}
-
-				
-			}
-			
-		});
+		org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils.displayConsoleView(console);
 	}
 	
 	public static OutputStream getConsoleOutputStream(IServer server) {
