@@ -29,6 +29,7 @@ public class OpenShiftCorePreferences {
 	private final StringsPreferenceValue connectionsPreferenceValue = 
 			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
 
+
 	private OpenShiftCorePreferences() {
 	}
 

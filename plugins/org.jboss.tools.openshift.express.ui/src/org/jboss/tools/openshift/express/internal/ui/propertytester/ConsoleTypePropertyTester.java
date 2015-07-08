@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.propertytester;
 
-import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.CONSOLE_TYPE_KEY;
-import static org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils.CONSOLE_TYPE_VALUE;
+import static org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils.CONSOLE_TYPE_KEY;
+import static org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils.CONSOLE_TYPE_VALUE;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.ui.console.MessageConsole;
