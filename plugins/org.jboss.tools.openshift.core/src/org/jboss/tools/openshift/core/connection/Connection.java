@@ -37,11 +37,9 @@ import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.BasicAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.IAuthorizationStrategy;
-import com.openshift.restclient.authorization.ResourceForbiddenException;
 import com.openshift.restclient.authorization.TokenAuthorizationStrategy;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -230,13 +228,14 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	private IAuthorizationStrategy getAuthorizationStrategy() {
 		final String scheme = getAuthScheme();
-		if(IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
-			return new TokenAuthorizationStrategy(getToken());
+		final String token = getToken();
+		if(org.apache.commons.lang.StringUtils.isNotEmpty(token) || IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
+			return new TokenAuthorizationStrategy(token); //always use the token if you have one?
 		}
 		if(IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)){
 			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
 		}
-		throw new OpenShiftException("Authschme '%s' is not supported.", scheme);
+		throw new OpenShiftException("Authscheme '%s' is not supported.", scheme);
 	}
 
 	public void setAuthScheme(String scheme) {
@@ -317,8 +316,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			return client.create(resource);
 		} catch (UnauthorizedException e) {
 			return retryCreate("Unauthorized.  Trying to reauthenticate", e, resource);
-		} catch (ResourceForbiddenException e) {
-			return retryCreate("Resource forbidden.  Trying to reauthenticate",e, resource);
 		}
 	}
 
@@ -336,8 +333,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			return client.list(kind);
 		} catch (UnauthorizedException e) {
 			return retryList("Unauthorized.  Trying to reauthenticate", e, kind);
-		} catch (ResourceForbiddenException e) {
-			return retryList("Resource forbidden.  Trying to reauthenticate",e, kind);
 		}
 	}
 
@@ -355,8 +350,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
 			return retryGet("Unauthorized.  Trying to reauthenticate", e, resource);
-		} catch (ResourceForbiddenException e) {
-			return retryGet("Resource forbidden.  Trying to reauthenticate",e, resource);
 		}
 	}
 	
