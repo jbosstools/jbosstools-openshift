@@ -52,6 +52,13 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		this.labelProvider = labelProvider;
 		this.contentProvider = contetProvider;
 	}
+	
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+
+
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -72,7 +79,10 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createTable(dialogArea);
 		viewer.setInput(resources);
-
+		
+		//hook for subclassing
+		createAreaAfterResourceSummary(parent);
+		
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
@@ -80,10 +90,19 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		return dialogArea;
 	}
 	
+	/**
+	 * Hook to allow sublcasses to add content
+	 * @param  parent   the dialog area to which the tree viewer is added
+	 */
+	protected void createAreaAfterResourceSummary(Composite parent) {
+	}
+	
 	private TreeViewer createTable(Composite parent) {
 		Composite tableContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
-		.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+			.align(SWT.FILL, SWT.FILL)
+			.grab(true, true)
+			.hint(400, 300).applyTo(tableContainer);
 
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		tableContainer.setLayout(treeLayout);

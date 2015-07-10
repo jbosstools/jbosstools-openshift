@@ -81,7 +81,7 @@ public class NewApplicationWizard extends Wizard implements IConnectionAwareWiza
 						@Override
 						public void run() {
 							final String message = NLS.bind("Results of creating the resources from the {0} template.", model.getTemplate().getName());
-							new ResourceSummaryDialog(getShell(), createJob.getResources(), "Create Application Summary",message, new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider()).open();
+							new NewApplicationSummaryDialog(getShell(), createJob, message).open();
 						}
 					});
 				}

@@ -8,7 +8,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.application;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -34,6 +33,7 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICellToolTipProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
@@ -100,12 +100,24 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		resetButton.addSelectionListener(onReset());
 	}
 	
-	protected TableViewer createTable(Composite tableContainer) {
+	public static TableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		this.viewer = new TableViewerBuilder(table, tableContainer)
+		ICellToolTipProvider<IParameter> cellToolTipProvider = new ICellToolTipProvider<IParameter>() {
+
+			@Override
+			public String getToolTipText(IParameter object) {
+				return object.getDescription();
+			}
+
+			@Override
+			public int getToolTipDisplayDelayTime(IParameter object) {
+				return 0;
+			}
+		};
+		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
 				.contentProvider(new ArrayContentProvider())
 				.column(new IColumnLabelProvider<IParameter>() {
 					@Override
@@ -113,16 +125,11 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 						return variable.getName();
 					}
 				})
+					.cellToolTipProvider(cellToolTipProvider)
 					.name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
 				.column(new TemplateParameterColumnLabelProvider())
+					.cellToolTipProvider(cellToolTipProvider)
 					.name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.column(new IColumnLabelProvider<IParameter>() {
-						@Override
-						public String getValue(IParameter variable) {
-							return StringUtils.defaultIfEmpty("", variable.getDescription());
-						}
-					})
-					.name("Description").align(SWT.LEFT).minWidth(100).buildColumn()
 				.buildViewer();
 		viewer.setComparator(new ViewerComparator() {
 

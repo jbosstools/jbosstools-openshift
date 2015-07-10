@@ -9,6 +9,7 @@
 package org.jboss.tools.openshift.internal.ui.job;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -61,6 +62,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 				
 				try {
 					ITemplate processed = capability.process(template);
+					parameters = processed.getParameters().values();
 					
 					resources = capability.apply(processed);
 					return handleResponse(resources);
@@ -78,6 +80,18 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 		
 		return status;
 	}
+	
+	/**
+	 * Get the list of parameters for this Job.  
+	 * The values
+	 * will have changed if the parameter is generated and 
+	 * has been processed by the server.
+	 * @return
+	 */
+	public Collection<IParameter> getParameters(){
+		return parameters;
+	}
+	
 	
 	@Override
 	public Collection<IResource> getResources(){
