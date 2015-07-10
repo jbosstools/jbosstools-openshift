@@ -469,7 +469,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		}
 
 		@Override
-		public void setAnnoation(String key, String value) {
+		public void setAnnotation(String key, String value) {
 			// TODO Auto-generated method stub
 			
 		}
