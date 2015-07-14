@@ -221,7 +221,16 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 			}
 		});
 	}
-
+	
+	protected void expand(final Object element, final int level) {
+		viewer.getControl().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				viewer.expandToLevel(element, level);
+			}
+		});
+	}
+	
 	@Override
 	public Object getParent(Object element) {
 		return null;

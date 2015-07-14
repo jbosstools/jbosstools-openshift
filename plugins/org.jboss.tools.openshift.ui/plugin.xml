@@ -120,6 +120,56 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.startbuild"
+		         id="org.jboss.tools.openshift.ui.explorer.command.startbuild">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false"
+		                     operator="and">
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IBuildConfig">
+		                  </instanceof>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.clonebuild"
+		         id="org.jboss.tools.openshift.ui.explorer.command.clonebuild">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false"
+		                     operator="and">
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IBuild">
+		                  </instanceof>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+		</menuContribution>
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
@@ -186,10 +236,18 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.RefreshResourceHandler"
 			commandId="org.jboss.tools.openshift.ui.command.resource.refresh">
 		</handler>
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.handler.PortForwardingHandler"
-        commandId="org.jboss.tools.openshift.ui.command.portforwarding">
-  </handler>
+	  <handler
+	        class="org.jboss.tools.openshift.internal.ui.handler.PortForwardingHandler"
+	        commandId="org.jboss.tools.openshift.ui.command.portforwarding">
+	  </handler>
+	  <handler
+	        class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
+	        commandId="org.jboss.tools.openshift.ui.command.startbuild">
+	  </handler>
+	  <handler
+	        class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
+	        commandId="org.jboss.tools.openshift.ui.command.clonebuild">
+	  </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -251,10 +309,18 @@
 			id="org.jboss.tools.openshift.ui.command.resource.refresh"
 			name="Refresh">
 		</command>
-  <command
-        id="org.jboss.tools.openshift.ui.command.portforwarding"
-        name="%openshift.command.application.portforwarding">
-  </command>
+	  <command
+	        id="org.jboss.tools.openshift.ui.command.portforwarding"
+	        name="%openshift.command.application.portforwarding">
+	  </command>
+	  <command
+	        id="org.jboss.tools.openshift.ui.command.startbuild"
+	        name="%openshift.command.build.startbuild">
+	  </command>
+	  <command
+	        id="org.jboss.tools.openshift.ui.command.clonebuild"
+	        name="%openshift.command.build.clonebuild">
+	  </command>
 	</extension>
 
 	<!-- editor for express connections -->

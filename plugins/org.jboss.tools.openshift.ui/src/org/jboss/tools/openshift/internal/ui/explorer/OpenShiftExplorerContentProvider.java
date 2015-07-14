@@ -57,6 +57,8 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				//add
 				IResource resource = (IResource)newValue;
 				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
+				ResourceGrouping group = getResourceGrouping(groupMap.get(resource.getProject()), resource.getKind());
+				expand(group, 1);
 			}else if(oldValue != null && newValue == null) {
 				//delete
 				IResource resource = (IResource) oldValue;
@@ -114,12 +116,19 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 
 
 	private void refreshGrouping(List<ResourceGrouping> groupings, String kind) {
+		ResourceGrouping group = getResourceGrouping(groupings, kind);
+		if(group != null) {
+			group.refresh();
+		}
+	}
+	
+	private ResourceGrouping getResourceGrouping(List<ResourceGrouping> groupings, String kind) {
 		for (ResourceGrouping group : groupings) {
 			if(kind.equals(group.getKind())){
-				group.refresh();
-				break;
+				return group;
 			}
 		}
+		return null;
 	}
 
 	/**
