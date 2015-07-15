@@ -1,5 +1,9 @@
 package org.jboss.tools.openshift.internal.ui.treeitem;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.core.databinding.conversion.Converter;
 
 public class ObservableTreeItem2ModelConverter extends Converter {
@@ -20,4 +24,17 @@ public class ObservableTreeItem2ModelConverter extends Converter {
 			return ((ObservableTreeItem) fromObject).getModel();
 		}
 	}
+
+	public <T> List<T> convert(List<ObservableTreeItem> items) {
+		if (items == null
+				|| items.size() == 0) {
+			return Collections.emptyList();
+		}
+		ArrayList<T> models = new ArrayList<T>();
+		for (ObservableTreeItem item : items) {
+			models.add((T) item.getModel());
+		}
+		return models;
+	}
+
 }

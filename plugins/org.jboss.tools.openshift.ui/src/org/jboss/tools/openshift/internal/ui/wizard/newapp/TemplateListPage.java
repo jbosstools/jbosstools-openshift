@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
@@ -65,6 +66,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
@@ -80,6 +82,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelCo
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
 import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.UnsupportedVersionException;
@@ -511,6 +514,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
+		if (!model.hasProjects()) {
+			List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjects());
+			Connection connection = model.getConnection();
+			if (Dialog.CANCEL == 
+					WizardUtils.openWizardDialog(new NewProjectWizard(connection, projects), getShell())) {
+				WizardUtils.close(getWizard());
+				return;
+			}
+		}
 		loadResources(model);
 		// fix GTK3 combo boxes too small
 		// https://issues.jboss.org/browse/JBIDE-16877,

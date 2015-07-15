@@ -88,5 +88,7 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	IProject getProject();
 	
 	List<ObservableTreeItem> getProjects();
+
+	boolean hasProjects();
 	
 }

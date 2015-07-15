@@ -315,9 +315,16 @@ public class NewApplicationWizardModel
 	}
 	
 	@Override
+	public boolean hasProjects() {
+		return projects != null 
+				&& projects.size() > 0;
+	}
+
+	@Override
 	public Object getContext() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 }
