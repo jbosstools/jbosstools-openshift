@@ -36,6 +36,7 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -48,23 +49,28 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
@@ -73,6 +79,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCellLabelProvider;
+import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
 import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.UnsupportedVersionException;
@@ -126,7 +133,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		StructuredViewer projectsViewer = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(projectsViewer.getControl());
 
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
@@ -158,10 +165,50 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		BeanProperties.value(ITemplateListPageModel.PROPERTY_CONNECTION).observe(model)
 				.addValueChangeListener(onConnectionChanged());
 
+		StyledText manageProjectsLink = new StyledText(parent, SWT.WRAP);
+		StyledTextUtils.setTransparent(manageProjectsLink);
+		StyledTextUtils.setLinkText("<a>Manage Projects</a>", manageProjectsLink);
+		GridDataFactory.fillDefaults()
+			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
+			.applyTo(manageProjectsLink);
+		manageProjectsLink.addListener(SWT.MouseDown, onManageProjectsClicked());
+		
 		Label filler = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).span(3, 1)
 			.applyTo(filler);
+	}
+
+	private Listener onManageProjectsClicked() {
+		return new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				try {
+					// run in job to enforce busy cursor which doesnt work otherwise
+					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							return Status.OK_STATUS;
+						}
+
+						@Override
+						protected IStatus updateUI(IProgressMonitor monitor) {
+							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
+							if(Dialog.OK == new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open()) {
+								model.setProject(manageProjectsWizard.getSelectedProject());
+							};
+							return Status.OK_STATUS;
+						}
+						
+											
+					}, getContainer());
+				} catch (InvocationTargetException | InterruptedException e) {
+					// swallow intentionnally
+				}
+			}
+		};
 	}
 
 	private void createUploadControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
@@ -193,7 +240,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
 		btnBrowseFiles.setText("Browse...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).grab(false, false)
+				.align(SWT.LEFT, SWT.CENTER).hint(120, SWT.DEFAULT).indent(6, 0)
 				.applyTo(btnBrowseFiles);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnBrowseFiles))

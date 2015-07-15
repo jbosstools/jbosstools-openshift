@@ -18,6 +18,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.common.ui.wizard.OkButtonWizardDialog;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
 /**
@@ -30,7 +31,7 @@ public class ManageProjectsHandler extends AbstractHandler {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		final Connection connection = UIUtils.getFirstElement(selection, Connection.class);
 		if(connection == null) {
-			return null;
+			return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected that we can manage projects for.");
 		}
 		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event),
 				new ManageProjectsWizard(connection)).open();
