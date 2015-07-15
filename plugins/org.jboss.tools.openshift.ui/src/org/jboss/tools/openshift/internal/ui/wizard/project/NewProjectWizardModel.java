@@ -22,6 +22,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.project.IProjectRequest;
 
 /**
  * @author jeff.cantrill
@@ -49,12 +50,12 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project, missing connection.");
 			return;
 		}
-		IProject project = connection.getResourceFactory().stub(ResourceKind.PROJECT, getProjectName());
-		project.setDescription(getDescription());
-		project.setDisplayName(getDisplayName());
-		project = connection.createResource(project);
+		IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, getProjectName());
+		request.setDescription(getDescription());
+		request.setDisplayName(getDisplayName());
+		IProject project = (IProject)connection.createResource(request);
 		List<IProject> newProjects = new ArrayList<IProject>(projects);
-		newProjects.add(project);
+		newProjects.add((IProject)connection.getResource(project));
 		
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
 				connection, 
