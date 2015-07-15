@@ -23,6 +23,7 @@ import com.openshift.restclient.model.IProject;
 public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjectsWizardPageModel> {
 
 	private String description;
+	private ManageProjectsWizardPage manageProjectsWizardPage;
 
 	public ManageProjectsWizard(Connection connection) {
 		this(null, connection);
@@ -31,6 +32,7 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 	public ManageProjectsWizard(IProject project, Connection connection) {
 		super("OpenShift Projects", new ManageProjectsWizardPageModel(project, connection));
 		this.description = NLS.bind("Manage projects for connection {0}", connection.toString(), connection);
+		setNeedsProgressMonitor(true);
 	}
 
 	@Override
@@ -40,7 +42,14 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 	
 	@Override
 	public void addPages() {
-		addPage(new ManageProjectsWizardPage(getWindowTitle(), description, getModel(), this));
+		addPage(this.manageProjectsWizardPage = new ManageProjectsWizardPage(getWindowTitle(), description, getModel(), this));
+	}
+	
+	public IProject getSelectedProject() {
+		if (manageProjectsWizardPage == null) {
+			return null;
+		}
+		return manageProjectsWizardPage.getSelectedProject();
 	}
 
 }

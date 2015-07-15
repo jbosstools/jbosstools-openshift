@@ -42,7 +42,7 @@ public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 	private NewProjectWizardModel model;
 
 	public NewProjectWizardPage(NewProjectWizardModel model, IWizard wizard) {
-		this("New OpenShift Project", "Please enter the project information", model, wizard);
+		this("New OpenShift Project", "Please provide name, display name and description", model, wizard);
 	}
 
 	protected NewProjectWizardPage(String title, String description, NewProjectWizardModel model, IWizard wizard) {
