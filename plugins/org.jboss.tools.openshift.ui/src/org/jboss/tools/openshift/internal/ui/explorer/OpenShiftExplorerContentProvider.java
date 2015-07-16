@@ -116,6 +116,10 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 
 
 	private void refreshGrouping(List<ResourceGrouping> groupings, String kind) {
+		if (groupings == null
+				|| groupings.size() == 0) {
+			return;
+		}
 		ResourceGrouping group = getResourceGrouping(groupings, kind);
 		if(group != null) {
 			group.refresh();
@@ -123,6 +127,10 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	}
 	
 	private ResourceGrouping getResourceGrouping(List<ResourceGrouping> groupings, String kind) {
+		if (groupings == null
+				|| groupings.size() == 0) {
+			return null;
+		}
 		for (ResourceGrouping group : groupings) {
 			if(kind.equals(group.getKind())){
 				return group;
