@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.project;
 
+import java.util.List;
+
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -52,4 +54,7 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 		return manageProjectsWizardPage.getSelectedProject();
 	}
 
+	public List<IProject> getProjects() {
+		return manageProjectsWizardPage.getProjects();
+	}
 }
