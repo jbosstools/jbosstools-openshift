@@ -63,10 +63,13 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
@@ -142,7 +145,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
 		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
 		projectsViewer.setInput(
-				BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECTS).observe(model));
+				BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
 
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding = 
@@ -200,11 +203,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						protected IStatus updateUI(IProgressMonitor monitor) {
 							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
 							if(Dialog.OK == new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open()) {
-								model.setProject(manageProjectsWizard.getSelectedProject());
+								IProject selectedProject = manageProjectsWizard.getSelectedProject();
+								if (selectedProject != null) {
+									model.setProject(selectedProject);
+								}
 							};
+							// reload projects to reflect changes that happened in projects wizard
+							loadResources(templatesViewer, model);
 							return Status.OK_STATUS;
 						}
-						
 											
 					}, getContainer());
 				} catch (InvocationTargetException | InterruptedException e) {
@@ -371,7 +378,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		TreeViewer viewer = new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
 				new IListProperty[] { 
-						BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECTS), 
+						BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS), 
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 		ObservableListTreeContentProvider contentProvider = new ObservableListTreeContentProvider(
 				childrenProperty.listFactory(), null);
@@ -480,33 +487,49 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override 
 			public void handleValueChange(ValueChangeEvent event) {
-				loadResources(model);
+				loadResources(templatesViewer, model);
 				templatesViewer.expandAll();
 			}
 		};
 	}
 
-	private void loadResources(final ITemplateListPageModel model) {
+	private void loadResources(final TreeViewer templatesViewer, final ITemplateListPageModel model) {
 		if (!model.hasConnection()) {
 			return;
 		}
 		try {
-			Job loadJob = new UIUpdatingJob("Loading projects, templates...") {
+			Job jobs = new JobChainBuilder(
+					new AbstractDelegatingMonitorJob("Loading projects, templates...") {
 
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					model.loadResources();
-					return Status.OK_STATUS;
-				}
-				
-				@Override
-				protected IStatus updateUI(IProgressMonitor monitor) {
-					templatesViewer.expandAll();
-					return Status.OK_STATUS;
-				}
+						@Override
+						protected IStatus doRun(IProgressMonitor monitor) {
+							model.loadResources();
+							return Status.OK_STATUS;
+						}
+					}).runWhenSuccessfullyDone(new UIJob("Verifying required project...") {
 
-			};
-			WizardUtils.runInWizard(loadJob, getContainer());
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							if(!model.hasProjects()) {
+								List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
+								Connection connection = model.getConnection();
+								if (Dialog.CANCEL == 
+										WizardUtils.openWizardDialog(new NewProjectWizard(connection, projects), getShell())) {
+									WizardUtils.close(getWizard());
+									return Status.CANCEL_STATUS;
+								}
+							}
+							return Status.OK_STATUS;
+						}
+					}).runWhenSuccessfullyDone(new UIJob("Expanding resource tree...") {
+
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							templatesViewer.expandAll();
+							return Status.OK_STATUS;
+						}
+					}).build();
+			WizardUtils.runInWizard(jobs, getContainer());
 		} catch (InvocationTargetException | InterruptedException e) {
 			// intentionnally swallowed
 		}
@@ -514,16 +537,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		if (!model.hasProjects()) {
-			List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjects());
-			Connection connection = model.getConnection();
-			if (Dialog.CANCEL == 
-					WizardUtils.openWizardDialog(new NewProjectWizard(connection, projects), getShell())) {
-				WizardUtils.close(getWizard());
-				return;
-			}
-		}
-		loadResources(model);
+		loadResources(templatesViewer, model);
 		// fix GTK3 combo boxes too small
 		// https://issues.jboss.org/browse/JBIDE-16877,
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425

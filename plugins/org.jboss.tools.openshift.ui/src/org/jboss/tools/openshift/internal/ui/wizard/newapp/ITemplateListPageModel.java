@@ -28,7 +28,7 @@ import com.openshift.restclient.model.template.ITemplate;
 public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	
 	static final String PROPERTY_PROJECT = "project";
-	static final String PROPERTY_PROJECTS = "projects";
+	static final String PROPERTY_PROJECT_ITEMS = "projectItems";
 	static final String PROPERTY_TEMPLATE = "template";
 	static final String PROPERTY_TEMPLATES = "templates";
 	static final String PROPERTY_TEMPLATE_FILENAME = "templateFileName";
@@ -87,7 +87,7 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 
 	IProject getProject();
 	
-	List<ObservableTreeItem> getProjects();
+	List<ObservableTreeItem> getProjectItems();
 
 	boolean hasProjects();
 	
