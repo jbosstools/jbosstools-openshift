@@ -50,7 +50,7 @@ public class NewApplicationWizardModel
 
 	private Connection connection;
 	private IProject project;
-	private List<ObservableTreeItem> projects = new ArrayList<>();
+	private List<ObservableTreeItem> projectItems = new ArrayList<>();
 	private ITemplate template;
 	private ITemplate uploadedTemplate;
 	private List<IParameter> parameters = new ArrayList<IParameter>();
@@ -64,12 +64,24 @@ public class NewApplicationWizardModel
 	private String templateFilename;
 	private IResourceFactory resourceFactory;
 
-	private void update(boolean useUploadTemplate, IProject selectedProject, List<ObservableTreeItem> projects, ITemplate selectedTemplate) {
+	private void update(boolean useUploadTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate selectedTemplate) {
 		firePropertyChange(PROPERTY_USE_UPLOAD_TEMPLATE, this.uploadTemplate, this.uploadTemplate = useUploadTemplate);
-		firePropertyChange(PROPERTY_PROJECTS, Collections.emptyList(), Collections.unmodifiableList(this.projects));
-		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projects));
+		updateProjectItems(projectItems);
+		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projectItems));
 		firePropertyChange(PROPERTY_TEMPLATE, this.template, this.template = selectedTemplate);
 		initTemplateParameters(selectedTemplate);
+	}
+	
+	private void updateProjectItems(List<ObservableTreeItem> projectItems) {
+		List<ObservableTreeItem> oldItems = new ArrayList<>(this.projectItems);
+		// ensure we're not operating on the same list
+		List<ObservableTreeItem> newItems = new ArrayList<>();
+		if (projectItems != null) {
+			newItems.addAll(projectItems);
+		}
+		this.projectItems.clear();
+		this.projectItems.addAll(newItems);
+		firePropertyChange(PROPERTY_PROJECT_ITEMS, oldItems, this.projectItems);
 	}
 	
 	@Override
@@ -83,7 +95,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setTemplate(ITemplate template) {
-		update(this.uploadTemplate, this.project, this.projects, template);
+		update(this.uploadTemplate, this.project, this.projectItems, template);
 	}
 
 	private void initTemplateParameters(ITemplate template) {
@@ -105,7 +117,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setProject(IProject project) {
-		update(this.uploadTemplate, project, this.projects, this.template);
+		update(this.uploadTemplate, project, this.projectItems, this.template);
 	}
 
 	@Override
@@ -126,7 +138,7 @@ public class NewApplicationWizardModel
 		ObservableTreeItem connectionItem = TemplateTreeItems.INSTANCE.create(connection);
 		connectionItem.load();
 		List<ObservableTreeItem> projects = connectionItem.getChildren();
-		setProjects(projects);
+		setProjectItems(projects);
 	}
 
 	@Override
@@ -222,7 +234,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setUseUploadTemplate(boolean uploadTemplate) {
-		update(uploadTemplate, this.project, this.projects, this.template);
+		update(uploadTemplate, this.project, this.projectItems, this.template);
 	}
 
 	@Override
@@ -301,23 +313,19 @@ public class NewApplicationWizardModel
 		this.resourceFactory = factory;
 	}
 	
-	private void setProjects(List<ObservableTreeItem> projects) {
-		this.projects.clear();
-		if (projects != null) {
-			this.projects.addAll(projects);
-		}
-		update(this.uploadTemplate, this.project, this.projects, this.template);
+	private void setProjectItems(List<ObservableTreeItem> projects) {
+		update(this.uploadTemplate, this.project, projects, this.template);
 	}
 
 	@Override
-	public List<ObservableTreeItem> getProjects() {
-		return this.projects;
+	public List<ObservableTreeItem> getProjectItems() {
+		return this.projectItems;
 	}
 	
 	@Override
 	public boolean hasProjects() {
-		return projects != null 
-				&& projects.size() > 0;
+		return projectItems != null 
+				&& projectItems.size() > 0;
 	}
 
 	@Override

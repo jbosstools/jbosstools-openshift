@@ -275,11 +275,13 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 		return pageModel.getSelectedProject();
 	}
 
+	public List<IProject> getProjects() {
+		return pageModel.getProjects();
+	}
+
 	@Override
 	public void dispose() {
 		pageModel.dispose();
 		super.dispose();
 	}
-	
-	
 }
