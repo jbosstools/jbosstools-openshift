@@ -314,7 +314,7 @@ public class NewApplicationWizardModel
 	}
 	
 	private void setProjectItems(List<ObservableTreeItem> projects) {
-		update(this.uploadTemplate, this.project, projects, this.template);
+		update(this.uploadTemplate, null, projects, this.template);
 	}
 
 	@Override
