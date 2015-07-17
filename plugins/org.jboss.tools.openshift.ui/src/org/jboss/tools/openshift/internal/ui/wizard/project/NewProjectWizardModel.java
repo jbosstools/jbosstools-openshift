@@ -38,6 +38,7 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 	private String projectName;
 	private Connection connection;
 	private List<IProject> projects;
+	private IProject project;
 
 	protected NewProjectWizardModel(Connection connection, List<IProject> projects) {
 		this.connection = connection;
@@ -45,10 +46,10 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 	}
 
 	
-	public void createProject() {
+	public IProject createProject() {
 		if (connection == null) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project, missing connection.");
-			return;
+			return null;
 		}
 		IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, getProjectName());
 		request.setDescription(getDescription());
@@ -62,6 +63,7 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 				ConnectionProperties.PROPERTY_PROJECTS, 
 				projects, 
 				Collections.unmodifiableList(newProjects));
+		return this.project = project;
 	}
 	public String getProjectName() {
 		return this.projectName;
@@ -86,5 +88,9 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 
 	public void setDisplayName(String displayName) {
 		firePropertyChange(PROPERTY_DISPLAY_NAME, this.displayName, this.displayName = displayName);
+	}
+	
+	public IProject getProject() {
+		return project;
 	}
 }

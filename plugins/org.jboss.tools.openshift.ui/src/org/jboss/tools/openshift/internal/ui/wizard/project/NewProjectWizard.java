@@ -32,6 +32,8 @@ import com.openshift.restclient.model.IProject;
  */
 public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardModel> {
 
+	private NewProjectWizardPage newProjectWizardPage;
+
 	public NewProjectWizard(Connection connection, List<IProject> projects) {
 		super("Create OpenShift Project", new NewProjectWizardModel(connection, projects));
 	}
@@ -62,6 +64,10 @@ public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardMo
 
 	@Override
 	public void addPages() {
-		addPage(new NewProjectWizardPage(getModel(), this));
+		addPage(this.newProjectWizardPage = new NewProjectWizardPage(getModel(), this));
+	}
+	
+	public IProject getProject() {
+		return newProjectWizardPage.getProject();
 	}
 }

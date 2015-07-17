@@ -203,14 +203,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						@Override
 						protected IStatus updateUI(IProgressMonitor monitor) {
 							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
+							// reload projects to reflect changes that happened in projects wizard
+							loadResources(templatesViewer, model);
 							if(Dialog.OK == new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open()) {
 								IProject selectedProject = manageProjectsWizard.getSelectedProject();
 								if (selectedProject != null) {
 									model.setProject(selectedProject);
 								}
 							};
-							// reload projects to reflect changes that happened in projects wizard
-							loadResources(templatesViewer, model);
 							return Status.OK_STATUS;
 						}
 											
@@ -514,10 +514,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							if(!model.hasProjects()) {
 								List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
 								Connection connection = model.getConnection();
+								NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
 								if (Dialog.CANCEL == 
-										WizardUtils.openWizardDialog(new NewProjectWizard(connection, projects), getShell())) {
+										WizardUtils.openWizardDialog(newProjectWizard, getShell())) {
 									WizardUtils.close(getWizard());
 									return Status.CANCEL_STATUS;
+								} else {
+									model.loadResources();
+									model.setProject(newProjectWizard.getProject());
 								}
 							}
 							return Status.OK_STATUS;

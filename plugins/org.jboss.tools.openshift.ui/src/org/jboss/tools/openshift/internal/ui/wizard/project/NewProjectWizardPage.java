@@ -34,6 +34,8 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.validator.ProjectNameValidator;
 
+import com.openshift.restclient.model.IProject;
+
 /**
  * @author jeff.cantrill
  */
@@ -115,6 +117,10 @@ public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 			.in(dbc);
 	}
 
+	public IProject getProject() {
+		return model.getProject();
+	}
+	
 	protected NewProjectWizardModel getModel() {
 		return model;
 	}
