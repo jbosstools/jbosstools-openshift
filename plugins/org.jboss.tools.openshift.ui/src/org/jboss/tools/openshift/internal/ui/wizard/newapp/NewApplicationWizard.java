@@ -58,7 +58,8 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		if (selection.isEmpty()) {
+		if (selection == null
+				|| selection.isEmpty()) {
 			return;
 		}
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
