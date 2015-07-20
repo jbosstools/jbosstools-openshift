@@ -174,6 +174,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		StyledText manageProjectsLink = new StyledText(parent, SWT.WRAP);
 		StyledTextUtils.setTransparent(manageProjectsLink);
 		StyledTextUtils.setLinkText("<a>Manage Projects</a>", manageProjectsLink);
+		manageProjectsLink.setEditable(false);
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
 			.applyTo(manageProjectsLink);
