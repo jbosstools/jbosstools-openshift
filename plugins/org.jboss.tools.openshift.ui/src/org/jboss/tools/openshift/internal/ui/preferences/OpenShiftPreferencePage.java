@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.internal.ui.preferences;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -27,6 +27,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
+import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
@@ -34,7 +35,8 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private static final int SUCCESS = 0;
+	private static final int WHICH_CMD_TIMEOUT = 10 * 1000;
+	private static final int WHICH_CMD_SUCCESS = 0;
 	private static final String OC_BINARY_NAME;
 	private static final String [] EXTENSIONS;
 	
@@ -72,7 +74,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	protected void performDefaults() {
 		String location = findOCLocation();
 		if(StringUtils.isBlank(location)) {
-			MessageDialog.openInformation(getShell(), "Unable to find OpenShift binary", "Unable to find the OpenShift binary in your path");
+			String message = NLS.bind("Could not find the openshift binary \"{0}\" on your path.", OC_BINARY_NAME);
+			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
+			MessageDialog.openWarning(getShell(), "No OpenShift binary", message);
 			return;
 		}
 		cliLocationEditor.setStringValue(location);
@@ -108,7 +112,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	}
 	
 	private String findOCLocation() {
-		String location = "";
+		String location = null;
 		if(SystemUtils.IS_OS_WINDOWS) {
 			String[] paths = StringUtils.split(System.getenv("PATH"), ";");
 			for (String path : paths) {
@@ -131,19 +135,31 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 				}
 			}
 		}else {
-			ProcessBuilder builder = new ProcessBuilder("which",OC_BINARY_NAME);
-			try {
-				Process process = builder.start();
-				if(process.waitFor(500, TimeUnit.MILLISECONDS) && process.exitValue() == SUCCESS) {
-					location = IOUtils.toString(process.getInputStream());
+			String path = ThreadUtils.runWithTimeout(WHICH_CMD_TIMEOUT, new Callable<String>() {
+				@Override
+				public String call() throws Exception {
+					Process process = null;
+					try {
+						process = new ProcessBuilder("which", OC_BINARY_NAME).start();
+						process.waitFor();
+						if(process.exitValue() == WHICH_CMD_SUCCESS) {
+							return IOUtils.toString(process.getInputStream());
+						};
+					} catch (IOException e) {
+						OpenShiftUIActivator.getDefault().getLogger().logError("Could not run 'which' command", e);
+					} finally {
+						if (process != null) {
+							process.destroy();
+						}
+					}
+					return null;
 				}
-			} catch (IOException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to find the openshift binary.");
-			} catch (InterruptedException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to find the openshift binary.");
+			});
+
+			if (!StringUtils.isEmpty(path)) {
+				location = path;
 			}
 		}
 		return StringUtils.trim(location);
-	}
-	
+	}	
 }

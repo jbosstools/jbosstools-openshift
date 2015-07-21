@@ -70,5 +70,13 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.internal.common.core.util;
+  x-friends:="org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.core,
+   org.jboss.tools.openshift.express.core,
+   org.jboss.tools.openshift.express.test,
+   org.jboss.tools.openshift.express.ui,
+   org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.ui"
 Service-Component: META-INF/connectionsFactory.xml
