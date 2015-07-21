@@ -238,7 +238,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				BrowserUtility.checkedCreateInternalBrowser(
+				new BrowserUtility().checkedCreateInternalBrowser(
 						OPENSHIFT_EXPRESS_SIGNUP_URL, 
 						OPENSHIFT_EXPRESS_SIGNUP_URL, 
 						OpenShiftCommonUIActivator.PLUGIN_ID, 

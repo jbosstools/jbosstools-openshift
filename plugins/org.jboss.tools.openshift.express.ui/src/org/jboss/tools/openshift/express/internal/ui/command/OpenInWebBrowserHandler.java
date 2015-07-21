@@ -35,7 +35,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler{
 		}
 		final String appName = application.getName();
 		final String appUrl = application.getApplicationUrl();
-		BrowserUtility.checkedCreateInternalBrowser(appUrl, appName,
+		new BrowserUtility().checkedCreateInternalBrowser(appUrl, appName,
 				ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 		return Status.OK_STATUS;
 	}

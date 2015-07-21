@@ -84,7 +84,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Could not find a route that points to an url to show in a browser.");
 			return;
 		}
-		BrowserUtility.checkedCreateInternalBrowser(route.getURL(), 
+		new BrowserUtility().checkedCreateInternalBrowser(route.getURL(), 
 				"", OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 	}
 

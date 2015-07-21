@@ -67,7 +67,7 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 							public IStatus runInUIThread(IProgressMonitor monitor) {
 								String webUIDomainPage = getURLJob.getWebUIDomainPageUrl();
 								if (webUIDomainPage != null) {
-									BrowserUtility.checkedCreateExternalBrowser(webUIDomainPage,
+									new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPage,
 											ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 								} else {
 									new WebUIDomainPageNotFoundDialog(getShell(), getModel().getOriginWebUIDomainPageUrl()).open();
@@ -134,7 +134,7 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					BrowserUtility.checkedCreateExternalBrowser(webUIDomainPageUrl,
+					new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPageUrl,
 							ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 				}
 
