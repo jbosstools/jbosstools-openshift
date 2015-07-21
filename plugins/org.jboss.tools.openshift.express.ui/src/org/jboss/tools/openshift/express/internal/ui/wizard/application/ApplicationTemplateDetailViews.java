@@ -361,7 +361,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 					if (template == null) {
 						return;
 					}
-					new BrowserUtility().checkedCreateExternalBrowser(template.getPageUrl(), ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
+					BrowserUtility.checkedCreateExternalBrowser(template.getPageUrl(), ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 				}
 
 			};
