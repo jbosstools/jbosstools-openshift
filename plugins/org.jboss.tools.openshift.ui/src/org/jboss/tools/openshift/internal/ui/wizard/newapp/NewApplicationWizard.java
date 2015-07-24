@@ -23,16 +23,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvider;
-import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
-import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
 import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
@@ -107,18 +103,15 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 							final String message = NLS.bind(
 									"Results of creating the resources from the {0} template.", 
 									model.getTemplate().getName());
-							new ResourceSummaryDialog(
+							new NewApplicationSummaryDialog(
 									getShell(), 
-									createJob.getResources(), 
-									"Create Application Summary",
-									message, 
-									new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider()).open();
+									createJob,
+									message).open();
 						}
 					});
 				}
 			}
 		});
-		DelegatingProgressMonitor monitor = createJob.getDelegatingProgressMonitor();
 		Job job = new JobChainBuilder(createJob)
 				.runWhenDone(new RefreshResourcesJob(createJob, true)).build();
 
