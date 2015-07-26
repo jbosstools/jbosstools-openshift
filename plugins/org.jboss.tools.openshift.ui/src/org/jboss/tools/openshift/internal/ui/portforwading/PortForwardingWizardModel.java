@@ -12,10 +12,13 @@ package org.jboss.tools.openshift.internal.ui.portforwading;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.jdt.launching.SocketUtil;
@@ -44,12 +47,19 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	private Boolean useFreePorts = Boolean.FALSE;
 	private final IPod pod;
 	private final ConsoleListener consoleListener = new ConsoleListener();
-	private List<IPortForwardable.PortPair> ports = new ArrayList<IPortForwardable.PortPair>();
+	private Set<IPortForwardable.PortPair> ports = new HashSet<IPortForwardable.PortPair>();
 
 	public PortForwardingWizardModel(final IPod pod) {
 		this.pod = pod;
-		for (IPort port : pod.getContainerPorts()) {
-			ports.add(new IPortForwardable.PortPair(port));
+		IPortForwardable forwardable = REGISTRY.get(pod);
+		if(forwardable != null) {
+			for(IPortForwardable.PortPair p : forwardable.getPortPairs()) {
+				ports.add(p);
+			}
+		}else {
+			for (IPort port : pod.getContainerPorts()) {
+				ports.add(new IPortForwardable.PortPair(port));
+			}
 		}
 		
 	}
@@ -63,8 +73,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		return isPortForwarding(pod);
 	}
 
-	public List<IPortForwardable.PortPair> getForwardablePorts(){
-		return Collections.unmodifiableList(ports);
+	public Collection<IPortForwardable.PortPair> getForwardablePorts(){
+		return Collections.unmodifiableCollection(ports);
 	}
 
 	public void startPortForwarding() {

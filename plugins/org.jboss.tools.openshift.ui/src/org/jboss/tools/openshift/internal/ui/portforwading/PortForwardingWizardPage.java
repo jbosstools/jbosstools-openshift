@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.portforwading;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -232,7 +232,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-	private void refreshViewerInput(List<IPortForwardable.PortPair> ports) {
+	private void refreshViewerInput(Collection<IPortForwardable.PortPair> ports) {
 		getShell().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -256,7 +256,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		@Override
 		protected IStatus validate() {
 			@SuppressWarnings("unchecked")
-			final List<IPortForwardable.PortPair> ports = (List<IPortForwardable.PortPair>) viewerObservable.getValue();
+			final Collection<IPortForwardable.PortPair> ports = (Collection<IPortForwardable.PortPair>) viewerObservable.getValue();
 			if(ports == null || ports.isEmpty()) {
 				return ValidationStatus.error("There are no available ports to forward to this pod.\nYour pod may not be running or does not expose any ports.");
 			}
