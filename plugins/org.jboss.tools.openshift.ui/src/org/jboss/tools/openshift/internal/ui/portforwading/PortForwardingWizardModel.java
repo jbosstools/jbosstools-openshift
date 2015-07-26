@@ -13,7 +13,9 @@ package org.jboss.tools.openshift.internal.ui.portforwading;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.jdt.launching.SocketUtil;
@@ -37,7 +39,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	public static final String PROPERTY_FORWARDABLE_PORTS = "forwardablePorts";
 	public static final String PROPERTY_PORT_FORWARDING = "portForwarding";
 	public static final String PROPERTY_USE_FREE_PORTS = "useFreePorts";
-
+	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<IPod, IPortForwardable>();
 
 	private Boolean useFreePorts = Boolean.FALSE;
 	private final IPod pod;
@@ -58,13 +60,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 
 	
 	public boolean getPortForwarding() {
-		return pod.accept(new CapabilityVisitor<IPortForwardable, Boolean>() {
-
-			@Override
-			public Boolean visit(IPortForwardable capability) {
-				return capability.isForwarding();
-			}
-		}, Boolean.FALSE);
+		return isPortForwarding(pod);
 	}
 
 	public List<IPortForwardable.PortPair> getForwardablePorts(){
@@ -72,11 +68,11 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public void startPortForwarding() {
-		pod.accept(new CapabilityVisitor<IPortForwardable, Object>() {
+		if(isPortForwarding(pod)) return;
+		IPortForwardable portForwardable = pod.accept(new CapabilityVisitor<IPortForwardable, IPortForwardable>() {
 
 			@Override
-			public Object visit(final IPortForwardable cap) {;
-				if(cap.isForwarding()) return null;
+			public IPortForwardable visit(final IPortForwardable cap) {
 				final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
 				consoleListener.setCapability(cap);
 				ConsoleUtils.registerConsoleListener(consoleListener);
@@ -89,9 +85,18 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				stream.println("done.");
 				ConsoleUtils.displayConsoleView(console);
 				firePropertyChange(PROPERTY_PORT_FORWARDING, false, getPortForwarding());
-				return null;
+				return cap;
 			}
 		}, null);
+		if(portForwardable != null) {
+			REGISTRY.put(pod, portForwardable);
+		}
+	}
+	
+	private boolean isPortForwarding(IPod pod) {
+		IPortForwardable capability = REGISTRY.get(pod);
+		if(capability == null) return false;
+		return capability.isForwarding();
 	}
 	
 	private class ConsoleListener implements IConsoleListener{
@@ -125,29 +130,22 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public void stopPortForwarding() {
-		pod.accept(new CapabilityVisitor<IPortForwardable, Object>() {
-
-			@Override
-			public Object visit(IPortForwardable cap) {
-				if(!cap.isForwarding()) return null;
-				try {
-					final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
-					MessageConsoleStream stream = console.newMessageStream();
-					stream.println("Stopping port-forwarding...");
-					cap.stop();
-					for (IPortForwardable.PortPair port : ports) {
-						stream.println(NLS.bind("{0} {1} -> {2}", new Object [] {port.getName(), port.getLocalPort(), port.getRemotePort()}));
-					}
-					stream.println("done.");
-					ConsoleUtils.displayConsoleView(console);
-					firePropertyChange(PROPERTY_PORT_FORWARDING, true, getPortForwarding());
-					return null;
-				}finally {
-					ConsoleUtils.deregisterConsoleListener(consoleListener);					
-				}
+		if(!isPortForwarding(pod)) return;
+		IPortForwardable cap = REGISTRY.remove(pod);
+		try {
+			final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
+			MessageConsoleStream stream = console.newMessageStream();
+			stream.println("Stopping port-forwarding...");
+			cap.stop();
+			for (IPortForwardable.PortPair port : ports) {
+				stream.println(NLS.bind("{0} {1} -> {2}", new Object [] {port.getName(), port.getLocalPort(), port.getRemotePort()}));
 			}
-		}, null);
-			
+			stream.println("done.");
+			ConsoleUtils.displayConsoleView(console);
+			firePropertyChange(PROPERTY_PORT_FORWARDING, true, getPortForwarding());
+		}finally {
+			ConsoleUtils.deregisterConsoleListener(consoleListener);					
+		}
 	}
 
 	public Boolean getUseFreePorts() {
