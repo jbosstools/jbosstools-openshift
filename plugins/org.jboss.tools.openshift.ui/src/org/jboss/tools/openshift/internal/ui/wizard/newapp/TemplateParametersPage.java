@@ -17,6 +17,9 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -80,6 +83,15 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		viewer.setContentProvider(new ObservableListContentProvider());
 		viewer.setInput(BeanProperties.list(
 				ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model));
+		
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+				IParameter param = (IParameter) selection.getFirstElement();
+				openEditDialog(param);
+			}
+		});
 		
 		Button editExistingButton = new Button(templateParametersGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -149,15 +161,19 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				final IParameter param = getSelectedParameter();
-				InputDialog dialog = new InputDialog(getShell(), "Edit Template Parameter", NLS.bind("Enter a value for {0}.\n{1}", param.getName(), param.getDescription()), param.getValue(), null) ;
-				if(InputDialog.OK == dialog.open()){
-					model.updateParameterValue(param, dialog.getValue());
-					viewer.refresh();
-				}
+				openEditDialog(param);
 			}
 		};
 	}
 
+	private void openEditDialog(final IParameter param) {
+		InputDialog dialog = new InputDialog(getShell(), "Edit Template Parameter", NLS.bind("Enter a value for {0}.\n{1}", param.getName(), param.getDescription()), param.getValue(), null) ;
+		if(InputDialog.OK == dialog.open()){
+			model.updateParameterValue(param, dialog.getValue());
+			viewer.refresh();
+		}
+	}
+	
 	private SelectionListener onReset() {
 		return new SelectionAdapter() {
 			@Override
