@@ -562,7 +562,8 @@ public class OpenShiftServerWizardComposite {
 			error = ExpressUIMessages.OpenShiftServerWizardPleaseSelectConnection;
 		} else if (domains == null) {
 			error = NLS.bind(ExpressUIMessages.OpenShiftServerWizardPleaseCreateDomain, connection.getId());
-		} else if (applications.isEmpty()) {
+		} else if (applications == null
+				|| applications.isEmpty()) {
 			error = ExpressUIMessages.OpenShiftServerWizardPleaseCreateApplication;
 		} else if (application == null) {
 			error = ExpressUIMessages.OpenShiftServerWizardPleaseSelectApplication;
