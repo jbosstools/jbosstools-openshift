@@ -65,7 +65,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public final String getPodName() {
-		return pod.getName();
+		return pod.getNamespace() + "\\" + pod.getName();
 	}
 
 	

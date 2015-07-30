@@ -258,7 +258,9 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 			@SuppressWarnings("unchecked")
 			final Collection<IPortForwardable.PortPair> ports = (Collection<IPortForwardable.PortPair>) viewerObservable.getValue();
 			if(ports == null || ports.isEmpty()) {
-				return ValidationStatus.error("There are no available ports to forward to this pod.\nYour pod may not be running or does not expose any ports.");
+				return ValidationStatus.error(
+						NLS.bind("There are no available ports to forward to {0}.\nYour pod may not be running or does not expose any ports.", 
+								wizardModel.getPodName()));
 			}
 			return Status.OK_STATUS;
 		}
