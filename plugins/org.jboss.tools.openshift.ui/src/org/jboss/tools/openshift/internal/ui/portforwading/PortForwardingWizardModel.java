@@ -52,7 +52,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	public PortForwardingWizardModel(final IPod pod) {
 		this.pod = pod;
 		IPortForwardable forwardable = REGISTRY.get(pod);
-		if(forwardable != null) {
+		if(forwardable != null && forwardable.getPortPairs() != null && forwardable.getPortPairs().length > 0) {
 			for(IPortForwardable.PortPair p : forwardable.getPortPairs()) {
 				ports.add(p);
 			}
@@ -122,6 +122,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				if(console.getName().equals(messageConsoleName)) {
 					try {
 						cap.stop();
+						REGISTRY.remove(pod);
 						return;
 					}finally {
 						ConsoleUtils.deregisterConsoleListener(this);
