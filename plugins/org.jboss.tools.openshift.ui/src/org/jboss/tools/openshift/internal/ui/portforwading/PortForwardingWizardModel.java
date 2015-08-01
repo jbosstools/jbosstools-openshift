@@ -61,7 +61,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				ports.add(new IPortForwardable.PortPair(port));
 			}
 		}
-		
+		ports = Collections.unmodifiableSet(ports);
 	}
 
 	public final String getPodName() {
@@ -74,7 +74,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public Collection<IPortForwardable.PortPair> getForwardablePorts(){
-		return Collections.unmodifiableCollection(ports);
+		return ports;
 	}
 
 	public void startPortForwarding() {

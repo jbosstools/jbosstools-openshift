@@ -16,6 +16,7 @@ import java.util.Collection;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -112,16 +113,37 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		// enabling/disabling controls
 		IObservableValue portForwardingStartedObservable = BeanProperties.value(
 				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
-		
-		
+
+		IObservableValue forwardablePortsModelObservable =
+				BeanProperties.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
+
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
 			.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+
+		
+		Converter collectionToBooleanConverter = new Converter(Collection.class, Boolean.class) {
+			
+			@Override
+			public Object convert(Object fromObject) {
+				if(fromObject instanceof Collection<?>) {
+					return !((Collection<?>) fromObject).isEmpty();
+				}
+				return Boolean.FALSE;
+			}
+			
+		};
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
+			.notUpdating(forwardablePortsModelObservable).converting(collectionToBooleanConverter).in(dbc);
 
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(stopButton))
 				.notUpdating(portForwardingStartedObservable).in(dbc);
 		
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
 				.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
+		.notUpdating(forwardablePortsModelObservable).converting(collectionToBooleanConverter).in(dbc);
+
 
 	}
 
@@ -212,15 +234,14 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		}, viewer, tableLayout);
 
 		IObservableValue forwardablePortsModelObservable =
-				BeanProperties.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS)
-						.observe(wizardModel);
-		
+				BeanProperties.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
+
 		final ForwardablePortListValidator validator =
 				new ForwardablePortListValidator(forwardablePortsModelObservable);
 		dbc.addValidationStatusProvider(validator);
 		
 		viewer.setInput(wizardModel.getForwardablePorts());
-		
+//		
 		return viewer;
 	}
 
