@@ -3,7 +3,9 @@
       id="org.jboss.tools.openshift.express.feature"
       label="%featureName"
       version="3.0.0.qualifier"
-      provider-name="%providerName">
+      provider-name="%providerName"
+      license-feature="org.jboss.tools.foundation.license.feature"
+	  license-feature-version="0.0.0">
 
    <description url="http://www.jboss.org/tools">
       %description
@@ -13,15 +15,7 @@
       %copyright
    </copyright>
 
-   <license url="license.html">
-      Red Hat, Inc. licenses these features and plugins to you under
-certain open source licenses (or aggregations of such licenses),
-which in a particular case may include the Eclipse Public License,
-the GNU Lesser General Public License, and/or certain other open
-source licenses. For precise licensing details, consult the corresponding
-source code, or contact Red Hat Legal Affairs, 1801 Varsity Drive,
-Raleigh NC 27606 USA.
-   </license>
+   <license>%license</license>
 
    <requires>
       <import feature="org.eclipse.m2e.feature" version="1.2.0.20120903-1050" match="greaterOrEqual"/>
