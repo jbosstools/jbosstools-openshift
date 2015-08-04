@@ -61,7 +61,7 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 	public IBuildConfigPageModel model;
 
 	public BuildConfigWizardPage(IWizard wizard, IBuildConfigPageModel model) {
-		super("Select Build Config", "Choose the build config that will be used to import a projct to Eclipse", "", wizard);
+		super("Select Build Config", "Choose the build config that will be used to import a project to Eclipse", "", wizard);
 		this.model = model;
 	}
 
