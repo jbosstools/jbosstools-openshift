@@ -59,6 +59,7 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotEmptyString2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.HttpsPrefixingAdapter;
@@ -70,8 +71,6 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  * @author Xavier Coulon
  */
 public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
-
-	protected static final String OPENSHIFT_EXPRESS_SIGNUP_URL = "https://openshift.redhat.com/app/user/new/express"; //$NON-NLS-1$
 
 	private final ConnectionWizardPageModel pageModel;
 	private ConnectionEditorsStackedView connectionEditors;
@@ -98,8 +97,16 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		signupLink.setText("If you do not have an account on OpenShift, please sign up <a>here</a>.");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);
-		signupLink.addSelectionListener(onSignupLinkClicked());
-
+		IObservableValue signupUrlObservable = BeanProperties
+				.value(ConnectionWizardPageModel.PROPERTY_SIGNUPURL).observe(pageModel);
+		signupLink.addSelectionListener(onSignupLinkClicked(signupUrlObservable));
+		ValueBindingBuilder
+			.bind(WidgetProperties.visible().observe(signupLink))
+			.notUpdatingParticipant()
+			.to(signupUrlObservable)
+			.converting(new IsNotEmptyString2BooleanConverter())
+			.in(dbc);
+		
 		Label fillerLabel = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.span(3, 4).hint(SWT.DEFAULT, 6).applyTo(fillerLabel);
@@ -151,11 +158,11 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		});
 		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
 		final IViewerObservableValue selectedServerType = ViewerProperties.singleSelection().observe(connectionFactoriesViewer);
+		IObservableValue connectionFactoryObservable = 
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
 		ValueBindingBuilder
 				.bind(selectedServerType)
-				.to(BeanProperties.value(
-						ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY, IConnection.class)
-						.observe(pageModel))
+				.to(connectionFactoryObservable)
 				.in(dbc);
 
 		// server
@@ -196,8 +203,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 						return ValidationStatus.ok();
 					}
 				})
-				.to(BeanProperties.value(
-						ConnectionWizardPageModel.PROPERTY_HOST, IConnection.class).observe(pageModel))
+				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel))
 				.in(dbc);
 		ControlDecorationSupport
 				.create(serverUrlBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -226,21 +232,25 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(connectionEditorsContainer);
 		this.connectionEditors = new ConnectionEditorsStackedView(
-				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel)
+				connectionFactoryObservable
 				, this
 				, connectionEditorsContainer
 				, dbc);
 		connectionEditors.createControls();
 	}
 
-	protected SelectionAdapter onSignupLinkClicked() {
+	protected SelectionAdapter onSignupLinkClicked(final IObservableValue signupUrlObservable) {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				String signupUrl = (String) signupUrlObservable.getValue();
+				if (StringUtils.isEmpty(signupUrl)) {
+					return;
+				}
 				new BrowserUtility().checkedCreateInternalBrowser(
-						OPENSHIFT_EXPRESS_SIGNUP_URL, 
-						OPENSHIFT_EXPRESS_SIGNUP_URL, 
+						signupUrl, 
+						signupUrl,
 						OpenShiftCommonUIActivator.PLUGIN_ID, 
 						OpenShiftCommonUIActivator.getDefault().getLog());
 				WizardUtils.close(getWizard());;

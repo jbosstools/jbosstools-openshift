@@ -43,6 +43,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USE_DEFAULT_HOST = "useDefaultHost";
 	public static final String PROPERTY_ALL_HOSTS = "allHosts";
 	public static final String PROPERTY_CONNECT_ERROR = "connectError";
+	public static final String PROPERTY_SIGNUPURL = "signupUrl";
 
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
@@ -55,6 +56,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private boolean useDefaultHost;
 	private Collection<String> allHosts;
 	private ConnectionsFactoryTracker connectionsFactory;
+	private String signupUrl;
 	private IStatus connectError;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
@@ -97,6 +99,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		} else {
 			initEditConnection(editedConnection);
 		}
+		this.signupUrl = getSignupUrl(host, connectionFactory);
 	}
 
 	private void initEditConnection(IConnection connection) {
@@ -131,11 +134,13 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		factory = updateFactory(factory, selectedConnection);
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
+		String signupUrl = getSignupUrl(host, factory);
 
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
+		firePropertyChange(PROPERTY_SIGNUPURL, this.signupUrl, this.signupUrl = signupUrl);
 		
 		setConnectionFactoryError(connectionFactoryError);
 		setConnectError(connectError);
@@ -186,6 +191,15 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return useDefaultHost;
 	}
 
+	private String getSignupUrl(String host, IConnectionFactory factory) {
+		if (factory == null
+				|| StringUtils.isEmpty(host)) {
+			return null;
+		}
+
+		return factory.getSignupUrl(host);
+	}
+
 	private boolean isNewConnection() {
 		return selectedConnection instanceof NewConnectionMarker;
 	}
@@ -225,11 +239,13 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return host;
 	}
 
+	public String getSignupUrl() {
+		return signupUrl;
+	}
+	
 	public void setHost(String host) {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
 	}
-	
-
 	
 	private void setConnectionFactoryError(IStatus status) {
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY_ERROR, this.connectionFactoryError, this.connectionFactoryError = status);

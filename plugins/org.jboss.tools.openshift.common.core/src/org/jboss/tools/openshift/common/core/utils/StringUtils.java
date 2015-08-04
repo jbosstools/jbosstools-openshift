@@ -45,6 +45,11 @@ public class StringUtils {
 				|| value.length() == 0;
 	}
 
+	public static boolean isEmpty(Object value) {
+		return (value instanceof String)
+				&& isEmpty((String) value);
+	}
+
 	public static <T> String toString(List<T> elements) {
 		return toString(elements, new ToStringConverter<T>() {
 

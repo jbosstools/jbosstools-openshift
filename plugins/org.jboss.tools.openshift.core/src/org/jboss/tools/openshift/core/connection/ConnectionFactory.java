@@ -74,4 +74,9 @@ public class ConnectionFactory implements IConnectionFactory {
 	public <T extends IConnection> boolean canCreate(Class<T> clazz) {
 		return Connection.class.isAssignableFrom(clazz);
 	}
+
+	@Override
+	public String getSignupUrl(String host) {
+		return null;
+	}
 }

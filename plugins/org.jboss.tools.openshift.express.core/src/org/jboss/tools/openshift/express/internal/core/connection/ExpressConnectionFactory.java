@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
@@ -65,6 +66,16 @@ public class ExpressConnectionFactory implements IConnectionFactory {
 	@Override
 	public <T extends IConnection> boolean canCreate(Class<T> clazz) {
 		return ExpressConnection.class == clazz;
+	}
+
+	@Override
+	public String getSignupUrl(String host) {
+		if (StringUtils.isEmpty(host)
+				|| !host.equals(getDefaultHost())) {
+			return null;
+		}
+		return host + "/app/user/new/express";
+	
 	}
 
 }
