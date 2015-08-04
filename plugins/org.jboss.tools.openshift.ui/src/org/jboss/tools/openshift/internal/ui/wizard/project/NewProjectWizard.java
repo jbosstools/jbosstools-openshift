@@ -48,8 +48,9 @@ public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardMo
 					getModel().createProject();
 					return Status.OK_STATUS;
 				} catch (OpenShiftException e) {
+					String problem = e.getStatus()==null?e.getMessage():e.getStatus().getMessage();
 					return	OpenShiftUIActivator.statusFactory().errorStatus(
-							NLS.bind("Could not create project \"{0}\": {1}", getModel().getProjectName(), e.getStatus().getMessage()), e);
+							NLS.bind("Could not create project \"{0}\": {1}", getModel().getProjectName(), problem), e);
 				}
 			}
 		};
