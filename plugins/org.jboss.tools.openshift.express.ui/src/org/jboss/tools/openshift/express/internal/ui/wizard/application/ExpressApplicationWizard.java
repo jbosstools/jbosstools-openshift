@@ -37,6 +37,7 @@ import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.ui.wizard.NewApplicationWorkbenchWizard;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
@@ -49,6 +50,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog.Lo
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.ImportFailedException;
@@ -119,44 +121,52 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 
 	@Override
 	public boolean performFinish() {
+			boolean success = createImportApplication();
 			if (!model.isUseExistingApplication()) {
-
-				IStatus status = createApplication();
-				if (!handleOpenShiftError(
-						NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())), status)) {
-					return false;
-				}
-
-				status = waitForApplication(model.getApplication());
-				if (!handleOpenShiftError(
-						NLS.bind("wait for application {0} to become reachable", StringUtils.null2emptyString(model.getApplicationName())),
-						status)) {
-					return false;
-				}
-
-				new FireExpressConnectionsChangedJob(model.getConnection()).schedule();
-				saveCodeAnythingUrl();
+				UsageStats.getInstance().newV2Application(model.getConnection().getHost(), success);
+			} else {
+				UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
 			}
+			return success;
+	}
 
-			if (!importProject()) {
+	private boolean createImportApplication() {
+		if (!model.isUseExistingApplication()) {
+			IStatus status = createApplication();
+			if (!handleOpenShiftError(
+					NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())), status)) {
 				return false;
 			}
 
-			if (!createServerAdapter()) {
+			status = waitForApplication(model.getApplication());
+			if (!handleOpenShiftError(
+					NLS.bind("wait for application {0} to become reachable", StringUtils.null2emptyString(model.getApplicationName())),
+					status)) {
 				return false;
 			}
 
-			return true;
+			new FireExpressConnectionsChangedJob(model.getConnection()).schedule();
+			saveCodeAnythingUrl();
+		}
+
+		if (!importProject()) {
+			return false;
+		}
+
+		if (!createServerAdapter()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private boolean handleOpenShiftError(String operation, IStatus status) {
+		boolean abort = false;
 		if (JobUtils.isCancel(status)) {
 			if (AbstractDelegatingMonitorJob.TIMEOUTED == status.getCode()) {
 				closeWizard();
 			}
-		}
-
-		if (!JobUtils.isOk(status)) {
+		} else if (!JobUtils.isOk(status)) {
 			// dont open error-dialog, the jobs will do if they fail
 			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
 			if (model.getConnection() != null) {
@@ -164,9 +174,10 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 					.runWhenDone(new FireExpressConnectionsChangedJob(model.getConnection()))
 					.schedule();
 			}
-			return false;
+			abort = true;
 		}
-		return true;
+		
+		return !abort;
 	}
 
 	private void closeWizard() {

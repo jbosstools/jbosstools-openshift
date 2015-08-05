@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
@@ -425,6 +426,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		firePropertyChange(SECURE_STORAGE_TOKEN, token, this.token = token);
 		this.tokenLoaded = true;
 	}
+
+	@Override
+	public void notifyUsage() {
+		UsageStats.getInstance().newV3Connection(getHost());
+	}
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -461,5 +467,4 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}, null);
 		return ObjectUtils.equals(this.client, client);
 	}
-
 }

@@ -19,6 +19,7 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -77,7 +78,9 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public boolean performFinish() {
-		return importProject();
+		boolean success = importProject();
+		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
+		return success;
 	}
 
 	private boolean importProject() {

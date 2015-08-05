@@ -27,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
@@ -129,19 +130,22 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 				}
 			}
 		});
-		Job job = new JobChainBuilder(createJob)
-				.runWhenDone(new RefreshResourcesJob(createJob, true)).build();
-
-			try {
-				IStatus status = runInWizard(
-						job, 
-						createJob.getDelegatingProgressMonitor(), 
-						getContainer());
-				return isFailed(status);
-			} catch (InvocationTargetException | InterruptedException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logError(e);
-				return false;
-			}
+		boolean success = false;
+		try {
+			Job job = new JobChainBuilder(createJob)
+					.runWhenDone(new RefreshResourcesJob(createJob, true)).build();
+			IStatus status = runInWizard(
+					job, 
+					createJob.getDelegatingProgressMonitor(), 
+					getContainer());
+			success = isFailed(status);
+		} catch (InvocationTargetException | InterruptedException e) {
+			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+			success = false;
+		} finally {
+			UsageStats.getInstance().newV3Application(model.getConnection().getHost(), success);
+		}
+		return success;
 	}
 
 	private boolean isFailed(IStatus status) {

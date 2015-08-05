@@ -278,6 +278,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			if(connection != null) {
 				if (connection.connect()) {
 					wizardModel.setConnection(connection);
+					connection.notifyUsage();
 				} else {
 					String message = NLS.bind("Unable to connect to {0}", connection.getHost());
 					OpenShiftCommonUIActivator.log(message, null);

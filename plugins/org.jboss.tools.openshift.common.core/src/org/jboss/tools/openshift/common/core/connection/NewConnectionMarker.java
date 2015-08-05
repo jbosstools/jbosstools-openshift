@@ -113,4 +113,8 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public void update(IConnection connection) {
 	}
+
+	@Override
+	public void notifyUsage() {
+	}
 }

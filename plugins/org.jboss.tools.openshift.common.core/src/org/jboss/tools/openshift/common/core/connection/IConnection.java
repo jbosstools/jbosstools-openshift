@@ -52,4 +52,6 @@ public interface IConnection {
 	public IConnection clone();
 
 	public void update(IConnection connection);
+
+	public void notifyUsage();
 }

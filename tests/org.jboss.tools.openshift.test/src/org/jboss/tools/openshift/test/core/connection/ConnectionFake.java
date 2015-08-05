@@ -94,7 +94,9 @@ public class ConnectionFake extends AbstractConnection {
 
 	@Override
 	public void setRememberPassword(boolean rememberPassword) {
-		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public void notifyUsage() {
 	}
 }

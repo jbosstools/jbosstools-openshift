@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePreferences;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
@@ -589,6 +590,11 @@ public class ExpressConnection extends AbstractConnection {
 	@Override
 	public ConnectionType getType() {
 		return ConnectionType.Express;
+	}
+	
+	@Override
+	public void notifyUsage() {
+		UsageStats.getInstance().newV2Connection(getHost());
 	}
 
 	@Override
