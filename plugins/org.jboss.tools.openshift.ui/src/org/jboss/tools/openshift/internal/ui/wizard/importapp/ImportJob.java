@@ -37,6 +37,7 @@ public class ImportJob extends WorkspaceJob {
 	private DelegatingProgressMonitor delegatingMonitor;
 	private String gitUrl;
 	private File cloneDestination;
+	private String gitRef;
 
 	public ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
 		super("Importing project to workspace...");
@@ -50,7 +51,7 @@ public class ImportJob extends WorkspaceJob {
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
 			delegatingMonitor.add(monitor);
-			new ImportNewProject(gitUrl, cloneDestination).execute(delegatingMonitor);
+			new ImportNewProject(gitUrl, gitRef, cloneDestination).execute(delegatingMonitor);
 			return Status.OK_STATUS;
 		} catch (final WontOverwriteException e) {
 			openError("Project already present", e.getMessage());
@@ -107,6 +108,11 @@ public class ImportJob extends WorkspaceJob {
 				}
 			});
 		}
+	}
+
+	public ImportJob setGitRef(String gitRef) {
+		this.gitRef = gitRef;
+		return this;
 	}
 
 

@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.BuildConfigTreeItems.ConnectionTreeItem;
 
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.build.IGitBuildSource;
 
 /**
  * @author Andre Dietisheim
@@ -69,6 +70,14 @@ public class ImportApplicationWizardModel
 		} else {
 			return config.getSourceURI();
 		}
+	}
+	
+	public String getGitRef() {
+		IBuildConfig config = getSelectedBuildConfig();
+		if (config != null && config.getBuildSource() instanceof IGitBuildSource){
+			return ((IGitBuildSource)config.getBuildSource()).getRef();
+		}
+		return null;
 	}
 	
 	@Override

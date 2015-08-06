@@ -279,16 +279,33 @@ public class EGitUtils {
 			File destination, IProgressMonitor monitor)
 			throws URISyntaxException, InvocationTargetException,
 			InterruptedException {
-		cloneRepository(uri, remoteName, destination, null, monitor);
+		cloneRepository(uri, remoteName, Constants.HEAD, destination, null, monitor);
 	}
 
+	public static void cloneRepository(String uri, String remoteName,
+			String ref, File destination, IProgressMonitor monitor)
+			throws URISyntaxException, InvocationTargetException,
+			InterruptedException {
+		cloneRepository(uri, remoteName, ref, destination, null, monitor);
+	}
+	
 	public static void cloneRepository(String uri, String remoteName,
 			File destination, PostCloneTask postCloneTask,
 			IProgressMonitor monitor) throws URISyntaxException,
 			InvocationTargetException, InterruptedException {
+		cloneRepository(uri, remoteName, Constants.HEAD, destination, postCloneTask, monitor);
+	}
+
+	public static void cloneRepository(String uri, String remoteName, String ref,
+			File destination, PostCloneTask postCloneTask,
+			IProgressMonitor monitor) throws URISyntaxException,
+			InvocationTargetException, InterruptedException {
 		URIish gitUri = new URIish(uri);
+		if (StringUtils.isEmptyOrNull(ref)) {
+			ref = Constants.HEAD;
+		}
 		CloneOperation cloneOperation = new CloneOperation(gitUri, true, null,
-				destination, Constants.HEAD, remoteName, getEgitTimeout());
+				destination, ref, remoteName, getEgitTimeout());
 		if (postCloneTask != null) {
 			cloneOperation.addPostCloneTask(postCloneTask);
 		}

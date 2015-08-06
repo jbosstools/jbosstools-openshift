@@ -39,9 +39,11 @@ public class ImportNewProject {
 
 	private File cloneDestination;
 	private String gitUrl;
+	private String gitRef;
 
-	public ImportNewProject(String gitUrl, File cloneDestination) {
+	public ImportNewProject(String gitUrl, String gitRef, File cloneDestination) {
 		this.gitUrl = gitUrl;
+		this.gitRef = gitRef;
 		this.cloneDestination = cloneDestination;
 	}
 
@@ -70,7 +72,7 @@ public class ImportNewProject {
 		}
 
 		File repositoryFolder =
-				cloneRepository(gitUrl, cloneDestination, monitor);
+				cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 	}
@@ -118,6 +120,8 @@ public class ImportNewProject {
 	 *            the name of the remote repo to clone
 	 * @param destination
 	 *            the destination to clone to
+	 * @param gitRef
+	 *            the git reference to check-out
 	 * @param addToRepoView
 	 *            if true, the clone repo will get added to the (egit)
 	 *            repositories view
@@ -133,12 +137,12 @@ public class ImportNewProject {
 	 * @see AbstractImportApplicationOperation#getApplication()
 	 * @see #getRepositoryPath()
 	 */
-	protected File cloneRepository(String gitUrl, File destination, IProgressMonitor monitor)
+	protected File cloneRepository(String gitUrl, File destination, String gitRef, IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		monitor.subTask(NLS.bind("Cloning  {0}...", gitUrl));
 		EGitUIUtils.ensureEgitUIIsStarted();
 		EGitUtils.cloneRepository(
-					gitUrl, Constants.DEFAULT_REMOTE_NAME, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+					gitUrl, Constants.DEFAULT_REMOTE_NAME, gitRef, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
 		return destination;
 	}
 

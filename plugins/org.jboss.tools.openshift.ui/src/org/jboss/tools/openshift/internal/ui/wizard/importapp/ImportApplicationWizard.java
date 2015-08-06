@@ -86,8 +86,9 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus jobResult = WizardUtils.runInWizard(
-					new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor), delegatingMonitor, getContainer());
+			ImportJob importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor)
+					.setGitRef(model.getGitRef());
+			IStatus jobResult = WizardUtils.runInWizard(importJob, delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", 
