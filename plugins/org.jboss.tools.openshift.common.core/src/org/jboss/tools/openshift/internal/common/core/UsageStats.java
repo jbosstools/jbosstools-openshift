@@ -76,32 +76,32 @@ public class UsageStats {
 	}
 
 	public void newV2Connection(String host) {
-		UsageReporter.getInstance().countEvent(
+		UsageReporter.getInstance().trackEvent(
 				newConnectionV2.event(getHostType(host)));
 	}
 
 	public void newV2Application(String host, boolean success) {
-		UsageReporter.getInstance().countEvent(
+		UsageReporter.getInstance().trackEvent(
 				newApplicationV2.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	public void importV2Application(String host, boolean success) {
-		UsageReporter.getInstance().countEvent(
+		UsageReporter.getInstance().trackEvent(
 				importApplicationV2.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	public void newV3Connection(String host) {
-		UsageReporter.getInstance().countEvent(
+		UsageReporter.getInstance().trackEvent(
 				newConnectionV3.event(getHostType(host)));
 	}
 
 	public void newV3Application(String host, boolean success) {
-		UsageReporter.getInstance().countEvent(
+		UsageReporter.getInstance().trackEvent(
 				newApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	public void importV3Application(String host, boolean success) {
-		UsageReporter.getInstance().countEvent(
+		UsageReporter.getInstance().trackEvent(
 				importApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
