@@ -5,3 +5,4 @@ bin/
 .project
 .plugins/.project
 .recommenders
+.DS_Store
