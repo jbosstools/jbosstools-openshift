@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
+import java.util.Collections;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -17,6 +19,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
@@ -88,6 +91,11 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
 			ImportJob importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor)
 					.setGitRef(model.getGitRef());
+			
+			String gitContextDir = model.getGitContextDir();
+			if (!StringUtils.isEmptyOrNull(gitContextDir)) {
+				importJob.setFilters(Collections.singleton(gitContextDir));
+			}
 			IStatus jobResult = WizardUtils.runInWizard(importJob, delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {

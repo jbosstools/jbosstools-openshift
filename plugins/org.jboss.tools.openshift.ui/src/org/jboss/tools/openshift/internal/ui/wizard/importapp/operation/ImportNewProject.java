@@ -14,9 +14,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Matcher;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,14 +40,18 @@ import com.openshift.restclient.OpenShiftException;
  */
 public class ImportNewProject {
 
+	private static final String PLATFORM_SEPARATOR = Matcher.quoteReplacement(File.separator);
+	
 	private File cloneDestination;
 	private String gitUrl;
 	private String gitRef;
+	private Collection<String> filters;
 
-	public ImportNewProject(String gitUrl, String gitRef, File cloneDestination) {
+	public ImportNewProject(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters) {
 		this.gitUrl = gitUrl;
 		this.gitRef = gitRef;
 		this.cloneDestination = cloneDestination;
+		this.filters = sanitize(filters);
 	}
 
 	/**
@@ -73,7 +80,7 @@ public class ImportNewProject {
 
 		File repositoryFolder =
 				cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
-		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, monitor);
+		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 	}
 	
@@ -83,16 +90,18 @@ public class ImportNewProject {
 	 * 
 	 * @param folder
 	 *            the folder the projects are located in
+	 * @param filters 
 	 * @param monitor
 	 *            the monitor to report progress to
 	 * @return
 	 * @throws CoreException
 	 * @throws InterruptedException
 	 */
-	private List<IProject> importProjectsFrom(final File folder, IProgressMonitor monitor)
+	private List<IProject> importProjectsFrom(final File folder, Collection<String> filters, IProgressMonitor monitor)
 			throws CoreException, InterruptedException {
 		MavenProjectImportOperation mavenImport = new MavenProjectImportOperation(folder);
-		List<IProject> importedProjects = Collections.emptyList();
+		mavenImport.setFilters(filters);
+		List<IProject> importedProjects;
 		if (mavenImport.isMavenProject()) {
 			importedProjects = mavenImport.importToWorkspace(monitor);
 		} else {
@@ -154,5 +163,23 @@ public class ImportNewProject {
 	protected boolean cloneDestinationExists() {
 		return cloneDestination != null
 				&& cloneDestination.exists();
+	}
+
+	private static Collection<String> sanitize(Collection<String> filters) {
+		Collection<String> sanitized = null;
+		if (filters != null) {
+			sanitized = new LinkedHashSet<>(filters.size());
+			for (String path : filters) {
+				if (StringUtils.isBlank(path)) {
+					sanitized.add(makePlatformDependent(path));
+				}
+			}
+		}
+		return sanitized;
+	}
+
+	private static String makePlatformDependent(String path) {
+		return path.replaceAll("/", PLATFORM_SEPARATOR)
+				   .replaceAll("\\\\", PLATFORM_SEPARATOR);
 	}
 }

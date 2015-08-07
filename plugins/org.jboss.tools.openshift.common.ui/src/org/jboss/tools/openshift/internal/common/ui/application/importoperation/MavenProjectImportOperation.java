@@ -36,17 +36,22 @@ import org.eclipse.osgi.util.NLS;
 public class MavenProjectImportOperation extends AbstractProjectImportOperation {
 
 	private static final String POM_FILE = "pom.xml";
+	private Collection<String> filters;
 
 	public MavenProjectImportOperation(File projectFolder) {
 		super(projectFolder);
 	}
 
+	public void setFilters(Collection<String> filters) {
+		this.filters = filters;
+	}
+	
 	public List<IProject> importToWorkspace(IProgressMonitor monitor)
 			throws CoreException, InterruptedException {
 		MavenPluginActivator mavenPlugin = MavenPluginActivator.getDefault();
 		IProjectConfigurationManager configurationManager = mavenPlugin.getProjectConfigurationManager();
 		MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
-		Set<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), modelManager, monitor);
+		Set<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), filters, modelManager, monitor);
 		ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration();
 		List<IMavenProjectImportResult> importResults =
 				configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
@@ -78,21 +83,48 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		return projects;
 	}
 
-	private Set<MavenProjectInfo> getMavenProjects(File directory, MavenModelManager modelManager,
+	private Set<MavenProjectInfo> getMavenProjects(File directory, Collection<String> filters, MavenModelManager modelManager,
+			IProgressMonitor monitor) throws InterruptedException {
+		if (filters == null || filters.isEmpty()) {
+			return scan(directory, modelManager, monitor);
+		}
+		Set<MavenProjectInfo> projectInfos = new LinkedHashSet<>();
+		for (String path : filters) {
+			File dir = new File(directory, path);
+			projectInfos.addAll(scan(dir, modelManager, monitor));
+		}
+		return projectInfos;
+	}
+
+	private Set<MavenProjectInfo> scan(File directory, MavenModelManager modelManager,
 			IProgressMonitor monitor) throws InterruptedException {
 		LocalProjectScanner scanner = new LocalProjectScanner(directory.getParentFile(), directory.toString(), false,
 				modelManager);
 		scanner.run(monitor);
 		return collectProjects(scanner.getProjects());
 	}
-
+	
 	public boolean isMavenProject() {
-		if (!isReadable(getProjectDirectory())
-				|| !getProjectDirectory().isDirectory()) {
+		File root = getProjectDirectory();
+		if (filters == null || filters.isEmpty()) {
+			return  isMavenProject(root);
+		}
+		for (String path : filters) {
+			File dir = new File(root, path);
+			if (isMavenProject(dir)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isMavenProject(File dir) {
+		if (!isReadable(dir)
+				|| !dir.isDirectory()) {
 			return false;
 		}
 
-		return isReadable(new File(getProjectDirectory(), POM_FILE));
+		return isReadable(new File(dir, POM_FILE));
 	}
 	
 	public Set<MavenProjectInfo> collectProjects(
@@ -110,4 +142,5 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 			}
 		}.collectProjects(projects);
 	}
+
 }

@@ -195,4 +195,12 @@ public class ImportApplicationWizardModel
 	public Object getContext() {
 		return null;
 	}
+
+	public String getGitContextDir() {
+		IBuildConfig config = getSelectedBuildConfig();
+		if (config != null && config.getBuildSource() instanceof IGitBuildSource){
+			return ((IGitBuildSource)config.getBuildSource()).getContextDir();
+		}
+		return null;
+	}
 }
