@@ -4,8 +4,9 @@
       label="%featureName"
       version="3.0.0.qualifier"
       provider-name="%providerName"
+      plugin="org.jboss.tools.openshift.egit.ui"
       license-feature="org.jboss.tools.foundation.license.feature"
-	  license-feature-version="0.0.0">
+      license-feature-version="0.0.0">
 
    <description url="http://www.jboss.org/tools">
       %description
@@ -15,7 +16,9 @@
       %copyright
    </copyright>
 
-   <license>%license</license>
+   <license>
+      %license
+   </license>
 
    <plugin
          id="org.jboss.tools.openshift.egit.core"
