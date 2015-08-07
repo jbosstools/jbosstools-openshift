@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.openshift.core
 Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator
 Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.common.core;bundle-version="[3.7.0,4.0.0)",

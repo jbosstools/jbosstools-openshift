@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.openshift.client;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
 Bundle-ClassPath: lib/openshift-restclient-java-3.0.0-SNAPSHOT.jar,
  lib/commons-compress-1.8.1.jar,
  lib/jboss-dmr-1.2.0.Final.jar,
