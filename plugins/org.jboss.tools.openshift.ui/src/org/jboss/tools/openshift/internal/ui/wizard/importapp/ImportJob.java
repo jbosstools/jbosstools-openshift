@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -38,6 +39,7 @@ public class ImportJob extends WorkspaceJob {
 	private String gitUrl;
 	private File cloneDestination;
 	private String gitRef;
+	private Collection<String> filters;
 
 	public ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
 		super("Importing project to workspace...");
@@ -51,7 +53,7 @@ public class ImportJob extends WorkspaceJob {
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
 			delegatingMonitor.add(monitor);
-			new ImportNewProject(gitUrl, gitRef, cloneDestination).execute(delegatingMonitor);
+			new ImportNewProject(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
 			return Status.OK_STATUS;
 		} catch (final WontOverwriteException e) {
 			openError("Project already present", e.getMessage());
@@ -115,5 +117,8 @@ public class ImportJob extends WorkspaceJob {
 		return this;
 	}
 
-
+	public ImportJob setFilters(Collection<String> filters) {
+		this.filters = filters;
+		return this;
+	}
 }
