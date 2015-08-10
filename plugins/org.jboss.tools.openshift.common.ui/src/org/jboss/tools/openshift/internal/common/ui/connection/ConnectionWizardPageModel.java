@@ -167,10 +167,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			host = selectedConnection.getHost();
 		} else if (factory != null) {
 			// factory changed
-			if (useDefaultHost
-					&& !StringUtils.isEmpty(factory.getDefaultHost())) {
-				host = factory.getDefaultHost();
-			}
+			host = factory.getDefaultHost();
 		}
 
 		return host;
