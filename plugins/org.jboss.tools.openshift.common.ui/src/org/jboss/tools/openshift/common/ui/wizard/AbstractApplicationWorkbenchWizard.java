@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
@@ -117,7 +118,11 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			if (factory == null) {
 				return false;
 			}
-			IConnection connection = factory.create(getModel().getHost());
+			String host = getModel().getHost();
+			if (StringUtils.isEmpty(host)){
+			    return false;
+			}
+			IConnection connection = factory.create(host);
 			if (connection == null) {
 				return false;
 			}
