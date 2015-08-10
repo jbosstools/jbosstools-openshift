@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.wizard.project;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -43,8 +42,6 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
@@ -52,7 +49,9 @@ import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICe
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
+import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 
 import com.openshift.restclient.model.IProject;
 
@@ -162,30 +161,12 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 					return;
 				}
 				boolean confirm = MessageDialog.openConfirm(getShell(), 
-						"OpenShift project deletion", 
-						NLS.bind("You are about to delete the \"{0}\" project.\nDo you want to continue?", project.getName()));
+						OpenShiftUIMessages.ProjectDeletionDialogTitle, 
+						NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, project.getName()));
 				if (!confirm) {
 					return;
 				}
-				final List<IProject> oldProjects = pageModel.getProjects();
-				final List<IProject> newProjects = new ArrayList<IProject>(oldProjects);
-				newProjects.remove(project);
-				DeleteResourceJob job = new DeleteResourceJob(project) {
-
-					@Override
-					protected IStatus doRun(IProgressMonitor monitor) {
-						IStatus status = super.doRun(monitor);
-						if(status.isOK()) {
-							ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-									pageModel.getConnection(), 
-									ConnectionProperties.PROPERTY_PROJECTS, 
-									oldProjects, 
-									newProjects);
-						}
-						return status;
-					}
-					
-				};
+				DeleteResourceJob job = OpenShiftJobs.createDeleteProjectJob(project);
 				try {
 					org.jboss.tools.common.ui.WizardUtils.runInWizard(
 							job, job.getDelegatingProgressMonitor(), getContainer(), dbc);

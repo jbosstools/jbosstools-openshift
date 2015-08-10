@@ -13,38 +13,48 @@ package org.jboss.tools.openshift.internal.ui.handler;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.common.ui.wizard.OkButtonWizardDialog;
-import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
+import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
+import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 
-import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IProject;
 
 /**
  * @author jeff.cantrill
+ * @author fbricon@gmail.com
  */
-public class ManageProjectsHandler extends AbstractHandler {
+public class DeleteProjectsHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if (connection == null) {
-			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
-			if (resource != null) {
-				connection = ConnectionsRegistryUtil.getConnectionFor(resource);
-			}
+		final IProject project = UIUtils.getFirstElement(selection, IProject.class);
+		if(project == null) {
+			return OpenShiftUIActivator.statusFactory().cancelStatus("No project selected that we can delete."); //$NON-NLS-1$
 		}
-		if(connection == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected that we can manage projects for.");
-		}
-		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event),
-				new ManageProjectsWizard(connection)).open();
+		deleteProject(project, HandlerUtil.getActiveShell(event));
 		return null;
+	}
+	
+	private void deleteProject(final IProject project, Shell shell) {
+		if (project == null) {
+			return;
+		}
+		boolean confirm = MessageDialog.openConfirm(shell, 
+				OpenShiftUIMessages.ProjectDeletionDialogTitle, 
+				NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, project.getName()));
+		if (!confirm) {
+			return;
+		}
+		DeleteResourceJob job = OpenShiftJobs.createDeleteProjectJob(project);
+		job.schedule();
 	}
 
 }

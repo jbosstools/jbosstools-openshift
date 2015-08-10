@@ -214,8 +214,34 @@
                     value="1">
               </count>
               <iterate>
+              	<or>
+				 <instanceof
+					value="com.openshift.restclient.model.IProject"/>
                  <instanceof
-                       value="org.jboss.tools.openshift.core.connection.Connection">
+                    value="org.jboss.tools.openshift.core.connection.Connection"/>
+				</or>
+              </iterate>
+           </and>
+        </visibleWhen>
+     </command>
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.project.delete"
+           style="push"
+           tooltip="Delete Project">
+        <visibleWhen
+              checkEnabled="false">
+           <and>
+             <!-- TODO support deletion of several projects in 1 command -->
+              <count
+                    value="1">
+              </count>
+              <iterate>
+                 <instanceof
+                       value="com.openshift.restclient.model.IProject">
                  </instanceof>
               </iterate>
            </and>
@@ -302,11 +328,15 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
-		<handler
-        	class="org.jboss.tools.openshift.internal.ui.handler.ManageProjectsHandler"
-			commandId="org.jboss.tools.openshift.ui.command.project.manage">
-		</handler>
-		<handler
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.ManageProjectsHandler"
+        commandId="org.jboss.tools.openshift.ui.command.project.manage">
+  </handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
+        commandId="org.jboss.tools.openshift.ui.command.project.delete">
+  </handler>
+  		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewApplicationHandler"
 			commandId="org.jboss.tools.openshift.ui.command.application.new">
 		</handler>
@@ -394,6 +424,11 @@
         id="org.jboss.tools.openshift.ui.command.project.manage"
         name="%openshift.command.project.manage">
   </command>
+  <command
+        description="Delete Project"
+        id="org.jboss.tools.openshift.ui.command.project.delete"
+        name="%openshift.command.project.delete">
+  </command>
 		<command
 			description="Refresh the Resource"
 			id="org.jboss.tools.openshift.ui.command.resource.refresh"
@@ -442,7 +477,7 @@
 			connection="org.jboss.tools.openshift.core.connection.Connection">
     	</newApplicationWizard>
     </extension>
-    
+
 	<!-- import wizard application -->
 	<extension
 		point="org.jboss.tools.openshift.ui.importApplicationWizard">
@@ -452,7 +487,7 @@
     	</importApplicationWizard>
     </extension>
 
-    
+
     <!-- Import Application -->
     <extension
            point="org.eclipse.ui.commands">
@@ -553,5 +588,5 @@
           name="%openshift.preferences.page.title">
     </page>
  </extension>
-    
+
 </plugin>
