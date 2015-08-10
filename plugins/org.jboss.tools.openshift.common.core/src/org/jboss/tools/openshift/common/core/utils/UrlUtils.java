@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.common.core.utils;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -244,8 +246,17 @@ public class UrlUtils {
 	}
 
 	public static boolean isValid(String url) {
-		// test via new URL(url) is far too slow, using a regex
-		return SIMPLE_URL_PATTERN.matcher(url).matches();
+		// Test via regex first. If passes then check via new URL(url) and URI(url) which are slower
+		if(SIMPLE_URL_PATTERN.matcher(url).matches()) {
+			try {
+				new URI(url);
+				new URL(url);
+			} catch (MalformedURLException | URISyntaxException e) {
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	/**
