@@ -65,7 +65,6 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotEmptyString
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
-import org.jboss.tools.openshift.internal.common.ui.utils.HttpsPrefixingAdapter;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
@@ -75,6 +74,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  */
 public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
+	private static final String COL_SLASHES = "://";
 	private final ConnectionWizardPageModel pageModel;
 	private ConnectionEditorsStackedView connectionEditors;
 
@@ -184,7 +184,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
 		Combo serversCombo = new Combo(parent, SWT.BORDER);
-		new HttpsPrefixingAdapter().addTo(serversCombo);
 		ComboViewer serversViewer = new ComboViewer(serversCombo);
 		serversViewer.setContentProvider(new ObservableListContentProvider());
 		serversViewer.setInput(BeanProperties.list(ConnectionWizardPageModel.PROPERTY_ALL_HOSTS).observe(pageModel));
@@ -199,7 +198,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					return;
 				}
 				String url = value;
-				if (!url.endsWith("://")) {
+				if (!url.startsWith(UrlUtils.SCHEME_HTTP) && !url.contains(":")) {
+					url = UrlUtils.ensureStartsWithScheme(value, UrlUtils.SCHEME_HTTPS);
+				}
+				if (!url.endsWith(COL_SLASHES)) {
 					url = StringUtils.removeTrailingSlashes(url);
 				}
 				if (!url.equals(value)){
