@@ -44,6 +44,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -83,7 +84,9 @@ import com.openshift.restclient.authorization.IAuthorizationDetails;
  */
 public class OAuthDetailView extends BaseDetailsView implements IConnectionEditorDetailView {
 
-	private static final String MSG_TOKEN = "Enter a token or <a>retrieve</a> a new one.";
+	private static final String MSG1_TOKEN = "Enter a token or";
+	private static final String LINK_TOKEN = "<a>retrieve</a>";
+	private static final String MSG2_TOKEN = "a new one.";
 	
 	private IObservableValue tokenObservable;
 	private Binding tokenBinding;
@@ -94,6 +97,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private IAuthorizationDetails authDetails;
 	private ConnectionWizardPageModel pageModel;
 	private Button chkRememberToken;
+	
+	final Cursor cursor = new Cursor(null, SWT.CURSOR_HAND);
 
 	private IWizard wizard;
 
@@ -117,16 +122,35 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).spacing(10, 10).applyTo(composite);
 		
-		StyledText tokenRequestLink = new StyledText(composite, SWT.WRAP);
+		Composite textContainer = new Composite(composite, SWT.None);
+		
+		GridLayoutFactory.fillDefaults()
+		.numColumns(3).spacing(1, 1).applyTo(textContainer);
+		
+		StyledText token1 = new StyledText(textContainer, SWT.WRAP);
+		
+		StyledTextUtils.setTransparent(token1);
+		StyledTextUtils.setLinkText(MSG1_TOKEN, token1);
+		token1.setEditable(false);
+		
+		StyledText tokenRequestLink = new StyledText(textContainer, SWT.WRAP);
 		StyledTextUtils.setTransparent(tokenRequestLink);
-		StyledTextUtils.setLinkText(MSG_TOKEN, tokenRequestLink);
+		StyledTextUtils.setLinkText(LINK_TOKEN, tokenRequestLink);
 		tokenRequestLink.setEditable(false);
+		tokenRequestLink.setCursor(cursor);
+		
+		StyledText token2 = new StyledText(textContainer, SWT.WRAP);
+		StyledTextUtils.setTransparent(token2);
+		StyledTextUtils.setLinkText(MSG2_TOKEN, token2);
+		token2.setEditable(false);
+		
 		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(tokenRequestLink);
+			.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(textContainer);
 		if(authDetails != null) {
 			authDetails.getRequestTokenLink();
 		}
 		tokenRequestLink.addListener(SWT.MouseDown, onRetrieveLinkClicked(parent.getShell()));
+		
 		//token
 		Label lblAuthType = new Label(composite, SWT.NONE);
 		lblAuthType.setText("Token");
