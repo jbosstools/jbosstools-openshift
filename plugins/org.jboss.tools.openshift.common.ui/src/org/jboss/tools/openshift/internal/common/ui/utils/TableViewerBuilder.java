@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -66,6 +67,10 @@ public class TableViewerBuilder {
 		return new ColumnBuilder<E>().labelProvider(columnLabelProvider);
 	}
 
+	public <E>ColumnBuilder<E> column(CellLabelProvider cellLabelProvider) {
+		return new ColumnBuilder<E>().labelProvider(cellLabelProvider);
+	}
+
 	public TableViewer buildViewer() {
 		return viewer;
 	}
@@ -74,6 +79,7 @@ public class TableViewerBuilder {
 		
 		private int alignement;
 		private IColumnLabelProvider<E> columnLabelProvider;
+		private CellLabelProvider cellLabelProvider;
 		private ICellToolTipProvider<E> cellToolTipProvider;
 		private String name;
 		private int weight;
@@ -84,6 +90,11 @@ public class TableViewerBuilder {
 		
 		public ColumnBuilder<E> labelProvider(IColumnLabelProvider<E> labelProvider) {
 			this.columnLabelProvider = labelProvider;
+			return this;
+		}
+
+		public ColumnBuilder<E> labelProvider(CellLabelProvider labelProvider) {
+			this.cellLabelProvider = labelProvider;
 			return this;
 		}
 
@@ -118,36 +129,54 @@ public class TableViewerBuilder {
 			}
 			TableViewerColumn column = new TableViewerColumn(viewer, alignement);
 			column.getColumn().setText(name);
-			column.setLabelProvider(new CellLabelProvider() {
-
-				@Override
-				public void update(ViewerCell cell) {
-					@SuppressWarnings("unchecked")
-					String cellValue = columnLabelProvider.getValue((E) cell.getElement());
-					cell.setText(cellValue);
-				}
-				
-				@SuppressWarnings("unchecked")
-				@Override
-				public String getToolTipText(Object object) {
-					if(cellToolTipProvider != null) {
-						return cellToolTipProvider.getToolTipText((E) object);
-					}
-					return super.getToolTipText(object);
-				};
-				
-				@SuppressWarnings("unchecked")
-				@Override
-				public int getToolTipDisplayDelayTime(Object element) {
-					if(cellToolTipProvider != null) {
-						return cellToolTipProvider.getToolTipDisplayDelayTime((E) element);
-					}
-					return super.getToolTipDisplayDelayTime(element);
-				}
-				
-			});
+			setLabelAndTooltipProviders(columnLabelProvider, cellLabelProvider, cellToolTipProvider, column);
 			tableLayout.setColumnData(column.getColumn(), new ColumnWeightData(weight, minWidth, true));
 			return TableViewerBuilder.this;
+		}
+
+		private void setLabelAndTooltipProviders(
+				final IColumnLabelProvider<E> labelProvider, final CellLabelProvider cellLabelProvider, final ICellToolTipProvider<E> tooltipProvider, TableViewerColumn column) {
+			Assert.isLegal(labelProvider != null
+					|| cellLabelProvider != null
+					, "set either IColumnLabelProvider or CellLabelProvider");
+			Assert.isLegal((cellLabelProvider != null && tooltipProvider == null)
+					|| cellLabelProvider == null
+					, "cannot use ITooltipProvider with with CellLabelProvider");
+			if (labelProvider != null) {
+				column.setLabelProvider(new CellLabelProvider() {
+
+					@Override
+					public void update(ViewerCell cell) {
+						if (labelProvider != null) {
+							@SuppressWarnings("unchecked")
+							String cellValue = labelProvider.getValue((E) cell.getElement());
+							cell.setText(cellValue);
+						}
+					}
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public String getToolTipText(Object object) {
+						if (tooltipProvider != null) {
+							return tooltipProvider.getToolTipText((E) object);
+						} else {
+							return super.getToolTipText(object);
+						}
+					};
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public int getToolTipDisplayDelayTime(Object element) {
+						if (tooltipProvider != null) {
+							return tooltipProvider.getToolTipDisplayDelayTime((E) element);
+						} else {
+							return super.getToolTipDisplayDelayTime(element);
+						}
+					}
+				});
+			} else {
+					column.setLabelProvider(cellLabelProvider);
+			}
 		}
 	}
 

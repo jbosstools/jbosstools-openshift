@@ -12,20 +12,28 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICellToolTipProvider;
+import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvider;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterUtils.ParameterNameViewerComparator;
+
+import com.openshift.restclient.model.template.IParameter;
 
 /**
  * 
  * @author jeff.cantrill
- *
+ * @author Andre Dietisheim
  */
 public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 
@@ -58,9 +66,51 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 			.grab(true, true)
 			.applyTo(parameters);
 		
-		TableViewer viewer = TemplateParametersPage.createTable(parameters);
+		TableViewer viewer = createTable(parameters);
 		viewer.setInput(job.getParameters());
 	}
 	
-	
+	public static TableViewer createTable(Composite tableContainer) {
+		Table table =
+				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		table.setLinesVisible(true);
+		table.setHeaderVisible(true);
+		ICellToolTipProvider<IParameter> cellToolTipProvider = new ICellToolTipProvider<IParameter>() {
+
+			@Override
+			public String getToolTipText(IParameter object) {
+				return object.getDescription();
+			}
+
+			@Override
+			public int getToolTipDisplayDelayTime(IParameter object) {
+				return 0;
+			}
+		};
+		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
+				.contentProvider(new ArrayContentProvider())
+				.column(new IColumnLabelProvider<IParameter>() {
+
+					@Override
+					public String getValue(IParameter variable) {
+						return variable.getName();
+					}})
+					.cellToolTipProvider(cellToolTipProvider)
+					.name("Name")
+					.align(SWT.LEFT).weight(2).minWidth(100)
+					.buildColumn()
+				.column(new IColumnLabelProvider<IParameter>() {
+
+					@Override
+					public String getValue(IParameter parameter) {
+						return TemplateParameterUtils.getValue(parameter);
+					}})
+					.cellToolTipProvider(cellToolTipProvider)
+					.name("Value")
+					.align(SWT.LEFT).weight(2).minWidth(100)
+					.buildColumn()
+				.buildViewer();
+		viewer.setComparator(new ParameterNameViewerComparator());
+		return viewer;
+	}
 }
