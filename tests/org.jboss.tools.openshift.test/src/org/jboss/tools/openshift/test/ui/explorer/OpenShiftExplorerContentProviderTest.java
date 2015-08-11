@@ -83,7 +83,7 @@ public class OpenShiftExplorerContentProviderTest {
 	@Test
 	public void getChildrenForConnectionReturnsProjects(){
 		List<IProject> projects = Arrays.asList(new IProject[]{project});
-		when(client.<IProject>list(ResourceKind.PROJECT)).thenReturn(projects);
+		when(client.<IProject>list(ResourceKind.PROJECT, "")).thenReturn(projects);
 		
 		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  provider.getChildrenFor(connection));
 	}

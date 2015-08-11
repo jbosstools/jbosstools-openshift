@@ -222,6 +222,58 @@
 			</visibleWhen>
      </command>
   </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.podlogs"
+           id="org.jboss.tools.openshift.ui.explorer.command.podlogs"
+           tooltip="The openshift binary must be set in user preferences in order to retrieve pod logs">
+        <visibleWhen>
+           <with
+                 variable="selection">
+              <and>
+                 <count
+                       value="1">
+                 </count>
+                 <iterate
+                       ifEmpty="false"
+                       operator="and">
+                    <instanceof
+                          value="com.openshift.restclient.model.IPod">
+                    </instanceof>
+                 </iterate>
+              </and>
+           </with>
+        </visibleWhen>
+     </command>
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.buildlogs"
+           id="org.jboss.tools.openshift.ui.explorer.command.buildlogs"
+           tooltip="The openshift binary must be set in user preferences in order to retrieve build logs">
+        <visibleWhen>
+           <with
+                 variable="selection">
+              <and>
+                 <count
+                       value="1">
+                 </count>
+                 <iterate
+                       ifEmpty="false"
+                       operator="and">
+                    <instanceof
+                          value="com.openshift.restclient.model.IBuild">
+                    </instanceof>
+                 </iterate>
+              </and>
+           </with>
+        </visibleWhen>
+     </command>
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -253,6 +305,10 @@
 	        class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
 	        commandId="org.jboss.tools.openshift.ui.command.clonebuild">
 	  </handler>
+   <handler
+         class="org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler"
+         commandId="org.jboss.tools.openshift.ui.command.podlogs">
+   </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -326,6 +382,15 @@
 	        id="org.jboss.tools.openshift.ui.command.clonebuild"
 	        name="%openshift.command.build.clonebuild">
 	  </command>
+   <command
+         id="org.jboss.tools.openshift.ui.command.podlogs"
+         name="%openshift.command.pod.logs">
+   </command>
+   <command
+         defaultHandler="org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler"
+         id="org.jboss.tools.openshift.ui.command.buildlogs"
+         name="%openshift.command.build.logs">
+   </command>
 	</extension>
 
 	<!-- editor for express connections -->

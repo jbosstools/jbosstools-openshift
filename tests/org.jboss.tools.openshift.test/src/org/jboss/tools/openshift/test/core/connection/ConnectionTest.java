@@ -86,7 +86,7 @@ public class ConnectionTest {
 	@Test
 	public void getResourceKindShouldCallClient(){
 		List<IProject> projects = Arrays.asList(mock(IProject.class));
-		when(client.<IProject>list(ResourceKind.PROJECT)).thenReturn(projects);
+		when(client.<IProject>list(ResourceKind.PROJECT, "")).thenReturn(projects);
 		
 		assertArrayEquals("Exp. to get projects from the client",projects.toArray(), connection.getResources(ResourceKind.PROJECT).toArray());
 	}

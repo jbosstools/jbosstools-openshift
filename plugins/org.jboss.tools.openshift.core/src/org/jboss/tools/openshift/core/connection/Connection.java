@@ -328,11 +328,15 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws OpenShiftException
 	 */
 	public <T extends IResource> List<T> getResources(String kind) {
+		return getResources(kind,"");
+	}
+	
+	public <T extends IResource> List<T> getResources(String kind, String namespace) {
 		try {
 			if(client.getAuthorizationStrategy() == null) {
 				client.setAuthorizationStrategy(getAuthorizationStrategy());
 			}
-			return client.list(kind);
+			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
 			return retryList("Unauthorized.  Trying to reauthenticate", e, kind);
 		}
