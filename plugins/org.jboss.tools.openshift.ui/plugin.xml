@@ -106,6 +106,7 @@
 			<command
 				commandId="org.jboss.tools.openshift.ui.command.application.new"
 				style="push"
+				icon="icons/query-new.gif"
 				tooltip="Create a new application">
 				<visibleWhen
 					checkEnabled="false">
