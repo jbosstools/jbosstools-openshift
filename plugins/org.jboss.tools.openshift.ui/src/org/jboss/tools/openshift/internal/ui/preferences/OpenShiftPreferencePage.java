@@ -66,6 +66,11 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		this.cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
 		this.cliLocationEditor.setFileExtensions(EXTENSIONS);
 		addField(cliLocationEditor);
+		//TODO Fix the Layout
+        Link link = new Link(getFieldEditorParent(), SWT.WRAP );
+        link.setText("Openshift plugin needs the openshift client binary (CLI) to provide some features like port forwarding.<br>"
+            + "You can find more information about how to install it <a href=\"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github\">here</a>");
+        //TODO open the links
     }
 
     @Override
