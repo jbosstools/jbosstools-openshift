@@ -45,7 +45,6 @@ import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePr
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.utils.ContentProposalUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.IApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICartridgeApplicationTemplate;
 import org.jboss.tools.openshift.express.internal.ui.wizard.application.template.ICodeAnythingApplicationTemplate;
@@ -122,7 +121,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
 			String templateName = applicationTemplate.getName();
 			this.nameText.setText(templateName);
-			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(templateName, null));
+			this.nameText.setStyleRange(StyledTextUtils.createBoldStyleRange(templateName, null));
 			this.descriptionText.setText(applicationTemplate.getDescription());
 		}
 
@@ -198,7 +197,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
 			String name = applicationTemplate.getName();
 			this.nameText.setText(name);
-			this.nameText.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
+			this.nameText.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
 			this.descriptionText.setText(applicationTemplate.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);

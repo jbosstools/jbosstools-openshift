@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvid
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterUtils.ParameterNameViewerComparator;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils.ParameterNameViewerComparator;
 
 import com.openshift.restclient.model.template.IParameter;
 
@@ -103,7 +103,7 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 
 					@Override
 					public String getValue(IParameter parameter) {
-						return TemplateParameterUtils.getValue(parameter);
+						return TemplateParameterViewerUtils.getValueLabel(parameter);
 					}})
 					.cellToolTipProvider(cellToolTipProvider)
 					.name("Value")

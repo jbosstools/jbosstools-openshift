@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -108,4 +109,14 @@ public class StyledTextUtils {
 		}
 	}
 
+	public static StyleRange createBoldStyleRange(String string, Color background) {
+		StyleRange styleRange = new StyleRange();
+		styleRange.fontStyle = SWT.BOLD;
+		if (background != null) {
+			styleRange.background = background;
+		}
+		styleRange.start = 0;
+		styleRange.length = string.length();
+		return styleRange;
+	}
 }

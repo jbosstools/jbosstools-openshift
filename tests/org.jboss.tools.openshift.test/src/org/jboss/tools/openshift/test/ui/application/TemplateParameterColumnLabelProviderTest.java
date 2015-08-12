@@ -11,7 +11,7 @@ package org.jboss.tools.openshift.test.ui.application;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterUtils;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,25 +30,25 @@ public class TemplateParameterColumnLabelProviderTest {
 	
 	@Test
 	public void parametersWithBlankValueAndNoGeneratorShouldReturnBlank() {
-		assertEquals("", TemplateParameterUtils.getValue(param));
+		assertEquals("", TemplateParameterViewerUtils.getValueLabel(param));
 	}
 
 	@Test
 	public void parametersWithBlankValueAndAGeneratorShouldReturnGenerated() {
 		when(param.getGeneratorName()).thenReturn("expression");
-		assertEquals("(generated)", TemplateParameterUtils.getValue(param));
+		assertEquals("(generated)", TemplateParameterViewerUtils.getValueLabel(param));
 	}
 
 	@Test
 	public void parametersWithAValueAndNoGeneratorShouldReturnTheValue() {
 		when(param.getValue()).thenReturn("abc123");
-		assertEquals("abc123", TemplateParameterUtils.getValue(param));
+		assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
 	}
 	
 	@Test
 	public void parametersWithAValueAndAGeneratorShouldReturnTheValue() {
 		when(param.getGeneratorName()).thenReturn("expression");
 		when(param.getValue()).thenReturn("abc123");
-		assertEquals("abc123", TemplateParameterUtils.getValue(param));
+		assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
 	}
 }

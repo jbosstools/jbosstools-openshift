@@ -19,12 +19,12 @@ import com.openshift.restclient.model.template.IParameter;
 /**
  * @author Andre Dietisheim
  */
-public class TemplateParameterUtils {
+public class TemplateParameterViewerUtils {
 
-	private TemplateParameterUtils() {
+	private TemplateParameterViewerUtils() {
 	}
 
-	public static String getValue(IParameter parameter) {
+	public static String getValueLabel(IParameter parameter) {
 		if (parameter == null) {
 			return null;
 		}

@@ -33,13 +33,11 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCartridge;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
-import org.jboss.tools.openshift.express.internal.ui.utils.StyleRangeUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.cartridge.ICartridge;
 
@@ -101,7 +99,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			ICartridge embeddableCartridge = (ICartridge) value;
 			String name = ExpressResourceLabelUtils.toString(embeddableCartridge);
 			this.nameLabel.setText(name);
-			this.nameLabel.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
+			this.nameLabel.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
 
 			this.description.setText(embeddableCartridge.getDescription());
 		}
@@ -150,7 +148,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			ICartridge cartridge = (ICartridge) value;
 			String cartridgeLabel = ExpressResourceLabelUtils.toString(cartridge);
 			this.name.setText(cartridgeLabel);
-			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(cartridgeLabel, null));
+			this.name.setStyleRange(StyledTextUtils.createBoldStyleRange(cartridgeLabel, null));
 			if (cartridge.getUrl() != null) {
 				this.url.setText(cartridge.getUrl().toString());
 			}
@@ -216,7 +214,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			CodeAnythingCartridge cartridge = (CodeAnythingCartridge) value;
 			String name = cartridge.getDisplayName();
 			this.name.setText(name);
-			this.name.setStyleRange(StyleRangeUtils.createBoldStyleRange(name, null));
+			this.name.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
 			this.description.setText(cartridge.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(100, urlText);

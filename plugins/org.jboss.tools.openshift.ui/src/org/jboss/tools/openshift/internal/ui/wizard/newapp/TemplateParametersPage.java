@@ -14,6 +14,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.map.ObservableMap;
 import org.eclipse.core.databinding.observable.map.WritableMap;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
@@ -51,7 +52,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2Boolea
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerCellDecorationManager;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterUtils.ParameterNameViewerComparator;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils.ParameterNameViewerComparator;
 
 import com.openshift.restclient.model.template.IParameter;
 
@@ -78,35 +79,26 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
-
-		Group templateParametersGroup = new Group(container, SWT.NONE);
-		templateParametersGroup.setText("Template Parameters");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(templateParametersGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(templateParametersGroup);
-		Composite tableContainer = new Composite(templateParametersGroup, SWT.NONE);
+			.numColumns(2).margins(10, 10)
+			.applyTo(container);
 		
+		// parameters table
+		Composite tableContainer = new Composite(container, SWT.NONE);
 		this.viewer = createTable(tableContainer, dbc);
 		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(300, 440).applyTo(tableContainer);
+				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+		IObservableValue selectedParameter = 
+				BeanProperties.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model))
+				.to(selectedParameter)
 				.in(dbc);
 		viewer.setInput(BeanProperties.list(
 				ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model));
-		
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-				IParameter param = (IParameter) selection.getFirstElement();
-				openEditDialog(param);
-			}
-		});
+		viewer.addDoubleClickListener(onDoubleClick());
 
-		Button editExistingButton = new Button(templateParametersGroup, SWT.PUSH);
+		// edit button
+		Button editExistingButton = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).hint(100, SWT.DEFAULT).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
@@ -114,20 +106,43 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model))
+				.to(selectedParameter)
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 		
-		Button resetButton = new Button(templateParametersGroup, SWT.PUSH);
+		// reset button
+		Button resetButton = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(resetButton);
 		resetButton.setText("Reset");
 		resetButton.addSelectionListener(onReset());
 
-		Label requiredExplanationLabel = new Label(templateParametersGroup, SWT.None);
+		// required explanation
+		Label requiredExplanationLabel = new Label(container, SWT.None);
 		requiredExplanationLabel.setText("* = value required, click the 'Edit...' button or double-click on a value to edit it.");
 		GridDataFactory.fillDefaults()
 			.grab(true, false).align(SWT.FILL, SWT.FILL).span(2,1).applyTo(requiredExplanationLabel);
+
+		// selected parameter details
+		final Group detailsContainer = new Group(container, SWT.NONE);
+		detailsContainer.setText("Details");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).span(2,1).hint(SWT.DEFAULT, 106)
+				.applyTo(detailsContainer);
+		new TemplateParameterDetailViews(selectedParameter, detailsContainer, dbc)
+				.createControls();
+
+	}
+
+	private IDoubleClickListener onDoubleClick() {
+		return new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+				IParameter param = (IParameter) selection.getFirstElement();
+				openEditDialog(param);
+			}
+		};
 	}
 	
 	public TableViewer createTable(final Composite tableContainer, DataBindingContext dbc) {
@@ -182,7 +197,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 								Assert.isLegal(cell.getElement() instanceof IParameter, "cell element is not a IParameter");
 
 								final IParameter parameter = (IParameter) cell.getElement();
-								String label = TemplateParameterUtils.getValue(parameter);
+								String label = TemplateParameterViewerUtils.getValueLabel(parameter);
 								cell.setText(label);
 
 								IStatus validationStatus = validate(parameter);
@@ -220,7 +235,6 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 						.name("Value")
 						.align(SWT.LEFT)
 						.weight(1)
-						.minWidth(180)
 						.buildColumn()
 			.buildViewer();
 
