@@ -64,7 +64,7 @@ public class WebHooksComponent extends Composite {
 			.applyTo(webhookExplanation);
 
 		Group hooksGroup = new Group(this, SWT.None);
-		hooksGroup.setText("Web Hooks");
+		hooksGroup.setText("Webhooks");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true)
 			.applyTo(hooksGroup);
@@ -88,14 +88,14 @@ public class WebHooksComponent extends Composite {
 
 	private void createNoHooksMessage(Composite parent) {
 		Label noHooksLabel = new Label(parent, SWT.NONE);
-		noHooksLabel.setText("You have no hooks configured for your build config.");
+		noHooksLabel.setText("You have no webhooks configured for your build config.");
 	}
 
 	private void createWebhookWidget(IWebhookTrigger webHook, Composite parent) {
 		Link link = new Link(parent, SWT.NONE);
 		link.addSelectionListener(onClickWebhook());
 		String linkLabel = isGitHub(webHook) ? "<a>" + webHook.getType() + "</a>" : webHook.getType();
-		link.setText(linkLabel + " web hook:");
+		link.setText(linkLabel + " webhook:");
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER)
 			.applyTo(link);
@@ -111,7 +111,7 @@ public class WebHooksComponent extends Composite {
 		
 		Button copyToClipboard = new Button(parent, SWT.PUSH);
 		copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
-		copyToClipboard.setToolTipText("Copy To Clipboard");
+		copyToClipboard.setToolTipText("Copy to clipboard");
 		copyToClipboard.addSelectionListener(onClickCopyButton(uriText));
 	}
 

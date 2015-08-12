@@ -33,7 +33,7 @@ public class WebHooksDialog extends Dialog {
 
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Web Hooks");
+		shell.setText("Webhooks triggers");
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 	
