@@ -39,7 +39,9 @@ public class OpenShiftImages {
 	public static final Image GEAR_IMG = repo.getImage("gear.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor LAYER = repo.create("layer.png"); //$NON-NLS-1$ 
 	public static final Image LAYER_IMG = repo.getImage("layer.png"); //$NON-NLS-1$ 
-
+	public static final ImageDescriptor COPY_TO_CLIPBOARD = repo.create("copy-to-clipboard.gif"); //$NON-NLS-1$ 
+	public static final Image COPY_TO_CLIPBOARD_IMG = repo.getImage("copy-to-clipboard.gif"); //$NON-NLS-1$ 
+	
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<String, ImageDescriptor>();
 
 	/**
