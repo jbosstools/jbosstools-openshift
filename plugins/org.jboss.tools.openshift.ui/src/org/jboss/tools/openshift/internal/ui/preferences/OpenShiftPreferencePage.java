@@ -23,7 +23,10 @@ import org.apache.commons.lang.SystemUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
@@ -63,8 +66,12 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		this.cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
 		this.cliLocationEditor.setFileExtensions(EXTENSIONS);
 		addField(cliLocationEditor);
-		
-	}
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+        performOk();
+    }
 	
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(OpenShiftUIActivator.getDefault().getCorePreferenceStore());
