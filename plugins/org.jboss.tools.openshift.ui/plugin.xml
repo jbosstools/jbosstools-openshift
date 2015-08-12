@@ -175,6 +175,31 @@
 		      </visibleWhen>
 		   </command>
 		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.showwebhooks"
+		         id="org.jboss.tools.openshift.ui.explorer.command.showwebhooks">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false"
+		                     operator="and">
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IBuildConfig">
+		                  </instanceof>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+		</menuContribution>
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
@@ -253,6 +278,10 @@
 	        class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
 	        commandId="org.jboss.tools.openshift.ui.command.clonebuild">
 	  </handler>
+	  <handler
+	        class="org.jboss.tools.openshift.internal.ui.handler.ShowWebHooksHandler"
+	        commandId="org.jboss.tools.openshift.ui.command.showwebhooks">
+	  </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -325,6 +354,10 @@
 	  <command
 	        id="org.jboss.tools.openshift.ui.command.clonebuild"
 	        name="%openshift.command.build.clonebuild">
+	  </command>
+	  <command
+	        id="org.jboss.tools.openshift.ui.command.showwebhooks"
+	        name="%openshift.command.build.showwebhooks">
 	  </command>
 	</extension>
 
