@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -22,6 +24,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -44,6 +47,10 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
  */
 public class WebHooksComponent extends Composite {
 
+	private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2 * 1000;
+
+	protected static final String WEBHOOKS_DOCS = "https://docs.openshift.org/latest/dev_guide/builds.html#webhook-triggers";
+	
 	private IBuildConfig buildConfig;
 
 	public WebHooksComponent(IBuildConfig buildConfig, Composite parent, int style) {
@@ -57,12 +64,13 @@ public class WebHooksComponent extends Composite {
 		GridLayoutFactory.fillDefaults()
 			.applyTo(this);
 
-		Label webhookExplanation = new Label(this, SWT.WRAP);
-		webhookExplanation.setText("Webhook triggers allow you to trigger a new build by sending a request to the OpenShift API endpoint.");
+		Link webhookExplanation = new Link(this, SWT.WRAP);
+		webhookExplanation.setText("<a>Webhook triggers</a> allow you to trigger a new build by sending a request to the OpenShift API endpoint.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, false)
 			.applyTo(webhookExplanation);
-
+		webhookExplanation.addSelectionListener(onWebhookExplanationClicked());
+		
 		Group hooksGroup = new Group(this, SWT.None);
 		hooksGroup.setText("Webhooks");
 		GridDataFactory.fillDefaults()
@@ -73,6 +81,17 @@ public class WebHooksComponent extends Composite {
 			.applyTo(hooksGroup);
 
 		createHookWidgets(getWebHooks(buildConfig), hooksGroup);
+	}
+
+	private SelectionListener onWebhookExplanationClicked() {
+		return new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				new BrowserUtility().checkedCreateExternalBrowser(WEBHOOKS_DOCS,
+						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+			}
+		};
 	}
 
 	private void createHookWidgets(List<IWebhookTrigger> webHooks, Composite parent) {
@@ -150,6 +169,16 @@ public class WebHooksComponent extends Composite {
 		uriText.selectAll();
 		String uriToCopy = uriText.getText();
 		copyToClipBoard(uriToCopy);
+		
+		notifyCopied(uriText);
+	}
+
+	private void notifyCopied(final Text uriText) {
+		DefaultToolTip copiedNotification = new DefaultToolTip(uriText, ToolTip.NO_RECREATE, true);
+		copiedNotification.setText("Webhook copied to clipboard");
+		copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
+		copiedNotification.show(uriText.getLocation());
+		copiedNotification.deactivate();
 	}
 
 	private boolean isGitHub(IWebhookTrigger webHook) {
