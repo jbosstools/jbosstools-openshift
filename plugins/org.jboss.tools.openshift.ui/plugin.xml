@@ -175,6 +175,31 @@
 		      </visibleWhen>
 		   </command>
 		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.showwebhooks"
+		         id="org.jboss.tools.openshift.ui.explorer.command.showwebhooks">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false"
+		                     operator="and">
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IBuildConfig">
+		                  </instanceof>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+		</menuContribution>
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
@@ -277,10 +302,10 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.handler.ManageProjectsHandler"
-        commandId="org.jboss.tools.openshift.ui.command.project.manage">
-  </handler>
+		<handler
+        	class="org.jboss.tools.openshift.internal.ui.handler.ManageProjectsHandler"
+			commandId="org.jboss.tools.openshift.ui.command.project.manage">
+		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewApplicationHandler"
 			commandId="org.jboss.tools.openshift.ui.command.application.new">
@@ -293,22 +318,26 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.RefreshResourceHandler"
 			commandId="org.jboss.tools.openshift.ui.command.resource.refresh">
 		</handler>
-	  <handler
-	        class="org.jboss.tools.openshift.internal.ui.handler.PortForwardingHandler"
-	        commandId="org.jboss.tools.openshift.ui.command.portforwarding">
-	  </handler>
-	  <handler
-	        class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
-	        commandId="org.jboss.tools.openshift.ui.command.startbuild">
-	  </handler>
-	  <handler
-	        class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
-	        commandId="org.jboss.tools.openshift.ui.command.clonebuild">
-	  </handler>
-   <handler
-         class="org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler"
-         commandId="org.jboss.tools.openshift.ui.command.podlogs">
-   </handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.PortForwardingHandler"
+			commandId="org.jboss.tools.openshift.ui.command.portforwarding">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
+			commandId="org.jboss.tools.openshift.ui.command.startbuild">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.StartBuildHandler"
+			commandId="org.jboss.tools.openshift.ui.command.clonebuild">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler"
+			commandId="org.jboss.tools.openshift.ui.command.podlogs">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.ShowWebHooksHandler"
+			commandId="org.jboss.tools.openshift.ui.command.showwebhooks">
+		</handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -370,27 +399,31 @@
 			id="org.jboss.tools.openshift.ui.command.resource.refresh"
 			name="Refresh">
 		</command>
-	  <command
-	        id="org.jboss.tools.openshift.ui.command.portforwarding"
-	        name="%openshift.command.application.portforwarding">
-	  </command>
-	  <command
-	        id="org.jboss.tools.openshift.ui.command.startbuild"
-	        name="%openshift.command.build.startbuild">
-	  </command>
-	  <command
-	        id="org.jboss.tools.openshift.ui.command.clonebuild"
-	        name="%openshift.command.build.clonebuild">
-	  </command>
-   <command
-         id="org.jboss.tools.openshift.ui.command.podlogs"
-         name="%openshift.command.pod.logs">
-   </command>
-   <command
-         defaultHandler="org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler"
-         id="org.jboss.tools.openshift.ui.command.buildlogs"
-         name="%openshift.command.build.logs">
-   </command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.portforwarding"
+			name="%openshift.command.application.portforwarding">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.startbuild"
+			name="%openshift.command.build.startbuild">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.clonebuild"
+			name="%openshift.command.build.clonebuild">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.podlogs"
+			name="%openshift.command.pod.logs">
+		</command>
+		<command
+			defaultHandler="org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler"
+			id="org.jboss.tools.openshift.ui.command.buildlogs"
+			name="%openshift.command.build.logs">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.showwebhooks"
+			name="%openshift.command.build.showwebhooks">
+		</command>
 	</extension>
 
 	<!-- editor for express connections -->
