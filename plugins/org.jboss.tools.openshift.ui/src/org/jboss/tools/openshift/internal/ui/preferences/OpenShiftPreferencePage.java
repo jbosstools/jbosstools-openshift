@@ -21,14 +21,18 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -59,18 +63,25 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	}
 	
 	public void createFieldEditors() {
+		Link link = new Link(getFieldEditorParent(), SWT.WRAP );
+		link.setText("The OpenShift Client (oc) binary is required for features such as Port Forwarding or Log Streaming. "
+				+ "You can find more information about how to install it from <a>here</a>.");
+		GridDataFactory.fillDefaults().span(3, 1).hint(300, SWT.DEFAULT).applyTo(link);
+		link.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				new BrowserUtility().checkedCreateExternalBrowser("https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github", 
+																  OpenShiftUIActivator.PLUGIN_ID, 
+																  OpenShiftUIActivator.getDefault().getLog());
+			}
+		});
 		this.cliLocationEditor = 
 				new FileFieldEditor(
 						IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, 
-						NLS.bind("{0} location", OC_BINARY_NAME), getFieldEditorParent());
+						NLS.bind("''{0}'' executable location", OC_BINARY_NAME), getFieldEditorParent());
 		this.cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
 		this.cliLocationEditor.setFileExtensions(EXTENSIONS);
 		addField(cliLocationEditor);
-		//TODO Fix the Layout
-        Link link = new Link(getFieldEditorParent(), SWT.WRAP );
-        link.setText("Openshift plugin needs the openshift client binary (CLI) to provide some features like port forwarding.<br>"
-            + "You can find more information about how to install it <a href=\"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github\">here</a>");
-        //TODO open the links
     }
 
     @Override
@@ -86,9 +97,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	protected void performDefaults() {
 		String location = findOCLocation();
 		if(StringUtils.isBlank(location)) {
-			String message = NLS.bind("Could not find the openshift binary \"{0}\" on your path.", OC_BINARY_NAME);
+			String message = NLS.bind("Could not find the OpenShift Client binary \"{0}\" on your path.", OC_BINARY_NAME);
 			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
-			MessageDialog.openWarning(getShell(), "No OpenShift binary", message);
+			MessageDialog.openWarning(getShell(), "No OpenShift Client binary", message);
 			return;
 		}
 		cliLocationEditor.setStringValue(location);
@@ -109,7 +120,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		}
 		File file = new File(location);
 		if(!OC_BINARY_NAME.equals(file.getName())) {
-			setErrorMessage(NLS.bind("{0} is not the openshift 'oc' executable.", file));
+			setErrorMessage(NLS.bind("{0} is not the OpenShift Client ''{1}'' executable.", file, OC_BINARY_NAME));
 			return false;
 		}
 		if(!file.exists()) {
