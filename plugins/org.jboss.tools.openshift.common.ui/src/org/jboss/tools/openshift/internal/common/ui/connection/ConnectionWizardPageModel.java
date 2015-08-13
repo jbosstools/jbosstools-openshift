@@ -161,12 +161,16 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private String updateHost(String host, boolean useDefaultHost, IConnection selectedConnection, IConnectionFactory factory) {
-		if (!(selectedConnection instanceof NewConnectionMarker)
-				&& !selectedConnection.equals(this.selectedConnection)) {
-			// connection changed
+		if (!selectedConnection.equals(this.selectedConnection)
+				&& useDefaultHost) {
+			// changed connection
 			host = selectedConnection.getHost();
-		} else if (factory != null) {
-			// factory changed
+		} else if (!factory.equals(this.connectionFactory)
+				&& useDefaultHost) {
+			// selected other server type
+			host = factory.getDefaultHost();
+		} else if (useDefaultHost != this.useDefaultHost) {
+			// checked/unchecked "use default server"
 			host = factory.getDefaultHost();
 		}
 
@@ -176,8 +180,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private boolean updateUseDefaultHost(boolean useDefaultHost, IConnection selectedConnection, IConnectionFactory factory) {
 		if (factory != null
 				&& !factory.equals(connectionFactory)) {
-			// connection factory changed
-			if (useDefaultHost) {
+			// server type changed
+			if (useDefaultHost
+					|| StringUtils.isEmpty(this.host)) {
 				useDefaultHost = factory.hasDefaultHost();
 			}
 		} else if (selectedConnection != null
