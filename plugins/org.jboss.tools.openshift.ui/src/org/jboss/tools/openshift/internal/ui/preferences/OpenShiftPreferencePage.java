@@ -48,7 +48,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	private static final int WHICH_CMD_TIMEOUT = 10 * 1000;
 	private static final int WHICH_CMD_SUCCESS = 0;
 	
-	private enum OCBinaryName {
+	public enum OCBinaryName {
 
 		WINDOWS("oc.exe", new String[] { "exe" }),
 		OTHER("oc", new String[] {});
