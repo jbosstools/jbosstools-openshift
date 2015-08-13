@@ -87,8 +87,8 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	}
 	
 	public void createFieldEditors() {
-		Link link = new Link(getFieldEditorParent(), SWT.WRAP );
-		link.setText("The OpenShift Client (oc) binary is required for features such as Port Forwarding or Log Streaming. "
+		Link link = new Link(getFieldEditorParent(), SWT.WRAP);
+		link.setText("The OpenShift Client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
 				+ "You can find more information about how to install it from <a>here</a>.");
 		GridDataFactory.fillDefaults().span(3, 1).hint(300, SWT.DEFAULT).applyTo(link);
 		link.addSelectionListener(new SelectionAdapter() {
