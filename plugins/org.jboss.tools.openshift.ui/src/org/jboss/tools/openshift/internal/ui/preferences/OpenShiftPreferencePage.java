@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,27 +39,51 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
  * @author jeff.cantrill
+ * @author Andre Dietisheim
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
+			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
 	private static final int WHICH_CMD_TIMEOUT = 10 * 1000;
 	private static final int WHICH_CMD_SUCCESS = 0;
-	private static final String OC_BINARY_NAME;
-	private static final String [] EXTENSIONS;
 	
-	static {
-		if(SystemUtils.IS_OS_WINDOWS) {
-			EXTENSIONS = new String []{"exe"};
-			OC_BINARY_NAME = "oc.exe";
-		}else {
-			EXTENSIONS = new String []{};
-			OC_BINARY_NAME = "oc";
+	private enum OCBinaryName {
+
+		WINDOWS("oc.exe", new String[] { "exe" }),
+		OTHER("oc", new String[] {});
+
+		private String name;
+		private String[] extensions;
+
+		private OCBinaryName(String name, String[] extensions) {
+			this.name = name;
+			this.extensions = extensions;
+		}
+
+		public String getName() {
+			return name;
+		};
+
+		public String[] getExtensions() {
+			return extensions;
+		};
+
+		public static OCBinaryName getInstance() {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				return WINDOWS;
+			} else {
+				return OTHER;
+			}
 		}
 	}
+	
 	private FileFieldEditor cliLocationEditor;
+	private OCBinaryName ocBinary;
 	
 	public OpenShiftPreferencePage() {
 		super(GRID);
+		this.ocBinary = OCBinaryName.getInstance();
 	}
 	
 	public void createFieldEditors() {
@@ -70,7 +94,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				new BrowserUtility().checkedCreateExternalBrowser("https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github", 
+				new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL, 
 																  OpenShiftUIActivator.PLUGIN_ID, 
 																  OpenShiftUIActivator.getDefault().getLog());
 			}
@@ -78,9 +102,17 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		this.cliLocationEditor = 
 				new FileFieldEditor(
 						IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, 
-						NLS.bind("''{0}'' executable location", OC_BINARY_NAME), getFieldEditorParent());
-		this.cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
-		this.cliLocationEditor.setFileExtensions(EXTENSIONS);
+						NLS.bind("''{0}'' executable location", ocBinary.getName()), getFieldEditorParent()) {
+
+							@Override
+							public boolean doCheckState() {
+								return validateLocation(getStringValue());
+							}
+			
+		};
+		cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
+		cliLocationEditor.setFileExtensions(ocBinary.getExtensions());
+		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
     }
 
@@ -97,7 +129,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	protected void performDefaults() {
 		String location = findOCLocation();
 		if(StringUtils.isBlank(location)) {
-			String message = NLS.bind("Could not find the OpenShift Client binary \"{0}\" on your path.", OC_BINARY_NAME);
+			String message = NLS.bind("Could not find the OpenShift Client binary \"{0}\" on your path.", ocBinary.getName());
 			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
 			MessageDialog.openWarning(getShell(), "No OpenShift Client binary", message);
 			return;
@@ -107,20 +139,20 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 
 	@Override
 	public boolean performOk() {
-		boolean valid = super.performOk() && validateLocation();
+		boolean valid = super.performOk() 
+				&& validateLocation(cliLocationEditor.getStringValue());
 		setValid(valid);
 		return valid;
 	}
 
 	
-	private boolean validateLocation() {
-		String location = cliLocationEditor.getStringValue();
+	private boolean validateLocation(String location) {
 		if(StringUtils.isBlank(location)) {
 			return true;
 		}
 		File file = new File(location);
-		if(!OC_BINARY_NAME.equals(file.getName())) {
-			setErrorMessage(NLS.bind("{0} is not the OpenShift Client ''{1}'' executable.", file, OC_BINARY_NAME));
+		if(!ocBinary.getName().equals(file.getName())) {
+			setErrorMessage(NLS.bind("{0} is not the OpenShift Client ''{1}'' executable.", file.getName(), ocBinary.getName()));
 			return false;
 		}
 		if(!file.exists()) {
@@ -143,12 +175,12 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 
 					@Override
 					public boolean accept(File file) {
-						return OC_BINARY_NAME.equals(file.getName());
+						return ocBinary.getName().equals(file.getName());
 					}
 
 					@Override
 					public boolean accept(File dir, String name) {
-						return OC_BINARY_NAME.equals(name);
+						return ocBinary.getName().equals(name);
 					}
 					
 				}, null);
@@ -163,7 +195,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 				public String call() throws Exception {
 					Process process = null;
 					try {
-						process = new ProcessBuilder("which", OC_BINARY_NAME).start();
+						process = new ProcessBuilder("which", ocBinary.getName()).start();
 						process.waitFor();
 						if(process.exitValue() == WHICH_CMD_SUCCESS) {
 							return IOUtils.toString(process.getInputStream());
