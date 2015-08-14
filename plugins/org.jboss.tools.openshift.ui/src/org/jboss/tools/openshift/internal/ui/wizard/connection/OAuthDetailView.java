@@ -24,6 +24,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -59,6 +60,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
@@ -126,7 +128,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		if(authDetails != null) {
 			authDetails.getRequestTokenLink();
 		}
-		tokenRequestLink.addListener(SWT.MouseDown, onRetrieveLinkClicked(parent.getShell()));
+		tokenRequestLink.addListener(SWT.MouseDown, onRetrieveLinkClicked(tokenRequestLink.getShell()));
+
 		//token
 		Label lblAuthType = new Label(composite, SWT.NONE);
 		lblAuthType.setText("Token");
@@ -151,7 +154,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dispose();
 	}
-	
+
 	@Override
 	public void dispose() {
 		DataBindingUtils.dispose(tokenBinding);
@@ -220,10 +223,21 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 										if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
 											MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
 											authSchemeObservable.setValue(details.getScheme());
-										}else {
-										    OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
-										    job.addJobChangeListener(dialog);
-										    dialog.open();
+										} else {
+											if (Platform.WS_COCOA.equals(Platform.getWS())) {
+												// open in external browser for MacOS
+												// because nested dialogs dont get mouse events
+												// https://issues.jboss.org/browse/JBIDE-20464
+												// https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717
+												new BrowserUtility().checkedCreateExternalBrowser(
+														details.getRequestTokenLink(), 
+														OpenShiftUIActivator.PLUGIN_ID, 
+														OpenShiftUIActivator.getDefault().getLog());
+											} else {
+												OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
+												job.addJobChangeListener(dialog);
+												dialog.open(); 
+											}
 										}
 									}
 								}
