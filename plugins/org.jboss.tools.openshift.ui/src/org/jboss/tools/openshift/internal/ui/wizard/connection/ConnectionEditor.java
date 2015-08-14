@@ -25,7 +25,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -91,11 +90,11 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			if(conn instanceof Connection) {
 				Connection connection = (Connection) conn;
 				detailViewObservable.setValue(detailViews.get(connection.getAuthScheme()));
-				getDetailView().setSelectedConnection(connection);
 			}else {
 				rememberTokenObservable.setValue(Boolean.FALSE);
 				detailViewObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
 			}
+			getDetailView().setSelectedConnection(conn);
 		}
 	}
 	
@@ -223,8 +222,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	@Override
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		IConnection conn = (IConnection) selectedConnection.getValue();
-		if(!(conn instanceof Connection)) return;
-		detailViewModel.setSelectedConnection((Connection)conn);
+		detailViewModel.setSelectedConnection(conn);
 	}
 
 	@Override
