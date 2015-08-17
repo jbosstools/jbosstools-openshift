@@ -94,7 +94,10 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				rememberTokenObservable.setValue(Boolean.FALSE);
 				detailViewObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
 			}
-			getDetailView().setSelectedConnection(conn);
+			for (IConnectionEditorDetailView view : detailViews.values()) {
+				//reset all views
+				view.setSelectedConnection(conn);
+			}
 		}
 	}
 	
