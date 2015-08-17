@@ -21,7 +21,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
@@ -30,7 +33,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.job.IResourcesModel;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
-import org.jboss.tools.openshift.common.core.IRefreshable;
+
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
 
@@ -60,6 +63,23 @@ public class RefreshResourceHandler extends AbstractHandler{
 		if(resource == null) {
 			resource = UIUtils.getFirstElement(selection, IResource.class);
 		}
+
+		if(resource == null
+				&& UIUtils.getFirstElement(selection, OpenShiftException.class) != null
+				&& selection instanceof ITreeSelection) {
+			//If nothing specific is found, find first refreshable parent of selected node
+			ITreeSelection treeSelection = (ITreeSelection) selection;
+			TreePath path = treeSelection.getPaths()[0].getParentPath();
+			while (path != null) {
+				Object o = path.getLastSegment();
+				if (o instanceof IRefreshable || o instanceof IConnection || o instanceof IResource) {
+					resource = o;
+					break;
+				}
+				path = path.getParentPath();
+			}
+		}
+
 		return resource;
 	}
 

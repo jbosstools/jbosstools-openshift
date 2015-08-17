@@ -63,6 +63,9 @@
             <instanceof
                   value="com.openshift.restclient.model.IResource">
             </instanceof>
+            <instanceof
+                  value="com.openshift.restclient.OpenShiftException">
+            </instanceof>
          </or>
 						</iterate>
 					</and>
