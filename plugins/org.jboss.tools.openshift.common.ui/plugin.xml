@@ -190,11 +190,22 @@
                 id="org.jboss.tools.openshift.express.ui.command.newconnection"
                 mnemonic="N">
 				<visibleWhen>
-					<or>
-						<with variable="activePartId">
-							<equals value="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView" />
-						</with>
-					</or>
+				<and>
+					<with variable="selection">
+						<and>
+							<count value="?" /><!-- 1 or none-->
+							<iterate ifEmpty="true" operator="and">
+								<not>
+									<instanceof
+										value="com.openshift.restclient.OpenShiftException" />
+								</not>
+							</iterate>
+						</and>
+					</with>
+					<with variable="activePartId">
+						<equals value="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView" />
+					</with>
+				</and>
 				</visibleWhen>
 			</command>
 		</menuContribution>
