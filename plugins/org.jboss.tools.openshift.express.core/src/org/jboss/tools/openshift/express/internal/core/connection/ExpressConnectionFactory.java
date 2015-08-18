@@ -75,7 +75,10 @@ public class ExpressConnectionFactory implements IConnectionFactory {
 			return null;
 		}
 		return host + "/app/user/new/express";
-	
 	}
 
+	@Override
+	public String getUserDocUrl() {
+		return null;
+	}
 }

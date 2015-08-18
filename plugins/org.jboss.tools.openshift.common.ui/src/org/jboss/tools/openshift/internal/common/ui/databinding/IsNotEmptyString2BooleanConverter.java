@@ -14,7 +14,7 @@ import org.eclipse.core.databinding.conversion.Converter;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
- * A converter that <code>null</code> or emtpy string to <code>false</code>.
+ * Converts <code>null</code> or empty string to <code>false</code>.
  * 
  * @author Andre Dietisheim
  */

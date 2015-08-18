@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @contributor Nick Boldt
  */
 public class ConnectionWizardPageModel extends ObservableUIPojo {
 
@@ -44,6 +45,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_ALL_HOSTS = "allHosts";
 	public static final String PROPERTY_CONNECT_ERROR = "connectError";
 	public static final String PROPERTY_SIGNUPURL = "signupUrl";
+	public static final String PROPERTY_USERDOCURL = "userdocUrl";
 
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
@@ -57,6 +59,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Collection<String> allHosts;
 	private ConnectionsFactoryTracker connectionsFactory;
 	private String signupUrl;
+	private String userdocUrl;
 	private IStatus connectError;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
@@ -100,6 +103,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			initEditConnection(editedConnection);
 		}
 		this.signupUrl = getSignupUrl(host, connectionFactory);
+		this.userdocUrl = getUserdocUrl(connectionFactory);
 	}
 
 	private void initEditConnection(IConnection connection) {
@@ -135,12 +139,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
 		String signupUrl = getSignupUrl(host, factory);
+		String userdocUrl = getUserdocUrl(factory);
 
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
 		firePropertyChange(PROPERTY_SIGNUPURL, this.signupUrl, this.signupUrl = signupUrl);
+		firePropertyChange(PROPERTY_USERDOCURL, this.userdocUrl, this.userdocUrl = userdocUrl);
 		
 		setConnectionFactoryError(connectionFactoryError);
 		setConnectError(connectError);
@@ -215,6 +221,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory.getSignupUrl(host);
 	}
 
+	private String getUserdocUrl(IConnectionFactory factory) {
+		return factory.getUserDocUrl();
+	}
+
 	private boolean isNewConnection() {
 		return selectedConnection instanceof NewConnectionMarker;
 	}
@@ -256,6 +266,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public String getSignupUrl() {
 		return signupUrl;
+	}
+	
+	public String getUserdocUrl() {
+		return userdocUrl;
 	}
 	
 	public void setHost(String host) {

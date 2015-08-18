@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.core.connection;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.foundation.core.properties.IPropertiesProvider;
+import org.jboss.tools.foundation.core.properties.PropertiesHelper;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
@@ -27,6 +29,8 @@ import com.openshift.restclient.OpenShiftException;
  * @author Andre Dietisheim
  */
 public class ConnectionFactory implements IConnectionFactory {
+
+	public static final String OPENSHIFT_USERDOC = "openshift.userdoc.url"; //$NON-NLS-1$
 
 	public ConnectionFactory() {
 	}
@@ -78,5 +82,16 @@ public class ConnectionFactory implements IConnectionFactory {
 	@Override
 	public String getSignupUrl(String host) {
 		return null;
+	}
+
+	@Override
+	public String getUserDocUrl() {
+		// use commandline override -Dopenshift.userdoc.url
+		String userdoc = System.getProperty(OPENSHIFT_USERDOC, null);
+		if (userdoc == null) {
+			IPropertiesProvider pp = PropertiesHelper.getPropertiesProvider();
+			userdoc = pp.getValue(OPENSHIFT_USERDOC);
+		}
+		return userdoc;
 	}
 }

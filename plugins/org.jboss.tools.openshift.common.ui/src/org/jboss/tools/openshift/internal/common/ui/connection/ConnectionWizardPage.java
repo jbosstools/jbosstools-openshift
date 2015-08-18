@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -71,6 +72,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @contributor Nick Boldt
  */
 public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
@@ -96,8 +98,9 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
 
+		// signup link
 		Link signupLink = new Link(parent, SWT.WRAP);
-		signupLink.setText("If you do not have an account on OpenShift, please sign up <a>here</a>.");
+		signupLink.setText("If you do not have an account on OpenShift, please <a>sign up here</a>.");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);
 		IObservableValue signupUrlObservable = BeanProperties
@@ -109,10 +112,35 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			.to(signupUrlObservable)
 			.converting(new IsNotEmptyString2BooleanConverter())
 			.in(dbc);
-		
+
+		// userdoc link (JBIDE-20401)
+		final Link userdocLink = new Link(parent, SWT.WRAP);
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(userdocLink);
+		IObservableValue userdocUrlObservable = BeanProperties
+				.value(ConnectionWizardPageModel.PROPERTY_USERDOCURL).observe(pageModel);
+		userdocLink.addSelectionListener(onUserdocLinkClicked(userdocUrlObservable));
+		ValueBindingBuilder
+			.bind(WidgetProperties.visible().observe(userdocLink))
+			.notUpdatingParticipant()
+			.to(userdocUrlObservable)
+			.converting(new IsNotEmptyString2BooleanConverter())
+			.in(dbc);
+
+		IObservableValue connectionFactoryObservable =
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
+
+		ValueBindingBuilder
+			.bind(WidgetProperties.text().observe(userdocLink))
+			.notUpdatingParticipant()
+			.to(connectionFactoryObservable)
+			.converting(new LinkConverter())
+			.in(dbc);
+
+		// filler
 		Label fillerLabel = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
-				.span(3, 4).hint(SWT.DEFAULT, 6).applyTo(fillerLabel);
+				.span(3, 3).hint(SWT.DEFAULT, 6).applyTo(fillerLabel);
 
 		// existing connections combo
 		Label connectionLabel = new Label(parent, SWT.NONE);
@@ -137,7 +165,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport
 				.create(selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
+
 		// server type
 		Label connectionFactoryLabel = new Label(parent, SWT.NONE);
 		connectionFactoryLabel.setText("Server type:");
@@ -161,8 +189,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		});
 		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
 		final IViewerObservableValue selectedServerType = ViewerProperties.singleSelection().observe(connectionFactoriesViewer);
-		IObservableValue connectionFactoryObservable = 
-				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
+
 		ValueBindingBuilder
 				.bind(selectedServerType)
 				.to(connectionFactoryObservable)
@@ -174,10 +201,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.span(3,1).align(SWT.FILL, SWT.FILL).applyTo(useDefaultServerCheckbox);
 		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(useDefaultServerCheckbox))
-				.to(BeanProperties.value(
-						ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST, IConnection.class).observe(pageModel))
-				.in(dbc);
+		.bind(WidgetProperties.selection().observe(useDefaultServerCheckbox))
+		.to(BeanProperties.value(
+				ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST, IConnection.class).observe(pageModel))
+		.in(dbc);
 
 		Label serverLabel = new Label(parent, SWT.NONE);
 		serverLabel.setText("Server:");
@@ -218,9 +245,9 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					public IStatus validate(Object value) {
 						if (!(value instanceof String)
 								|| StringUtils.isEmpty((String) value)) {
-							return ValidationStatus.cancel("Please provide an url to an OpenShift server.");
+							return ValidationStatus.cancel("Please provide an OpenShift server url.");
 						} else if (!UrlUtils.isValid((String) value)) {
-							return ValidationStatus.error("Please provide a valid url to an OpenShift server.");
+							return ValidationStatus.error("Please provide a valid OpenShift server url.");
 						}
 						return ValidationStatus.ok();
 					}
@@ -271,11 +298,28 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					return;
 				}
 				new BrowserUtility().checkedCreateInternalBrowser(
-						signupUrl, 
 						signupUrl,
-						OpenShiftCommonUIActivator.PLUGIN_ID, 
+						signupUrl,
+						OpenShiftCommonUIActivator.PLUGIN_ID,
 						OpenShiftCommonUIActivator.getDefault().getLog());
 				WizardUtils.close(getWizard());;
+			}
+		};
+	}
+
+	protected SelectionAdapter onUserdocLinkClicked(final IObservableValue userdocUrlObservable) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String userdocUrl = (String) userdocUrlObservable.getValue();
+				if (StringUtils.isEmpty(userdocUrl)) {
+					return;
+				}
+				new BrowserUtility().checkedCreateExternalBrowser(
+						userdocUrl,
+						OpenShiftCommonUIActivator.PLUGIN_ID,
+						OpenShiftCommonUIActivator.getDefault().getLog());
 			}
 		};
 	}
@@ -372,5 +416,18 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		public IStatus getConnectionStatus() {
 			return connectionStatus;
 		}
+	}
+
+	private static class LinkConverter extends Converter {
+
+		public LinkConverter() {
+			super(IConnectionFactory.class, String.class);
+		}
+
+		@Override
+		public Object convert(Object fromObject) {
+			return NLS.bind("New to {0}? Explore the <a>getting started documentation</a>.", ((IConnectionFactory)fromObject).getName());
+		}
+
 	}
 }

@@ -54,4 +54,6 @@ public interface IConnectionFactory {
 	 * @return
 	 */
 	public <T extends IConnection> boolean canCreate(Class<T> clazz);
+
+	public String getUserDocUrl();
 }
