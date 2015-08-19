@@ -208,9 +208,13 @@ public class UIUtils {
 				if (clazz.isAssignableFrom(selectedElements[index].getClass())) {
 					elements.add((E) selectedElements[index]);
 				} else if (IAdaptable.class.isAssignableFrom(selectedElements[index].getClass())) {
-					elements.add((E) ((IAdaptable) selectedElements[index]).getAdapter(clazz));
+                                        E adapted = (E) ((IAdaptable) selectedElements[index]).getAdapter(clazz);
+					if( adapted != null )
+						elements.add(adapted);
 				} else {
-					elements.add((E) Platform.getAdapterManager().getAdapter(selectedElements[index], clazz));
+					E adapted = (E) Platform.getAdapterManager().getAdapter(selectedElements[index], clazz);
+					if( adapted != null )
+						elements.add(adapted);
 				}
 			}
 			return elements.toArray((E[])Array.newInstance(clazz, 0));
