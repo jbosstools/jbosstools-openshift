@@ -133,7 +133,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 		boolean success = false;
 		try {
 			Job job = new JobChainBuilder(createJob)
-					.runWhenDone(new RefreshResourcesJob(createJob, true)).build();
+					.runWhenSuccessfullyDone(new RefreshResourcesJob(createJob, true)).build();
 			IStatus status = runInWizard(
 					job, 
 					createJob.getDelegatingProgressMonitor(), 

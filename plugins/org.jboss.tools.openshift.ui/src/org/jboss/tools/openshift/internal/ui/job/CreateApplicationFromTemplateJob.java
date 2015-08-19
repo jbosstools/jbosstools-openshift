@@ -8,8 +8,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.job;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,9 +19,11 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageModel.Label;
 
+import com.openshift.restclient.IClient;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
@@ -55,6 +58,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 			template.addObjectLabel(label.getName(), label.getValue());
 		}
 		
+		
 		IStatus status = project.accept(new CapabilityVisitor<IProjectTemplateProcessing, IStatus>() {
 
 			@Override
@@ -62,8 +66,11 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 				
 				try {
 					ITemplate processed = capability.process(template);
+					Collection<IResource> existing = findExistingResources(project, processed);
+					if(!existing.isEmpty()) {
+						return createErrorStatusForExistingResources(existing);
+					}
 					parameters = processed.getParameters().values();
-					
 					resources = capability.apply(processed);
 					return handleResponse(resources);
 				}catch(OpenShiftException e) {
@@ -74,11 +81,55 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, -1, message, e);
 				}
 			}
+
+
 		},
 		new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Template processing is unsupported for this client and server combination.", null));
 		
 		
 		return status;
+	}
+
+	@SuppressWarnings("serial")
+	private IStatus createErrorStatusForExistingResources(Collection<IResource> resources) {
+		final StringBuilder b = new StringBuilder("\nThe following resource names already exist:\n");
+		for (IResource r : resources) {
+			b.append("\n\"").append(r.getName()).append("\" ").append(r.getKind());
+		}
+		b.append("\n\nYou need to use different names or create this application in a different OpenShift project.");
+		String message = String.valueOf(resources.size()) + " resource name collisions found. ";
+		return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, new Throwable() {
+
+			@Override
+			public String getMessage() {
+				return b.toString();
+			}
+			
+		});
+	}
+
+	/*
+	 * @throws
+	 */
+	private Collection<IResource> findExistingResources(final IProject project, final ITemplate template) {
+		return project.accept(new CapabilityVisitor<IClientCapability, Collection<IResource>>() {
+
+			@Override
+			public Collection<IResource> visit(IClientCapability capability) {
+				final IClient client = capability.getClient();
+				List<IResource> existing = new ArrayList<IResource>(template.getItems().size());
+				for (IResource resource : template.getItems()) {
+					try {
+						IResource found = client.get(resource.getKind(), resource.getName(), project.getName());
+						existing.add(found);
+					}catch(OpenShiftException e) {
+						//this is expected if the resource is not found
+						//@TODO change to NotFoundException of some kind
+					}
+				}
+				return existing;
+			}
+		}, new ArrayList<IResource>());
 	}
 	
 	/**

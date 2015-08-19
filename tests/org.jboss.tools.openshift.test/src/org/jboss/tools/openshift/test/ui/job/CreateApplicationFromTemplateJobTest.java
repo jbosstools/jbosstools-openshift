@@ -20,14 +20,18 @@ import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageMo
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import com.openshift.restclient.IClient;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
@@ -41,8 +45,11 @@ import com.openshift.restclient.model.template.ITemplate;
 public class CreateApplicationFromTemplateJobTest {
 	
 	@Mock private IProjectTemplateProcessing capability;
+	@Mock private IClientCapability clientCapability;
+	@Mock private IClient client;
 	@Mock private ITemplate template;
 	@Mock private IProject project;
+	
 	private Collection<Label> labels = new ArrayList<Label>();
 	private Collection<IParameter> parameters = new ArrayList<IParameter>();
 	
@@ -54,14 +61,26 @@ public class CreateApplicationFromTemplateJobTest {
 	public void setUp() throws Exception {
 		labels.add(new Label("foo", "bar"));
 		job = spy(new CreateApplicationFromTemplateJobRunner(project, template, parameters, labels));
-		when(project.accept(any(CapabilityVisitor.class), any(IStatus.class)))
-		.thenAnswer(new Answer<IStatus>() {
+		when(client.get(anyString(), anyString(), anyString())).thenThrow(OpenShiftException.class);
+		when(clientCapability.getClient()).thenReturn(client);
+		
+		
+		when(project.accept(isA(CapabilityVisitor.class), any()))
+		.thenAnswer(new Answer() {
 				@Override
-				public IStatus answer(InvocationOnMock args) throws Throwable {
-					CapabilityVisitor<IProjectTemplateProcessing, IStatus> visitor = (CapabilityVisitor<IProjectTemplateProcessing, IStatus>)args.getArguments()[0];
-					return visitor.visit(capability);
+				public Object answer(InvocationOnMock args) throws Throwable {
+					if( args.getArguments()[1] instanceof IStatus) {
+						CapabilityVisitor<IProjectTemplateProcessing, IStatus> visitor = (CapabilityVisitor<IProjectTemplateProcessing, IStatus>) args.getArguments()[0];
+						return visitor.visit(capability);
+						
+					} else if (args.getArguments()[1] instanceof Collection) {
+						CapabilityVisitor<IClientCapability, Collection> visitor = (CapabilityVisitor<IClientCapability, Collection>) args.getArguments()[0];
+						return visitor.visit(clientCapability);
+					}
+					return null;
 				}
 			});
+
 	}
 
 	/*
