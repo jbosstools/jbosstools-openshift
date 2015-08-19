@@ -15,7 +15,9 @@
       %copyright
    </copyright>
 
-   <license>%license</license>
+   <license url="%licenseURL">
+      %license
+   </license>
 
    <plugin
          id="org.jboss.tools.openshift.express.test"
