@@ -35,7 +35,7 @@ public class ExpressUIMessages extends NLS {
 	public static String PublishDialogCustomizeGitCommitMsg;
 	public static String PublishDialogDefaultGitCommitMsg;
 	public static String ClientReadTimeout;
-	public static String TerminateConsole;
+	public static String CloseConsole;
 	public static String DomainName;
 	public static String EnterDomainName;
 	public static String DomainNameMayHaveLettersAndDigits;

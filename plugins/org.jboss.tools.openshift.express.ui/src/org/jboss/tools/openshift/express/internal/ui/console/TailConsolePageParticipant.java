@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
  * @author Xavier Coulon
  * 
  */
+@SuppressWarnings("restriction")
 public class TailConsolePageParticipant implements IConsolePageParticipant {
 
 	/** The standard Eclipse UI CloseConsoleAction.*/
@@ -35,8 +36,8 @@ public class TailConsolePageParticipant implements IConsolePageParticipant {
 
 	public void init(IPageBookViewPage page, IConsole console) {
 		this.closeConsoleAction = new CloseConsoleAction(console);
-		this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_LCL_TERMINATE));
-		this.closeConsoleAction.setToolTipText(ExpressUIMessages.TerminateConsole);
+		this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_ELCL_REMOVE));
+		this.closeConsoleAction.setToolTipText(ExpressUIMessages.CloseConsole);
 		IActionBars bars = page.getSite().getActionBars();
 		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction);
 	}
