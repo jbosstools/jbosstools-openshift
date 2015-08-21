@@ -328,6 +328,35 @@
         </visibleWhen>
      </command>
   </menuContribution>
+  <menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.showproperties"
+		         id="org.jboss.tools.openshift.ui.explorer.command.showproperties">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false">
+		                 <or>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IResource">
+		                  </instanceof>
+		                  <instanceof
+		                        value="org.jboss.tools.openshift.core.connection.Connection">
+		                  </instanceof>
+		                  </or>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -370,6 +399,10 @@
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.ShowWebHooksHandler"
 			commandId="org.jboss.tools.openshift.ui.command.showwebhooks">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.ShowPropertiesHandler"
+			commandId="org.jboss.tools.openshift.ui.command.showproperties">
 		</handler>
 	</extension>
 	<!-- adapters -->
@@ -461,6 +494,10 @@
 		<command
 			id="org.jboss.tools.openshift.ui.command.showwebhooks"
 			name="%openshift.command.build.showwebhooks">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.showproperties"
+			name="%openshift.command.showproperties">
 		</command>
 	</extension>
 
