@@ -62,7 +62,6 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotEmptyString2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.utils.HttpsPrefixingAdapter;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
@@ -181,7 +180,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
 		Combo serversCombo = new Combo(parent, SWT.BORDER);
-		new HttpsPrefixingAdapter().addTo(serversCombo);
+//		new HttpsPrefixingAdapter().addTo(serversCombo);
 		ComboViewer serversViewer = new ComboViewer(serversCombo);
 		serversViewer.setContentProvider(new ObservableListContentProvider());
 		serversViewer.setInput(BeanProperties.list(ConnectionWizardPageModel.PROPERTY_ALL_HOSTS).observe(pageModel));
@@ -198,7 +197,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 								|| StringUtils.isEmpty((String) value)) {
 							return ValidationStatus.cancel("Please provide an url to an OpenShift server.");
 						} else if (!UrlUtils.isValid((String) value)) {
-							return ValidationStatus.error("Please provide a valid url to an OpenShift server.");
+							String url = UrlUtils.ensureStartsWithScheme((String)value, UrlUtils.SCHEME_HTTPS);
+							if(!UrlUtils.isValid(url)) {
+								return ValidationStatus.error("Please provide a valid url to an OpenShift server.");
+							}
 						}
 						return ValidationStatus.ok();
 					}
