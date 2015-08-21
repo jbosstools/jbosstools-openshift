@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.foundation.core.properties.IPropertiesProvider;
+import org.jboss.tools.foundation.core.properties.PropertiesHelper;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -33,6 +35,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @contributor Nick Boldt
  */
 public class ConnectionWizardPageModel extends ObservableUIPojo {
 
@@ -44,6 +47,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_ALL_HOSTS = "allHosts";
 	public static final String PROPERTY_CONNECT_ERROR = "connectError";
 	public static final String PROPERTY_SIGNUPURL = "signupUrl";
+	public static final String PROPERTY_USERDOCURL = "userdocUrl";
+	public static final String OPENSHIFT_USERDOC = "openshift.userdoc.url"; //$NON-NLS-1$
+
 
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
@@ -57,6 +63,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Collection<String> allHosts;
 	private ConnectionsFactoryTracker connectionsFactory;
 	private String signupUrl;
+	private String userdocUrl;
 	private IStatus connectError;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
@@ -100,6 +107,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			initEditConnection(editedConnection);
 		}
 		this.signupUrl = getSignupUrl(host, connectionFactory);
+		this.userdocUrl = getUserdocUrl(host, connectionFactory);
 	}
 
 	private void initEditConnection(IConnection connection) {
@@ -135,12 +143,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
 		String signupUrl = getSignupUrl(host, factory);
+		String userdocUrl = getUserdocUrl(host, factory);
 
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
 		firePropertyChange(PROPERTY_SIGNUPURL, this.signupUrl, this.signupUrl = signupUrl);
+		firePropertyChange(PROPERTY_USERDOCURL, this.userdocUrl, this.userdocUrl = userdocUrl);
 		
 		setConnectionFactoryError(connectionFactoryError);
 		setConnectError(connectError);
@@ -215,6 +225,23 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory.getSignupUrl(host);
 	}
 
+	private String getUserdocUrl(String host, IConnectionFactory factory) {
+		if (factory == null
+				|| StringUtils.isEmpty(host)) {
+			return null;
+		}
+		// use commandline override -Dopenshift.userdoc.url
+		String userdoc = System.getProperty(OPENSHIFT_USERDOC, null);
+		if (userdoc == null) {
+			IPropertiesProvider pp = PropertiesHelper.getPropertiesProvider();
+			userdoc = pp.getValue(OPENSHIFT_USERDOC);
+		}
+		if (userdoc == null) {
+			return String.format("No URL set for Openshift User Doc. Property %s is missing!", OPENSHIFT_USERDOC); //$NON-NLS-1$
+		}
+		return userdoc;
+	}
+
 	private boolean isNewConnection() {
 		return selectedConnection instanceof NewConnectionMarker;
 	}
@@ -256,6 +283,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public String getSignupUrl() {
 		return signupUrl;
+	}
+	
+	public String getUserdocUrl() {
+		return userdocUrl;
 	}
 	
 	public void setHost(String host) {
