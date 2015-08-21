@@ -17,7 +17,8 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionPersistencyTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
-import org.jboss.tools.openshift.test.core.securtiy.SecureStorageTest;
+import org.jboss.tools.openshift.test.core.security.OpenShiftSecureStorageKeyTest;
+import org.jboss.tools.openshift.test.core.security.SecureStorageTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
@@ -53,6 +54,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
+	OpenShiftSecureStorageKeyTest.class,
 	PortForwardingWizardModelTest.class,
 	ResourcePropertySourceTest.class,
 	StringUtilsTest.class,
