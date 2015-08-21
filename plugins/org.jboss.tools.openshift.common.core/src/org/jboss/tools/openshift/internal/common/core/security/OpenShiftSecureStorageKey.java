@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStor
  */
 public class OpenShiftSecureStorageKey implements IStoreKey {
 
-	private static final char SEPARATOR = '/';
+	private static final String SEPARATOR = "/";
 	private static final Pattern SCHEME_PATTERN = Pattern.compile(".+://(.*)"); 
 	
 	private String baseKey;
@@ -33,7 +33,7 @@ public class OpenShiftSecureStorageKey implements IStoreKey {
 
 	public OpenShiftSecureStorageKey(String baseKey, String host, String userName) {
 		this.baseKey = baseKey;
-		this.host = stripScheme(host);
+		this.host = sanitizeHost(host);
 		this.userName = userName;
 	}
 
@@ -47,14 +47,19 @@ public class OpenShiftSecureStorageKey implements IStoreKey {
 				.toString();
 	}
 
-	private String stripScheme(String value) {
+	private String sanitizeHost(String value) {
 		Matcher matcher = SCHEME_PATTERN.matcher(value);
+		String host;
 		if (matcher.find()
 			&& matcher.groupCount() == 1) {
-			return matcher.group(1);
+			host = matcher.group(1);
 		} else {
-			return value;
+			host = value;
 		}
+		if(host.endsWith(SEPARATOR)) {
+			host = host.substring(0, host.length()-1);
+		}
+		return host;
 	}
 	
 	@Override
