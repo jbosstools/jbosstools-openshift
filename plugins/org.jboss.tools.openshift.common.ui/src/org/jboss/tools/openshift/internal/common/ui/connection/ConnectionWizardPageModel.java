@@ -176,7 +176,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			// checked/unchecked "use default server"
 			host = factory.getDefaultHost();
 		}
-
 		return host;
 	}
 

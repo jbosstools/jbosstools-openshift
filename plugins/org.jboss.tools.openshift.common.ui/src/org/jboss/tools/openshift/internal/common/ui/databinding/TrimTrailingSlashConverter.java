@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.runtime.Assert;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
  * @author André Dietisheim
@@ -25,10 +26,6 @@ public class TrimTrailingSlashConverter extends Converter {
 	@Override
 	public Object convert(Object fromObject) {
 		Assert.isLegal(fromObject instanceof String);
-		String url = (String) fromObject;
-		if (url.charAt(url.length() - 1) == '/') {
-			return url.substring(0, url.length() - 1);
-		}
-		return url;
+		return StringUtils.removeTrailingSlashes((String) fromObject);
 	}
 }

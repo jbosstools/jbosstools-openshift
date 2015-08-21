@@ -8,7 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.common.core.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,4 +33,14 @@ public class StringUtilsTest {
 		assertEquals("first=avalue,second=secondvalue", StringUtils.serialize(map));
 	}
 
+	@Test
+	public void testRemoveTrailingSlashes(){
+		assertNull(StringUtils.removeTrailingSlashes(null));
+		assertEquals("", StringUtils.removeTrailingSlashes(""));
+		assertEquals("", StringUtils.removeTrailingSlashes("/"));
+		assertEquals("a", StringUtils.removeTrailingSlashes("a"));
+		assertEquals("a/ ", StringUtils.removeTrailingSlashes("a/ /"));
+		assertEquals("http://foo.bar", StringUtils.removeTrailingSlashes("http://foo.bar/"));
+		assertEquals("a", StringUtils.removeTrailingSlashes("a//"));
+	}
 }

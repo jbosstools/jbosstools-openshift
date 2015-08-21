@@ -192,4 +192,16 @@ public class StringUtils {
 		Collections.sort(out);
 		return org.apache.commons.lang.StringUtils.join(out.toArray(), ",");
 	}
+
+	/**
+	 * Remove all trailing <code>/</code> from a {@link String}.
+	 * @param value
+	 * @return the value without trailing <code>/</code>
+	 */
+	public static String removeTrailingSlashes(String value) {
+		if (value == null){
+			return null;
+		}
+		return value.replaceAll("/*$", "");
+	}
 }

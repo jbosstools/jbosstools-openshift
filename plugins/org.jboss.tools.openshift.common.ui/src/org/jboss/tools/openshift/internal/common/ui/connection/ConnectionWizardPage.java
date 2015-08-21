@@ -36,6 +36,8 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -62,6 +64,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotEmptyString2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.HttpsPrefixingAdapter;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
@@ -188,8 +191,25 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serversCombo);
 		final IObservableValue serverUrlObservable = WidgetProperties.text().observe(serversCombo);
+		serversCombo.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				String value = (String)serverUrlObservable.getValue();
+				if (value == null) {
+					return;
+				}
+				String url = value;
+				if (!url.endsWith("://")) {
+					url = StringUtils.removeTrailingSlashes(url);
+				}
+				if (!url.equals(value)){
+					serverUrlObservable.setValue(url);
+				}
+			}
+		});
 		Binding serverUrlBinding = ValueBindingBuilder
 				.bind(serverUrlObservable)
+				.converting(new TrimTrailingSlashConverter())
 				.validatingAfterGet(new IValidator() {
 
 					@Override
