@@ -330,7 +330,7 @@
   </menuContribution>
   <menuContribution
 			allPopups="false"
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
 		   <command
 		         commandId="org.jboss.tools.openshift.ui.command.showproperties"
 		         id="org.jboss.tools.openshift.ui.explorer.command.showproperties">
