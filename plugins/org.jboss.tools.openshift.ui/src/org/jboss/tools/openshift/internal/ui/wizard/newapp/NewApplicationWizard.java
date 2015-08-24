@@ -28,8 +28,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
@@ -42,6 +40,7 @@ import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
@@ -55,8 +54,6 @@ import com.openshift.restclient.model.IResource;
  * @author Andre Dietisheim
  */
 public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
-
-	private static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
 
 	private NewApplicationWizardModel model;
 
@@ -123,19 +120,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 									message).open();
 						}
 					});
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								PlatformUI.getWorkbench()
-								.getActiveWorkbenchWindow()
-								.getActivePage()
-								.showView(OPENSHIFT_EXPLORER_VIEW_ID);
-							} catch (PartInitException e) {
-								OpenShiftUIActivator.getDefault().getLogger().logError("Failed to show the OpenShift Explorer view", e);
-							}
-						}
-					});
+					UIUtils.showOpenShiftExplorerView();
 					final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(createJob.getResources());
 					if (projectsAndBuildConfigs.isEmpty()) {
 						return;

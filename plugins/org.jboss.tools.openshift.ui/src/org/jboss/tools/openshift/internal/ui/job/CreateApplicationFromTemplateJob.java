@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.job;
 
+import static org.jboss.tools.openshift.internal.ui.job.ResourceCreationJobUtils.createErrorStatusForExistingResources;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageModel.Label;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.OpenShiftException;
@@ -88,24 +89,6 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 		
 		
 		return status;
-	}
-
-	@SuppressWarnings("serial")
-	private IStatus createErrorStatusForExistingResources(Collection<IResource> resources) {
-		final StringBuilder b = new StringBuilder("\nThe following resource names already exist:\n");
-		for (IResource r : resources) {
-			b.append("\n\"").append(r.getName()).append("\" ").append(r.getKind());
-		}
-		b.append("\n\nYou need to use different names or create this application in a different OpenShift project.");
-		String message = String.valueOf(resources.size()) + " resource name collisions found. ";
-		return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, new Throwable() {
-
-			@Override
-			public String getMessage() {
-				return b.toString();
-			}
-			
-		});
 	}
 
 	/*

@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.ResourceDetailsContentProvider;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.ResourceDetailsLabelProvider;
 
 import com.openshift.restclient.model.IResource;
 
@@ -39,6 +41,12 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 	private IStyledLabelProvider labelProvider;
 	private ITreeContentProvider contentProvider;
 
+	public ResourceSummaryDialog(Shell parentShell,
+			Collection<IResource> resources, 
+			String dialogTitle,
+			String message) {
+		this(parentShell, resources, dialogTitle, message, new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider());
+	}
 	public ResourceSummaryDialog(Shell parentShell, 
 			Collection<IResource> resources, 
 			String dialogTitle,

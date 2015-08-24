@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.test.ui.property.build.BuildConfigPropertySourc
 import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
+import org.jboss.tools.openshift.test.ui.wizard.deployimage.PortSpecAdapterTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -56,6 +57,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	OpenShiftExplorerLabelProviderTest.class,
 	OpenShiftSecureStorageKeyTest.class,
 	PortForwardingWizardModelTest.class,
+	PortSpecAdapterTest.class,
 	ResourcePropertySourceTest.class,
 	StringUtilsTest.class,
 	TemplateParameterColumnLabelProviderTest.class,

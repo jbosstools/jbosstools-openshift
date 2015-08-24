@@ -19,6 +19,7 @@ import org.eclipse.osgi.util.NLS;
  * Validate project name same as Kubernetes server for namespaces
  * @author jeff.cantrill
  */
+//TODO Refactor to merge base into ResourceNameValidator
 public class ProjectNameValidator extends LabelValueValidator {
 
 	private String message;

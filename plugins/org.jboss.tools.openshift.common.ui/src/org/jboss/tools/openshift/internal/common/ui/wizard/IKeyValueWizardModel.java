@@ -59,4 +59,10 @@ public interface IKeyValueWizardModel<T extends IKeyValueItem> {
 	 * @return
 	 */
 	String getValueLabel();
+	
+	/**
+	 * Is the key editable
+	 * @return
+	 */
+	boolean isKeyEditable();
 }

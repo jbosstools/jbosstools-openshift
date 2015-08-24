@@ -58,6 +58,7 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
 		Text nameText = new Text(group, SWT.BORDER);
+		nameText.setEditable(model.isKeyEditable());
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder

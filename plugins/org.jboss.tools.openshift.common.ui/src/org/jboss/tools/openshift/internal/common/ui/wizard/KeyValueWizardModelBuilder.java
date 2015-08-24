@@ -29,6 +29,7 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 	private String keyLabel = "Name";
 	private String valueLabel = "Value";
 	private String windowTitle = "";
+	private boolean keyEditable = true;;
 
 	public KeyValueWizardModelBuilder() {
 		this(null);
@@ -49,12 +50,16 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 				description,
 				groupLabel,
 				keyAfterConvertValidator,
-				valueAfterConvertValidator);
+				valueAfterConvertValidator,
+				keyEditable);
 		model.setKey(key);
 		model.setValue(value);
 		return model;
 	}		
-
+	public KeyValueWizardModelBuilder<T> editableKey(boolean editable){
+		this.keyEditable  = editable;
+		return this;
+	}
 	public KeyValueWizardModelBuilder<T>  keyLabel(String label) {
 		this.keyLabel = label;
 		return this;

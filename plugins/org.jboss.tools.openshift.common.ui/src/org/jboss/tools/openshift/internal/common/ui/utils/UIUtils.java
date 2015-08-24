@@ -42,14 +42,34 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 /**
  * @author André Dietisheim
  */
 public class UIUtils {
+	
+	private static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
 
+	public static void showOpenShiftExplorerView() {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getActivePage()
+					.showView(OPENSHIFT_EXPLORER_VIEW_ID);
+				} catch (PartInitException e) {
+					OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to show the OpenShift Explorer view", e);
+				}
+			}
+		});
+	}
+	
 	public static void selectAllOnFocus(final Text text) {
 		final FocusListener onFocus = new FocusAdapter() {
 

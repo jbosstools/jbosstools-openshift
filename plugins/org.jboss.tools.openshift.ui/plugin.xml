@@ -42,6 +42,62 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.menus">
+    <menuContribution
+          locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.import">
+       <command
+             commandId="org.jboss.tools.openshift.ui.command.importapplication"
+             icon="icons/application_import.gif"
+             label="%openshift.command.application.import"
+             mnemonic="A">
+          <visibleWhen>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate
+                      ifEmpty="false">
+                   <or>
+                      <instanceof
+                            value="org.jboss.tools.openshift.core.connection.Connection">
+                      </instanceof>
+                      <instanceof
+                            value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping">
+                      </instanceof>
+                      <instanceof
+                            value="com.openshift.restclient.model.IResource">
+                      </instanceof>
+                   </or>
+                </iterate>
+             </with>
+          </visibleWhen>
+       </command>
+       <command
+             commandId="org.jboss.tools.openshift.ui.command.deployimage"
+             icon="icons/layer.png"
+             label="%openshift.command.application.deploydockerimage "
+             style="push"
+             tooltip="Deploy a Docker Image">
+          <visibleWhen
+                checkEnabled="false">
+             <and>
+                <count
+                      value="1">
+                </count>
+                <iterate>
+                   <or>
+                      <instanceof
+                            value="com.openshift.restclient.model.IProject">
+                      </instanceof>
+                      <instanceof
+                            value="org.jboss.tools.openshift.core.connection.Connection">
+                      </instanceof>
+                   </or>
+                </iterate>
+             </and>
+          </visibleWhen>
+       </command>
+    </menuContribution>
 		<!-- openshift explorer context menu: refresh resource -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
@@ -357,6 +413,38 @@
 		      </visibleWhen>
 		   </command>
   </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.eclipse.linuxtools.docker.ui.dockerExplorerView#PopupMenu?before=group.run">
+     <separator
+           name="org.jboss.tools.openshift.ui.separator.docker.explorer"
+           visible="true">
+     </separator>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.deployimage"
+           icon="icons/openshift-logo-white-icon.png"
+           id="org.jboss.tools.openshift.ui.docker.explorer.deploy"
+           style="push">
+        <visibleWhen
+              checkEnabled="false">
+           <with
+                 variable="selection">
+              <and>
+                 <count
+                       value="1">
+                 </count>
+                 <iterate
+                       ifEmpty="false"
+                       operator="and">
+                    <instanceof
+                          value="org.eclipse.linuxtools.docker.core.IDockerImage">
+                    </instanceof>
+                 </iterate>
+              </and>
+           </with>
+        </visibleWhen>
+     </command>
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -404,6 +492,10 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.ShowPropertiesHandler"
 			commandId="org.jboss.tools.openshift.ui.command.showproperties">
 		</handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.DeployImageHandler"
+        commandId="org.jboss.tools.openshift.ui.command.deployimage">
+  </handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -499,6 +591,10 @@
 			id="org.jboss.tools.openshift.ui.command.showproperties"
 			name="%openshift.command.showproperties">
 		</command>
+  <command
+        id="org.jboss.tools.openshift.ui.command.deployimage"
+        name="%openshift.command.application.deployimage">
+  </command>
 	</extension>
 
 	<!-- editor for express connections -->
@@ -546,32 +642,6 @@
 	<!-- openshift explorer: import application -->
     <extension
            point="org.eclipse.ui.menus">
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.import">
-				<command
-                	commandId="org.jboss.tools.openshift.ui.command.importapplication"
-                	icon="icons/application_import.gif"
-					label="%openshift.command.application.import"
-                	mnemonic="A">
-					<visibleWhen>
-						<with
-							variable="selection">
-							<count value="1"/>
-							<iterate
-								ifEmpty="false">
-								<or>
-									<instanceof
-										value="org.jboss.tools.openshift.core.connection.Connection" />
-									<instanceof
-										value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
-									<instanceof
-										value="com.openshift.restclient.model.IResource" />
-								</or>
-							</iterate>
-						</with>
-					</visibleWhen>
-			</command>
-		</menuContribution>
 	</extension>
 
 	<!-- Open In Browser -->

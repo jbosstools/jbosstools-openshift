@@ -32,8 +32,12 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	private String valueLabel;
 	private String title;
 	private String windowTitle;
+	private boolean keyEditable;
 
-	public KeyValueWizardModel(String windowTitle, String title, String keyLabel, String valueLabel, String description, String groupLabel, IValidator keyAfterConvertValidator, IValidator valueAfterConvertValidator) {
+	public KeyValueWizardModel(String windowTitle, 
+			String title, String keyLabel, String valueLabel, String description, String groupLabel, 
+			IValidator keyAfterConvertValidator, 
+			IValidator valueAfterConvertValidator, boolean keyEditable) {
 		this.windowTitle = windowTitle;
 		this.title = title;
 		this.keyLabel = keyLabel;
@@ -42,6 +46,7 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 		this.groupLabel = groupLabel;
 		this.keyAfterConvertValidator = keyAfterConvertValidator;
 		this.valueAfterConvertValidator = valueAfterConvertValidator;
+		this.keyEditable = keyEditable;
 	}
 
 	@Override
@@ -104,6 +109,11 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	@Override
 	public String getValue() {
 		return value;
+	}
+
+	@Override
+	public boolean isKeyEditable() {
+		return keyEditable;
 	}
 
 }

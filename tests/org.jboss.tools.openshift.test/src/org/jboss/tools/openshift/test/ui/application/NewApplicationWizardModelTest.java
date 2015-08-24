@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
 import org.junit.Before;
 import org.junit.Test;

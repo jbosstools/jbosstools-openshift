@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.newapp;
+package org.jboss.tools.openshift.internal.ui.wizard.common;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -31,7 +31,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
@@ -44,7 +43,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueWizardModelBu
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.validator.LabelKeyValidator;
 import org.jboss.tools.openshift.internal.ui.validator.LabelValueValidator;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.IResourceLabelsPageModel.Label;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 
 /**
  * Page to edit the labels for a resource.  Labels with certain keys can be identified
@@ -63,7 +62,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 	private IResourceLabelsPageModel model;
 	private TableViewer viewer;
 
-	protected ResourceLabelsPage(IWizard wizard, IResourceLabelsPageModel model) {
+	public ResourceLabelsPage(IWizard wizard, IResourceLabelsPageModel model) {
 		super("Resource Labels", PAGE_DESCRIPTION, "Resource Labels Page", wizard);
 		this.model = model;
 	}
@@ -71,13 +70,16 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
+		org.eclipse.swt.widgets.Label lblLabel = new org.eclipse.swt.widgets.Label(container, SWT.NONE);
+		lblLabel.setText("Labels");
 
-		Group labelsGroup = new Group(container, SWT.NONE);
-		labelsGroup.setText("Labels");
+		Composite labelsGroup = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(labelsGroup);
+			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(labelsGroup);
 		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(labelsGroup);
+			.numColumns(2)
+			.applyTo(labelsGroup);
+		
 		Composite tableContainer = new Composite(labelsGroup, SWT.NONE);
 
 		this.viewer = createTable(tableContainer);
@@ -142,14 +144,14 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				final Label label = UIUtils.getFirstElement(viewer.getSelection(),Label.class);
 				IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>(label)
-						.windowTitle(RESOURCE_LABEL)
-						.title("Edit Label")
-						.description("Edit the resource label.")
-						.keyLabel(LABEL)
-						.groupLabel(LABEL)
-						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
-						.valueAfterConvertValidator(new LabelValueValidator())
-						.build();
+					.windowTitle(RESOURCE_LABEL)
+					.title("Edit Label")
+					.description("Edit the resource label.")
+					.keyLabel(LABEL)
+					.groupLabel(LABEL)
+					.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
+					.valueAfterConvertValidator(new LabelValueValidator())
+					.build();
 				OkCancelButtonWizardDialog dialog =
 						new OkCancelButtonWizardDialog(getShell(),
 								new KeyValueWizard<Label>(label, dialogModel));

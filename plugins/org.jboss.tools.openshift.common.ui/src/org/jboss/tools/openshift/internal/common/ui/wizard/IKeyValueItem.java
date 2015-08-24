@@ -16,7 +16,9 @@ package org.jboss.tools.openshift.internal.common.ui.wizard;
 public interface IKeyValueItem {
 
 	String getKey();
+	void setKey(String key);
 	
 	String getValue();
+	void setValue(String value);
 
 }

@@ -310,6 +310,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return client.getBaseURL().toString();
 	}
 
+	/**
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws UnauthorizedException 
+	 */
 	public <T extends IResource> T createResource(T resource) {
 		try {
 			if(client.getAuthorizationStrategy() == null) {

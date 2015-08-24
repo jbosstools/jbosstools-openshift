@@ -6,7 +6,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.newapp;
+package org.jboss.tools.openshift.internal.ui.wizard.common;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +48,11 @@ public interface IResourceLabelsPageModel {
 		public Label(String name, String value){
 			this.name = name;
 			this.value = value;
+		}
+
+		@Override
+		public void setKey(String key) {
+			setName(key);
 		}
 
 		public String getName() {
