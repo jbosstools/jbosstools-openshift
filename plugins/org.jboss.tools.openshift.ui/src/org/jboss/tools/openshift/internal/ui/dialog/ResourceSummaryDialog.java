@@ -102,7 +102,7 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL)
 			.grab(true, true)
-			.hint(400, 300).applyTo(tableContainer);
+			.hint(400, 150).applyTo(tableContainer);
 
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		tableContainer.setLayout(treeLayout);

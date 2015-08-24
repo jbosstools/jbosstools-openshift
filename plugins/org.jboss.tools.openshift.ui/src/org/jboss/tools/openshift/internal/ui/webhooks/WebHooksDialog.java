@@ -8,6 +8,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.webhooks;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -24,11 +27,16 @@ import com.openshift.restclient.model.IBuildConfig;
  */
 public class WebHooksDialog extends Dialog {
 
-	private IBuildConfig buildConfig;
+	private Collection<IBuildConfig> buildConfigs;
 
 	public WebHooksDialog(Shell parent, IBuildConfig buildConfig) {
 		super(parent);
-		this.buildConfig = buildConfig;
+		this.buildConfigs = Collections.singleton(buildConfig);
+	}
+
+	public WebHooksDialog(Shell parent, Collection<IBuildConfig> buildConfigs) {
+		super(parent);
+		this.buildConfigs = buildConfigs;
 	}
 
 	protected void configureShell(Shell shell) {
@@ -40,7 +48,7 @@ public class WebHooksDialog extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
-		WebHooksComponent webHookComponent = new WebHooksComponent(buildConfig, container, SWT.NONE);
+		WebHooksComponent webHookComponent = new WebHooksComponent(buildConfigs, container, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, SWT.DEFAULT)
 			.applyTo(webHookComponent);

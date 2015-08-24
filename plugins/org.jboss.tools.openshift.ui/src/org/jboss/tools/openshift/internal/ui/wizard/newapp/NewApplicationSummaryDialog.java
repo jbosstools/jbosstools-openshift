@@ -10,13 +10,20 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
@@ -26,8 +33,12 @@ import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvid
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
+import org.jboss.tools.openshift.internal.ui.webhooks.WebHooksDialog;
+import org.jboss.tools.openshift.internal.ui.webhooks.WebhookUtil;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils.ParameterNameViewerComparator;
 
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
 
 /**
@@ -46,15 +57,31 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 
 	@Override
 	protected void createAreaAfterResourceSummary(Composite parent) {
-		if(job.getParameters().size() == 0) {
-			return;
-		}
 		
 		Composite area = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(area);
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(area);
 		
+		final Collection<IBuildConfig> buildConfigs = findBuildConfigsWithWebHooks();
+		if (!buildConfigs.isEmpty()) {
+			Link webHooksLink = new Link(area, SWT.NONE);
+			webHooksLink.setText("Click <a>here</a> to display the webhooks available to automatically trigger builds.");
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(webHooksLink);
+			webHooksLink.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					WebHooksDialog dialog = new WebHooksDialog(getParentShell(), buildConfigs);
+					dialog.open();
+				}
+			});
+		}
+
+		if(job.getParameters().isEmpty()) {
+			return;
+		}
+
 		Label lblParams = new Label(area, SWT.NONE);
 		lblParams.setText("Please make note of the following parameters which may \ninclude values required to administer your resources:");
 		GridDataFactory.fillDefaults()
@@ -70,6 +97,16 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 		viewer.setInput(job.getParameters());
 	}
 	
+	private Collection<IBuildConfig> findBuildConfigsWithWebHooks() {
+		Set<IBuildConfig> buildConfigs = new LinkedHashSet<>();
+		for (IResource r : job.getResources()) {
+			if (r instanceof IBuildConfig && !WebhookUtil.getWebHooks((IBuildConfig)r).isEmpty()) {
+				buildConfigs.add((IBuildConfig)r);
+			}
+		}
+		return buildConfigs;
+	}
+
 	public static TableViewer createTable(Composite tableContainer) {
 		Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);

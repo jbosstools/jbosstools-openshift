@@ -8,7 +8,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.webhooks;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,13 +32,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.build.BuildTriggerType;
-import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.IWebhookTrigger;
 
 /**
@@ -51,36 +49,45 @@ public class WebHooksComponent extends Composite {
 
 	protected static final String WEBHOOKS_DOCS = "https://docs.openshift.org/latest/dev_guide/builds.html#webhook-triggers";
 	
-	private IBuildConfig buildConfig;
+	private Collection<IBuildConfig> buildConfigs;
 
 	public WebHooksComponent(IBuildConfig buildConfig, Composite parent, int style) {
 		super(parent, style);
-		this.buildConfig = buildConfig;
-		
-		createControls(buildConfig, parent);
+		this.buildConfigs = Collections.singleton(buildConfig);
+		createControls(buildConfigs, parent);
 	}
 
-	private void createControls(IBuildConfig buildConfig, Composite parent) {
+	public WebHooksComponent(Collection<IBuildConfig> buildConfigs, Composite parent, int style) {
+	    super(parent, style);
+	    this.buildConfigs = buildConfigs;
+	    createControls(buildConfigs, parent);
+	}
+
+	private void createControls(Collection<IBuildConfig> buildConfigs, Composite parent) {
 		GridLayoutFactory.fillDefaults()
 			.applyTo(this);
 
 		Link webhookExplanation = new Link(this, SWT.WRAP);
 		webhookExplanation.setText("<a>Webhook triggers</a> allow you to trigger a new build by sending a request to the OpenShift API endpoint.");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, false)
-			.applyTo(webhookExplanation);
+					   .align(SWT.FILL, SWT.FILL).grab(true, false)
+					   .applyTo(webhookExplanation);
 		webhookExplanation.addSelectionListener(onWebhookExplanationClicked());
 		
-		Group hooksGroup = new Group(this, SWT.None);
-		hooksGroup.setText("Webhooks");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true)
-			.applyTo(hooksGroup);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(10, 10)
-			.applyTo(hooksGroup);
+		for (IBuildConfig buildConfig : buildConfigs) {
+			Group hooksGroup = new Group(this, SWT.None);
+			hooksGroup.setText("Webhooks for "+buildConfig.getSourceURI());
+			GridDataFactory.fillDefaults()
+						   .align(SWT.FILL, SWT.FILL)
+						   .grab(true, true)
+						   .applyTo(hooksGroup);
+			GridLayoutFactory.fillDefaults()
+							 .numColumns(3)
+							 .margins(10, 10)
+							 .applyTo(hooksGroup);
 
-		createHookWidgets(getWebHooks(buildConfig), hooksGroup);
+			createHookWidgets(buildConfig, hooksGroup);
+		}
 	}
 
 	private SelectionListener onWebhookExplanationClicked() {
@@ -94,26 +101,28 @@ public class WebHooksComponent extends Composite {
 		};
 	}
 
-	private void createHookWidgets(List<IWebhookTrigger> webHooks, Composite parent) {
-		if (webHooks == null
+	private void createHookWidgets(IBuildConfig buildConfig, Composite parent) {
+	  List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
+	  if (webHooks == null
 				|| webHooks.isEmpty()) {
-			createNoHooksMessage(parent);
+			createNoHooksMessage(buildConfig, parent);
 		} else {
 			for (IWebhookTrigger webHook : webHooks) {
-				createWebhookWidget(webHook, parent);
+				createWebhookWidget(buildConfig, webHook, parent);
 			}
 		}
 	}
 
-	private void createNoHooksMessage(Composite parent) {
+	private void createNoHooksMessage(IBuildConfig buildConfig, Composite parent) {
 		Label noHooksLabel = new Label(parent, SWT.NONE);
-		noHooksLabel.setText("You have no webhooks configured for your build config.");
+		noHooksLabel.setText("You have no webhooks configured for build config. "+buildConfig.getSourceURI());
 	}
 
-	private void createWebhookWidget(IWebhookTrigger webHook, Composite parent) {
+	private void createWebhookWidget(IBuildConfig buildConfig, IWebhookTrigger webHook, Composite parent) {
 		Link link = new Link(parent, SWT.NONE);
-		link.addSelectionListener(onClickWebhook());
-		String linkLabel = isGitHub(webHook) ? "<a>" + webHook.getType() + "</a>" : webHook.getType();
+		link.addSelectionListener(onClickWebhook(buildConfig));
+		String gitUrl = buildConfig.getSourceURI();
+		String linkLabel = isGitHub(gitUrl, webHook) ? "<a>" + webHook.getType() + "</a>" : webHook.getType();
 		link.setText(linkLabel + " webhook:");
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER)
@@ -153,7 +162,7 @@ public class WebHooksComponent extends Composite {
 		};
 	}
 
-	private SelectionAdapter onClickWebhook() {
+	private SelectionAdapter onClickWebhook(final IBuildConfig buildConfig) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -181,11 +190,9 @@ public class WebHooksComponent extends Composite {
 		copiedNotification.deactivate();
 	}
 
-	private boolean isGitHub(IWebhookTrigger webHook) {
-		if (buildConfig == null
-				|| buildConfig.getBuildSource() == null
-				|| StringUtils.isEmpty(buildConfig.getBuildSource().getURI()) 
-				|| !buildConfig.getBuildSource().getURI().startsWith("https://github.com/")) {
+	private static boolean isGitHub(String gitUrl, IWebhookTrigger webHook) {
+		if (gitUrl == null
+				|| !gitUrl.startsWith("https://github.com/")) {
 			return false;
 		}
 
@@ -195,35 +202,6 @@ public class WebHooksComponent extends Composite {
 				return true;
 			default:
 				return false;
-		}
-	}
-
-	public List<IWebhookTrigger> getWebHooks(IBuildConfig buildConfig) {
-		List<IBuildTrigger> triggers = buildConfig.getBuildTriggers();
-		List<IWebhookTrigger> webHooks = null;
-		if (triggers == null || triggers.isEmpty()) {
-			webHooks = Collections.emptyList();
-		} else {
-			webHooks = new ArrayList<>(triggers.size());
-			for (IBuildTrigger trigger : triggers) {
-				IWebhookTrigger webHook = getAsWebHook(trigger);
-				if (webHook != null) {
-					webHooks.add(webHook);
-				}
-			}
-		}
-		return webHooks;
-	}
-
-	private IWebhookTrigger getAsWebHook(IBuildTrigger trigger) {
-		switch (trigger.getType()) {
-		case BuildTriggerType.generic:
-		case BuildTriggerType.GENERIC:
-		case BuildTriggerType.github:
-		case BuildTriggerType.GITHUB:
-			return (IWebhookTrigger) trigger;
-		default:
-			return null;
 		}
 	}
 
