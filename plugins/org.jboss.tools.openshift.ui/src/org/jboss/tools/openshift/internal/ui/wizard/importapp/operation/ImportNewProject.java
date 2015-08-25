@@ -170,7 +170,7 @@ public class ImportNewProject {
 		if (filters != null) {
 			sanitized = new LinkedHashSet<>(filters.size());
 			for (String path : filters) {
-				if (StringUtils.isBlank(path)) {
+				if (StringUtils.isNotBlank(path)) {
 					sanitized.add(makePlatformDependent(path));
 				}
 			}
