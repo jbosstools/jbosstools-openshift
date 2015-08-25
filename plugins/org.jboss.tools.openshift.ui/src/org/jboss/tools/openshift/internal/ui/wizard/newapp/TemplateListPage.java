@@ -203,9 +203,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						@Override
 						protected IStatus updateUI(IProgressMonitor monitor) {
 							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
+							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open(); 
 							// reload projects to reflect changes that happened in projects wizard
-							loadResources(templatesViewer, model);
-							if(Dialog.OK == new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open()) {
+							if (manageProjectsWizard.hasChanged()) {
+								loadResources(templatesViewer, model);
+							}
+							if(Dialog.OK == result) {
 								IProject selectedProject = manageProjectsWizard.getSelectedProject();
 								if (selectedProject != null) {
 									model.setProject(selectedProject);

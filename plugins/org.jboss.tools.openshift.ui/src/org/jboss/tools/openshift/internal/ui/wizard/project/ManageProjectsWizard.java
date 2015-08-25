@@ -57,4 +57,8 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 	public List<IProject> getProjects() {
 		return manageProjectsWizardPage.getProjects();
 	}
+
+	public boolean hasChanged() {
+		return manageProjectsWizardPage.hasChanged();
+	}
 }

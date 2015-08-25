@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.project;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -64,6 +65,8 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 	private ManageProjectsWizardPageModel pageModel;
 	private TableViewer viewer;
 
+	private List<IProject> initialProjects;
+
 	public ManageProjectsWizardPage(String title, String description, ManageProjectsWizardPageModel pageModel, IWizard wizard) {
 		super(title, description, title, wizard);
 		this.pageModel = pageModel;
@@ -88,6 +91,8 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 		viewer.setInput(BeanProperties.list(
 				ManageProjectsWizardPageModel.PROPERTY_PROJECTS).observe(pageModel));
 		loadProjects(dbc);
+		initialProjects = getProjects();
+
 		IObservableValue viewerSingleSelection = ViewerProperties.singleSelection().observe(viewer);
 		ValueBindingBuilder.bind(viewerSingleSelection)
 				.to(BeanProperties.value(ManageProjectsWizardPageModel.PROPERTY_SELECTED_PROJECT).observe(pageModel))
@@ -264,5 +269,9 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 	public void dispose() {
 		pageModel.dispose();
 		super.dispose();
+	}
+
+	public boolean hasChanged() {
+		return !Objects.deepEquals(initialProjects,getProjects());
 	}
 }
