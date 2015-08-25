@@ -10,18 +10,34 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -29,6 +45,7 @@ import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICellToolTipProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
+import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvider;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
@@ -45,9 +62,12 @@ import com.openshift.restclient.model.template.IParameter;
  * 
  * @author jeff.cantrill
  * @author Andre Dietisheim
+ * @author Fred Bricon
  */
 public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 
+	private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2*1000;
+	
 	private CreateApplicationFromTemplateJob job;
 
 	public NewApplicationSummaryDialog(Shell parentShell, CreateApplicationFromTemplateJob job, String message) {
@@ -82,21 +102,84 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 			return;
 		}
 
-		Label lblParams = new Label(area, SWT.NONE);
-		lblParams.setText("Please make note of the following parameters which may \ninclude values required to administer your resources:");
+		Label lblParams = new Label(area, SWT.WRAP);
+		lblParams.setText("Please make note of the following parameters which may include values required to administer your resources:");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(lblParams);
+			.align(SWT.FILL, SWT.TOP).hint(100, SWT.DEFAULT).grab(true, false).applyTo(lblParams);
+
+		Composite container = new Composite(parent, SWT.NONE);
+		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, true).applyTo(container);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).equalWidth(false).applyTo(container);
 		
-		Composite parameters = new Composite(area, SWT.NONE);
+		Composite parameters = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults()
-			.hint(100, 250)
+			.hint(100, 200)
 			.grab(true, true)
 			.applyTo(parameters);
-		
+
 		TableViewer viewer = createTable(parameters);
 		viewer.setInput(job.getParameters());
+
+		Button copyToClipboard = new Button(container, SWT.PUSH);
+		copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
+		copyToClipboard.setToolTipText("Copy parameters to clipboard");
+		copyToClipboard.addSelectionListener(onClickCopyButton(lblParams));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(copyToClipboard);
 	}
 	
+	private SelectionAdapter onClickCopyButton(final Control control) {
+	  return new SelectionAdapter() {
+	    @Override
+	    public void widgetSelected(SelectionEvent e) {
+	    	List<IParameter> params = new ArrayList<>(job.getParameters());
+	    	Collections.sort(params, new Comparator<IParameter>() {
+
+				@Override
+				public int compare(IParameter p1, IParameter p2) {
+					return p1.getName().compareTo(p2.getName());
+				}
+			});
+	    	String text = getAsString(params);
+	        copyToClipBoard(control, text, "Parameters copied to clipboard");
+	    }
+	  };
+	}
+
+	private static String getAsString(Collection<IParameter> parameters) {
+	  StringBuilder content = new StringBuilder();
+	  for (IParameter param : parameters) {
+	    content.append(getAsString(param)).append("\r\n");
+	  }
+	  return content.toString();
+	}
+
+	private static String getAsString(IParameter param) {
+	  StringBuilder content = new StringBuilder(param.getName());
+	  content.append(": ").append(param.getValue());
+	  return content.toString();
+	}
+	 
+	private void copyToClipBoard(Control control, String text, String notification) {
+	  copyToClipBoard(text);
+	  notifyCopied(control, notification);
+	}
+
+	private void notifyCopied(Control control, String notification) {
+	  DefaultToolTip copiedNotification = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
+	  copiedNotification.setText(notification);
+	  copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
+	  copiedNotification.show(control.getLocation());
+	  copiedNotification.deactivate();
+	}
+
+	private void copyToClipBoard(String text) {
+	  Clipboard clipboard = new Clipboard(Display.getCurrent());
+	  Object[] data = new Object[] { text };
+	  Transfer[] dataTypes = new Transfer[] { TextTransfer.getInstance() };
+	  clipboard.setContents(data, dataTypes);
+	  clipboard.dispose();
+	}
+ 
 	private Collection<IBuildConfig> findBuildConfigsWithWebHooks() {
 		Set<IBuildConfig> buildConfigs = new LinkedHashSet<>();
 		for (IResource r : job.getResources()) {
@@ -107,9 +190,9 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 		return buildConfigs;
 	}
 
-	public static TableViewer createTable(Composite tableContainer) {
+	public TableViewer createTable(Composite tableContainer) {
 		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+				new Table(tableContainer, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		ICellToolTipProvider<IParameter> cellToolTipProvider = new ICellToolTipProvider<IParameter>() {
@@ -148,6 +231,25 @@ public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
 					.buildColumn()
 				.buildViewer();
 		viewer.setComparator(new ParameterNameViewerComparator());
+
+		viewer.addDoubleClickListener(onDoubleClick(table));
 		return viewer;
+	}
+
+	 private IDoubleClickListener onDoubleClick(final Control control) {
+	    return new IDoubleClickListener() {
+	      @Override
+	      public void doubleClick(DoubleClickEvent event) {
+	        IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+	        IParameter param = (IParameter) selection.getFirstElement();
+	        if (param != null) {
+	        	String text = param.getValue();
+	        	if (StringUtils.isNotBlank(text)) {
+	        		String notification = param.getName() + " value copied to clipboard";
+	        		copyToClipBoard(control, text, notification);
+	        	}
+	        }
+	      }
+	    };
 	}
 }
