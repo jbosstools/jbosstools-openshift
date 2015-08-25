@@ -203,6 +203,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 			public void run() {
 				synchronized (viewer) {
 					viewer.remove(parent, objects);
+					viewer.refresh();
 				}
 			}
 		});
