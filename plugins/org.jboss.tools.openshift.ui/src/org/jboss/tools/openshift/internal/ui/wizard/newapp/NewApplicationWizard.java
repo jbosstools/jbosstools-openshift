@@ -11,13 +11,19 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 import static org.jboss.tools.common.ui.WizardUtils.runInWizard;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
@@ -35,7 +41,10 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -114,7 +123,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 									message).open();
 						}
 					});
-					Display.getDefault().asyncExec(new Runnable() {
+					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
 							try {
@@ -125,6 +134,17 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 							} catch (PartInitException e) {
 								OpenShiftUIActivator.getDefault().getLogger().logError("Failed to show the OpenShift Explorer view", e);
 							}
+						}
+					});
+					final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(createJob.getResources());
+					if (projectsAndBuildConfigs.isEmpty()) {
+						return;
+					}
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
+							new WizardDialog(getShell(), wizard).open();
 						}
 					});
 				}
@@ -146,6 +166,25 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 			UsageStats.getInstance().newV3Application(model.getConnection().getHost(), success);
 		}
 		return success;
+	}
+
+	protected Map<IProject, Collection<IBuildConfig>> getBuildConfigs(Collection<IResource> resources) {
+		Map<IProject, Collection<IBuildConfig>> projects = new LinkedHashMap<>();
+		for (IResource resource : resources) {
+			if (resource instanceof IBuildConfig) {
+				IBuildConfig buildConfig = (IBuildConfig)resource;
+				if (StringUtils.isNotBlank(buildConfig.getSourceURI())) {
+					IProject p = buildConfig.getProject();
+					Collection<IBuildConfig> buildConfigs = projects.get(p);
+					if (buildConfigs == null) {
+						buildConfigs = new LinkedHashSet<>();
+						projects.put(p, buildConfigs);
+					}
+					buildConfigs.add(buildConfig);
+				}
+			}
+		}
+		return projects;
 	}
 
 	private boolean isFailed(IStatus status) {

@@ -8,7 +8,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -28,6 +30,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
@@ -47,8 +50,28 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		this.model = new ImportApplicationWizardModel();
 	}
 
+	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
+		this();
+		if (projectsAndBuildConfigs != null && projectsAndBuildConfigs.size() == 1) {
+			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
+			IProject project = entry.getKey();
+			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
+			setModelConnection(connection);
+			Collection<IBuildConfig> buildConfigs = entry.getValue();
+			if (buildConfigs.size() == 1) {
+				model.setSelectedItem(buildConfigs.iterator().next());
+			} else {
+				model.setSelectedItem(project);
+				//TODO Get BuildConfigWizardPage to only display the buildconfigs passed here
+			}
+		}
+	}
+	
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		if (model.getConnection() != null && model.getSelectedItem() != null) {
+			return;
+		}
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
 		if (connection != null) {
 			model.setConnection(connection);
@@ -75,7 +98,10 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public void addPages() {
-		addPage(new BuildConfigWizardPage(this, model));
+		//Skip build config selection page if it's already set
+		if (model.getSelectedBuildConfig() == null) {
+			addPage(new BuildConfigWizardPage(this, model));
+		}
 		addPage(new GitCloningWizardPage(this, model));
 	}
 
