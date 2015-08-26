@@ -11,11 +11,15 @@
 
 package org.jboss.tools.openshift.express.internal.core;
 
+import java.util.Collection;
+
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionPersistency;
 import org.osgi.framework.BundleContext;
@@ -49,6 +53,30 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 
         ConnectionsRegistrySingleton.getInstance().addAll(
         		new ExpressConnectionPersistency().load());
+
+       ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
+			@Override
+			public void connectionRemoved(IConnection connection) {
+				if(connection instanceof ExpressConnection){
+					saveAllConnections();
+				}
+			}
+
+			@Override
+			public void connectionAdded(IConnection connection) {
+				if(connection instanceof ExpressConnection){
+					saveAllConnections();
+				}
+			}
+
+			@Override
+			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+				if(connection instanceof ExpressConnection && (oldValue instanceof ExpressConnection || newValue instanceof ExpressConnection) ){
+					saveAllConnections();
+				}
+			}
+
+        });
     }
 
 	/**
@@ -89,4 +117,8 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 		context = null;
 	}
 
+	protected void saveAllConnections() {
+		Collection<ExpressConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll(ExpressConnection.class);
+		new ExpressConnectionPersistency().save(connections);
+	}
 }

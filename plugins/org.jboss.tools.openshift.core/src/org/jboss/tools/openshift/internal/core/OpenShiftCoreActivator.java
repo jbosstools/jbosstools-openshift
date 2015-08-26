@@ -67,15 +67,29 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 				if(url != null) {
 					OpenShiftCorePreferences.INSTANCE.removeAuthScheme(url.toString());
 				}
+				saveAllConnections();
+
+			}
+			
+			@Override
+			public void connectionAdded(IConnection connection) {
+				if (connection instanceof Connection) {
+					saveAllConnections();
+				}
 			}
         	
+			@Override
+			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+				if (connection instanceof Connection && (oldValue instanceof Connection || newValue instanceof Connection) ) {
+					saveAllConnections();
+				}
+			}
         });
 	}
 
     @Override
 	public void stop(BundleContext context) throws Exception {
-    	Collection<Connection> connections = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
-		new ConnectionPersistency().save(connections);
+    	saveAllConnections();
     	super.stop(context);
 	}
 
@@ -105,6 +119,11 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	 */
 	public static StatusFactory statusFactory() {
 		return getDefault().statusFactoryInternal();
+	}
+
+	protected void saveAllConnections() {
+		Collection<Connection> connections = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
+		new ConnectionPersistency().save(connections);
 	}
 
 }
