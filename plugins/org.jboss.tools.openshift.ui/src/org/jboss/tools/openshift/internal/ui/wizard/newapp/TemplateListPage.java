@@ -42,6 +42,9 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -326,6 +329,18 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_TEMPLATE).observe(model))
 			.converting(new Model2ObservableTreeItemConverter(TemplateTreeItems.INSTANCE))
 			.in(dbc);
+
+		templatesViewer.addDoubleClickListener(new IDoubleClickListener() {
+	        @Override
+	        public void doubleClick(DoubleClickEvent event) {
+	            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+	            if (selection.getFirstElement() instanceof ObservableTreeItem
+	            		&& (((ObservableTreeItem) selection.getFirstElement()).getModel() instanceof ITemplate)
+	            		&& canFlipToNextPage()) {
+	            	getContainer().showPage(getNextPage());
+	            }
+	        }
+	    });
 
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
