@@ -51,6 +51,7 @@ public class NewApplicationWizardModel
 	private Connection connection;
 	private IProject project;
 	private List<ObservableTreeItem> projectItems = new ArrayList<>();
+	private List<ObservableTreeItem> projectTemplates = new ArrayList<>();
 	private ITemplate template;
 	private ITemplate uploadedTemplate;
 	private List<IParameter> parameters = new ArrayList<IParameter>();
@@ -68,10 +69,24 @@ public class NewApplicationWizardModel
 		firePropertyChange(PROPERTY_USE_UPLOAD_TEMPLATE, this.uploadTemplate, this.uploadTemplate = useUploadTemplate);
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projectItems));
+		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
 		firePropertyChange(PROPERTY_TEMPLATE, this.template, this.template = selectedTemplate);
 		initTemplateParameters(selectedTemplate);
 	}
 	
+	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject,
+			List<ObservableTreeItem> allProjects) {
+		if (allProjects == null) {
+			return null;
+		}
+		for (ObservableTreeItem item : allProjects) {
+			if (item.getModel().equals(selectedProject)) {
+				return item.getChildren();
+			}
+		}
+		return allProjects;
+	}
+
 	private void updateProjectItems(List<ObservableTreeItem> projectItems) {
 		List<ObservableTreeItem> oldItems = new ArrayList<>(this.projectItems);
 		// ensure we're not operating on the same list
@@ -320,6 +335,11 @@ public class NewApplicationWizardModel
 	@Override
 	public List<ObservableTreeItem> getProjectItems() {
 		return this.projectItems;
+	}
+
+	@Override
+	public List<ObservableTreeItem> getTemplates() {
+		return this.projectTemplates;
 	}
 	
 	@Override

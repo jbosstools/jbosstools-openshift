@@ -397,7 +397,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		TreeViewer viewer = new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
 				new IListProperty[] { 
-						BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS), 
+						BeanProperties.list(ITemplateListPageModel.PROPERTY_TEMPLATES),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 		ObservableListTreeContentProvider contentProvider = new ObservableListTreeContentProvider(
 				childrenProperty.listFactory(), null);

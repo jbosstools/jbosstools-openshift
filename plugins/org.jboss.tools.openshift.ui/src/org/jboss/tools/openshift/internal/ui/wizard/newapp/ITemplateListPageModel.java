@@ -90,5 +90,7 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	List<ObservableTreeItem> getProjectItems();
 
 	boolean hasProjects();
+
+	List<ObservableTreeItem> getTemplates();
 	
 }
