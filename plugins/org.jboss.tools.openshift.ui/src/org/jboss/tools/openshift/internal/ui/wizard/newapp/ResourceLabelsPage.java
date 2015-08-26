@@ -35,8 +35,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueWizard;
@@ -93,13 +93,13 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		Button addButton = new Button(labelsGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
-		addButton.setText("Add");
+		addButton.setText("Add...");
 		addButton.addSelectionListener(onAdd());
 		
 		Button editExistingButton = new Button(labelsGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
-		editExistingButton.setText("Edit");
+		editExistingButton.setText("Edit...");
 		editExistingButton.addSelectionListener(onEdit());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))

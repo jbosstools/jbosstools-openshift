@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
 /**
  * A generic page for editing key value pairs (e.g. env vars; labels) 
@@ -54,7 +53,7 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 				.numColumns(4).margins(6, 6).applyTo(group);
 
 		Label nameLabel = new Label(group, SWT.NONE);
-		nameLabel.setText(model.getKeyLabel());
+		nameLabel.setText(model.getKeyLabel()+":");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
@@ -70,7 +69,7 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		Label valueLabel = new Label(group, SWT.NONE);
-		valueLabel.setText(model.getValueLabel());
+		valueLabel.setText(model.getValueLabel()+":");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 
