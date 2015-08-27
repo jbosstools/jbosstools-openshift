@@ -492,10 +492,14 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.ShowPropertiesHandler"
 			commandId="org.jboss.tools.openshift.ui.command.showproperties">
 		</handler>
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.handler.DeployImageHandler"
-        commandId="org.jboss.tools.openshift.ui.command.deployimage">
-  </handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.DeployImageHandler"
+			commandId="org.jboss.tools.openshift.ui.command.deployimage">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.OpenInWebConsoleHandler"
+			commandId="org.jboss.tools.openshift.ui.command.openInWebConsole">
+		</handler>
 	</extension>
 	<!-- adapters -->
 	<extension
@@ -591,10 +595,14 @@
 			id="org.jboss.tools.openshift.ui.command.showproperties"
 			name="%openshift.command.showproperties">
 		</command>
-  <command
-        id="org.jboss.tools.openshift.ui.command.deployimage"
-        name="%openshift.command.application.deployimage">
-  </command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.deployimage"
+			name="%openshift.command.application.deployimage">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.openInWebConsole"
+			name="%openshift.command.openwebconsole">
+		</command>
 	</extension>
 
 	<!-- editor for express connections -->
@@ -680,8 +688,34 @@
 										value="com.openshift.restclient.model.route.IRoute" />
 									<instanceof
 										value="com.openshift.restclient.model.IProject" />
+								</or>
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+        </menuContribution>
+    </extension>
+	<extension
+		point="org.eclipse.ui.menus">
+		<!-- openshift explorer: open in web console -->
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.showIn">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
+				icon="icons/open-web-console.gif"
+				label="Web Console"
+				mnemonic="C">
+					<visibleWhen>
+						<with
+							variable="selection">
+							<count value="1"/>
+							<iterate
+								ifEmpty="false">
+								<or>
 									<instanceof
 										value="org.jboss.tools.openshift.core.connection.Connection" />
+									<instanceof
+										value="com.openshift.restclient.model.IResource" />
 								</or>
 						</iterate>
 					</with>
