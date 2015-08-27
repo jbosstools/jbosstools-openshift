@@ -89,7 +89,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 			.cancelStatus("Could not find a route that points to an url to show in a browser.");
 	}
 
-	private void openBrowser(IRoute route) {
+	protected void openBrowser(IRoute route) {
 		if (route == null 
 				|| StringUtils.isBlank(route.getURL())) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Could not find a route that points to an url to show in a browser.");
@@ -98,7 +98,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 		openInBrowser(route.getURL());
 	}
 
-	private void openInBrowser(String url) {
+	protected void openInBrowser(String url) {
 		if (StringUtils.isBlank(url)) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("No url to show in a browser.");
 			return;
