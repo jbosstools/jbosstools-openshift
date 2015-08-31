@@ -27,7 +27,7 @@ public class ImportApplicationHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		WizardUtils.openWizardDialog(
 				new ImportApplicationWizard(),
-				HandlerUtil.getActiveShell(event));
+				HandlerUtil.getActiveShell(event), false);
 		return Status.OK_STATUS;
 	}
 }
