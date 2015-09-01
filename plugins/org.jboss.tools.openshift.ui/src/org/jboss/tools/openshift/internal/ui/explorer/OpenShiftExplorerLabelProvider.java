@@ -131,12 +131,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 
 	private StyledString getStyledText(IPod pod) {
-		String labels = StringUtils.serialize(pod.getLabels());
-		if(StringUtils.isEmpty(labels)){
-			return new StyledString(pod.getName());
-		}
-		String podQualifiedText = String.format("labels: %s", labels);
-		return style(pod.getName(), podQualifiedText);
+		return style(pod.getName(), pod.getStatus());
 	}
 
 	private StyledString getStyledText(IImageStream repo) {

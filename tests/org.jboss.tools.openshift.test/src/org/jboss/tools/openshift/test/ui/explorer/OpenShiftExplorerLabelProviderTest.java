@@ -8,8 +8,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.explorer;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.StyledString;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
@@ -94,12 +94,11 @@ public class OpenShiftExplorerLabelProviderTest {
 	@Test
 	public void getStyledTextForAPod(){
 		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
-		when(pod.getIP()).thenReturn("172.17.2.226");
-		Map<String, String> labels = new HashMap<String, String>();
-		labels.put("foo", "bar");
-		when(pod.getLabels()).thenReturn(labels);
+		assertEquals(pod.getName(), provider.getStyledText(pod).getString());
 		
-		String exp = String.format("%s labels: %s", pod.getName(), StringUtils.serialize(pod.getLabels()));
+		String status = "Chilling";
+		when(pod.getStatus()).thenReturn(status);
+		String exp = String.format("%s %s", pod.getName(), status);
 		assertEquals(exp, provider.getStyledText(pod).getString());
 	}
 
