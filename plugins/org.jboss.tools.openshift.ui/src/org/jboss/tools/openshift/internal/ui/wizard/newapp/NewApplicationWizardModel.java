@@ -69,7 +69,7 @@ public class NewApplicationWizardModel
 		firePropertyChange(PROPERTY_USE_UPLOAD_TEMPLATE, this.uploadTemplate, this.uploadTemplate = useUploadTemplate);
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projectItems));
-		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
+		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(project, projectItems) );
 		firePropertyChange(PROPERTY_TEMPLATE, this.template, this.template = selectedTemplate);
 		initTemplateParameters(selectedTemplate);
 	}
