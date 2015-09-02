@@ -19,6 +19,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -47,18 +48,24 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 
 		Group group = new Group(parent, SWT.NONE);
 		group.setText(model.getGroupLabel());
+		group.setLayout(new GridLayout());
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(4).margins(6, 6).applyTo(group);
 
-		Label nameLabel = new Label(group, SWT.NONE);
+		Composite composite = new Composite(group, SWT.NONE);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(4).margins(25, 25).applyTo(composite);
+
+		Label nameLabel = new Label(composite, SWT.NONE);
 		nameLabel.setText(model.getKeyLabel()+":");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
-		Text nameText = new Text(group, SWT.BORDER);
+		Text nameText = new Text(composite, SWT.BORDER);
 		nameText.setEditable(model.isKeyEditable());
+
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
@@ -69,12 +76,12 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		Label valueLabel = new Label(group, SWT.NONE);
+		Label valueLabel = new Label(composite, SWT.NONE);
 		valueLabel.setText(model.getValueLabel()+":");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 
-		Text valueText = new Text(group, SWT.BORDER);
+		Text valueText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
 		Binding valeuBinding = ValueBindingBuilder
