@@ -90,7 +90,8 @@ public class ConnectionFactory implements IConnectionFactory {
 		String userdoc = System.getProperty(OPENSHIFT_USERDOC, null);
 		if (userdoc == null) {
 			IPropertiesProvider pp = PropertiesHelper.getPropertiesProvider();
-			userdoc = pp.getValue(OPENSHIFT_USERDOC);
+			// fall back to hard-coded default, if not found in ide-config.properties file
+			userdoc = pp.getValue(OPENSHIFT_USERDOC, "http://tools.jboss.org/documentation/howto/openshift3_getting_started.html"); //$NON-NLS-1$
 		}
 		return userdoc;
 	}
