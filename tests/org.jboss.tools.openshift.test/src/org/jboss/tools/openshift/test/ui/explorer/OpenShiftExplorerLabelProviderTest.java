@@ -117,7 +117,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		IService service = givenAResource(IService.class, ResourceKind.SERVICE);
 		when(service.getPortalIP()).thenReturn("172.17.2.226");
 		when(service.getPort()).thenReturn(5432);
-		when(service.getContainerPort()).thenReturn(3306);
+		when(service.getTargetPort()).thenReturn(3306);
 		Map<String, String> labels = new HashMap<String, String>();
 		labels.put("foo", "bar");
 		when(service.getSelector()).thenReturn(labels);

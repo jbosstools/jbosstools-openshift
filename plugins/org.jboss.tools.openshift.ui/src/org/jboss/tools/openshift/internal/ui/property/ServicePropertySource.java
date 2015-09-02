@@ -33,7 +33,7 @@ public class ServicePropertySource extends ResourcePropertySource<IService>{
 	@Override
 	public Object getPropertyValue(Object id) {
 		if("portalIp".equals(id)) return getResource().getPortalIP();
-		if("containerPort".equals(id)) return getResource().getContainerPort();
+		if("containerPort".equals(id)) return getResource().getTargetPort();
 		if("selector".equals(id)){
 			return StringUtils.serialize(getResource().getSelector());
 		}
