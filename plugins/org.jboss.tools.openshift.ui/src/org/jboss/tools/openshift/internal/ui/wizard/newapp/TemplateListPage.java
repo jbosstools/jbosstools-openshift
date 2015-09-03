@@ -319,7 +319,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				
 				@Override
 				public IStatus validate(Object value) {
-					if (!(value instanceof ITemplate)) {
+					if (!hasTemplate(value)) {
 						return ValidationStatus.cancel("Please select a template to create your application.");
 					}
 					return ValidationStatus.ok();
@@ -334,8 +334,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	        @Override
 	        public void doubleClick(DoubleClickEvent event) {
 	            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-	            if (selection.getFirstElement() instanceof ObservableTreeItem
-	            		&& (((ObservableTreeItem) selection.getFirstElement()).getModel() instanceof ITemplate)
+	            if (hasTemplate(selection.getFirstElement())
 	            		&& canFlipToNextPage()) {
 	            	getContainer().showPage(getNextPage());
 	            }
@@ -404,7 +403,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(new ObservableTreeItemStyledCellLabelProvider());
 		viewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-		viewer.setComparator(new ViewerComparator());
+		viewer.setComparator(new TemplateComparator());
 		viewer.addFilter(new TemplateViewerFilter(templateFilterText));
 		viewer.setInput(model);
 
@@ -567,5 +566,22 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		((Composite) getControl()).layout(true, true);
 	}
 
+	public static class TemplateComparator extends ViewerComparator {
+
+		@Override
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			if (hasTemplate(e1) && hasTemplate(e2)) {
+				String t1 = ((ITemplate)((ObservableTreeItem)e1).getModel()).getName();
+				String t2 = ((ITemplate)((ObservableTreeItem)e2).getModel()).getName();
+				return t1.compareTo(t2);
+			}
+			return super.compare(viewer, e1, e2);
+		}
+	}
+
+	private static boolean hasTemplate(Object item) {
+		return item instanceof ITemplate ||
+			   item instanceof ObservableTreeItem && ((ObservableTreeItem)item).getModel() instanceof ITemplate;
+	}
 
 }
