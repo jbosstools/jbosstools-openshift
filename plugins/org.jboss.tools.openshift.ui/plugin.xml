@@ -163,6 +163,31 @@
 			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
 			<command
+				commandId="org.jboss.tools.openshift.ui.command.project.new"
+				style="push"
+				icon="icons/globe_new.png"
+				tooltip="Create a new project">
+				<visibleWhen
+					checkEnabled="false">
+					<and>
+						<count
+							value="1" />
+						<iterate>
+						 <or>
+							<instanceof
+								value="com.openshift.restclient.model.IProject" />
+							<instanceof
+                    			value="org.jboss.tools.openshift.core.connection.Connection"/>
+						 </or>
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+			<command
 				commandId="org.jboss.tools.openshift.ui.command.application.new"
 				style="push"
 				icon="icons/query-new.gif"
@@ -274,8 +299,6 @@
               </count>
               <iterate>
               	<or>
-				 <instanceof
-					value="com.openshift.restclient.model.IProject"/>
                  <instanceof
                     value="org.jboss.tools.openshift.core.connection.Connection"/>
 				</or>
@@ -290,6 +313,7 @@
      <command
            commandId="org.jboss.tools.openshift.ui.command.project.delete"
            style="push"
+           icon="icons/globe_delete.png"
            tooltip="Delete Project">
         <visibleWhen
               checkEnabled="false">
@@ -456,6 +480,10 @@
         class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
         commandId="org.jboss.tools.openshift.ui.command.project.delete">
   </handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler"
+        commandId="org.jboss.tools.openshift.ui.command.project.new">
+  </handler>
   		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewApplicationHandler"
 			commandId="org.jboss.tools.openshift.ui.command.application.new">
@@ -545,6 +573,11 @@
 			description="Create a new application from a template"
 			id="org.jboss.tools.openshift.ui.command.application.new"
 			name="Application">
+		</command>
+		<command
+			description="Create a new project"
+			id="org.jboss.tools.openshift.ui.command.project.new"
+			name="Project">
 		</command>
 		<command
 			description="Delete the Resource"
