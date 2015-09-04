@@ -30,7 +30,7 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
 /**
- * Contributes OpenShift v3 specific content to the OpenShift explorer view
+ * Contributes OpenShift 3 specific content to the OpenShift explorer view
  * 
  * @author jeff.cantrill
  */

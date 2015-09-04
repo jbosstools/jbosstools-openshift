@@ -48,7 +48,7 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
 
 /**
  * Detail view used in the common Connection Wizard to
- * support establishing connections to v3 instance of OpenShift
+ * support establishing connections to 3 instance of OpenShift
  * 
  * @author Jeff Cantrill
  * @author Andre Dietisheim

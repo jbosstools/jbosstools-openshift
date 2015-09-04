@@ -61,7 +61,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
 					GridLayoutFactory.fillDefaults().applyTo(container);
 					Link link = new Link(container, SWT.WRAP);
-					link.setText("You must set the binary location in the <a>OpenShift v3 preferences</a>.");
+					link.setText("You must set the binary location in the <a>OpenShift 3 preferences</a>.");
 					link.addSelectionListener(new OpenPreferencesListener(this));
 					container.setFocus();
 					return container;

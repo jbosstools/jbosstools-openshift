@@ -18,10 +18,10 @@ import java.util.Collection;
  */
 public interface IConnectionsFactory {
 
-	/** connection factory for v2 OpenShift */
+	/** connection factory for OpenShift 2 */
 	public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.express.core.ConnectionFactory";
 
-	/** connection factory for v3 OpenShift */
+	/** connection factory for OpenShift 3 */
 	public static final String CONNECTIONFACTORY_OPENSHIFT_ID = "org.jboss.tools.openshift.core.ConnectionFactory";
 	
 	/**

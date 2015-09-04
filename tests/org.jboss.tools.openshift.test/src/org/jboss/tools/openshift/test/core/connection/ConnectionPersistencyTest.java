@@ -108,7 +108,7 @@ public class ConnectionPersistencyTest {
 		assertContainsConnection(connection2, connections);
 	}
 	
-	@Ignore("no default server for OpenShift v3 yet")
+	@Ignore("no default server for OpenShift 3 yet")
 	@Test
 	public void shouldLoadUsernamesAsDefaultHostConnection() {	
 		// pre-condition

@@ -22,7 +22,7 @@ import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 
 /**
- * Content Provider for OpenShift v2 content
+ * Content Provider for OpenShift 2 content
  */
 public class ExpressExplorerContentProvider extends BaseExplorerContentProvider {
 
