@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -44,9 +45,11 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
@@ -66,6 +69,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotEmptyString
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
@@ -98,14 +102,21 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
 
-		// signup link
-		Link signupLink = new Link(parent, SWT.WRAP);
-		signupLink.setText("If you do not have an account on OpenShift, please <a>sign up here</a>.");
+		//JBIDE-20361 signup link doesn't work on OSX in some situations. 
+		//Link signupLink = new Link(parent, SWT.WRAP);
+		//signupLink.setText("If you do not have an account on OpenShift, please <a>sign up here</a>.");
+
+		StyledText signupLink = new StyledText(parent, SWT.WRAP);
+		StyledTextUtils.setTransparent(signupLink);
+		StyledTextUtils.setLinkText("If you do not have an account on OpenShift, please <a>sign up here</a>.", signupLink);
+		signupLink.setEditable(false);
+
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);
 		IObservableValue signupUrlObservable = BeanProperties
 				.value(ConnectionWizardPageModel.PROPERTY_SIGNUPURL).observe(pageModel);
-		signupLink.addSelectionListener(onSignupLinkClicked(signupUrlObservable));
+		signupLink.addListener(SWT.MouseDown, onSignupLinkClicked(signupUrlObservable));
+
 		ValueBindingBuilder
 			.bind(WidgetProperties.visible().observe(signupLink))
 			.notUpdatingParticipant()
@@ -288,11 +299,10 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		connectionEditors.createControls();
 	}
 
-	protected SelectionAdapter onSignupLinkClicked(final IObservableValue signupUrlObservable) {
-		return new SelectionAdapter() {
-
+	protected Listener onSignupLinkClicked(final IObservableValue signupUrlObservable) {
+		return new Listener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void handleEvent(Event event) {
 				String signupUrl = (String) signupUrlObservable.getValue();
 				if (StringUtils.isEmpty(signupUrl)) {
 					return;
@@ -302,7 +312,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 						signupUrl,
 						OpenShiftCommonUIActivator.PLUGIN_ID,
 						OpenShiftCommonUIActivator.getDefault().getLog());
-				WizardUtils.close(getWizard());;
+				WizardUtils.close(getWizard());
 			}
 		};
 	}
