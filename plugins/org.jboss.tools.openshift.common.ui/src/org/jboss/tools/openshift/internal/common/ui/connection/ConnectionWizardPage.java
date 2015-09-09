@@ -17,7 +17,6 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -247,26 +246,28 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 		});
-		Binding serverUrlBinding = ValueBindingBuilder
-				.bind(serverUrlObservable)
+		ValueBindingBuilder.bind(serverUrlObservable)
 				.converting(new TrimTrailingSlashConverter())
-				.validatingAfterGet(new IValidator() {
-
-					@Override
-					public IStatus validate(Object value) {
-						if (!(value instanceof String)
-								|| StringUtils.isEmpty((String) value)) {
-							return ValidationStatus.cancel("Please provide an OpenShift server url.");
-						} else if (!UrlUtils.isValid((String) value)) {
-							return ValidationStatus.error("Please provide a valid OpenShift server url.");
-						}
-						return ValidationStatus.ok();
-					}
-				})
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel))
 				.in(dbc);
+		
+		MultiValidator serverUrlValidator = new MultiValidator() {
+			
+			@Override
+			protected IStatus validate() {
+				Object value = serverUrlObservable.getValue();
+				if (!(value instanceof String)
+						|| StringUtils.isEmpty((String) value)) {
+					return ValidationStatus.cancel("Please provide an OpenShift server url.");
+				} else if (!UrlUtils.isValid((String) value)) {
+					return ValidationStatus.error("Please provide a valid OpenShift server url.");
+				}
+				return ValidationStatus.ok();
+			}
+		};
 		ControlDecorationSupport
-				.create(serverUrlBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+			.create(serverUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		dbc.addValidationStatusProvider(serverUrlValidator);
 
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(serversCombo))
