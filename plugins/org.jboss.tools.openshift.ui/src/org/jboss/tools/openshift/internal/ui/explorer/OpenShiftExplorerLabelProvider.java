@@ -40,6 +40,20 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider { 
 
+	
+	@Override
+	public String getText(Object element) {
+		if(element instanceof IProject) {
+			IProject project = (IProject) element;
+			String name = project.getName();
+			if(org.apache.commons.lang.StringUtils.isNotEmpty(project.getDisplayName())) {
+				name = project.getDisplayName() + " (" + name + ")";
+			}
+			return name;
+		}
+		return super.getText(element);
+	}
+
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof ResourceGrouping) {
@@ -161,8 +175,10 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 	
 	private StyledString getStyledText(IProject project) {
-		String name = org.apache.commons.lang.StringUtils.defaultIfBlank(project.getDisplayName(), project.getName());
-		return style(name, "");
+		if(org.apache.commons.lang.StringUtils.isNotBlank(project.getDisplayName())) {
+			return style(project.getDisplayName(), project.getName());
+		}
+		return style(project.getName(), "");
 	}
 
 	private StyledString style(String baseText, String qualifiedText) {

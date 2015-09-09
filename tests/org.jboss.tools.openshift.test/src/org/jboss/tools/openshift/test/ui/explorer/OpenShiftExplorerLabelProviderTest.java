@@ -174,7 +174,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(project.getDisplayName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
 		
-		assertEquals(project.getDisplayName(), provider.getStyledText(project).getString());
+		assertEquals(project.getDisplayName() + " " + project.getName(), provider.getStyledText(project).getString());
 	}
 	
 	@Test

@@ -27,7 +27,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
@@ -39,8 +38,8 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.validator.DeployImageNameValidator;
@@ -233,16 +232,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.applyTo(cmboProject.getControl());
 		
 		cmboProject.setContentProvider(new ObservableListContentProvider());
-		cmboProject.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if(element instanceof IProject) {
-					return ((IProject)element).getName();
-				}
-				return super.getText(element);
-			}
-			
-		});
+		cmboProject.setLabelProvider(new OpenShiftExplorerLabelProvider());
 		cmboProject.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
 		
