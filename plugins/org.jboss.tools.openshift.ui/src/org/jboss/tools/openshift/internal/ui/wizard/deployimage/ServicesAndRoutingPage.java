@@ -75,20 +75,15 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			.applyTo(routingContainer);
 		
 		Button btnAddRoute = new Button(routingContainer, SWT.CHECK);
+		btnAddRoute.setText("Add Route");
+		btnAddRoute.setToolTipText("Adding a route to the service will make it accessible outside of the OpenShift cluster.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(btnAddRoute);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
 			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
 			.observe(model))
 			.in(dbc);
-		
-		Label lblRoute = new Label(routingContainer, SWT.NONE);
-		lblRoute.setText("Add Route");
-		lblRoute.setToolTipText("Adding a route to the service will make it accessible outside of the OpenShift cluster.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
-			.grab(true, false)
-			.applyTo(lblRoute);
+
 	}
 
 	private void createExposedPortsControl(Composite parent, DataBindingContext dbc) {
