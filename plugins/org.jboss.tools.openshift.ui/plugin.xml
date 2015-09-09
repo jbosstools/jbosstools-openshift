@@ -439,7 +439,7 @@
   </menuContribution>
   <menuContribution
         allPopups="false"
-        locationURI="popup:org.eclipse.linuxtools.docker.ui.dockerExplorerView#PopupMenu?before=group.run">
+        locationURI="popup:org.eclipse.linuxtools.docker.ui.dockerExplorerView#PopupMenu">
      <separator
            name="org.jboss.tools.openshift.ui.separator.docker.explorer"
            visible="true">
