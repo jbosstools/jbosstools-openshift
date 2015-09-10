@@ -44,6 +44,7 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.webhooks;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.common;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.deployimage;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.wizard.importapp;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.newapp;x-friends:="org.jboss.tools.openshift.test"
 Import-Package: org.apache.commons.io,
  org.eclipse.jface.text

@@ -55,10 +55,17 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 
 	public GitCloningWizardPage(IWizard wizard, IGitCloningPageModel model) {
 		super(
-				"Import an existing OpenShift application",
+				getTitle(model),
 				"Configure the cloning settings by specifying the clone destination",
 				"Cloning settings", wizard);
 		this.model = model;
+	}
+
+	private static String getTitle(IGitCloningPageModel model) {
+		String name = (model == null)? null: model.getApplicationName();
+		return (name == null)?
+				"Import an existing OpenShift application":
+				"Import the '"+ name +"' OpenShift application";
 	}
 
 	@Override
@@ -189,5 +196,13 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 			revalidate();
 		}
 
+	}
+	
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			setTitle(getTitle(model));
+		}
+		super.setVisible(visible);
 	}
 }

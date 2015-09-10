@@ -32,7 +32,7 @@ public class ImportApplicationWizardModel
 	extends ObservableUIPojo 
 	implements IBuildConfigPageModel, IGitCloningPageModel {
 
-	private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("([^\\/\\.git]+)(\\.git)?$");
+	private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("([^/]+[^(\\.git)/])(/|\\.git)?$");
 
 	private Connection connection;
 	private Object selectedItem;
@@ -41,7 +41,7 @@ public class ImportApplicationWizardModel
 	private String projectName;
 
 	private ObservableTreeItem buildConfigsTreeRoot;
-	
+
 	ImportApplicationWizardModel() {
 		this.useDefaultRepoPath = true;
 		this.repoPath = getDefaultRepoPath();
@@ -126,10 +126,20 @@ public class ImportApplicationWizardModel
 		setProjectName(getProjectName(config));
 	}
 
-	private String getProjectName(IBuildConfig config) {
+	private static String getProjectName(IBuildConfig config) {
+		String projectName = (config == null)?null:extractProjectNameFromURI(config.getSourceURI());
+		return projectName;
+	}
+
+	/**
+	 * Extract the last segment of an URI, stripped from .git suffixes
+	 *
+	 * Made public for testing purposes.
+	 */
+	public static String extractProjectNameFromURI(String uri) {
 		String projectName = null;
-		if (config != null) {
-			Matcher matcher = PROJECT_NAME_PATTERN.matcher(config.getSourceURI());
+		if (uri != null) {
+			Matcher matcher = PROJECT_NAME_PATTERN.matcher(uri);
 			if (matcher.find()
 					&& matcher.group(1) != null) {
 				projectName = matcher.group(1);
@@ -202,5 +212,15 @@ public class ImportApplicationWizardModel
 			return ((IGitBuildSource)config.getBuildSource()).getContextDir();
 		}
 		return null;
+	}
+
+	@Override
+	public String getApplicationName() {
+		String appName = null;
+		IBuildConfig buildConfig = getSelectedBuildConfig();
+		if (buildConfig != null) {
+			appName = buildConfig.getName();
+		}
+		return appName;
 	}
 }

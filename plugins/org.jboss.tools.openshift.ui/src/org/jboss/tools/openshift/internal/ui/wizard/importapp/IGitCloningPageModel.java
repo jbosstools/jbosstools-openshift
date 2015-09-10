@@ -27,4 +27,7 @@ public interface IGitCloningPageModel {
 
 	public void setProjectName(String name);
 	public String getProjectName();
+
+	public String getApplicationName();
+
 }
