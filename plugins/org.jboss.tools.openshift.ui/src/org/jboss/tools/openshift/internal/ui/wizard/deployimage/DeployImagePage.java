@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-
-
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -28,6 +26,8 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.osgi.util.NLS;
@@ -231,11 +231,18 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(cmboProject.getControl());
 		
+		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
 		cmboProject.setContentProvider(new ObservableListContentProvider());
-		cmboProject.setLabelProvider(new OpenShiftExplorerLabelProvider());
+		cmboProject.setLabelProvider(labelProvider);
 		cmboProject.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
-		
+		cmboProject.setSorter(new ViewerSorter() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				return labelProvider.getText(e1).compareTo(labelProvider.getText(e2));
+			}
+			
+		});
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
 		Binding selectedProjectBinding = 
 			ValueBindingBuilder.bind(selectedProjectObservable)
