@@ -81,7 +81,6 @@ public class DeployImageWizardModel
 	private boolean originatedFromDockerExplorer;
 	
 	public DeployImageWizardModel() {
-		setConnection(ConnectionsRegistrySingleton.getInstance().getRecentConnection(Connection.class));
 	}
 	
 	public void setOriginatedFromDockerExplorer(boolean orig) {
@@ -145,6 +144,9 @@ public class DeployImageWizardModel
 		firePropertyChange(PROPERTY_PROJECTS, this.projects, this.projects = projects);
 		if(!projects.isEmpty() && !projects.contains(getProject())) {
 			setProject(null);
+		}
+		if(projects.size() == 1) {
+			setProject(projects.get(0));
 		}
 	}
 
