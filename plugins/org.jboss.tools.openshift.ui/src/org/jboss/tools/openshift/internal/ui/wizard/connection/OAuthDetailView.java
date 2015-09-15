@@ -161,10 +161,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
+		RequiredStringValidator validator = new RequiredStringValidator("token");
 		this.tokenBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(txtToken))
+				.bind(WidgetProperties.text(SWT.Modify | SWT.FocusOut).observe(txtToken))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("token"))
+				.validatingAfterGet(validator)
+				.validatingAfterConvert(validator)
 				.to(tokenObservable)
 				.in(dbc);
 		ControlDecorationSupport.create(
