@@ -45,6 +45,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -129,6 +130,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			authDetails.getRequestTokenLink();
 		}
 		tokenRequestLink.addListener(SWT.MouseDown, onRetrieveLinkClicked(tokenRequestLink.getShell()));
+		tokenRequestLink.setCursor(new Cursor(tokenRequestLink.getShell().getDisplay(), SWT.CURSOR_HAND));
 
 		//token
 		Label lblAuthType = new Label(composite, SWT.NONE);
