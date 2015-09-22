@@ -18,9 +18,8 @@ import org.junit.Test;
  * @author jeff.cantrill
  */
 public class ProjectNameValidatorTest extends LabelValueValidatorTest {
-	
-	private ProjectNameValidator validator = new ProjectNameValidator("default message");
 
+	private ProjectNameValidator validator = new ProjectNameValidator("default message");
 
 	@Override
 	protected IValidator getValidator() {
@@ -36,7 +35,7 @@ public class ProjectNameValidatorTest extends LabelValueValidatorTest {
 	public void doubleDotNameShouldNotBeAllowed() {
 		assertFailure(".,");
 	}
-	
+
 	@Test
 	public void slashShouldNotBeAllowed() {
 		assertFailure("abc\\def");
@@ -62,4 +61,35 @@ public class ProjectNameValidatorTest extends LabelValueValidatorTest {
 		assertCancel("");
 	}
 
+	@Override
+	public void valueWithSlashesShouldBeInValid() {
+		// Should be invalid, as opposed to regular LabelValueValidator behavior
+		assertFailure("abcd.efg/a23");
+	}
+
+	@Override
+	public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
+		// Should be invalid, as opposed to regular LabelValueValidator behavior
+		assertFailure("abcd.efg_k-123");
+	}
+
+	@Override
+	public void nullValueShouldBeInvalid() {
+		assertFailure(null);
+	}
+
+	@Test
+	public void startsWithDashShouldNotBeAllowed() {
+		assertFailure("-abc");
+	}
+
+	@Test
+	public void endsWithDashShouldNotBeAllowed() {
+		assertFailure("abc-");
+	}
+
+	@Test
+	public void upperCaseCharactersShouldNotBeAllowed() {
+		assertFailure("aBc");
+	}
 }

@@ -18,9 +18,8 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.security.OpenShiftSecureStorageKeyTest;
-import org.jboss.tools.openshift.test.core.security.SecureStorageTest;
-import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
+import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
@@ -33,6 +32,7 @@ import org.jboss.tools.openshift.test.ui.property.build.BuildConfigPropertySourc
 import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
+import org.jboss.tools.openshift.test.ui.validator.ProjectNameValidatorTest;
 import org.jboss.tools.openshift.test.ui.wizard.deployimage.PortSpecAdapterTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -50,7 +50,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	CreateApplicationFromTemplateJobTest.class,
 	ExtTextPropertyDescriptorTest.class,
 	LabelKeyValidatorTest.class,
-	LabelValueValidatorTest.class, 
+	LabelValueValidatorTest.class,
+	ProjectNameValidatorTest.class,
 	LazySSLCertificateCallbackTest.class, 
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,
