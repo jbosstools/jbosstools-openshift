@@ -121,7 +121,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
 			String templateName = applicationTemplate.getName();
 			this.nameText.setText(templateName);
-			this.nameText.setStyleRange(StyledTextUtils.createBoldStyleRange(templateName, null));
+			this.nameText.setStyleRange(StyledTextUtils.createBoldStyle(templateName, null));
 			this.descriptionText.setText(applicationTemplate.getDescription());
 		}
 
@@ -197,7 +197,7 @@ public class ApplicationTemplateDetailViews extends AbstractStackedDetailViews {
 			IApplicationTemplate applicationTemplate = (IApplicationTemplate) value;
 			String name = applicationTemplate.getName();
 			this.nameText.setText(name);
-			this.nameText.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
+			this.nameText.setStyleRange(StyledTextUtils.createBoldStyle(name, null));
 			this.descriptionText.setText(applicationTemplate.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observe(urlText);
