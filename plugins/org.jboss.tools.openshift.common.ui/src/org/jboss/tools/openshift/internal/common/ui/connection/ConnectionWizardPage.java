@@ -104,11 +104,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		//JBIDE-20361 signup link doesn't work on OSX in some situations. 
 		//Link signupLink = new Link(parent, SWT.WRAP);
 		//signupLink.setText("If you do not have an account on OpenShift, please <a>sign up here</a>.");
-
-		StyledText signupLink = new StyledText(parent, SWT.WRAP);
-		StyledTextUtils.setTransparent(signupLink);
-		StyledTextUtils.setLinkText("If you do not have an account on OpenShift, please <a>sign up here</a>.", signupLink);
-		signupLink.setEditable(false);
+		StyledText signupLink = StyledTextUtils.emulateLinkWidget(
+				"If you do not have an account on OpenShift, please <a>sign up here</a>.", new StyledText(parent, SWT.WRAP));
 
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);

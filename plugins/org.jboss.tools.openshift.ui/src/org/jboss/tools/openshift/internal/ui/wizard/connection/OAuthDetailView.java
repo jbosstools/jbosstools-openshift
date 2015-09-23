@@ -119,11 +119,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).spacing(10, 10).applyTo(composite);
-		
-		StyledText tokenRequestLink = new StyledText(composite, SWT.WRAP);
-		StyledTextUtils.setTransparent(tokenRequestLink);
-		StyledTextUtils.setLinkText(MSG_TOKEN, tokenRequestLink);
-		tokenRequestLink.setEditable(false);
+
+		StyledText tokenRequestLink = StyledTextUtils.emulateLinkWidget(MSG_TOKEN, new StyledText(composite, SWT.WRAP));
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(tokenRequestLink);
 		if(authDetails != null) {

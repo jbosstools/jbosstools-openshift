@@ -81,7 +81,7 @@ public class TemplateParameterDetailViews extends AbstractStackedDetailViews {
 			IParameter parameter = (IParameter) value;
 			String name = parameter.getName();
 			this.nameText.setText(name);
-			this.nameText.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
+			this.nameText.setStyleRange(StyledTextUtils.createBoldStyle(name, null));
 			this.descriptionText.setText(parameter.getDescription());
 		}
 

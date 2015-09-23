@@ -174,10 +174,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		BeanProperties.value(ITemplateListPageModel.PROPERTY_CONNECTION).observe(model)
 				.addValueChangeListener(onConnectionChanged());
 
-		StyledText manageProjectsLink = new StyledText(parent, SWT.WRAP);
-		StyledTextUtils.setTransparent(manageProjectsLink);
-		StyledTextUtils.setLinkText("<a>Manage Projects</a>", manageProjectsLink);
-		manageProjectsLink.setEditable(false);
+		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
 			.applyTo(manageProjectsLink);
