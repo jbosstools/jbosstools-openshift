@@ -278,16 +278,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		uploadTemplate.addOption(Boolean.FALSE, 
 				WidgetProperties.selection().observe(btnServerTemplate));
 		
-		Composite treeComposite = new Composite(parent, SWT.NONE);
+		Composite serverTemplatesComposite = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
-				.applyTo(treeComposite);
+				.applyTo(serverTemplatesComposite);
 		GridLayoutFactory.fillDefaults()
 			.spacing(2, 2)
-			.applyTo(treeComposite);
+			.applyTo(serverTemplatesComposite);
 
 		// filter text
-		Text txtTemplateFilter = UIUtils.createSearchText(treeComposite);
+		Text txtTemplateFilter = UIUtils.createSearchText(serverTemplatesComposite);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.CENTER)
 				.applyTo(txtTemplateFilter);
@@ -299,7 +299,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.in(dbc);		
 		
 		// the list of templates
-		this.templatesViewer = createTemplatesViewer(treeComposite, txtTemplateFilter);
+		this.templatesViewer = createTemplatesViewer(serverTemplatesComposite, txtTemplateFilter);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
@@ -352,28 +352,30 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.in(dbc);
 				
 		// details
-		final Group detailsGroup = new Group(treeComposite, SWT.NONE);
+		Group detailsGroup = new Group(serverTemplatesComposite, SWT.NONE);
 		detailsGroup.setText("Details");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL)
+				.grab(true, false)
 				.hint(SWT.DEFAULT, 106)
 				.applyTo(detailsGroup);
 		GridLayoutFactory.fillDefaults()
 			.margins(10, 6).spacing(2, 2)
 			.applyTo(detailsGroup);
-		
-		
+
 		Composite detailsContainer = new Composite(detailsGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 140)
-			.applyTo(detailsContainer);
-		new TemplateDetailViews(selectedResource, null, detailsContainer, dbc).createControls();
-		
+				.align(SWT.FILL, SWT.FILL).grab(true, true)
+				.applyTo(detailsContainer);
+
+		new TemplateDetailViews(selectedResource, null, detailsContainer, dbc)
+			.createControls();
+
 		// details button
 		Button btnDetails = new Button(detailsGroup, SWT.NONE);
 		btnDetails.setText("Defined Resources...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.RIGHT, SWT.CENTER).span(2,1).grab(false, false)
+				.align(SWT.RIGHT, SWT.CENTER)
 				.applyTo(btnDetails);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnDetails))
