@@ -60,10 +60,10 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
-		model.setTemplateFileName("theFileName");
+		model.setLocalTemplateFileName("theFileName");
 		
 		verify(factory).create(any(InputStream.class));
-		assertEquals(template, model.getTemplate());
+		assertEquals(template, model.getSelectedTemplate());
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class NewApplicationWizardModelTest {
 		for (Entry<String, String> label : labels.entrySet()) {
 			modelLabels.add(new IResourceLabelsPageModel.Label(label.getKey(), label.getValue()));
 		}
-		model.setTemplate(template);
+		model.setServerTemplate(template);
 
 		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
 		assertArrayEquals(modelLabels.toArray(), model.getLabels().toArray());
@@ -109,14 +109,14 @@ public class NewApplicationWizardModelTest {
 	
 	@Test
 	public void getParametersShouldReturnAnEmptyMapWhenTemplateIsNull() {
-		model.setTemplate(null);
+		model.setServerTemplate(null);
 		assertNotNull("Exp. an empty map",model.getParameters());
 	}
 	
 	@Test
 	public void getParametersShouldReturnAParameterMapWhenTemplateIsNotNull() {
 		Map<String, IParameter> parameters = givenTheTemplateHasParameters();
-		model.setTemplate(template);
+		model.setServerTemplate(template);
 		
 		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
 	}
