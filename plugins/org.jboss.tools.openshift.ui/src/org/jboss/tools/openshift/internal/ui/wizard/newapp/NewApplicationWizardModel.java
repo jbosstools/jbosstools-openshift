@@ -49,24 +49,53 @@ public class NewApplicationWizardModel
 	private IProject project;
 	private List<ObservableTreeItem> projectItems = new ArrayList<>();
 	private List<ObservableTreeItem> projectTemplates = new ArrayList<>();
-	private ITemplate template;
-	private ITemplate uploadedTemplate;
+	private ITemplate selectedTemplate;
+	private ITemplate localTemplate;
+	private ITemplate serverTemplate;
 	private List<IParameter> parameters = new ArrayList<IParameter>();
 	private IParameter selectedParameter;
 	private HashMap<String, String> originalValueMap;
 	private Collection<IResource> items = new ArrayList<IResource>(); 
-	private boolean uploadTemplate = true;
-	private String templateFilename;
+	private boolean useLocalTemplate = true;
+	private String localTemplateFilename;
 	private IResourceFactory resourceFactory;
 
-	private void update(boolean useUploadTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate selectedTemplate) {
-		firePropertyChange(PROPERTY_USE_UPLOAD_TEMPLATE, this.uploadTemplate, this.uploadTemplate = useUploadTemplate);
+	private void update(boolean useUploadTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate serverTemplate, String localTemplateFilename) {
+		firePropertyChange(PROPERTY_USE_LOCAL_TEMPLATE, this.useLocalTemplate, this.useLocalTemplate = useUploadTemplate);
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projectItems));
 		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(project, projectItems) );
-		firePropertyChange(PROPERTY_TEMPLATE, this.template, this.template = selectedTemplate);
-		initTemplateParameters(selectedTemplate);
+		updateTemplate(useUploadTemplate, serverTemplate, localTemplate, localTemplateFilename);
+		initTemplateParameters(serverTemplate);
 	}
+
+	private void updateTemplate(boolean useUploadTemplate, ITemplate serverTemplate, ITemplate uploadedTemplate, String localTemplateFilename) {
+		ITemplate template = null;
+		if (useUploadTemplate) {
+			if (!ObjectUtils.equals(localTemplateFilename, this.localTemplateFilename)) {
+				template = this.localTemplate = getLocalTemplate(localTemplateFilename);
+				firePropertyChange(PROPERTY_LOCAL_TEMPLATE_FILENAME, this.localTemplateFilename, this.localTemplateFilename = localTemplateFilename);
+			} else {
+				template = uploadedTemplate;
+			}
+		} else {
+			template = this.serverTemplate = serverTemplate;
+		}
+		firePropertyChange(PROPERTY_SELECTED_TEMPLATE, this.selectedTemplate, this.selectedTemplate = template);
+	}
+	
+	private ITemplate getLocalTemplate(String filename) {
+		ITemplate uploadedTemplate = null;
+		try {
+			uploadedTemplate = resourceFactory.create(createInputStream(filename));
+		} catch (FileNotFoundException e) {
+			throw new OpenShiftException(e, "Unable to find the file to upload");
+		} catch (ResourceFactoryException | ClassCastException e) {
+			throw e;
+		}
+		return uploadedTemplate;
+	}
+	
 	
 	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject,
 			List<ObservableTreeItem> allProjects) {
@@ -103,8 +132,18 @@ public class NewApplicationWizardModel
 	}
 
 	@Override
-	public void setTemplate(ITemplate template) {
-		update(this.uploadTemplate, this.project, this.projectItems, template);
+	public void setServerTemplate(ITemplate serverTemplate) {
+		update(this.useLocalTemplate, this.project, this.projectItems, serverTemplate, localTemplateFilename);
+	}
+
+	@Override
+	public ITemplate getServerTemplate() {
+		return serverTemplate;
+	}
+
+	@Override
+	public ITemplate getSelectedTemplate() {
+		return selectedTemplate;
 	}
 
 	private void initTemplateParameters(ITemplate template) {
@@ -126,17 +165,12 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setProject(IProject project) {
-		update(this.uploadTemplate, project, this.projectItems, this.template);
+		update(this.useLocalTemplate, project, this.projectItems, this.serverTemplate, localTemplateFilename);
 	}
 
 	@Override
 	public IProject getProject() {
 		return project;
-	}
-
-	@Override
-	public ITemplate getTemplate() {
-		return template;
 	}
 
 	@Override
@@ -194,40 +228,27 @@ public class NewApplicationWizardModel
 	}
 
 	@Override
-	public void setUseUploadTemplate(boolean uploadTemplate) {
-		update(uploadTemplate, this.project, this.projectItems, this.template);
+	public void setUseLocalTemplate(boolean uploadTemplate) {
+		update(uploadTemplate, this.project, this.projectItems, this.serverTemplate, this.localTemplateFilename);
 	}
 
 	@Override
-	public boolean isUseUploadTemplate() {
-		return this.uploadTemplate;
+	public boolean isUseLocalTemplate() {
+		return useLocalTemplate;
 	}
 
-	@Override
-	public void setTemplateFileName(String name) {
-		try {
-			uploadedTemplate = resourceFactory.create(createInputStream(name));
-			setTemplate(uploadedTemplate);
-		} catch (FileNotFoundException e) {
-			name = "";
-			setTemplate(null);
-			throw new OpenShiftException(e, "Unable to find the file to upload");
-		} catch (ResourceFactoryException | ClassCastException e) {
-			name = "";
-			setTemplate(null);
-			throw e;
-		} finally {
-			firePropertyChange(PROPERTY_TEMPLATE_FILENAME, this.templateFilename, this.templateFilename = name);
-		}
-	}
-	
 	public InputStream createInputStream(String fileName) throws FileNotFoundException {
 		return new FileInputStream(fileName);
 	}
 
 	@Override
-	public String getTemplateFileName() {
-		return this.templateFilename;
+	public void setLocalTemplateFileName(String filename) {
+		update(this.useLocalTemplate, this.project, this.projectItems, serverTemplate, filename);
+	}
+
+	@Override
+	public String getLocalTemplateFileName() {
+		return this.localTemplateFilename;
 	}
 
 	@Override
@@ -253,7 +274,7 @@ public class NewApplicationWizardModel
 	}
 
 	private void reset() {
-		update(this.uploadTemplate, null, null, null);
+		update(this.useLocalTemplate, null, null, null, null);
 	}
 
 	private IProject getDefaultProject(List<ObservableTreeItem> projects) {
@@ -275,7 +296,7 @@ public class NewApplicationWizardModel
 	}
 	
 	private void setProjectItems(List<ObservableTreeItem> projects) {
-		update(this.uploadTemplate, null, projects, this.template);
+		update(useLocalTemplate, null, projects, serverTemplate, localTemplateFilename);
 	}
 
 	@Override
@@ -296,9 +317,6 @@ public class NewApplicationWizardModel
 
 	@Override
 	public Object getContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 }

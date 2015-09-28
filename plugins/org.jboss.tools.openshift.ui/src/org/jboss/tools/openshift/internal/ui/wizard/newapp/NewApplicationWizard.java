@@ -98,7 +98,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 	public boolean performFinish() {
 		final CreateApplicationFromTemplateJob createJob = new CreateApplicationFromTemplateJob(
 				model.getProject(),
-				model.getTemplate(),
+				model.getServerTemplate(),
 				model.getParameters(),
 				model.getLabels()
 				);
@@ -113,7 +113,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 						public void run() {
 							final String message = NLS.bind(
 									"Results of creating the resources from the {0} template.", 
-									model.getTemplate().getName());
+									model.getServerTemplate().getName());
 							new NewApplicationSummaryDialog(
 									getShell(), 
 									createJob,
