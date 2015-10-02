@@ -255,7 +255,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
 		dec.setShowOnlyOnFocus(true);
 
-		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllOpenedProjects());
+		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllAccessibleProjectNames());
 
 		// browse projects
 		Button browseProjectsButton = new Button(parent, SWT.NONE);

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -65,15 +66,33 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private IStatus connectedStatus;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
+	private Class<? extends IConnection> connectionType;
 	private IConnectionAware<IConnection> wizardModel;
 	
-	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
-		this.allConnections = allConnections;
+	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, 
+			Class<? extends IConnection> connectionType, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
+		this.allConnections = filterAllConnections(editedConnection, allConnections, connectionType, allowConnectionChange);
+		this.connectionType = connectionType;
 		this.wizardModel = wizardModel;
 		this.allHosts = createAllHosts(allConnections);
 		this.allowConnectionChange = allowConnectionChange;
 		this.connectionsFactory = createConnectionsFactory();
-		init(editedConnection);
+		init(editedConnection, connectionType);
+	}
+
+	private Collection<IConnection> filterAllConnections(IConnection editedConnection, Collection<IConnection> allConnections,
+			Class<? extends IConnection> connectionType, boolean allowConnectionChange) {
+		if (connectionType == null) {
+			if (allowConnectionChange) {
+				return allConnections;
+			} else {
+				return Collections.singletonList(editedConnection);
+			}
+		} else {
+			return allConnections.stream()
+						.filter(connection -> connection.getClass().equals(connectionType))
+						.collect(Collectors.toList());			
+		}
 	}
 
 	private Collection<String> createAllHosts(Collection<IConnection> allConnections) {
@@ -96,16 +115,21 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return connectionsFactory;
 	}
 	
-	private void init(IConnection editedConnection) {
+	private void init(IConnection editedConnection, Class<? extends IConnection> connectionType) {
 		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
-		if (editedConnection == null) {
-			initNewConnection();
+		initConnection(editedConnection, connectionType);
+		this.signupUrl = getSignupUrl(host, connectionFactory);
+		this.userdocUrl = getUserdocUrl(connectionFactory);
+	}
+
+	private void initConnection(IConnection editedConnection, Class<? extends IConnection> connectionType) {
+		if (editedConnection == null
+				|| (connectionType != null && !editedConnection.getClass().equals(connectionType) )) {
+			initNewConnection(connectionType);
 		} else {
 			initEditConnection(editedConnection);
 		}
-		this.signupUrl = getSignupUrl(host, connectionFactory);
-		this.userdocUrl = getUserdocUrl(connectionFactory);
 	}
 
 	private void initEditConnection(IConnection connection) {
@@ -116,16 +140,26 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.useDefaultHost = connection.isDefaultHost();
 	}
 
-	private void initNewConnection() {
+	private void initNewConnection(Class<? extends IConnection> connectionType) {
 		this.selectedConnection = NewConnectionMarker.getInstance();
-		this.connectionFactory = getDefaultConnectionFactory(connectionsFactory);
+		this.connectionFactory = getConnectionFactory(connectionType, connectionsFactory);
 		if (connectionFactory != null) {
 			this.host = connectionFactory.getDefaultHost();
-			this.useDefaultHost = connectionFactory.hasDefaultHost();
 			if (host != null) {
 				this.connection = connectionFactory.create(host);
 			}
+			this.useDefaultHost = connectionFactory.hasDefaultHost();
 		}
+	}
+
+	private IConnectionFactory getConnectionFactory(Class<? extends IConnection> connectionType, IConnectionsFactory connectionsFactory) {
+		IConnectionFactory factory = null;
+		if (connectionType == null) {
+			factory = getDefaultConnectionFactory(connectionsFactory);
+		} else{
+			factory = connectionsFactory.getByConnection(connectionType);
+		}
+		return factory;
 	}
 
 	private IConnectionFactory getDefaultConnectionFactory(IConnectionsFactory connectionsFactory) {
@@ -135,9 +169,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 		return factory;
 	}
-	
-	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, 
-			IStatus connectionFactoryError, IStatus connectError) {
+
+	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
 		factory = updateFactory(factory, selectedConnection);
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
@@ -253,14 +286,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public Collection<IConnection> getAllConnections() {
-		if (allowConnectionChange) {
-			List<IConnection> connections = new ArrayList<IConnection>();
-			connections.add(NewConnectionMarker.getInstance());
-			connections.addAll(allConnections);
-			return connections;
-		} else {
-			return Collections.singletonList(selectedConnection);
-		}
+		List<IConnection> connections = new ArrayList<IConnection>();
+		connections.add(NewConnectionMarker.getInstance());
+		connections.addAll(allConnections);
+		return connections;
 	}
 
 	public String getHost() {
@@ -392,9 +421,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public Collection<IConnectionFactory> getAllConnectionFactories() {
-		List<IConnectionFactory> connectionFactories = new ArrayList<IConnectionFactory>();
-		connectionFactories.addAll(connectionsFactory.getAll());
-		return connectionFactories;
+		return connectionsFactory.getAll(connectionType);
 	}
 
 	public void dispose() {
@@ -434,4 +461,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public Object getContext() {
 		return wizardModel.getContext();
 	}
+
+	public static interface IConnectionFilter {
+
+		public boolean accept(IConnection connection); 
+	}
+
 }

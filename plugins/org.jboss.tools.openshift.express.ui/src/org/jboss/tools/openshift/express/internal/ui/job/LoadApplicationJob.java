@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 
 import com.openshift.client.IApplication;
@@ -38,7 +38,7 @@ public class LoadApplicationJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		this.application = OpenShiftServerUtils.getApplication(server);
+		this.application = ExpressServerUtils.getApplication(server);
 		if (application == null) {
 			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Failed to retrieve Application from server adapter {0}.\n" +

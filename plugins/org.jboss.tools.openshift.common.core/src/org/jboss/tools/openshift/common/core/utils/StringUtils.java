@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.WordUtils;
 
@@ -65,7 +66,7 @@ public class StringUtils {
 	
 	public static <T> String toString(Collection<T> elements, ToStringConverter<T> converter) {
 		if (elements == null
-				|| elements.size() == 0) {
+				|| elements.isEmpty()) {
 			return "";
 		}
 		StringBuilder builder = new StringBuilder();
@@ -79,6 +80,23 @@ public class StringUtils {
 		return builder.toString();
 	}
 		
+	public static <T> String toString(Map<String, String> map) {
+		if (map == null
+				|| map.isEmpty()) {
+			return null;
+		}
+		return toString(map.entrySet(), new ToStringConverter<Entry<String, String>>() {
+
+			@Override
+			public String toString(Entry<String, String> entry) {
+				return new StringBuilder(entry.getKey())
+					.append('=')
+					.append(entry.getValue())
+					.toString();
+			}
+		});
+	}
+
 	public static interface ToStringConverter<T> {
 		public String toString(T object);
 	}

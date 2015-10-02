@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/ 
-package org.jboss.tools.openshift.express.internal.core.server;
+package org.jboss.tools.openshift.core.server;
 
 import org.eclipse.wst.server.core.model.RuntimeDelegate;
 

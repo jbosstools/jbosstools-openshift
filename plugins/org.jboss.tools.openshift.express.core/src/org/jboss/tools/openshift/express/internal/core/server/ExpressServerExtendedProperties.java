@@ -18,9 +18,9 @@ import com.openshift.client.IApplication;
 /**
  * @author Rob Stryker
  */
-public class OpenShiftServerExtendedProperties extends ServerExtendedProperties {
+public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 
-	public OpenShiftServerExtendedProperties(IAdaptable adaptable) {
+	public ExpressServerExtendedProperties(IAdaptable adaptable) {
 		super(adaptable);
 	}
 
@@ -33,10 +33,10 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 	}
 	
 	public String getWelcomePageUrl() {
-		if (!OpenShiftServerUtils.isOpenShiftRuntime(server)) {
+		if (!ExpressServerUtils.isExpressRuntime(server)) {
 			return null;
 		}
-		final IApplication application = OpenShiftServerUtils.getApplication(server);
+		final IApplication application = ExpressServerUtils.getApplication(server);
 		if (application != null) {
 			return application.getApplicationUrl();
 		}

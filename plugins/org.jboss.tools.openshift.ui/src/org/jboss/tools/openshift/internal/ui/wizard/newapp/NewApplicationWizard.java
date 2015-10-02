@@ -139,6 +139,25 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 					});
 				}
 			}
+			
+			protected Map<IProject, Collection<IBuildConfig>> getBuildConfigs(Collection<IResource> resources) {
+				Map<IProject, Collection<IBuildConfig>> projects = new LinkedHashMap<>();
+				for (IResource resource : resources) {
+					if (resource instanceof IBuildConfig) {
+						IBuildConfig buildConfig = (IBuildConfig)resource;
+						if (StringUtils.isNotBlank(buildConfig.getSourceURI())) {
+							IProject p = buildConfig.getProject();
+							Collection<IBuildConfig> buildConfigs = projects.get(p);
+							if (buildConfigs == null) {
+								buildConfigs = new LinkedHashSet<>();
+								projects.put(p, buildConfigs);
+							}
+							buildConfigs.add(buildConfig);
+						}
+					}
+				}
+				return projects;
+			}
 		});
 		boolean success = false;
 		try {
@@ -156,25 +175,6 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 			UsageStats.getInstance().newV3Application(model.getConnection().getHost(), success);
 		}
 		return success;
-	}
-
-	protected Map<IProject, Collection<IBuildConfig>> getBuildConfigs(Collection<IResource> resources) {
-		Map<IProject, Collection<IBuildConfig>> projects = new LinkedHashMap<>();
-		for (IResource resource : resources) {
-			if (resource instanceof IBuildConfig) {
-				IBuildConfig buildConfig = (IBuildConfig)resource;
-				if (StringUtils.isNotBlank(buildConfig.getSourceURI())) {
-					IProject p = buildConfig.getProject();
-					Collection<IBuildConfig> buildConfigs = projects.get(p);
-					if (buildConfigs == null) {
-						buildConfigs = new LinkedHashSet<>();
-						projects.put(p, buildConfigs);
-					}
-					buildConfigs.add(buildConfig);
-				}
-			}
-		}
-		return projects;
 	}
 
 	private boolean isFailed(IStatus status) {

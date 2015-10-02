@@ -28,22 +28,26 @@ import org.jboss.tools.common.ui.WizardUtils;
 /**
  * @author Rob Stryker
  */
-public class OpenShiftServerWizardFragment extends WizardFragment implements ICompletable {
+public class ExpressServerWizardFragment extends WizardFragment implements ICompletable {
 
-	private OpenShiftServerWizardComposite composite;
-		
+	private ExpressServerWizardComposite composite;
+
+	@Override
 	public boolean hasComposite() {
 		return true;
 	}
 
+	@Override
 	public void setComplete(boolean complete) {
 		super.setComplete(complete);
 	}
 
+	@Override
 	public boolean isComplete() {
 		return composite != null && composite.createErrorMessage() == null;
 	}
-	
+
+	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		handle.setTitle("Create an OpenShift Server Adapter");
 		handle.setDescription("Create an OpenShift Server Adapter by choosing your connection, application and deploy project.");
@@ -60,19 +64,23 @@ public class OpenShiftServerWizardFragment extends WizardFragment implements ICo
 		};
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
-		this.composite = new OpenShiftServerWizardComposite(composite, callback);
+		this.composite = new ExpressServerWizardComposite(composite, callback);
 		return this.composite.getComposite();
 	}
-		
+
+	@Override
 	public void enter() {
 		// do nothing
 	}
-	
+
+	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
 		composite.performFinish(monitor);
 		composite = null;
 	}
+
+	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
 		composite = null;
 	}

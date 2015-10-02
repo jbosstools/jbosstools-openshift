@@ -43,7 +43,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.IServerModule;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.express.internal.ui.console.GearGroupsUtils;
@@ -127,8 +127,8 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 	}
 
 	private IStatus execute(final IServer server, final Shell shell) throws MalformedURLException {
-		if (!OpenShiftServerUtils.isOpenShiftRuntime(server)
-				|| !OpenShiftServerUtils.isInOpenshiftBehaviourMode(server)) {
+		if (!ExpressServerUtils.isExpressRuntime(server)
+				|| !ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
 			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Server {0} is not an OpenShift Server Adapter", server.getName()));
 		}

@@ -166,6 +166,24 @@ public class UrlUtils {
 		return host.indexOf(SCHEME_SEPARATOR) > -1;
 	}
 
+	public static String getHost(String url) {
+		if (isEmpty(url)) {
+			return url;
+		}
+		
+		int beginIndex = getHostIndex(url);
+		if (beginIndex == -1) {
+			beginIndex = 0;
+		}
+		
+		int endIndex = url.length() - 1;
+		if (url.endsWith("/")) {
+			endIndex -= 1;
+		}
+		
+		return url.substring(beginIndex, endIndex);
+	}
+	
 	private static int getHostIndex(String url) {
 		int schemeSeparatorIndex = url.indexOf(SCHEME_SEPARATOR);
 		if (schemeSeparatorIndex == -1) {
@@ -177,6 +195,25 @@ public class UrlUtils {
 	private static boolean isEmpty(String string) {
 		return string == null
 				|| string.isEmpty();
+	}
+
+	public static String cutPort(String host) {
+		if (isEmpty(host)) {
+			return host;
+		}
+		int portIndex = getPortIndex(host);
+		if (portIndex > -1) {
+			return host.substring(0, portIndex);
+		}
+		return host;
+	}
+
+	private static int getPortIndex(String url) {
+		int portSeparatorIndex = url.indexOf(PORT_DELIMITER);
+		if (portSeparatorIndex == -1) {
+			return portSeparatorIndex;
+		}
+		return portSeparatorIndex;
 	}
 
 	/**

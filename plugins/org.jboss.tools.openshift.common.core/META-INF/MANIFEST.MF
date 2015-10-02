@@ -11,6 +11,8 @@ Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.common.core;bundle-version="[3.7.0,4.0.0)",
  org.jboss.tools.foundation.core;bundle-version="[1.2.0,2.0.0)",
  org.jboss.tools.usage;bundle-version="2.1.0",
+ org.jboss.ide.eclipse.as.core;bundle-version="3.1.1",
+ org.eclipse.wst.server.core;bundle-version="1.6.100",
  org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.9.100",
  org.eclipse.equinox.common,
@@ -26,6 +28,14 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.common.core.connection;
+  x-friends:="org.jboss.tools.openshift.common.ui,
+   org.jboss.tools.openshift.core,
+   org.jboss.tools.openshift.express.core,
+   org.jboss.tools.openshift.express.test,
+   org.jboss.tools.openshift.express.ui,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.common.core.server;
   x-friends:="org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.express.core,

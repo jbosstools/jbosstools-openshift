@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 
 /**
  * Property tester for properties that are related to the OpenShift server
@@ -41,6 +41,6 @@ public class ServerTypePropertyTester extends PropertyTester {
 		}
 
 		return ((Boolean) expectedValue).equals(
-				OpenShiftServerUtils.isOpenShiftRuntime((IServer) receiver));
+				ExpressServerUtils.isExpressRuntime((IServer) receiver));
 	}
 }

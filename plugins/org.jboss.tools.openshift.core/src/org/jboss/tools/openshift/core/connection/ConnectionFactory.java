@@ -49,9 +49,7 @@ public class ConnectionFactory implements IConnectionFactory {
 		try {
 			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback();
 			IClient client = new ClientFactory().create(url, sslCertCallback);
-			return new Connection(client, 
-					new LazyCredentialsPrompter(),
-					sslCertCallback);
+			return new Connection(client, new LazyCredentialsPrompter(), sslCertCallback);
 		} catch (OpenShiftException e) {
 			OpenShiftCoreActivator.pluginLog().logInfo(NLS.bind("Could not create OpenShift connection: Malformed url {0}", url), e);
 			return null;

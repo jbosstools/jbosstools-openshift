@@ -53,6 +53,13 @@ public interface IConnectionsFactory {
 	public Collection<IConnectionFactory> getAll();
 	
 	/**
+	 * Returns all connection factories that can create connections of the given
+	 * type. Returns all connection factories if the given type is {@code null}
+	 * 
+	 * @return
+	 */
+	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz);
+	/**
 	 * Returns the connection factory that is registered to this composite
 	 * factory for the given id. Returns <code>null</code> otherwise.
 	 * 
@@ -68,5 +75,4 @@ public interface IConnectionsFactory {
 	 * @throws IOException
 	 */
 	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz);
-
 }

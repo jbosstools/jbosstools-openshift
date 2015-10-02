@@ -19,15 +19,16 @@ import org.eclipse.wst.server.core.IServerAttributes;
  * @author Andre Dietisheim
  * 
  */
-public class OpenShiftProjectAdapterFactory implements IAdapterFactory {
+public class ExpressProjectAdapterFactory implements IAdapterFactory {
 
 	@Override
-	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == IProject.class) {
 			if (adaptableObject instanceof IProject) {
-				return adaptableObject;
+				return (T) adaptableObject;
 			} else if (adaptableObject instanceof IServer) {
-				return OpenShiftServerUtils.getDeployProject((IServerAttributes) adaptableObject);
+				return (T) ExpressServerUtils.getDeployProject((IServerAttributes) adaptableObject);
 			}
 		}
 		return null;
@@ -37,5 +38,4 @@ public class OpenShiftProjectAdapterFactory implements IAdapterFactory {
 	public Class<?>[] getAdapterList() {
 		return new Class[] { IProject.class };
 	}
-
 }

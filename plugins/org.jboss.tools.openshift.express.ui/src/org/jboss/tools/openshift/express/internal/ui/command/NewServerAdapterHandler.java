@@ -32,9 +32,9 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.express.core.util.ExpressConnectionUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.server.BehaviorTaskModelUtil;
+import org.jboss.tools.openshift.express.internal.ui.server.ExpressServerWizardTaskModelUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.client.IApplication;
@@ -59,17 +59,17 @@ public class NewServerAdapterHandler extends AbstractHandler {
 		}
 		
 		try {
-			NewServerWizard wizard = new NewServerWizard(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE);
-			BehaviorTaskModelUtil.put(application, wizard.getTaskModel());
+			NewServerWizard wizard = new NewServerWizard(ExpressServerUtils.EXPRESS_SERVER_TYPE);
+			ExpressServerWizardTaskModelUtil.put(application, wizard.getTaskModel());
 			final IDomain domain = application.getDomain();
-			BehaviorTaskModelUtil.put(domain, wizard.getTaskModel());
+			ExpressServerWizardTaskModelUtil.put(domain, wizard.getTaskModel());
 			ExpressConnection connection = ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance());
 			if (connection == null) {
 				return ExpressUIActivator.createCancelStatus(NLS.bind(
 						"Cannot create server adapter: connection for application {0} not found.",
 						application.getName()));
 			}
-			BehaviorTaskModelUtil.put(connection, wizard.getTaskModel());
+			ExpressServerWizardTaskModelUtil.put(connection, wizard.getTaskModel());
 			WizardUtils.openWizardDialog(400, 700, wizard, HandlerUtil.getActiveShell(event));
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {

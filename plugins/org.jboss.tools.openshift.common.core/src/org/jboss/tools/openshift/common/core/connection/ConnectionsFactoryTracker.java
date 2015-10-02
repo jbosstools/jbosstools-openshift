@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.common.core.connection;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
@@ -66,12 +67,22 @@ public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactor
 	}
 
 	@Override
+	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz) {
+		if (clazz == null) {
+			return getAll();
+		} else {
+			return Arrays.asList(getByConnection(clazz));
+		}
+	}
+
+	@Override
 	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz) {
 		IConnectionsFactory service = getService();
 		if (service == null) {
 			return null;
 		}
 
-		return service.getByConnection(clazz);	}
+		return service.getByConnection(clazz);	
+	}
 
 }

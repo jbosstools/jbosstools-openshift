@@ -52,7 +52,8 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
 		this();
-		if (projectsAndBuildConfigs != null && projectsAndBuildConfigs.size() == 1) {
+		if (projectsAndBuildConfigs != null 
+				&& projectsAndBuildConfigs.size() == 1) {
 			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
 			IProject project = entry.getKey();
 			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
@@ -69,7 +70,8 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		if (model.getConnection() != null && model.getSelectedItem() != null) {
+		if (model.getConnection() != null 
+				&& model.getSelectedItem() != null) {
 			return;
 		}
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);

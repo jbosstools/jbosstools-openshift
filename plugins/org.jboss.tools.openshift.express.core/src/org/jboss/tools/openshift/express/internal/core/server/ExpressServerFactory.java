@@ -41,9 +41,9 @@ import com.openshift.client.OpenShiftException;
  * @author Rob Stryker
  * @author André Dietisheim
  */
-public class OpenShiftServerFactory {
+public class ExpressServerFactory {
 
-	public OpenShiftServerFactory() {
+	public ExpressServerFactory() {
 	}
 
 	public IServer create(IProject project, IApplication application, IDomain domain, IProgressMonitor monitor)
@@ -65,7 +65,7 @@ public class OpenShiftServerFactory {
 		
 		IServer server = null;
 		try {
-			IServerType serverType = ServerCore.findServerType(OpenShiftServerUtils.OPENSHIFT_SERVER_TYPE);
+			IServerType serverType = ServerCore.findServerType(ExpressServerUtils.EXPRESS_SERVER_TYPE);
 			server = createAdapter(serverType, application, domain, project.getName(), remoteName);
 			server = addModules(getModules(Collections.singletonList(project)), server, monitor);
 		} catch (CoreException ce) {
@@ -84,9 +84,9 @@ public class OpenShiftServerFactory {
 		Assert.isLegal(serverType != null, "Missing server adapter type");
 		Assert.isLegal(application != null, "Missing application");
 
-		String serverName = OpenShiftServerUtils.getDefaultServerName(application);
-		IServer server = OpenShiftServerUtils.createServer(serverType, serverName);
-		OpenShiftServerUtils.fillServerWithOpenShiftDetails(
+		String serverName = ExpressServerUtils.getDefaultServerName(application);
+		IServer server = ExpressServerUtils.createServer(serverType, serverName);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(
 				server, deployProject, remoteName, serverName, application, domain);
 		return server;
 	}
@@ -101,10 +101,10 @@ public class OpenShiftServerFactory {
 			return server;
 		}
 		IServerWorkingCopy wc = server.createWorkingCopy();
-		IModule[] add = modules.toArray(new IModule[modules.size()]);
-		wc.modifyModules(add, new IModule[0], new NullProgressMonitor());
+		IModule[] addedModules = modules.toArray(new IModule[modules.size()]);
+		wc.modifyModules(addedModules, new IModule[0], monitor);
 		server = wc.save(true, monitor);
-		((Server) server).setModulePublishState(add, IServer.PUBLISH_STATE_NONE);
+		((Server) server).setModulePublishState(addedModules, IServer.PUBLISH_STATE_NONE);
 		return server;
 	}
 

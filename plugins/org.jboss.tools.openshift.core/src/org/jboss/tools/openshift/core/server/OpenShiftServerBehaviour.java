@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat Inc..
+ * Copyright (c) 2015 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.server;
+package org.jboss.tools.openshift.core.server;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 /**
- * @author Rob Stryker
+ * @author Andre Dietisheim
  */
 public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 
@@ -30,12 +30,12 @@ public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 
 	public IStatus publish(int kind, IProgressMonitor monitor) {
 		boolean shouldPublish = false;
-		if( publishAdaptableInfo != null ) {
-			// Previous reference to Shell.class was redundant and unnecessary
+		if (publishAdaptableInfo != null) {
 			shouldPublish = "user".equals(publishAdaptableInfo.getAdapter(String.class));
 		}
-		if( shouldPublish )
+		if (shouldPublish) {
 			return super.publish(kind, monitor);
+		}
 		return Status.OK_STATUS;
 	}
 	

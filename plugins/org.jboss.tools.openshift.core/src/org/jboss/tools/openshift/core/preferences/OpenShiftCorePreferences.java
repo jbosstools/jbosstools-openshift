@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.preferences;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;
@@ -18,7 +19,7 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftCorePreferences {
+public class OpenShiftCorePreferences implements IOpenShiftCoreConstants {
 	
 	public static final OpenShiftCorePreferences INSTANCE = new OpenShiftCorePreferences();
 
@@ -29,7 +30,9 @@ public class OpenShiftCorePreferences {
 	private final StringsPreferenceValue connectionsPreferenceValue = 
 			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
 
-
+	private final StringPreferenceValue ocBinaryLocation = 
+			new StringPreferenceValue(OPENSHIFT_CLI_LOC, OpenShiftCoreActivator.PLUGIN_ID);
+	
 	private OpenShiftCorePreferences() {
 	}
 
@@ -52,8 +55,16 @@ public class OpenShiftCorePreferences {
 	public String loadScheme(String connectionURL) {
 		return createPreferenceValue(connectionURL).get();
 	}
-	
+
 	private StringPreferenceValue createPreferenceValue(String connectionURL) {
 		return new StringPreferenceValue(NLS.bind("{0}.{1}",CONNECTION_AUTH_PREFIX,connectionURL), OpenShiftCoreActivator.PLUGIN_ID);
+	}
+	
+	public String getOCBinaryLocation() {
+		return ocBinaryLocation.get();
+	}
+	
+	public void saveOCBinaryLocation(String location) {
+		ocBinaryLocation.set(location);
 	}
 }

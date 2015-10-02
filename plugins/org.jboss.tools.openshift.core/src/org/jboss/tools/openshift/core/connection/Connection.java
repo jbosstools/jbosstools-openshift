@@ -26,6 +26,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
@@ -333,7 +334,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	/**
-	 * Get a list of resource types
+	 * Get a list of resource types in the default namespace
 	 * 
 	 * @return List<IResource>
 	 * @throws OpenShiftException
@@ -347,6 +348,8 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			if(client.getAuthorizationStrategy() == null) {
 				client.setAuthorizationStrategy(getAuthorizationStrategy());
 			}
+
+			client.setSSLCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
 			return retryList("Unauthorized.  Trying to reauthenticate", e, kind);

@@ -42,62 +42,58 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.menus">
-    <menuContribution
-          locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.import">
-       <command
-             commandId="org.jboss.tools.openshift.ui.command.importapplication"
-             icon="icons/application_import.gif"
-             label="%openshift.command.application.import"
-             mnemonic="A">
-          <visibleWhen>
-             <with
-                   variable="selection">
-                <count
-                      value="1">
-                </count>
-                <iterate
-                      ifEmpty="false">
-                   <or>
-                      <instanceof
-                            value="org.jboss.tools.openshift.core.connection.Connection">
-                      </instanceof>
-                      <instanceof
-                            value="com.openshift.restclient.model.IBuildConfig">
-                      </instanceof>
-                      <instanceof
-                            value="com.openshift.restclient.model.IProject">
-                      </instanceof>
-                   </or>
-                </iterate>
-             </with>
-          </visibleWhen>
-       </command>
-       <command
-             commandId="org.jboss.tools.openshift.ui.command.deployimage"
-             icon="icons/layer.png"
-             label="%openshift.command.application.deploydockerimage "
-             style="push"
-             tooltip="Deploy a Docker Image">
-          <visibleWhen
-                checkEnabled="false">
-             <and>
-                <count
-                      value="1">
-                </count>
-                <iterate>
-                   <or>
-                      <instanceof
-                            value="com.openshift.restclient.model.IProject">
-                      </instanceof>
-                      <instanceof
-                            value="org.jboss.tools.openshift.core.connection.Connection">
-                      </instanceof>
-                   </or>
-                </iterate>
-             </and>
-          </visibleWhen>
-       </command>
-    </menuContribution>
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.import">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.importapplication"
+				icon="icons/application_import.gif"
+				label="%openshift.command.application.import"
+				mnemonic="A">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<count
+							value="1">
+						</count>
+						<iterate
+							ifEmpty="false">
+							<or>
+								<instanceof
+									value="org.jboss.tools.openshift.core.connection.Connection" />
+								<instanceof
+									value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
+								<instanceof
+									value="com.openshift.restclient.model.IResource" />
+							</or>
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.deployimage"
+				icon="icons/layer.png"
+				label="%openshift.command.application.deploydockerimage "
+				style="push"
+				tooltip="Deploy a Docker Image">
+				<visibleWhen
+					checkEnabled="false">
+					<and>
+						<count
+							value="1">
+						</count>
+						<iterate>
+							<or>
+								<instanceof
+									value="com.openshift.restclient.model.IProject" />
+								<instanceof
+									value="org.jboss.tools.openshift.core.connection.Connection" />
+							</or>
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		
 		<!-- openshift explorer context menu: refresh resource -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
@@ -112,22 +108,20 @@
 						<count
 							value="1" />
 						<iterate>
-         <or>
-            <instanceof
-                  value="org.jboss.tools.openshift.common.core.IRefreshable">
-            </instanceof>
-            <instanceof
-                  value="com.openshift.restclient.model.IResource">
-            </instanceof>
-            <instanceof
-                  value="com.openshift.restclient.OpenShiftException">
-            </instanceof>
-         </or>
+							<or>
+								<instanceof
+									value="org.jboss.tools.openshift.common.core.IRefreshable" />
+								<instanceof
+									value="com.openshift.restclient.model.IResource" />
+								<instanceof
+                  					value="com.openshift.restclient.OpenShiftException" />
+							</or>
 						</iterate>
 					</and>
 				</visibleWhen>
 			</command>
 		</menuContribution>
+
 		<!-- openshift explorer context menu: new connection -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
@@ -284,206 +278,206 @@
 		      </visibleWhen>
 		   </command>
 		</menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.project.manage"
-           style="push"
-           tooltip="Manage Projects">
-        <visibleWhen
-              checkEnabled="false">
-           <and>
-              <count
-                    value="1">
-              </count>
-              <iterate>
-              	<or>
-                 <instanceof
-                    value="org.jboss.tools.openshift.core.connection.Connection"/>
-				</or>
-              </iterate>
-           </and>
-        </visibleWhen>
-     </command>
-  </menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.project.delete"
-           style="push"
-           icon="icons/globe_delete.png"
-           tooltip="Delete Project">
-        <visibleWhen
-              checkEnabled="false">
-           <and>
-             <!-- TODO support deletion of several projects in 1 command -->
-              <count
-                    value="1">
-              </count>
-              <iterate>
-                 <instanceof
-                       value="com.openshift.restclient.model.IProject">
-                 </instanceof>
-              </iterate>
-           </and>
-        </visibleWhen>
-     </command>
-  </menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.portforwarding"
-           id="org.jboss.tools.openshift.ui.explorer.command.portforwarding"
-           tooltip="The openshift binary must be set in user preferences in order to use port forwarding">
-			<visibleWhen>
-				<with
-					variable="selection">
+ 		<menuContribution
+        	allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.project.manage"
+				style="push"
+				tooltip="Manage Projects">
+				<visibleWhen
+					checkEnabled="false">
 					<and>
 						<count
 							value="1">
 						</count>
-		                <iterate
-							ifEmpty="false"
-							operator="and">
-							<instanceof
-								value="com.openshift.restclient.model.IPod" />
+						<iterate>
+							<or>
+								<instanceof
+									value="org.jboss.tools.openshift.core.connection.Connection"/>
+							</or>
 						</iterate>
 					</and>
-				</with>
-			</visibleWhen>
-     </command>
-  </menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.podlogs"
-           id="org.jboss.tools.openshift.ui.explorer.command.podlogs"
-           tooltip="The openshift binary must be set in user preferences in order to retrieve pod logs">
-        <visibleWhen>
-           <with
-                 variable="selection">
-              <and>
-                 <count
-                       value="1">
-                 </count>
-                 <iterate
-                       ifEmpty="false"
-                       operator="and">
-                    <instanceof
-                          value="com.openshift.restclient.model.IPod">
-                    </instanceof>
-                 </iterate>
-              </and>
-           </with>
-        </visibleWhen>
-     </command>
-  </menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.buildlogs"
-           id="org.jboss.tools.openshift.ui.explorer.command.buildlogs"
-           tooltip="The openshift binary must be set in user preferences in order to retrieve build logs">
-        <visibleWhen>
-           <with
-                 variable="selection">
-              <and>
-                 <count
-                       value="1">
-                 </count>
-                 <iterate
-                       ifEmpty="false"
-                       operator="and">
-                    <instanceof
-                          value="com.openshift.restclient.model.IBuild">
-                    </instanceof>
-                 </iterate>
-              </and>
-           </with>
-        </visibleWhen>
-     </command>
-  </menuContribution>
-  <menuContribution
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+        	locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.project.delete"
+				style="push"
+				icon="icons/globe_delete.png"
+				tooltip="Delete Project">
+				<visibleWhen
+					checkEnabled="false">
+					<and>
+						<!-- TODO support deletion of several projects in 1 command -->
+						<count
+                    		value="1">
+						</count>
+						<iterate>
+							<instanceof
+								value="com.openshift.restclient.model.IProject">
+							</instanceof>
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.portforwarding"
+				id="org.jboss.tools.openshift.ui.explorer.command.portforwarding"
+				tooltip="The openshift binary must be set in user preferences in order to use port forwarding">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+		                	<iterate
+								ifEmpty="false"
+								operator="and">
+								<instanceof
+									value="com.openshift.restclient.model.IPod" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.podlogs"
+				id="org.jboss.tools.openshift.ui.explorer.command.podlogs"
+				tooltip="The openshift binary must be set in user preferences in order to retrieve pod logs">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+							<iterate
+								ifEmpty="false"
+								operator="and">
+								<instanceof
+									value="com.openshift.restclient.model.IPod">
+								</instanceof>
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.buildlogs"
+				id="org.jboss.tools.openshift.ui.explorer.command.buildlogs"
+				tooltip="The openshift binary must be set in user preferences in order to retrieve build logs">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+							<iterate
+								ifEmpty="false"
+								operator="and">
+                    			<instanceof
+									value="com.openshift.restclient.model.IBuild">
+								</instanceof>
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
 			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
-		   <command
-		         commandId="org.jboss.tools.openshift.ui.command.showproperties"
-		         id="org.jboss.tools.openshift.ui.explorer.command.showproperties">
-		      <visibleWhen>
-		         <with
-		               variable="selection">
-		            <and>
-		               <count
-		                     value="1">
-		               </count>
-		               <iterate
-		                     ifEmpty="false">
-		                 <or>
-		                  <instanceof
-		                        value="com.openshift.restclient.model.IResource">
-		                  </instanceof>
-		                  <instanceof
-		                        value="org.jboss.tools.openshift.core.connection.Connection">
-		                  </instanceof>
-		                  </or>
-		               </iterate>
-		            </and>
-		         </with>
-		      </visibleWhen>
-		   </command>
-  </menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="popup:org.eclipse.linuxtools.docker.ui.dockerExplorerView#PopupMenu">
-     <separator
-           name="org.jboss.tools.openshift.ui.separator.docker.explorer"
-           visible="true">
-     </separator>
-     <command
-           commandId="org.jboss.tools.openshift.ui.command.deployimage"
-           icon="icons/openshift-logo-white-icon.png"
-           id="org.jboss.tools.openshift.ui.docker.explorer.deploy"
-           style="push">
-        <visibleWhen
-              checkEnabled="false">
-           <with
-                 variable="selection">
-              <and>
-                 <count
-                       value="1">
-                 </count>
-                 <iterate
-                       ifEmpty="false"
-                       operator="and">
-                    <instanceof
-                          value="org.eclipse.linuxtools.docker.core.IDockerImage">
-                    </instanceof>
-                 </iterate>
-              </and>
-           </with>
-        </visibleWhen>
-     </command>
-  </menuContribution>
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.showproperties"
+				id="org.jboss.tools.openshift.ui.explorer.command.showproperties">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+							<iterate
+								ifEmpty="false">
+								<or>
+									<instanceof
+										value="com.openshift.restclient.model.IResource">
+									</instanceof>
+									<instanceof
+										value="org.jboss.tools.openshift.core.connection.Connection">
+									</instanceof>
+								</or>
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.eclipse.linuxtools.docker.ui.dockerExplorerView#PopupMenu">
+			<separator
+				name="org.jboss.tools.openshift.ui.separator.docker.explorer"
+				visible="true">
+			</separator>
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.deployimage"
+				icon="icons/openshift-logo-white-icon.png"
+				id="org.jboss.tools.openshift.ui.docker.explorer.deploy"
+				style="push">
+				<visibleWhen
+					checkEnabled="false">
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+							<iterate
+								ifEmpty="false"
+								operator="and">
+								<instanceof
+									value="org.eclipse.linuxtools.docker.core.IDockerImage">
+								</instanceof>
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.handler.ManageProjectsHandler"
-        commandId="org.jboss.tools.openshift.ui.command.project.manage">
-  </handler>
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
-        commandId="org.jboss.tools.openshift.ui.command.project.delete">
-  </handler>
-  <handler
-        class="org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler"
-        commandId="org.jboss.tools.openshift.ui.command.project.new">
-  </handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.ManageProjectsHandler"
+			commandId="org.jboss.tools.openshift.ui.command.project.manage">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
+			commandId="org.jboss.tools.openshift.ui.command.project.delete">
+		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler"
+			commandId="org.jboss.tools.openshift.ui.command.project.new">
+		</handler>
   		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewApplicationHandler"
 			commandId="org.jboss.tools.openshift.ui.command.application.new">
@@ -529,6 +523,7 @@
 			commandId="org.jboss.tools.openshift.ui.command.openInWebConsole">
 		</handler>
 	</extension>
+	
 	<!-- adapters -->
 	<extension
 		point="org.eclipse.core.runtime.adapters">
@@ -547,6 +542,7 @@
 		</adapter>
 	</factory>
 	</extension>
+
 	<!-- definitions -->
 	<extension
 		point="org.eclipse.core.expressions.definitions">
@@ -584,16 +580,16 @@
 			id="org.jboss.tools.openshift.ui.command.resource.delete"
 			name="Delete Resource...">
 		</command>
-  <command
-        description="Manage Projects"
-        id="org.jboss.tools.openshift.ui.command.project.manage"
-        name="%openshift.command.project.manage">
-  </command>
-  <command
-        description="Delete Project"
-        id="org.jboss.tools.openshift.ui.command.project.delete"
-        name="%openshift.command.project.delete">
-  </command>
+		<command
+			description="Manage Projects"
+			id="org.jboss.tools.openshift.ui.command.project.manage"
+			name="%openshift.command.project.manage">
+		</command>
+		<command
+			description="Delete Project"
+			id="org.jboss.tools.openshift.ui.command.project.delete"
+			name="%openshift.command.project.delete">
+		</command>
 		<command
 			description="Refresh the Resource"
 			id="org.jboss.tools.openshift.ui.command.resource.refresh"
@@ -764,6 +760,37 @@
 			id="org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage"
 			name="%openshift.preferences.page.title">
 		</page>
+	</extension>
+ 
+ 	<!-- OpenShift 3 server adapter icon -->
+	<extension
+		point="org.eclipse.wst.server.ui.serverImages">
+		<image
+			icon="icons/openshift-logo-white-icon.png"
+			typeIds="org.jboss.tools.openshift.server.type,org.jboss.tools.openshift.core.server.OpenShiftRuntime"
+			id="org.jboss.tools.openshift.server.icon"/>
+	</extension>
+ 
+ 	<!-- OpenShift 3 server editor -->
+	<extension
+		point="org.eclipse.wst.server.ui.editorPageSections">
+		<section
+			class="org.jboss.tools.openshift.internal.ui.server.OpenShiftServerEditorSection"
+			id="org.jboss.tools.openshift.ui.behaviour.details.section"
+			insertionId="org.eclipse.wst.server.editor.overview.left"
+			order="10"
+			typeIds="org.jboss.tools.openshift.server.type">
+		</section>
+	</extension>
+	
+	<!-- OpenShift 3 server wizard -->
+	<extension
+			point="org.eclipse.wst.server.ui.wizardFragments">
+		<fragment
+			class="org.jboss.tools.openshift.internal.ui.server.OpenShiftServerWizardFragment"
+			id="org.jboss.tools.openshift.ui.server.fragment"
+			typeIds="org.jboss.tools.openshift.server.type">
+		</fragment>
 	</extension>
 	
 	<!-- Core UI Integration: ssl certificate callback -->

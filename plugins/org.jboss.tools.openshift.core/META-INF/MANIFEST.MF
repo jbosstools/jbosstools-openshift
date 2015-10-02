@@ -7,11 +7,17 @@ Bundle-Activator: org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
+ org.jboss.tools.openshift.egit.core;bundle-version="3.1.0",
  org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.common.core;bundle-version="[3.7.0,4.0.0)",
  org.jboss.tools.foundation.core;bundle-version="1.2.0",
+ org.jboss.ide.eclipse.as.core;bundle-version="3.1.1",
  org.jboss.ide.eclipse.as.dmr;bundle-version="3.1.0",
  org.jboss.tools.usage;bundle-version="2.1.0",
+ org.eclipse.wst.server.core;bundle-version="1.6.100",
+ org.eclipse.jdt.launching;bundle-version="3.8.0",
+ org.eclipse.debug.core;bundle-version="3.10.0",
+ org.eclipse.core.resources;bundle-version="3.10.0",
  org.eclipse.core.runtime,
  org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
  org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
@@ -22,6 +28,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.core.server;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
 Service-Component: META-INF/connectionFactory.xml

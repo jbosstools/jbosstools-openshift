@@ -149,7 +149,7 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
 		dec.setShowOnlyOnFocus(true);
 
-		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllOpenedProjects());
+		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllAccessibleProjectNames());
 
 		// browse projects
 		Button browseProjectsButton = new Button(projectComposite, SWT.NONE);
@@ -196,7 +196,8 @@ public class ProjectAndServerAdapterSettingsWizardPage extends AbstractOpenShift
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SelectExistingProjectDialog dialog = 
-						new SelectExistingProjectDialog(pageModel.getApplicationName(), getShell());
+						new SelectExistingProjectDialog(
+								NLS.bind("Select an existing project for {0}", pageModel.getApplicationName()), getShell());
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
 					if (selectedProject instanceof IProject) {

@@ -1,98 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point 
+	<extension-point 
    		id="org.jboss.tools.openshift.express.core.ui.egit" 
    		name="openshiftCoreUIServices" 
    		schema="schema/org.jboss.tools.openshift.express.core.ui.egit.exsd"/>
-   <extension
-         point="org.eclipse.wst.server.core.serverTypes">
-      <serverType
-            behaviourClass="org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerBehaviour"
-            class="org.jboss.tools.openshift.express.internal.core.server.OpenShiftServer"
-            name="%openshift.express.name"
-            description="%openshift.express.description"
-            hasConfiguration="false"
-            id="org.jboss.tools.openshift.express.openshift.server.type"
-            initialState="started"
-            launchConfigId="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
-            launchModes="run,debug,profile"
-            runtime="false"
-            runtimeTypeId="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-            startBeforePublish="false"
-            startTimeout="450000"
-            stopTimeout="450000"
-            supportsRemoteHosts="true"/>
-    </extension>
-    <extension
-         point="org.eclipse.wst.server.core.runtimeTypes">
-      <runtimeType
-             vendor="%ProviderName"
-             class="org.jboss.tools.openshift.express.internal.core.server.OpenShiftRuntime"
-             description="%openshift.express.runtime.name"
-             name="%openshift.express.runtime.name"
-             id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-             version="1.0">
-          <moduleType types="jst.appclient" versions="5.0, 6.0, 7.0"/>
-          <moduleType types="wst.web" versions="1.0,1.2,1.3,1.4"/>
-          <moduleType types="jst.web" versions="2.2, 2.3, 2.4, 2.5, 3.0,3.1"/>
-          <moduleType types="jst.ejb" versions="1.0, 1.1, 2.0, 2.1, 3.0, 3.1,3.2"/>
-          <moduleType types="jst.ear" versions="1.2, 1.3, 1.4, 5.0, 6.0,7.0"/>
-          <moduleType types="jst.connector" versions="1.0, 1.5, 1.6,1.7"/>
-	      <moduleType types="jst.utility" versions="1.0"/>
-          <moduleType types="jboss.package" versions="1.0"/>
-          <moduleType types="jboss.singlefile" versions="1.0"/>
-          <moduleType types="jst.jboss.esb" versions="4.2,4.3,4.4,4.5,4.6,4.7,4.9"/>
-          <moduleType types="jst.jboss.sar" versions="1.0"/>
-          <moduleType types="jbt.bpel.module" versions="1.1, 2.0"/>
-          <moduleType types="bpel.module" versions="1.1, 2.0"/>
-          <moduleType types="jboss.osgi" versions="1.0"/>          
-      </runtimeType>
-    </extension>
-    <extension
-         point="org.eclipse.jst.server.core.runtimeFacetMappings">
-      <runtimeFacetMapping
-            runtimeTypeId="org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-            runtime-component="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"
-            version="1.0"/>
-    </extension>
-   <extension
-         point="org.eclipse.wst.common.project.facet.core.runtimes">
-      <runtime-component-type id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"/>
-      <runtime-component-version
-            type="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"
-            version="1.0"/>
-      <supported>
-        <runtime-component
-         	id="org.jboss.tools.openshift.express.internal.OpenShiftRuntime.component"
-         	version="1.0"/>
-       <facet id="wst.web"  version="1.0,1.2,1.3,1.4"/>
-       <facet id="jst.web"  version="2.2,2.3,2.4,2.5,3.0,3.1"/>
-       <facet id="jst.java" version="5.0,6.0,1.7,1.8"/>
-       <facet id="jst.utility" version="1.0"/>
-       <facet id="jst.connector" version="1.0,1.5,1.6"/>
-       <facet id="jst.ejb" version="2.0,2.1,3.0,3.1,3.2"/>
-       <facet id="jst.ear" version="1.2,1.3,1.4,5.0,6.0,7.0"/>
-       <facet id="jst.appclient" version="1.2,1.3,1.4,5.0,6.0,7.0"/>
-       <facet id="jst.webfragment" version="3.0,3.1"/>
-     </supported>
-   </extension>
-   <extension
-         point="org.eclipse.debug.core.launchConfigurationTypes">
-      <launchConfigurationType
-            category="JBoss"
-            delegate="org.jboss.tools.openshift.express.internal.core.server.OpenshiftDelegatingStartLaunchConfiguration"
-            id="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
-            modes="run,debug,profile"
-            name="JBoss OpenShift Server Startup Configuration"
-            public="true"
-            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
-            sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
-    </extension>
-    
+	<extension
+		point="org.eclipse.wst.server.core.serverTypes">
+		<serverType
+			behaviourClass="org.jboss.tools.openshift.express.internal.core.server.ExpressServerBehaviour"
+			class="org.jboss.tools.openshift.express.internal.core.server.ExpressServer"
+			name="%openshift.express.name"
+			description="%openshift.express.description"
+			hasConfiguration="false"
+			id="org.jboss.tools.openshift.express.openshift.server.type"
+			initialState="started"
+			launchConfigId="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
+			launchModes="run,debug,profile"
+			runtime="false"
+			runtimeTypeId="org.jboss.tools.openshift.express.internal.ExpressRuntime"
+			startBeforePublish="false"
+			startTimeout="450000"
+			stopTimeout="450000"
+			supportsRemoteHosts="true"/>
+	</extension>
+	<extension
+		point="org.eclipse.wst.server.core.runtimeTypes">
+		<runtimeType
+			vendor="%ProviderName"
+			class="org.jboss.tools.openshift.express.internal.core.server.ExpressRuntime"
+			description="%openshift.express.runtime.name"
+			name="%openshift.express.runtime.name"
+			id="org.jboss.tools.openshift.express.internal.ExpressRuntime"
+			version="1.0">
+			<moduleType types="jst.appclient" versions="5.0, 6.0, 7.0"/>
+			<moduleType types="wst.web" versions="1.0,1.2,1.3,1.4"/>
+			<moduleType types="jst.web" versions="2.2, 2.3, 2.4, 2.5, 3.0,3.1"/>
+			<moduleType types="jst.ejb" versions="1.0, 1.1, 2.0, 2.1, 3.0, 3.1,3.2"/>
+			<moduleType types="jst.ear" versions="1.2, 1.3, 1.4, 5.0, 6.0,7.0"/>
+			<moduleType types="jst.connector" versions="1.0, 1.5, 1.6,1.7"/>
+			<moduleType types="jst.utility" versions="1.0"/>
+			<moduleType types="jboss.package" versions="1.0"/>
+			<moduleType types="jboss.singlefile" versions="1.0"/>
+			<moduleType types="jst.jboss.esb" versions="4.2,4.3,4.4,4.5,4.6,4.7,4.9"/>
+			<moduleType types="jst.jboss.sar" versions="1.0"/>
+			<moduleType types="jbt.bpel.module" versions="1.1, 2.0"/>
+			<moduleType types="bpel.module" versions="1.1, 2.0"/>
+			<moduleType types="jboss.osgi" versions="1.0"/>          
+		</runtimeType>
+	</extension>
+	<extension
+		point="org.eclipse.jst.server.core.runtimeFacetMappings">
+		<runtimeFacetMapping
+			runtimeTypeId="org.jboss.tools.openshift.express.internal.ExpressRuntime"
+			runtime-component="org.jboss.tools.openshift.express.internal.ExpressRuntime.component"
+			version="1.0"/>
+	</extension>
+	<extension
+		point="org.eclipse.wst.common.project.facet.core.runtimes">
+		<runtime-component-type id="org.jboss.tools.openshift.express.internal.ExpressRuntime.component"/>
+		<runtime-component-version
+			type="org.jboss.tools.openshift.express.internal.ExpressRuntime.component"
+			version="1.0"/>
+		<supported>
+			<runtime-component
+				id="org.jboss.tools.openshift.express.internal.ExpressRuntime.component"
+				version="1.0"/>
+			<facet id="wst.web"  version="1.0,1.2,1.3,1.4"/>
+			<facet id="jst.web"  version="2.2,2.3,2.4,2.5,3.0,3.1"/>
+			<facet id="jst.java" version="5.0,6.0,1.7,1.8"/>
+			<facet id="jst.utility" version="1.0"/>
+			<facet id="jst.connector" version="1.0,1.5,1.6"/>
+			<facet id="jst.ejb" version="2.0,2.1,3.0,3.1,3.2"/>
+			<facet id="jst.ear" version="1.2,1.3,1.4,5.0,6.0,7.0"/>
+			<facet id="jst.appclient" version="1.2,1.3,1.4,5.0,6.0,7.0"/>
+			<facet id="jst.webfragment" version="3.0,3.1"/>
+		</supported>
+	</extension>
+	<extension
+		point="org.eclipse.debug.core.launchConfigurationTypes">
+		<launchConfigurationType
+			category="JBoss"
+			delegate="org.jboss.tools.openshift.express.internal.core.server.ExpressStartLaunchConfiguration"
+			id="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"
+			modes="run,debug,profile"
+			name="JBoss OpenShift Server Startup Configuration"
+			public="true"
+			sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+			sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
+	</extension>
+
 	<!-- Connection Adapter factory -->
-    <extension
-           point="org.eclipse.core.runtime.adapters">
+	<extension
+		point="org.eclipse.core.runtime.adapters">
         <factory
               adaptableType="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection"
               class="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionAdapterFactory">
@@ -125,7 +125,7 @@
 		<!-- Project Adapter factory -->
         <factory
               adaptableType="org.eclipse.wst.server.core.IServer"
-              class="org.jboss.tools.openshift.express.internal.core.server.OpenShiftProjectAdapterFactory">
+              class="org.jboss.tools.openshift.express.internal.core.server.ExpressProjectAdapterFactory">
            <adapter
                  type="org.eclipse.core.resources.IProject">
            </adapter>

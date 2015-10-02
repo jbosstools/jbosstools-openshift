@@ -45,6 +45,7 @@ import org.jboss.ide.eclipse.as.core.util.ServerConverter;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.util.PublishControllerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.publish.LocalZippedModulePublishRunner;
 import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
+import org.jboss.tools.openshift.common.core.server.ServerUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
@@ -53,26 +54,26 @@ import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 /**
  * @author Rob Stryker
  */
-public class OpenShiftServerPublishMethod  {
+public class ExpressServerPublishMethod  {
 
 	public void publishStart(final IServer server, final IProgressMonitor monitor) throws CoreException {
-		String destProjName = OpenShiftServerUtils.getDeployProjectName(server);
+		String destProjName = ExpressServerUtils.getDeployProjectName(server);
 		IProject magicProject = destProjName == null ? 
 				null : ResourcesPlugin.getWorkspace().getRoot().getProject(destProjName);
 		if (magicProject == null 
 				|| !magicProject.isAccessible()) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					ExpressCoreActivator.PLUGIN_ID,
-					NLS.bind(OpenShiftServerMessages.publishFailMissingProject, server.getName(), destProjName)));
+					NLS.bind(ExpressServerMessages.publishFailMissingProject, server.getName(), destProjName)));
 		}
 	}
 
 	public int publishFinish(IServer server, IProgressMonitor monitor) throws CoreException {
-		IProject project = OpenShiftServerUtils.getDeployProject(server);
+		IProject project = ExpressServerUtils.getDeployProject(server);
 		boolean allSubModulesPublished = areAllModulesPublished(server);
 
 		if (ProjectUtils.exists(project)) {
-			IContainer deployFolder = OpenShiftServerUtils.getContainer(OpenShiftServerUtils.getDeployFolder(server), project);
+			IContainer deployFolder = ServerUtils.getContainer(ExpressServerUtils.getDeployFolder(server), project);
 			if (allSubModulesPublished
 					|| (deployFolder != null && deployFolder.isAccessible())) {
 				project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
@@ -102,7 +103,7 @@ public class OpenShiftServerPublishMethod  {
 			return IServer.PUBLISH_STATE_UNKNOWN;
 
 		// Magic Project
-		String destProjName = OpenShiftServerUtils.getDeployProjectName(server);
+		String destProjName = ExpressServerUtils.getDeployProjectName(server);
 		if (isInDestProjectTree(destProjName, module))
 			return IServer.PUBLISH_STATE_NONE;
 
@@ -168,12 +169,12 @@ public class OpenShiftServerPublishMethod  {
 	}
 
 	private IContainer getDestination(IServer server, IProject destProj) throws CoreException {
-		String destinationFolder = OpenShiftServerUtils.getDeployFolder(server);
-		IContainer destFolder = OpenShiftServerUtils.getContainer(destinationFolder, destProj);
+		String destinationFolder = ExpressServerUtils.getDeployFolder(server);
+		IContainer destFolder = ServerUtils.getContainer(destinationFolder, destProj);
 		if (destFolder == null 
 				|| !destFolder.isAccessible()) {
 			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus(NLS.bind(
-					OpenShiftServerMessages.publishFailMissingFolder,
+					ExpressServerMessages.publishFailMissingFolder,
 					server.getName(),
 					createMissingPath(destProj, destinationFolder, destFolder))));
 		}
@@ -223,14 +224,14 @@ public class OpenShiftServerPublishMethod  {
 			boolean uncommittedChanges = EGitUtils.countChanges(
 					EGitUtils.getRepository(project), true, new NullProgressMonitor()) > 0;
 			if (uncommittedChanges) {
-				String remote = OpenShiftServerUtils.getRemoteName(server);
-				String applicationName = OpenShiftServerUtils.getApplicationName(server);
+				String remote = ExpressServerUtils.getRemoteName(server);
+				String applicationName = ExpressServerUtils.getApplicationName(server);
 				ExpressCoreUIIntegration.openCommitDialog(project, remote, applicationName, 
 						new PublishJob(applicationName, project, server));
 			} else {
 				if (ExpressCoreUIIntegration.requestApproval(
 						getPushQuestion(project, server, subMonitor),
-						NLS.bind(OpenShiftServerMessages.publishTitle, project.getName()))) {
+						NLS.bind(ExpressServerMessages.publishTitle, project.getName()))) {
 					return push(project, server, subMonitor);
 				}
 			}
@@ -246,11 +247,11 @@ public class OpenShiftServerPublishMethod  {
 		
 	private String getPushQuestion(IProject project, IServer server, IProgressMonitor monitor)
 			throws IOException, InvocationTargetException, URISyntaxException {
-		String openShiftRemoteName = OpenShiftServerUtils.getRemoteName(server);
+		String openShiftRemoteName = ExpressServerUtils.getRemoteName(server);
 		if (!EGitUtils.isAhead(project, openShiftRemoteName, monitor)) {
-			return NLS.bind(OpenShiftServerMessages.noChangesPushAnywayMsg, project.getName());
+			return NLS.bind(ExpressServerMessages.noChangesPushAnywayMsg, project.getName());
 		} else {
-			return NLS.bind(OpenShiftServerMessages.committedChangesNotPushedYet, project.getName());
+			return NLS.bind(ExpressServerMessages.committedChangesNotPushedYet, project.getName());
 		}
 	}
 	
@@ -258,7 +259,7 @@ public class OpenShiftServerPublishMethod  {
 		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
 		Repository repository = EGitUtils.getRepository(project);
 		ExpressCoreUIIntegration.displayConsoleView(server);
-		String remoteName = OpenShiftServerUtils.getRemoteName(server.createWorkingCopy());
+		String remoteName = ExpressServerUtils.getRemoteName(server.createWorkingCopy());
 		try {
 			return EGitUtils.push(
 					remoteName, repository, subMonitor,
