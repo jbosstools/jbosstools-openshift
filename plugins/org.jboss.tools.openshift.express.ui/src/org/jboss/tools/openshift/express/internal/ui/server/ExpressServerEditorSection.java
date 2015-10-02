@@ -50,19 +50,19 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.eclipse.wst.server.ui.internal.editor.ServerEditorPartInput;
 import org.jboss.ide.eclipse.as.ui.UIUtil;
-import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyButtonCommand;
 import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyComboCommand;
-import org.jboss.ide.eclipse.as.ui.editor.ServerWorkingCopyPropertyCommand;
+import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyButtonCommand;
+import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 
 /**
  * @author Rob Stryker
  */
-public class OpenShiftServerEditorSection extends ServerEditorSection {
+public class ExpressServerEditorSection extends ServerEditorSection {
 	private static final String DEFAULT_HOST_MARKER = " (default)";
 
 	private IEditorInput input;
@@ -104,28 +104,28 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	protected void initWidgets() {
 		// Set the widgets
 		deployProjectCombo.setEnabled(true);
-		ConnectionURL connectionUrl = OpenShiftServerUtils.getConnectionUrl(server);
+		ConnectionURL connectionUrl = ExpressServerUtils.getConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
-		String domainName = OpenShiftServerUtils.getDomainName(server);
+		String domainName = ExpressServerUtils.getDomainName(server);
 		domainNameText.setText(StringUtils.null2emptyString(domainName));
-		String appName = OpenShiftServerUtils.getApplicationName(server);
+		String appName = ExpressServerUtils.getApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
 		connectionText.setEnabled(false);
 		domainNameText.setEnabled(false);
 		appNameText.setEnabled(false);
 
-		deployFolderText.setText(StringUtils.null2emptyString(OpenShiftServerUtils.getDeployFolder(server)));
-		String remote = OpenShiftServerUtils.getRemoteName(server);
+		deployFolderText.setText(StringUtils.null2emptyString(ExpressServerUtils.getDeployFolder(server)));
+		String remote = ExpressServerUtils.getRemoteName(server);
 		remoteText.setText(StringUtils.null2emptyString(remote));
 
 		deployProjectCombo.setItems(getSuitableProjects());
 		int index = getProjectIndex(
-				OpenShiftServerUtils.getDeployProjectName(server), Arrays.asList(deployProjectCombo.getItems()));
+				ExpressServerUtils.getDeployProjectName(server), Arrays.asList(deployProjectCombo.getItems()));
 		if (index > -1) {
 			deployProjectCombo.select(index);
 		}
 
-		boolean overrides = OpenShiftServerUtils.getOverridesProject(server);
+		boolean overrides = ExpressServerUtils.isOverridesProject(server);
 		overrideProjectSettings.setSelection(overrides);
 		remoteText.setEnabled(overrides);
 		deployFolderText.setEnabled(overrides);
@@ -154,7 +154,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private String[] getSuitableProjects() {
-		IProject[] allProjects = OpenShiftServerUtils.findAllSuitableOpenshiftProjects();
+		IProject[] allProjects = ExpressServerUtils.getAllOpenshiftProjects();
 		String[] allProjectNames = new String[allProjects.length];
 		for (int i = 0; i < allProjects.length; i++) {
 			allProjectNames[i] = allProjects[i].getName();
@@ -187,9 +187,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
 
-		Label userLabel = toolkit
+		// connection
+		Label connectionLabel = toolkit
 				.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionConnectionLabel, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(userLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
 		connectionText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionText);
 
@@ -278,7 +279,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private IFolder chooseFolder() {
-		String depProject = OpenShiftServerUtils.getDeployProjectName(server);
+		String depProject = ExpressServerUtils.getDeployProjectName(server);
 
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(depProject);
 
@@ -291,7 +292,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
 		IResource res = p.findMember(new Path(
-				StringUtils.null2emptyString(OpenShiftServerUtils.getDeployFolder(server))));
+				StringUtils.null2emptyString(ExpressServerUtils.getDeployFolder(server))));
 		if (res != null)
 			dialog.setInitialSelection(res);
 
@@ -303,15 +304,15 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	public class SetRemoteCommand extends ServerWorkingCopyPropertyCommand {
 		public SetRemoteCommand(IServerWorkingCopy server) {
 			super(server, "Change Remote Name", remoteText, remoteText.getText(),
-					OpenShiftServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener,
-					OpenShiftServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
+					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME, remoteModifyListener,
+					ExpressServerUtils.ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		}
 	}
 
 	public class SetProjectCommand extends ServerWorkingCopyPropertyComboCommand {
 		public SetProjectCommand(IServerWorkingCopy wc, String newVal) {
 			super(wc, "Change OpenShift Project", deployProjectCombo, newVal,
-					OpenShiftServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
+					ExpressServerUtils.ATTRIBUTE_DEPLOY_PROJECT, deployProjectListener);
 		}
 
 		@Override
@@ -323,8 +324,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	public class SetDeployFolderCommand extends ServerWorkingCopyPropertyCommand {
 		public SetDeployFolderCommand(IServerWorkingCopy server) {
 			super(server, "Change Deployment Folder", deployFolderText, deployFolderText.getText(),
-					OpenShiftServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener,
-					OpenShiftServerUtils.getDefaultDeployFolder(server));
+					ExpressServerUtils.ATTRIBUTE_DEPLOY_FOLDER_NAME, deployDestinationModifyListener,
+					ExpressServerUtils.getDefaultDeployFolder(server));
 		}
 	}
 
@@ -332,7 +333,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		public SetOverrideCommand(IServerWorkingCopy wc) {
 			super(wc, "Override OpenShift Project Settings Command",
 					overrideProjectSettings, overrideProjectSettings.getSelection(),
-					OpenShiftServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
+					ExpressServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
 		}
 
 		@Override
@@ -342,18 +343,18 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private void updateWidgetsFromWorkingCopy() {
-		ConnectionURL connectionUrl = OpenShiftServerUtils.getConnectionUrl(server);
+		ConnectionURL connectionUrl = ExpressServerUtils.getConnectionUrl(server);
 		connectionText.setText(createConnectionLabel(connectionUrl));
-		String appName = OpenShiftServerUtils.getApplicationName(server);
+		String appName = ExpressServerUtils.getApplicationName(server);
 		appNameText.setText(StringUtils.null2emptyString(appName));
-		String domainName = OpenShiftServerUtils.getDomainName(server);
+		String domainName = ExpressServerUtils.getDomainName(server);
 		domainNameText.setText(StringUtils.null2emptyString(domainName));
 
 		browseDestButton.setEnabled(overrideProjectSettings.getSelection());
 		deployFolderText.setEnabled(overrideProjectSettings.getSelection());
 		remoteText.setEnabled(overrideProjectSettings.getSelection());
-		String remote = OpenShiftServerUtils.getRemoteName(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
-		String depFolder = OpenShiftServerUtils.getDeployFolder(server, OpenShiftServerUtils.SETTING_FROM_PROJECT);
+		String remote = ExpressServerUtils.getRemoteName(server, ExpressServerUtils.SETTING_FROM_PROJECT);
+		String depFolder = ExpressServerUtils.getDeployFolder(server, ExpressServerUtils.SETTING_FROM_PROJECT);
 
 		remoteText.removeModifyListener(remoteModifyListener);
 		deployFolderText.removeModifyListener(deployDestinationModifyListener);

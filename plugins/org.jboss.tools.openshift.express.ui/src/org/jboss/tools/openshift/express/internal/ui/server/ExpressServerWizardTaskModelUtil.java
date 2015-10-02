@@ -12,12 +12,16 @@ package org.jboss.tools.openshift.express.internal.ui.server;
 
 import org.eclipse.wst.server.core.TaskModel;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 
 import com.openshift.client.IApplication;
 import com.openshift.client.IDomain;
 
-public class BehaviorTaskModelUtil {
+/**
+ * @author Rob Stryker
+ */
+public class ExpressServerWizardTaskModelUtil {
 	/* For use inside express wizard fragment */
 	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
 	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";
@@ -29,7 +33,11 @@ public class BehaviorTaskModelUtil {
 	}
 
 	public static ExpressConnection getConnection(IServerModeUICallback callback) {
-		return (ExpressConnection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
+		ExpressConnection connection = (ExpressConnection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
+		if (connection == null) {
+			connection = ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class);
+		}
+		return connection;
 	}
 
 	public static void put(IDomain domain, TaskModel taskModel) {

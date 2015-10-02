@@ -50,8 +50,65 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	
 	public enum OCBinaryName {
 
-		WINDOWS("oc.exe", new String[] { "exe" }),
-		OTHER("oc", new String[] {});
+		WINDOWS("oc.exe", new String[] { "exe" }) {
+			public String getLocation() {
+				String location = null;
+				String[] paths = StringUtils.split(System.getenv("PATH"), ";");
+				for (String path : paths) {
+					Collection<File> files = FileUtils.listFiles(new File(path), new IOFileFilter() {
+
+						@Override
+						public boolean accept(File file) {
+							return getName().equals(file.getName());
+						}
+
+						@Override
+						public boolean accept(File dir, String name) {
+							return getName().equals(name);
+						}
+						
+					}, null);
+					if(files.size() > 0) {
+						location = files.iterator().next().toString();
+						break;
+					}
+				}
+				return StringUtils.trim(location);
+			}	
+		},
+		OTHER("oc", new String[] {}) {
+
+			@Override
+			public String getLocation() {
+				String location = null;
+				String path = ThreadUtils.runWithTimeout(WHICH_CMD_TIMEOUT, new Callable<String>() {
+					@Override
+					public String call() throws Exception {
+						Process process = null;
+						try {
+							process = new ProcessBuilder("which", getName()).start();
+							process.waitFor();
+							if(process.exitValue() == WHICH_CMD_SUCCESS) {
+								return IOUtils.toString(process.getInputStream());
+							};
+						} catch (IOException e) {
+							OpenShiftUIActivator.getDefault().getLogger().logError("Could not run 'which' command", e);
+						} finally {
+							if (process != null) {
+								process.destroy();
+							}
+						}
+						return null;
+					}
+				});
+
+				if (!StringUtils.isEmpty(path)) {
+					location = path;
+				}
+
+				return StringUtils.trim(location);
+			}
+		};
 
 		private String name;
 		private String[] extensions;
@@ -69,6 +126,8 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 			return extensions;
 		};
 
+		public abstract String getLocation();
+		
 		public static OCBinaryName getInstance() {
 			if (SystemUtils.IS_OS_WINDOWS) {
 				return WINDOWS;
@@ -127,7 +186,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	
 	@Override
 	protected void performDefaults() {
-		String location = findOCLocation();
+		String location = ocBinary.getLocation();
 		if(StringUtils.isBlank(location)) {
 			String message = NLS.bind("Could not find the OpenShift Client binary \"{0}\" on your path.", ocBinary.getName());
 			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
@@ -165,56 +224,4 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		}
 		return true;
 	}
-	
-	private String findOCLocation() {
-		String location = null;
-		if(SystemUtils.IS_OS_WINDOWS) {
-			String[] paths = StringUtils.split(System.getenv("PATH"), ";");
-			for (String path : paths) {
-				Collection<File> files = FileUtils.listFiles(new File(path), new IOFileFilter() {
-
-					@Override
-					public boolean accept(File file) {
-						return ocBinary.getName().equals(file.getName());
-					}
-
-					@Override
-					public boolean accept(File dir, String name) {
-						return ocBinary.getName().equals(name);
-					}
-					
-				}, null);
-				if(files.size() > 0) {
-					location = files.iterator().next().toString();
-					break;
-				}
-			}
-		}else {
-			String path = ThreadUtils.runWithTimeout(WHICH_CMD_TIMEOUT, new Callable<String>() {
-				@Override
-				public String call() throws Exception {
-					Process process = null;
-					try {
-						process = new ProcessBuilder("which", ocBinary.getName()).start();
-						process.waitFor();
-						if(process.exitValue() == WHICH_CMD_SUCCESS) {
-							return IOUtils.toString(process.getInputStream());
-						};
-					} catch (IOException e) {
-						OpenShiftUIActivator.getDefault().getLogger().logError("Could not run 'which' command", e);
-					} finally {
-						if (process != null) {
-							process.destroy();
-						}
-					}
-					return null;
-				}
-			});
-
-			if (!StringUtils.isEmpty(path)) {
-				location = path;
-			}
-		}
-		return StringUtils.trim(location);
-	}	
 }

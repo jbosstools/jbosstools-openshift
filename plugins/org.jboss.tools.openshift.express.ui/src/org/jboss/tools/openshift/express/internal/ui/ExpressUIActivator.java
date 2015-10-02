@@ -128,7 +128,7 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 		}
 		return null;
 	}
-	
+
     public IPreferenceStore getCorePreferenceStore() {
         // Create the preference store lazily.
         if (corePreferenceStore == null) {

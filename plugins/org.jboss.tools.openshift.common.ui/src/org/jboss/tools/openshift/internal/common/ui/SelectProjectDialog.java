@@ -20,7 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.internal.SharedImages;
+import org.eclipse.ui.ide.IDE.SharedImages;
 
 /**
  * @author André Dietisheim

@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2013 Red Hat, Inc. 
+ * Copyright (c) 2015 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.core.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,7 +23,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 public class ProjectUtils {
 
 	private static final String RSE_INTERNAL_PROJECTS = "RemoteSystems";
-
+	private static final String EXTERNAL_PLUGIN_LIBRARIES = "External Plug-in Libraries"; // "External Plug-in Libraries" 
+	
 	public static boolean exists(IProject project) {
 		return project != null
 				&& project.exists();
@@ -47,13 +48,37 @@ public class ProjectUtils {
 				&& project.isAccessible();
 	}
 
-	public static String[] getAllOpenedProjects() {
+	public static List<IProject> getAllAccessibleProjects(boolean excludeInternalProjects) {
 		return Arrays.stream(ResourcesPlugin.getWorkspace().getRoot().getProjects())
-					 .filter(IProject::isAccessible)
-					 .map(IProject::getName)
-					 .toArray(size -> new String[size]);
+					 .filter((IProject project) -> { 
+							if (isAccessible(project)) {
+								if (!excludeInternalProjects 
+										|| !(isInternalRSE(project.getName())
+												|| isInternalPde(project.getName()))) {
+									return true;
+								}
+							}
+							return false;
+						 }
+					 )
+					 .collect(Collectors.toList());
 	}
 
+	public static String[] getAllAccessibleProjectNames() {
+		return getAllAccessibleProjectNames(true);
+	}
+
+	public static String[] getAllAccessibleProjectNames(boolean excludeInternalProjects) {
+		return getAllAccessibleProjects(excludeInternalProjects)
+				.stream()
+				.map(IProject::getName)
+				.toArray(String[]::new);
+	}
+
+	public static List<IProject> getAllAccessibleProjects() {
+		return getAllAccessibleProjects(true);
+	}
+	
 	/**
 	 * Returns <code>true</code> if the given project name matches the name used
 	 * for internal rse projects.
@@ -66,4 +91,23 @@ public class ProjectUtils {
 				&& projectName.startsWith(RSE_INTERNAL_PROJECTS);
 	}
 
+	/**
+	 * Returns <code>true</code> if the given project name matches the name used
+	 * for the pde "External Plug-in Libraries" project.
+	 * 
+	 * @param projectName
+	 * @return
+	 */
+	public static boolean isInternalPde(String projectName) {
+		return projectName != null
+				&& projectName.startsWith(EXTERNAL_PLUGIN_LIBRARIES);
+	}
+
+	public static String getName(IProject project) {
+		if (isAccessible(project)) {
+			return project.getName();
+		} else {
+			return null;
+		}
+	}
 }

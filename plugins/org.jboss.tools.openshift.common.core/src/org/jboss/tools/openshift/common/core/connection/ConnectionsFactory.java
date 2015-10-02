@@ -98,4 +98,8 @@ public class ConnectionsFactory implements IConnectionsFactory {
 		return new ArrayList<IConnectionFactory>(connectionFactories);
 	}
 
+	@Override
+	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz) {
+		return new ArrayList<IConnectionFactory>(connectionFactories);
+	}
 }

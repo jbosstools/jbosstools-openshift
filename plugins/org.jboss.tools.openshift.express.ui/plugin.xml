@@ -7,15 +7,7 @@
 			class="org.jboss.tools.openshift.express.internal.ui.server.EGitUI">
 		</egitui>
 	</extension>
-	
-	<extension
-		point="org.eclipse.wst.server.ui.serverImages">
-		<image
-			icon="$nl$/icons/openshift-logo-white-icon.png"
-			typeIds="org.jboss.tools.openshift.express.openshift.server.type,org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
-			id="org.jboss.ide.eclipse.as.ui.jbossIcon"/>
-	</extension>
-    
+
 	<!-- servers view context menu: OpenShift submenu-->
 	<extension
 		point="org.eclipse.ui.menus">
@@ -54,25 +46,37 @@
 		</menuContribution>
 	</extension>	
 
+ 	<!-- OpenShift 2 server adapter icon -->
+	<extension
+		point="org.eclipse.wst.server.ui.serverImages">
+		<image
+			icon="icons/openshift-logo-white-icon.png"
+			typeIds="org.jboss.tools.openshift.express.openshift.server.type,org.jboss.tools.openshift.express.internal.OpenShiftRuntime"
+			id="org.jboss.tools.openshift.express.server.icon"/>
+	</extension>
+
+	<!-- OpenShift 2 server editor -->
 	<extension
 		point="org.eclipse.wst.server.ui.editorPageSections">
 		<section
-			class="org.jboss.tools.openshift.express.internal.ui.server.OpenShiftServerEditorSection"
+			class="org.jboss.tools.openshift.express.internal.ui.server.ExpressServerEditorSection"
 			id="org.jboss.tools.openshift.express.ui.behaviour.details.section"
 			insertionId="org.eclipse.wst.server.editor.overview.left"
 			order="10"
 			typeIds="org.jboss.tools.openshift.express.openshift.server.type">
 		</section>
 	</extension>
+
+	<!-- OpenShift 2 server wizard -->
 	<extension
 			point="org.eclipse.wst.server.ui.wizardFragments">
 		<fragment
-			class="org.jboss.tools.openshift.express.internal.ui.server.OpenShiftServerWizardFragment"
+			class="org.jboss.tools.openshift.express.internal.ui.server.ExpressServerWizardFragment"
 			id="org.jboss.tools.openshift.express.ui.server.fragment"
 			typeIds="org.jboss.tools.openshift.express.openshift.server.type">
 		</fragment>
 	</extension>
-    
+
 	<!-- openshift tail files console -->
     <extension
           point="org.eclipse.ui.console.consolePageParticipants">
@@ -843,47 +847,48 @@
               class="org.jboss.tools.openshift.express.internal.ui.command.EditCartridgesHandler">
     	</handler>
 	</extension>
-     <extension
-           point="org.eclipse.ui.menus">
+	<extension
+		point="org.eclipse.ui.menus">
 		<!-- openshift explorer: edit embedded cartridges -->
-        <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
-          <command
-                commandId="org.jboss.tools.openshift.express.ui.command.editcartridges"
-                icon="icons/cartridges-edit.gif"
-                id="org.jboss.tools.openshift.express.ui.command.editcartridges"
-                mnemonic="C">
-           <visibleWhen>
-             <with
-                   variable="selection">
-				<or>
-					<and>
-		                <count
-							value="1">
-		                </count>
-		                <iterate
-							ifEmpty="false"
-							operator="and">
-							<instanceof
-								value="com.openshift.client.IApplication" />
-		                </iterate>
-		            </and>
-					<and>
-		                <count
-							value="+">
-		                </count>
-		                <iterate
-							ifEmpty="false"
-							operator="and">
-							<instanceof
-								value="com.openshift.client.cartridge.IEmbeddedCartridge" />
-						</iterate>
-					</and>
-                </or>
-             </with>
-           </visibleWhen>
-          </command>
-        </menuContribution>
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.express.ui.command.editcartridges"
+				icon="icons/cartridges-edit.gif"
+				id="org.jboss.tools.openshift.express.ui.command.editcartridges"
+				mnemonic="C">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<or>
+							<and>
+								<count
+									value="1">
+								</count>
+								<iterate
+									ifEmpty="false"
+									operator="and">
+									<instanceof
+										value="com.openshift.client.IApplication" />
+								</iterate>
+							</and>
+							<and>
+								<count
+									value="+">
+								</count>
+								<iterate
+									ifEmpty="false"
+									operator="and">
+									<instanceof
+										value="com.openshift.client.cartridge.IEmbeddedCartridge" />
+									</iterate>
+							</and>
+						</or>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+
 		<!-- servers view: edit embedded cartridges -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.modify">

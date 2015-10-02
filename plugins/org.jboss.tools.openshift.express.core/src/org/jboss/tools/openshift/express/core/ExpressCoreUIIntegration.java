@@ -87,10 +87,12 @@ public class ExpressCoreUIIntegration {
 		return egitUI;
 	}
 
+	// TODO: replace by ExtensionUtils
 	private IConfigurationElement[] getExtension(String name) {
 		return Platform.getExtensionRegistry().getConfigurationElementsFor(name);
 	}
 
+	// TODO: replace by ExtensionUtils
 	@SuppressWarnings("unchecked")
 	private <T> T getConfigurationElement(IConfigurationElement[] configurations) throws CoreException {
 		T element = null;

@@ -17,11 +17,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.ConnectionNotFoundException;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizard;
-
-import com.openshift.restclient.model.IProject;
 
 /**
  * Handler to trigger the New Application workflow
@@ -29,7 +26,7 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  * @author Andre Dietisheim
  */
-public class NewApplicationHandler extends AbstractHandler{
+public class NewApplicationHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {

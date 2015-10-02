@@ -18,7 +18,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.LoadApplicationJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -46,7 +46,7 @@ public abstract class AbstractApplicationHandler extends AbstractHandler {
 	}
 
 	protected IStatus execute(IServer server, Shell shell) {
-		String applicationName = OpenShiftServerUtils.getApplicationName(server);
+		String applicationName = ExpressServerUtils.getApplicationName(server);
 		if (StringUtils.isEmpty(applicationName)) {
 			return ExpressUIActivator.createCancelStatus(NLS.bind(
 					"Could not {0} application: application for server adapter {1} not found.",

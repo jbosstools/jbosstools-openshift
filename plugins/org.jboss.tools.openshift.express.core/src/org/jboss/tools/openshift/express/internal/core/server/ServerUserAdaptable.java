@@ -21,7 +21,8 @@ import org.eclipse.core.runtime.IAdaptable;
 public class ServerUserAdaptable implements IAdaptable {
 
 	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+	@SuppressWarnings(value = { "unchecked", "rawtypes" })
+	public Object getAdapter(Class adapter) {
 		if (String.class.equals(adapter)) {
 			return "user";
 		}

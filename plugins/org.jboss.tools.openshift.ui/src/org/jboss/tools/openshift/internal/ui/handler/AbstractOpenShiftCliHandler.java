@@ -28,8 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.ui.preferences.OpenShiftPreferencePage.OCBinaryName;
 
 import com.openshift.restclient.capability.resources.IPortForwardable;
@@ -46,7 +45,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		//check binary locations
-		final String location = OpenShiftUIActivator.getDefault().getCorePreferenceStore().getString(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC);
+		final String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
 		if(StringUtils.isBlank(location)) {
 			
 			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),

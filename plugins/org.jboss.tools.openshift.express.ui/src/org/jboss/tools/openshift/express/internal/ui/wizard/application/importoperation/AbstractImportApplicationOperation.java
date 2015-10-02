@@ -39,7 +39,7 @@ import org.jboss.tools.openshift.egit.core.GitIgnore;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.marker.IOpenShiftMarker;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 import org.jboss.tools.openshift.express.internal.core.util.DeployFolder;
 import org.jboss.tools.openshift.express.internal.ui.ExpressException;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
@@ -279,8 +279,8 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		// This is our project
 		IApplication app = getApplication();
 		// Add the settings here!
-		OpenShiftServerUtils.updateOpenshiftProjectSettings(
-				project, app, app.getDomain(), getUser(), getRemoteName(), OpenShiftServerUtils.getDefaultDeployFolder(app));
+		ExpressServerUtils.updateOpenshiftProjectSettings(
+				project, app, app.getDomain(), getUser(), getRemoteName(), ExpressServerUtils.getDefaultDeployFolder(app));
 		return (IResource) project.getFolder(".settings");
 	}
 

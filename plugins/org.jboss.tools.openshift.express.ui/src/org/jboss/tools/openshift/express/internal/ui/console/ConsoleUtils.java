@@ -26,7 +26,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.express.core.IConsoleUtility;
-import org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils;
 
 import com.openshift.client.IApplication;
 
@@ -181,7 +181,7 @@ public class ConsoleUtils implements IConsoleUtility {
 
 	
 	public static void appendToConsole(IServer server, String message ) {
-		if (OpenShiftServerUtils.isOpenShiftRuntime(server)) {
+		if (ExpressServerUtils.isExpressRuntime(server)) {
 			final MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
 			MessageConsoleStream newMessageStream = console.newMessageStream();
 			newMessageStream.print(message);

@@ -35,11 +35,9 @@ public class SelectExistingProjectDialog extends SelectProjectDialog {
 	StringPreferenceValue showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftCommonUIActivator.PLUGIN_ID);
 	private boolean showAll;
 	
-	public SelectExistingProjectDialog(String openShiftAppName, Shell shell) {
+	public SelectExistingProjectDialog(String message, Shell shell) {
 		super(shell);
-		setMessage(NLS.bind(
-				"Select an existing project for {0}.\nOnly non-shared projects or Git projects allowed.",
-				openShiftAppName));
+		setMessage(NLS.bind("{0}.\nOnly non-shared projects or Git projects allowed.", message));
 		this.showAll = getShowAllPreferences();
 	}
 

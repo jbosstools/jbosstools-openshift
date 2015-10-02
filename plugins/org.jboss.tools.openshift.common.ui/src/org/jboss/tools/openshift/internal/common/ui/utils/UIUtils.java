@@ -23,6 +23,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -317,4 +318,11 @@ public class UIUtils {
 		control.getParent().layout();
 	}
 
+	public static <T> ISelection createSelection(T selectedObject) {
+		ISelection selection = new StructuredSelection();
+		if (selectedObject != null) {
+			selection = new StructuredSelection(selectedObject);
+		}
+		return selection;
+	}
 }

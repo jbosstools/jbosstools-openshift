@@ -463,6 +463,37 @@ public class EGitUtils {
 		}
 		return uris;
 	}
+	
+	/**
+	 * Returns <code>true</code> if the given project has a given remote that
+	 * matches the given git uri. If the given remote is null or empty, all
+	 * remotes are examined. Returns <code>false</code> otherwise.
+	 * 
+	 * @param gitURI
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 */
+	public static boolean hasGitUri(String gitURI, String remote, IProject project) throws CoreException {
+		Pattern gitURIPattern = Pattern.compile(escapeRegex(gitURI));
+		Repository repository = EGitUtils.getRepository(project);
+		if (!StringUtils.isEmptyOrNull(remote)) {
+			return hasRemoteUrl(gitURIPattern, getRemoteByName(remote, repository));
+		} else {
+			return hasRemoteUrl(gitURIPattern, repository);
+		}
+	}
+
+	public static String escapeRegex(String value) {
+		StringBuilder builder = new StringBuilder();
+		for(char character : value.toCharArray()) {
+			if ('/' == character) {
+				builder.append('\\');
+			} 
+			builder.append(character);
+		}
+		return builder.toString();
+	}
 
 	public static List<URIish> getDefaultRemoteURIs(IProject project)
 			throws CoreException {
