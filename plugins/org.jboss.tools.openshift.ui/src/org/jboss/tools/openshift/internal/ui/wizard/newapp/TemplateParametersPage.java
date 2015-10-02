@@ -12,6 +12,9 @@ import java.util.Iterator;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IListChangeListener;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.map.ObservableMap;
 import org.eclipse.core.databinding.observable.map.WritableMap;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -85,7 +88,9 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		
 		// parameters table
 		Composite tableContainer = new Composite(container, SWT.NONE);
-		this.viewer = createTable(tableContainer, dbc);
+		IObservableList parametersObservable = 
+				BeanProperties.list(ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model);
+		this.viewer = createTable(tableContainer, parametersObservable, dbc);
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
 		IObservableValue selectedParameter = 
@@ -93,8 +98,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
 				.to(selectedParameter)
 				.in(dbc);
-		viewer.setInput(BeanProperties.list(
-				ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model));
+		viewer.setInput(parametersObservable);
 		viewer.addDoubleClickListener(onDoubleClick());
 
 		// edit button
@@ -134,6 +138,18 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 
 	}
 
+	private IListChangeListener onParametersChanged(final TableViewerCellDecorationManager cellDecorations, final ObservableMap validationStatusByParameter) {
+		return new IListChangeListener() {
+
+			@Override
+			public void handleListChange(ListChangeEvent event) {
+				// new list of parameters, clear current validation status
+				validationStatusByParameter.clear();
+				cellDecorations.hideAll();
+			}
+		};
+	}
+
 	private IDoubleClickListener onDoubleClick() {
 		return new IDoubleClickListener() {
 			@Override
@@ -145,7 +161,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 	
-	public TableViewer createTable(final Composite tableContainer, DataBindingContext dbc) {
+	public TableViewer createTable(final Composite tableContainer, IObservableList parametersObservable, DataBindingContext dbc) {
 		final Table table =
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
@@ -153,6 +169,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		Image decorationImage = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
 		final ObservableMap cellsValidationStatusObservable = new WritableMap(String.class, IStatus.class);
 		final TableViewerCellDecorationManager decorations = new TableViewerCellDecorationManager(decorationImage, table);
+		parametersObservable.addListChangeListener(onParametersChanged(decorations, cellsValidationStatusObservable));
 		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
 				.contentProvider(new ArrayContentProvider())
 				.column(new CellLabelProvider() {
@@ -202,18 +219,15 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 
 								IStatus validationStatus = validate(parameter);
 								cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
-								if(validationStatus.isOK()) {
-									decorations.hide(cell);
-								} else {
-									decorations.show(cell);
-								}
+								decorations.toggle(!validationStatus.isOK(), cell);
 							}
 
 							private IStatus validate(IParameter parameter) {
 								if (parameter.isRequired()) {
 									if (StringUtils.isEmpty(parameter.getValue())
 											&& StringUtils.isEmpty(parameter.getGeneratorName())) {
-										return ValidationStatus.error(NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
+										return ValidationStatus.error(
+												NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
 									};
 								} 
 								return ValidationStatus.ok();
@@ -245,7 +259,6 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			
 			@Override
-			@SuppressWarnings("unchecked")
 			protected IStatus validate() {
 				for (Iterator<IStatus> iterator = 
 						(Iterator<IStatus>) cellsValidationStatusObservable.values().iterator(); iterator.hasNext(); ) {
