@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ViewerCell;
@@ -45,6 +46,14 @@ public class TableViewerCellDecorationManager {
 		this.table = table;
 	}
 
+	public void toggle(boolean show, ViewerCell cell) {
+		if (show) {
+			show(cell);
+		} else {
+			hide(cell);
+		}
+	}
+	
 	public void show(ViewerCell cell) {
 		TableEditor editor = decorationByCell.get(cell);
 		if (editor == null) {
@@ -58,17 +67,28 @@ public class TableViewerCellDecorationManager {
 	public void hide(ViewerCell cell) {
 		TableEditor editor = decorationByCell.get(cell);
 		if (editor != null) {
-			Control decoration = editor.getEditor();
-			if (decoration != null) {
-				decoration.setVisible(false);
-				decoration.dispose();
-			}
-			editor.setEditor(null);
-			editor.dispose();
+			hide(editor);
 			decorationByCell.remove(cell);
 		}
 	}
 
+	private void hide(TableEditor editor) {
+		Control decoration = editor.getEditor();
+		if (decoration != null) {
+			decoration.setVisible(false);
+			decoration.dispose();
+		}
+		editor.setEditor(null);
+		editor.dispose();
+	}
+
+	public void hideAll() {
+		for (TableEditor decoration : decorationByCell.values()) {
+			hide(decoration);
+		}
+		decorationByCell.clear();
+	}
+	
 	private Control createDecoration(Image image, Table table) {
 		Label validationDecoration = new Label(table, SWT.None);
 		validationDecoration.setImage(image);
