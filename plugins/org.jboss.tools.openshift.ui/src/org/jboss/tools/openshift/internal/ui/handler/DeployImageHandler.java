@@ -19,6 +19,7 @@ import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
@@ -41,14 +42,17 @@ public class DeployImageHandler extends AbstractHandler {
 			model.setOriginatedFromDockerExplorer(true);
 			model.setDockerConnection(dockerConnection);
 			model.setImage(image.repo());
-		}
-		final IProject project = UIUtils.getFirstElement(selection, IProject.class);
-		if(project != null) {
-			model.setProject(project);
-		}
-		final Connection osConnection = UIUtils.getFirstElement(selection, Connection.class);
-		if(osConnection != null){
-			model.setConnection(osConnection);
+		}else{
+			final IProject project = UIUtils.getFirstElement(selection, IProject.class);
+			if(project != null) {
+				model.setProject(project);
+				model.setConnection(ConnectionsRegistryUtil.getConnectionFor(project));
+			}else {
+				final Connection osConnection = UIUtils.getFirstElement(selection, Connection.class);
+				if(osConnection != null){
+					model.setConnection(osConnection);
+				}
+			}
 		}
 
 		
