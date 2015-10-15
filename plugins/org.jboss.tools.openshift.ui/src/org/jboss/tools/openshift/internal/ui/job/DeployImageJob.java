@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,6 +29,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeployImageParameters;
 
@@ -145,10 +147,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.setReplicas(parameters.getReplicas());
 		dc.setReplicaSelector(SELECTOR_KEY, name);
 		
-		Map<String, String> envs = new HashMap<>();
-		for (IKeyValueItem label : parameters.getEnvironmentVariables()) {
-			envs.put(label.getKey(), label.getValue());
-		}
+		Map<String, String> envs = getModifiedEnvVars(parameters.getEnvironmentVariables(), parameters.getImageEnvVars());
 		dc.addContainer(dc.getName(), imageUri, new HashSet<IPort>(parameters.getPortSpecs()), envs, parameters.getVolumes());
 		
 		dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
@@ -157,6 +156,17 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		imageChangeTrigger.setContainerName(imageUri.getName());
 		imageChangeTrigger.setFrom(new DockerImageURI(imageUri.getNameAndTag()));
 		return dc;
+	}
+	
+	private Map<String, String> getModifiedEnvVars(Collection<EnvironmentVariable> envVars, Map<String, String> dockerEnvVars){
+		Map<String, String> envs = new HashMap<>();
+		for (EnvironmentVariable var : parameters.getEnvironmentVariables()) {
+			//will return null if new
+			if(!StringUtils.defaultIfEmpty(dockerEnvVars.get(var.getKey()),"").equals(var.getValue())){
+				envs.put(var.getKey(), var.getValue());
+			}
+		}
+		return envs;
 	}
 
 	private IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
