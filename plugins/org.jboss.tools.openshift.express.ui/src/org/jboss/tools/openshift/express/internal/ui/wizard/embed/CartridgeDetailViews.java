@@ -99,7 +99,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			ICartridge embeddableCartridge = (ICartridge) value;
 			String name = ExpressResourceLabelUtils.toString(embeddableCartridge);
 			this.nameLabel.setText(name);
-			this.nameLabel.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
+			this.nameLabel.setStyleRange(StyledTextUtils.createBoldStyle(name, null));
 
 			this.description.setText(embeddableCartridge.getDescription());
 		}
@@ -148,7 +148,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			ICartridge cartridge = (ICartridge) value;
 			String cartridgeLabel = ExpressResourceLabelUtils.toString(cartridge);
 			this.name.setText(cartridgeLabel);
-			this.name.setStyleRange(StyledTextUtils.createBoldStyleRange(cartridgeLabel, null));
+			this.name.setStyleRange(StyledTextUtils.createBoldStyle(cartridgeLabel, null));
 			if (cartridge.getUrl() != null) {
 				this.url.setText(cartridge.getUrl().toString());
 			}
@@ -214,7 +214,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			CodeAnythingCartridge cartridge = (CodeAnythingCartridge) value;
 			String name = cartridge.getDisplayName();
 			this.name.setText(name);
-			this.name.setStyleRange(StyledTextUtils.createBoldStyleRange(name, null));
+			this.name.setStyleRange(StyledTextUtils.createBoldStyle(name, null));
 			this.description.setText(cartridge.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(100, urlText);

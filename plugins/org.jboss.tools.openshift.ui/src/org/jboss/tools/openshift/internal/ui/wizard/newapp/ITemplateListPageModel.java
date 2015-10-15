@@ -29,10 +29,11 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	
 	static final String PROPERTY_PROJECT = "project";
 	static final String PROPERTY_PROJECT_ITEMS = "projectItems";
-	static final String PROPERTY_TEMPLATE = "template";
+	static final String PROPERTY_SELECTED_TEMPLATE = "selectedTemplate";
 	static final String PROPERTY_TEMPLATES = "templates";
-	static final String PROPERTY_TEMPLATE_FILENAME = "templateFileName";
-	static final String PROPERTY_USE_UPLOAD_TEMPLATE = "useUploadTemplate";
+	static final String PROPERTY_SERVER_TEMPLATE = "serverTemplate";
+	static final String PROPERTY_LOCAL_TEMPLATE_FILENAME = "localTemplateFileName";
+	static final String PROPERTY_USE_LOCAL_TEMPLATE = "useLocalTemplate";
 	
 	/**
 	 * Loads the resources for the given connection (in this model) from the server. Should be
@@ -45,43 +46,50 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	 *
 	 * @param template
 	 */
-	void setTemplate(ITemplate template);
+	void setServerTemplate(ITemplate template);
 	
 	/**
-	 * Returns the selected template
+	 * Returns the selected server template
 	 *
 	 * @return
 	 */
-	ITemplate getTemplate();
+	ITemplate getServerTemplate();
 	
 	/**
-	 * Sets this model to upload templates if <code>true</code> is given. 
-	 * Will use server provided templates otherwise.
+	 * Returns the selected server template
+	 *
+	 * @return
+	 */
+	ITemplate getSelectedTemplate();
+
+	/**
+	 * Sets this model to use a local template if <code>true</code> is given. 
+	 * Will use server provided template otherwise.
 	 *
 	 * @param uploadTemplate
 	 */
-	void setUseUploadTemplate(boolean uploadTemplate);
+	void setUseLocalTemplate(boolean uploadTemplate);
 	
 	/**
-	 * Returns <code>true</code> if this model is set to upload local templates.
+	 * Returns <code>true</code> if this model is set use a local template and upload it.
 	 *
 	 * @return
 	 */
-	boolean isUseUploadTemplate();
+	boolean isUseLocalTemplate();
 	
 	/**
 	 * Sets the name of the local template that will be uploaded to the server.
 	 *
 	 * @param name
 	 */
-	void setTemplateFileName(String name);
+	void setLocalTemplateFileName(String name);
 	
 	/**
-	 * Returns the name of the template that will be uploaded to the server.
+	 * Returns the name of the local template that will be uploaded to the server.
 	 *
 	 * @return
 	 */
-	String getTemplateFileName();
+	String getLocalTemplateFileName();
 	
 	void setProject(IProject project);
 

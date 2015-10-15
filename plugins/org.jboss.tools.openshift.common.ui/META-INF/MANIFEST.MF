@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.common.ui;singleton:=true
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator
 Require-Bundle: org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",

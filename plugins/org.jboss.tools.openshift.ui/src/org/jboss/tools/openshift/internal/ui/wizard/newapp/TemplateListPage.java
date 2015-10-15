@@ -18,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.SelectObservableValue;
@@ -73,6 +72,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
@@ -90,6 +90,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCe
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.UnsupportedVersionException;
 import com.openshift.restclient.model.IProject;
@@ -126,11 +127,11 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		ValueBindingBuilder
 			.bind(uploadTemplate)
 			.to(BeanProperties.value(
-					ITemplateListPageModel.PROPERTY_USE_UPLOAD_TEMPLATE).observe(model))
+					ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model))
 			.in(dbc);
 		createUploadControls(parent, uploadTemplate, dbc);
 		createServerTemplateControls(parent, uploadTemplate, dbc);
-		model.setUseUploadTemplate(false);
+		model.setUseLocalTemplate(false);
 	}
 
 	private void createProjectControls(Composite parent, DataBindingContext dbc) {
@@ -174,10 +175,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		BeanProperties.value(ITemplateListPageModel.PROPERTY_CONNECTION).observe(model)
 				.addValueChangeListener(onConnectionChanged());
 
-		StyledText manageProjectsLink = new StyledText(parent, SWT.WRAP);
-		StyledTextUtils.setTransparent(manageProjectsLink);
-		StyledTextUtils.setLinkText("<a>Manage Projects</a>", manageProjectsLink);
-		manageProjectsLink.setEditable(false);
+		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
 			.applyTo(manageProjectsLink);
@@ -250,7 +248,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		ValueBindingBuilder
 				.bind(uploadedFilenameTextObservable)
 				.to(BeanProperties.value(
-						ITemplateListPageModel.PROPERTY_TEMPLATE_FILENAME).observe(model))
+						ITemplateListPageModel.PROPERTY_LOCAL_TEMPLATE_FILENAME).observe(model))
 				.in(dbc);
 
 		// browse button
@@ -278,16 +276,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		uploadTemplate.addOption(Boolean.FALSE, 
 				WidgetProperties.selection().observe(btnServerTemplate));
 		
-		Composite treeComposite = new Composite(parent, SWT.NONE);
+		Composite serverTemplatesComposite = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
-				.applyTo(treeComposite);
+				.applyTo(serverTemplatesComposite);
 		GridLayoutFactory.fillDefaults()
 			.spacing(2, 2)
-			.applyTo(treeComposite);
+			.applyTo(serverTemplatesComposite);
 
 		// filter text
-		Text txtTemplateFilter = UIUtils.createSearchText(treeComposite);
+		Text txtTemplateFilter = UIUtils.createSearchText(serverTemplatesComposite);
 		GridDataFactory.fillDefaults()
 				.span(3, 1).align(SWT.FILL, SWT.CENTER)
 				.applyTo(txtTemplateFilter);
@@ -299,7 +297,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.in(dbc);		
 		
 		// the list of templates
-		this.templatesViewer = createTemplatesViewer(treeComposite, txtTemplateFilter);
+		this.templatesViewer = createTemplatesViewer(serverTemplatesComposite, txtTemplateFilter);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
@@ -326,7 +324,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					
 				}
 			})
-			.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_TEMPLATE).observe(model))
+			.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_SERVER_TEMPLATE).observe(model))
 			.converting(new Model2ObservableTreeItemConverter(TemplateTreeItems.INSTANCE))
 			.in(dbc);
 
@@ -343,53 +341,49 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
-		IObservableValue selectedResource = new WritableValue();
+		IObservableValue selectedServerResource = new WritableValue();
 		ValueBindingBuilder
 			.bind(selectedItem)
 			.converting(new ObservableTreeItem2ModelConverter())
-			.to(selectedResource)
+			.to(selectedServerResource)
 			.notUpdatingParticipant()
 			.in(dbc);
 				
 		// details
-		final Group detailsGroup = new Group(treeComposite, SWT.NONE);
+		Group detailsGroup = new Group(serverTemplatesComposite, SWT.NONE);
 		detailsGroup.setText("Details");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL)
+				.grab(true, false)
 				.hint(SWT.DEFAULT, 106)
 				.applyTo(detailsGroup);
 		GridLayoutFactory.fillDefaults()
 			.margins(10, 6).spacing(2, 2)
 			.applyTo(detailsGroup);
-		
-		
+
 		Composite detailsContainer = new Composite(detailsGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 140)
-			.applyTo(detailsContainer);
-		new TemplateDetailViews(selectedResource, null, detailsContainer, dbc).createControls();
-		
+				.align(SWT.FILL, SWT.FILL).grab(true, true)
+				.applyTo(detailsContainer);
+
+		new TemplateDetailViews(selectedServerResource, null, detailsContainer, dbc)
+			.createControls();
+
 		// details button
 		Button btnDetails = new Button(detailsGroup, SWT.NONE);
 		btnDetails.setText("Defined Resources...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.RIGHT, SWT.CENTER).span(2,1).grab(false, false)
+				.align(SWT.RIGHT, SWT.CENTER)
 				.applyTo(btnDetails);
+
+		IObservableValue selectedTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnDetails))
 				.notUpdatingParticipant()
-				.to(selectedResource)
-				.converting(new Converter(ITemplate.class, Boolean.class) {
-					@Override
-					public Object convert(Object value) {
-						if(!(value instanceof ITemplate)) {
-							return Boolean.FALSE;
-						}
-						return Boolean.TRUE;
-					}
-				})
+				.to(selectedTemplate)
+				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
-		btnDetails.addSelectionListener(onDetailsClicked());
+		btnDetails.addSelectionListener(onDefinedResourcesClicked());
 	}
 
 	private TreeViewer createTemplatesViewer(Composite parent, final Text templateFilterText) {
@@ -435,8 +429,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
-				if(StringUtils.isNotBlank(model.getTemplateFileName())) {
-					File file = new File(model.getTemplateFileName());
+				if(StringUtils.isNotBlank(model.getLocalTemplateFileName())) {
+					File file = new File(model.getLocalTemplateFileName());
 					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
 				}
 				String file = null;
@@ -444,7 +438,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					file = dialog.open();
 					if (file != null) {
 						try {
-							model.setTemplateFileName(file);
+							model.setLocalTemplateFileName(file);
 							return;
 						} catch (ClassCastException ex) {
 							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
@@ -457,15 +451,13 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 							ErrorDialog.openError(getShell(), "Template Error", 
-									NLS.bind("The file \"{0}\" is a template in a version that we do not support.", 
-											file),
+									NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file),
 									status);
-						} catch (ResourceFactoryException ex) {
+						} catch (OpenShiftException ex) {
 							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 							ErrorDialog.openError(getShell(), "Template Error",
-									NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.",
-											file),
+									NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file),
 									status);
 						}
 					}
@@ -474,16 +466,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private SelectionAdapter onDetailsClicked() {
+	private SelectionAdapter onDefinedResourcesClicked() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final String message = "The following resources will be created by using this template:";
+				ITemplate template = model.getSelectedTemplate();
 				new ResourceSummaryDialog(getShell(), 
-						model.getTemplate().getItems(), 
+						template.getItems(),
 						"Template Details",
-						message, 
+						NLS.bind("The following resources will be created by using template\n\"{0}\":", template.getName()), 
 						new ResourceDetailsLabelProvider(), new ResourceDetailsContentProvider()).open();
 			}
 			

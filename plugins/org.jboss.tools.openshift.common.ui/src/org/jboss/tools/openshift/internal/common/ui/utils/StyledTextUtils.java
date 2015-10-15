@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -36,6 +37,23 @@ public class StyledTextUtils {
 	}
 
 	/**
+	 * Configures the given styled text so that it looks and behaves as if it was a link widget. 
+	 * 
+	 * @param text
+	 * @param styledText
+	 * 
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717">Some link objects don't work on Mac</a>
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
+	 */
+	public static StyledText emulateLinkWidget(String text, StyledText styledText) {
+		setLinkText(text, styledText);
+		setTransparent(styledText);
+		styledText.setEditable(false);
+		styledText.setCursor(new Cursor(styledText.getShell().getDisplay(), SWT.CURSOR_HAND));
+		return styledText;
+	}
+
+	/**
 	 * Sets a given text (with link markers <a></a>) to a given styled text.
 	 * Applies a link-styled alike style range to the text within the markers
 	 * while removing the markers.
@@ -46,7 +64,8 @@ public class StyledTextUtils {
 	 * @param text
 	 * @param styledText
 	 *
-	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">swt link widget is not clickable in certain situations on MacOS</a>
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717">Some link objects don't work on Mac</a>
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
 	 */
 	public static void setLinkText(String text, StyledText styledText) {
 		Matcher matcher = LINK_REGEX.matcher(text);
@@ -109,7 +128,7 @@ public class StyledTextUtils {
 		}
 	}
 
-	public static StyleRange createBoldStyleRange(String string, Color background) {
+	public static StyleRange createBoldStyle(String string, Color background) {
 		StyleRange styleRange = new StyleRange();
 		styleRange.fontStyle = SWT.BOLD;
 		if (background != null) {
