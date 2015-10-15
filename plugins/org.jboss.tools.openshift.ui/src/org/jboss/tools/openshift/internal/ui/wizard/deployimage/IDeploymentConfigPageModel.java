@@ -14,7 +14,7 @@ import java.util.List;
 
 import com.openshift.restclient.model.IPort;
 
-import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
+import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 
 /**
  * Page model for the deployment config page
@@ -34,15 +34,15 @@ public interface IDeploymentConfigPageModel {
 	
 	String getName();
 
-	List<IKeyValueItem> getEnvironmentVariables();
-	void setEnvironmentVariables(List<IKeyValueItem> envVars);
+	List<EnvironmentVariable> getEnvironmentVariables();
+	void setEnvironmentVariables(List<EnvironmentVariable> envVars);
 	
-	void setSelectedEnvironmentVariable(IKeyValueItem envVar);
-	IKeyValueItem getSelectedEnvironmentVariable();
+	void setSelectedEnvironmentVariable(EnvironmentVariable envVar);
+	EnvironmentVariable getSelectedEnvironmentVariable();
 	
-	void removeEnvironmentVariable(IKeyValueItem envVar);
-	void resetEnvironmentVariable(IKeyValueItem envVar);
-	void updateEnvironmentVariable(IKeyValueItem envVar, String key, String value);
+	void removeEnvironmentVariable(EnvironmentVariable envVar);
+	void resetEnvironmentVariable(EnvironmentVariable envVar);
+	void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value);
 	void addEnvironmentVariable(String key, String value);
 
 	void setVolumes(List<String> volumes);

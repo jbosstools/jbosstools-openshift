@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import java.util.Map;
+
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 
 /**
@@ -26,5 +28,11 @@ public interface IDeployImageParameters
 			IServiceAndRoutingPageModel{
 
 	void setOriginatedFromDockerExplorer(boolean b);
+	
+	/**
+	 * Retrieve the env vars declared by the image
+	 * @return
+	 */
+	Map<String, String> getImageEnvVars();
 
 }

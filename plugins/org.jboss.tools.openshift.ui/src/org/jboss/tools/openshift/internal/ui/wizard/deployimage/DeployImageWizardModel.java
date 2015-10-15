@@ -32,10 +32,10 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
-import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueItem;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
@@ -59,9 +59,9 @@ public class DeployImageWizardModel
 	private String image;
 	private Collection<IProject> projects = Collections.emptyList();
 
-	private List<IKeyValueItem> environmentVariables = Collections.emptyList();
+	private List<EnvironmentVariable> environmentVariables = Collections.emptyList();
 	private Map<String, String> imageEnvVars = new HashMap<>();
-	private IKeyValueItem selectedEnvironmentVariable = null;
+	private EnvironmentVariable selectedEnvironmentVariable = null;
 
 	private List<String> volumes = Collections.emptyList();
 	private String selectedVolume;
@@ -191,7 +191,7 @@ public class DeployImageWizardModel
 	}
 	
 	private void resetImageInfo() {
-		setEnvironmentVariables(new ArrayList<IKeyValueItem>());
+		setEnvironmentVariables(new ArrayList<EnvironmentVariable>());
 		setVolumes(new ArrayList<String>());
 		setPortSpecs(new ArrayList<IPort>());
 		setReplicas(DEFAULT_REPLICA_COUNT);
@@ -199,7 +199,7 @@ public class DeployImageWizardModel
 	}
 
 	@Override
-	public List<IKeyValueItem> getEnvironmentVariables() {
+	public List<EnvironmentVariable> getEnvironmentVariables() {
 		return environmentVariables;
 	}
 	
@@ -225,15 +225,15 @@ public class DeployImageWizardModel
 	}
 	
 	private void setEnvVars(List<String> env) {
-		List<IKeyValueItem> envVars = new ArrayList<>(env.size());
+		List<EnvironmentVariable> envVars = new ArrayList<>(env.size());
 		for (String var : env) {
 			String[] split = var.split("=");
-			envVars.add(new KeyValueItem(split[0], split[1]));
+			envVars.add(new EnvironmentVariable(split[0], split[1]));
 		}
 		setEnvironmentVariables(envVars);
 	}
 	@Override
-	public void setEnvironmentVariables(List<IKeyValueItem> envVars) {
+	public void setEnvironmentVariables(List<EnvironmentVariable> envVars) {
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, 
 				this.environmentVariables, 
 				this.environmentVariables = envVars);
@@ -323,38 +323,39 @@ public class DeployImageWizardModel
 	}
 
 	@Override
-	public void setSelectedEnvironmentVariable(IKeyValueItem envVar) {
+	public void setSelectedEnvironmentVariable(EnvironmentVariable envVar) {
 		firePropertyChange(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, 
 				this.selectedEnvironmentVariable, 
 				this.selectedEnvironmentVariable = envVar);
 	}
 
 	@Override
-	public IKeyValueItem getSelectedEnvironmentVariable() {
+	public EnvironmentVariable getSelectedEnvironmentVariable() {
 		return selectedEnvironmentVariable;
 	}
 
 	@Override
-	public void removeEnvironmentVariable(IKeyValueItem envVar) {
+	public void removeEnvironmentVariable(EnvironmentVariable envVar) {
 		final int i = environmentVariables.indexOf(envVar);
 		if(i > -1) {
-			List<IKeyValueItem> old = new ArrayList<IKeyValueItem>(environmentVariables);
+			List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
 			this.environmentVariables.remove(i);
 			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
 		}
 	}
 
 	@Override
-	public void updateEnvironmentVariable(IKeyValueItem envVar, String key, String value) {
+	public void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value) {
 		final int i = environmentVariables.indexOf(envVar);
 		if(i > -1) {
-			List<IKeyValueItem> old = new ArrayList<IKeyValueItem>(environmentVariables);
-			environmentVariables.set(i, new KeyValueItem(key, value));
+			List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
+			EnvironmentVariable prev = environmentVariables.get(i);
+			environmentVariables.set(i, new EnvironmentVariable(key, value, prev.isNew()));
 			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
 		}
 	}	
 	@Override
-	public void resetEnvironmentVariable(IKeyValueItem envVar) {
+	public void resetEnvironmentVariable(EnvironmentVariable envVar) {
 		if(imageEnvVars.containsKey(envVar.getKey())) {
 			updateEnvironmentVariable(envVar, envVar.getKey(), imageEnvVars.get(envVar.getKey()));
 		}
@@ -363,8 +364,8 @@ public class DeployImageWizardModel
 
 	@Override
 	public void addEnvironmentVariable(String key, String value) {
-		List<IKeyValueItem> old = new ArrayList<IKeyValueItem>(environmentVariables);
-		this.environmentVariables.add(new KeyValueItem(key, value));
+		List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
+		this.environmentVariables.add(new EnvironmentVariable(key, value, true));
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, old, Collections.unmodifiableList(environmentVariables));
 	}
 
@@ -427,6 +428,11 @@ public class DeployImageWizardModel
 			ports.add(new ServicePortAdapter(port));
 		}
 		setServicePorts(ports);
+	}
+
+	@Override
+	public Map<String, String> getImageEnvVars() {
+		return Collections.unmodifiableMap(this.imageEnvVars);
 	}
 	
 	
