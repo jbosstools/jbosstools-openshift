@@ -45,8 +45,7 @@ public class DeployImageHandler extends AbstractHandler {
 		}else{
 			final IProject project = UIUtils.getFirstElement(selection, IProject.class);
 			if(project != null) {
-				model.setProject(project);
-				model.setConnection(ConnectionsRegistryUtil.getConnectionFor(project));
+				model.initModel(ConnectionsRegistryUtil.getConnectionFor(project), project);
 			}else {
 				final Connection osConnection = UIUtils.getFirstElement(selection, Connection.class);
 				if(osConnection != null){

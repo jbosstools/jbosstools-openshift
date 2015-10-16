@@ -228,7 +228,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		
 		StructuredViewer cmboProject = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.hint(SWT.DEFAULT, 30)
 			.applyTo(cmboProject.getControl());
 		
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();

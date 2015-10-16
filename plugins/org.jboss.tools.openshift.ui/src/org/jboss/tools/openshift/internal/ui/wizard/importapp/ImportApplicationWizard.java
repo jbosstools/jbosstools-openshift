@@ -142,8 +142,8 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	}
 
 	@Override
-	public Connection setConnection(Connection connection) {
-		return model.setConnection(connection);
+	public void setConnection(Connection connection) {
+		model.setConnection(connection);
 	}
 
 	@Override

@@ -23,7 +23,10 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
@@ -115,13 +118,12 @@ public class DeployImageWizardModel
 	public Connection getConnection() {
 		return connection;
 	}
-
-	@Override
-	public Connection setConnection(final Connection connection) {
+	
+	public void initModel(final Connection connection, final IProject project) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 		if(this.connection != null) {
 			Job job = new AbstractDelegatingMonitorJob("Loading projects...") {
-
+				
 				@Override
 				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
@@ -134,9 +136,22 @@ public class DeployImageWizardModel
 				}
 				
 			};
+			if(project != null) {
+				job.addJobChangeListener(new JobChangeAdapter() {
+
+					@Override
+					public void done(IJobChangeEvent event) {
+						setProject(project);
+					}
+				});
+			}
 			job.schedule();
 		}
-		return this.connection;
+	}
+
+	@Override
+	public void setConnection(final Connection connection) {
+		initModel(connection, null);
 	}
 
 	private void setProjects(List<IProject> projects) {

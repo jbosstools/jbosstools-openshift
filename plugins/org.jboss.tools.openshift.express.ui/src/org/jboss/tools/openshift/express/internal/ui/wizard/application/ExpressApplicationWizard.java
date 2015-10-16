@@ -398,8 +398,8 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	}
 
 	@Override
-	public ExpressConnection setConnection(ExpressConnection connection) {
-		return model.setConnection(connection);
+	public void setConnection(ExpressConnection connection) {
+		model.setConnection(connection);
 	}
 
 	@Override
