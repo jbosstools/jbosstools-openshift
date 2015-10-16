@@ -169,10 +169,9 @@ public class ImportApplicationWizardModel
 	}
 
 	@Override
-	public Connection setConnection(Connection connection) {
+	public void setConnection(Connection connection) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 		setBuildConfigsTreeRoot(connection);
-		return this.connection;
 	}
 
 	private void setBuildConfigsTreeRoot(Connection connection) {

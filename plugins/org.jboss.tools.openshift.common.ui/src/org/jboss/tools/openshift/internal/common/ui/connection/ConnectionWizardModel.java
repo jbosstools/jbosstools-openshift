@@ -37,9 +37,8 @@ public class ConnectionWizardModel implements IConnectionAware<IConnection> {
 	}
 
 	@Override
-	public IConnection setConnection(IConnection connection) {
+	public void setConnection(IConnection connection) {
 		this.connection = connection;
-		return connection;
 	}
 
 	@Override
