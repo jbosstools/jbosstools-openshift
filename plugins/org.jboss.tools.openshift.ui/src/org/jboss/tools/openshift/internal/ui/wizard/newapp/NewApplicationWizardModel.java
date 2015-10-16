@@ -262,15 +262,14 @@ public class NewApplicationWizardModel
 	}
 
 	@Override
-	public Connection setConnection(Connection connection) {
+	public void setConnection(Connection connection) {
 		if (ObjectUtils.equals(connection, this.connection)) {
-			return this.connection;
+			return;
 		}
 
 		setResourceFactory(connection);
 		reset();
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
-		return connection;
 	}
 
 	private void reset() {

@@ -541,9 +541,8 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
-	public ExpressConnection setConnection(ExpressConnection connection) {
+	public void setConnection(ExpressConnection connection) {
 		setProperty(PROP_CONNECTION, connection);
-		return connection;
 	}
 	
 	@Override
