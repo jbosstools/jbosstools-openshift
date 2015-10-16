@@ -59,8 +59,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 
 		@Override
 		public boolean canFlipToNextPage() {
-			return hasWizard(getModel().getConnectionFactory())
-					&& isValid();
+			return isValid()
+					&& hasWizard(getModel().getConnectionFactory());
 		}
 
 		private boolean isValid() {
