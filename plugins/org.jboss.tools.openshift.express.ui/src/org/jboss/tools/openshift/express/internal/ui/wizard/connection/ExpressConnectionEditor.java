@@ -97,11 +97,11 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 
 	@Override
 	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
-		bindWidgetsToInternalModel(detailViewModel, dbc);
 		updateFrom(selectedConnection);
+		bindWidgetsToInternalModel(dbc);
 	}
 
-	private void bindWidgetsToInternalModel(IObservableValue detailViewModel, DataBindingContext dbc) {
+	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
 		// username
 		this.usernameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
@@ -142,12 +142,13 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	}
 	
 	private void updateFrom(IObservableValue selectedConnectionObservable) {
-		if (selectedConnectionObservable.getValue() instanceof ExpressConnection) {
+		Object value = selectedConnectionObservable.getValue();
+		if (value instanceof ExpressConnection) {
 			ExpressConnection selectedConnection = (ExpressConnection) selectedConnectionObservable.getValue();
 			usernameObservable.setValue(selectedConnection.getUsername());
 			passwordObservable.setValue(selectedConnection.getPassword());
 			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
-		} else if (selectedConnectionObservable.getValue() instanceof NewConnectionMarker) {
+		} else if (value instanceof NewConnectionMarker) {
 			usernameObservable.setValue(null);
 			passwordObservable.setValue(null);
 			rememberPasswordObservable.setValue(false);

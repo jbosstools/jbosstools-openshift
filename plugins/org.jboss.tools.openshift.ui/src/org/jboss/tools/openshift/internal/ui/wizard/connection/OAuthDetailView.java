@@ -90,27 +90,26 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	
 	private IObservableValue tokenObservable;
 	private Binding tokenBinding;
-	private Text txtToken;
+	private Text tokenText;
 	private IValueChangeListener changeListener;
 	private IObservableValue rememberTokenObservable;
 	private IObservableValue authSchemeObservable;
 	private IAuthorizationDetails authDetails;
 	private ConnectionWizardPageModel pageModel;
-	private Button chkRememberToken;
+	private Button rememberTokenCheckbox;
 
 	private IWizard wizard;
 
-
-
-	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, IObservableValue rememberTokenObservable, Button chkRememberToken, IObservableValue authSchemeObservable) {
+	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, 
+			IObservableValue rememberTokenObservable, Button rememberTokenCheckbox, IObservableValue authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
 		this.rememberTokenObservable = rememberTokenObservable;
 		this.authSchemeObservable = authSchemeObservable;
 		this.changeListener = changeListener;
-		this.chkRememberToken = chkRememberToken;
-		if(context instanceof IAuthorizationDetails) {
-			this.authDetails = (IAuthorizationDetails)context;
+		this.rememberTokenCheckbox = rememberTokenCheckbox;
+		if (context instanceof IAuthorizationDetails) {
+			this.authDetails = (IAuthorizationDetails) context;
 		}
 	}
 	
@@ -130,23 +129,22 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		tokenRequestLink.setCursor(new Cursor(tokenRequestLink.getShell().getDisplay(), SWT.CURSOR_HAND));
 
 		//token
-		Label lblAuthType = new Label(composite, SWT.NONE);
-		lblAuthType.setText("Token");
+		Label authTypeLabel = new Label(composite, SWT.NONE);
+		authTypeLabel.setText("Token");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(lblAuthType);
-		txtToken = new Text(composite, SWT.BORDER);
+				.align(SWT.LEFT, SWT.CENTER).applyTo(authTypeLabel);
+		this.tokenText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(txtToken);
-		tokenObservable = new WritableValue(null, String.class);
-		
+			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(tokenText);
+		this.tokenObservable = new WritableValue(null, String.class);
+
 		return composite;
 	}
-
 	
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		chkRememberToken.setText("&Save token (could trigger secure storage login)");
+		rememberTokenCheckbox.setText("&Save Token (could trigger secure storage login)");
 	}
 	
 	@Override
@@ -160,12 +158,10 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
-		RequiredStringValidator validator = new RequiredStringValidator("token");
 		this.tokenBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify | SWT.FocusOut).observe(txtToken))
+				.bind(WidgetProperties.text(SWT.Modify).observe(tokenText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterGet(validator)
-				.validatingAfterConvert(validator)
+				.validatingAfterConvert(new RequiredStringValidator("token"))
 				.to(tokenObservable)
 				.in(dbc);
 		ControlDecorationSupport.create(
@@ -199,7 +195,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	public String toString() {
 		return IAuthorizationContext.AUTHSCHEME_OAUTH;
 	}
-	
+
 	private Listener onRetrieveLinkClicked(final Shell shell) {
 		return new Listener() {
 
@@ -208,7 +204,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				if (StringUtils.isBlank(pageModel.getHost())) {
 					return;
 				}
-				
+
 				Job job = new AuthDetailsJob(pageModel.getHost());
 				job.addJobChangeListener(new JobChangeAdapter() {
 					@Override
@@ -252,13 +248,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 					showErrorDialog(shell,ex);
 				}				
 			}
-			
 		};
 	}
 	
 	private void showErrorDialog(final Shell shell, final Throwable e) {
 		Display.getDefault().asyncExec(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				ErrorDialog.openError(shell, 
@@ -288,7 +283,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			try {
 				IClient client = new ClientFactory().create(host, OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 				details = client.getAuthorizationDetails(host);
-			}catch(Exception e) {
+			} catch(Exception e) {
 				if (e.getCause() instanceof ConnectTimeoutException) {
 					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.", e);
 				}
@@ -324,7 +319,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	 * Leaving for now as we may need this if we are ever able
 	 * to progammatically get the token
 	 */
-	private class OAuthDialog extends Dialog implements IJobChangeListener{
+	private class OAuthDialog extends Dialog implements IJobChangeListener {
 		
 		private String loadingHtml;
 		private String url;
@@ -360,26 +355,21 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		protected Control createDialogArea(Composite parent) {
 			Composite container = (Composite) super.createDialogArea(parent);
 			container.setLayout(new GridLayout());
-			
-			GridData data = new GridData();
-			data.horizontalAlignment = GridData.FILL;
-			data.verticalAlignment = GridData.FILL;
-			data.grabExcessHorizontalSpace = true;
-			data.grabExcessVerticalSpace = true;
-			container.setLayoutData(data);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
 			
 			browser = new Browser(container, SWT.BORDER);
 			browser.setText(loadingHtml);
-			browser.setLayoutData(data);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(browser);
 			
 			final ProgressBar progressBar = new ProgressBar(container, SWT.NONE);
-			data = new GridData();
-			data.horizontalAlignment = GridData.FILL;
-			progressBar.setLayoutData(data);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(progressBar);
 			
 			ProgressListener progressListener = new ProgressListener() {
 				public void changed(ProgressEvent event) {
-					if (event.total <= 0) return;                            
+					if (event.total <= 0) return;
 					int ratio = event.current * 100 / event.total;
 					progressBar.setSelection(ratio);;
 				}

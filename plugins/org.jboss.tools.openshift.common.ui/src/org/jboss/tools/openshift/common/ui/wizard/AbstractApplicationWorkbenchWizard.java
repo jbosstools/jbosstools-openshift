@@ -13,8 +13,7 @@ package org.jboss.tools.openshift.common.ui.wizard;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.databinding.AggregateValidationStatus;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
@@ -32,6 +31,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.ExtensionUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
@@ -46,8 +46,6 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 	
 	protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
 		
-		private IObservableValue validationStatus;
-
 		private DelegatingConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
 			super(wizard, wizardModel);
 		}
@@ -59,21 +57,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 
 		@Override
 		public boolean canFlipToNextPage() {
-			return isValid()
-					&& hasWizard(getModel().getConnectionFactory());
-		}
-
-		private boolean isValid() {
-			IStatus status = (IStatus) getValidationStatus().getValue();
-			return status == null || status.isOK();
-		}
-
-		private IObservableValue getValidationStatus() {
-			if (validationStatus == null) {
-				this.validationStatus = 
-						new AggregateValidationStatus(getDatabindingContext(), AggregateValidationStatus.MAX_SEVERITY);
-			}
-			return validationStatus;
+			return hasWizard(getModel().getConnectionFactory())
+					&& DataBindingUtils.isValid(getDatabindingContext());
 		}
 
 		@Override
@@ -202,5 +187,4 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 		this.workbench = workbench;
 		this.selection = selection;
 	}
-
 }

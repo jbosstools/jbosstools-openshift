@@ -126,7 +126,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		this.usernameBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("username"))
+				.validatingAfterConvert(new RequiredStringValidator("v3 username"))
 				.to(usernameObservable)
 				.in(dbc);
 		ControlDecorationSupport.create(
@@ -137,7 +137,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		this.passwordBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("password"))
+				.validatingAfterConvert(new RequiredStringValidator("v3 password"))
 				.to(passwordObservable)
 				.in(dbc);
 		ControlDecorationSupport.create(

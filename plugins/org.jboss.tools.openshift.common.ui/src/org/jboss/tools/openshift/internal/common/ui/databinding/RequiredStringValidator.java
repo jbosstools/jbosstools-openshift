@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.common.ui.databinding;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 /**
@@ -36,9 +37,9 @@ public class RequiredStringValidator implements IValidator {
 
 	@Override
 	public IStatus validate(Object value) {
-		String name = (String) value;
-		if (StringUtils.isEmpty(name)) {
-			return ValidationStatus.cancel("You have to provide a " + fieldName);
+		String string = (String) value;
+		if (StringUtils.isEmpty(string)) {
+			return ValidationStatus.cancel(NLS.bind("Please provide a {0}", fieldName));
 		}
 		return validateString((String) value);
 	}
