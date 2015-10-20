@@ -12,11 +12,14 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.observable.IObservable;
+import org.eclipse.core.runtime.IStatus;
 
 /**
  * @author Andre Dietisheim
@@ -59,6 +62,21 @@ public class DataBindingUtils {
 		}
 	}
 	
+	/**
+	 * Triggers (model to target) validation of all bindings within the given databinding context. 
+	 * 
+	 * @param dbc the databinding context
+	 * 
+	 * @see DataBindingContext 
+	 * @see Binding#validateTargetToModel()
+	 */
+	public static void validateTargetsToModels(DataBindingContext dbc) {
+		for (Iterator<?> iterator = dbc.getBindings().iterator(); iterator.hasNext(); ) {
+			Binding binding = (Binding) iterator.next();
+			binding.validateTargetToModel();
+		}
+	}
+	
 	public static void dispose(List<ValidationStatusProvider> providers) {
 		for (ValidationStatusProvider provider : providers) {
 			dispose(provider);
@@ -84,4 +102,19 @@ public class DataBindingUtils {
 		}
 	}
 
+	public static boolean isValid(DataBindingContext dbc) {
+		if (dbc == null) {
+			return false;
+		}
+
+		for (Object element : dbc.getValidationStatusProviders()) {
+			ValidationStatusProvider validationProvider = (ValidationStatusProvider) element;
+			IStatus validationStatus = (IStatus) validationProvider.getValidationStatus().getValue();
+			if (!isDisposed(validationProvider)
+					&& !validationStatus.isOK()) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

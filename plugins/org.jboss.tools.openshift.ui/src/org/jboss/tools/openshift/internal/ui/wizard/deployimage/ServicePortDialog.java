@@ -76,17 +76,17 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 			.align(SWT.RIGHT, SWT.CENTER)
 			.applyTo(lblServicePort);
 		
-		Spinner servicePort = new Spinner(dialogArea, SWT.BORDER);
-		servicePort.setMinimum(1);
-		servicePort.setMaximum(65535);
-		servicePort.setToolTipText("The port exposed by the service that will route to the pod.");
+		final Spinner servicePortSpinner = new Spinner(dialogArea, SWT.BORDER);
+		servicePortSpinner.setMinimum(1);
+		servicePortSpinner.setMaximum(65535);
+		servicePortSpinner.setToolTipText("The port exposed by the service that will route to the pod.");
 
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.span(2, 1)
-			.applyTo(servicePort);
+			.applyTo(servicePortSpinner);
 		Binding servicePortBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(servicePort))
+				.bind(WidgetProperties.selection().observe(servicePortSpinner))
 				.validatingAfterConvert(new ServicePortValidator())
 				.to(BeanProperties.value(PROPERTY_SERVICE_PORT).observe(model))
 				.in(dbc);
@@ -100,26 +100,26 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 			.align(SWT.RIGHT, SWT.CENTER).applyTo(lblPodPort);
 
 		//to be replaced by txtbox when supporting named ports
-		Spinner podPort = new Spinner(dialogArea, SWT.BORDER);
-		podPort.setMinimum(1);
-		podPort.setMaximum(65535);
-		podPort.setToolTipText("The port exposed by the pod which will accept traffic");
+		final Spinner podPortSpinner = new Spinner(dialogArea, SWT.BORDER);
+		podPortSpinner.setMinimum(1);
+		podPortSpinner.setMaximum(65535);
+		podPortSpinner.setToolTipText("The port exposed by the pod which will accept traffic");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.span(2, 1)
-			.applyTo(podPort);
+			.applyTo(podPortSpinner);
 		Binding podPortBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(podPort))
+				.bind(WidgetProperties.selection().observe(podPortSpinner))
 				.validatingAfterConvert(new PodPortValidator())
 				.to(BeanProperties.value(PROPERTY_POD_PORT).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				podPortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
-		servicePort.addModifyListener(new ModifyListener() {
+		servicePortSpinner.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				podPort.setSelection(servicePort.getSelection());
+				podPortSpinner.setSelection(servicePortSpinner.getSelection());
 			}
 		});
 		

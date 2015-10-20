@@ -43,6 +43,7 @@ public class UrlUtils {
 
 	public static final String HTTP = "http";
 	public static final String HTTPS = "https";
+	public static final String SCHEME_TERMINATOR = ":";
 	public static final String SCHEME_SEPARATOR = "://";
 	public static final String SCHEME_HTTPS = HTTPS + SCHEME_SEPARATOR;
 	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;

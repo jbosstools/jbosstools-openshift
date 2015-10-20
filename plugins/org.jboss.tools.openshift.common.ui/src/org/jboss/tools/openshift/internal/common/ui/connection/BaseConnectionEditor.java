@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
+import java.util.Iterator;
+
+import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -18,6 +21,7 @@ import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 
 /**
  * @author Andre Dietisheim
@@ -54,7 +58,7 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
 		this.visible = true;
 		pageModel.setConnectionAuthenticationProvider(connectionAuthenticationProvider);
-		this.connectionChangedListener = addSelectedConnectionChangedListener(selectedConnection);
+		this.connectionChangedListener = addSelectedConnectionChangedListener(selectedConnection, dbc);
 		onVisible(detailViewModel, pageModel, dbc);
 	}
 
@@ -73,12 +77,13 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 
 	protected abstract void onSelectedConnectionChanged(IObservableValue selectedConnection);
 
-	private IValueChangeListener addSelectedConnectionChangedListener(final IObservableValue selectedConnection) {
+	private IValueChangeListener addSelectedConnectionChangedListener(final IObservableValue selectedConnection, final DataBindingContext dbc) {
 		IValueChangeListener listener = new IValueChangeListener() {
 			
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				onSelectedConnectionChanged(selectedConnection);
+				DataBindingUtils.validateTargetsToModels(dbc);
 			}
 		};
 		selectedConnection.addValueChangeListener(listener);

@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -79,7 +80,6 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  */
 public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
-	private static final String COL_SLASHES = "://";
 	private final ConnectionWizardPageModel pageModel;
 	private ConnectionEditorsStackedView connectionEditors;
 
@@ -91,6 +91,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection",
 				wizard);
 		this.pageModel = new ConnectionWizardPageModel(wizardModel.getConnection(), ConnectionsRegistrySingleton.getInstance().getAll(), allowConnectionChange, wizardModel);
+
 		/*
 		 * JBIDE-12999: ensure EclipseAuthenticator is installed and overrides
 		 * NetAuthenticator
@@ -224,25 +225,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serversCombo);
 		final IObservableValue serverUrlObservable = WidgetProperties.text().observe(serversCombo);
-		serversCombo.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				String value = (String)serverUrlObservable.getValue();
-				if (value == null) {
-					return;
-				}
-				String url = value;
-				if (!url.startsWith(UrlUtils.SCHEME_HTTP) && !url.contains(":")) {
-					url = UrlUtils.ensureStartsWithScheme(value, UrlUtils.SCHEME_HTTPS);
-				}
-				if (!url.endsWith(COL_SLASHES)) {
-					url = StringUtils.removeTrailingSlashes(url);
-				}
-				if (!url.equals(value)){
-					serverUrlObservable.setValue(url);
-				}
-			}
-		});
+		serversCombo.addFocusListener(onServerFocusLost(serverUrlObservable));
 		ValueBindingBuilder.bind(serverUrlObservable)
 				.converting(new TrimTrailingSlashConverter())
 				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel))
@@ -285,16 +268,45 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		});
 
 		// connection editors
-		final Group connectionEditorsContainer = new Group(parent, SWT.NONE);
-		connectionEditorsContainer.setText("Authentication");
+		Group authenticationDetailsGroup = new Group(parent, SWT.NONE);
+		authenticationDetailsGroup.setText("Authentication");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(connectionEditorsContainer);
+			.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(authenticationDetailsGroup);
+		GridLayoutFactory.fillDefaults()
+			.margins(0, 0).applyTo(authenticationDetailsGroup);
+		// additional nesting required because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+		Composite authenticationDetailsContainer = new Composite(authenticationDetailsGroup, SWT.None);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(authenticationDetailsContainer);
 		this.connectionEditors = new ConnectionEditorsStackedView(
 				connectionFactoryObservable
 				, this
-				, connectionEditorsContainer
+				, authenticationDetailsContainer
 				, dbc);
 		connectionEditors.createControls();
+	}
+
+	private FocusAdapter onServerFocusLost(final IObservableValue serverUrlObservable) {
+		return new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				String value = (String) serverUrlObservable.getValue();
+				if (StringUtils.isEmpty(value)) {
+					return;
+				}
+				String url = value;
+				if (!url.startsWith(UrlUtils.SCHEME_HTTP) 
+						&& !url.contains(UrlUtils.SCHEME_TERMINATOR)) {
+					url = UrlUtils.ensureStartsWithScheme(value, UrlUtils.SCHEME_HTTPS);
+				}
+				if (!url.endsWith(UrlUtils.SCHEME_SEPARATOR)) {
+					url = StringUtils.removeTrailingSlashes(url);
+				}
+				if (!url.equals(value)) {
+					serverUrlObservable.setValue(url);
+				}
+			}
+		};
 	}
 
 	protected Listener onSignupLinkClicked(final IObservableValue signupUrlObservable) {
