@@ -105,7 +105,6 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(lblName);
 		Text txtName = new Text(parent, SWT.BORDER);
-//		txtName.setEditable(false);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
@@ -245,6 +244,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			}
 			
 		});
+	
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
 		Binding selectedProjectBinding = 
 			ValueBindingBuilder.bind(selectedProjectObservable)

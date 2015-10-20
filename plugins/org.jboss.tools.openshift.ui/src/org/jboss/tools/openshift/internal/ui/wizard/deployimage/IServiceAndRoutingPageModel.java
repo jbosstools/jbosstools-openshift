@@ -44,5 +44,8 @@ public interface IServiceAndRoutingPageModel {
 	 * image;
 	 */
 	void resetServicePorts();
-
+	
+	void addServicePort(IServicePort port);
+	
+	void updateServicePort(IServicePort source, IServicePort target);
 }

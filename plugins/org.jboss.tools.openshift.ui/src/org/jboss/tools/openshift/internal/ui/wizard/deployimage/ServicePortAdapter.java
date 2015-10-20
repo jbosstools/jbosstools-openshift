@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import org.jboss.tools.common.databinding.ObservablePojo;
+
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IServicePort;
 
@@ -18,22 +20,28 @@ import com.openshift.restclient.model.IServicePort;
  * @author jeff.cantrill
  *
  */
-class ServicePortAdapter implements IServicePort{
+class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	
 	private String name;
+	private int port;
 	private int containerPort;
 	private String protocol;
 
 	ServicePortAdapter(IPort port){
 		name = port.getName();
+		this.port = port.getContainerPort();
 		containerPort = port.getContainerPort();
 		protocol = port.getProtocol();
 	}
 	
 	ServicePortAdapter(IServicePort port) {
-		name = port.getName();
-		containerPort = port.getPort();
-		protocol = port.getProtocol();
+		this.name = port.getName();
+		this.port = port.getPort();
+		this.containerPort = port.getTargetPort() == 0 ? this.port : port.getTargetPort();
+		this.protocol = port.getProtocol();
+	}
+
+	public ServicePortAdapter() {
 	}
 
 	@Override
@@ -43,15 +51,17 @@ class ServicePortAdapter implements IServicePort{
 
 	@Override
 	public void setName(String name) {
+		firePropertyChange("name", this.name, this.name = name);
 	}
 
 	@Override
 	public int getPort() {
-		return containerPort;
+		return port;
 	}
 
 	@Override
 	public void setPort(int port) {
+		firePropertyChange("port", this.port, this.port = port);
 	}
 
 	@Override
@@ -61,6 +71,7 @@ class ServicePortAdapter implements IServicePort{
 
 	@Override
 	public void setTargetPort(int port) {
+		firePropertyChange("targetPort", this.containerPort, this.containerPort = port);
 	}
 
 	@Override
@@ -70,12 +81,14 @@ class ServicePortAdapter implements IServicePort{
 
 	@Override
 	public void setProtocol(String proto) {
+		firePropertyChange("protocol", this.protocol, this.protocol = proto);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + port;
 		result = prime * result + containerPort;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
@@ -91,6 +104,8 @@ class ServicePortAdapter implements IServicePort{
 		if (getClass() != obj.getClass())
 			return false;
 		ServicePortAdapter other = (ServicePortAdapter) obj;
+		if (port != other.port)
+			return false;
 		if (containerPort != other.containerPort)
 			return false;
 		if (name == null) {
