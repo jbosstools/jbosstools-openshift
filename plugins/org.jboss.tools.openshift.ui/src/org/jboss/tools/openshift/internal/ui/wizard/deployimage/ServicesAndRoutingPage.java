@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -19,7 +22,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -76,7 +82,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		
 		Button btnAddRoute = new Button(routingContainer, SWT.CHECK);
 		btnAddRoute.setText("Add Route");
-		btnAddRoute.setToolTipText("Adding a route to the service will make it accessible outside of the OpenShift cluster.");
+		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(btnAddRoute);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
@@ -112,18 +118,38 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		portsViewer.setInput(BeanProperties.list(
 				IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model));
 	
+		Button btnAdd = new Button(container, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).applyTo(btnAdd);
+		btnAdd.setText("Add...");
+		btnAdd.setToolTipText("Add a port to be exposed by the service which is not explicilty declared by the image.");
+		btnAdd.addSelectionListener(onAdd());
+
+		Button btnEdit = new Button(container, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).applyTo(btnEdit);
+		btnEdit.setText("Edit...");
+		btnEdit.setToolTipText("Edit a port to be exposed by the service.");
+		btnEdit.addSelectionListener(new EditHandler());
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(btnEdit))
+			.notUpdatingParticipant()
+			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
+			.converting(new IsNotNull2BooleanConverter())
+			.in(dbc);
+
 		Button removeButton = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText("Remove");
+		removeButton.setText("Remove...");
 		removeButton.setToolTipText("Remove a port that will be exposed by the service.");
 		removeButton.addSelectionListener(onRemove());
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
-				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+			.bind(WidgetProperties.enabled().observe(removeButton))
+			.notUpdatingParticipant()
+			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
+			.converting(new IsNotNull2BooleanConverter())
+			.in(dbc);
 
 		Button btnReset = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -132,6 +158,65 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnReset.setToolTipText("Resets the list of ports to the exposed ports of the image.");
 		btnReset.addSelectionListener(onReset());
 		
+	}
+
+	private SelectionListener onAdd() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String message = "Add a port to be exposed by the service";
+				ServicePortAdapter port = new ServicePortAdapter();
+				port.setPort(Collections.max(model.getServicePorts(), new Comparator<IServicePort>() {
+
+					@Override
+					public int compare(IServicePort first, IServicePort second) {
+						return Integer.compare(first.getPort(), second.getPort());
+					}
+					
+				}).getPort() + 1);
+				port.setTargetPort(Collections.max(model.getServicePorts(), new Comparator<IServicePort>() {
+
+					@Override
+					public int compare(IServicePort first, IServicePort second) {
+						return Integer.compare(first.getTargetPort(), second.getTargetPort());
+					}
+					
+				}).getPort() + 1);
+				ServicePortDialog dialog = new ServicePortDialog(port, message, model.getServicePorts());
+				if(Window.OK == dialog.open()) {
+					port.setName(NLS.bind("{0}-tcp", port.getPort()));
+					model.addServicePort(port);
+				}
+			}
+			
+		};
+	}
+	
+	class EditHandler extends SelectionAdapter implements IDoubleClickListener{
+		
+		
+		@Override
+		public void doubleClick(DoubleClickEvent event) {
+			handleEvent();
+		}
+		
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			handleEvent();
+		}
+		
+		public void handleEvent(){
+			String message = "Edit the port to be exposed by the service";
+			final IServicePort port = model.getSelectedServicePort();
+			final ServicePortAdapter target = new ServicePortAdapter(port);
+			ServicePortDialog dialog = new ServicePortDialog(target, message, model.getServicePorts());
+			if(Window.OK == dialog.open()) {
+				target.setName(NLS.bind("{0}-tcp", target.getPort()));
+				model.updateServicePort(port, target);
+				model.setSelectedServicePort(target);
+			}
+		}
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
@@ -163,7 +248,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				})
 				.name("Pod Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
 				.buildViewer();
-
+		viewer.addDoubleClickListener(new EditHandler());
 		return viewer;
 	}
 

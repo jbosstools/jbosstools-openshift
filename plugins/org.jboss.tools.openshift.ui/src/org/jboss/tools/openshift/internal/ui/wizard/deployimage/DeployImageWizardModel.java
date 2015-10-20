@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
@@ -382,6 +381,28 @@ public class DeployImageWizardModel
 		List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
 		this.environmentVariables.add(new EnvironmentVariable(key, value, true));
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, old, Collections.unmodifiableList(environmentVariables));
+	}
+	
+	
+
+	@Override
+	public void addServicePort(IServicePort port) {
+		if(this.servicePorts.contains(port)) {
+			return;
+		}
+		List<IServicePort> old = new ArrayList<>(this.servicePorts);
+		this.servicePorts.add(port);
+		firePropertyChange(PROPERTY_SERVICE_PORTS, old, Collections.unmodifiableList(servicePorts));
+	}
+	
+	@Override
+	public void updateServicePort(IServicePort source, IServicePort target){
+		final int pos = this.servicePorts.indexOf(source);
+		if(pos > -1) {
+			List<IServicePort> old = new ArrayList<>(this.servicePorts);
+			this.servicePorts.set(pos, target);
+			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
+		}
 	}
 
 	@Override
