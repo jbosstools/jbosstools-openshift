@@ -68,7 +68,7 @@ public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 		IObservableValue nameTextObservable = WidgetProperties.text(SWT.Modify).observe(txtName);
 		Binding nameBinding = ValueBindingBuilder
 				.bind(nameTextObservable)
-				.validatingAfterConvert(new ProjectNameValidator(getDescription()))
+				.validatingAfterConvert(new ProjectNameValidator(getDescription(), model.getUnavailableNames()))
 				.to(BeanProperties.value(NewProjectWizardModel.PROPERTY_PROJECT_NAME).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(nameBinding, SWT.LEFT | SWT.TOP, null,
