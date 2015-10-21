@@ -204,7 +204,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 		// server
 		Button useDefaultServerCheckbox = new Button(parent, SWT.CHECK);
-		useDefaultServerCheckbox.setText("Use default Server");
+		useDefaultServerCheckbox.setText("Use default server");
 		GridDataFactory.fillDefaults()
 			.span(3,1).align(SWT.FILL, SWT.FILL).applyTo(useDefaultServerCheckbox);
 		ValueBindingBuilder

@@ -100,7 +100,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		chkRememberToken.setText("&Save Password (could trigger secure storage login)");
+		chkRememberToken.setText("&Save password (could trigger secure storage login)");
 	}
 	
 	@Override
