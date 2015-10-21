@@ -86,7 +86,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 		passwordObservable.addValueChangeListener(changeListener);
 		
 		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
-		rememberPasswordCheckBox.setText("&Save Password (could trigger secure storage login)");
+		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
 		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);

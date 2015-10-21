@@ -146,7 +146,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		chkRememberToken.setText("&Save Token (could trigger secure storage login)");
+		chkRememberToken.setText("&Save token (could trigger secure storage login)");
 	}
 	
 	@Override
