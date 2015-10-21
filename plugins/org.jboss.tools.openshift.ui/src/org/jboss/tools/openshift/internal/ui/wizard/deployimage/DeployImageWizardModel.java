@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -74,7 +75,7 @@ public class DeployImageWizardModel
 
 	private boolean addRoute = false;
 
-	List<IServicePort> servicePorts = new ArrayList<IServicePort>();
+	List<IServicePort> servicePorts = new ArrayList<>();
 	IServicePort selectedServicePort = null;
 	
 	private IDockerConnection dockerConnection;
@@ -102,8 +103,9 @@ public class DeployImageWizardModel
 
 	@Override
 	public IDockerConnection getDockerConnection() {
-		if(dockerConnection == null && getDockerConnections().size() == 1) {
-			setDockerConnection(getDockerConnections().get(0));
+		List<IDockerConnection> all = getDockerConnections();
+		if(dockerConnection == null && all.size() == 1) {
+			setDockerConnection(all.get(0));
 		}
 		return dockerConnection;
 	}
@@ -205,9 +207,9 @@ public class DeployImageWizardModel
 	}
 	
 	private void resetImageInfo() {
-		setEnvironmentVariables(new ArrayList<EnvironmentVariable>());
-		setVolumes(new ArrayList<String>());
-		setPortSpecs(new ArrayList<IPort>());
+		setEnvironmentVariables(new ArrayList<>());
+		setVolumes(new ArrayList<>());
+		setPortSpecs(new ArrayList<>());
 		setReplicas(DEFAULT_REPLICA_COUNT);
 		imageInfoInitialized = false;
 	}
@@ -218,7 +220,7 @@ public class DeployImageWizardModel
 	}
 	
 	private synchronized void initContainerInfo() {
-		if(imageInfoInitialized) return;
+		if(imageInfoInitialized || dockerConnection == null) return;
 		IDockerImageInfo info = dockerConnection.getImageInfo(getImage());
 		if(info == null) return;
 		IDockerContainerConfig imageConfig = info.config();
@@ -234,7 +236,7 @@ public class DeployImageWizardModel
 			}
 		}
 		setPortSpecs(portSpecs);
-		setVolumes(new ArrayList<String>(imageConfig.volumes()));
+		setVolumes(new ArrayList<>(imageConfig.volumes()));
 		imageInfoInitialized = true;
 	}
 	
@@ -315,7 +317,6 @@ public class DeployImageWizardModel
 
 	@Override
 	public Object getContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -352,7 +353,7 @@ public class DeployImageWizardModel
 	public void removeEnvironmentVariable(EnvironmentVariable envVar) {
 		final int i = environmentVariables.indexOf(envVar);
 		if(i > -1) {
-			List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
+			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
 			this.environmentVariables.remove(i);
 			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
 		}
@@ -362,7 +363,7 @@ public class DeployImageWizardModel
 	public void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value) {
 		final int i = environmentVariables.indexOf(envVar);
 		if(i > -1) {
-			List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
+			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
 			EnvironmentVariable prev = environmentVariables.get(i);
 			environmentVariables.set(i, new EnvironmentVariable(key, value, prev.isNew()));
 			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
@@ -419,7 +420,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void updateVolume(String volume, String value) {
-		Set<String> old = new LinkedHashSet<String>(volumes);
+		Set<String> old = new LinkedHashSet<>(volumes);
 		this.volumes.remove(volume);
 		this.volumes.add(value);
 		firePropertyChange(PROPERTY_VOLUMES, old, Collections.unmodifiableList(volumes));
@@ -441,12 +442,12 @@ public class DeployImageWizardModel
 	public void removeServicePort(IServicePort port) {
 		int index = servicePorts.indexOf(port);
 		if(index > -1) {
-			List<IServicePort> old = new ArrayList<IServicePort>(servicePorts);
+			List<IServicePort> old = new ArrayList<>(servicePorts);
 			this.servicePorts.remove(port);
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, index, old, Collections.unmodifiableList(servicePorts));
 		}
 	}
-	
+
 	@Override
 	public void setDockerConnection(IDockerConnection dockerConnection) {
 		firePropertyChange(PROPERTY_DOCKER_CONNECTION, this.dockerConnection, this.dockerConnection = dockerConnection);
@@ -454,15 +455,12 @@ public class DeployImageWizardModel
 
 	@Override
 	public boolean imageExists(String image) {
-		return dockerConnection.getImageInfo(image) != null; 
+		return dockerConnection != null && dockerConnection.getImageInfo(image) != null; 
 	}
 
 	@Override
 	public void resetServicePorts() {
-		List<IServicePort> ports = new ArrayList<>(this.imagePorts.size());
-		for (IServicePort port : this.imagePorts) {
-			ports.add(new ServicePortAdapter(port));
-		}
+		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp)).collect(Collectors.toList());
 		setServicePorts(ports);
 	}
 
@@ -470,7 +468,4 @@ public class DeployImageWizardModel
 	public Map<String, String> getImageEnvVars() {
 		return Collections.unmodifiableMap(this.imageEnvVars);
 	}
-	
-	
-	
 }
