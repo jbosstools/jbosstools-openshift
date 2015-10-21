@@ -22,23 +22,31 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
+import org.eclipse.linuxtools.docker.ui.wizards.ImageSearch;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
@@ -65,7 +73,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults()
-			.numColumns(2)
+			.numColumns(3)
 			.margins(10, 10)
 			.applyTo(parent);
 
@@ -97,6 +105,22 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				imageBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
+		//browse
+		Button btnDockerSearch = new Button(parent, SWT.NONE);
+		btnDockerSearch.setText("Search...");
+		btnDockerSearch.setToolTipText("Look-up an image by browsing the docker daemon");
+		btnDockerSearch.addSelectionListener(onSearch(txtImage));
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(btnDockerSearch);
+
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnDockerSearch))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
+				.converting(new IsNotNull2BooleanConverter())
+				.in(dbc);
+
 		//Resource Name
 		Label lblName = new Label(parent, SWT.NONE);
 		lblName.setText("Resource Name: ");
@@ -108,6 +132,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
+			.span(2, 1)
 			.applyTo(txtName);
 		IObservableValue nameTextObservable = 
 				WidgetProperties.text(SWT.Modify).observe(txtName);
@@ -118,7 +143,23 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
+	}
+
+	private SelectionAdapter onSearch(Text txtImage) {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (model.getDockerConnection() == null) {
+					MessageDialog.openError(getShell(), "A Docker connection must be selected", "You must first select a Docker connection.");
+					return;
+				}
+				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText());
+				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
+					model.setImage(wizard.getSelectedImage());
+				}
+			}
+			
+		};
 	}
 	
 	private void createDockerConnectionControl(Composite parent, DataBindingContext dbc) {
@@ -130,7 +171,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		
 		StructuredViewer connectionViewer = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.span(2, 1)
 			.applyTo(connectionViewer.getControl());
 		
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
@@ -188,7 +231,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		
 		StructuredViewer connectionViewer = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.span(2,1)
 			.applyTo(connectionViewer.getControl());
 		
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
@@ -229,6 +274,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
+			.span(2, 1)
 			.hint(SWT.DEFAULT, 30)
 			.applyTo(cmboProject.getControl());
 		
