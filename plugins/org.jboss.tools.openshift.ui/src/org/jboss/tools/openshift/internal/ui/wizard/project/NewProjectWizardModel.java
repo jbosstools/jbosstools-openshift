@@ -11,8 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.wizard.project;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -92,5 +94,12 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 	
 	public IProject getProject() {
 		return project;
+	}
+	
+	public Collection<String> getUnavailableNames() {
+		if (projects == null || projects.isEmpty()) {
+			return Collections.emptySet();
+		}
+		return projects.stream().map(IProject::getName).collect(Collectors.toSet());
 	}
 }

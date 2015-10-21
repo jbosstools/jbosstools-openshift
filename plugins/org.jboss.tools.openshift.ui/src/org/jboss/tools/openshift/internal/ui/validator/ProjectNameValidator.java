@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.validator;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,9 +29,12 @@ public class ProjectNameValidator extends LabelValueValidator {
 
 	private String message;
 
-	public ProjectNameValidator(String defaultMessage) {
+	private Collection<String> unavailableNames;
+
+	public ProjectNameValidator(String defaultMessage, Collection<String> unavailableNames) {
 		super("project name");
 		this.message = defaultMessage;
+		this.unavailableNames = unavailableNames;
 	}
 	
 	@Override
@@ -51,6 +55,9 @@ public class ProjectNameValidator extends LabelValueValidator {
 
 		if (!PROJECT_NAME_PATTERN.matcher(param).matches()) {
 			return ValidationStatus.error("Project name may only contain lower-case letters, numbers, and dashes. It may not start or end with a dash.");
+		}
+		if (unavailableNames != null && unavailableNames.contains(param)) {
+			return ValidationStatus.error("A project with the same name already exists.");
 		}
 		return super.validate(value);
 	}
