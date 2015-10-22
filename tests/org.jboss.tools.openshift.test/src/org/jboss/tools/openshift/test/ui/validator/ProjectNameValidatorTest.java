@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.validator;
 
+import java.util.Arrays;
+
 import org.eclipse.core.databinding.validation.IValidator;
 import org.jboss.tools.openshift.internal.ui.validator.ProjectNameValidator;
 import org.junit.Test;
@@ -19,7 +21,7 @@ import org.junit.Test;
  */
 public class ProjectNameValidatorTest extends LabelValueValidatorTest {
 
-	private ProjectNameValidator validator = new ProjectNameValidator("default message");
+	private ProjectNameValidator validator = new ProjectNameValidator("default message", Arrays.asList("nope","back off"));
 
 	@Override
 	protected IValidator getValidator() {
@@ -91,5 +93,11 @@ public class ProjectNameValidatorTest extends LabelValueValidatorTest {
 	@Test
 	public void upperCaseCharactersShouldNotBeAllowed() {
 		assertFailure("aBc");
+	}
+
+	@Test
+	public void reservedNamesShouldNotBeAllowed() {
+		assertFailure("nope");
+		assertFailure("back off");
 	}
 }
