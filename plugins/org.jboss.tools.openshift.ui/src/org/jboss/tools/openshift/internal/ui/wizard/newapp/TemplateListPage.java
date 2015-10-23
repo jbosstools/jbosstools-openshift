@@ -612,7 +612,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		private IObservableValue selectedTemplate;
 
 		private IObservableValue invalidObservable;
-		private IObservableList mutableTargets = new WritableList<>();
+		private IObservableList mutableTargets = new WritableList();
 		private Composite composite;
 		
 		public SelectedTemplateValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
