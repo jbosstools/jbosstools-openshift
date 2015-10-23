@@ -15,8 +15,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,11 +48,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -65,11 +64,11 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
-import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotEmptyString2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
@@ -82,6 +81,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 	private final ConnectionWizardPageModel pageModel;
 	private ConnectionEditorsStackedView connectionEditors;
+	private StyledText userdocLink;
+	private StyledText signupLink;
 
 	public ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
 		this(wizard, wizardModel, true);
@@ -99,52 +100,45 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		EGitUIUtils.ensureEgitUIIsStarted();
 	}
 
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+	protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
 
 		//JBIDE-20361 signup link doesn't work on OSX in some situations. 
 		//Link signupLink = new Link(parent, SWT.WRAP);
 		//signupLink.setText("If you do not have an account on OpenShift, please <a>sign up here</a>.");
-		StyledText signupLink = StyledTextUtils.emulateLinkWidget(
-				"If you do not have an account on OpenShift, please <a>sign up here</a>.", new StyledText(parent, SWT.WRAP));
-
+		this.signupLink = new StyledText(parent, SWT.WRAP);
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);
-		IObservableValue signupUrlObservable = BeanProperties
-				.value(ConnectionWizardPageModel.PROPERTY_SIGNUPURL).observe(pageModel);
-		signupLink.addListener(SWT.MouseDown, onSignupLinkClicked(signupUrlObservable));
+				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);;
+		showHideSignupLink();
+		signupLink.addListener(SWT.MouseDown, onSignupLinkClicked());
+		IObservableValue signupUrlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SIGNUPURL).observe(pageModel);
+		signupUrlObservable.addValueChangeListener(new IValueChangeListener() {
 
-		ValueBindingBuilder
-			.bind(WidgetProperties.visible().observe(signupLink))
-			.notUpdatingParticipant()
-			.to(signupUrlObservable)
-			.converting(new IsNotEmptyString2BooleanConverter())
-			.in(dbc);
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				showHideSignupLink();
+			}
+		});
 
 		// userdoc link (JBIDE-20401)
-		final Link userdocLink = new Link(parent, SWT.WRAP);
+		this.userdocLink = new StyledText(parent, SWT.WRAP); // text set in #showHideUserdocLink
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(userdocLink);
+		showHideUserdocLink();
 		IObservableValue userdocUrlObservable = BeanProperties
 				.value(ConnectionWizardPageModel.PROPERTY_USERDOCURL).observe(pageModel);
 		userdocLink.addSelectionListener(onUserdocLinkClicked(userdocUrlObservable));
-		ValueBindingBuilder
-			.bind(WidgetProperties.visible().observe(userdocLink))
-			.notUpdatingParticipant()
-			.to(userdocUrlObservable)
-			.converting(new IsNotEmptyString2BooleanConverter())
-			.in(dbc);
+		userdocUrlObservable.addValueChangeListener(new IValueChangeListener() {
 
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				showHideUserdocLink();
+			}
+		});
+		
 		IObservableValue connectionFactoryObservable =
 				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
-
-		ValueBindingBuilder
-			.bind(WidgetProperties.text().observe(userdocLink))
-			.notUpdatingParticipant()
-			.to(connectionFactoryObservable)
-			.converting(new LinkConverter())
-			.in(dbc);
-
+		
 		// filler
 		Label fillerLabel = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -197,7 +191,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		});
 		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
 		final IViewerObservableValue selectedServerType = ViewerProperties.singleSelection().observe(connectionFactoriesViewer);
-
 		ValueBindingBuilder
 				.bind(selectedServerType)
 				.to(connectionFactoryObservable)
@@ -286,6 +279,26 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		connectionEditors.createControls();
 	}
 
+	private void showHideSignupLink() {
+		boolean userdocExists = !StringUtils.isEmpty(pageModel.getSignupUrl());
+		IConnectionFactory factory = pageModel.getConnectionFactory();
+		if (factory != null) {
+			StyledTextUtils.emulateLinkWidget(NLS.bind("If you do not have an account on {0}, please <a>sign up here</a>.", factory.getName()), signupLink);
+		}
+		UIUtils.setVisibleAndExclude(userdocExists, signupLink);
+	}
+
+	private void showHideUserdocLink() {
+		boolean signupUrlExists = !StringUtils.isEmpty(pageModel.getUserdocUrl());
+		if (signupUrlExists) {
+			IConnectionFactory factory = pageModel.getConnectionFactory();
+			if (factory != null) {
+				StyledTextUtils.emulateLinkWidget(NLS.bind("New to OpenShift {0}? Explore the <a>getting started documentation</a>.", factory.getName()), userdocLink);
+			}
+		}
+		UIUtils.setVisibleAndExclude(signupUrlExists, userdocLink);
+	}
+
 	private FocusAdapter onServerFocusLost(final IObservableValue serverUrlObservable) {
 		return new FocusAdapter() {
 			@Override
@@ -309,11 +322,11 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	protected Listener onSignupLinkClicked(final IObservableValue signupUrlObservable) {
+	protected Listener onSignupLinkClicked() {
 		return new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				String signupUrl = (String) signupUrlObservable.getValue();
+				String signupUrl = pageModel.getSignupUrl();
 				if (StringUtils.isEmpty(signupUrl)) {
 					return;
 				}
@@ -438,16 +451,16 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		}
 	}
 
-	private static class LinkConverter extends Converter {
-
-		public LinkConverter() {
-			super(IConnectionFactory.class, String.class);
-		}
-
-		@Override
-		public Object convert(Object fromObject) {
-			return NLS.bind("New to {0}? Explore the <a>getting started documentation</a>.", ((IConnectionFactory)fromObject).getName());
-		}
-
-	}
+//	private static class LinkConverter extends Converter {
+//
+//		public LinkConverter() {
+//			super(IConnectionFactory.class, String.class);
+//		}
+//
+//		@Override
+//		public Object convert(Object fromObject) {
+//			return NLS.bind("New to {0}? Explore the <a>getting started documentation</a>.", ((IConnectionFactory)fromObject).getName());
+//		}
+//
+//	}
 }
