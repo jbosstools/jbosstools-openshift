@@ -31,6 +31,7 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -299,6 +300,21 @@ public class UIUtils {
 			}
 		});
 		return searchText;
-
 	}
+
+	/**
+	 * Sets the visibility of the given control, its {@link GridData#exclude} and relayouts its parent.
+	 * 
+	 * @param visible
+	 * @param control
+	 */
+	public static void setVisibleAndExclude(boolean visible, final Control control) {
+		Assert.isLegal(control != null && !control.isDisposed());
+		Assert.isLegal(control.getLayoutData() instanceof GridData);
+		
+		control.setVisible(visible);
+		((GridData) control.getLayoutData()).exclude = !visible;
+		control.getParent().layout();
+	}
+
 }
