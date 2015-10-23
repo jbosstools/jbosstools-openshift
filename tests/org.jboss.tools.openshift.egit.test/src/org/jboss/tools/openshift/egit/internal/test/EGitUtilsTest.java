@@ -76,8 +76,8 @@ public class EGitUtilsTest {
 		TestRepository testRepository = new TestRepository(TestUtils.createGitDir(project));
 		testRepository.createMockSystemReader(ResourcesPlugin.getWorkspace().getRoot().getLocation());
 		testRepository.setUserAndEmail(GIT_USER, GIT_EMAIL);
-		testRepository.connect(testProject.getProject());
-		testRepository.add(testProject.getFile(".project"));
+		testRepository.connect(project.getProject());
+		testRepository.add(project.getFile(".project"));
 		testRepository.initialCommit();
 		return testRepository;
 	}

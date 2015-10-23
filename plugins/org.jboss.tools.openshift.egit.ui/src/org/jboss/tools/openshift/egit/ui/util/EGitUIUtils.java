@@ -38,7 +38,7 @@ public class EGitUIUtils {
 	};
 	
 	public static String getEGitDefaultRepositoryPath() {
-		return Activator.getDefault().getPreferenceStore().getString(UIPreferences.DEFAULT_REPO_DIR);
+		return RepositoryUtil.getDefaultRepositoryDir();
 	}
 
 	/**
