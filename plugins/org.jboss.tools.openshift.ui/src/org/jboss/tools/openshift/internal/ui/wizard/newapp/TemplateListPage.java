@@ -12,12 +12,17 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.Observables;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.SelectObservableValue;
@@ -26,6 +31,7 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -91,7 +97,6 @@ import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard
 import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceFactoryException;
 import com.openshift.restclient.UnsupportedVersionException;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.template.ITemplate;
@@ -100,6 +105,7 @@ import com.openshift.restclient.model.template.ITemplate;
  * A page that offers a list templates to a user
  *
  * @author jeff.cantrill
+ * @author Andre Dietisheim
  *
  */
 public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
@@ -122,16 +128,30 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.applyTo(parent);
 		
 		createProjectControls(parent, dbc);
-
-		SelectObservableValue uploadTemplate = new SelectObservableValue();
+		
+		SelectObservableValue useLocalTemplate = new SelectObservableValue();
 		ValueBindingBuilder
-			.bind(uploadTemplate)
+			.bind(useLocalTemplate)
 			.to(BeanProperties.value(
 					ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model))
 			.in(dbc);
-		createUploadControls(parent, uploadTemplate, dbc);
-		createServerTemplateControls(parent, uploadTemplate, dbc);
+
+		IObservableValue localTemplateFilename = createLocalTemplateControls(parent, useLocalTemplate, dbc);
+		IObservableValue serverTemplate = createServerTemplateControls(parent, useLocalTemplate, dbc);
+
 		model.setUseLocalTemplate(false);
+
+		// validate required template
+		IObservableValue useLocaTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model);
+		IObservableValue selectedTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
+		SelectedTemplateValidator selectedTemplateValidator = new SelectedTemplateValidator(useLocaTemplate, localTemplateFilename, serverTemplate, selectedTemplate, parent);
+		dbc.addValidationStatusProvider(selectedTemplateValidator );
+		ControlDecorationSupport create = ControlDecorationSupport.create(
+				selectedTemplateValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+	}
+
+	private IValueChangeListener onRequiredValueMissing() {
+		return null;
 	}
 
 	private void createProjectControls(Composite parent, DataBindingContext dbc) {
@@ -226,27 +246,24 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private void createUploadControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
+	private IObservableValue createLocalTemplateControls(Composite parent, SelectObservableValue useLocalTemplate, DataBindingContext dbc) {
 		// upload  app radio
-		Button btnUploadTemplate = new Button(parent, SWT.RADIO);
-		btnUploadTemplate.setText("Use a template from my local file system:");
+		Button btnUseLocalTemplate = new Button(parent, SWT.RADIO);
+		btnUseLocalTemplate.setText("Use a template from my local file system:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(3, 1).grab(true, false)
-				.applyTo(btnUploadTemplate);
+				.applyTo(btnUseLocalTemplate);
+		useLocalTemplate.addOption(Boolean.TRUE, 
+				WidgetProperties.selection().observe(btnUseLocalTemplate));
 
-		uploadTemplate.addOption(Boolean.TRUE, 
-				WidgetProperties.selection().observe(btnUploadTemplate));
-
-		// uploaded file name
-		Text txtUploadedFileName = new Text(parent, SWT.BORDER);
-		txtUploadedFileName.setEnabled(false);
+		// local template file name
+		Text txtLocalTemplateFileName = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
-				.applyTo(txtUploadedFileName);
-		IObservableValue uploadedFilenameTextObservable = 
-				WidgetProperties.text(SWT.Modify).observe(txtUploadedFileName);
-		ValueBindingBuilder
-				.bind(uploadedFilenameTextObservable)
+				.applyTo(txtLocalTemplateFileName);
+		IObservableValue localTemplateFilename = WidgetProperties.text(SWT.Modify).observe(txtLocalTemplateFileName);
+		Binding localTemplateFilenameBinding = ValueBindingBuilder
+				.bind(localTemplateFilename )
 				.to(BeanProperties.value(
 						ITemplateListPageModel.PROPERTY_LOCAL_TEMPLATE_FILENAME).observe(model))
 				.in(dbc);
@@ -260,13 +277,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnBrowseFiles))
 				.notUpdatingParticipant()
-				.to(uploadTemplate)
+				.to(useLocalTemplate)
 				.in(dbc);
 		btnBrowseFiles.addSelectionListener(onBrowseClicked());
+		
+		return localTemplateFilename;
 	}
 
-	private void createServerTemplateControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
-		// existing app radio
+	private IObservableValue createServerTemplateControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
+		// server template radio
 		Button btnServerTemplate = new Button(parent, SWT.RADIO);
 		btnServerTemplate.setText("Use a template from the server:");
 		GridDataFactory.fillDefaults()
@@ -297,7 +316,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.in(dbc);		
 		
 		// the list of templates
-		this.templatesViewer = createTemplatesViewer(serverTemplatesComposite, txtTemplateFilter);
+		this.templatesViewer = createServerTemplatesViewer(serverTemplatesComposite, txtTemplateFilter);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
@@ -308,42 +327,22 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
 
-		IObservableValue selectedItem = 
+		IObservableValue selectedViewerServerTemplate = 
 				ViewerProperties.singleSelection().observe(templatesViewer);
 		ValueBindingBuilder
-			.bind(selectedItem)
+			.bind(selectedViewerServerTemplate)
 			.converting(new ObservableTreeItem2ModelConverter(ITemplate.class))
-			.validatingAfterConvert(new IValidator() {
-				
-				@Override
-				public IStatus validate(Object value) {
-					if (!hasTemplate(value)) {
-						return ValidationStatus.cancel("Please select a template to create your application.");
-					}
-					return ValidationStatus.ok();
-					
-				}
-			})
 			.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_SERVER_TEMPLATE).observe(model))
 			.converting(new Model2ObservableTreeItemConverter(TemplateTreeItems.INSTANCE))
 			.in(dbc);
 
-		templatesViewer.addDoubleClickListener(new IDoubleClickListener() {
-	        @Override
-	        public void doubleClick(DoubleClickEvent event) {
-	            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-	            if (hasTemplate(selection.getFirstElement())
-	            		&& canFlipToNextPage()) {
-	            	getContainer().showPage(getNextPage());
-	            }
-	        }
-	    });
+		templatesViewer.addDoubleClickListener(onServerTemplateDoubleClicked());
 
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
 		IObservableValue selectedServerResource = new WritableValue();
 		ValueBindingBuilder
-			.bind(selectedItem)
+			.bind(selectedViewerServerTemplate)
 			.converting(new ObservableTreeItem2ModelConverter())
 			.to(selectedServerResource)
 			.notUpdatingParticipant()
@@ -369,14 +368,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		new TemplateDetailViews(selectedServerResource, null, detailsContainer, dbc)
 			.createControls();
 
-		// details button
+		// detail resources button
 		Button btnDetails = new Button(detailsGroup, SWT.NONE);
 		btnDetails.setText("Defined Resources...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.RIGHT, SWT.CENTER)
 				.applyTo(btnDetails);
 
-		IObservableValue selectedTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
+		IObservableValue selectedTemplate = 
+				BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnDetails))
 				.notUpdatingParticipant()
@@ -384,9 +384,24 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
+		
+		return selectedViewerServerTemplate;
 	}
 
-	private TreeViewer createTemplatesViewer(Composite parent, final Text templateFilterText) {
+	private IDoubleClickListener onServerTemplateDoubleClicked() {
+		return new IDoubleClickListener() {
+	        @Override
+	        public void doubleClick(DoubleClickEvent event) {
+	            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+	            if (hasTemplate(selection.getFirstElement())
+	            		&& canFlipToNextPage()) {
+	            	getContainer().showPage(getNextPage());
+	            }
+	        }
+	    };
+	}
+
+	private TreeViewer createServerTemplatesViewer(Composite parent, final Text templateFilterText) {
 		TreeViewer viewer = new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
 				new IListProperty[] { 
@@ -428,11 +443,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
-				if(StringUtils.isNotBlank(model.getLocalTemplateFileName())) {
-					File file = new File(model.getLocalTemplateFileName());
-					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
-				}
+				FileDialog dialog = createFileDialog(model.getLocalTemplateFileName());
 				String file = null;
 				do {
 					file = dialog.open();
@@ -447,21 +458,33 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 									NLS.bind("The file \"{0}\" is not an OpenShift template.", 
 											file),
 									status);
+							file = null;
 						} catch (UnsupportedVersionException ex) {
 							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 							ErrorDialog.openError(getShell(), "Template Error", 
 									NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file),
 									status);
+							file = null;
 						} catch (OpenShiftException ex) {
 							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 							ErrorDialog.openError(getShell(), "Template Error",
 									NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file),
 									status);
+							file = null;
 						}
 					}
 				} while (file != null);
+			}
+
+			private FileDialog createFileDialog(String selectedFile) {
+				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+				if(StringUtils.isNotBlank(selectedFile)) {
+					File file = new File(selectedFile);
+					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
+				}
+				return dialog;
 			}
 		};
 	}
@@ -573,7 +596,60 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	private static boolean hasTemplate(Object item) {
 		return item instanceof ITemplate ||
-			   item instanceof ObservableTreeItem && ((ObservableTreeItem)item).getModel() instanceof ITemplate;
+			   item instanceof ObservableTreeItem && 
+			   ((ObservableTreeItem)item).getModel() instanceof ITemplate;
 	}
+	
+	/**
+	 * A validator that validates this page based on the choice to use a local
+	 * or server template and the settings that are required therefore.
+	 */
+	private class SelectedTemplateValidator extends MultiValidator {
+
+		private IObservableValue useLocalTemplate;
+		private IObservableValue localTemplateFilename;
+		private IObservableValue serverTemplate;
+		private IObservableValue selectedTemplate;
+
+		private IObservableValue invalidObservable;
+		private IObservableList mutableTargets = new WritableList<>();
+		private Composite composite;
+		
+		public SelectedTemplateValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
+				IObservableValue serverTemplate, IObservableValue selectedTemplate, Composite composite) {
+			this.useLocalTemplate = useLocalTemplate;
+			this.localTemplateFilename = localTemplateFilename;
+			this.serverTemplate = serverTemplate;
+			this.selectedTemplate = selectedTemplate;
+			this.composite = composite;
+		}
+
+		@Override
+		protected IStatus validate() {
+			IStatus status = ValidationStatus.ok();
+			mutableTargets.clear();
+			if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
+				if (StringUtils.isEmpty((String) localTemplateFilename.getValue())
+						|| selectedTemplate.getValue() == null) {
+					status = ValidationStatus.cancel("Please select a local template file.");
+					mutableTargets.add(localTemplateFilename);
+				}
+			} else {
+				if (selectedTemplate.getValue() == null){
+					status = ValidationStatus.cancel("Please select a server template.");
+					mutableTargets.add(serverTemplate);
+				} 
+			}
+			
+			// force redraw since removed decorations somehow stay visible, GTK3 bug?
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+			composite.redraw();
+			
+			return status;
+		}
+
+		
+	}
+	
 
 }

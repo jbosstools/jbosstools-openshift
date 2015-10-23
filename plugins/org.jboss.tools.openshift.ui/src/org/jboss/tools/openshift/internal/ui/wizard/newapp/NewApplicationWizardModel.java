@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
@@ -69,14 +70,14 @@ public class NewApplicationWizardModel
 		initTemplateParameters(serverTemplate);
 	}
 
-	private void updateTemplate(boolean useUploadTemplate, ITemplate serverTemplate, ITemplate uploadedTemplate, String localTemplateFilename) {
+	private void updateTemplate(boolean useLoadlTemplate, ITemplate serverTemplate, ITemplate localTemplate, String localTemplateFilename) {
 		ITemplate template = null;
-		if (useUploadTemplate) {
+		if (useLoadlTemplate) {
 			if (!ObjectUtils.equals(localTemplateFilename, this.localTemplateFilename)) {
 				template = this.localTemplate = getLocalTemplate(localTemplateFilename);
 				firePropertyChange(PROPERTY_LOCAL_TEMPLATE_FILENAME, this.localTemplateFilename, this.localTemplateFilename = localTemplateFilename);
 			} else {
-				template = uploadedTemplate;
+				template = localTemplate;
 			}
 		} else {
 			template = this.serverTemplate = serverTemplate;
@@ -85,11 +86,15 @@ public class NewApplicationWizardModel
 	}
 	
 	private ITemplate getLocalTemplate(String filename) {
+		if (StringUtils.isBlank(filename)) {
+			return null;
+		}
+		
 		ITemplate uploadedTemplate = null;
 		try {
 			uploadedTemplate = resourceFactory.create(createInputStream(filename));
 		} catch (FileNotFoundException e) {
-			throw new OpenShiftException(e, "Unable to find the file to upload");
+			throw new OpenShiftException(e, "Could not find the file \"{0}\" to upload", filename);
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
 		}
