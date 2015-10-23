@@ -59,7 +59,7 @@ public class TemplateFilterTest {
 		whenResourceDoesNotSupportITagCapability();
 		assertTrue(ResourceUtils.isMatching(" ", resource));
 	}
-	
+
 	@Test
 	public void resourcesThatAreAnnotatedWithTheIncludedTagShouldReturnTrue() {
 		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
@@ -67,13 +67,40 @@ public class TemplateFilterTest {
 		
 		assertTrue(ResourceUtils.isMatching("foobar", resource));
 	}
+	
 	@Test
 	public void resourcesThatAreAnnotatedWithTheIncludedTagShouldReturnFalseWhenNotMatched() {
 		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
 		whenResourceSupportsITagCapability();
 		assertFalse(ResourceUtils.isMatching("abcxyz", resource));
 	}
-	
+
+	@Test
+	public void nameThatPartiallyMatchesElementsShouldReturnFalse() {
+		assertFalse(ResourceUtils.isMatching("resource mysql", resource));
+	}
+
+	@Test
+	public void nameThatMatchesAllElementsShouldReturnTrue() {
+		assertTrue(ResourceUtils.isMatching("mongo resource", resource));
+	}
+
+	@Test
+	public void tagsThatMatchAllElementsShouldReturnTrue() {
+		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
+		whenResourceSupportsITagCapability();
+
+		assertTrue(ResourceUtils.isMatching("foobar foo", resource));
+	}
+
+	@Test
+	public void tagsThatPartiallyMatchAllElementsShouldReturnFalse() {
+		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
+		whenResourceSupportsITagCapability();
+
+		assertFalse(ResourceUtils.isMatching("foobar baz", resource));
+	}
+
 	private void whenResourceSupportsITagCapability() {
 		@SuppressWarnings("unchecked")
 		CapabilityVisitor<ITags, Boolean> visitor = any(CapabilityVisitor.class);

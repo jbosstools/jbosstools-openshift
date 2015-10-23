@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.util;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -30,19 +35,33 @@ public class ResourceUtils {
 		if (StringUtils.isBlank(filterText)) {
 			return true;
 		}
-		if (template.getName().contains(filterText)) {
+
+		final Set<String> items = new HashSet<>(Arrays.asList(filterText.replaceAll(",", " ").toLowerCase().split(" ")));
+		if (containsAll(template.getName(), items)) {
 			return true;
 		}
+
 		return template.accept(new CapabilityVisitor<ITags, Boolean>() {
 			@Override
 			public Boolean visit(ITags capability) {
-				for (String tag : capability.getTags()) {
-					if (tag.contains(filterText)) {
-						return true;
+				for (String item : items) {
+					if (!inCollection(item, capability.getTags())) {
+						return false;
 					}
 				}
-				return false;
+				return true;
 			}
 		}, Boolean.FALSE);
-	}	
+	}
+
+	private static boolean containsAll(String text, final Collection<String> items) {
+		final String _text = text.toLowerCase();
+		return items.stream().allMatch((String it)->{return _text.contains(it);});
+	}
+
+	private static boolean inCollection(String item, final Collection<String> texts) {
+		final String _item = item.toLowerCase();
+		return texts.stream().anyMatch((String txt)->{return txt.toLowerCase().contains(_item);});
+	}
+
 }
