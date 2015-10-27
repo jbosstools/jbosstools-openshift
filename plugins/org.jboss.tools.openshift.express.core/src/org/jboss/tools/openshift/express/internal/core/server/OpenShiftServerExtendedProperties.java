@@ -23,7 +23,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 	public OpenShiftServerExtendedProperties(IAdaptable adaptable) {
 		super(adaptable);
 	}
-	
+
 	public boolean allowConvenienceEnhancements() {
 		return false;
 	}
