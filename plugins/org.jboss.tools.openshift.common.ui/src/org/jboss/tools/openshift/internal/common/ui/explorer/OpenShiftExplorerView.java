@@ -74,7 +74,11 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 	
 	private void showConnectionsOrExplanations() {
-		Display.getDefault().syncExec(new Runnable() { 
+		asyncShowConnectionsOrExplanations();
+	}
+	
+	private void asyncShowConnectionsOrExplanations() {
+		Display.getDefault().asyncExec(new Runnable() { 
 			public void run() {
 				showConnectionsOrExplanations(connectionsPane, explanationsPane);
 			}
@@ -83,7 +87,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 
 	@Override
 	public void connectionRemoved(IConnection connection) {
-		showConnectionsOrExplanations();
+		asyncShowConnectionsOrExplanations();
 	}
 
 	@Override

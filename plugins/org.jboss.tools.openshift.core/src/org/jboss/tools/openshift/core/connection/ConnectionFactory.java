@@ -16,6 +16,7 @@ import org.jboss.tools.foundation.core.properties.PropertiesHelper;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
+import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -47,7 +48,7 @@ public class ConnectionFactory implements IConnectionFactory {
 	
 	@Override
 	public Connection create(String url) {
-		return create(url, null);
+		return create(url, new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
 	}		
 	
 	public Connection create(String url, ICredentialsPrompter credentialsPrompter) {

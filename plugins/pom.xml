@@ -21,5 +21,6 @@
 		<module>org.jboss.tools.openshift.common.ui</module>
 		<module>org.jboss.tools.openshift.core</module>
 		<module>org.jboss.tools.openshift.ui</module>
+		<module>org.jboss.tools.openshift.cdk.server</module>
 	</modules>
 </project>
