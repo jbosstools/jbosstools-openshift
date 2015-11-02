@@ -113,7 +113,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		Button removeButton = new Button(labelsGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText("Remove");
+		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(removeButton))
