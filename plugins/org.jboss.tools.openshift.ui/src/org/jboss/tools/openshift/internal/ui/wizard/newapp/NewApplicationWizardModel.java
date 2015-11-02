@@ -66,11 +66,11 @@ public class NewApplicationWizardModel
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projectItems));
 		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(project, projectItems) );
-		updateTemplate(useUploadTemplate, serverTemplate, localTemplate, localTemplateFilename);
-		initTemplateParameters(serverTemplate);
+		updateSelectedTemplate(useUploadTemplate, serverTemplate, localTemplate, localTemplateFilename);
+		updateTemplateParameters(selectedTemplate);
 	}
 
-	private void updateTemplate(boolean useLoadlTemplate, ITemplate serverTemplate, ITemplate localTemplate, String localTemplateFilename) {
+	private void updateSelectedTemplate(boolean useLoadlTemplate, ITemplate serverTemplate, ITemplate localTemplate, String localTemplateFilename) {
 		ITemplate template = null;
 		if (useLoadlTemplate) {
 			if (!ObjectUtils.equals(localTemplateFilename, this.localTemplateFilename)) {
@@ -151,7 +151,7 @@ public class NewApplicationWizardModel
 		return selectedTemplate;
 	}
 
-	private void initTemplateParameters(ITemplate template) {
+	private void updateTemplateParameters(ITemplate template) {
 		if (template == null) {
 			return;
 		}
