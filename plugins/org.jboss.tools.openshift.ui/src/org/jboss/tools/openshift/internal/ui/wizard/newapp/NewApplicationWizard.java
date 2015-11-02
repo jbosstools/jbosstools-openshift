@@ -98,26 +98,24 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 	public boolean performFinish() {
 		final CreateApplicationFromTemplateJob createJob = new CreateApplicationFromTemplateJob(
 				model.getProject(),
-				model.getServerTemplate(),
+				model.getSelectedTemplate(),
 				model.getParameters(),
-				model.getLabels()
-				);
+				model.getLabels());
+		
 		createJob.addJobChangeListener(new JobChangeAdapter(){
 
 			@Override
 			public void done(IJobChangeEvent event) {
 				IStatus status = event.getResult();
-				if(JobUtils.isOk(status) || JobUtils.isWarning(status)) {
+				if(JobUtils.isOk(status) 
+						|| JobUtils.isWarning(status)) {
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
 							final String message = NLS.bind(
 									"Results of creating the resources from the {0} template.", 
-									model.getServerTemplate().getName());
-							new NewApplicationSummaryDialog(
-									getShell(), 
-									createJob,
-									message).open();
+									model.getSelectedTemplate().getName());
+							new NewApplicationSummaryDialog(getShell(), createJob, message).open();
 						}
 					});
 					UIUtils.showOpenShiftExplorerView();

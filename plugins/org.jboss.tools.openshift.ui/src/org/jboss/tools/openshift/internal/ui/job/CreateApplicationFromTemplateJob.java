@@ -58,8 +58,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 		for (Label label : labels) {
 			template.addObjectLabel(label.getName(), label.getValue());
 		}
-		
-		
+
 		IStatus status = project.accept(new CapabilityVisitor<IProjectTemplateProcessing, IStatus>() {
 
 			@Override
