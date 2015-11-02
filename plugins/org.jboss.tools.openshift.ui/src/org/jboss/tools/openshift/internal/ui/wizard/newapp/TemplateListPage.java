@@ -12,22 +12,18 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.SelectObservableValue;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -340,14 +336,6 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
-		IObservableValue selectedServerResource = new WritableValue();
-		ValueBindingBuilder
-			.bind(selectedViewerServerTemplate)
-			.converting(new ObservableTreeItem2ModelConverter())
-			.to(selectedServerResource)
-			.notUpdatingParticipant()
-			.in(dbc);
-				
 		// details
 		Group detailsGroup = new Group(serverTemplatesComposite, SWT.NONE);
 		detailsGroup.setText("Details");
@@ -365,7 +353,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
 				.applyTo(detailsContainer);
 
-		new TemplateDetailViews(selectedServerResource, null, detailsContainer, dbc)
+		new TemplateDetailViews(
+			BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model), null, detailsContainer, dbc)
 			.createControls();
 
 		// detail resources button
