@@ -18,6 +18,9 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.observable.ChangeEvent;
+import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -66,6 +69,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -76,6 +81,7 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelectionProperty;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -106,6 +112,8 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
+	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
+
 	private ITemplateListPageModel model;
 	private TreeViewer templatesViewer;
 	
@@ -122,9 +130,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		GridLayoutFactory.fillDefaults()
 			.numColumns(3).margins(10, 6).spacing(2, 2)
 			.applyTo(parent);
-		
+
 		createProjectControls(parent, dbc);
 		
+		TabFolder tabContainer= new TabFolder(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+		.span(3, 1)
+		.align(SWT.FILL, SWT.CENTER)
+		.grab(true, false)
+		.applyTo(tabContainer);
+
 		SelectObservableValue useLocalTemplate = new SelectObservableValue();
 		ValueBindingBuilder
 			.bind(useLocalTemplate)
@@ -132,15 +147,35 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model))
 			.in(dbc);
 
-		IObservableValue localTemplateFilename = createLocalTemplateControls(parent, useLocalTemplate, dbc);
-		IObservableValue serverTemplate = createServerTemplateControls(parent, useLocalTemplate, dbc);
+		ValueBindingBuilder
+		  .bind(new TabFolderSelectionProperty().observe(tabContainer))
+		  .converting(new Converter(Integer.class, Boolean.class) {
+			@Override
+			public Object convert(Object fromObject) {
+				return Integer.valueOf(LOCAL_TEMPLATE_TAB_INDEX).equals(fromObject);
+			}
+		  })
+		  .to(BeanProperties.value(
+					ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model))
+		  .converting(new Converter(Boolean.class,Integer.class) {
+			@Override
+			public Object convert(Object fromObject) {
+					return (fromObject != null && (Boolean)fromObject)?LOCAL_TEMPLATE_TAB_INDEX:0;
+			}
+		})
+		 .in(dbc);
+
+
+		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, useLocalTemplate, dbc);
+		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, useLocalTemplate, dbc);
+
+		createDetailsGroup(parent, dbc);
 
 		model.setUseLocalTemplate(false);
 
 		// validate required template
-		IObservableValue useLocaTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model);
 		IObservableValue selectedTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
-		SelectedTemplateValidator selectedTemplateValidator = new SelectedTemplateValidator(useLocaTemplate, localTemplateFilename, serverTemplate, selectedTemplate, parent);
+		SelectedTemplateValidator selectedTemplateValidator = new SelectedTemplateValidator(useLocalTemplate, localTemplateFilename, serverTemplate, selectedTemplate, parent);
 		dbc.addValidationStatusProvider(selectedTemplateValidator );
 		ControlDecorationSupport create = ControlDecorationSupport.create(
 				selectedTemplateValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
@@ -242,20 +277,23 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private IObservableValue createLocalTemplateControls(Composite parent, SelectObservableValue useLocalTemplate, DataBindingContext dbc) {
-		// upload  app radio
-		Button btnUseLocalTemplate = new Button(parent, SWT.RADIO);
-		btnUseLocalTemplate.setText("Use a template from my local file system:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(3, 1).grab(true, false)
-				.applyTo(btnUseLocalTemplate);
-		useLocalTemplate.addOption(Boolean.TRUE, 
-				WidgetProperties.selection().observe(btnUseLocalTemplate));
+	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, SelectObservableValue useLocalTemplate, DataBindingContext dbc) {
+
+		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
+		localTemplatesTab.setText("Local template");
+
+		Composite parent = new Composite(tabContainer, SWT.NONE);
+		GridLayoutFactory.fillDefaults()
+		.numColumns(3).margins(10, 6).spacing(2, 2)
+		.applyTo(parent);
+
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText("Select a template from the file system:");
 
 		// local template file name
 		Text txtLocalTemplateFileName = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
+				.align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(txtLocalTemplateFileName);
 		IObservableValue localTemplateFilename = WidgetProperties.text(SWT.Modify).observe(txtLocalTemplateFileName);
 		Binding localTemplateFilenameBinding = ValueBindingBuilder
@@ -270,58 +308,37 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(120, SWT.DEFAULT).indent(6, 0)
 				.applyTo(btnBrowseFiles);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(btnBrowseFiles))
-				.notUpdatingParticipant()
-				.to(useLocalTemplate)
-				.in(dbc);
+
 		btnBrowseFiles.addSelectionListener(onBrowseClicked());
-		
+
+		localTemplatesTab.setControl(parent);
+
 		return localTemplateFilename;
 	}
 
-	private IObservableValue createServerTemplateControls(Composite parent, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
-		// server template radio
-		Button btnServerTemplate = new Button(parent, SWT.RADIO);
-		btnServerTemplate.setText("Use a template from the server:");
-		GridDataFactory.fillDefaults()
-				.span(3, 1).indent(0, 8).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(btnServerTemplate);
+	private IObservableValue createServerTemplateControls(TabFolder tabFolder, SelectObservableValue uploadTemplate, DataBindingContext dbc) {
 
-		uploadTemplate.addOption(Boolean.FALSE, 
-				WidgetProperties.selection().observe(btnServerTemplate));
-		
-		Composite serverTemplatesComposite = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
-				.applyTo(serverTemplatesComposite);
+		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
+		serverTemplatesTab.setText("Server templates");
+
+		Composite parent = new Composite(tabFolder, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
-			.spacing(2, 2)
-			.applyTo(serverTemplatesComposite);
+		.margins(10, 6).spacing(2, 2)
+		.applyTo(parent);
+
+		serverTemplatesTab.setControl(parent);
 
 		// filter text
-		Text txtTemplateFilter = UIUtils.createSearchText(serverTemplatesComposite);
+		Text txtTemplateFilter = UIUtils.createSearchText(parent);
 		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.CENTER)
+				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(txtTemplateFilter);
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(txtTemplateFilter))
-			.notUpdatingParticipant()
-			.to(uploadTemplate)
-			.converting(new InvertingBooleanConverter())
-			.in(dbc);		
-		
+
 		// the list of templates
-		this.templatesViewer = createServerTemplatesViewer(serverTemplatesComposite, txtTemplateFilter);
+		this.templatesViewer = createServerTemplatesViewer(parent, txtTemplateFilter);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(templatesViewer.getControl()))
-			.notUpdatingParticipant()
-			.to(uploadTemplate)
-			.converting(new InvertingBooleanConverter())
-			.in(dbc);
 
 		IObservableValue selectedViewerServerTemplate = 
 				ViewerProperties.singleSelection().observe(templatesViewer);
@@ -336,16 +353,22 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
+		return selectedViewerServerTemplate;
+	}
+
+	private void createDetailsGroup(Composite parent, DataBindingContext dbc) {
+		
 		// details
-		Group detailsGroup = new Group(serverTemplatesComposite, SWT.NONE);
-		detailsGroup.setText("Details");
+		Group detailsGroup = new Group(parent, SWT.NONE);
+		detailsGroup.setText("Template details");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL)
 				.grab(true, false)
+				.span(3, 1)
 				.hint(SWT.DEFAULT, 106)
 				.applyTo(detailsGroup);
 		GridLayoutFactory.fillDefaults()
-			.margins(10, 6).spacing(2, 2)
+			.margins(10, 6).spacing(2, 2) //TODO fix margins
 			.applyTo(detailsGroup);
 
 		Composite detailsContainer = new Composite(detailsGroup, SWT.NONE);
@@ -373,10 +396,10 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
-		
-		return selectedViewerServerTemplate;
-	}
 
+		
+	}
+	
 	private IDoubleClickListener onServerTemplateDoubleClicked() {
 		return new IDoubleClickListener() {
 	        @Override
@@ -600,7 +623,6 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		private IObservableValue serverTemplate;
 		private IObservableValue selectedTemplate;
 
-		private IObservableValue invalidObservable;
 		private IObservableList mutableTargets = new WritableList();
 		private Composite composite;
 		
