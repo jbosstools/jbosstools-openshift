@@ -60,6 +60,7 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
+		model.setUseLocalTemplate(true);
 		model.setLocalTemplateFileName("theFileName");
 		
 		verify(factory).create(any(InputStream.class));
@@ -74,6 +75,7 @@ public class NewApplicationWizardModelTest {
 		for (Entry<String, String> label : labels.entrySet()) {
 			modelLabels.add(new IResourceLabelsPageModel.Label(label.getKey(), label.getValue()));
 		}
+		model.setUseLocalTemplate(false);
 		model.setServerTemplate(template);
 
 		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
@@ -116,6 +118,7 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void getParametersShouldReturnAParameterMapWhenTemplateIsNotNull() {
 		Map<String, IParameter> parameters = givenTheTemplateHasParameters();
+		model.setUseLocalTemplate(false);
 		model.setServerTemplate(template);
 		
 		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
