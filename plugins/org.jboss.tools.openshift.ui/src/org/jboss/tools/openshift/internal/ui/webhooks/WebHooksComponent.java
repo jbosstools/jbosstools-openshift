@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.DefaultToolTip;
@@ -166,8 +167,15 @@ public class WebHooksComponent extends Composite {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO open https://github.com/<user>/<repo>/settings/hooks
 				String url = buildConfig.getBuildSource().getURI();
+				url = StringUtils.removeEnd(url, ".git");
+				if (isGitHub(url)) {
+					//open https://github.com/<user>/<repo>/settings/hooks
+					if(!url.endsWith("/")) {
+						url = url+"/";
+					}
+					url += "settings/hooks";
+				}
 				new BrowserUtility().checkedCreateExternalBrowser(url,
 					OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 			}
@@ -191,8 +199,7 @@ public class WebHooksComponent extends Composite {
 	}
 
 	private static boolean isGitHub(String gitUrl, IWebhookTrigger webHook) {
-		if (gitUrl == null
-				|| !gitUrl.startsWith("https://github.com/")) {
+		if (!isGitHub(gitUrl)) {
 			return false;
 		}
 
@@ -205,6 +212,10 @@ public class WebHooksComponent extends Composite {
 		}
 	}
 
+	private static boolean isGitHub(String gitUrl) {
+		return StringUtils.startsWith(gitUrl, "https://github.com/");
+	}
+	
 	private void copyToClipBoard(String url) {
 		Clipboard clipboard = new Clipboard(getDisplay());
 		Object[] data = new Object[] { url };
