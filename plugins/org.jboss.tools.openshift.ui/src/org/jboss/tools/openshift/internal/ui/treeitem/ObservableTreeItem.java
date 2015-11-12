@@ -26,7 +26,7 @@ public class ObservableTreeItem extends ObservableUIPojo {
 
 	public static final String PROPERTY_CHILDREN = "children";
 
-	private List<ObservableTreeItem> children = new ArrayList<>();
+	private List<ObservableTreeItem> children;
 
 	private Object model;
 	private IModelFactory factory;
@@ -60,6 +60,10 @@ public class ObservableTreeItem extends ObservableUIPojo {
 		}
 	}
 
+	public boolean isLoaded() {
+		return children != null;
+	}
+	
 	protected List<? extends Object> loadChildren() {
 		if (factory != null) {
 			return factory.createChildren(model);
