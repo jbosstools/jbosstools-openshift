@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,12 +37,12 @@ public class ImportApplicationWizardModel
 	private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("([^/]+[^(\\.git)/])(/|\\.git)?$");
 
 	private Connection connection;
+	private ConnectionTreeItem connectionItem;
 	private Object selectedItem;
 	private String repoPath;
 	private boolean useDefaultRepoPath;
 	private String projectName;
-
-	private ObservableTreeItem buildConfigsTreeRoot;
+	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
 
 	ImportApplicationWizardModel() {
 		this.useDefaultRepoPath = true;
@@ -170,34 +172,33 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setConnection(Connection connection) {
+		this.connectionItem = new ConnectionTreeItem(connection);
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
-		setBuildConfigsTreeRoot(connection);
-	}
-
-	private void setBuildConfigsTreeRoot(Connection connection) {
-		ObservableTreeItem buildConfigTreeRoot = new ConnectionTreeItem(connection);
-		setBuildConfigsTreeRoot(buildConfigTreeRoot);
 	}
 
 	@Override
-	public void setBuildConfigsTreeRoot(ObservableTreeItem root) {
-		firePropertyChange(PROPERTY_BUILDCONFIGS_TREEROOT, this.buildConfigsTreeRoot, this.buildConfigsTreeRoot = root);
+	public List<ObservableTreeItem> getBuildConfigs() {
+		return buildConfigs;
 	}
 	
 	@Override
 	public void loadBuildConfigs() {
-		if (buildConfigsTreeRoot == null) {
-			if (connection == null) {
+		if (connectionItem == null) {
 				return;
-			}
-			setBuildConfigsTreeRoot(connection);
 		}
-		buildConfigsTreeRoot.load();
+		connectionItem.load();
+		setBuildConfigs(connectionItem.getChildren());
 	}
 	
-	@Override
-	public ObservableTreeItem getBuildConfigsTreeRoot() {
-		return this.buildConfigsTreeRoot;
+	private void setBuildConfigs(List<ObservableTreeItem> newBuildConfigs) {
+		if (newBuildConfigs == null) {
+			return;
+		}
+		List<ObservableTreeItem> oldItems = new ArrayList<>(this.buildConfigs);
+		List<ObservableTreeItem> newItems = new ArrayList<>(newBuildConfigs);
+		buildConfigs.clear();
+		buildConfigs.addAll(connectionItem.getChildren());
+		firePropertyChange(PROPERTY_BUILDCONFIGS, oldItems, newItems);
 	}
 
 	@Override
