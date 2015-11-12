@@ -43,9 +43,11 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_HOST = "host";
 	public static final String PROPERTY_USE_DEFAULT_HOST = "useDefaultHost";
 	public static final String PROPERTY_ALL_HOSTS = "allHosts";
-	public static final String PROPERTY_CONNECT_ERROR = "connectError";
+	public static final String PROPERTY_CONNECTED_STATUS = "connectedStatus";
 	public static final String PROPERTY_SIGNUPURL = "signupUrl";
 	public static final String PROPERTY_USERDOCURL = "userdocUrl";
+
+	private static final IStatus NOT_CONNECTED_STATUS = null;//StatusFactory.infoStatus(OpenShiftCommonCoreActivator.PLUGIN_ID, "not connected");
 
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
@@ -60,7 +62,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private ConnectionsFactoryTracker connectionsFactory;
 	private String signupUrl;
 	private String userdocUrl;
-	private IStatus connectError;
+	private IStatus connectedStatus;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	private Collection<IConnection> allConnections;
 	private IConnectionAware<IConnection> wizardModel;
@@ -95,7 +97,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private void init(IConnection editedConnection) {
-		this.connectError = Status.OK_STATUS;
+		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
 		if (editedConnection == null) {
 			initNewConnection();
@@ -134,7 +136,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory;
 	}
 	
-	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
+	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, 
+			IStatus connectionFactoryError, IStatus connectError) {
 		factory = updateFactory(factory, selectedConnection);
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
@@ -149,7 +152,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_USERDOCURL, this.userdocUrl, this.userdocUrl = userdocUrl);
 		
 		setConnectionFactoryError(connectionFactoryError);
-		setConnectError(connectError);
+		setConnectedStatus(connectError);
 	}
 
 	private IConnectionFactory updateFactory(IConnectionFactory factory, IConnection selectedConnection) {
@@ -230,7 +233,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setSelectedConnection(IConnection selectedConnection) {
-		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
 
 	public IConnection getSelectedConnection() {
@@ -242,7 +245,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setConnectionFactory(IConnectionFactory factory) {
-		update(NewConnectionMarker.getInstance(), factory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(NewConnectionMarker.getInstance(), factory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
 	
 	public IConnectionFactory getConnectionFactory() {
@@ -273,7 +276,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setHost(String host) {
-		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
 	
 	private void setConnectionFactoryError(IStatus status) {
@@ -285,7 +288,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public void setUseDefaultHost(boolean useDefaultHost) {
-		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, Status.OK_STATUS);
+		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
 	
 	public boolean isUseDefaultHost() {
@@ -301,6 +304,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IStatus connect() {
+		if (isConnected()) {
+			return Status.OK_STATUS;
+		}
 		IStatus status = Status.OK_STATUS;
 		try {
 			this.connection = createConnection();
@@ -339,18 +345,34 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return connection;
 	}
 
-	public void resetConnectError() {
-		setConnectError(Status.OK_STATUS);
+	public void setNotConnected() {
+		setConnectedStatus(NOT_CONNECTED_STATUS);
 	}
 	
-	private void setConnectError(IStatus status) {
-		firePropertyChange(PROPERTY_CONNECT_ERROR, this.connectError, this.connectError = status);
+	private void setConnectedStatus(IStatus status) {
+		firePropertyChange(PROPERTY_CONNECTED_STATUS, this.connectedStatus, this.connectedStatus = status);
 	}
 
-	public IStatus getConnectError() {
-		return connectError;
+	public IStatus getConnectedStatus() {
+		return connectedStatus;
 	}
-	
+
+	/**
+	 * Returns {@code true} if the connection in this model is already
+	 * connected. Returns {@code false} otherwise. The reason for implementing
+	 * this in the wizard and not in the connection is that you cannot be sure
+	 * of a connected state since tokens have an expiration timestamp. This
+	 * method thus is only of limited use within a wizard that doesn't want to
+	 * re-connect a connection that it created upon page changes etc.
+	 * 
+	 * @return true if the
+	 */
+	public boolean isConnected() {
+		return connectedStatus != null
+				&& connectedStatus != NOT_CONNECTED_STATUS
+				&& connectedStatus.isOK();
+	}
+
 	public void saveRecentConnection() {
 //		IConnection connection = getConnection();
 //		if (connection != null) {
@@ -387,7 +409,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	 */
 	public boolean saveConnection() {
 		if (connection == null
-				|| !connectError.isOK()) {
+				|| !connectedStatus.isOK()) {
 			return false;
 		}
 

@@ -108,7 +108,7 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 				if (!visible) {
 					return;
 				}
-				pageModel.resetConnectError();
+				pageModel.setNotConnected();
 			}
 		};
 	}
