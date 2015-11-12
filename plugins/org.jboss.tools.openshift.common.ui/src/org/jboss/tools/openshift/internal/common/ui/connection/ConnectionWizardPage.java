@@ -315,6 +315,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				if (!url.endsWith(UrlUtils.SCHEME_SEPARATOR)) {
 					url = StringUtils.removeTrailingSlashes(url);
 				}
+				url = org.apache.commons.lang.StringUtils.removeEnd(url, "/console");
 				if (!url.equals(value)) {
 					serverUrlObservable.setValue(url);
 				}
