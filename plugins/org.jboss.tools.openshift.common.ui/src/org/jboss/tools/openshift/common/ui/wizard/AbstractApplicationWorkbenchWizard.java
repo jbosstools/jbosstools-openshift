@@ -13,9 +13,7 @@ package org.jboss.tools.openshift.common.ui.wizard;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizard;
@@ -46,6 +44,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 	
 	protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
 		
+		private IConnectionAwareWizard<IConnection> wizard;
+
 		private DelegatingConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
 			super(wizard, wizardModel);
 		}
@@ -63,19 +63,20 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 
 		@Override
 		public IWizardPage getNextPage() {
-			if (!connect()) {
-				return null;
+			IWizardPage page = null;
+			if (isConnected()) {
+				if (wizard != null) {
+					return wizard.getStartingPage();
+				}
+			} else if (connect()) {
+				IConnection connection = getConnection();
+				this.wizard = getWizard(connection);
+				if (wizard != null) {
+					wizard.setConnection(connection);
+					page = wizard.getStartingPage();
+				}
 			}
-			IConnection connection = getConnection();
-			if (connection == null) {
-				return null;
-			}
-			IConnectionAwareWizard<IConnection> wizard = getWizard(connection);
-			if (wizard == null) {
-				return null;
-			}
-			wizard.setConnection(connection);
-			return wizard.getStartingPage();
+			return page;
 		}
 
 		private IConnectionAwareWizard<IConnection> getWizard(IConnection connection) {

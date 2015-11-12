@@ -255,7 +255,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			protected IStatus validate() {
 				return (IStatus) BeanProperties
-						.value(ConnectionWizardPageModel.PROPERTY_CONNECT_ERROR, IStatus.class)
+						.value(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS, IStatus.class)
 						.observe(pageModel).getValue();
 			}
 		});
@@ -373,12 +373,18 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		if (direction == Direction.BACKWARDS) {
 			return;
 		}
-		event.doit = connect();
+		if (!isConnected()) {
+			event.doit = connect();
+		}
 		if (!event.doit) {
 //			setInitialFocus();
 		}
 	}
 
+	public boolean isConnected() {
+		return getModel().isConnected();
+	}
+	
 	public boolean connect() {
 		try {
 			ConnectJob connectJob = new ConnectJob();
@@ -450,17 +456,4 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			return connectionStatus;
 		}
 	}
-
-//	private static class LinkConverter extends Converter {
-//
-//		public LinkConverter() {
-//			super(IConnectionFactory.class, String.class);
-//		}
-//
-//		@Override
-//		public Object convert(Object fromObject) {
-//			return NLS.bind("New to {0}? Explore the <a>getting started documentation</a>.", ((IConnectionFactory)fromObject).getName());
-//		}
-//
-//	}
 }
