@@ -136,6 +136,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.grab(true, false)
 			.applyTo(tabContainer);
 
+		tabContainer.addListener(SWT.Selection, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				parent.layout(true, false);
+			}
+		});
+
 		IObservableValue useLocalTemplateObservable = 
 				BeanProperties.value(ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model);
 		ValueBindingBuilder
