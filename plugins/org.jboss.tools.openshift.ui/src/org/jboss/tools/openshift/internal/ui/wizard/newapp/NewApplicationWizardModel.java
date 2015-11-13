@@ -10,19 +10,36 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.variables.VariablesPlugin;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 
@@ -55,11 +72,13 @@ public class NewApplicationWizardModel
 	private ITemplate serverTemplate;
 	private List<IParameter> parameters = new ArrayList<IParameter>();
 	private IParameter selectedParameter;
-	private HashMap<String, String> originalValueMap;
+	
+	private Map<String, String> originalValueMap;
 	private Collection<IResource> items = new ArrayList<IResource>(); 
 	private boolean useLocalTemplate = true;
 	private String localTemplateFilename;
 	private IResourceFactory resourceFactory;
+	private org.eclipse.core.resources.IProject eclipseProject;
 
 	private void update(boolean useUploadTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate serverTemplate, String localTemplateFilename) {
 		firePropertyChange(PROPERTY_USE_LOCAL_TEMPLATE, this.useLocalTemplate, this.useLocalTemplate = useUploadTemplate);
@@ -89,12 +108,15 @@ public class NewApplicationWizardModel
 		if (StringUtils.isBlank(filename)) {
 			return null;
 		}
-		
 		ITemplate uploadedTemplate = null;
 		try {
+			filename = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(filename);
+			if (!Files.exists(Paths.get(filename))) {
+				return null;
+			}
 			uploadedTemplate = resourceFactory.create(createInputStream(filename));
-		} catch (FileNotFoundException e) {
-			throw new OpenShiftException(e, "Could not find the file \"{0}\" to upload", filename);
+		} catch (FileNotFoundException | CoreException e) {
+			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
 		}
@@ -155,7 +177,6 @@ public class NewApplicationWizardModel
 		if (template == null) {
 			return;
 		}
-
 		setParameters(new ArrayList<IParameter>(template.getParameters().values()));
 		setItems(template.getItems());
 		setLabels(template.getObjectLabels());
@@ -196,11 +217,60 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setParameters(List<IParameter> parameters) {
-		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = parameters);
-		this.originalValueMap = new HashMap<String, String>(parameters.size());
-		for (IParameter param : parameters) {
-			originalValueMap.put(param.getName(), param.getValue());
+		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(getEclipseProject(), parameters));
+		originalValueMap = parameters.stream().collect(Collectors.toMap(IParameter::getName,IParameter::getValue));
+	}
+
+	private static List<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, List<IParameter> originalParameters) {
+		if (originalParameters == null || originalParameters.isEmpty()) {
+			return originalParameters;
 		}
+		Map<String, String> projectParams = getProjectParameters(project);
+
+		List<IParameter> newParameters = originalParameters.stream().map(p -> { 
+			IParameter clone = p.clone();
+			String value = projectParams.get(clone.getName());
+			if (value != null) {
+				clone.setValue(value);
+			}
+			return clone;
+		}).collect(Collectors.toList());
+
+		return newParameters;
+	}
+
+	private static Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
+		if(project == null) {
+			return Collections.emptyMap();
+		}
+		Map<String,String> projectParams = new HashMap<>();
+		String gitRepo = null;
+		try {
+			gitRepo = StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
+		} catch (CoreException e) {
+			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
+		}
+		if (gitRepo != null) {
+			projectParams.put("SOURCE_REPOSITORY_URL", gitRepo);
+			projectParams.put("GIT_URI", gitRepo);//legacy key
+			
+			String branch;
+			try {
+				branch = StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
+			} catch (CoreException e) {
+				throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
+			}
+			projectParams.put("SOURCE_REPOSITORY_REF", branch);
+			projectParams.put("GIT_REF", branch);//legacy key
+			
+			//Setting the context dir is a really bad idea if we're dealing with a multi module project
+			//Better let the user do it manually if needed.
+			//String contextDir = getDefaultContextDir(project);
+			String contextDir = StringUtils.EMPTY;
+			projectParams.put("CONTEXT_DIR", contextDir);
+			projectParams.put("GIT_CONTEXT_DIR", contextDir);//legacy key
+		}
+		return projectParams;
 	}
 
 	@Override
@@ -316,11 +386,23 @@ public class NewApplicationWizardModel
 	@Override
 	public boolean hasProjects() {
 		return projectItems != null 
-				&& projectItems.size() > 0;
+				&& !projectItems.isEmpty();
 	}
 
 	@Override
 	public Object getContext() {
 		return null;
 	}
+
+	@Override
+	public void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject) {
+		firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = eclipseProject);
+		updateTemplateParameters(selectedTemplate);
+	}
+
+	@Override
+	public org.eclipse.core.resources.IProject getEclipseProject() {
+		return eclipseProject;
+	}
+	
 }
