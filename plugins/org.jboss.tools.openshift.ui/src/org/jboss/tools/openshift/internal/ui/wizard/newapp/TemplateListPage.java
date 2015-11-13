@@ -11,7 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -29,17 +32,32 @@ import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.variables.VariablesPlugin;
+import org.eclipse.egit.core.internal.util.ProjectUtil;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.fieldassist.AutoCompleteField;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -52,6 +70,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -59,22 +79,32 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelectionProperty;
@@ -91,6 +121,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCellLabelProvider;
+import org.jboss.tools.openshift.internal.ui.wizard.builder.ProjectBuilderTypeDetector;
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
@@ -115,7 +146,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	
 	public TemplateListPage(IWizard wizard, ITemplateListPageModel model) {
 		super("Select template", 
-				"Templates choices may be reduced to a smaller list by typing the name of a tag in the text field.", 
+				"Server template choices may be filtered by typing the name of a tag in the text field.", 
 				"templateList", 
 				wizard);
 		this.model = model;
@@ -128,7 +159,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.applyTo(parent);
 
 		createProjectControls(parent, dbc);
-		
+		IObservableValue selectedEclipseProject = createEclipseProjectControls(parent, dbc);
+
 		TabFolder tabContainer= new TabFolder(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.span(3, 1)
@@ -164,21 +196,129 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, useLocalTemplateObservable, dbc);
 		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, useLocalTemplateObservable, dbc);
+
 		createDetailsGroup(parent, dbc);
 
 		model.setUseLocalTemplate(false);
 
 		// validate required template
 		IObservableValue selectedTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
-		SelectedTemplateValidator selectedTemplateValidator = new SelectedTemplateValidator(useLocalTemplateObservable, localTemplateFilename, serverTemplate, selectedTemplate, parent);
-		dbc.addValidationStatusProvider(selectedTemplateValidator );
-		ControlDecorationSupport.create(
-				selectedTemplateValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		TemplateListPageValidator pageValidator = new TemplateListPageValidator(useLocalTemplateObservable, localTemplateFilename, serverTemplate, selectedTemplate, selectedEclipseProject, parent);
+		dbc.addValidationStatusProvider(pageValidator );
+		ControlDecorationSupport.create(pageValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+	}
+
+	private IObservableValue createEclipseProjectControls(Composite parent, DataBindingContext dbc) {
+		// existing project
+		Label existingProjectLabel = new Label(parent, SWT.NONE);
+		existingProjectLabel.setText("Use existing workspace project:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.applyTo(existingProjectLabel);
+
+		final Text existingProjectNameText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.applyTo(existingProjectNameText);
+		
+		ISWTObservableValue projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
+
+		IObservableValue eclipseProjectObservable = BeanProperties.value(
+				ITemplateListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
+		
+		ValueBindingBuilder
+			.bind(projectNameTextObservable)
+			.converting(new Converter(String.class, org.eclipse.core.resources.IProject.class) {
+				@Override
+				public Object convert(Object fromObject) {
+					String name = (String)fromObject;
+					return ProjectUtils.getProject(name);
+				}
+			})
+			.to(eclipseProjectObservable)
+			.converting(new Converter(org.eclipse.core.resources.IProject.class, String.class) {
+				
+				@Override
+				public Object convert(Object fromObject) {
+					return fromObject == null?"": ((org.eclipse.core.resources.IProject)fromObject).getName();
+				}
+			})
+			.in(dbc);
+
+		// project name content assist
+		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
+		
+		FieldDecoration contentProposalFieldIndicator =
+				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		dec.setImage(contentProposalFieldIndicator.getImage());
+		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
+		dec.setShowOnlyOnFocus(true);
+
+		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllOpenedProjects());
+
+		// browse projects
+		Button browseProjectsButton = new Button(parent, SWT.NONE);
+		browseProjectsButton.setText("Browse...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER)
+				.hint(100, SWT.DEFAULT)
+				.grab(false, false)
+				.applyTo(browseProjectsButton);
+		browseProjectsButton.addSelectionListener(onBrowseProjects());
+		
+		Link gitLabel = new Link(parent, SWT.NONE);
+		gitLabel.setText("The project needs to be <a>shared with Git</a> and have a remote repository accessible by OpenShift");
+		gitLabel.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Display.getCurrent().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						org.eclipse.core.resources.IProject p = model.getEclipseProject();
+						model.setEclipseProject(null);
+						EGitUIUtils.openGitSharingWizard(Display.getCurrent().getActiveShell(), p);
+						model.setEclipseProject(p);//force re-validation
+					}
+				});
+			}
+		});
+		GridDataFactory.fillDefaults().span(3, 1).applyTo(gitLabel);
+		
+		eclipseProjectObservable.addValueChangeListener(new IValueChangeListener() {
+
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				org.eclipse.core.resources.IProject p = (org.eclipse.core.resources.IProject) event.getObservableValue().getValue();
+				toggleEgitLink(gitLabel, p);
+			}
+		});
+		toggleEgitLink(gitLabel, model.getEclipseProject());
+		return projectNameTextObservable;
+	}
+
+	/**
+	 * Open a dialog box to select an open project when clicking on the 'Browse' button.
+	 * 
+	 * @return
+	 */
+	private SelectionListener onBrowseProjects() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SelectExistingProjectDialog dialog = 
+						new SelectExistingProjectDialog(model.getEclipseProject() == null? null: model.getEclipseProject().getName(), getShell());
+				if (dialog.open() == Dialog.OK) {
+					Object selectedProject = dialog.getFirstResult();
+					model.setEclipseProject(((org.eclipse.core.resources.IProject) selectedProject));
+				}
+			}
+		};
 	}
 
 	private void createProjectControls(Composite parent, DataBindingContext dbc) {
 		Label projectLabel = new Label(parent, SWT.NONE);
-		projectLabel.setText("Project: ");
+		projectLabel.setText("OpenShift project: ");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(projectLabel);
@@ -204,7 +344,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							if (value instanceof IProject) {
 								return ValidationStatus.ok();
 							}
-							return ValidationStatus.cancel("Please choose a project.");
+							return ValidationStatus.cancel("Please choose an OpenShift project.");
 						}
 					})
 					.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_PROJECT)
@@ -279,8 +419,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.applyTo(parent);
 
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Select a template from the file system:");
-
+		lbl.setText("Select a local template:");
+		GridDataFactory.fillDefaults().span(3,1).applyTo(lbl);
+		
 		// local template file name
 		Text txtLocalTemplateFileName = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
@@ -291,20 +432,117 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.bind(localTemplateFilename )
 				.to(BeanProperties.value(
 						ITemplateListPageModel.PROPERTY_LOCAL_TEMPLATE_FILENAME).observe(model))
+				.validatingBeforeSet( o -> isFile(o.toString())?
+						ValidationStatus.ok(): 
+						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"))
 				.in(dbc);
 
 		// browse button
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
-		btnBrowseFiles.setText("Browse...");
+		btnBrowseFiles.setText("File system...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(120, SWT.DEFAULT).indent(6, 0)
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
 				.applyTo(btnBrowseFiles);
 
-		btnBrowseFiles.addSelectionListener(onBrowseClicked());
+		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
+		
+		// browse button
+		Button btnBrowseWorkspaceFiles = new Button(parent, SWT.NONE);
+		btnBrowseWorkspaceFiles.setText("Workspace...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.applyTo(btnBrowseWorkspaceFiles);
+
+		btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
+
 
 		localTemplatesTab.setControl(parent);
-
+		
 		return localTemplateFilename;
+	}
+
+	private SelectionListener onBrowseWorkspaceClicked() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ElementTreeSelectionDialog dialog = createFileDialog(model.getLocalTemplateFileName());
+				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
+					String path = ((IFile)dialog.getFirstResult()).getFullPath().toPortableString();
+					String file = VariablesPlugin.getDefault().getStringVariableManager().generateVariableExpression("workspace_loc", path);
+					setLocalTemplate(file);
+				}
+			}
+
+
+			private ElementTreeSelectionDialog createFileDialog(String selectedFile) {
+				ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+						    getShell(),
+						    new WorkbenchLabelProvider(),
+						    new WorkbenchContentProvider()
+				);
+				dialog.setTitle("Select an OpenShift template");
+				dialog.setMessage("Select an OpenShift template (*.json)");
+				dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
+				dialog.addFilter(new ViewerFilter() {
+					
+					@Override
+					public boolean select(Viewer viewer, Object parentElement, Object element) {
+						return element instanceof IContainer 
+								|| (element instanceof IFile && ((IFile)element).getFileExtension().equals("json"));
+					}
+				});
+				dialog.setAllowMultiple( false );
+				IResource res = model.getEclipseProject();
+				if (StringUtils.isNotBlank(selectedFile)) {
+					String prefix = "${workspace_loc:";
+					String path = selectedFile;
+					if (selectedFile.startsWith(prefix) && selectedFile.endsWith("}")) {
+						path = path.substring(prefix.length(), path.length()-1);
+					}
+					res = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+				}
+				if (res != null) {
+					dialog.setInitialSelection(res);
+				}
+				
+				return dialog;
+			}
+		};
+	}
+
+
+	private void setLocalTemplate(String file) {
+		if (file == null || !isFile(file)) {
+			return;
+		}
+		try {
+			model.setLocalTemplateFileName(file);
+			return;
+		} catch (ClassCastException ex) {
+			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
+			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
+			ErrorDialog.openError(getShell(), "Template Error",
+					NLS.bind("The file \"{0}\" is not an OpenShift template.", 
+							file),
+					status);
+		} catch (UnsupportedVersionException ex) {
+			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
+			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
+			ErrorDialog.openError(getShell(), "Template Error", 
+					NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file),
+					status);
+		} catch (OpenShiftException ex) {
+			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
+			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
+			ErrorDialog.openError(getShell(), "Template Error",
+					NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file),
+					status);
+		}
+	}
+	
+	private boolean isFile(String path) {
+		return Files.isRegularFile(Paths.get(substituteVariables(path)));
 	}
 
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder, IObservableValue uploadTemplate, DataBindingContext dbc) {
@@ -320,17 +558,28 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		serverTemplatesTab.setControl(parent);
 
 		// filter text
-		Text txtTemplateFilter = UIUtils.createSearchText(parent);
+		final Text txtTemplateFilter = UIUtils.createSearchText(parent);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(txtTemplateFilter);
 
+		IObservableValue eclipseProjectObservable = BeanProperties.value(ITemplateListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
+		eclipseProjectObservable.addValueChangeListener(new IValueChangeListener() {
+
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				filterTemplates(txtTemplateFilter, (org.eclipse.core.resources.IProject)event.getObservableValue().getValue());
+			}
+		});
+		
+		filterTemplates(txtTemplateFilter, model.getEclipseProject());
+		
 		// the list of templates
 		this.templatesViewer = createServerTemplatesViewer(parent, txtTemplateFilter);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
-
+		
 		IObservableValue selectedViewerServerTemplate = 
 				ViewerProperties.singleSelection().observe(templatesViewer);
 		ValueBindingBuilder
@@ -345,6 +594,10 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
 		return selectedViewerServerTemplate;
+	}
+
+	protected String findMatchingTags(org.eclipse.core.resources.IProject project) {
+		return new ProjectBuilderTypeDetector().findTemplateFilter(project);
 	}
 
 	private void createDetailsGroup(Composite parent, DataBindingContext dbc) {
@@ -441,48 +694,19 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		}
 	}
 
-	private SelectionAdapter onBrowseClicked() {
+	private SelectionAdapter onFileSystemBrowseClicked() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = createFileDialog(model.getLocalTemplateFileName());
-				String file = null;
-				do {
-					file = dialog.open();
-					if (file != null) {
-						try {
-							model.setLocalTemplateFileName(file);
-							return;
-						} catch (ClassCastException ex) {
-							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
-							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
-							ErrorDialog.openError(getShell(), "Template Error",
-									NLS.bind("The file \"{0}\" is not an OpenShift template.", 
-											file),
-									status);
-							file = null;
-						} catch (UnsupportedVersionException ex) {
-							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
-							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
-							ErrorDialog.openError(getShell(), "Template Error", 
-									NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file),
-									status);
-							file = null;
-						} catch (OpenShiftException ex) {
-							IStatus status = ValidationStatus.error(ex.getMessage(), ex);
-							OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
-							ErrorDialog.openError(getShell(), "Template Error",
-									NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file),
-									status);
-							file = null;
-						}
-					}
-				} while (file != null);
+				String file = dialog.open();
+				setLocalTemplate(file);
 			}
 
 			private FileDialog createFileDialog(String selectedFile) {
 				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+				dialog.setText("Select an OpenShift template");
 				if(StringUtils.isNotBlank(selectedFile)) {
 					File file = new File(selectedFile);
 					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
@@ -607,23 +831,25 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	 * A validator that validates this page based on the choice to use a local
 	 * or server template and the settings that are required therefore.
 	 */
-	private class SelectedTemplateValidator extends MultiValidator {
+	private class TemplateListPageValidator extends MultiValidator {
 
 		private IObservableValue useLocalTemplate;
 		private IObservableValue localTemplateFilename;
 		private IObservableValue serverTemplate;
 		private IObservableValue selectedTemplate;
+		private IObservableValue projectNameObservable;
 
 		private IObservableList mutableTargets = new WritableList();
 		private Composite composite;
 		
-		public SelectedTemplateValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
-				IObservableValue serverTemplate, IObservableValue selectedTemplate, Composite composite) {
+		public TemplateListPageValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
+				IObservableValue serverTemplate, IObservableValue selectedTemplate, IObservableValue projectNameObservable, Composite composite) {
 			this.useLocalTemplate = useLocalTemplate;
 			useLocalTemplate.getValue();
 			this.localTemplateFilename = localTemplateFilename;
 			this.serverTemplate = serverTemplate;
 			this.selectedTemplate = selectedTemplate;
+			this.projectNameObservable = projectNameObservable;
 			this.composite = composite;
 		}
 
@@ -631,19 +857,56 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		protected IStatus validate() {
 			IStatus status = ValidationStatus.ok();
 			mutableTargets.clear();
-			if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
-				if (StringUtils.isEmpty((String) localTemplateFilename.getValue())
-						|| selectedTemplate.getValue() == null) {
-					status = ValidationStatus.cancel("Please select a local template file.");
-					mutableTargets.add(localTemplateFilename);
-				}
-			} else {
-				if (selectedTemplate.getValue() == null){
-					status = ValidationStatus.cancel("Please select a server template.");
-					mutableTargets.add(serverTemplate);
-				} 
-			}
 			
+			final String projectName = (String) projectNameObservable.getValue();
+
+			if (!StringUtils.isEmpty(projectName)) {
+				final org.eclipse.core.resources.IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+				if (!ProjectUtils.exists(project)) {
+					status = ValidationStatus.error(
+							NLS.bind("The project {0} does not exist in your workspace.", projectName));
+				} else if (!ProjectUtils.isAccessible(project)) {
+					status = ValidationStatus.error(
+							NLS.bind("The project {0} is not open.", projectName));
+				} else if (EGitUtils.isSharedWithGit(project)){
+					try {
+						List<String> repos = EGitUtils.getRemoteGitRepos(project);
+						if (repos == null || repos.isEmpty()) {
+							status = ValidationStatus.error(
+									NLS.bind("No remote Git repository is defined on project {0}", projectName));
+						} else {
+							status = getGitDirtyStatus(project);						
+						}
+					} catch (CoreException e) {
+						status = ValidationStatus.error(
+								NLS.bind("Can not read Git config on project {0} : {1}", projectName, e.getMessage()));
+					}
+				} else {
+					status = ValidationStatus.error(
+							NLS.bind("The project {0} is not shared with Git.", projectName));
+				}
+			}
+			if (!status.isOK()) {
+				mutableTargets.add(projectNameObservable);
+			} else {
+				if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
+					String localTemplate = (String)localTemplateFilename.getValue();
+					if (StringUtils.isNotEmpty(localTemplate)){ 
+						if (!isFile(localTemplate)) {
+							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
+							mutableTargets.add(localTemplateFilename);
+						}
+					} else if (selectedTemplate.getValue() == null) {
+						status = ValidationStatus.cancel("Please select a local template file.");
+						mutableTargets.add(localTemplateFilename);
+					}
+				} else {
+					if (selectedTemplate.getValue() == null){
+						status = ValidationStatus.cancel("Please select a server template.");
+						mutableTargets.add(serverTemplate);
+					} 
+				}
+			}			
 			// force redraw since removed decorations somehow stay visible, GTK3 bug?
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
 			composite.redraw();
@@ -651,8 +914,48 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			return status;
 		}
 
-		
+		@Override
+		public IObservableList getTargets() {
+			return mutableTargets;
+		}
 	}
 	
+	private IStatus getGitDirtyStatus(org.eclipse.core.resources.IProject project) {
+		try {
+			if (EGitUtils.isDirty(project, false, new NullProgressMonitor())) {
+				return ValidationStatus.error(NLS.bind(
+						"The project {0} has uncommitted changes. Please commit those changes first.",
+						project.getName()));
+			} else {
+				return ValidationStatus.ok();
+			}
+		} catch (NoWorkTreeException | IOException | GitAPIException e) {
+			return ValidationStatus.error(NLS.bind(
+					"The git repository for project {0} looks corrupt. Please fix it before using it.",
+					project.getName()));
+		}
+	}
 
+	private void filterTemplates(Text text, org.eclipse.core.resources.IProject project) {
+		String tags = findMatchingTags(project);
+		if (tags != null && !text.isDisposed()) {
+			text.setText(tags);
+		}
+	}
+
+	private void toggleEgitLink(Link gitLabel, org.eclipse.core.resources.IProject p) {
+		if (gitLabel.isDisposed()) {
+			return;
+		}
+		boolean showLink = p != null && !EGitUtils.isSharedWithGit(p);
+		UIUtils.setVisibleAndExclude(showLink, gitLabel);
+	}
+
+	private String substituteVariables(String string) {
+		try {
+			return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(string);
+		} catch (CoreException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 }

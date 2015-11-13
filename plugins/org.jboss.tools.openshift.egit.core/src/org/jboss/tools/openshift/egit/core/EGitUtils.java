@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -92,6 +94,7 @@ import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
  */
 public class EGitUtils {
 
+	private static final String ORIGIN = "origin";
 	private static final String EGIT_UI_PLUGIN_ID = "org.eclipse.egit.ui";
 	/*
 	 * @see org.eclipse.egit.ui.UIPreferences#REMOTE_CONNECTION_TIMEOUT
@@ -838,8 +841,10 @@ public class EGitUtils {
 		return getRemoteConfig(remote, allRemotes);
 	}
 
-	private static String getCurrentBranch(Repository repository)
+	public static String getCurrentBranch(Repository repository)
 			throws CoreException {
+		Assert.isLegal(repository != null,
+				"Could not get configuration. No repository provided.");
 		String branch = null;
 		try {
 			branch = repository.getBranch();
@@ -851,6 +856,15 @@ public class EGitUtils {
 		return branch;
 	}
 
+	public static String getCurrentBranch(IProject project)
+			throws CoreException {
+		if (project == null) {
+			return null;
+		}
+		Repository repo = EGitUtils.getRepository(project);
+		return (repo == null)? null: EGitUtils.getCurrentBranch(repo);
+	}
+	
 	/**
 	 * Gets the remote config with the given name from the list of remote
 	 * configs. Returns <code>null</code> if it was not found.
@@ -1444,5 +1458,58 @@ public class EGitUtils {
 			}
 			return indexDiff;
 		}
+	}
+
+	/**
+	 * Return the names of remote http(s)-based git repositories. The <code>origin</code> repository, if present will be listed first.
+	 * Following repositories are listed lexicographically, ignoring case differences.
+	 * 
+	 * @throws CoreException
+	 */
+	public static List<String> getRemoteGitRepos(IProject project) throws CoreException {
+		if (project == null) {
+			return null;
+		}
+		Repository repo = getRepository(project);
+		if (repo == null) {
+		  return null;
+		}
+		//Returned configurations are ordered lexicographically by names.
+		List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(repo);
+		Collections.sort(remoteConfigs, new Comparator<RemoteConfig>() {
+
+			@Override
+			public int compare(RemoteConfig o1, RemoteConfig o2) {
+				if (ORIGIN.equals(o1.getName())) {
+					return 1;
+				}
+				if (ORIGIN.equals(o2.getName())) {
+					return -1;
+				}
+				return o1.getName().compareToIgnoreCase(o2.getName());
+			}
+		});
+		return remoteConfigs.stream()
+				.map(rc -> getFetchURI(rc))
+				.filter(uri -> uri != null && uri.toString().startsWith("http"))
+				.map(URIish::toString)
+				.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Returns the name of the first http(s)-based git remote repository of a project, or <code>null</code>, if no matching repository is found.
+	 * 
+	 * @see EGitUtils#getRemoteGitRepos(IProject)
+	 * @throws CoreException 
+	 */
+	public static String getDefaultRemoteRepo(org.eclipse.core.resources.IProject project) throws CoreException {
+		if (project == null) {
+			return null;
+		}
+		List<String> remoteRepos = EGitUtils.getRemoteGitRepos(project);
+		if (remoteRepos != null && !remoteRepos.isEmpty()) {
+			return remoteRepos.get(0);
+		}
+		return null;
 	}
 }
