@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.common.core.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -32,20 +33,25 @@ public class ProjectUtils {
 		return exists(ResourcesPlugin.getWorkspace().getRoot().getProject(name));
 	}
 
+	
+	public static IProject getProject(String name) {
+		if (StringUtils.isEmptyOrNull(name)) {
+			return null;
+		}
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+		return exists(project)?project:null;
+	}
+	
 	public static boolean isAccessible(IProject project) {
 		return project != null
 				&& project.isAccessible();
 	}
 
 	public static String[] getAllOpenedProjects() {
-		List<String> projects = new ArrayList<String>();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (project.exists()
-					&& project.isOpen()) {
-				projects.add(project.getName());
-			}
-		}
-		return projects.toArray(new String[projects.size()]);
+		return Arrays.stream(ResourcesPlugin.getWorkspace().getRoot().getProjects())
+					 .filter(IProject::isAccessible)
+					 .map(IProject::getName)
+					 .toArray(size -> new String[size]);
 	}
 
 	/**

@@ -34,6 +34,7 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	static final String PROPERTY_SERVER_TEMPLATE = "serverTemplate";
 	static final String PROPERTY_LOCAL_TEMPLATE_FILENAME = "localTemplateFileName";
 	static final String PROPERTY_USE_LOCAL_TEMPLATE = "useLocalTemplate";
+	static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
 	
 	/**
 	 * Loads the resources for the given connection (in this model) from the server. Should be
@@ -100,5 +101,9 @@ public interface ITemplateListPageModel extends IConnectionAware<Connection> {
 	boolean hasProjects();
 
 	List<ObservableTreeItem> getTemplates();
+
+	org.eclipse.core.resources.IProject getEclipseProject();
+
+	void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject);
 	
 }

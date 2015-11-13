@@ -69,6 +69,9 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 				|| selection.isEmpty()) {
 			return;
 		}
+		org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection, org.eclipse.core.resources.IProject.class);
+		model.setEclipseProject(selectedProject);
+		
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
 		if (connection != null) {
 			model.setConnection(connection);
@@ -119,6 +122,10 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 						}
 					});
 					UIUtils.showOpenShiftExplorerView();
+					if (model.getEclipseProject() != null) {
+						//No need to import the project from git, it's already here
+						return;
+					}
 					final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(createJob.getResources());
 					if (projectsAndBuildConfigs.isEmpty()) {
 						return;

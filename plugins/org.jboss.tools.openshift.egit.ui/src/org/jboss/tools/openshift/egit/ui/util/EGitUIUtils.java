@@ -10,14 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.egit.ui.util;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.op.CloneOperation.PostCloneTask;
 import org.eclipse.egit.ui.Activator;
 import org.eclipse.egit.ui.UIPreferences;
+import org.eclipse.egit.ui.internal.sharing.SharingWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @author Andre Dietisheim
@@ -61,5 +66,15 @@ public class EGitUIUtils {
 	public static void ensureEgitUIIsStarted() {
 		Activator.getDefault();
 	}
-
+	
+	@SuppressWarnings("restriction")
+	public static void openGitSharingWizard(Shell shell, IProject project) {
+		if (project == null) {
+			return;
+		}
+		final SharingWizard wizard = new SharingWizard();
+		wizard.init(PlatformUI.getWorkbench(), project);
+		WizardDialog wizardDialog = new WizardDialog(shell, wizard);
+		wizardDialog.open();
+	}
 }

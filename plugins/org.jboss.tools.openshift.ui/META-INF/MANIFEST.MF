@@ -30,7 +30,9 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.apache.commons.collections;bundle-version="3.2.0",
  org.eclipse.ui.console;bundle-version="3.6.0",
  org.eclipse.jdt.launching;bundle-version="3.8.0",
- org.eclipse.linuxtools.docker.core;bundle-version="1.0.0"
+ org.eclipse.linuxtools.docker.core;bundle-version="1.0.0",
+ org.eclipse.ui.ide,
+ org.eclipse.core.variables
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test",
@@ -42,6 +44,7 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.property.build;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.validator;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.webhooks;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.wizard.builder;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.common;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.deployimage;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.importapp;x-friends:="org.jboss.tools.openshift.test",
