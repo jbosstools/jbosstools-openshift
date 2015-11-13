@@ -135,6 +135,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
 			.applyTo(tabContainer);
+		tabContainer.addListener(SWT.Selection, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				// JBIDE-21072: force re-layout of the parent upon tab switching
+				parent.layout(true, false);
+			}
+		});
 
 		IObservableValue useLocalTemplateObservable = 
 				BeanProperties.value(ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model);
