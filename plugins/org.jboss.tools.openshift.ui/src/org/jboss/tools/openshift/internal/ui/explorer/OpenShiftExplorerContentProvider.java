@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
+import org.jboss.tools.openshift.internal.core.WatchManager;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
@@ -181,6 +182,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				return groups.toArray();
 			} else if (parentElement instanceof ResourceGrouping) {
 				ResourceGrouping group = (ResourceGrouping) parentElement;
+				WatchManager.getInstance().startWatch(group.getProject());
 				return group.getProject().getResources(group.getKind()).toArray();
 			}
 		} catch (OpenShiftException e) {

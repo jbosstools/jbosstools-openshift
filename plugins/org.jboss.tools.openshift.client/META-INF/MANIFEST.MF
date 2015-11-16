@@ -37,4 +37,9 @@ Import-Package: org.apache.commons.logging,
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
- org.apache.httpcomponents.httpcore;bundle-version="4.3.3"
+ org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
+ org.eclipse.jetty.websocket.client;bundle-version="9.2.13",
+ org.eclipse.jetty.util;bundle-version="9.2.13",
+ org.eclipse.jetty.io;bundle-version="9.2.13",
+ org.eclipse.jetty.websocket.common;bundle-version="9.2.13",
+ org.eclipse.jetty.websocket.api;bundle-version="9.2.13"
