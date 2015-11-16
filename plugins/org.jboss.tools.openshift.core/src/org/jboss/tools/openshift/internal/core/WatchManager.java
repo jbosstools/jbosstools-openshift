@@ -91,7 +91,7 @@ public class WatchManager {
 		private List<IResource> resources = Collections.synchronizedList(new ArrayList<>());
 
 		public WatchListener(IProject project, Connection conn, int backoff, long lastConnect) {
-			OpenShiftCoreActivator.pluginLog().logInfo("Adding WatchListener for " + project.getName());
+			Trace.debug("Adding WatchListener for {0}", project.getName());
 			this.project = project;
 			this.conn = conn;
 			this.backoff = backoff;
@@ -100,40 +100,40 @@ public class WatchManager {
 			if(System.currentTimeMillis() - lastConnect > BACKOFF_RESET) {
 				backoff = 0;
 			}
-			OpenShiftCoreActivator.pluginLog().logInfo("Initial watch backoff in sec: " + FIBONACCI[backoff] * BACKOFF_MILLIS / 1000);
+			Trace.debug("Initial watch backoff of {0} ms", FIBONACCI[backoff] * BACKOFF_MILLIS );
 
 		}
 	
 		@Override
 		public void connected(List<IResource> resources) {
-			OpenShiftCoreActivator.pluginLog().logInfo("The watch connected to OpenShift connection " + conn.toString());
+			Trace.debug("Endpoint connected to {0} with {1} resources", conn.toString(), resources.size());
 			this.resources.addAll(resources);
 		}
 
 		@Override
 		public void disconnected() {
-			OpenShiftCoreActivator.pluginLog().logInfo("The watch disconnected to OpenShift connection " + conn.toString());
+			Trace.debug("Endpoint disconnected to {0}." + conn.toString());
 			restart();
 		}
 
 		@Override
 		public void error(Throwable err) {
-			OpenShiftCoreActivator.logWarning("Reconnecting. There was an error watching connection " + conn.toString(), err);
+			Trace.warn("Reconnecting. There was an error watching connection {0}:", err, conn.toString());
 			restart();
 		}
 		
 		private synchronized void restart() {
 			if(state.get() == State.DISCONNECTED) {
-				OpenShiftCoreActivator.pluginLog().logInfo("Restart called but returning early because already disconnected");
+				Trace.debug("Restart called but returning early because already disconnected");
 				return;
 			}
 			state.set(State.DISCONNECTED);
 			IWatcher watcher = watches.get(project);
 			if(watcher != null) {
-				OpenShiftCoreActivator.pluginLog().logInfo("Stopping watcher for project " + project.getName());
+				Trace.debug("Stopping watcher for project {0}", project.getName());
 				watcher.stop();
 			}
-			OpenShiftCoreActivator.pluginLog().logInfo("Rescheduling watch job for project " + project.getName());
+			Trace.debug("Rescheduling watch job for project {0}", project.getName());
 			startWatch(project, backoff, lastConnect);
 		}
 		
@@ -150,16 +150,16 @@ public class WatchManager {
 				try {
 					connect(client);
 				}catch(Exception e) {
-					OpenShiftCoreActivator.pluginLog().logInfo("Exception starting watch on project " + project.getName(),e);
+					Trace.debug("Exception starting watch on project {0}",e,project.getName());
 					backoff++;
 					if(backoff > FIBONACCI.length) {
-						OpenShiftCoreActivator.pluginLog().logInfo("Exceeded backoff attempts trying to reconnect watch for " + project.getName());
+						Trace.info("Exceeded backoff attempts trying to reconnect watch for {0}",project.getName());
 						watches.remove(project);
 						state.set(State.DISCONNECTED);
 						return Status.OK_STATUS;
 					}
 					final long delay = FIBONACCI[backoff] * BACKOFF_MILLIS;
-					OpenShiftCoreActivator.pluginLog().logInfo("Delaying watch restart by " + delay + "(ms).");
+					Trace.debug("Delaying watch restart by {0}ms", delay);
 					new RestartWatchJob(client).schedule(delay);
 				}
 				return Status.OK_STATUS;
@@ -169,11 +169,11 @@ public class WatchManager {
 		
 		public void start() {
 			if(state.get() == State.STARTING) {
-				OpenShiftCoreActivator.pluginLog().logInfo("In the process of starting watch already.  Returning early");
+				Trace.debug("In the process of starting watch already.  Returning early");
 				return;
 			}
 			state.set(State.STARTING);
-			OpenShiftCoreActivator.pluginLog().logInfo("Starting watch on project " + project.getName());
+			Trace.info("Starting watch on project {0}", project.getName());
 			IClient client = getClientFor(project);
 			new RestartWatchJob(client).schedule();
 		}
@@ -200,7 +200,7 @@ public class WatchManager {
 		
 		@Override
 		public void received(IResource resource, ChangeType change) {
-			OpenShiftCoreActivator.pluginLog().logInfo("Watch received change " + change + ":" + resource.toJson(false));
+			Trace.debug("Watch received change\n{0}",resource.toJson(false));
 			IResource newItem = null;
 			IResource oldItem = null;
 			int index = resources.indexOf(resource);
