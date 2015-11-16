@@ -50,6 +50,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         this.context = context;
+        registerDebugOptionsListener(PLUGIN_ID, new Trace(this), context);
         Collection<Connection> connections = new ConnectionPersistency().load();
         ConnectionsRegistrySingleton.getInstance().addAll(connections);
         ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {

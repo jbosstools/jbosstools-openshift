@@ -1,0 +1,9 @@
+org.jboss.tools.openshift.core/debug=false
+
+# Tracing options
+org.jboss.tools.openshift.core/config=false
+org.jboss.tools.openshift.core/info=false
+org.jboss.tools.openshift.core/warning=false
+org.jboss.tools.openshift.core/severe=false
+org.jboss.tools.openshift.core/finest=false
+org.jboss.tools.openshift.core/finer=false
