@@ -136,12 +136,8 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		// password
 		this.passwordBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("v3 password"))
 				.to(passwordObservable)
 				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		passwordObservable.addValueChangeListener(changeListener);
 		
 		connectionAuthProvider = new ConnectionAuthenticationProvider();
