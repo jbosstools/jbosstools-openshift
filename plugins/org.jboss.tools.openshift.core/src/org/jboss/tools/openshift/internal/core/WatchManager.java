@@ -112,7 +112,7 @@ public class WatchManager {
 
 		@Override
 		public void disconnected() {
-			Trace.debug("Endpoint disconnected to {0}." + conn.toString());
+			Trace.debug("Endpoint disconnected to {0}.", conn.toString());
 			restart();
 		}
 
@@ -128,11 +128,6 @@ public class WatchManager {
 				return;
 			}
 			state.set(State.DISCONNECTED);
-			IWatcher watcher = watches.get(project);
-			if(watcher != null) {
-				Trace.debug("Stopping watcher for project {0}", project.getName());
-				watcher.stop();
-			}
 			Trace.debug("Rescheduling watch job for project {0}", project.getName());
 			startWatch(project, backoff, lastConnect);
 		}
