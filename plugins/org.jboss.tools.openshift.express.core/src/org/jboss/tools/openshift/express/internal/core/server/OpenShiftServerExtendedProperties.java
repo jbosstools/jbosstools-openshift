@@ -24,6 +24,10 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		super(adaptable);
 	}
 	
+	public boolean allowConvenienceEnhancements() {
+		return false;
+	}
+	
 	public boolean hasWelcomePage() {
 		return true;
 	}
