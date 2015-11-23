@@ -34,7 +34,6 @@ public class NewApplicationHandler extends AbstractHandler{
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			IProject project = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IProject.class);
 			WizardUtils.openWizardDialog(new NewApplicationWizard(), HandlerUtil.getActiveShell(event));
 		} catch (ConnectionNotFoundException e) {
 			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to find the connection", e);
