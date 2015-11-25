@@ -218,7 +218,11 @@ public class NewApplicationWizardModel
 	@Override
 	public void setParameters(List<IParameter> parameters) {
 		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(getEclipseProject(), parameters));
-		originalValueMap = parameters.stream().collect(Collectors.toMap(IParameter::getName,IParameter::getValue));
+		Map<String, String> paramsMap = new HashMap<>();
+		if (parameters != null) {
+		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
+		}
+		originalValueMap = paramsMap;
 	}
 
 	private static List<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, List<IParameter> originalParameters) {

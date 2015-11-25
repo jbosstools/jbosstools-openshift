@@ -61,7 +61,7 @@ public class NewApplicationWizardModelTest {
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
 		model.setUseLocalTemplate(true);
-		model.setLocalTemplateFileName("theFileName");
+		model.setLocalTemplateFileName("resources/eap6-basic-sti.json");
 		
 		verify(factory).create(any(InputStream.class));
 		assertEquals(template, model.getSelectedTemplate());
@@ -94,6 +94,7 @@ public class NewApplicationWizardModelTest {
 		IParameter param = mock(IParameter.class);
 		when(param.getName()).thenReturn("foo");
 		when(param.getValue()).thenReturn("abc");
+		when(param.clone()).thenReturn(param);
 		
 		model.setParameters(Arrays.asList(new IParameter[] {param}));
 		model.resetParameter(param);
@@ -127,7 +128,7 @@ public class NewApplicationWizardModelTest {
 	private Map<String, IParameter> givenTheTemplateHasParameters() {
 		IParameter param = mock(IParameter.class);
 		when(param.getName()).thenReturn("foo");
-
+		when(param.clone()).thenReturn(param);
 		Map<String, IParameter> parameters = new HashMap<String, IParameter>();
 		parameters.put(param.getName(), param );
 		when(template.getParameters()).thenReturn(parameters);
