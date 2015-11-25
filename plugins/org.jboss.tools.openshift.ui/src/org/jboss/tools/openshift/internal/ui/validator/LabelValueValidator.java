@@ -23,35 +23,37 @@ import org.eclipse.osgi.util.NLS;
  * @author Jeff Cantrill
  */
 public class LabelValueValidator implements IValidator {
-
+	
 	public static final int LABEL_MAXLENGTH = 63;
 	private static final Pattern LABEL_REGEXP = Pattern.compile("^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$");
 
-	private final String failureMessage = "A valid {0} is alphanumeric (a-z, and 0-9), "
-			+ "with the characters '-', '.' allowed anywhere except first or last.";
+	private final String failureMessage = "A valid {0} must be 63 characters or less and must begin and end with an alphanumeric character " + 
+			"([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.";
 
 	private final IStatus FAILED;
+	protected String type;
 	
 	public LabelValueValidator() {
 		this("label value");
 	}
 	
 	public LabelValueValidator(String element) {
-		FAILED = ValidationStatus.error(NLS.bind(failureMessage, element));
+		type = element;
+		FAILED = ValidationStatus.error(NLS.bind(failureMessage, type));
 	}
 
 	@Override
 	public IStatus validate(Object paramObject) {
 		if(!(paramObject instanceof String))
-			return ValidationStatus.cancel("Value is not an instance of a string");
+			return ValidationStatus.cancel(NLS.bind("{0} is not an instance of a string", type));
 		String value= (String) paramObject;
-		if(StringUtils.isEmpty(value))
-			return FAILED;
+		if(StringUtils.isBlank(value))
+			return getPatternConstraintError();
 		if(value.length()  > LABEL_MAXLENGTH) {
-			return ValidationStatus.error(NLS.bind("Maximum length allowed is {0} characters", LABEL_MAXLENGTH));
+			return getSizeConstraintError();
 		}
 		if(!LABEL_REGEXP.matcher(value).matches()) {
-			return FAILED;
+			return getPatternConstraintError();
 		}
 		
 		return ValidationStatus.OK_STATUS;
@@ -62,6 +64,14 @@ public class LabelValueValidator implements IValidator {
       	  return false; 
   	  }
         return LABEL_REGEXP.matcher(value).matches();
+	}
+	
+	protected IStatus getSizeConstraintError() {
+		return ValidationStatus.error(NLS.bind("Maximum length allowed is {0} characters for {1}", LABEL_MAXLENGTH, type));
+	}
+
+	protected IStatus getPatternConstraintError() {
+		return getFailedStatus();
 	}
 	
 	protected IStatus getFailedStatus() {

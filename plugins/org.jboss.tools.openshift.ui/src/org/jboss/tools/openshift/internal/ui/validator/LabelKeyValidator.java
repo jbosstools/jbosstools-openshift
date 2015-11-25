@@ -28,23 +28,26 @@ public class LabelKeyValidator extends LabelValueValidator {
 	private static final Pattern SUBDOMAIN_REGEXP = Pattern.compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$");
 	private Collection<String> readonlykeys;
 
-	private static final String failureMessage = "A valid object label has the form [domain/]name where a name is an alphanumeric (a-z, and 0-9) string,"
-			+ " with a maximum length of 63 characters, with the '-' character allowed anywhere except the first or last character. A domain is a sequence of names "
-			+ "separated by the '.' character with a maximum length of 253 characters.";
+	private static final String failureMessage = "A valid label key has the form [domain/]name where name is required,"
+			+ " must be 63 characters or less, beginning and ending with an "
+			+ "alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots "
+			+ "(.), and alphanumerics between. A domain is an optional sequence of names separated "
+			+ "by the '.' character with a maximum length of 253 characters.";
 	
 	private final IStatus FAILED = ValidationStatus.error(failureMessage);
 	
 	public LabelKeyValidator(Collection<String> readonlykeys) {
+		super("label key");
 		this.readonlykeys = readonlykeys != null ? readonlykeys : new ArrayList<String>(0);
 	}
 	
 	@Override
 	public IStatus validate(Object paramObject) {
 		if(!(paramObject instanceof String))
-			return FAILED;
+			return getFailedStatus();
 		String value= (String) paramObject;
 		if(StringUtils.isEmpty(value))
-			return FAILED;
+			return getFailedStatus();
 		if(readonlykeys.contains(value)) {
 			return ValidationStatus.error("Adding a label with a key that is the same as a readonly label is not allowed");
 		}
@@ -53,10 +56,10 @@ public class LabelKeyValidator extends LabelValueValidator {
 			case 1:
 	            return super.validate(value);
 			case 2:
-				return (validateSubdomain(parts[0]) && validateLabel(parts[1]) ) ? ValidationStatus.OK_STATUS : FAILED;
+				return (validateSubdomain(parts[0]) && validateLabel(parts[1]) ) ? ValidationStatus.OK_STATUS : getFailedStatus();
             default:
 		}
-		return FAILED;
+		return getFailedStatus();
 	}
 	
 	private boolean validateSubdomain(String value) {
@@ -66,4 +69,8 @@ public class LabelKeyValidator extends LabelValueValidator {
 		return SUBDOMAIN_REGEXP.matcher(value).matches();
 	}
 
+	@Override
+	protected IStatus getFailedStatus() {
+		return FAILED;
+	}
 }

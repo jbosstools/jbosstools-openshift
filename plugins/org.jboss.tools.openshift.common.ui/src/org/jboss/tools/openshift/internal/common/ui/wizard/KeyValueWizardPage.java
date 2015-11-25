@@ -49,7 +49,7 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 		Group group = new Group(parent, SWT.NONE);
 		group.setText(model.getGroupLabel());
 		group.setLayout(new GridLayout());
-		GridDataFactory.fillDefaults()
+		GridDataFactory.fillDefaults().hint(550, SWT.DEFAULT)
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
 
 		Composite composite = new Composite(group, SWT.NONE);
