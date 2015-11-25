@@ -44,7 +44,7 @@ public class LabelValueValidatorTest {
 
 	@Test
 	public void valueWithoutSubDomainThatExceedsTheMaxValueShouldBeInvalid() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		for(int i=0; i < LabelKeyValidator.LABEL_MAXLENGTH + 1; i++)
 			b.append("a");
 		assertFailure(b.toString());
