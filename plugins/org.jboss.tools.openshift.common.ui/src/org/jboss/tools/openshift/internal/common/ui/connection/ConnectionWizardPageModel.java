@@ -416,7 +416,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (isNewConnection()) {
 			ConnectionsRegistrySingleton.getInstance().add(connection);
 		} else {
-			getSelectedConnection().update(connection);
+			ConnectionsRegistrySingleton.getInstance().update(getSelectedConnection(), connection);
 		}
 		return true;
 	}

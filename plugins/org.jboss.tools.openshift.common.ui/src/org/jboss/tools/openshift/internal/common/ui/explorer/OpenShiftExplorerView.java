@@ -25,6 +25,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
@@ -69,12 +70,20 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 
 	@Override
 	public void connectionAdded(IConnection connection) {
-		showConnectionsOrExplanations(connectionsPane, explanationsPane);
+		showConnectionsOrExplanations();
+	}
+	
+	private void showConnectionsOrExplanations() {
+		Display.getDefault().syncExec(new Runnable() { 
+			public void run() {
+				showConnectionsOrExplanations(connectionsPane, explanationsPane);
+			}
+		});
 	}
 
 	@Override
 	public void connectionRemoved(IConnection connection) {
-		showConnectionsOrExplanations(connectionsPane, explanationsPane);
+		showConnectionsOrExplanations();
 	}
 
 	@Override
@@ -121,7 +130,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	}
 
 	private void showConnectionsOrExplanations(Control connectionsPane, Control explanationsPane) {
-		if (ConnectionsRegistrySingleton.getInstance().getAll().size() < 1) {
+		if (ConnectionsRegistrySingleton.getInstance().getAll().isEmpty()) {
 			pageBook.showPage(explanationsPane);
 		} else {
 			pageBook.showPage(connectionsPane);
