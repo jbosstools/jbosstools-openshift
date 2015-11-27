@@ -707,7 +707,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			private FileDialog createFileDialog(String selectedFile) {
 				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
 				dialog.setText("Select an OpenShift template");
-				if(StringUtils.isNotBlank(selectedFile)) {
+				if(isFile(selectedFile)) {
 					File file = new File(selectedFile);
 					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
 				}
