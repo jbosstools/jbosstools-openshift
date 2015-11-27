@@ -251,5 +251,37 @@ public class ConnectionsRegistry {
 		}
 		
 	}
+
+	public void update(IConnection currentConnection, IConnection updatedConnection) {
+		ConnectionURL updatedConnectionUrl = null;
+		try {
+			updatedConnectionUrl = ConnectionURL.forConnection(updatedConnection);
+		} catch (UnsupportedEncodingException | MalformedURLException e) {
+			throw new OpenShiftCoreException(e, NLS.bind("Could not update connection {0}", updatedConnection.getHost()));
+		}
+		ConnectionURL oldConnectionUrl = null;
+		try {
+			oldConnectionUrl = ConnectionURL.forConnection(currentConnection);
+		} catch (UnsupportedEncodingException | MalformedURLException e) {
+			throw new OpenShiftCoreException(e, NLS.bind("Could not update connection {0}", currentConnection.getHost()));
+		}
+		if (!oldConnectionUrl.equals(updatedConnectionUrl)) {
+			connectionsByUrl.remove(oldConnectionUrl);
+		}
+		
+		//serious change = username changed
+		boolean seriousChange = !updatedConnection.equals(currentConnection);
+		
+		//in case of a serious change, we perform remove+add instead of just updating+emitting change event
+		// because the connection hashcode will change, refreshing it in the treeview will cause `widget is disposed` errors
+		if (seriousChange) {
+			remove(currentConnection);
+		}
+		currentConnection.update(updatedConnection);
+		if (seriousChange) {
+			add(currentConnection);
+		}
+		this.recentConnection = currentConnection;
+	}
 	
 }
