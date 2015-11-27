@@ -44,7 +44,7 @@ public class OpenInWebConsoleHandler extends OpenInWebBrowserHandler {
 		}
 		if (connection != null) {
 			String url = getWebConsoleUrl(connection, resource);
-			openInBrowser(url);
+			openInBrowser(HandlerUtil.getActiveShell(event) , url);
 		}
 		return null;
 	}
