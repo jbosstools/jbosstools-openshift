@@ -20,8 +20,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -39,16 +41,20 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class OpenInWebBrowserHandler extends AbstractHandler {
 
+	private static final String NOTHING_TO_OPEN_MSG = "Could not find a route that points to an url to show in a browser.";
+
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection currentSelection = HandlerUtil.getCurrentSelection(event);
 		
 		final IRoute route = UIUtils.getFirstElement(currentSelection, IRoute.class);
+		final Shell shell = HandlerUtil.getActiveShell(event);
+		//Open route
 		if (route != null) {
-			openBrowser(route);
-			return Status.OK_STATUS;
+			return openBrowser(shell, route);
 		}
 		
+		//Open Project
 		final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
 		if (project != null) {
 			new UIUpdatingJob(NLS.bind("Loading routes for project {0}", project.getName())) {
@@ -63,48 +69,49 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 
 				protected IStatus updateUI(IProgressMonitor monitor) {
 					if (routes == null || routes.isEmpty()) {
-						return OpenShiftUIActivator.statusFactory()
-								.cancelStatus("Could not find a route that points to an url to show in a browser.");
-					} else if (routes.size() > 1) {
-						SelectRouteDialog routeDialog = new SelectRouteDialog(routes, HandlerUtil.getActiveShell(event));
-						if (routeDialog.open() == Dialog.OK) {
-							openBrowser(routeDialog.getSelectedRoute());
-						}
-					} else {
-						openBrowser(routes.get(0));
+						return nothingToOpenDialog(shell);
+					}
+					if (routes.size() == 1) {
+						return openBrowser(shell, routes.get(0));
+					}
+					SelectRouteDialog routeDialog = new SelectRouteDialog(routes, HandlerUtil.getActiveShell(event));
+					if (routeDialog.open() == Dialog.OK) {
+						return openBrowser(shell, routeDialog.getSelectedRoute());
 					}
 					return Status.OK_STATUS;
 				}
 			}.schedule();
 			return Status.OK_STATUS;
 		}
-
+		
+		//Open Connection
 		final IConnection connection = UIUtils.getFirstElement(currentSelection, IConnection.class);
 		if (connection != null) {
-			openInBrowser(connection.getHost());
-			return Status.OK_STATUS;
+			return openInBrowser(shell, connection.getHost());
 		}
 
-		return OpenShiftUIActivator.statusFactory()
-			.cancelStatus("Could not find a route that points to an url to show in a browser.");
+		return nothingToOpenDialog(shell);
+	}
+	
+	private IStatus nothingToOpenDialog(Shell shell) {
+		MessageDialog.openWarning(shell,"No route to open", NOTHING_TO_OPEN_MSG);
+		return OpenShiftUIActivator.statusFactory().cancelStatus(NOTHING_TO_OPEN_MSG);
 	}
 
-	protected void openBrowser(IRoute route) {
-		if (route == null 
-				|| StringUtils.isBlank(route.getURL())) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("Could not find a route that points to an url to show in a browser.");
-			return;
+	protected IStatus openBrowser(Shell shell, IRoute route) {
+		if (route == null) {
+			return nothingToOpenDialog(shell);
 		}
-		openInBrowser(route.getURL());
+		return openInBrowser(shell, route.getURL());
 	}
 
-	protected void openInBrowser(String url) {
+	protected IStatus openInBrowser(Shell shell, String url) {
 		if (StringUtils.isBlank(url)) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("No url to show in a browser.");
-			return;
+			return nothingToOpenDialog(shell);
 		}
 		new BrowserUtility().checkedCreateInternalBrowser(url,
 				"", OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+		return Status.OK_STATUS;
 	}
 
 }
