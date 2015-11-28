@@ -19,6 +19,7 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
@@ -588,10 +589,20 @@ public class TestRepository {
 	public void addRemoteTo(String remoteName, Repository remoteRepository)
 			throws URISyntaxException, MalformedURLException,
 			IOException {
+		URIish uri = new URIish(remoteRepository.getDirectory().toURI().toURL());
+		addRemoteTo(remoteName, uri);
+	}
+	
+	public void addRemoteTo(String remoteName, String remoteUri)
+			throws URISyntaxException, IOException {
+		addRemoteTo(remoteName, new URIish(remoteUri));
+	}
+	
+	public void addRemoteTo(String remoteName, URIish remoteUri)
+			throws URISyntaxException, IOException {
 		StoredConfig config = repository.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, remoteName);
-		URIish uri = new URIish(remoteRepository.getDirectory().toURI().toURL());
-		remoteConfig.addURI(uri);
+		remoteConfig.addURI(remoteUri);
 		remoteConfig.update(config);
 		config.save();
 	}
