@@ -448,4 +448,43 @@ public class EGitUtilsTest {
 		assertTrue(EGitUtils.isValidGitUrl("git@eap2-honkabonka2.rhcloud.com:openshift/eap2.git/"));
 		// verification
 	}
+	
+	@Test
+	public void originShouldBeDefaultRemoteRepo() throws Exception {
+		//pre-conditions
+		testRepository.addRemoteTo("git", "git://git.stuff/");
+		testRepository.addRemoteTo("foo", "https://foo.bar/");
+		testRepository.addRemoteTo("bar", "http://bar.foo/");
+		
+		//Get 1st remote after remotes were ordered alphabetically
+		//operation
+		String defaultRepo = EGitUtils.getDefaultRemoteRepo(testProject.getProject());
+		// verification
+		assertEquals("http://bar.foo/", defaultRepo);
+
+		//Check origin is always default
+		testRepository.addRemoteTo("origin", "http://origin/");
+		//operation
+		defaultRepo = EGitUtils.getDefaultRemoteRepo(testProject.getProject());
+		// verification
+		assertEquals("http://origin/", defaultRepo);
+	}
+	
+	@Test
+	public void getRemoteHttpRepos() throws Exception {
+		//pre-conditions
+		testRepository.addRemoteTo("git", "git://git.stuff/");
+		testRepository.addRemoteTo("foo", "https://foo.bar/");
+		testRepository.addRemoteTo("bar", "http://bar.foo/");
+		testRepository.addRemoteTo("origin", "http://origin/");
+		
+		//operation
+		List<String> repos = EGitUtils.getRemoteGitRepos(testProject.getProject());
+		
+		// verification
+		assertEquals(3, repos.size());
+		assertEquals("http://origin/", 	repos.get(0));
+		assertEquals("http://bar.foo/", repos.get(1));
+		assertEquals("https://foo.bar/", repos.get(2));
+	}
 }

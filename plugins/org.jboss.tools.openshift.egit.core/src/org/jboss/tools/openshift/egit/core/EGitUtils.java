@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -1467,6 +1468,21 @@ public class EGitUtils {
 	 * @throws CoreException
 	 */
 	public static List<String> getRemoteGitRepos(IProject project) throws CoreException {
+		Stream<String> stream = getRemoteGitReposFilteredStream(project);
+		return stream == null ? null : stream.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns the name of the first http(s)-based git remote repository of a project, or <code>null</code>, if no matching repository is found.
+	 *
+	 * @throws CoreException
+	 */
+	public static String getDefaultRemoteRepo(org.eclipse.core.resources.IProject project) throws CoreException {
+		Stream<String> stream = getRemoteGitReposFilteredStream(project);
+		return stream == null ? null : stream.findFirst().get();
+	}
+
+	private static Stream<String> getRemoteGitReposFilteredStream(IProject project) throws CoreException {
 		if (project == null) {
 			return null;
 		}
@@ -1481,10 +1497,10 @@ public class EGitUtils {
 			@Override
 			public int compare(RemoteConfig o1, RemoteConfig o2) {
 				if (ORIGIN.equals(o1.getName())) {
-					return 1;
+					return -1;
 				}
 				if (ORIGIN.equals(o2.getName())) {
-					return -1;
+					return 1;
 				}
 				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
@@ -1492,24 +1508,6 @@ public class EGitUtils {
 		return remoteConfigs.stream()
 				.map(rc -> getFetchURI(rc))
 				.filter(uri -> uri != null && uri.toString().startsWith("http"))
-				.map(URIish::toString)
-				.collect(Collectors.toList());
-	}
-	
-	/**
-	 * Returns the name of the first http(s)-based git remote repository of a project, or <code>null</code>, if no matching repository is found.
-	 * 
-	 * @see EGitUtils#getRemoteGitRepos(IProject)
-	 * @throws CoreException 
-	 */
-	public static String getDefaultRemoteRepo(org.eclipse.core.resources.IProject project) throws CoreException {
-		if (project == null) {
-			return null;
-		}
-		List<String> remoteRepos = EGitUtils.getRemoteGitRepos(project);
-		if (remoteRepos != null && !remoteRepos.isEmpty()) {
-			return remoteRepos.get(0);
-		}
-		return null;
+				.map(URIish::toString);
 	}
 }
