@@ -25,9 +25,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
@@ -133,6 +133,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		
 		for (IResource resource : resources.values()) {
 			addLabelsToResource(resource);
+			resource.setAnnotation(OpenShiftAPIAnnotations.GENERATED_BY, "jbosstools-openshift");
 		}
 		return resources;
 	}
@@ -171,7 +172,6 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 
 	private IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
 		IImageStream imageStream = factory.stub(ResourceKind.IMAGE_STREAM, name, parameters.getProject().getName());
-		imageStream.setDockerImageRepository(imageUri);
 		return imageStream;
 	}
 
