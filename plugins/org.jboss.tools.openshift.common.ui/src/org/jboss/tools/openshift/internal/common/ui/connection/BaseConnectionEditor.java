@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
-import java.util.Iterator;
-
-import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;

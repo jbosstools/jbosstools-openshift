@@ -15,8 +15,8 @@ import java.util.Collection;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
-import org.jboss.tools.openshift.internal.common.ui.utils.ExtensionUtils;
 
 /**
  * @author Andre Dietisheim

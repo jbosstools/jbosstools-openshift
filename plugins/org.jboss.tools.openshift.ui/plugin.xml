@@ -756,14 +756,27 @@
 			</command>
         </menuContribution>
     </extension>
- <extension
-       point="org.eclipse.ui.preferencePages">
-    <page
-          category="org.jboss.tools.common.model.ui.MainPreferencePage"
-          class="org.jboss.tools.openshift.internal.ui.preferences.OpenShiftPreferencePage"
-          id="org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage"
-          name="%openshift.preferences.page.title">
-    </page>
- </extension>
+	<extension
+		point="org.eclipse.ui.preferencePages">
+		<page
+			category="org.jboss.tools.common.model.ui.MainPreferencePage"
+			class="org.jboss.tools.openshift.internal.ui.preferences.OpenShiftPreferencePage"
+			id="org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage"
+			name="%openshift.preferences.page.title">
+		</page>
+	</extension>
+	
+	<!-- Core UI Integration: ssl certificate callback -->
+ 	<extension
+		point="org.jboss.tools.openshift.core.sslCertificateCallbackUI">
+		<sslCertificateCallbackUI
+			class="org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback" />
+	</extension>
+	<!-- Core UI Integration: credentials prompt -->
+	<extension
+		point="org.jboss.tools.openshift.core.credentialsPrompterUI">
+		<credentialsPrompterUI
+			class="org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter" />
+	</extension>
 
 </plugin>

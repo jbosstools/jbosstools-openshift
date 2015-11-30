@@ -25,12 +25,12 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
+import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.ExtensionUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 

@@ -11,6 +11,7 @@
 
 package org.jboss.tools.openshift.internal.common.core;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
@@ -72,6 +73,18 @@ public class OpenShiftCommonCoreActivator extends BaseCorePlugin {
 	 */
 	public static StatusFactory statusFactory() {
 		return getDefault().statusFactoryInternal();
+	}
+
+	public static void log(Throwable t) {
+		log(null, t);
+	}
+
+	public static void log(String message, Throwable t) {
+		log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
+	}
+	
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
 	}
 
 }
