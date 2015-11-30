@@ -19,10 +19,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
-import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
-import org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback;
 import org.osgi.framework.BundleContext;
 
 import com.openshift.restclient.OpenShiftException;
@@ -44,8 +41,6 @@ public class OpenShiftUIActivator extends BaseUIPlugin{
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		OpenShiftCoreUIIntegration.getInstance().setSSLCertificateAuthorization(new SSLCertificateCallback());
-		OpenShiftCoreUIIntegration.getInstance().setCredentialPrompter(new CredentialsPrompter());
 	}
 
 	public void stop(BundleContext context) throws Exception {

@@ -84,10 +84,10 @@ public class RefreshResourceHandler extends AbstractHandler{
 	}
 
 	private void refresh(final Object element) {
-		Job job;
-		if(element instanceof IResource) {
+		Job job = null;
+		if (element instanceof IResource) {
 			job = createRefreshResourceJob(element);
-		}else {
+		} else {
 			job = createRefreshRefreshableJob(element);
 		}
 		job.schedule();
@@ -128,7 +128,7 @@ public class RefreshResourceHandler extends AbstractHandler{
 	private IConnection getConnection(final Object resource) {
 		if (resource instanceof IConnection) {
 			return (IConnection) resource; 
-		}else if(resource instanceof IResource) {
+		} else if (resource instanceof IResource) {
 			return ConnectionsRegistryUtil.getConnectionFor((IResource)resource);
 		}
 		return null;

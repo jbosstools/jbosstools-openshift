@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.utils;
+package org.jboss.tools.openshift.common.core.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 import org.osgi.framework.Bundle;
 
 /**
@@ -45,11 +45,20 @@ public class ExtensionUtils {
 		return extensions;
 	}
 
+	public static <T> T getFirstExtension(String extensionId, String classAttribute) {
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(extensionId);
+		if (config.length == 0) {
+			return null;
+		}
+
+		return safeCreateExtension(extensionId, classAttribute, config[0]);
+	}
+
 	public static <T> T safeCreateExtension(String extensionId, String classAttribute, IConfigurationElement configurationElement) {
 		try {
 			return createExtension(classAttribute, configurationElement);
 		} catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException e) {
-			OpenShiftCommonUIActivator.log(NLS.bind("Could not create extension {0} in bundle {1}", configurationElement.getName(), getBundleNameFor(configurationElement)), e);
+			OpenShiftCommonCoreActivator.log(NLS.bind("Could not create extension {0} in bundle {1}", configurationElement.getName(), getBundleNameFor(configurationElement)), e);
 			return null;
 		}
 	}

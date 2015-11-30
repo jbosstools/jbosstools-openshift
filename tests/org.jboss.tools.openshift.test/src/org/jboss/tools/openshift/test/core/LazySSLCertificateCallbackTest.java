@@ -8,8 +8,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.security.cert.X509Certificate;
 
@@ -34,8 +40,8 @@ public class LazySSLCertificateCallbackTest {
 	@Mock
 	private ISSLCertificateCallback altCallback;
 	private LazySSLCertificateCallback lazyCallback;
-	private X509Certificate [] certs = new X509Certificate [] {mock(X509Certificate.class)};
-	private OpenShiftCoreUIIntegration integration = OpenShiftCoreUIIntegration.getInstance();
+	private X509Certificate[] certs = new X509Certificate[] { mock(X509Certificate.class) };
+	private TestOpenShiftCoreUIIntegration integration = new TestOpenShiftCoreUIIntegration();
 	
 	@Mock
 	private SSLSession session;
@@ -121,4 +127,11 @@ public class LazySSLCertificateCallbackTest {
 		verify(defaultCallback, never()).allowHostname(anyString(),any(SSLSession.class));
 	}
 
+	private class TestOpenShiftCoreUIIntegration extends OpenShiftCoreUIIntegration {
+
+		protected void setSSLCertificateAuthorization(ISSLCertificateCallback callback) {
+			sslCertificateCallback = callback;
+		}
+	}
+	
 }

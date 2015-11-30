@@ -9,39 +9,49 @@
 package org.jboss.tools.openshift.core;
 
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
+import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
 
 import com.openshift.restclient.ISSLCertificateCallback;
 
 /**
+ * Allows the core plugin to call UI contributions provided by the ui-plugin
+ * (org.jboss.tools.openshift.ui)
+ * 
  * @author Rob Stryker
  * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
 public class OpenShiftCoreUIIntegration {
 
+	private static final String SSLCERTIFICATE_CALLBACK_UI_EXTENSION = "org.jboss.tools.openshift.core.sslCertificateCallbackUI";
+	private static final String CREDENTIALS_PROMPTER_UI_EXTENSION = "org.jboss.tools.openshift.core.credentialsPrompterUI";
+
+	private static final String ATTRIBUTE_CLASS = "class";
+
 	private static OpenShiftCoreUIIntegration INSTANCE = new OpenShiftCoreUIIntegration();
-	
+
 	public static OpenShiftCoreUIIntegration getInstance(){
 		return INSTANCE;
 	}
-	
-	private ISSLCertificateCallback sslCertificateCallback;
-	private ICredentialsPrompter credentialPrompter;
-	
+
+	protected ISSLCertificateCallback sslCertificateCallback;
+	protected ICredentialsPrompter credentialPrompter;
+
+	// for testing purposes
+	protected OpenShiftCoreUIIntegration() {
+	}
+
 	public ISSLCertificateCallback getSSLCertificateCallback() {
+		if (sslCertificateCallback == null) {
+			sslCertificateCallback = ExtensionUtils.getFirstExtension(SSLCERTIFICATE_CALLBACK_UI_EXTENSION, ATTRIBUTE_CLASS);
+		}
 		return sslCertificateCallback;
 	}
 	
-	public void setSSLCertificateAuthorization(ISSLCertificateCallback callback) {
-		this.sslCertificateCallback = callback;
-	}
-	
 	public ICredentialsPrompter getCredentialPrompter() {
+		if (credentialPrompter == null) {
+			this.credentialPrompter = ExtensionUtils.getFirstExtension(CREDENTIALS_PROMPTER_UI_EXTENSION, ATTRIBUTE_CLASS);
+		}
 		return credentialPrompter;
 	}
-	
-	public void setCredentialPrompter(ICredentialsPrompter prompter) {
-		this.credentialPrompter = prompter;
-	}
-
 }

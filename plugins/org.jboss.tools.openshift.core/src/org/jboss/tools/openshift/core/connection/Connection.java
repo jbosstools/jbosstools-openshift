@@ -54,7 +54,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private static final String SECURE_STORAGE_PASSWORD = "password";
 	private static final String SECURE_STORAGE_TOKEN = "token";
 	private static final String SECURE_STORAGE_AUTHSCHEME = "authtype";
-
 	public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
 	
 	private IClient client;
@@ -70,11 +69,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private String authScheme;
 
 	//TODO modify default client to take url and throw lib specific exception
-	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) throws MalformedURLException{
+	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback)
+			throws MalformedURLException {
 		this(new ClientFactory().create(url, sslCertCallback), credentialsPrompter, sslCertCallback);
 	}
 	
-	public Connection(IClient client, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback){
+	public Connection(IClient client, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) {
+		Assert.isLegal(client != null);
+		Assert.isLegal(credentialsPrompter != null);
+		Assert.isLegal(sslCertCallback != null);
+				
 		this.client = client;
 		this.client.setSSLCertificateCallback(sslCertCallback);
 		this.credentialsPrompter = credentialsPrompter;
@@ -210,20 +214,24 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
 			if (!context.isAuthorized() && credentialsPrompter != null){
 				credentialsPrompter.promptAndAuthenticate(this, null);
-			}else {
+			} else {
 				setToken(context.getToken());
 				client.setAuthorizationStrategy(new TokenAuthorizationStrategy(getToken()));
 				updateCredentials(context);
 			}
-		}catch(UnauthorizedException e) {
-			if(credentialsPrompter == null) throw e;
-			credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
+		} catch (UnauthorizedException e) {
+			if (credentialsPrompter == null) {
+				throw e;
+			} else {
+				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
+			}
 		}
 		return getToken() != null;
 	}
 	
+	
 	private void updateCredentials(IAuthorizationContext context) {
-		if(IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(this.getAuthScheme())){
+		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(this.getAuthScheme())) {
 			setUsername(context.getUser().getName());
 		}
 	}
@@ -231,10 +239,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private IAuthorizationStrategy getAuthorizationStrategy() {
 		final String scheme = getAuthScheme();
 		final String token = getToken();
-		if(org.apache.commons.lang.StringUtils.isNotEmpty(token) || IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
+		if (org.apache.commons.lang.StringUtils.isNotEmpty(token)
+				|| IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
 			return new TokenAuthorizationStrategy(token); //always use the token if you have one?
 		}
-		if(IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)){
+		if (IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)) {
 			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
 		}
 		throw new OpenShiftException("Authscheme '%s' is not supported.", scheme);

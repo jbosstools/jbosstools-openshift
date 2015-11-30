@@ -52,24 +52,26 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-		if(!(connection instanceof Connection))return;
+		if (!(connection instanceof Connection)) {
+			return;
+		}
 		if(ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
-			if(oldValue == null && newValue != null) {
-				//add
-				IResource resource = (IResource)newValue;
+			if (oldValue == null && newValue != null) {
+				// add
+				IResource resource = (IResource) newValue;
 				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
 				ResourceGrouping group = getResourceGrouping(groupMap.get(resource.getProject()), resource.getKind());
 				expand(group, 1);
-			}else if(oldValue != null && newValue == null) {
-				//delete
+			} else if (oldValue != null && newValue == null) {
+				// delete
 				IResource resource = (IResource) oldValue;
 				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
-			}else {
+			} else {
 				refreshViewer(newValue);
 			}
-		}else if(ConnectionProperties.PROPERTY_PROJECTS.equals(property)){
+		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
 			handleProjectChanges((Connection) connection, oldValue, newValue);
-		}else{
+		} else {
 			super.handleConnectionChanged(connection, property, oldValue, newValue);
 		}
 	}
