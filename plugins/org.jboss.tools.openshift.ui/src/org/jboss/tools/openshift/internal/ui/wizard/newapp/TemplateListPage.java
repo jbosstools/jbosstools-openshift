@@ -542,7 +542,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	}
 	
 	private boolean isFile(String path) {
-		return Files.isRegularFile(Paths.get(substituteVariables(path)));
+		return StringUtils.isNotBlank(path) && 
+				Files.isRegularFile(Paths.get(substituteVariables(path)));
 	}
 
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder, IObservableValue uploadTemplate, DataBindingContext dbc) {
