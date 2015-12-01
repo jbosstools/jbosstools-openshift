@@ -26,7 +26,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.client.IHttpClient.ISSLCertificateCallback;
 
-@SuppressWarnings("restriction")
 @RunWith(MockitoJUnitRunner.class)
 public class LazySSLCertificateCallbackTest {
 
@@ -119,7 +118,5 @@ public class LazySSLCertificateCallbackTest {
 		verify(altCallback, never()).allowHostname(anyString(),any(SSLSession.class));
 		verify(defaultCallback, never()).allowHostname(anyString(),any(SSLSession.class));
 	}
-	
-	
 
 }

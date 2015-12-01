@@ -75,10 +75,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 	
 	public Connection(IClient client, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) {
-		Assert.isLegal(client != null);
-		Assert.isLegal(credentialsPrompter != null);
-		Assert.isLegal(sslCertCallback != null);
-				
 		this.client = client;
 		this.client.setSSLCertificateCallback(sslCertCallback);
 		this.credentialsPrompter = credentialsPrompter;
