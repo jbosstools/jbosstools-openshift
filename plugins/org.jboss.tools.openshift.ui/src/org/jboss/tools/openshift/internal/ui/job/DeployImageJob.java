@@ -149,7 +149,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.setReplicaSelector(SELECTOR_KEY, name);
 		
 		Map<String, String> envs = getModifiedEnvVars(parameters.getEnvironmentVariables(), parameters.getImageEnvVars());
-		dc.addContainer(dc.getName(), imageUri, new HashSet<IPort>(parameters.getPortSpecs()), envs, parameters.getVolumes());
+		dc.addContainer(dc.getName(), new DockerImageURI(imageUri.getNameAndTag()), new HashSet<IPort>(parameters.getPortSpecs()), envs, parameters.getVolumes());
 		
 		dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
 		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) dc.addTrigger(DeploymentTriggerType.IMAGE_CHANGE);
