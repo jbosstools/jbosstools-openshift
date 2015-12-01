@@ -10,13 +10,6 @@ public class LazySSLCertificateCallback implements ISSLCertificateCallback {
 
 	private ISSLCertificateCallback callback;
 
-	public LazySSLCertificateCallback(ISSLCertificateCallback callback) {
-		if(callback instanceof LazySSLCertificateCallback){
-			throw new IllegalArgumentException("Unable to initialize a LazySSLCertificateCallback with instance of the same type");
-		}
-		this.callback = callback;
-	}
-
 	@Override
 	public boolean allowCertificate(X509Certificate[] certs) {
 		if(!loadCallback()) return false;
@@ -30,10 +23,15 @@ public class LazySSLCertificateCallback implements ISSLCertificateCallback {
 	}
 	
 	private boolean loadCallback(){
-		if(callback == null){
-			callback = OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback();
-			if(callback == null) return false;
+		if(callback == null) {
+			callback = getExtension();
+			return callback != null;
 		}
 		return true;
+	}
+
+	// for testing purposes
+	public ISSLCertificateCallback getExtension() {
+		return OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback();
 	}
 }

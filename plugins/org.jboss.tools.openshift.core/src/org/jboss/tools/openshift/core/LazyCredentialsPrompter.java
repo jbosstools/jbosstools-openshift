@@ -15,29 +15,32 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  * A class to support deferred initialization where the actual provider may
  * be initialized after the class that depends upon this on
  */
-public final class LazyCredentialsPrompter implements ICredentialsPrompter {
+public class LazyCredentialsPrompter implements ICredentialsPrompter {
 	
 	private ICredentialsPrompter prompter;
-	
-	public LazyCredentialsPrompter(ICredentialsPrompter prompter) {
-		if(prompter instanceof LazyCredentialsPrompter){
-			throw new IllegalArgumentException("Unable to initialize a LazyCredentialsPrompter with instance of the same type");
-		}
-		this.prompter = prompter;
-	}
 	
 	/**
 	 * Prompt for authentication.
 	 */
 	@Override
 	public final boolean promptAndAuthenticate(IConnection connection, Object context) {
-		if (prompter == null) {
-			prompter = OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter();
-			if (prompter == null) {
-				return false;
-			}
+		if (!loadPrompter()) {
+			return false;
 		}
 		return prompter.promptAndAuthenticate(connection, context);
 	}
 
+	private boolean loadPrompter() {
+		if (prompter == null) {
+			prompter = getExtension();
+			return prompter != null;
+		}
+		return true;
+	}
+
+	// for testing purposes
+	public ICredentialsPrompter getExtension() {
+		return OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter();
+	}
+	
 }

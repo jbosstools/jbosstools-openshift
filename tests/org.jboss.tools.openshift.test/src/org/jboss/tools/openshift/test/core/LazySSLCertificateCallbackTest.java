@@ -11,9 +11,10 @@ package org.jboss.tools.openshift.test.core;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,10 +23,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLSession;
 
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
-import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -33,108 +31,76 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.ISSLCertificateCallback;
 
+/**
+ * @author Andre Dietisheim
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class LazySSLCertificateCallbackTest {
 
-	@Mock
-	private ISSLCertificateCallback defaultCallback;
-	@Mock
-	private ISSLCertificateCallback altCallback;
 	private LazySSLCertificateCallback lazyCallback;
+
+	@Mock
+	private ISSLCertificateCallback permissiveExtensionCallback;
+	@Mock
+	private ISSLCertificateCallback denyingExtensionCallback;
 	private X509Certificate[] certs = new X509Certificate[] { mock(X509Certificate.class) };
-	private TestOpenShiftCoreUIIntegration integration = new TestOpenShiftCoreUIIntegration();
-	
 	@Mock
 	private SSLSession session;
 	
 	@Before
 	public void setup(){
-		integration.setSSLCertificateAuthorization(null);
-		when(defaultCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(true);
-		when(defaultCallback.allowHostname(anyString(), any(SSLSession.class))).thenReturn(true);
-		when(altCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(true);
-		when(altCallback.allowHostname(anyString(), any(SSLSession.class))).thenReturn(true);
-	}
-	
-	@After
-	public void teardown(){
-		integration.setSSLCertificateAuthorization(null);
+		lazyCallback = spy(new LazySSLCertificateCallback());
+		when(permissiveExtensionCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(true);
+		when(permissiveExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(true);
+		when(denyingExtensionCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(false);
+		when(denyingExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(false);
 	}
 	
 	@Test
-	public void testConstructionThrowsWhenInitializedWithSelf(){
-		boolean exception = false;
-		try{
-			new LazySSLCertificateCallback(new LazySSLCertificateCallback(null));
-		}catch(IllegalArgumentException e){
-			exception = true;
-		}
-		assertTrue("Expected an exception when trying to initialize with a lazy cred prompter", exception);
-	}
-	
-	@Test
-	public void testAllowCertificateWhenInitializedWithACallback() {
-		lazyCallback = new LazySSLCertificateCallback(defaultCallback);
-		
-		assertTrue("Exp. to allowCerts", lazyCallback.allowCertificate(certs));
-		verify(defaultCallback).allowCertificate(any(X509Certificate[].class));
-		verify(altCallback, never()).allowCertificate(any(X509Certificate[].class));
+	public void testAllowCertificateWhenHasCallback() {
+		when(lazyCallback.getExtension()).thenReturn(permissiveExtensionCallback);
+
+		assertTrue("Exp. to allow certs", lazyCallback.allowCertificate(certs));
+		verify(permissiveExtensionCallback, times(1)).allowCertificate(any(X509Certificate[].class));
 	}
 
 	@Test
-	public void testAllowHostnameWhenInitializedWithACallback() {
-		lazyCallback = new LazySSLCertificateCallback(defaultCallback);
-		
-		assertTrue("Exp. to allow hostname", lazyCallback.allowHostname("",session));
-		verify(defaultCallback).allowHostname(anyString(), any(SSLSession.class));
-		verify(altCallback, never()).allowHostname(anyString(),any(SSLSession.class));
-	}
+	public void testDisallowCertificateWhenHasCallback() {
+		when(lazyCallback.getExtension()).thenReturn(denyingExtensionCallback);
 
-	@Ignore("currently failing")
-	@Test
-	public void testAllowCertificateDeferredLoadsWhenInitializedWithNull() {
-		integration.setSSLCertificateAuthorization(altCallback);
-		lazyCallback = new LazySSLCertificateCallback(null);
-		
-		assertTrue("Exp. to allowCerts", lazyCallback.allowCertificate(certs));
-		verify(altCallback).allowCertificate(any(X509Certificate[].class));
-		verify(defaultCallback, never()).allowCertificate(any(X509Certificate[].class));
-	}
-	
-	@Ignore("currently failing")
-	@Test
-	public void testAllowHostnameDeferredLoadsWhenInitializedWithNull() {
-		integration.setSSLCertificateAuthorization(altCallback);
-		lazyCallback = new LazySSLCertificateCallback(null);
-		
-		assertTrue("Exp. to allow hostname", lazyCallback.allowHostname("",session));
-		verify(altCallback).allowHostname(anyString(), any(SSLSession.class));
-		verify(defaultCallback, never()).allowHostname(anyString(),any(SSLSession.class));
+		assertFalse("Exp. to disallow certs", lazyCallback.allowCertificate(certs));
+		verify(denyingExtensionCallback, times(1)).allowCertificate(any(X509Certificate[].class));
 	}
 
 	@Test
-	public void testAllowCertificateReturnsFalseWhenItCantGetACallback() {
-		lazyCallback = new LazySSLCertificateCallback(null);
-		
-		assertFalse("Exp. to not to allowCertificate", lazyCallback.allowCertificate(certs));
-		verify(altCallback, never()).allowCertificate(any(X509Certificate[].class));
-		verify(defaultCallback, never()).allowCertificate(any(X509Certificate[].class));
+	public void testDisallowCertificateWhenHasNoCallback() {
+		when(lazyCallback.getExtension()).thenReturn(null);
+
+		assertFalse("Exp. to disallow certs", lazyCallback.allowCertificate(certs));
+		verify(denyingExtensionCallback, never()).allowCertificate(any(X509Certificate[].class));
 	}
 
 	@Test
-	public void testHostnameReturnsFalseWhenItCantGetACallback() {
-		lazyCallback = new LazySSLCertificateCallback(null);
-		
-		assertFalse("Exp. to not to allowCertificate", lazyCallback.allowHostname("",session));
-		verify(altCallback, never()).allowHostname(anyString(),any(SSLSession.class));
-		verify(defaultCallback, never()).allowHostname(anyString(),any(SSLSession.class));
+	public void testVerifyHostnameCertificateWhenHasCallback() {
+		when(lazyCallback.getExtension()).thenReturn(permissiveExtensionCallback);
+
+		assertTrue("Exp. to allow certs", lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
+		verify(permissiveExtensionCallback, times(1)).allowHostname(any((String.class)), any(SSLSession.class));
 	}
 
-	private class TestOpenShiftCoreUIIntegration extends OpenShiftCoreUIIntegration {
+	@Test
+	public void testWontVerifyHostnameWhenHasCallback() {
+		when(lazyCallback.getExtension()).thenReturn(denyingExtensionCallback);
 
-		protected void setSSLCertificateAuthorization(ISSLCertificateCallback callback) {
-			sslCertificateCallback = callback;
-		}
+		assertFalse("Exp. to not verify hostname", lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
+		verify(denyingExtensionCallback, times(1)).allowHostname(any((String.class)), any(SSLSession.class));
 	}
-	
+
+	@Test
+	public void testWontVerifyHostnameWhenHasNoCallback() {
+		when(lazyCallback.getExtension()).thenReturn(null);
+
+		assertFalse("Exp. to not verify hostname", lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
+		verify(denyingExtensionCallback, never()).allowHostname(any((String.class)), any(SSLSession.class));
+	}
 }

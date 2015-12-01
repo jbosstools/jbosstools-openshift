@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.core.connection;
 
 import org.jboss.tools.openshift.common.core.connection.AbstractConnectionPersistency;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
-import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
-import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
@@ -41,8 +39,7 @@ public class ConnectionPersistency extends AbstractConnectionPersistency<Connect
 	@Override
 	protected Connection createConnection(ConnectionURL connectionURL) {
 		Connection connection = new ConnectionFactory().create(
-				connectionURL.getHostWithScheme(),
-				new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
+				connectionURL.getHostWithScheme());
 		if (connection == null) {
 			return null;
 		} else {
