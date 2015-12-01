@@ -145,6 +145,9 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 			if (!loadingElements.containsKey(parentElement)) {
 				// Load the data
 				return new Object[] {launchLoadingJob(parentElement)};
+			} else {
+				// Data is loading, after it is loaded refresh will be called. 
+				return new Object[]{loadingElements.get(parentElement)};
 			}
 		}
 		return getChildrenFor(parentElement);
