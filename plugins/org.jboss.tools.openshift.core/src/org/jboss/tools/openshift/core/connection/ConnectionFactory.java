@@ -13,12 +13,10 @@ package org.jboss.tools.openshift.core.connection;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.properties.IPropertiesProvider;
 import org.jboss.tools.foundation.core.properties.PropertiesHelper;
-import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
-import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.ClientFactory;
@@ -48,16 +46,11 @@ public class ConnectionFactory implements IConnectionFactory {
 	
 	@Override
 	public Connection create(String url) {
-		return create(url, new LazyCredentialsPrompter(OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter()));
-	}		
-	
-	public Connection create(String url, ICredentialsPrompter credentialsPrompter) {
 		try {
-			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback(
-					OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
+			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback();
 			IClient client = new ClientFactory().create(url, sslCertCallback);
 			return new Connection(client, 
-					credentialsPrompter,
+					new LazyCredentialsPrompter(),
 					sslCertCallback);
 		} catch (OpenShiftException e) {
 			OpenShiftCoreActivator.pluginLog().logInfo(NLS.bind("Could not create OpenShift connection: Malformed url {0}", url), e);
