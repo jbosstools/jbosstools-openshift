@@ -57,7 +57,7 @@
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
-            icon="$nl$/icons/vagrant_16.png"
+            icon="$nl$/icons/cdk_box_16.png"
             typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.runtime.type"
             id="org.jboss.tools.openshift.cdk.server.type.icon"/>
    </extension>
