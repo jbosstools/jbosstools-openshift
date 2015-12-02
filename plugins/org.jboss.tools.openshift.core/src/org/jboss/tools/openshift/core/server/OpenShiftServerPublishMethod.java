@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jgit.util.FileUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -87,7 +88,7 @@ public class OpenShiftServerPublishMethod  {
 			throws CoreException {
 		return IServer.PUBLISH_STATE_NONE;
 	}
-	
+
 	private static class RSync extends OCBinaryOperation {
 
 		private IProject project;
@@ -98,8 +99,18 @@ public class OpenShiftServerPublishMethod  {
 		public RSync(IProject project, IService service, String podPath, IServer server) {
 			this.project = project;
 			this.service = service;
-			this.podPath = podPath;
+			this.podPath = sanitizePath(podPath);
 			this.server = server;
+		}
+
+		private static String sanitizePath(String path) {
+			if (path == null) {
+				return null;
+			}
+			if (path.endsWith("/") || path.endsWith("/.")) {
+				return path;
+			}
+			return path+"/";
 		}
 
 		@Override
@@ -114,10 +125,34 @@ public class OpenShiftServerPublishMethod  {
 		}
 
 		private void sync(IProject project, IPod pod, String podPath, IServer server) throws IOException {
-			File tmpCopy = createFilteredCopy(project, server);
-			String sourcePath = tmpCopy.getAbsolutePath() + "/.";
-			pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
+			File tmpCopy = getLocalDeploymentDirectory(server);
+			if (!tmpCopy.exists() || tmpCopy.listFiles().length == 0) {
+				//we try to avoid permission denied issues on the remote pod,
+				//so, fugly workaround, we 1st rsync those files to the local directory.
+				//The initial cost is heavy, several MB to transfer,
+				//but it should only happen for the very first deployment.
+				//This workaround is not 100% guaranteed to work though.
+				syncPodToDirectory(pod, podPath, tmpCopy);
+			}
+			publishLocally(project, tmpCopy);
+			syncDirectoryToPod(pod, tmpCopy, podPath);
+		}
 
+		private void syncPodToDirectory(IPod pod, String podPath, File destination) throws IOException {
+			destination.mkdirs();
+			String destinationPath = sanitizePath(destination.getAbsolutePath());
+			pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
+				@Override
+				public IRSyncable visit(IRSyncable rsyncable) {
+					rsyncable.sync(new PodPeer(podPath, pod), new LocalPeer(destinationPath));
+					return rsyncable;
+				}
+			}, null);
+		}
+
+		private void syncDirectoryToPod(IPod pod, File source, String podPath) throws IOException {
+			String sourcePath = sanitizePath(source.getAbsolutePath());
+			pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
 				@Override
 				public IRSyncable visit(IRSyncable rsyncable) {
 					rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod));
@@ -126,11 +161,9 @@ public class OpenShiftServerPublishMethod  {
 			}, null);
 		}
 
-		private File createFilteredCopy(IProject project, IServer server) throws IOException {
+		private void publishLocally(IProject project, File localDeploymentDirectory) throws IOException {
 			File source = project.getLocation().toFile();
-			File destination = ServerUtil.getServerStateLocation(server).toFile();
-			
-			FileUtils.copyDir(source, destination, true, true, true, new FileFilter() {
+			FileUtils.copyDir(source, localDeploymentDirectory, true, true, true, new FileFilter() {
 
 				@Override
 				public boolean accept(File file) {
@@ -141,8 +174,12 @@ public class OpenShiftServerPublishMethod  {
 							&& !filename.endsWith(".settings")
 							&& !filename.endsWith(".project")
 							&& !filename.endsWith(".classpath");
-				}});
-			return destination;
+				}
+			});
+		}
+
+		private File getLocalDeploymentDirectory(IServer server) {
+			return ServerUtil.getServerStateLocation(server).toFile();
 		}
 	}
 }
