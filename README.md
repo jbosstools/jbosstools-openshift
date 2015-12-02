@@ -2,7 +2,7 @@
 
 ## Summary
 
-OpenShift Tools provides wizards and views for creating and maintaining OpenShift applications. 
+OpenShift Tools provides wizards and views for creating and maintaining OpenShift applications.
 
 ## Install
 
@@ -12,13 +12,13 @@ on its own or together with the full JBoss Tools distribution.
 
 ## Get the code
 
-The easiest way to get started with the code is to [create your own fork](http://help.github.com/forking/), 
+The easiest way to get started with the code is to [create your own fork](http://help.github.com/forking/),
 and then clone your fork:
 
     $ git clone git@github.com:<you>/jbosstools-openshift.git
     $ cd jbosstools-openshift
     $ git remote add upstream git://github.com/jbosstools/jbosstools-openshift.git
-	
+
 At any time, you can pull changes from the upstream and merge them onto your master:
 
     $ git checkout master               # switches to the 'master' branch
@@ -42,7 +42,22 @@ If you just want to check if things compiles/builds you can run:
     $ mvn clean verify -DskipTest=true
 
 But *do not* push changes without having the new and existing unit tests pass!
- 
+
+## Working with [openshift-restclient-java](https://github.com/openshift/openshift-restclient-java/)
+
+When making changes to the [openshift-restclient-java](https://github.com/openshift/openshift-restclient-java/), it needs to be built and its jar copied to `org.jboss.tools.openshift.client/lib` in order to be consumed (workspace resolution doesn't work for projects embedded as jars within Eclipse plugins). The best way to achieve a quick turnaround it to have `openshift-restclient-java` opened as an Eclipse project and leverage its `jar.outputDir` property, so that Maven can generate the rest client jar
+directly in the org.jboss.tools.openshift.client/lib folder, followed by a directory refresh.
+
+- Right-click on the `openshift-rest-client-java` project
+- Run As > Maven Build
+- set goals=package
+- add `jar.outpuDir` property, set the absolute path to org.jboss.tools.openshift.client/lib as value
+- In the refresh tab, enable refresh resources upon completion
+- click specify resources..., select org.jboss.tools.openshift.client/lib
+- Run, profit!
+
+Subsequent Maven runs will reuse this launch configuration automatically.
+
 ## Contribute fixes and features
 
 _OpenShift Tools_ is open source, and we welcome anybody that wants to
