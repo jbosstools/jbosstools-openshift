@@ -42,6 +42,8 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -65,6 +67,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
@@ -111,6 +116,18 @@ public class ServerSettingsView {
 		this.model = new ServerSettingsViewModel(callback.getServer(), OpenShiftServerTaskModelAccessor.getConnection(callback));
 	}
 
+	private IProject getSelectedProject() {
+		IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		ISelection selection = win.getSelectionService().getSelection();
+		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
+			Object element = ((IStructuredSelection)selection).getFirstElement();
+			if (element instanceof org.eclipse.core.resources.IResource) {
+				return (((org.eclipse.core.resources.IResource)element).getProject());
+			}
+		}
+		return null;
+	}
+
 	public Control createControls(Composite parent) {
 		this.dbc = new DataBindingContext();
 
@@ -143,11 +160,17 @@ public class ServerSettingsView {
 			.align(SWT.FILL, SWT.FILL).grab(true, true)
 			.applyTo(serviceComposite);
 
+		final IProject selectedProject = getSelectedProject();
+
 		callback.executeLongRunning(new Job("Loading projects and services...") {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				model.loadResources();
+				//initializing the project combo with the project selected in the workspace
+				if (selectedProject != null) {
+					model.setDeployProject(selectedProject);
+				}
 				return Status.OK_STATUS;
 			}
 		});
@@ -285,7 +308,7 @@ public class ServerSettingsView {
 				.hint(100, SWT.DEFAULT)
 				.applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects(model, browseProjectsButton.getShell()));
-		
+
 		return projectComposite;
 	}
 
