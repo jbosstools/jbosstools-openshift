@@ -11,15 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.preferences;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.Callable;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -34,7 +29,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
-import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
+import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
@@ -45,74 +40,15 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 
 	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
 			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
-	private static final int WHICH_CMD_TIMEOUT = 10 * 1000;
-	private static final int WHICH_CMD_SUCCESS = 0;
 	
 	public enum OCBinaryName {
 
-		WINDOWS("oc.exe", new String[] { "exe" }) {
-			public String getLocation() {
-				String location = null;
-				String[] paths = StringUtils.split(System.getenv("PATH"), ";");
-				for (String path : paths) {
-					Collection<File> files = FileUtils.listFiles(new File(path), new IOFileFilter() {
-
-						@Override
-						public boolean accept(File file) {
-							return getName().equals(file.getName());
-						}
-
-						@Override
-						public boolean accept(File dir, String name) {
-							return getName().equals(name);
-						}
-						
-					}, null);
-					if(files.size() > 0) {
-						location = files.iterator().next().toString();
-						break;
-					}
-				}
-				return StringUtils.trim(location);
-			}	
-		},
-		OTHER("oc", new String[] {}) {
-
-			@Override
-			public String getLocation() {
-				String location = null;
-				String path = ThreadUtils.runWithTimeout(WHICH_CMD_TIMEOUT, new Callable<String>() {
-					@Override
-					public String call() throws Exception {
-						Process process = null;
-						try {
-							process = new ProcessBuilder("which", getName()).start();
-							process.waitFor();
-							if(process.exitValue() == WHICH_CMD_SUCCESS) {
-								return IOUtils.toString(process.getInputStream());
-							};
-						} catch (IOException e) {
-							OpenShiftUIActivator.getDefault().getLogger().logError("Could not run 'which' command", e);
-						} finally {
-							if (process != null) {
-								process.destroy();
-							}
-						}
-						return null;
-					}
-				});
-
-				if (!StringUtils.isEmpty(path)) {
-					location = path;
-				}
-
-				return StringUtils.trim(location);
-			}
-		};
-
+		WINDOWS("oc.exe", new String[] { "exe" }), 
+		OTHER("oc", new String[] {});
+		
 		private String name;
 		private String[] extensions;
-
+		private CommandLocationBinary locationBinary;
 		private OCBinaryName(String name, String[] extensions) {
 			this.name = name;
 			this.extensions = extensions;
@@ -126,7 +62,14 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 			return extensions;
 		};
 
-		public abstract String getLocation();
+		public String getLocation() {
+			if( locationBinary == null ) {
+				locationBinary = new CommandLocationBinary("oc");
+				locationBinary.addPlatformLocation(Platform.OS_LINUX, "/usr/bin/oc");
+				locationBinary.setDefaultPlatform(Platform.OS_LINUX);
+			}
+			return locationBinary.findLocation();
+		}
 		
 		public static OCBinaryName getInstance() {
 			if (SystemUtils.IS_OS_WINDOWS) {
