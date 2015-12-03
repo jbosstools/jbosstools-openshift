@@ -20,7 +20,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -33,17 +34,16 @@ import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
-import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComposite;
+import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComponent;
 import org.jboss.tools.foundation.ui.credentials.ICredentialCompositeListener;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.ui.internal.util.FormDataUtility;
 
 public class CDKServerWizardFragment extends WizardFragment {
 	private IWizardHandle handle;
 	private String homeDir;
 	private Text homeText;
 	private Button browseButton;
-	private ChooseCredentialComposite credentials;
+	private ChooseCredentialComponent credentials;
 	
 	
 	public boolean hasComposite() {
@@ -53,15 +53,31 @@ public class CDKServerWizardFragment extends WizardFragment {
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		this.handle = handle;
 		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new FormLayout());
 		handle.setTitle("CDK Server Adapter");
 		handle.setDescription("A server adapter representing a CDK installation folder containing a Vagrantfile.");
 		
+		main.setLayout(new GridLayout(3, false));
+		
+		
+		credentials = new ChooseCredentialComponent(new String[]{CredentialService.REDHAT_ACCESS});
+		credentials.addCredentialListener(new ICredentialCompositeListener() {
+			public void credentialsChanged() {
+				validate();
+			}
+		});
+		credentials.create(main);
+		credentials.gridLayout(3);
+		
+		
 		Label l = new Label(main, SWT.NONE);
 		l.setText("Folder: ");
+		GridData homeData = new GridData();
+		homeData.grabExcessHorizontalSpace = true;
+		homeData.horizontalAlignment = SWT.FILL;
 		homeText = new Text(main, SWT.BORDER);
+		homeText.setLayoutData(homeData);
 		browseButton = new Button(main, SWT.PUSH);
-		browseButton.setText("Browse");
+		browseButton.setText("Browse...");
 		
 
 		homeText.addModifyListener(new ModifyListener() {
@@ -81,17 +97,9 @@ public class CDKServerWizardFragment extends WizardFragment {
 			}
 
 		});
-		credentials = new ChooseCredentialComposite(main, new String[]{CredentialService.REDHAT_ACCESS});
-		credentials.addCredentialListener(new ICredentialCompositeListener() {
-			public void credentialsChanged() {
-				validate();
-			}
-		});
 		
-		l.setLayoutData(FormDataUtility.createFormData2(0,7,null,0,0,5,null,0));
-		homeText.setLayoutData(FormDataUtility.createFormData2(0,5,null,0,l,50,browseButton,-5));
-		browseButton.setLayoutData(FormDataUtility.createFormData2(0,5,null,0,null,0,100,-5));
-		credentials.setLayoutData(FormDataUtility.createFormData2(browseButton,5,null,0,0,0,100,-5));
+
+		
 		
 		String err = findError();
 		setComplete(err == null);

@@ -11,14 +11,16 @@
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -35,6 +37,7 @@ import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyButtonCom
 import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand;
 import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
+import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComponent;
 import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComposite;
 import org.jboss.tools.foundation.ui.credentials.ICredentialCompositeListener;
 import org.jboss.tools.foundation.ui.util.FormDataUtility;
@@ -47,7 +50,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 public class CDKCredentialSection extends ServerEditorSection {
 	private Button passCredentialsButton;
 	private SelectionListener passCredentialsListener;
-	private ChooseCredentialComposite2 credentialComposite;
+	private ChooseCredentialComponent credentialComposite;
 	private Text envUserText, envPassText;
 	private ModifyListener envUserListener, envPassListener;
 	
@@ -70,7 +73,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 		
 		Composite composite = toolkit.createComposite(section);
-		composite.setLayout(new FormLayout());
+		composite.setLayout(new GridLayout(3, false));
 
 		passCredentialsButton = toolkit.createButton(composite, "Pass credentials to environment", SWT.CHECK);
 		passCredentialsButton.setSelection(cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false));
@@ -82,17 +85,19 @@ public class CDKCredentialSection extends ServerEditorSection {
 		passCredentialsButton.addSelectionListener(passCredentialsListener);
 		
 		
-		credentialComposite = createChooseCredentialComposite(composite);
+		credentialComposite = createChooseCredentialComponent(composite);
 		credentialComposite.addCredentialListener(new ICredentialCompositeListener() {
 			public void credentialsChanged() {
 				execute(new SetUsernameCommand(server));
 			}
 		});
 
-		Label userEnvLabel = toolkit.createLabel(composite, "Username Environment Variable: ");
+		Label environmentVars = toolkit.createLabel(composite, "Environment Variables: ");
+		
+		Label userEnvLabel = toolkit.createLabel(composite, "Username: ");
 		envUserText = toolkit.createText(composite, server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKServer.SUB_USERNAME));
 		
-		Label passEnvLabel = toolkit.createLabel(composite, "Password Environment Variable: ");
+		Label passEnvLabel = toolkit.createLabel(composite, "Password: ");
 		envPassText = toolkit.createText(composite, server.getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKServer.SUB_PASSWORD));
 		
 		envUserListener = new ModifyListener() {
@@ -111,37 +116,23 @@ public class CDKCredentialSection extends ServerEditorSection {
 		
 		
 		// Layout the widgets
-		passCredentialsButton.setLayoutData(FormDataUtility.createFormData2(0,5,null,0,0,5,100,-5));
-		credentialComposite.setLayoutData(FormDataUtility.createFormData2(passCredentialsButton,5,null,0,0,5,100,-5));
-		userEnvLabel.setLayoutData(FormDataUtility.createFormData2(credentialComposite,8,null,0,0,5,null,0));
-		envUserText.setLayoutData(FormDataUtility.createFormData2(credentialComposite,5,null,0,userEnvLabel,5,100,-5));
-		passEnvLabel.setLayoutData(FormDataUtility.createFormData2(envUserText,8,null,0,0,5,null,0));
-		envPassText.setLayoutData(FormDataUtility.createFormData2(envUserText,5,null,0,passEnvLabel,5,100,-5));
-		
+		GridDataFactory.generate(passCredentialsButton, new Point(3,1));
+		credentialComposite.gridLayout(3);
+		GridDataFactory.generate(environmentVars, new Point(3,1));
+		GridDataFactory.generate(envUserText, new Point(2,1));
+		GridDataFactory.generate(envPassText, new Point(2,1));
 		
 		toolkit.paintBordersFor(composite);
 		section.setClient(composite);
 	}
 	
-	private class ChooseCredentialComposite2 extends ChooseCredentialComposite {
-		public ChooseCredentialComposite2(Composite parent, String[] domains, String selectedUsername) {
-			super(parent, domains, selectedUsername);
-		}
-		public Combo getUserCombo() {
-			return userCombo;
-		}
-		public SelectionListener getUserListener() {
-			return userComboListener;
-		}
-	}
-	private ChooseCredentialComposite2 createChooseCredentialComposite(Composite parent) {
+	
+	private ChooseCredentialComponent createChooseCredentialComponent(Composite parent) {
 		String initialUsername = server.getAttribute(CDKServer.PROP_USERNAME, (String)null);
-		final ChooseCredentialComposite2 comp = new ChooseCredentialComposite2(
-				parent, 
+		final ChooseCredentialComponent comp = new ChooseCredentialComponent(
 				new String[]{CredentialService.REDHAT_ACCESS},
-				initialUsername) {
-			
-		};
+				initialUsername);
+		comp.create(parent);
 		return comp;
 	}
 	
