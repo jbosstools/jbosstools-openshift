@@ -13,9 +13,8 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.ContributionManager;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionManager;
@@ -204,40 +203,18 @@ public class UIUtils {
 		return getFirstElement(selection, clazz) != null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
-			Object firstSelectedElement = getFirstElement(selection);
-			if (firstSelectedElement == null) {
-				return null;
-			} 
-			
-			if (clazz.isAssignableFrom(firstSelectedElement.getClass())) {
-				return (E) firstSelectedElement;
-			} else if (IAdaptable.class.isAssignableFrom(firstSelectedElement.getClass())) {
-				return (E) ((IAdaptable) firstSelectedElement).getAdapter(clazz);
-			} else {
-				return (E) Platform.getAdapterManager().getAdapter(firstSelectedElement, clazz);
-			}
+			return Adapters.adapt(getFirstElement(selection), clazz);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <E> E[] getElements(ISelection selection, Class<E> clazz) {
-			Object[] selectedElements = getElements(selection);
-			
 			ArrayList<E> elements = new ArrayList<E>();
 			
-			for(int index = 0; index < selectedElements.length; index++){
-				if (clazz.isAssignableFrom(selectedElements[index].getClass())) {
-					elements.add((E) selectedElements[index]);
-				} else if (IAdaptable.class.isAssignableFrom(selectedElements[index].getClass())) {
-                                        E adapted = (E) ((IAdaptable) selectedElements[index]).getAdapter(clazz);
-					if( adapted != null )
-						elements.add(adapted);
-				} else {
-					E adapted = (E) Platform.getAdapterManager().getAdapter(selectedElements[index], clazz);
-					if( adapted != null )
-						elements.add(adapted);
-				}
+			for(Object element: getElements(selection)) {
+				E adapted = Adapters.adapt(element, clazz);
+				if( adapted != null )
+					elements.add(adapted);
 			}
 			return elements.toArray((E[])Array.newInstance(clazz, 0));
 	}
