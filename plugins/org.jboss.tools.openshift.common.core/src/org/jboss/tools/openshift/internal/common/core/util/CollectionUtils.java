@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.express.internal.core.util;
+package org.jboss.tools.openshift.internal.common.core.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
