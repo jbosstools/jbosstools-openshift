@@ -12,7 +12,10 @@ package org.jboss.tools.openshift.core.server;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -26,6 +29,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.OpenShiftException;
@@ -60,11 +64,19 @@ public class OpenShiftServerPublishMethod  {
 					NLS.bind("Server {0} could not determine the service to publish to.", server.getName())));
 		}
 
+		String sourcePath = OpenShiftServerUtils.getSourcePath(server);
+		if (StringUtils.isEmpty(sourcePath)) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Server {0} could not determine the source to publish.", server.getName())));
+		}
 		String podPath = OpenShiftServerUtils.getPodPath(server);
-		IProject project = OpenShiftServerUtils.getDeployProject(server);
+		if (StringUtils.isEmpty(podPath)) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Server {0} could not determine the destination directory to publish to.", server.getName())));
+		}
 		MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
-				NLS.bind("Could not sync project {0} to all pods running the service {1}", project.getName(), service.getName()), null);
-		new RSync(project, service, podPath, server).run(status);
+				NLS.bind("Could not sync {0} to all pods running the service {1}", sourcePath, service.getName()), null);
+		new RSync(sourcePath, service, podPath, server).run(status);
 
 //		boolean allSubModulesPublished = areAllModulesPublished(server);
 //
@@ -90,13 +102,21 @@ public class OpenShiftServerPublishMethod  {
 
 	private static class RSync extends OCBinaryOperation {
 
-		private IProject project;
+		private static final Collection<String> IGNORED_DIRS = Arrays.asList("tempDeploy", "deploy");
+
+		private static final FilenameFilter SERVER_DIR_FILTER = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return !IGNORED_DIRS.contains(name);
+			}
+		};
+		private String sourcePath;
 		private IService service;
 		private String podPath;
 		private IServer server;
 
-		public RSync(IProject project, IService service, String podPath, IServer server) {
-			this.project = project;
+		public RSync(String sourcePath, IService service, String podPath, IServer server) {
+			this.sourcePath = sourcePath;
 			this.service = service;
 			this.podPath = sanitizePath(podPath);
 			this.server = server;
@@ -116,16 +136,16 @@ public class OpenShiftServerPublishMethod  {
 		protected void runOCBinary(MultiStatus status) {
 			for (IPod pod : service.getPods()) {
 				try {
-					sync(project, pod, podPath, server);
+					sync(sourcePath, pod, podPath, server);
 				} catch (IOException | OpenShiftException e) {
 					status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 				}
 			}
 		}
 
-		private void sync(IProject project, IPod pod, String podPath, IServer server) throws IOException {
+		private void sync(String sourcePath, IPod pod, String podPath, IServer server) throws IOException {
 			File tmpCopy = getLocalDeploymentDirectory(server);
-			if (!tmpCopy.exists() || tmpCopy.listFiles().length == 0) {
+			if (!tmpCopy.exists() || tmpCopy.listFiles(SERVER_DIR_FILTER).length == 0) {
 				//we try to avoid permission denied issues on the remote pod,
 				//so, fugly workaround, we 1st rsync those files to the local directory.
 				//The initial cost is heavy, several MB to transfer,
@@ -133,7 +153,7 @@ public class OpenShiftServerPublishMethod  {
 				//This workaround is not 100% guaranteed to work though.
 				syncPodToDirectory(pod, podPath, tmpCopy);
 			}
-			publishLocally(project, tmpCopy);
+			publishLocally(sourcePath, tmpCopy);
 			syncDirectoryToPod(pod, tmpCopy, podPath);
 		}
 
@@ -160,8 +180,8 @@ public class OpenShiftServerPublishMethod  {
 			}, null);
 		}
 
-		private void publishLocally(IProject project, File localDeploymentDirectory) throws IOException {
-			File source = project.getLocation().toFile();
+		private void publishLocally(String sourcePath,File localDeploymentDirectory) throws IOException {
+			File source = new File(sourcePath);
 			FileUtils.copyDir(source, localDeploymentDirectory, true, true, true, new FileFilter() {
 
 				@Override

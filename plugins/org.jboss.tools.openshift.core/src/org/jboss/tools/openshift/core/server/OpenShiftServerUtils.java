@@ -45,6 +45,7 @@ public class OpenShiftServerUtils {
 
 	public static final String ATTR_SERVICE = "org.jboss.tools.openshift.Service"; //$NON-NLS-1$
 	public static final String ATTR_DEPLOYPROJECT = "org.jboss.tools.openshift.DeployProject"; //$NON-NLS-1$
+	public static final String ATTR_SOURCE_PATH = "org.jboss.tools.openshift.SourcePath"; //$NON-NLS-1$
 	public static final String ATTR_POD_PATH = "org.jboss.tools.openshift.PodPath"; //$NON-NLS-1$
 
 	public static final String ATTR_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.IgnoreContextRoot";//$NON-NLS-1$
@@ -66,10 +67,10 @@ public class OpenShiftServerUtils {
 				.toString();
 	}
 
-	public static void updateServer(String serverName, String connectionUrl, IService service, String podPath, IProject deployProject, IServerWorkingCopy server) {
+	public static void updateServer(String serverName, String connectionUrl, IService service, String podPath, String sourcePath, IProject deployProject, IServerWorkingCopy server) {
 		String host = getHost(service);
 		String deployProjectName = ProjectUtils.getName(deployProject);
-		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), podPath, server);
+		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, server);
 	}
 	
 	private static String getHost(IService service) {
@@ -101,7 +102,7 @@ public class OpenShiftServerUtils {
 	 * @param applicationName
 	 *            the application name for the server adapter
 	 */
-	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName, String serviceId, String podPath, IServerWorkingCopy server) {
+	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName, String serviceId, String sourcePath, String podPath, IServerWorkingCopy server) {
 		updateServer(server);
 
 		server.setName(serverName);
@@ -109,6 +110,7 @@ public class OpenShiftServerUtils {
 		
 		server.setAttribute(ATTR_CONNECTIONURL, connectionUrl);
 		server.setAttribute(ATTR_DEPLOYPROJECT, deployProjectName);
+		server.setAttribute(ATTR_SOURCE_PATH, sourcePath);
 		server.setAttribute(ATTR_POD_PATH, podPath);
 		server.setAttribute(ATTR_SERVICE, serviceId);
 	}
@@ -123,14 +125,15 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 	}
 	
-	public static void updateServerProject(String connectionUrl, IService service, String podPath, IProject project) {
-		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), podPath, project);
+	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, IProject project) {
+		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, project);
 	}
 
-	public static void updateServerProject(String connectionUrl, String serviceId, String podPath, IProject project) {
+	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, IProject project) {
 		IEclipsePreferences node = ServerUtils.getProjectNode(SERVER_PROJECT_QUALIFIER, project);
 		node.put(ATTR_CONNECTIONURL, connectionUrl);
 		node.put(ATTR_DEPLOYPROJECT, project.getName());
+		node.put(ATTR_SOURCE_PATH, sourcePath);
 		node.put(ATTR_POD_PATH, podPath);
 		node.put(ATTR_SERVICE, serviceId);
 		try {
@@ -218,6 +221,11 @@ public class OpenShiftServerUtils {
 	public static String getPodPath(IServerAttributes attributes) {
 		// TODO: implement override project settings with server settings
 		return getProjectAttribute(ATTR_POD_PATH, null, getDeployProject(attributes));
+	}
+	
+	public static String getSourcePath(IServerAttributes attributes) {
+		// TODO: implement override project settings with server settings
+		return getProjectAttribute(ATTR_SOURCE_PATH, null, getDeployProject(attributes));
 	}
 
 	public static boolean isOverridesProject(IServerAttributes server) {

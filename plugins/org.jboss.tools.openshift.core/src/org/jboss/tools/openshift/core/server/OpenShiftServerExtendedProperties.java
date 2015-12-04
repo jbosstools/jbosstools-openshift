@@ -36,24 +36,28 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 
 	@Override
 	public boolean hasWelcomePage() {
-        return getWelcomePageUrl() != null;
+		// return getWelcomePageUrl() != null;
+		return true;
     }
 
 	@Override
     public String getWelcomePageUrl() {
-        IService service = OpenShiftServerUtils.getService(server);
-        if (service != null) {
-            IProject project = service.getProject();
-            if (project != null) {
-                List<IRoute> routes = project.getResources(ResourceKind.ROUTE);
-                if (routes != null && !routes.isEmpty()) {
-                    //if more than 1 route, well, we're not in the UI layer here, 
-                    //so can't let the user select the url to open, tough luck. 
-                    //So we pick the 1st one we find
-                    return routes.get(0).getURL();
-                }
-            }
-        }
+		// checked when unfolding the context menu, cant do remoting
+		// org.jboss.ide.eclipse.as.ui.views.server.extensions.ShowInWelcomePageActionProvider#hasURL -> #getUrl -> props.getWelcomePageUrl()
+		
+//        IService service = OpenShiftServerUtils.getService(server);
+//        if (service != null) {
+//            IProject project = service.getProject();
+//            if (project != null) {
+//                List<IRoute> routes = project.getResources(ResourceKind.ROUTE);
+//                if (routes != null && !routes.isEmpty()) {
+//                    //if more than 1 route, well, we're not in the UI layer here, 
+//                    //so can't let the user select the url to open, tough luck. 
+//                    //So we pick the 1st one we find
+//                    return routes.get(0).getURL();
+//                }
+//            }
+//        }
         return null;
     }
 
