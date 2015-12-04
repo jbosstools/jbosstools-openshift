@@ -147,7 +147,7 @@ public class WatchManager {
 				}catch(Exception e) {
 					Trace.debug("Exception starting watch on project {0}",e,project.getName());
 					backoff++;
-					if(backoff > FIBONACCI.length) {
+					if(backoff >= FIBONACCI.length) {
 						Trace.info("Exceeded backoff attempts trying to reconnect watch for {0}",project.getName());
 						watches.remove(project);
 						state.set(State.DISCONNECTED);
