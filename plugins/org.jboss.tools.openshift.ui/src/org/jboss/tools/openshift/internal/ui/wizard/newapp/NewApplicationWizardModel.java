@@ -10,13 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,18 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.VariablesPlugin;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
@@ -72,7 +63,6 @@ public class NewApplicationWizardModel
 	private ITemplate serverTemplate;
 	private List<IParameter> parameters = new ArrayList<IParameter>();
 	private IParameter selectedParameter;
-	
 	private Map<String, String> originalValueMap;
 	private Collection<IResource> items = new ArrayList<IResource>(); 
 	private boolean useLocalTemplate = true;

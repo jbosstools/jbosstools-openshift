@@ -10,34 +10,36 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.TaskModel;
-import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.openshift.core.connection.Connection;
-
-import com.openshift.restclient.model.IProject;
 
 /**
  * @author Andre Dietisheim
  */
 public class OpenShiftServerTaskModelAccessor {
-	/* For use inside express wizard fragment */
+
 	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
 	public static final String TASK_WIZARD_ATTR_PROJECT = "project";
 
-	public static void set(Connection connection, TaskModel taskModel) {
-		taskModel.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
+	public static void set(Connection connection, TaskModel model) {
+		if (model == null) {
+			return;
+		}
+		model.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
 	}
 
 	public static Connection getConnection(TaskModel model) {
+		if (model == null) {
+			return null;
+		}
 		return (Connection) model.getObject(TASK_WIZARD_ATTR_CONNECTION);
 	}
-	
-	public static Connection getConnection(IServerModeUICallback callback) {
-		return (Connection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
-	}
 
-	public static IProject getProject(IServerModeUICallback callback) {
-		return (IProject) callback.getAttribute(TASK_WIZARD_ATTR_PROJECT);
+	public static IServerWorkingCopy getServer(TaskModel model) {
+		if (model == null) {
+			return null;
+		}
+		return (IServerWorkingCopy) model.getObject(TaskModel.TASK_SERVER);
 	}
-
 }

@@ -24,6 +24,7 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.NewServerWizardBehaviourCallback;
 import org.jboss.ide.eclipse.as.ui.editor.IDeploymentTypeUI.IServerModeUICallback;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 /**
  * @author Rob Stryker
@@ -49,8 +50,9 @@ public class ExpressServerWizardFragment extends WizardFragment implements IComp
 
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		handle.setTitle("Create an OpenShift Server Adapter");
-		handle.setDescription("Create an OpenShift Server Adapter by choosing your connection, application and deploy project.");
+		handle.setTitle("Create an OpenShift 2 Server Adapter");
+		handle.setDescription("Create an OpenShift 2 Server Adapter by choosing your connection, application and deploy project.");
+		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
 		IServerModeUICallback callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
 			public void executeLongRunning(Job j) {
 				// depends on COMMON, DAMN

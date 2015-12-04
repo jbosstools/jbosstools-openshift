@@ -98,9 +98,10 @@ public class ServiceDetailViews extends AbstractStackedDetailViews {
 					org.jboss.tools.openshift.common.core.utils.StringUtils.toString(service.getLabels()));
 			selectorsText.setText(
 					org.jboss.tools.openshift.common.core.utils.StringUtils.toString(service.getSelector()));
-			ipText.setText(org.apache.commons.lang.StringUtils.join(new String[] {
-					service.getPortalIP(), StringUtils.toStringOrNull(service.getTargetPort())		
-			}, ':'));
+			ipText.setText(
+					org.apache.commons.lang.StringUtils.join(new String[] {
+							service.getPortalIP(), StringUtils.toStringOrNull(service.getTargetPort())
+					}, ':'));
 			portText.setText(StringUtils.toStringOrNull(service.getPort()));
 		}
 

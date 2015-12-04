@@ -52,10 +52,12 @@ public class ProjectUtils {
 		return Arrays.stream(ResourcesPlugin.getWorkspace().getRoot().getProjects())
 					 .filter((IProject project) -> { 
 							if (isAccessible(project)) {
-								if (!excludeInternalProjects 
-										|| !(isInternalRSE(project.getName())
-												|| isInternalPde(project.getName()))) {
+								if (!excludeInternalProjects) {
 									return true;
+								} else {
+									return !(isInternalRSE(project.getName())
+											|| isInternalPde(project.getName()));
+
 								}
 							}
 							return false;
