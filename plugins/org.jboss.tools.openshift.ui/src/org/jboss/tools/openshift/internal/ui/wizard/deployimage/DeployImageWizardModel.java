@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,7 +33,6 @@ import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
@@ -103,9 +103,11 @@ public class DeployImageWizardModel
 
 	@Override
 	public IDockerConnection getDockerConnection() {
-		List<IDockerConnection> all = getDockerConnections();
-		if(dockerConnection == null && all.size() == 1) {
-			setDockerConnection(all.get(0));
+		if(dockerConnection == null) {
+			List<IDockerConnection> all = getDockerConnections();
+			if(all.size() == 1) {
+				setDockerConnection(all.get(0));
+			}
 		}
 		return dockerConnection;
 	}
@@ -198,7 +200,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setImage(String image) {
-		if(StringUtils.isEmpty(image)) return;
+		if(StringUtils.isBlank(image)) return;
 		firePropertyChange(PROPERTY_IMAGE, this.image, this.image = image);
 		DockerImageURI uri = new DockerImageURI(image);
 		setName(uri.getName());
@@ -379,7 +381,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void addEnvironmentVariable(String key, String value) {
-		List<EnvironmentVariable> old = new ArrayList<EnvironmentVariable>(environmentVariables);
+		List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
 		this.environmentVariables.add(new EnvironmentVariable(key, value, true));
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, old, Collections.unmodifiableList(environmentVariables));
 	}
@@ -455,7 +457,16 @@ public class DeployImageWizardModel
 
 	@Override
 	public boolean imageExists(String image) {
-		return dockerConnection != null && dockerConnection.getImageInfo(image) != null; 
+		if (dockerConnection == null || StringUtils.isBlank(image)) {
+			return false;
+		}
+		String[] imageDetails = image.split(":");
+		if (imageDetails.length > 2) {
+			return false;
+		}
+		String repo = imageDetails[0];
+		String tag = (imageDetails.length == 1)?"latest":imageDetails[1];
+		return dockerConnection.hasImage(repo, tag);
 	}
 
 	@Override
