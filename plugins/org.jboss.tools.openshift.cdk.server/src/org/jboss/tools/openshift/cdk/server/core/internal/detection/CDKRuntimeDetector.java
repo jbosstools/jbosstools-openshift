@@ -37,7 +37,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	}
 	
 	public boolean initializeRuntime(RuntimeDefinition runtimeDefinition) throws CoreException {
-		if( !exists(runtimeDefinition)) {
+		if( !exists(runtimeDefinition) && validate(runtimeDefinition.getLocation())) {
 			IServerType st = ServerCore.findServerType(CDKServer.CDK_SERVER_TYPE);
 			String possibleId = runtimeDefinition.getLocation().getName() + " CDK Server";
 			String suffixed = ServerNamingUtility.getDefaultServerName(possibleId);
