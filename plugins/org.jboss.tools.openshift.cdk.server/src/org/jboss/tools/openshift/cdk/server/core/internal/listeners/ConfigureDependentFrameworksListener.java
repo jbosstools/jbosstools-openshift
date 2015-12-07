@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.IStreamListener;
@@ -192,17 +193,20 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 				}
 			}
 			
+			String setEnvVarCommand = Platform.getOS().equals(Platform.OS_WIN32) ? "setx " : "export ";
+			String setEnvVarDelim = Platform.getOS().equals(Platform.OS_WIN32) ? " " : "=";
 			HashMap<String,String> env = new HashMap<String,String>();
 			Iterator<String> lineIterator = lines.iterator();
 			while(lineIterator.hasNext()) {
 				String oneAppend = lineIterator.next();
 				String[] allAppends = oneAppend.split("\n");
 				for( int i = 0; i < allAppends.length; i++ ) {
-					if( allAppends[i].trim().startsWith("export ")) {
-						int eq = allAppends[i].indexOf("=");
+					if( allAppends[i].trim().startsWith(setEnvVarCommand)) {
+						String lineRemainder = allAppends[i].trim().substring(setEnvVarCommand.length());
+						int eq = lineRemainder.indexOf(setEnvVarDelim);
 						if( eq != -1 ) {
-							String k = allAppends[i].substring("export ".length(), eq);
-							String v = allAppends[i].substring(eq+1);
+							String k = lineRemainder.substring(0, eq);
+							String v = lineRemainder.substring(eq+1);
 							env.put(k, v);
 						}
 					}
