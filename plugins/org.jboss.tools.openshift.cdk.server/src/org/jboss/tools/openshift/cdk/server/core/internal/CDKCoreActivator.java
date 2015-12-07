@@ -10,13 +10,17 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal;
 
-import org.eclipse.core.runtime.Plugin;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListenerManager;
+import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
+import org.jboss.tools.foundation.ui.plugin.BaseUISharedImages;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ConfigureDependentFrameworksListener;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-public class CDKCoreActivator extends Plugin {
+public class CDKCoreActivator extends BaseUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.cdk.server.core"; //$NON-NLS-1$
 
@@ -67,6 +71,39 @@ public class CDKCoreActivator extends Plugin {
 	public static CDKCoreActivator getDefault() {
 		return plugin;
 	}
+	/**
+	 * Get the IPluginLog for this plugin. This method 
+	 * helps to make logging easier, for example:
+	 * 
+	 *     FoundationCorePlugin.pluginLog().logError(etc)
+	 *  
+	 * @return IPluginLog object
+	 */
+	public static IPluginLog pluginLog() {
+		return getDefault().pluginLogInternal();
+	}
 
+	/**
+	 * Get a status factory for this plugin
+	 * @return status factory
+	 */
+	public static StatusFactory statusFactory() {
+		return getDefault().statusFactoryInternal();
+	}
+	
 
+	/**
+	 * Create your shared images instance. Clients are expected to override this
+	 */
+	protected BaseUISharedImages createSharedImages() {
+		return new CDKSharedImages(getBundle());
+	}
+
+	public static final String CDK_WIZBAN = "icons/cdk_box_128.png";
+	private static class CDKSharedImages extends BaseUISharedImages {
+		public CDKSharedImages(Bundle pluginBundle) {
+			super(pluginBundle);
+			addImage(CDK_WIZBAN, CDK_WIZBAN);
+		}
+	}
 }
