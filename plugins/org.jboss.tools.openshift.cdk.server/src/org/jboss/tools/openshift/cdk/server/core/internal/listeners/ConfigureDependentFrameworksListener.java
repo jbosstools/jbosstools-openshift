@@ -1,11 +1,15 @@
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -22,6 +26,7 @@ import org.eclipse.linuxtools.internal.docker.core.DockerConnection.Builder;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchConfigUtility;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
@@ -45,7 +50,7 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	
 	private void launchChange(IServer server) {
 		ADBInfo adb = loadADBInfo(server);
-		configureOpenshift(adb);
+		configureOpenshift(server, adb);
 		configureDocker(server, adb);
 	}
 	
@@ -84,7 +89,6 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 		IDockerConnection[] cons = mgr.getConnections();
 		String httpHost = dockerHost.replace("tcp://", "http://");
 		for( int i = 0; i < cons.length; i++ ) {
-			System.out.println(dockerHost + " vs " + cons[i].getUri());
 			if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost)) {
 				return true;
 			}
@@ -114,7 +118,32 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 			de.printStackTrace();
 		}
 	}
-	private void configureOpenshift(ADBInfo adb) {
+	
+	private static String DOTCDK_AUTH_SCHEME = "openshift.auth.scheme";
+	private static String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
+
+	private Properties getDotCDK(IServer server) {
+		String cdkFolder = server.getAttribute(CDKServer.PROP_FOLDER, (String)null);
+		if( cdkFolder != null && new File(cdkFolder).exists()) {
+			File dotcdk = new File(cdkFolder, ".cdk");
+			if( dotcdk.exists()) {
+				try {
+					Properties props = new Properties();
+					props.load(new FileInputStream(dotcdk));
+					return props;
+				} catch(IOException ioe) {
+					CDKCoreActivator.pluginLog().logError("Error loading properties from .cdk file " + dotcdk.getAbsolutePath(), ioe);
+				}
+			}
+		}
+		return new Properties();
+	}
+	
+	private void configureOpenshift(IServer server, ADBInfo adb) {
+		Properties dotcdkProps = getDotCDK(server);
+		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
+		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "test-admin";
+		String password = "password";
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		Iterator<IConnection> it = connections.iterator();
 		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
@@ -134,9 +163,9 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 			connectionsFactory.open();
 			IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
 			IConnection con = factory.create(soughtHost);
-			((Connection)con).setAuthScheme("Basic");
-			((Connection)con).setUsername("test-admin");
-			((Connection)con).setPassword("password");
+			((Connection)con).setAuthScheme(authScheme);
+			((Connection)con).setUsername(username);
+			((Connection)con).setPassword(password);
 			ConnectionsRegistrySingleton.getInstance().add(con);
 		}
 	}
