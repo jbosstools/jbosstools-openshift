@@ -15,6 +15,7 @@ import java.io.File;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -36,6 +37,7 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComponent;
 import org.jboss.tools.foundation.ui.credentials.ICredentialCompositeListener;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class CDKServerWizardFragment extends WizardFragment {
@@ -49,13 +51,16 @@ public class CDKServerWizardFragment extends WizardFragment {
 	public boolean hasComposite() {
 		return true;
 	}
-	
+	public ImageDescriptor getImageDescriptor() {
+		return CDKCoreActivator.getDefault().getSharedImages().descriptor(CDKCoreActivator.CDK_WIZBAN);
+	}
+
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		this.handle = handle;
 		Composite main = new Composite(parent, SWT.NONE);
 		handle.setTitle("CDK Server Adapter");
 		handle.setDescription("A server adapter representing a CDK installation folder containing a Vagrantfile.");
-		
+		handle.setImageDescriptor(getImageDescriptor());
 		main.setLayout(new GridLayout(3, false));
 		
 		
