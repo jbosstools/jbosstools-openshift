@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
@@ -73,15 +74,25 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
     	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+    	
+    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
+    	if( env == null ) {
+    		env = new HashMap<String, String>();
+    	} else {
+    		env = new HashMap<String,String>(env); // no guarantee existing map is editable
+    	}
     	if( passCredentials) {
     		// These environment variables are visible AND persisted in the launch configuration.
     		// It is not safe to persist the password here, but rather add it on-the-fly to the 
     		// program launch later on. 
-    		HashMap<String, String> env = new HashMap<String, String>();
 			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
 			env.put(userKey, cdkServer.getUsername());
-			workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
     	}
+    	if( Platform.getOS().equals(Platform.OS_WIN32)) {
+    		// We need to set the cygwin flag
+    		env.put("VAGRANT_DETECTED_OS", "cygwin");
+    	}
+		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
 	}
 	
 	private void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException {
@@ -101,7 +112,9 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
     	}
 		wc.setAttribute(ATTR_LOCATION, CDKConstantUtility.getVagrantLocation());
-		wc.setAttribute(ATTR_ARGS, CDKConstants.VAGRANT_CMD_UP + " " + CDKConstants.VAGRANT_FLAG_PROVISION);
+		
+		String args =  CDKConstants.VAGRANT_CMD_UP + " " + CDKConstants.VAGRANT_FLAG_PROVISION + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
+		wc.setAttribute(ATTR_ARGS, args);
 	}
 	
 	private boolean isInitialized(ILaunchConfigurationWorkingCopy wc) throws CoreException{
@@ -131,7 +144,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 		
 		String args = configuration.getAttribute(ATTR_ARGS, (String)null);
-		ILaunchConfigurationWorkingCopy wc = new CDKLaunchConfigUtility().createExternalToolsLaunchConfig(s, args, getStartupLaunchName(s));
+		ILaunchConfigurationWorkingCopy wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(s, args, getStartupLaunchName(s));
 
 		// Run the launch, mark server as starting, add debug listeners, etc
 		ILaunch launch2 = wc.launch("run", monitor);

@@ -3,7 +3,15 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ATTR_ARGS;
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ENVIRONMENT_VARS_KEY;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -17,7 +25,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
-public class CDKLaunchConfigUtility {
+public class VagrantLaunchUtility {
 	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args, String launchConfigName) throws CoreException {
 		return setupLaunch(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
 	}
@@ -72,4 +80,72 @@ public class CDKLaunchConfigUtility {
 	private ILaunchConfigurationWorkingCopy findLaunchConfig(IServer s, String launchName) throws CoreException {
 		return ExternalLaunchUtil.findExternalToolsLaunchConfig(s, launchName);
 	}
+	
+	/*
+	 * The following methods are for dealing with raw calls to vagrant, 
+	 * not using launch configurations at all. 
+	 */
+
+	/*
+	 * Convert a string/string hashmap into an array of string environment
+	 * variables as required by java.lang.Runtime This will super-impose the
+	 * provided environment variables ON TOP OF the existing environment in
+	 * eclipse, as users may not know *all* environment variables that need to
+	 * be set, or to do so may be tedious.
+	 */
+	public static String[] convertEnvironment(Map<String, String> env) {
+		if (env == null || env.size() == 0)
+			return null;
+
+		// Create a new map based on pre-existing environment of Eclipse
+		Map<String, String> original = new HashMap<>(System.getenv());
+
+		// Add new environment on top of existing
+		Iterator<String> additonal = env.keySet().iterator();
+		String k;
+		while (additonal.hasNext()) {
+			k = additonal.next();
+			original.put(k, env.get(k));
+		}
+
+		// Convert the combined map into a form that can be used to launch
+		// process
+		ArrayList<String> ret = new ArrayList<>();
+		Iterator<String> it = original.keySet().iterator();
+		String working = null;
+		while (it.hasNext()) {
+			working = it.next();
+			ret.add(working + "=" + original.get(working)); //$NON-NLS-1$
+		}
+		return ret.toArray(new String[ret.size()]);
+	}
+
+	public static String[] call(String rootCommand, String[] args, File vagrantDir,
+			Map<String, String> env) throws IOException {
+		String[] envp = (env == null ? null : convertEnvironment(env));
+
+		List<String> result = new ArrayList<>();
+		List<String> cmd = new ArrayList<>();
+		cmd.add(rootCommand);
+		cmd.addAll(Arrays.asList(args));
+		Process p = Runtime.getRuntime().exec(cmd.toArray(new String[0]),
+				envp, vagrantDir);
+		BufferedReader buff = new BufferedReader(
+				new InputStreamReader(p.getInputStream()));
+		try {
+			if (p.waitFor() == 0) {
+				String line;
+				while ((line = buff.readLine()) != null) {
+					result.add(line);
+				}
+			} else {
+				return new String[0];
+			}
+		} catch(InterruptedException ie) {
+			// ignore
+		}
+		return result.toArray(new String[0]);
+	}
+	
+	
 }
