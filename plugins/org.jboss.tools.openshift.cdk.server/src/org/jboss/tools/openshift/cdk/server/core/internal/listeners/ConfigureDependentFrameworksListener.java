@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,9 +28,12 @@ import org.eclipse.linuxtools.internal.docker.core.DockerConnection.Builder;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
+import org.jboss.ide.eclipse.as.core.server.IServerStatePoller.PollingException;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchConfigUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -171,32 +175,37 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 		}
 	}
 	
+
+	private File getWorkingDirectory(IServer s) {
+		String str = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
+		if( str != null && new File(str).exists()) {
+			return new File(str);
+		}
+		return null;
+	}
+	
 	private ADBInfo loadADBInfo(IServer server) {
-		try {
-			ILaunchConfigurationWorkingCopy wc = new CDKLaunchConfigUtility().
-					createExternalToolsLaunchConfig(server, "adbinfo", server.getName() + " adbinfo");
-			ILaunch launch2 = wc.launch("run", new NullProgressMonitor());
-			final IProcess[] processes = launch2.getProcesses();
-			IStreamMonitor mon = processes[0].getStreamsProxy().getOutputStreamMonitor();
-			final ArrayList<String> lines = new ArrayList<String>();
-			mon.addListener(new IStreamListener() {
-				public void streamAppended(String text, IStreamMonitor monitor) {
-					lines.add(text);
-				}
-			});
-			
-			while( !processes[0].isTerminated()) {
-				try {
-					Thread.sleep(500);
-				} catch(InterruptedException ie) {
-					// ignore
-				}
-			}
-			
+		
+		String[] args = new String[]{CDKConstants.VAGRANT_CMD_ADBINFO, CDKConstants.VAGRANT_FLAG_NO_COLOR};
+		HashMap<String,String> env = new HashMap<String,String>(System.getenv());
+		
+    	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
+		
+    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+		if( passCredentials ) {
+			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
+			env.put(userKey, cdkServer.getUsername());
+			env.put(passKey, cdkServer.getPassword());
+		}
+		
+	    try {
+	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
 			String setEnvVarCommand = Platform.getOS().equals(Platform.OS_WIN32) ? "setx " : "export ";
 			String setEnvVarDelim = Platform.getOS().equals(Platform.OS_WIN32) ? " " : "=";
-			HashMap<String,String> env = new HashMap<String,String>();
-			Iterator<String> lineIterator = lines.iterator();
+			HashMap<String,String> adbEnv = new HashMap<String,String>();
+			Iterator<String> lineIterator = Arrays.asList(lines).iterator();
 			while(lineIterator.hasNext()) {
 				String oneAppend = lineIterator.next();
 				String[] allAppends = oneAppend.split("\n");
@@ -207,16 +216,13 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 						if( eq != -1 ) {
 							String k = lineRemainder.substring(0, eq);
 							String v = lineRemainder.substring(eq+1);
-							env.put(k, v);
+							adbEnv.put(k, v);
 						}
 					}
 				}
 			}
-			
-			
-			System.out.println(lines);
-			return new ADBInfo(env);
-		} catch(CoreException ce) {
+			return new ADBInfo(adbEnv);
+		} catch(IOException ce) {
 			ce.printStackTrace(); // TODO log
 		}
 		return null;

@@ -10,17 +10,13 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.IStatus;
@@ -32,6 +28,7 @@ import org.jboss.ide.eclipse.as.core.server.IServerStatePollerType;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
 
 public class VagrantPoller implements IServerStatePoller2 {
 	private IServer server;
@@ -131,54 +128,32 @@ public class VagrantPoller implements IServerStatePoller2 {
 		throw  new PollingException("Working Directory not found: " + str);
 	}
 	
-	private int onePing(IServer server) {
-	    try {
-	        String line;
-	    	Process p = null;
-	    	List<String> args = new ArrayList<String>();
-	    	String vagrantCmdLoc = CDKConstantUtility.getVagrantLocation(server);
-	    	args.add(vagrantCmdLoc);
-	    	args.add(CDKConstants.VAGRANT_CMD_STATUS);
-	    	args.add(CDKConstants.VAGRANT_FLAG_MACHINE_READABLE);
-	    	
 
-	    	
-	    	ProcessBuilder pb = new ProcessBuilder(args);
-	    	Map<String, String> env = pb.environment();
-	    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-	    	
-	    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
-			if( passCredentials ) {
-				String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
-				String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
-				env.put(userKey, cdkServer.getUsername());
-				env.put(passKey, cdkServer.getPassword());
-			}
-	    	
-	    	try {
-		    	File fDir = getWorkingDirectory(server);
-		    	pb.directory(fDir);
-		    	p = pb.start();
-		        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		        StringBuffer sb = new StringBuffer();
-	  	        while ((line = input.readLine()) != null) {
-	  	        	sb.append(line);
-	  	        	sb.append("\n");
-	  	        }
-	  	        input.close();
-	  	        
-	  	        // Evaluate the output
-	  	        return parseOutput(sb.toString());
-	    	} catch(PollingException pe) {
-	    		aborted = pe;
-	    	} catch(IOException ioe) {
-	    		// TODO
-	    		ioe.printStackTrace();
-	    	}
-	      }
-	      catch (Exception err) {
-	        err.printStackTrace();
-	      }
+	private int onePing(IServer server) {
+		String[] args = new String[]{CDKConstants.VAGRANT_CMD_STATUS, 
+				CDKConstants.VAGRANT_FLAG_MACHINE_READABLE, CDKConstants.VAGRANT_FLAG_NO_COLOR};
+		HashMap<String,String> env = new HashMap<String,String>(System.getenv());
+		
+    	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
+		
+    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+		if( passCredentials ) {
+			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
+			env.put(userKey, cdkServer.getUsername());
+			env.put(passKey, cdkServer.getPassword());
+		}
+		
+	    try {
+	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
+  	        return parseOutput(lines);
+    	} catch(PollingException pe) {
+    		aborted = pe;
+    	} catch(IOException ioe) {
+    		// TODO
+    		ioe.printStackTrace();
+    	}
 		return IStatus.INFO;
 	}
 	
@@ -199,12 +174,11 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 	
 	
-	private int parseOutput(String s) {
+	private int parseOutput(String[] lines) {
 		HashMap<String, VagrantStatus> status = new HashMap<String, VagrantStatus>();
-		if( !s.isEmpty()) {
-			String[] byLine = s.split("\n");
-			for( int i = 0; i < byLine.length; i++ ) {
-				String[] csv = byLine[i].split(",");
+		if( lines != null && lines.length > 0 ) {
+			for( int i = 0; i < lines.length; i++ ) {
+				String[] csv = lines[i].split(",");
 				String timestamp = csv[0];
 				String vmId = csv[1];
 				if( vmId != null && !vmId.isEmpty() ) {

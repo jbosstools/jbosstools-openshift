@@ -99,10 +99,11 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 		}
 	}
 	
-	
 	private void shutdownViaExternalTools() throws CoreException {
-		ILaunchConfigurationWorkingCopy wc = new CDKLaunchConfigUtility().createExternalToolsLaunchConfig(getServer(), 
-				CDKConstants.VAGRANT_CMD_HALT, "Shutdown " + getServer().getName());
+		String cmd = CDKConstants.VAGRANT_CMD_HALT + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR; 
+		
+		ILaunchConfigurationWorkingCopy wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(getServer(), 
+				cmd, "Shutdown " + getServer().getName());
 		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(
 					ControllableServerBehavior.class, new NullProgressMonitor());
 		try {

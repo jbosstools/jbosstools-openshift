@@ -17,8 +17,10 @@ public interface CDKConstants {
 	public static final String VAGRANT_CMD_STATUS = "status";
 	public static final String VAGRANT_CMD_UP = "up";
 	public static final String VAGRANT_CMD_HALT = "halt";
+	public static final String VAGRANT_CMD_ADBINFO = "adbinfo";
 	public static final String VAGRANT_FLAG_MACHINE_READABLE = "--machine-readable";
 	public static final String VAGRANT_FLAG_PROVISION = "--provision";
+	public static final String VAGRANT_FLAG_NO_COLOR= "--no-color";
 	public static final String VAGRANT_FLAG_PROVIDER_NAME = "provider-name";
 	
 	public static final String CDK_ENV_SUB_USERNAME = "SUB_USERNAME";
