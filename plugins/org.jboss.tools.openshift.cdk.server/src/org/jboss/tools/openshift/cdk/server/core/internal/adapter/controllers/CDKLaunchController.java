@@ -10,6 +10,7 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
@@ -113,6 +115,13 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(configuration);
 		beh.setServerStarting();
+		
+		String vagrantLoc = CDKConstantUtility.getVagrantLocation(s);
+		if( s == null || !(new File(vagrantLoc).exists())) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command: " + vagrantLoc));
+		}
+		
 		
 		// Poll the server once more 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
