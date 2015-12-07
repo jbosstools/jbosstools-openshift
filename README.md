@@ -51,7 +51,7 @@ directly in the org.jboss.tools.openshift.client/lib folder, followed by a direc
 - Right-click on the `openshift-rest-client-java` project
 - Run As > Maven Build
 - set goals=package
-- add `jar.outpuDir` property, set the absolute path to org.jboss.tools.openshift.client/lib as value
+- add `jar.outputDir` property, set the absolute path to org.jboss.tools.openshift.client/lib as value
 - In the refresh tab, enable refresh resources upon completion
 - click specify resources..., select org.jboss.tools.openshift.client/lib
 - Run, profit!
