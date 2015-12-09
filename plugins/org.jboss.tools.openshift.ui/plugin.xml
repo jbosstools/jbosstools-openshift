@@ -232,6 +232,50 @@
 			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
 		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.editresource"
+		         id="org.jboss.tools.openshift.ui.explorer.command.editresource">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false">
+		                  <or>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IBuildConfig">
+		                  </instanceof>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IDeploymentConfig">
+		                  </instanceof>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IPod">
+		                  </instanceof>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IImageStream">
+		                  </instanceof>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IReplicationController">
+		                  </instanceof>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.IService">
+		                  </instanceof>
+		                  <instanceof
+		                        value="com.openshift.restclient.model.route.IRoute">
+		                  </instanceof>
+		                  </or>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+		   <command
 		         commandId="org.jboss.tools.openshift.ui.command.clonebuild"
 		         id="org.jboss.tools.openshift.ui.explorer.command.clonebuild">
 		      <visibleWhen>
@@ -522,6 +566,10 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.OpenInWebConsoleHandler"
 			commandId="org.jboss.tools.openshift.ui.command.openInWebConsole">
 		</handler>
+		<handler
+			class="org.jboss.tools.openshift.internal.ui.handler.EditResourceHandler"
+			commandId="org.jboss.tools.openshift.ui.command.editresource">
+		</handler>
 	</extension>
 	
 	<!-- adapters -->
@@ -631,6 +679,10 @@
 		<command
 			id="org.jboss.tools.openshift.ui.command.openInWebConsole"
 			name="%openshift.command.openwebconsole">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.editresource"
+			name="%openshift.command.editresource">
 		</command>
 	</extension>
 
@@ -806,4 +858,11 @@
 			class="org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter" />
 	</extension>
 
+<extension point="org.eclipse.ui.editors.documentProviders"> 
+    <provider 
+        inputTypes="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceInput" 
+        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceDocumentProvider" 
+        id="org.jboss.tools.openshift.ui.text.OpenShiftResourceDocumentProvider"> 
+    </provider> 
+</extension> 
 </plugin>
