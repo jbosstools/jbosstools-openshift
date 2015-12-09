@@ -27,6 +27,10 @@ public class StringUtils {
 	private static final String LINE_SEPARATOR_KEY = "line.separator";
 	private static final String SHORTENING_MARKER = "...";
 	
+	public static String pluralize(String value) {
+		return value + "s";
+	}
+	
 	public static String null2emptyString(String value) {
 		if (value != null) {
 			return value;

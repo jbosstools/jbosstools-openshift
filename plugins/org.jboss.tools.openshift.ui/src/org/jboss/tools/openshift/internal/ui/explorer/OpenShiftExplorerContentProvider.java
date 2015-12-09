@@ -23,13 +23,13 @@ import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 import org.jboss.tools.openshift.internal.core.WatchManager;
+import org.jboss.tools.openshift.internal.ui.models.Deployment;
+import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * Contributes OpenShift 3 specific content to the OpenShift explorer view
@@ -38,12 +38,10 @@ import com.openshift.restclient.model.IService;
  */
 public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider {
 	
-	private Map<IProject, List<Deployment>> deploymentsByProject = new HashMap<>();
-	private Map<IService, Deployment> deploymentByService = new HashMap<>();
+	private Map<String, DeploymentResourceMapper> deploymentCache = new HashMap<>();
 	
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-       
 		if (!(connection instanceof Connection)) {
 			return;
 		}
@@ -57,6 +55,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				handleRemoveResource((IResource) oldValue);
 			} else {
 				//update
+				handleUpdateResource((IResource) newValue);
 				updateChildrenFromViewer(newValue);
 			}
 		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
@@ -65,57 +64,23 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			super.handleConnectionChanged(connection, property, oldValue, newValue);
 		}
 	}
-	private void handleAddResource(IResource resource) {
-		switch(resource.getKind()) {
-		case ResourceKind.SERVICE:
-			IService service = (IService) resource;
-			Deployment deployment = DeploymentResourceMapper.getDeployment(service);
-			deploymentByService.put(service, deployment);
-			addChildrenToViewer(resource.getProject(), deployment);
-			break;
-		case ResourceKind.POD:
-			IPod pod = (IPod)resource;
-			Map<String, String> labels = pod.getLabels();
-			for (IService depService : deploymentByService.keySet()) {
-				Map<String, String> selector = depService.getSelector();
-				if(selectorsOverlap(selector, labels)) {
-					Deployment deploymentForPod = deploymentByService.get(depService);
-					deploymentForPod.add(pod);
-					addChildrenToViewer(depService, deploymentForPod);
-				}
-			}
-		default:
-		}
-	}
-	private void handleRemoveResource(IResource resource) {
-		switch(resource.getKind()) {
-		case ResourceKind.SERVICE:
-			IService service = (IService)resource;
-			deploymentByService.remove(service);
-			removeChildrenFromViewer(resource.getProject(), deploymentByService.get(service));
-			break;
-		case ResourceKind.POD:
-			IPod pod = (IPod)resource;
-			for (IService deployedService : deploymentByService.keySet()) {
-				if(selectorsOverlap(deployedService.getSelector(), pod.getLabels())){
-					deploymentByService.get(deployedService).remove(pod);
-					removeChildrenFromViewer(deploymentByService, pod);
-				}
-			}
-		default:
-		}
+	
+	private void handleUpdateResource(IResource resource) {
+		final String project = resource.getNamespace();
+		if(!deploymentCache.containsKey(project)) return;
+		deploymentCache.get(project).update(resource);
 	}
 	
-	private boolean selectorsOverlap(Map<String, String> source, Map<String, String> target) {
-		if(!target.keySet().containsAll(source.keySet())) {
-			return false;
-		}
-		for (String key : source.keySet()) {
-			if(!target.get(key).equals(source.get(key))) {
-				return false;
-			}
-		}
-		return true;
+	private void handleAddResource(IResource resource) {
+		final String project = resource.getNamespace();
+		if(!deploymentCache.containsKey(project)) return;
+		deploymentCache.get(project).add(resource);
+	}
+	
+	private void handleRemoveResource(IResource resource) {
+		final String project = resource.getNamespace();
+		if(!deploymentCache.containsKey(project)) return;
+		deploymentCache.get(project).remove(resource);
 	}
 	
 	//TODO: Handle updates to a project when needed.  Back-end doesnt support edit of resources(most?) now
@@ -132,7 +97,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			public void handleRemove(int index, Object element) {
 				IProject project = (IProject) element;
 				removed.add(project);
-				deploymentsByProject.remove(project);
 			}
 			
 			@Override
@@ -147,14 +111,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	
 	@Override
 	protected void handleConnectionRemoved(IConnection connection) {
-		if(!(connection instanceof Connection))return;
-		for (IProject project : deploymentsByProject.keySet()) {
-			Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
-			if(connection.equals(conn)) {
-				deploymentsByProject.remove(project);
-				break;
-			}
-		}
 		super.handleConnectionRemoved(connection);
 	}
 
@@ -186,13 +142,9 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			} else if (parentElement instanceof IProject) {
 				IProject project = (IProject) parentElement;
 				DeploymentResourceMapper mapper = new DeploymentResourceMapper(ConnectionsRegistryUtil.getConnectionFor(project), project);
-				deploymentsByProject.put(project, mapper.getDeployments());
-				for (Deployment deployment : mapper.getDeployments()) {
-					deploymentByService.put(deployment.getService(),deployment);
-				}
+				deploymentCache.put(project.getName(), mapper);
 				WatchManager.getInstance().startWatch(project);
 				return mapper.getDeployments().toArray();
-
 			} else if (parentElement instanceof Deployment) {
 				return ((Deployment) parentElement).getPods().toArray();
 			}

@@ -18,6 +18,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
+import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 
 /**
  * An adapter factory to provide a tabbed property view in support of the
@@ -27,16 +28,15 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
  *
  */
 public class ExplorerViewTabbedPropertyAdapterFactory implements IAdapterFactory {
-	private static final String VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == IPropertySheetPage.class) {
-			IWorkbenchPart found = findView(VIEW_ID);
+			IWorkbenchPart found = findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
 			if (found != null) {
 				ITabbedPropertySheetPageContributor contrib = new ITabbedPropertySheetPageContributor() {
 					public String getContributorId() {
-						return VIEW_ID;
+						return OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID;
 					}
 				};
 				return new TabbedPropertySheetPage(contrib);
