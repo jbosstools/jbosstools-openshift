@@ -45,7 +45,10 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		//check binary locations
-		final String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
+		String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
+		if (StringUtils.isBlank(location)) {
+			location = OCBinaryName.getInstance().getLocation();
+		}
 		if(StringUtils.isBlank(location)) {
 			
 			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),
