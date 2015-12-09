@@ -61,9 +61,9 @@
 								<instanceof
 									value="org.jboss.tools.openshift.core.connection.Connection" />
 								<instanceof
-									value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
+									value="com.openshift.restclient.model.IBuildConfig" />
 								<instanceof
-									value="com.openshift.restclient.model.IResource" />
+									value="com.openshift.restclient.model.IProject" />
 							</or>
 						</iterate>
 					</with>
