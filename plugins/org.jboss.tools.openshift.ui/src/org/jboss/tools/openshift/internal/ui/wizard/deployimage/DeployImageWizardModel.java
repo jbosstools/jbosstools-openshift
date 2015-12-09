@@ -34,11 +34,11 @@ import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
-import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
@@ -157,14 +157,15 @@ public class DeployImageWizardModel
 		initModel(connection, null);
 	}
 
-	private void setProjects(List<IProject> projects) {
+	@Override
+	public void setProjects(Collection<IProject> projects) {
 		if(projects == null) projects = Collections.emptyList();
 		firePropertyChange(PROPERTY_PROJECTS, this.projects, this.projects = projects);
 		if(!projects.isEmpty() && !projects.contains(getProject())) {
 			setProject(null);
 		}
 		if(projects.size() == 1) {
-			setProject(projects.get(0));
+			setProject(projects.iterator().next());
 		}
 	}
 

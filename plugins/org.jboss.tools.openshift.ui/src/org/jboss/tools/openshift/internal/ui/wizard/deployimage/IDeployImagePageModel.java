@@ -57,6 +57,7 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return
 	 */
 	Collection<IProject> getProjects();
+	void setProjects(Collection<IProject> projects);
 	
 	/**
 	 * The project to associate with this deployment
