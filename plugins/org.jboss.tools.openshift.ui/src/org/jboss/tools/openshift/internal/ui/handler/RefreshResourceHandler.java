@@ -86,7 +86,7 @@ public class RefreshResourceHandler extends AbstractHandler{
 	private void refresh(final Object element) {
 		Job job = null;
 		if (element instanceof IResource) {
-			job = createRefreshResourceJob(element);
+			job = createRefreshResourceJob((IResource)element);
 		} else {
 			job = createRefreshRefreshableJob(element);
 		}
@@ -116,11 +116,11 @@ public class RefreshResourceHandler extends AbstractHandler{
 		};
 	}
 	
-	private Job createRefreshResourceJob(final Object element) {
+	private Job createRefreshResourceJob(final IResource element) {
 		return new RefreshResourcesJob(new IResourcesModel() {
 			@Override
 			public Collection<IResource> getResources() {
-				return Arrays.asList(new IResource[] {(IResource) element});
+				return Arrays.asList(element);
 			}
 		}, false);
 	}
