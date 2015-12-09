@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -17,11 +19,14 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -35,22 +40,29 @@ import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.ui.wizards.ImageSearch;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.validator.DeployImageNameValidator;
+import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
 import com.openshift.restclient.model.IProject;
 
@@ -274,7 +286,6 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
-			.span(2, 1)
 			.hint(SWT.DEFAULT, 30)
 			.applyTo(cmboProject.getControl());
 		
@@ -310,6 +321,49 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.in(dbc);
 		ControlDecorationSupport.create(
 				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		
+		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
+		GridDataFactory.fillDefaults()
+			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
+			.applyTo(manageProjectsLink);
+		manageProjectsLink.addListener(SWT.MouseDown, onManageProjectsClicked());
 	}
 
+	private Listener onManageProjectsClicked() {
+		return new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				try {
+					// run in job to enforce busy cursor which doesnt work otherwise
+					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							return Status.OK_STATUS;
+						}
+
+						@Override
+						protected IStatus updateUI(IProgressMonitor monitor) {
+							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
+							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open(); 
+							// reload projects to reflect changes that happened in projects wizard
+							if (manageProjectsWizard.hasChanged()) {
+								model.setProjects(manageProjectsWizard.getProjects());
+							}
+							if(Dialog.OK == result) {
+								IProject selectedProject = manageProjectsWizard.getSelectedProject();
+								if (selectedProject != null) {
+									model.setProject(selectedProject);
+								}
+							}
+							return Status.OK_STATUS;
+						}
+					}, getContainer());
+				} catch (InvocationTargetException | InterruptedException e) {
+					// swallow intentionnally
+				}
+			}
+		};
+	}
 }
