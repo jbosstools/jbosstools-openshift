@@ -10,8 +10,16 @@ package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 
 import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.build.IBuildSource;
+import com.openshift.restclient.model.build.IBuildStatus;
+import com.openshift.restclient.model.build.IBuildStrategy;
+import com.openshift.restclient.model.build.IDockerBuildStrategy;
+import com.openshift.restclient.model.build.IGitBuildSource;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 
@@ -19,27 +27,91 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 		super(resource);
 	}
 
+	
 	@Override
-	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
+	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("podName", "Build Pod"),
-				new TextPropertyDescriptor("message", "Build Message"),
-				new TextPropertyDescriptor("status", "Status"),
+			new TextPropertyDescriptor("status", "Status"),
+			new TextPropertyDescriptor("started", "Started"),
+			new TextPropertyDescriptor("duration", "Duration"),
+			new TextPropertyDescriptor("build.config", "Build Configuration"),
+			new TextPropertyDescriptor("build.strategy", "Build Strategy"),
+			new TextPropertyDescriptor("builder.image", "Builder Image"),
+			new TextPropertyDescriptor("source.type", "Source Type"),
+			new TextPropertyDescriptor("source.repo", "Source Repo"),
+			new TextPropertyDescriptor("source.ref", "Source Ref."),
+			new TextPropertyDescriptor("source.contextDir", "Source Context Dir."),
+			new TextPropertyDescriptor("output.image", "Output Image"),
+			new TextPropertyDescriptor("push.secret", "Push Secret")
 		};
 	}
 
+
 	@Override
 	public Object getPropertyValue(Object id) {
-		if("status".equals(id)){
-			return getResource().getStatus();
-		}
-		if("message".equals(id)){
-			return getResource().getMessage();
-		}
-		if("podName".equals(id)){
-			return getResource().getPodName();
+		IBuild build = getResource();
+		switch((String)id) {
+		case "status": return build.getStatus();
+		case "started": 
+			return DateTimeUtils.formatSince(build .getCreationTimeStamp());
+		case "build.config": 
+			return build.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME);
+		case "build.strategy" :
+		case "builder.image" :
+			return handleBuildStrategy((String)id, build.getBuildStrategy());
+		case "source.type" : 
+		case "source.repo" : 
+		case "source.ref" : 
+		case "source.contextDir" :
+			return handleBuildSource((String) id, build.getBuildSource());
+		case "duration": 
+		case "output.image": 
+			return handleBuildStatus((String)id, build.getBuildStatus());
+		case "push.secret" :
+			return build.getPushSecret();
 		}
 		return super.getPropertyValue(id);
 	}
 	
+	private Object handleBuildStatus(String id, IBuildStatus status) {
+		if(status != null) {
+			switch(id){
+			case "output.image":
+				return status.getOutputDockerImage() != null ? status.getOutputDockerImage().getUriWithoutHost() : "";
+			case "duration":
+				return DateTimeUtils.formatDuration(status.getDuration());
+			}
+		}
+		return "";
+	}
+	
+	private Object handleBuildStrategy(String id, IBuildStrategy strategy) {
+		if(strategy == null) return "";
+		switch(id) {
+		case "build.strategy" : return strategy.getType();
+		case "builder.image" : 
+			if(strategy instanceof IDockerBuildStrategy) {
+				return ((IDockerBuildStrategy) strategy).getBaseImage();
+			}
+			if(strategy instanceof ISourceBuildStrategy) {
+				return ((ISourceBuildStrategy) strategy).getImage();
+			}
+		}
+		return "";
+	}
+	
+	private Object handleBuildSource(String id, IBuildSource buildSource) {
+		if(buildSource == null) return "";
+		if("source.type".equals(id)) return buildSource.getType();
+		if(buildSource instanceof IGitBuildSource) {
+			IGitBuildSource source = (IGitBuildSource) buildSource;
+			switch(id) {
+			case "source.repo":  return source.getURI();
+			case "source.ref":   return source.getRef();
+			case "source.contextDir": return source.getContextDir();
+			}
+		}
+		return "";
+		
+	}
 }
