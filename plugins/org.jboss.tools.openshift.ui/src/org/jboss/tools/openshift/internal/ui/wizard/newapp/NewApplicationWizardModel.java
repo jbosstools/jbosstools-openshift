@@ -111,7 +111,7 @@ public class NewApplicationWizardModel
 		ITemplate uploadedTemplate = null;
 		try {
 			filename = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(filename);
-			if (!Files.exists(Paths.get(filename))) {
+			if (!Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
 			uploadedTemplate = resourceFactory.create(createInputStream(filename));
