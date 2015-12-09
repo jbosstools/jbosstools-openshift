@@ -8,52 +8,28 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.explorer;
+package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.tabbed.AbstractPropertySection;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
-import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 
-public class DefaultPropertySection extends AbstractPropertySection {
+public class DeploymentPropertySection extends AbstractPropertySection {
 
-	private PropertySheetPage page;
-
-	public DefaultPropertySection() {
-		page = new PropertySheetPage();
-	}
+	private Text createText;
 
 	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		page.createControl(parent);
+		super.createControls(parent, aTabbedPropertySheetPage);
+		createText = getWidgetFactory().createText(parent, "myValue");
 	}
 
-	
 	@Override
 	public boolean shouldUseExtraSpace() {
 		return true;
 	}
 	
-
-	@Override
-	public void dispose() {
-		page.dispose();
-	}
-
-	@Override
-	public void setInput(IWorkbenchPart part, ISelection selection) {
-		super.setInput(part, selection);
-		page.selectionChanged(part, selection);
-	}
-
-	@Override
-	public void refresh() {
-		if(!DisposeUtils.isDisposed(page.getControl())){
-			page.refresh();
-		}
-	}
 	
+
 }

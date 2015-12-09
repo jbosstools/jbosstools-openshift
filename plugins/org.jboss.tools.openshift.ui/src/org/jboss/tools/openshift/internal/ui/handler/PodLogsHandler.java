@@ -18,25 +18,27 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.job.PodLogsJob;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IResource;
 
 /**
  * @author jeff.cantrill
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed"};
-	private static final String BUILDNAME_ANNOTATION = "openshift.io/build.name";
 
 	@Override
 	protected void handleEvent(ExecutionEvent event){
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getSelectionService().getSelection();
 		IPod pod = UIUtils.getFirstElement(selection, IPod.class);
 		if(pod == null) {
 			pod = getPodFromBuild(selection);
@@ -62,12 +64,21 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 
 	private IPod getPodFromBuild(ISelection selection) {
 		IBuild build = UIUtils.getFirstElement(selection, IBuild.class);
+		if(build == null) {
+			IResourceUIModel model = UIUtils.getFirstElement(selection, IResourceUIModel.class);
+			if(model != null) {
+				IResource resource = model.getResource();
+				if(resource != null && ResourceKind.BUILD.equals(resource.getKind())) {
+					build = (IBuild) resource;
+				}
+			}
+		}
 		if(build != null) {
 			final String buildName = build.getName();
 			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
 			List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespace());
 			for (IPod pod : pods) {
-				if(buildName.equals(pod.getAnnotation(BUILDNAME_ANNOTATION))) {
+				if(buildName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.BUILD_NAME))) {
 					return pod;
 				}
 			}

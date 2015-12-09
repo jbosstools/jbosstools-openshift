@@ -507,6 +507,39 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.BuildsTab">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.buildlogs"
+           id="org.jboss.tools.openshift.ui.explorer.command.buildlogs"
+           tooltip="The openshift binary must be set in user preferences in order to retrieve build logs">
+     </command>
+     <separator
+           name="org.jboss.tools.openshift.ui.properties.tab.BuildsTab.separator1"
+           visible="true">
+     </separator>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.startbuild"
+           style="push">
+        <parameter
+              name="org.jboss.tools.openshift.ui.command.startbuild.source"
+              value="BuildConfig">
+        </parameter>
+     </command>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.clonebuild"
+           style="push">
+     </command>
+     <separator
+           name="org.jboss.tools.openshift.ui.properties.tab.BuildsTab.separator2"
+           visible="true">
+     </separator>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.resource.delete"
+           style="push">
+     </command>
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -647,8 +680,25 @@
 		</adapter>
 	</factory>
  <factory
-       adaptableType="org.jboss.tools.openshift.internal.ui.explorer.Deployment"
+       adaptableType="org.jboss.tools.openshift.internal.ui.models.Deployment"
        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
+    <adapter
+          type="org.eclipse.ui.views.properties.IPropertySource">
+    </adapter>
+ </factory>
+ <factory
+       adaptableType="org.jboss.tools.openshift.internal.common.ui.explorer.OpenShiftExplorerView"
+       class="org.jboss.tools.openshift.internal.ui.property.tabbed.ExplorerViewTabbedPropertyAdapterFactory">
+    <adapter
+          type="org.eclipse.ui.views.properties.IPropertySheetPage">
+    </adapter>
+ </factory>
+ <factory
+       adaptableType="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel"
+       class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
+    <adapter
+          type="org.eclipse.ui.views.properties.IPropertySource">
+    </adapter>
     <adapter
           type="org.eclipse.ui.views.properties.IPropertySource">
     </adapter>
@@ -714,6 +764,11 @@
 		<command
 			id="org.jboss.tools.openshift.ui.command.startbuild"
 			name="%openshift.command.build.startbuild">
+     <commandParameter
+           id="org.jboss.tools.openshift.ui.command.startbuild.source"
+           name="name"
+           optional="true">
+     </commandParameter>
 		</command>
 		<command
 			id="org.jboss.tools.openshift.ui.command.clonebuild"
@@ -793,9 +848,6 @@
      	</handler>
     </extension>
 	<!-- openshift explorer: import application -->
-    <extension
-           point="org.eclipse.ui.menus">
-	</extension>
 
 	<!-- Open In Browser -->
 	<extension
@@ -816,7 +868,7 @@
 		point="org.eclipse.ui.menus">
 		<!-- openshift explorer: open in browser -->
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.showIn">
+			locationURI="popup:org.eclipse.ui.views.PropertySheet">
 			<command
 				commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
 				icon="icons/open-browser.gif"
@@ -935,4 +987,47 @@
 			id="org.jboss.tools.openshift.ui.text.OpenShiftResourceDocumentProvider"> 
 		</provider> 
 	</extension>
+
+<extension point="org.eclipse.ui.editors.documentProviders"> 
+    <provider 
+        inputTypes="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceInput" 
+        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceDocumentProvider" 
+        id="org.jboss.tools.openshift.ui.text.OpenShiftResourceDocumentProvider"> 
+    </provider> 
+</extension>
+<extension
+      point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+   <propertyTabs
+         contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+      <propertyTab
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.BuildsTab"
+            label="%openshift.explorer.properties.tab.builds">
+      </propertyTab>
+   </propertyTabs>
+</extension>
+<extension
+      point="org.eclipse.ui.views.properties.tabbed.propertySections">
+   <propertySections
+         contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.BuildsPropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.builds"
+            tab="org.jboss.tools.openshift.ui.properties.tab.BuildsTab">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+   </propertySections>
+</extension>
+<extension
+      point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+   <propertyContributor
+         contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+      <propertyCategory
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments">
+      </propertyCategory>
+   </propertyContributor>
+</extension>
 </plugin>
