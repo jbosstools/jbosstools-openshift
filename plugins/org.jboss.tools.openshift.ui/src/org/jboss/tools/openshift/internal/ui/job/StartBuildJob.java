@@ -14,10 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionProperties;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
@@ -55,12 +51,6 @@ public class StartBuildJob extends AbstractDelegatingMonitorJob {
 			if(build == null) {
 				return new Status(Status.INFO, OpenShiftUIActivator.PLUGIN_ID, "Manually triggering builds is unsupported");
 			}
-			Connection connection = ConnectionsRegistryUtil.getConnectionFor(buildsource);
-			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-					connection, 
-					ConnectionProperties.PROPERTY_RESOURCE, 
-					null, 
-					build);
 			return Status.OK_STATUS;
 		}catch(OpenShiftException e) {
 			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Error starting build {0}.", buildsource.getName()), e);

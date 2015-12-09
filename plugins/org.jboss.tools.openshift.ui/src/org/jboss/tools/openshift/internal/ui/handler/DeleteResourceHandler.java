@@ -20,6 +20,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.model.IResource;
 
@@ -32,8 +33,14 @@ public class DeleteResourceHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		IResource resource = UIUtils.getFirstElement(selection, IResource.class);
+		if(resource == null) {
+			IResourceUIModel model = UIUtils.getFirstElement(selection, IResourceUIModel.class);
+			if(model != null) {
+				resource = model.getResource();
+			}
+		}
 		if(resource == null) {
 			return Status.OK_STATUS;
 		}
