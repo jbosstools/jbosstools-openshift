@@ -68,8 +68,10 @@ public class VagrantPoller implements IServerStatePoller2 {
 	
 	private void pollerRun() {
 		setStateInternal(false, state);
+    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+    	String pass = cdkServer.getPassword();
 		while(aborted == null && !canceled && !done) {
-			int status = onePing(server);
+			int status = onePing(server, pass);
 			boolean completeUp = ( status == IStatus.OK && expectedState);
 			boolean completeDown = (status == IStatus.ERROR && !expectedState);
 			if( completeUp || completeDown) {
@@ -128,8 +130,15 @@ public class VagrantPoller implements IServerStatePoller2 {
 		throw  new PollingException("Working Directory not found: " + str);
 	}
 	
-
+	
+	// This *could* prompt for a password, so dont use this method for repeated calls
 	private int onePing(IServer server) {
+    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+    	return onePing(server, cdkServer.getPassword());
+	}
+	
+	private int onePing(IServer server, String password) {
+
 		String[] args = new String[]{CDKConstants.VAGRANT_CMD_STATUS, 
 				CDKConstants.VAGRANT_FLAG_MACHINE_READABLE, CDKConstants.VAGRANT_FLAG_NO_COLOR};
 		HashMap<String,String> env = new HashMap<String,String>(System.getenv());
@@ -142,7 +151,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
 			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
 			env.put(userKey, cdkServer.getUsername());
-			env.put(passKey, cdkServer.getPassword());
+			env.put(passKey, password);
 		}
 		
 	    try {
