@@ -135,7 +135,9 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		String vagrantLoc = CDKConstantUtility.getVagrantLocation(s);
 		if(vagrantLoc == null || !(new File(vagrantLoc).exists())) {
 			beh.setServerStopped();
-			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command: " + vagrantLoc));
+			if( vagrantLoc == null )
+				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command. Please check to ensure that the command is available on your Path environment variable."));
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Expected location of vagrant command does not exist: " + vagrantLoc));
 		}
 		
 		
