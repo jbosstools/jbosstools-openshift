@@ -125,12 +125,15 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
 		final IServer s = ServerUtil.getServer(configuration);
+		if( s == null ) {
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate server from launch configuration."));
+		}
 		
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(configuration);
 		beh.setServerStarting();
 		
 		String vagrantLoc = CDKConstantUtility.getVagrantLocation(s);
-		if( s == null || !(new File(vagrantLoc).exists())) {
+		if(vagrantLoc == null || !(new File(vagrantLoc).exists())) {
 			beh.setServerStopped();
 			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command: " + vagrantLoc));
 		}
