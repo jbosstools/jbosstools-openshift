@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.treeitem;
 
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
+import org.jboss.tools.openshift.internal.common.ui.viewer.GTK3WorkaroundStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 
 /**
@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
  * 
  * @author Andre Dietisheim
  */
-public class ObservableTreeItemStyledCellLabelProvider extends StyledCellLabelProvider {
+public class ObservableTreeItemStyledCellLabelProvider extends GTK3WorkaroundStyledCellLabelProvider {
 
 	private OpenShiftExplorerLabelProvider explorerLabelProvider;
 
