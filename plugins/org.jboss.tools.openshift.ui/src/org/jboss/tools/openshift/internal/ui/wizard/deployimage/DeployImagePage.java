@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -62,6 +61,7 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.validator.DeployImageNameValidator;
+import org.jboss.tools.openshift.internal.ui.validator.DockerImageValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
 import com.openshift.restclient.model.IProject;
@@ -111,7 +111,15 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				WidgetProperties.text(SWT.Modify).observeDelayed(500, txtImage);
 		Binding imageBinding = ValueBindingBuilder
 			.bind(imageTextObservable)
-			.validatingAfterConvert(new DockerImageValidator())
+			.validatingAfterConvert(new DockerImageValidator() {
+				@Override
+				public IStatus additionalValidation(String imageName) {
+					if (!model.imageExists(imageName)) {
+						return ValidationStatus.cancel("This docker image was not pulled in the selected Docker connection. Mapping ports will not be possible.");
+					}
+					return ValidationStatus.ok();
+				}
+			})
 			.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE).observe(model))
 			.in(dbc);
 		ControlDecorationSupport.create(
@@ -221,18 +229,6 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.in(dbc);
 		ControlDecorationSupport.create(
 			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));	}
-
-	private class DockerImageValidator implements IValidator {
-
-		@Override
-		public IStatus validate(Object value) {
-			String uri = (String) value;
-			if(StringUtils.isEmpty(uri) || !model.imageExists(uri)) {
-				return ValidationStatus.cancel("Please provide an existing docker image in the format of <repo>/<namespace>/<name>:<tag>. The defaults are: repo=docker.io, namespace=library, tag=latest");
-			}
-			return ValidationStatus.ok();
-		}
-	}
 	
 	private void createConnectionControl(Composite parent, DataBindingContext dbc) {
 		Label lblConnection = new Label(parent, SWT.NONE);
