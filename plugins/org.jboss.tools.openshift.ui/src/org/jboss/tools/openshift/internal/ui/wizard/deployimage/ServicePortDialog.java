@@ -71,7 +71,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		
 		//service port
 		Label lblServicePort = new Label(dialogArea, SWT.NONE);
-		lblServicePort.setText("Service Port:");
+		lblServicePort.setText("Service port:");
 		GridDataFactory.fillDefaults()
 			.align(SWT.RIGHT, SWT.CENTER)
 			.applyTo(lblServicePort);
@@ -83,7 +83,6 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.span(2, 1)
 			.applyTo(servicePortSpinner);
 		Binding servicePortBinding = ValueBindingBuilder
 				.bind(WidgetProperties.selection().observe(servicePortSpinner))
@@ -92,10 +91,12 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 			servicePortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
+		//filler
+		new Label(dialogArea, SWT.NONE);
+		
 		//pod port
 		Label lblPodPort = new Label(dialogArea, SWT.NONE);
-		lblPodPort.setText("Pod Port:");
+		lblPodPort.setText("Pod port:");
 		GridDataFactory.fillDefaults()
 			.align(SWT.RIGHT, SWT.CENTER).applyTo(lblPodPort);
 
@@ -106,7 +107,6 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		podPortSpinner.setToolTipText("The port exposed by the pod which will accept traffic");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.span(2, 1)
 			.applyTo(podPortSpinner);
 		Binding podPortBinding = ValueBindingBuilder
 				.bind(WidgetProperties.selection().observe(podPortSpinner))
@@ -123,6 +123,11 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 			}
 		});
 		
+		Label lbl = new Label(dialogArea, SWT.NONE);
+		lbl.setText("Pod port is linked to service port changes");
+		GridDataFactory.fillDefaults()
+		.align(SWT.FILL, SWT.CENTER)
+		.applyTo(lbl);
 	}
 	
 	class ServicePortValidator implements IValidator{
