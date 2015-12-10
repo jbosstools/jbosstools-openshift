@@ -190,6 +190,16 @@ public class UIUtils {
 		public void visit(Control control);
 	}
 	
+	public static void enableAllChildren(boolean enabled, Composite composite) {
+		doForAllChildren(new IWidgetVisitor() {
+			
+			@Override
+			public void visit(Control control) {
+				control.setEnabled(enabled);
+			}
+		}, composite);
+	}
+	
 	public static Shell getShell() {
 		Shell shell = null;
 		final IWorkbenchWindow window =

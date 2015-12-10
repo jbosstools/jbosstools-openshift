@@ -24,12 +24,12 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.IApplicationProperties;
 import org.jboss.tools.openshift.express.internal.core.cartridges.CodeAnythingCartridge;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
-import org.jboss.tools.openshift.express.internal.core.util.CollectionUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
 import org.jboss.tools.openshift.express.internal.ui.job.EmbedCartridgesJob;
 import org.jboss.tools.openshift.express.internal.ui.job.FireExpressConnectionsChangedJob;
 import org.jboss.tools.openshift.express.internal.ui.wizard.CreationLogDialog;
 import org.jboss.tools.openshift.express.internal.ui.wizard.LogEntryFactory;
+import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
 
 import com.openshift.client.ApplicationScale;
 import com.openshift.client.IApplication;

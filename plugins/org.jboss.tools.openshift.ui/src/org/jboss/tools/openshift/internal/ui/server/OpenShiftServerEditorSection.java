@@ -10,24 +10,46 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
 
+import org.eclipse.core.databinding.Binding;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -35,196 +57,445 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
-import org.eclipse.wst.server.ui.internal.editor.ServerEditorPartInput;
-import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyButtonCommand;
-import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand;
-import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
-import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.utils.FileUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionFactory;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.job.DisableAllWidgetsJob;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+
+import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
  */
 public class OpenShiftServerEditorSection extends ServerEditorSection {
-	private static final String DEFAULT_HOST_MARKER = " (default)";
 
-	private IEditorInput input;
-	protected Text connectionText;
-	protected Text projectNameText;
-	protected Text buildConfigText;
-	protected Combo deployProjectCombo;
-	protected Button verifyButton, overrideProjectSettings;
-	protected Group projectSettingGroup;
+	private IServerEditorPartInput input;
+	private OpenShiftServerEditorModel model;
 
+	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
-		this.input = input;
+		if (input instanceof IServerEditorPartInput) {
+			this.input = (IServerEditorPartInput) input;
+		}
 	}
 
+	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
+
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 
 		Section section = toolkit.createSection(parent,
 				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
 		section.setText("OpenShift Server Adapter");
-		section.setLayoutData(new GridData(
-				GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL
-						| GridData.GRAB_VERTICAL));
-		Composite c = toolkit.createComposite(section, SWT.NONE);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).equalWidth(true).applyTo(c);
-		createWidgets(c, toolkit);
-		toolkit.paintBordersFor(c);
-		toolkit.adapt(c);
-		section.setClient(c);
-
-		initWidgets();
-		addListeners();
-	}
-
-	protected void initWidgets() {
-		// Set the widgets
-		deployProjectCombo.setEnabled(true);
-//		ConnectionURL connectionUrl = OpenShiftServerUtils.getConnectionUrl(server);
-//		connectionText.setText(createConnectionLabel(connectionUrl));
-//		String openShiftProjectName = OpenShiftServerUtils.getOpenShiftProject(server);
-//		projectNameText.setText(StringUtils.null2emptyString(openShiftProjectName));
-		connectionText.setEnabled(false);
-		projectNameText.setEnabled(false);
-
-		deployProjectCombo.setItems(ProjectUtils.getAllAccessibleProjectNames());
-		int index = getProjectIndex(
-				OpenShiftServerUtils.getDeployProjectName(server), Arrays.asList(deployProjectCombo.getItems()));
-		if (index > -1) {
-			deployProjectCombo.select(index);
-		}
-
-		overrideProjectSettings.setSelection(OpenShiftServerUtils.isOverridesProject(server));
-	}
-
-	private int getProjectIndex(String deployProject, List<String> deployProjectNames) {
-		if (deployProject == null) {
-			return -1;
-		}
-		return deployProjectNames.indexOf(deployProject);
-	}
-
-	private String createConnectionLabel(ConnectionURL connectionUrl) {
-		String connectionLabel = "";
-		if (connectionUrl != null) {
-			Connection connection = 
-					new ConnectionFactory().create(connectionUrl.getHostWithScheme());
-			StringBuilder builder =
-					new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
-			if (connectionUrl.isDefaultHost()) {
-				builder.append(DEFAULT_HOST_MARKER);
-			}
-			connectionLabel = builder.toString();
-		}
-		return connectionLabel;
-	}
-
-	protected Composite createComposite(Section section) {
-		createWidgets(section, new FormToolkit(section.getDisplay()));
-		return section;
-	}
-
-	private void createWidgets(Composite composite, FormToolkit toolkit) {
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).equalWidth(false).applyTo(composite);
-
-		deployProjectCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
-
-		projectSettingGroup = new Group(composite, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1)
-				.applyTo(projectSettingGroup);
-		projectSettingGroup.setLayout(new GridLayout(2, false));
-		projectSettingGroup.setText("Project Settings:");
-
-		overrideProjectSettings = toolkit.createButton(projectSettingGroup,
-				"Override Project Settings", SWT.CHECK);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(section);
 
+		this.model = new OpenShiftServerEditorModel(server, null);
+
+		Composite container = createControls(section, model);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, true)
+				.applyTo(container);
+		toolkit.paintBordersFor(container);
+		toolkit.adapt(container);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(container);
+		
+		section.setClient(container);
+
+		loadResources(section, model);
+	}
+
+	private Composite createControls(Composite parent, OpenShiftServerEditorModel model) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults()
+				.numColumns(3)
+				.applyTo(container);
+
+		DataBindingContext dbc = new DataBindingContext();
+		
 		// connection
-		Label connectionLabel = toolkit
-				.createLabel(projectSettingGroup, "Connection:", SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
-		connectionText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionText);
+		createConnectionContols(container, dbc);
+		
+		// project settings
+		Group projectSettingGroup = new Group(container, SWT.NONE);
+		projectSettingGroup.setText("Project Settings:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1)
+			.applyTo(projectSettingGroup);
+		GridLayoutFactory.fillDefaults()
+				.margins(10, 10)
+				.applyTo(projectSettingGroup);
 
-		// project name
-		Label projectNameLabel = toolkit.createLabel(
-				projectSettingGroup, "Project:", SWT.NONE);
+		// additional nesting required because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+		Composite projectSettingsContainer = new Composite(projectSettingGroup, SWT.None);
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(projectNameLabel);
-		projectNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectNameText);
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(projectSettingsContainer);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(4)
+			.applyTo(projectSettingsContainer);
+		
+		createProjectControls(projectSettingsContainer, dbc);
+		createDeploymentControls(projectSettingsContainer, dbc);
+		createSourcePathControls(projectSettingsContainer, dbc);
+		createServiceControls(projectSettingsContainer, dbc);
 
-		// build config
-		Label buildConfigLabel = toolkit.createLabel(
-				projectSettingGroup, "Build Config",SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(buildConfigLabel);
-		buildConfigText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(buildConfigText);
+		return container;
 	}
 
-	ModifyListener remoteModifyListener, deployDestinationModifyListener, deployProjectListener;
-	SelectionListener overrideListener;
+	private void createConnectionContols(Composite parent, DataBindingContext dbc) {
+		Label connectionLabel = new Label(parent, SWT.NONE);
+		connectionLabel.setText("Connection:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER)
+				.applyTo(connectionLabel);
 
-	protected void addListeners() {
-		deployProjectListener = new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				int ind = deployProjectCombo.getSelectionIndex();
-				String newVal = ind == -1 ? null : deployProjectCombo.getItem(ind);
-				((ServerEditorPartInput) input).getServerCommandManager().execute(
-						new SetProjectCommand(server, newVal));
-			}
-		};
-		deployProjectCombo.addModifyListener(deployProjectListener);
-		overrideListener = new SelectionAdapter() {
+		Combo connectionCombo = new Combo(parent, SWT.DEFAULT);
+		ComboViewer connectionViewer = new ComboViewer(connectionCombo);
+		connectionViewer.setContentProvider(new ObservableListContentProvider());
+		connectionViewer.setLabelProvider(new ConnectionColumLabelProvider());
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false)
+				.applyTo(connectionCombo);
+		connectionViewer.setInput(
+				BeanProperties.list(OpenShiftServerEditorModel.PROPERTY_CONNECTIONS).observe(model));
+		 Binding connectionBinding = ValueBindingBuilder	
+			.bind(ViewerProperties.singleSelection().observe(connectionViewer))
+			.validatingAfterGet(new IValidator() {
+				
+				@Override
+				public IStatus validate(Object value) {
+					if (!(value instanceof Connection)) {
+						return ValidationStatus.cancel("Please select a connection for this server adapter.");
+					}
+					return ValidationStatus.ok();
+				}
+			})
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_CONNECTION).observe(model))
+		 	.in(dbc);
+		ControlDecorationSupport.create(
+				connectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+		Button newConnectionButton = new Button(parent, SWT.PUSH);
+		newConnectionButton.setText("New...");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+			.applyTo(newConnectionButton);
+		newConnectionButton.addSelectionListener(onNewConnection(connectionViewer));
+	}
+
+	private SelectionListener onNewConnection(ComboViewer connectionViewer) {
+		return new SelectionAdapter() {
+
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				((ServerEditorPartInput) input).getServerCommandManager().execute(new SetOverrideCommand(server));
+				Connection connection = UIUtils.getFirstElement(connectionViewer.getSelection(), Connection.class);
+				ConnectionWizard wizard = new ConnectionWizard(connection);
+				if (WizardUtils.openWizardDialog(
+						wizard, connectionViewer.getControl().getShell()) == Window.OK) {
+					connectionViewer.getControl().setEnabled(true);
+					connectionViewer.setInput(ConnectionsRegistrySingleton.getInstance().getAll());
+					final Connection selectedConnection =
+							ConnectionsRegistrySingleton.getInstance().getRecentConnection(Connection.class);
+					model.setConnection(selectedConnection);
+				}
 			}
 		};
-		overrideProjectSettings.addSelectionListener(overrideListener);
 	}
 
-	public class SetProjectCommand extends ServerWorkingCopyPropertyComboCommand {
-		public SetProjectCommand(IServerWorkingCopy wc, String newVal) {
-			super(wc, "Change OpenShift Project", deployProjectCombo, newVal,
-					OpenShiftServerUtils.ATTR_DEPLOYPROJECT, deployProjectListener);
-		}
+	private void createProjectControls(Composite parent, DataBindingContext dbc) {
+		Label projectLabel = new Label(parent, SWT.NONE);
+		projectLabel.setText("Eclipse Project: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(projectLabel);
 
-		@Override
-		protected void postOp(int type) {
-			updateWidgetsFromWorkingCopy();
-		}
+		StructuredViewer projectsViewer = new ComboViewer(parent);
+		GridDataFactory.fillDefaults()
+			.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(projectsViewer.getControl());
+
+		projectsViewer.setContentProvider(new ObservableListContentProvider());
+		projectsViewer.setLabelProvider(new ColumnLabelProvider() {
+
+			@Override
+			public String getText(Object element) {
+				if (!(element instanceof IProject)) {
+					return null;
+				}
+
+				return ((IProject) element).getName();
+			}
+		});
+		projectsViewer.setInput(
+				BeanProperties.list(OpenShiftServerEditorModel.PROPERTY_PROJECTS).observe(model));
+
+		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
+		Binding selectedProjectBinding = 
+				ValueBindingBuilder.bind(selectedProjectObservable)
+					.validatingAfterConvert(new IValidator() {
+
+						@Override
+						public IStatus validate(Object value) {
+							if (value instanceof IProject) {
+								return ValidationStatus.ok();
+							}
+							return ValidationStatus.cancel("Please choose a project to deploy.");
+						}
+					})
+					.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEPLOYPROJECT)
+					.observe(model))
+					.in(dbc);
+		ControlDecorationSupport.create(
+				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+		// browse projects
+		Button browseProjectsButton = new Button(parent, SWT.NONE);
+		browseProjectsButton.setText("Browse...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.applyTo(browseProjectsButton);
+		browseProjectsButton.addSelectionListener(onBrowseProjects(model, browseProjectsButton.getShell()));
 	}
 
-	public class SetOverrideCommand extends ServerWorkingCopyPropertyButtonCommand {
-		public SetOverrideCommand(IServerWorkingCopy wc) {
-			super(wc, "Override OpenShift Project Settings Command",
-					overrideProjectSettings, overrideProjectSettings.getSelection(),
-					OpenShiftServerUtils.ATTR_OVERRIDE_PROJECT_SETTINGS, overrideListener);
-		}
-
-		@Override
-		protected void postOp(int type) {
-			updateWidgetsFromWorkingCopy();
-		}
+	private SelectionListener onBrowseProjects(OpenShiftServerEditorModel model, final Shell shell) {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SelectExistingProjectDialog dialog = 
+						new SelectExistingProjectDialog("Select a project to deploy", shell);
+				if (dialog.open() == Dialog.OK) {
+					Object selectedProject = dialog.getFirstResult();
+					if (selectedProject instanceof IProject) {
+						model.setDeployProject((org.eclipse.core.resources.IProject) selectedProject);
+					}
+				}
+			}
+		};
 	}
 
-	private void updateWidgetsFromWorkingCopy() {
-//		connectionText.setText(createConnectionLabel(OpenShiftServerUtils.getConnectionUrl(server)));
-//		buildConfigText.setText("");
-//		projectNameText.setText(StringUtils.null2emptyString(OpenShiftServerUtils.getOpenShiftProject(server)));
+	private void createSourcePathControls(Composite container, DataBindingContext dbc) {
+		Label sourcePathLabel = new Label(container, SWT.NONE);
+		sourcePathLabel.setText("Source Path: ");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.applyTo(sourcePathLabel);
+
+		Text sourcePathText = new Text(container, SWT.BORDER | SWT.READ_ONLY);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.applyTo(sourcePathText);
+		ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(sourcePathText))
+				.validatingAfterConvert(new IValidator() {
+
+					@Override
+					public IStatus validate(Object value) {
+						if (StringUtils.isEmpty(value)) {
+							return ValidationStatus.cancel("Please provide a source path to deploy to the pod.");
+						}
+						String path = (String) value;
+						if (!isValidFile(path)) {
+							return ValidationStatus.error("Please provide a valid path to deploy to the pod");
+						}
+						return ValidationStatus.ok();
+					}
+					
+					private boolean isValidFile(String path) {
+						return FileUtils.exists(new File(path));
+					}
+
+				})
+				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_SOURCE_PATH).observe(model))
+				.in(dbc);
+
+		Button browseSourceButton = new Button(container, SWT.PUSH);
+		browseSourceButton.setText("Browse...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.applyTo(browseSourceButton);
+		browseSourceButton.addSelectionListener(onBrowseSource(browseSourceButton.getShell()));
+
+		Button browseWorkspaceSourceButton = new Button(container, SWT.PUSH | SWT.READ_ONLY);
+		browseWorkspaceSourceButton.setText("Workspace...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.applyTo(browseWorkspaceSourceButton);
+		browseWorkspaceSourceButton.addSelectionListener(onBrowseWorkspace(browseWorkspaceSourceButton.getShell()));
+	}
+
+	private SelectionAdapter onBrowseSource(final Shell shell) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DirectoryDialog dialog = new DirectoryDialog(shell, SWT.OPEN);
+				dialog.setText("Choose the source path to sync");
+				dialog.setFilterPath(model.getSourcePath());
+				String filepath = dialog.open();
+				if (!StringUtils.isEmpty(filepath)) {
+					model.setSourcePath(filepath);
+				}
+			}
+		};
+	}
+
+	private SelectionAdapter onBrowseWorkspace(final Shell shell) {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DirectoryDialog dialog = new DirectoryDialog(shell, SWT.OPEN);
+				dialog.setText("Choose the source path to sync");
+				dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
+				String filepath = dialog.open();
+				if (!StringUtils.isEmpty(filepath)) {
+					model.setSourcePath(filepath);
+				}
+			}
+		};
+	}
+
+	private void createDeploymentControls(Composite parent, DataBindingContext dbc) {
+		Label deployPathLabel = new Label(parent, SWT.NONE);
+		deployPathLabel.setText("Pod Deployment Path: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(deployPathLabel);
+
+		Text deployPathText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(deployPathText);
+		ValueBindingBuilder
+			.bind(WidgetProperties.text(SWT.Modify).observe(deployPathText))
+			.validatingAfterConvert(new IValidator() {
+
+				@Override
+				public IStatus validate(Object value) {
+					String path = (String) value;
+					if (StringUtils.isEmpty(value)) {
+						return ValidationStatus.cancel("Please provide a path to deploy to on the pod.");
+					}
+					if (!Path.isValidPosixPath(path)) {
+						return ValidationStatus.error("Please provide a valid path to deploy to on the pod");
+					}
+					return ValidationStatus.ok();
+				}
+				
+			})
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH).observe(model))
+			.in(dbc);
+	}
+
+	private void createServiceControls(Composite parent, DataBindingContext dbc) {
+		Label serviceLabel = new Label(parent, SWT.NONE);
+		serviceLabel.setText("Service:");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.applyTo(serviceLabel);
+
+		Text serviceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		GridDataFactory.fillDefaults()
+			.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(serviceText);
+		ValueBindingBuilder
+			.bind(WidgetProperties.text(SWT.Modify).observe(serviceText))
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_SERVICE).observe(model))
+			.converting(new Converter(IService.class, String.class) {
+				
+				@Override
+				public Object convert(Object fromObject) {
+					if (!(fromObject instanceof IService)) {
+						return null;
+					};
+					return ((IService) fromObject).getName();
+				}
+			})
+			.in(dbc);
+
+		Button selectServiceButton = new Button(parent, SWT.PUSH);
+		selectServiceButton.setText("Select...");
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.applyTo(selectServiceButton);
+		selectServiceButton.addSelectionListener(onSelectService(model, selectServiceButton.getShell()));
+	}
+
+	private SelectionListener onSelectService(OpenShiftServerEditorModel model, final Shell shell) {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				
+				SelectServiceWizard selectServiceDialog = 
+						new SelectServiceWizard(NLS.bind("Select a service that your server adapter {0} will publish to.", 
+								input.getServer().getName()), model.getService(), model.getConnection());
+				if (WizardUtils.openWizardDialog(selectServiceDialog, shell) 
+						== Dialog.OK) {
+					model.setService(selectServiceDialog.getService());
+				}
+			}
+		};
+	}
+
+	private void loadResources(Composite container, OpenShiftServerEditorModel model) {
+		IServerWorkingCopy server = input.getServer();
+
+		final Connection connection = OpenShiftServerUtils.getConnection(server);
+		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
+
+		Cursor busyCursor = new Cursor(container.getDisplay(), SWT.CURSOR_WAIT);
+		new JobChainBuilder(
+				new DisableAllWidgetsJob(true, container, busyCursor))
+				.runWhenDone(
+						new Job("Loading projects...") {
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								model.loadResources();
+								return Status.OK_STATUS;
+							}
+						})
+				.runWhenDone(
+						new Job("Setting connection, deploy project...") {
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								model.setService(OpenShiftServerUtils.getService(server));
+								if (deployProject != null) {
+									model.setDeployProject(deployProject);
+								}
+								if (connection != null) {
+									model.setConnection(connection);
+								}
+								return Status.OK_STATUS;
+							}
+						})
+				.runWhenDone(new DisableAllWidgetsJob(true, container, false, busyCursor))
+				.schedule();
+	}
+	
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		// TODO Auto-generated method stub
+		super.doSave(monitor);
 	}
 }
