@@ -119,6 +119,12 @@ public class DeployImageWizardModel
 
 	@Override
 	public Connection getConnection() {
+		if (connection == null) {
+			Collection<Connection> connections = getConnections();
+			if (connections.size() == 1) {
+				setConnection(connections.iterator().next());
+			}
+		}
 		return connection;
 	}
 	
