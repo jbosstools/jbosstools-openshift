@@ -874,7 +874,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						List<String> repos = EGitUtils.getRemoteGitRepos(project);
 						if (repos == null || repos.isEmpty()) {
 							status = ValidationStatus.error(
-									NLS.bind("No remote Git repository is defined on project {0}", projectName));
+									NLS.bind("A remote Git repository using the HTTP(S) protocol must be defined on project {0}", projectName));
 						} else {
 							status = getGitDirtyStatus(project);						
 						}
