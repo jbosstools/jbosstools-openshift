@@ -851,18 +851,18 @@
 		<sslCertificateCallbackUI
 			class="org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback" />
 	</extension>
-	<!-- Core UI Integration: credentials prompt -->
+	<!-- Core UI Integration: route chooser -->
 	<extension
-		point="org.jboss.tools.openshift.core.credentialsPrompterUI">
-		<credentialsPrompterUI
-			class="org.jboss.tools.openshift.internal.common.ui.connection.CredentialsPrompter" />
+		point="org.jboss.tools.openshift.core.routeChooser">
+		<routeChooser
+			class="org.jboss.tools.openshift.internal.ui.route.RouteChooser" />
 	</extension>
-
-<extension point="org.eclipse.ui.editors.documentProviders"> 
-    <provider 
-        inputTypes="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceInput" 
-        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceDocumentProvider" 
-        id="org.jboss.tools.openshift.ui.text.OpenShiftResourceDocumentProvider"> 
-    </provider> 
-</extension> 
+	
+	<extension point="org.eclipse.ui.editors.documentProviders"> 
+		<provider 
+			inputTypes="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceInput" 
+			class="org.jboss.tools.openshift.internal.ui.property.OpenShiftResourceDocumentProvider" 
+			id="org.jboss.tools.openshift.ui.text.OpenShiftResourceDocumentProvider"> 
+		</provider> 
+	</extension>
 </plugin>

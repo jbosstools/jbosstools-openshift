@@ -349,4 +349,12 @@
 		</menuContribution>
 	</extension>
 
+	<!-- Core UI Integration: credentials prompt -->
+	<extension
+		point="org.jboss.tools.openshift.core.credentialsPrompterUI">
+		<credentialsPrompterUI
+			class="org.jboss.tools.openshift.common.ui.connection.CredentialsPrompter" />
+	</extension>
+
+
 </plugin>

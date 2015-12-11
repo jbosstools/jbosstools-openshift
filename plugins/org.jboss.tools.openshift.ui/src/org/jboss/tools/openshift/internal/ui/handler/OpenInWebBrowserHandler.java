@@ -40,20 +40,20 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  */
 public class OpenInWebBrowserHandler extends AbstractHandler {
-
 	private static final String NOTHING_TO_OPEN_MSG = "Could not find a route that points to an url to show in a browser.";
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection currentSelection = HandlerUtil.getCurrentSelection(event);
-		
-		final IRoute route = UIUtils.getFirstElement(currentSelection, IRoute.class);
 		final Shell shell = HandlerUtil.getActiveShell(event);
+
+		final ISelection currentSelection = HandlerUtil.getCurrentSelection(event);
+		final IRoute route = UIUtils.getFirstElement(currentSelection, IRoute.class);
+
 		//Open route
 		if (route != null) {
 			return openBrowser(shell, route);
 		}
-		
+
 		//Open Project
 		final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
 		if (project != null) {
