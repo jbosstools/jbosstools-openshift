@@ -214,9 +214,14 @@ public class UIUtils {
 	}
 	
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
-			return Adapters.adapt(getFirstElement(selection), clazz);
+			return adapt(getFirstElement(selection), clazz);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <E> E adapt(Object object, Class<E> clazz) {
+		return Adapters.adapt(object, clazz);
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <E> E[] getElements(ISelection selection, Class<E> clazz) {
 			ArrayList<E> elements = new ArrayList<E>();
