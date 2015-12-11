@@ -487,7 +487,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 								return Status.OK_STATUS;
 							}
 						})
-				.runWhenDone(new DisableAllWidgetsJob(false, container, false, busyCursor))
+				// disable widgets for now, we're not supporting editing yet
+				.runWhenDone(new DisableAllWidgetsJob(true, container, false, busyCursor))
 				.schedule();
 	}
 	

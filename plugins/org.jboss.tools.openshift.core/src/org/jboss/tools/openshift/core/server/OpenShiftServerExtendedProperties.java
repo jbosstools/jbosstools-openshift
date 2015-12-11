@@ -37,7 +37,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 	@Override
 	public boolean hasWelcomePage() {
 		// return getWelcomePageUrl() != null;
-		return true;
+		return false;
     }
 
 	@Override
