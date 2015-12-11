@@ -11,6 +11,9 @@
 package org.jboss.tools.openshift.cdk.server.core.internal.detection;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +23,8 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.ide.eclipse.as.core.util.ServerNamingUtility;
+import org.jboss.tools.foundation.core.credentials.CredentialService;
+import org.jboss.tools.foundation.core.credentials.ICredentialDomain;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.runtime.core.model.AbstractRuntimeDetectorDelegate;
@@ -43,7 +48,26 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 			String suffixed = ServerNamingUtility.getDefaultServerName(possibleId);
 			try {
 				IServerWorkingCopy wc = st.createServer(suffixed, null, new NullProgressMonitor());
-				wc.setAttribute(CDKServer.PROP_FOLDER, runtimeDefinition.getLocation().getAbsolutePath());
+				String folder = runtimeDefinition.getLocation().getAbsolutePath();
+				File cdkFile = new File(folder, CDKConstants.CDK_RESOURCE_DOTCDK);
+				Properties props = new Properties();
+				if( cdkFile.exists()) {
+					try {
+						props.load(new FileInputStream(cdkFile));
+					} catch(IOException ioe) {
+						// Ignore
+					}
+				}
+				String val = props.getProperty("rhel.subscription.username");
+				if( val != null ) {
+					ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
+					if( !domain.userExists(val)) {
+						CredentialService.getCredentialModel().addPromptedCredentials(domain, val);
+						CredentialService.getCredentialModel().saveModel();
+					}
+				}
+				wc.setAttribute(CDKServer.PROP_FOLDER, folder);
+				wc.setAttribute(CDKServer.PROP_USERNAME, val);
 				wc.setName(suffixed);
 				IServer s = wc.save(true, new NullProgressMonitor());
 				return true;

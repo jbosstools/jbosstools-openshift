@@ -13,10 +13,12 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.model.ServerDelegate;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.core.credentials.ICredentialDomain;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
@@ -72,6 +74,11 @@ public class CDKServer extends ServerDelegate {
 	}
 	
 	public String getPassword() {
+		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
+		Object pw = beh.getSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD);
+		if( pw instanceof String )
+			return (String)pw;
+		
 		ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
 		String user = getUsername();
 		if( user != null && domain != null) {
