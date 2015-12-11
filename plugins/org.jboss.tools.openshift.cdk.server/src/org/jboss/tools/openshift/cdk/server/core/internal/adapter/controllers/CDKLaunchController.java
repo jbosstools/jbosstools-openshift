@@ -140,6 +140,11 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Expected location of vagrant command does not exist: " + vagrantLoc));
 		}
 		
+		CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		String password = cdkServer.getPassword();
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, password);
+
+		
 		
 		// Poll the server once more 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());

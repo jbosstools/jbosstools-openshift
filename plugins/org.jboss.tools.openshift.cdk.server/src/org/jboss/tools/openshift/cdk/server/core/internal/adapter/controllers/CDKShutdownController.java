@@ -40,6 +40,7 @@ import org.jboss.tools.as.core.server.controllable.IDeployableServerBehaviorProp
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 import org.jboss.tools.openshift.cdk.server.ui.internal.util.TerminalUtility;
 
@@ -148,6 +149,7 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 				if( stat.getSeverity() == IStatus.ERROR) {
 					beh.setServerStopped();
 					beh.setRunMode("run");
+					beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, null);
 				} else {
 					// The shutdown failed. We'll set the server to started and indicate a requiresForce
 					beh.setServerStarted();
