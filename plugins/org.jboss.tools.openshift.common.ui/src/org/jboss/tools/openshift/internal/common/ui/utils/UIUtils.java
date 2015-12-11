@@ -214,22 +214,25 @@ public class UIUtils {
 		return getFirstElement(selection, clazz) != null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
 			Object firstSelectedElement = getFirstElement(selection);
 			if (firstSelectedElement == null) {
 				return null;
 			} 
-			
-			if (clazz.isAssignableFrom(firstSelectedElement.getClass())) {
-				return (E) firstSelectedElement;
-			} else if (IAdaptable.class.isAssignableFrom(firstSelectedElement.getClass())) {
-				return (E) ((IAdaptable) firstSelectedElement).getAdapter(clazz);
-			} else {
-				return (E) Platform.getAdapterManager().getAdapter(firstSelectedElement, clazz);
-			}
+			return adapt(firstSelectedElement, clazz);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <E> E adapt(Object object, Class<E> clazz) {
+		if (clazz.isAssignableFrom(object.getClass())) {
+			return (E) object;
+		} else if (IAdaptable.class.isAssignableFrom(object.getClass())) {
+			return (E) ((IAdaptable) object).getAdapter(clazz);
+		} else {
+			return (E) Platform.getAdapterManager().getAdapter(object, clazz);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <E> E[] getElements(ISelection selection, Class<E> clazz) {
 			Object[] selectedElements = getElements(selection);
