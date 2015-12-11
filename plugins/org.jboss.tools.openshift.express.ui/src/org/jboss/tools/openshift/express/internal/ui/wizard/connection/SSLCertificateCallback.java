@@ -105,7 +105,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 		private void setupDialog(Composite parent) {
 			parent.getShell().setText("Untrusted SSL Certificate");
-			setTitle("Please accept or deny the following untrusted SSL certificate");
+			setTitle("Do you accept the following untrusted SSL certificate?");
 			setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 			setDialogHelpAvailable(false);
 		}
