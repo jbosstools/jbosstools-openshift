@@ -20,7 +20,8 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBeha
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IModuleStateController;
 
 public class CDKServerBehaviour extends ControllableServerBehavior implements IControllableServerBehavior  {
-	protected final Object serverStateLock = new Object();
+	
+	public static final String PROP_CACHED_PASSWORD = "CDKServerBehaviour.CACHED_PASSWORD"; 
 	public CDKServerBehaviour() {
 	}
 
