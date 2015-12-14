@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.handler;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -22,6 +23,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
@@ -35,7 +37,7 @@ import com.openshift.restclient.model.IService;
 /**
  * @author Fred Bricon
  */
-public class OpenInWebConsoleHandler extends AbstractHandler {
+public class OpenInWebConsoleHandler extends OpenInWebBrowserHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -47,15 +49,19 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 		} else {
 			connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
 		}
-		if (connection != null) {
+		String msg;
+		if (connection == null) {
+			msg = "Could not find an OpenShift connection to open a console for";
+		} else {
 			String url = getWebConsoleUrl(connection, resource);
 			if (!StringUtils.isEmpty(url)) {
-				MessageDialog.openWarning(HandlerUtil.getActiveShell(event), 
-						"No Web Console Url", 
-						NLS.bind("Could not determine the url for the web console on {0}", connection.getHost()));
+				openInBrowser(HandlerUtil.getActiveShell(event) , url);
+				return Status.OK_STATUS;
 			}
+			msg = NLS.bind("Could not determine the url for the web console on {0}", connection.getHost());
 		}
-		return Status.OK_STATUS;
+		MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "No Web Console Url", msg);
+		return new Status(IStatus.WARNING, OpenShiftUIActivator.PLUGIN_ID, msg);
 	}
 
 	private String getWebConsoleUrl(Connection connection, IResource resource) {
