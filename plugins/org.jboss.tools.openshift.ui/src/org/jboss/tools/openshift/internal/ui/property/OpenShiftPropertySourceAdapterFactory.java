@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.property;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.ui.explorer.Deployment;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -26,8 +27,9 @@ import com.openshift.restclient.model.route.IRoute;
 
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
+	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == IPropertySource.class) {
 			if(adaptableObject instanceof Connection){
 				return new ConnectionPropertySource((Connection) adaptableObject);
@@ -52,6 +54,9 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 				default:
 					return new ResourcePropertySource<IResource>(resource);
 				}
+			}
+			if(adaptableObject instanceof Deployment) {
+				return new ServicePropertySource(((Deployment) adaptableObject).getService());
 			}
 		}
 		return null;
