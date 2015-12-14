@@ -20,7 +20,6 @@ import java.util.Map;
 import org.eclipse.jface.viewers.StyledString;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
-import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -175,12 +174,6 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(project.getNamespace()).thenReturn(namespace);
 		
 		assertEquals(project.getDisplayName() + " " + project.getName(), provider.getStyledText(project).getString());
-	}
-	
-	@Test
-	public void getStyledTextForResourceGrouping(){
-		ResourceGrouping grouping = new ResourceGrouping(ResourceKind.SERVICE, mock(IProject.class));
-		assertEquals("Services", provider.getStyledText(grouping).getString());
 	}
 	
 	@Test

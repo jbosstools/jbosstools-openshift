@@ -191,7 +191,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		control.getDisplay().asyncExec(runner);
 	}
 	
-	protected void addChildrenToViewer(final Object parent, final Object [] objects) {
+	protected void addChildrenToViewer(final Object parent, final Object ... objects) {
 		asyncViewerRefresh(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
@@ -201,12 +201,21 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		});
 	}
 
-	protected void removeChildrenFromViewer(final Object parent, final Object [] objects) {
+	protected void removeChildrenFromViewer(final Object parent, final Object ... objects) {
 		asyncViewerRefresh(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
 					viewer.remove(parent, objects);
 					viewer.refresh();
+				}
+			}
+		});
+	}
+	protected void updateChildrenFromViewer(final Object ... objects) {
+		asyncViewerRefresh(new Runnable() {
+			public void run() {
+				synchronized (viewer) {
+					viewer.refresh(objects);
 				}
 			}
 		});

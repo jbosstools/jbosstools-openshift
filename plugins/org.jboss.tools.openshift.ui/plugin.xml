@@ -24,8 +24,6 @@
 				<or>
 					<instanceof
 						value="com.openshift.restclient.model.IResource" />
-					<instanceof
-						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>
 			</possibleChildren>
 			<triggerPoints>
@@ -34,8 +32,6 @@
 						value="org.jboss.tools.openshift.core.connection.Connection" />
 					<instanceof
 						value="com.openshift.restclient.model.IProject" />
-					<instanceof
-						value="org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping" />
 				</or>
 			</triggerPoints>
 		</navigatorContent>
@@ -589,6 +585,13 @@
 			type="org.eclipse.ui.views.properties.IPropertySource">
 		</adapter>
 	</factory>
+ <factory
+       adaptableType="org.jboss.tools.openshift.internal.ui.explorer.Deployment"
+       class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
+    <adapter
+          type="org.eclipse.ui.views.properties.IPropertySource">
+    </adapter>
+ </factory>
 	</extension>
 
 	<!-- definitions -->

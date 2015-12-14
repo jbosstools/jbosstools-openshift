@@ -16,7 +16,6 @@ import java.util.Map;
 import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffVisitor;
-import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -27,53 +26,96 @@ import org.jboss.tools.openshift.internal.core.WatchManager;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 
 /**
  * Contributes OpenShift 3 specific content to the OpenShift explorer view
  * 
  * @author jeff.cantrill
  */
-public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider{
+public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider {
 	
-	private static final String [] groupings = new String [] {
-		ResourceKind.BUILD_CONFIG, 
-		ResourceKind.DEPLOYMENT_CONFIG, 
-		ResourceKind.SERVICE, 
-		ResourceKind.POD,
-		ResourceKind.REPLICATION_CONTROLLER, 
-		ResourceKind.BUILD, 
-		ResourceKind.IMAGE_STREAM, 
-		ResourceKind.ROUTE
-	};
-	
-	private Map<IProject, List<ResourceGrouping>> groupMap = new HashMap<IProject, List<ResourceGrouping>>();
+	private Map<IProject, List<Deployment>> deploymentsByProject = new HashMap<>();
+	private Map<IService, Deployment> deploymentByService = new HashMap<>();
 	
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+       
 		if (!(connection instanceof Connection)) {
 			return;
 		}
 		if(ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
 			if (oldValue == null && newValue != null) {
 				// add
-				IResource resource = (IResource) newValue;
-				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
-				ResourceGrouping group = getResourceGrouping(groupMap.get(resource.getProject()), resource.getKind());
-				expand(group, 1);
+				handleAddResource((IResource) newValue);
+				
 			} else if (oldValue != null && newValue == null) {
 				// delete
-				IResource resource = (IResource) oldValue;
-				refreshGrouping(groupMap.get(resource.getProject()), resource.getKind());
+				handleRemoveResource((IResource) oldValue);
 			} else {
-				refreshViewer(newValue);
+				//update
+				updateChildrenFromViewer(newValue);
 			}
 		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
 			handleProjectChanges((Connection) connection, oldValue, newValue);
 		} else {
 			super.handleConnectionChanged(connection, property, oldValue, newValue);
 		}
+	}
+	private void handleAddResource(IResource resource) {
+		switch(resource.getKind()) {
+		case ResourceKind.SERVICE:
+			IService service = (IService) resource;
+			Deployment deployment = DeploymentResourceMapper.getDeployment(service);
+			deploymentByService.put(service, deployment);
+			addChildrenToViewer(resource.getProject(), deployment);
+			break;
+		case ResourceKind.POD:
+			IPod pod = (IPod)resource;
+			Map<String, String> labels = pod.getLabels();
+			for (IService depService : deploymentByService.keySet()) {
+				Map<String, String> selector = depService.getSelector();
+				if(selectorsOverlap(selector, labels)) {
+					Deployment deploymentForPod = deploymentByService.get(depService);
+					deploymentForPod.add(pod);
+					addChildrenToViewer(depService, deploymentForPod);
+				}
+			}
+		default:
+		}
+	}
+	private void handleRemoveResource(IResource resource) {
+		switch(resource.getKind()) {
+		case ResourceKind.SERVICE:
+			IService service = (IService)resource;
+			deploymentByService.remove(service);
+			removeChildrenFromViewer(resource.getProject(), deploymentByService.get(service));
+			break;
+		case ResourceKind.POD:
+			IPod pod = (IPod)resource;
+			for (IService deployedService : deploymentByService.keySet()) {
+				if(selectorsOverlap(deployedService.getSelector(), pod.getLabels())){
+					deploymentByService.get(deployedService).remove(pod);
+					removeChildrenFromViewer(deploymentByService, pod);
+				}
+			}
+		default:
+		}
+	}
+	
+	private boolean selectorsOverlap(Map<String, String> source, Map<String, String> target) {
+		if(!target.keySet().containsAll(source.keySet())) {
+			return false;
+		}
+		for (String key : source.keySet()) {
+			if(!target.get(key).equals(source.get(key))) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	//TODO: Handle updates to a project when needed.  Back-end doesnt support edit of resources(most?) now
@@ -90,7 +132,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			public void handleRemove(int index, Object element) {
 				IProject project = (IProject) element;
 				removed.add(project);
-				groupMap.remove(project);
+				deploymentsByProject.remove(project);
 			}
 			
 			@Override
@@ -106,40 +148,14 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	@Override
 	protected void handleConnectionRemoved(IConnection connection) {
 		if(!(connection instanceof Connection))return;
-		for (IProject project : groupMap.keySet()) {
+		for (IProject project : deploymentsByProject.keySet()) {
 			Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
 			if(connection.equals(conn)) {
-				groupMap.remove(project);
+				deploymentsByProject.remove(project);
 				break;
 			}
 		}
 		super.handleConnectionRemoved(connection);
-	}
-
-
-
-	private void refreshGrouping(List<ResourceGrouping> groupings, String kind) {
-		if (groupings == null
-				|| groupings.size() == 0) {
-			return;
-		}
-		ResourceGrouping group = getResourceGrouping(groupings, kind);
-		if(group != null) {
-			group.refresh();
-		}
-	}
-	
-	private ResourceGrouping getResourceGrouping(List<ResourceGrouping> groupings, String kind) {
-		if (groupings == null
-				|| groupings.size() == 0) {
-			return null;
-		}
-		for (ResourceGrouping group : groupings) {
-			if(kind.equals(group.getKind())){
-				return group;
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -169,24 +185,18 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				return connection.getResources(ResourceKind.PROJECT).toArray();
 			} else if (parentElement instanceof IProject) {
 				IProject project = (IProject) parentElement;
-				List<ResourceGrouping> groups = new ArrayList<ResourceGrouping>(groupings.length);
-				for (String kind : groupings) {
-					final ResourceGrouping grouping = new ResourceGrouping(kind, project);
-					grouping.setRefreshable(new IRefreshable() {
-						@Override
-						public void refresh() {
-							refreshViewer(grouping);
-						}
-					});
-					groups.add(grouping);
+				DeploymentResourceMapper mapper = new DeploymentResourceMapper(ConnectionsRegistryUtil.getConnectionFor(project), project);
+				deploymentsByProject.put(project, mapper.getDeployments());
+				for (Deployment deployment : mapper.getDeployments()) {
+					deploymentByService.put(deployment.getService(),deployment);
 				}
-				groupMap.put(project, groups);
-				return groups.toArray();
-			} else if (parentElement instanceof ResourceGrouping) {
-				ResourceGrouping group = (ResourceGrouping) parentElement;
-				WatchManager.getInstance().startWatch(group.getProject());
-				return group.getProject().getResources(group.getKind()).toArray();
+				WatchManager.getInstance().startWatch(project);
+				return mapper.getDeployments().toArray();
+
+			} else if (parentElement instanceof Deployment) {
+				return ((Deployment) parentElement).getPods().toArray();
 			}
+		
 		} catch (OpenShiftException e) {
 			addException(parentElement, e);
 		}
@@ -198,6 +208,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		return element instanceof ConnectionsRegistry
 				|| element instanceof IConnection
 				|| element instanceof IProject
-				|| element instanceof ResourceGrouping;
+				|| element instanceof Deployment;
 	}
 }

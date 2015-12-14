@@ -12,14 +12,12 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider;
-import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,8 +27,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * @author jeff.cantrill
@@ -53,33 +49,6 @@ public class OpenShiftExplorerContentProviderTest {
 		provider = new OpenShiftExplorerContentProvider();
 	}
 	
-	private ResourceGrouping givenAResourceGroup(){
-		ArrayList<IResource> resources = new ArrayList<IResource>();
-		resources.add(mock(IService.class));
-		when(project.getResources(ResourceKind.SERVICE)).thenReturn(resources);
-		ResourceGrouping group = new ResourceGrouping(ResourceKind.SERVICE, project);
-		return group;
-	}
-	
-	@Test
-	public void getChildrenForProjectReturnsResourceGroups(){
-		when(project.getResources(anyString())).thenReturn(new ArrayList<IResource>());
-
-		ResourceGrouping [] groups = new ResourceGrouping[]{
-				new ResourceGrouping(ResourceKind.BUILD_CONFIG, project),
-				new ResourceGrouping(ResourceKind.DEPLOYMENT_CONFIG, project),
-				new ResourceGrouping(ResourceKind.SERVICE, project),
-				new ResourceGrouping(ResourceKind.POD, project),
-				new ResourceGrouping(ResourceKind.REPLICATION_CONTROLLER, project),
-				new ResourceGrouping(ResourceKind.BUILD, project),
-				new ResourceGrouping(ResourceKind.IMAGE_STREAM, project),
-				new ResourceGrouping(ResourceKind.ROUTE, project),
-		};
-		
-		Object[] children = provider.getChildrenFor(project);
-		assertArrayEquals("Exp. to get a set of resource groups for a project", groups, children);
-	}
-	
 	@Test
 	public void getChildrenForConnectionReturnsProjects(){
 		List<IProject> projects = Arrays.asList(new IProject[]{project});
@@ -93,12 +62,6 @@ public class OpenShiftExplorerContentProviderTest {
 		assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", new Object []{connection},  provider.getExplorerElements(registry));
 	}
 
-	@Test
-	public void resourceGroupingsShouldHaveChildrenWhenTheyHaveNonEmptyList(){
-		ResourceGrouping group = givenAResourceGroup();
-		assertTrue("Exp. #hasChildren to return true for ResourceGrouping with resources", provider.hasChildren(group));
-	}
-	
 	@Test
 	public void connectionsRegistryShouldHaveChildren(){
 		assertTrue("Exp. #hasChildren to return true for ConnectionsRegistry", provider.hasChildren(registry));

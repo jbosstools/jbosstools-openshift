@@ -357,4 +357,46 @@
 	</extension>
 
 
+	<extension point="org.eclipse.core.runtime.adapters">
+		 <factory
+		       adaptableType="org.jboss.tools.openshift.internal.common.ui.explorer.OpenShiftExplorerView"
+		       class="org.jboss.tools.openshift.internal.common.ui.explorer.ExplorerViewTabbedPropertyAdapterFactory">
+		    <adapter
+		          type="org.eclipse.ui.views.properties.IPropertySheetPage">
+		    </adapter>
+		 </factory>
+	</extension>
+	 <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+    	<propertyContributor
+	          contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+	       <propertyCategory
+	             category="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.DefaultTab"></propertyCategory>
+	    </propertyContributor>
+	 </extension>
+	 <extension
+	       point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+	    <propertyTabs
+	          contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+	       <propertyTab
+	             category="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.DefaultTab"
+	             id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.DefaultTab"
+	             label="%openshift.common.explorer.properties.tab.default">
+	       </propertyTab>
+	    </propertyTabs>
+	 </extension>
+	  <extension
+       point="org.eclipse.ui.views.properties.tabbed.propertySections">
+	    <propertySections
+	          contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+	        <propertySection
+	              class="org.jboss.tools.openshift.internal.common.ui.explorer.DefaultPropertySection"
+	              enablesFor="1"
+	              id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.DefaultSection"
+	              tab="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.DefaultTab">
+            <input
+                  type="java.lang.Object">
+            </input>
+	        </propertySection>
+        </propertySections>
+	 </extension>
 </plugin>
