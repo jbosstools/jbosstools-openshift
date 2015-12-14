@@ -23,7 +23,8 @@ Require-Bundle: org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0
  org.eclipse.core.resources;bundle-version="3.9.100",
  org.eclipse.core.runtime,
  org.eclipse.m2e.core;bundle-version="1.6.0",
- org.apache.commons.lang;bundle-version="2.6.0"
+ org.apache.commons.lang;bundle-version="2.6.0",
+ org.jboss.tools.openshift.client;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Bundle-Vendor
@@ -106,3 +107,4 @@ Export-Package: org.jboss.tools.openshift.common.ui.connection;
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.ui"
+Import-Package: org.eclipse.ui.views.properties.tabbed
