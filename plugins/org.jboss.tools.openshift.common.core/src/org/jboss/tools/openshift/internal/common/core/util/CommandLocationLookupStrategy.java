@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,25 +28,32 @@ public class CommandLocationLookupStrategy {
 	private static final String WINDOWS_PATHVAR = "Path";
 
 	public static final CommandLocationLookupStrategy WINDOWS_STRATEGY = 
-			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com"});
+			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com"}, null);
 	public static final CommandLocationLookupStrategy LINUX_STRATEGY = 
-			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{});
+			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{}, null);
+	public static final CommandLocationLookupStrategy MAC_STRATEGY = 
+			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{}, new String[]{"bash", "-c", "echo $PATH"});
 	
 	public static CommandLocationLookupStrategy get() {
 		String os = Platform.getOS();
 		if( Platform.OS_WIN32.equals(os)) {
 			return WINDOWS_STRATEGY;
 		}
+		if( Platform.OS_MACOSX.equals(os)) {
+			return MAC_STRATEGY;
+		}
 		return LINUX_STRATEGY;
 	}
 	
 	private String which, delim, pathvar;
+	private String[] pathCommand;
 	private String[] suffixes;
-	public CommandLocationLookupStrategy(String which, String delim, String pathvar, String[] suffixes) {
+	public CommandLocationLookupStrategy(String which, String delim, String pathvar, String[] suffixes, String[] pathCommand) {
 		this.which = which;
 		this.delim = delim;
 		this.pathvar = pathvar;
 		this.suffixes = suffixes;
+		this.pathCommand = pathCommand;
 	}
 	
 	public String search(CommandLocationBinary binary) {
@@ -82,9 +91,30 @@ public class CommandLocationLookupStrategy {
 		}
 		String ret = searchPath(System.getenv(pathvar), delim, cmd);
 		if( ret == null ) {
-			ret = runCommand(which + cmd, timeout);
+			ret = runCommand(which + cmd, timeout, true);
 		}
 		return ret;
+	}
+	
+	public void ensureOnPath( Map<String, String> env, String folder) {
+		String newPath = ensureFolderOnPath(env.get(pathvar), folder);
+		env.put(pathvar, newPath);
+	}
+	
+	public String ensureFolderOnPath(String existingPath, String folder) {
+		existingPath = (existingPath == null ? "" : existingPath);
+		String[] roots = null;
+		if( existingPath.isEmpty() && pathCommand != null) {
+			// Path should never be empty, we have to discover the path (OSX when eclipse launched via .app)
+			String pathresult = runCommand(pathCommand, false);
+			roots = pathresult.split(delim);
+		} else
+			roots = existingPath.split(delim);
+		ArrayList<String> list = new ArrayList(Arrays.asList(roots));
+		if( !list.contains(folder)) {
+			list.add(folder);
+		}
+		return String.join(delim, list);
 	}
 	
 	/**
@@ -114,42 +144,52 @@ public class CommandLocationLookupStrategy {
 		}
 		return null;
 	}
-	
-	private  String runCommand(final String cmd, int timeout) {
+	private  String runCommand(final String cmd, int timeout, boolean verifyFileExists) {
 		if( timeout == -1 ) {
-			return runCommand(cmd);
+			return runCommand(cmd, verifyFileExists);
 		} else {
 			String path = ThreadUtils.runWithTimeout(timeout, new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					return runCommand(cmd);
+					return runCommand(cmd, verifyFileExists);
 				}
 			});
 			return path;
 		}
 	}
 	
-	private  String runCommand(String cmd) {
-
+	private  String runCommand(String cmd, boolean verifyFileExists) {
+		return runCommand(new String[]{cmd}, verifyFileExists);
+	}
+	
+	private  String runCommand(String cmd[], boolean verifyFileExists) {
 		Process p = null;
 		try {
-			p = Runtime.getRuntime().exec(cmd);
+			if( cmd.length > 1 ) 
+				p = Runtime.getRuntime().exec(cmd);
+			else 
+				p = Runtime.getRuntime().exec(cmd[0]);
 			try {
 				p.waitFor();
 			} catch(InterruptedException ie) {
 				// Ignore, expected
 			}
+			InputStream is = null;
 			if(p.exitValue() == 0) {
-				InputStream is = p.getInputStream();
+				is = p.getInputStream();
+			} else {
+				// For debugging only
+				//is = p.getErrorStream();
+			}
+			if( is != null ) {
 				java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
 				String cmdOutput = s.hasNext() ? s.next() : "";
 				if( !cmdOutput.isEmpty()) {
 					cmdOutput = StringUtils.trim(cmdOutput);
-					if( new File(cmdOutput).exists())
+					if( !verifyFileExists || new File(cmdOutput).exists())
 						return cmdOutput;
 				}
 			}
-
 		} catch(IOException ioe) {
 			// Ignore this
 		} finally {

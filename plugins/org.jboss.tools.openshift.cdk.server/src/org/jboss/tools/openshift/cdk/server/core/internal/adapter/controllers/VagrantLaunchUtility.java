@@ -20,10 +20,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class VagrantLaunchUtility {
 	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args, String launchConfigName) throws CoreException {
@@ -120,8 +122,13 @@ public class VagrantLaunchUtility {
 		return ret.toArray(new String[ret.size()]);
 	}
 
+	private static void ensureCommandOnPath(String rootCommand, Map<String, String> env) {
+		CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
+	}
+	
 	public static String[] call(String rootCommand, String[] args, File vagrantDir,
 			Map<String, String> env) throws IOException {
+		ensureCommandOnPath(rootCommand, env);
 		String[] envp = (env == null ? null : convertEnvironment(env));
 
 		List<String> result = new ArrayList<>();
@@ -130,15 +137,22 @@ public class VagrantLaunchUtility {
 		cmd.addAll(Arrays.asList(args));
 		Process p = Runtime.getRuntime().exec(cmd.toArray(new String[0]),
 				envp, vagrantDir);
-		BufferedReader buff = new BufferedReader(
-				new InputStreamReader(p.getInputStream()));
 		try {
 			if (p.waitFor() == 0) {
+				BufferedReader buff = new BufferedReader(
+						new InputStreamReader(p.getInputStream()));
 				String line;
 				while ((line = buff.readLine()) != null) {
 					result.add(line);
 				}
 			} else {
+				// This read loop is just here for debugging
+				BufferedReader buff = new BufferedReader(
+						new InputStreamReader(p.getErrorStream()));
+				String line;
+				while ((line = buff.readLine()) != null) {
+					result.add(line);
+				}
 				return new String[0];
 			}
 		} catch(InterruptedException ie) {
