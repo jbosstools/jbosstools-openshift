@@ -36,7 +36,6 @@ import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
@@ -80,13 +79,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 			if (resource != null) {
 				model.setConnection(ConnectionsRegistryUtil.safeGetConnectionFor(resource));
 				model.setProject(resource.getProject());
-			} else {
-				ResourceGrouping grouping = UIUtils.getFirstElement(selection, ResourceGrouping.class);
-				if (grouping != null) {
-					model.setConnection(ConnectionsRegistryUtil.safeGetConnectionFor(grouping.getProject()));
-					model.setProject(grouping.getProject());
-				}
-			}
+			} 
 		}
 	}
 
