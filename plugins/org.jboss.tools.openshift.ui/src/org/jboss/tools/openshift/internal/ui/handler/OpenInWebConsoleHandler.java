@@ -19,6 +19,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
@@ -37,7 +38,7 @@ import com.openshift.restclient.model.IService;
 /**
  * @author Fred Bricon
  */
-public class OpenInWebConsoleHandler extends OpenInWebBrowserHandler {
+public class OpenInWebConsoleHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -55,7 +56,8 @@ public class OpenInWebConsoleHandler extends OpenInWebBrowserHandler {
 		} else {
 			String url = getWebConsoleUrl(connection, resource);
 			if (!StringUtils.isEmpty(url)) {
-				openInBrowser(HandlerUtil.getActiveShell(event) , url);
+				new BrowserUtility().checkedCreateInternalBrowser(url,
+						"", OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				return Status.OK_STATUS;
 			}
 			msg = NLS.bind("Could not determine the url for the web console on {0}", connection.getHost());
