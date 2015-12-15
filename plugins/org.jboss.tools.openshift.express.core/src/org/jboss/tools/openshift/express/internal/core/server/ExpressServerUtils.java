@@ -391,7 +391,7 @@ public class ExpressServerUtils {
 		if (application == null) {
 			return null;
 		}
-		return ServerUtils.getServerName(application.getName());
+		return ServerUtils.getServerName(application.getName())+ " 2";
 	}
 
 	public static IServer createServer(String serverID) throws CoreException {
