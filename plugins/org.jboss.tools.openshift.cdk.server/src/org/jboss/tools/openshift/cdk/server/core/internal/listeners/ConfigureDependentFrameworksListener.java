@@ -109,12 +109,10 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 						.name(getNextName(server, mgr)).tcpHost(dockerHost);
 				String tlsVerifyString = adb.env.get("DOCKER_TLS_VERIFY");
 				boolean tlsVerify = (Integer.parseInt(tlsVerifyString) != 0);
-				// For some reason, the connection fails if i set this. 
-				// Not sure why the disconnect between what adbinfo tells me to use and what works upstream
-//				if( tlsVerify ) {
-//					String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
-//					tcpConnectionBuilder.tcpCertPath(tlsCertPath);
-//				}
+				if( tlsVerify ) {
+					String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
+					tcpConnectionBuilder.tcpCertPath(tlsCertPath);
+				}
 				DockerConnection con = tcpConnectionBuilder.build();
 				IDockerConnection[] other = mgr.getConnections();
 				mgr.addConnection(con);
