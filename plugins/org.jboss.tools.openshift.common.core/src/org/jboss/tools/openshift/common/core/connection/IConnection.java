@@ -54,4 +54,6 @@ public interface IConnection {
 	public void update(IConnection connection);
 
 	public void notifyUsage();
+
+	public void enablePromptCredentials(boolean enable);
 }

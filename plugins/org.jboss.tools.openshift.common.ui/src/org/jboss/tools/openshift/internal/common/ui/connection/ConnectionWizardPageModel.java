@@ -341,6 +341,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			this.connection = createConnection();
 			if(connection != null) {
 				if (connection.connect()) {
+					connection.enablePromptCredentials(true);
 					wizardModel.setConnection(connection);
 					connection.notifyUsage();
 				} else {
@@ -357,7 +358,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
 		return status;
 	}
-	
+
 	private IConnection createConnection() {
 		if (connectionFactory == null) {
 			return null;
@@ -371,6 +372,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (connectionAuthenticationProvider != null) {
 			connectionAuthenticationProvider.update(connection);
 		}
+		connection.enablePromptCredentials(false);
 		return connection;
 	}
 
@@ -380,6 +382,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	private void setConnectedStatus(IStatus status) {
 		firePropertyChange(PROPERTY_CONNECTED_STATUS, this.connectedStatus, this.connectedStatus = status);
+		if (isConnected()) {
+			this.connection.enablePromptCredentials(true);
+		}
 	}
 
 	public IStatus getConnectedStatus() {
