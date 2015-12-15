@@ -40,7 +40,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  */
 public class OpenInWebBrowserHandler extends AbstractHandler {
-	private static final String NOTHING_TO_OPEN_MSG = "Could not find a route that points to an url to show in a browser.";
+	private static final String NO_ROUTE_MSG = "Could not find a route that points to an url to show in a browser.";
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -87,25 +87,25 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 		//Open Connection
 		final IConnection connection = UIUtils.getFirstElement(currentSelection, IConnection.class);
 		if (connection != null) {
-			return openInBrowser(shell, connection.getHost());
+			return openBrowser(shell, connection.getHost());
 		}
 
 		return nothingToOpenDialog(shell);
 	}
 	
 	private IStatus nothingToOpenDialog(Shell shell) {
-		MessageDialog.openWarning(shell,"No route to open", NOTHING_TO_OPEN_MSG);
-		return OpenShiftUIActivator.statusFactory().cancelStatus(NOTHING_TO_OPEN_MSG);
+		MessageDialog.openWarning(shell,"No Route", NO_ROUTE_MSG);
+		return OpenShiftUIActivator.statusFactory().cancelStatus(NO_ROUTE_MSG);
 	}
-
+	
 	protected IStatus openBrowser(Shell shell, IRoute route) {
 		if (route == null) {
 			return nothingToOpenDialog(shell);
 		}
-		return openInBrowser(shell, route.getURL());
+		return openBrowser(shell, route.getURL());
 	}
 
-	protected IStatus openInBrowser(Shell shell, String url) {
+	protected IStatus openBrowser(Shell shell, String url) {
 		if (StringUtils.isBlank(url)) {
 			return nothingToOpenDialog(shell);
 		}
