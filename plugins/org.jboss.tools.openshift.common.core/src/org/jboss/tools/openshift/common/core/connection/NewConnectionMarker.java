@@ -106,6 +106,10 @@ public class NewConnectionMarker extends AbstractConnection {
 	}
 
 	@Override
+	public void enablePromptCredentials(boolean enable) {
+	}
+
+	@Override
 	public IConnection clone() {
 		throw new UnsupportedOperationException();
 	}

@@ -74,6 +74,7 @@ public class ExpressConnection extends AbstractConnection {
 	private IUser user;
 	private boolean isDomainLoaded;
 	private boolean rememberPassword;
+	private boolean promptPasswordEnabled = true;
 	private boolean didPromptForPassword;
 	private boolean passwordLoaded;
 	private ICredentialsPrompter passwordPrompter;
@@ -168,9 +169,15 @@ public class ExpressConnection extends AbstractConnection {
 	}
 
 	public boolean canPromptForPassword() {
-		return this.didPromptForPassword == false;
+		return this.didPromptForPassword == false
+				&& promptPasswordEnabled;
 	}
 
+	@Override
+	public void enablePromptCredentials(boolean enable) {
+		this.promptPasswordEnabled = enable;
+	}
+	
 	public void setSSLCertificateCallback(ISSLCertificateCallback callback) {
 		this.sslCallback = callback;
 	}
