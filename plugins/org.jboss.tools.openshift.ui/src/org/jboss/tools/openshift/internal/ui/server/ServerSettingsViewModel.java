@@ -57,6 +57,10 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			String sourcePath, String podPath, IService service, List<ObservableTreeItem> serviceItems) {
 		update(connection, connections, service, serviceItems);
 		updateProjects(projects);
+		if (this.deployProject != deployProject) {
+			//project changed, reset default sourcePath
+			sourcePath = null;
+		}
 		deployProject = updateDeployProject(deployProject, projects);
 		updateSourcePath(sourcePath, deployProject);
 		updatePodPath(getService());
