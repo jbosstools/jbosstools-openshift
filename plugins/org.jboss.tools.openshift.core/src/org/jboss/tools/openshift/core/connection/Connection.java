@@ -65,6 +65,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private boolean tokenLoaded;
 	private boolean rememberPassword;
 	private boolean rememberToken;
+	private boolean promptCredentialsEnabled = true;
 	private ICredentialsPrompter credentialsPrompter;
 	private ISSLCertificateCallback sslCertificateCallback;
 	private String authScheme;
@@ -139,11 +140,15 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	public boolean isRememberToken() {
 		return rememberToken;
-		
 	}
 	
 	public void setRememberToken(boolean rememberToken) {
 		firePropertyChange(PROPERTY_REMEMBER_TOKEN, this.rememberToken, this.rememberToken = rememberToken);
+	}
+	
+	@Override
+	public void enablePromptCredentials(boolean enable) {
+		this.promptCredentialsEnabled = enable;
 	}
 	
 	public void save() {
@@ -209,7 +214,9 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		client.setAuthorizationStrategy(getAuthorizationStrategy());
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
-			if (!context.isAuthorized() && credentialsPrompter != null){
+			if (!context.isAuthorized() 
+					&& credentialsPrompter != null
+					&& promptCredentialsEnabled){
 				credentialsPrompter.promptAndAuthenticate(this, null);
 			} else {
 				setToken(context.getToken());
@@ -217,7 +224,8 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 				updateCredentials(context);
 			}
 		} catch (UnauthorizedException e) {
-			if (credentialsPrompter == null) {
+			if (!promptCredentialsEnabled
+					|| credentialsPrompter == null) {
 				throw e;
 			} else {
 				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
@@ -283,6 +291,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		connection.setRememberPassword(rememberPassword);
 		connection.setToken(token);
 		connection.setAuthScheme(authScheme);
+		connection.promptCredentialsEnabled = promptCredentialsEnabled;
 		return connection;
 	}
 	
