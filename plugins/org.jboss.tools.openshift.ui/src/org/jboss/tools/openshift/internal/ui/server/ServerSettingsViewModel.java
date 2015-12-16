@@ -63,7 +63,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		}
 		deployProject = updateDeployProject(deployProject, projects);
 		updateSourcePath(sourcePath, deployProject);
-		updatePodPath(getService());
+		updatePodPath(podPath);
 	}
 
 	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
@@ -92,9 +92,11 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
 	}
 
-	protected void updatePodPath(IService service) {
-		String podPath = "/opt/app-root/src";
-		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = podPath);
+	protected void updatePodPath(String newPodPath) {
+		if (newPodPath == null) {
+			newPodPath = "/opt/app-root/src";
+		}
+		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = newPodPath);
 	}
 
 	public void setDeployProject(org.eclipse.core.resources.IProject project) {
@@ -122,7 +124,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	}
 
 	public void setPodPath(String podPath) {
-		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, getService(), getServiceItems());
+		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, podPath, getService(), getServiceItems());
 	}
 
 	public String getPodPath() {
