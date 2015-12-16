@@ -239,7 +239,7 @@ private ServerSettingsViewModel model;
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(sourcePathLabel);
 
-		Text sourcePathText = new Text(container, SWT.BORDER | SWT.READ_ONLY);
+		Text sourcePathText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(sourcePathText);
