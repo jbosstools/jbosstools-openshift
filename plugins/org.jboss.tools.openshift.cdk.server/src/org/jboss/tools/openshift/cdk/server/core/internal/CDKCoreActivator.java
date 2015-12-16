@@ -99,7 +99,7 @@ public class CDKCoreActivator extends BaseUIPlugin {
 		return new CDKSharedImages(getBundle());
 	}
 
-	public static final String CDK_WIZBAN = "icons/cdk_box_128.png";
+	public static final String CDK_WIZBAN = "icons/cdk_box_130x65.png";
 	private static class CDKSharedImages extends BaseUISharedImages {
 		public CDKSharedImages(Bundle pluginBundle) {
 			super(pluginBundle);
