@@ -154,7 +154,14 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 		
 		String args = configuration.getAttribute(ATTR_ARGS, (String)null);
-		ILaunchConfigurationWorkingCopy wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(s, args, getStartupLaunchName(s));
+		ILaunchConfigurationWorkingCopy wc = null;
+		try {
+			wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(s, args, getStartupLaunchName(s));
+		} catch(CoreException ce) {
+			CDKCoreActivator.pluginLog().logError(ce);
+			beh.setServerStopped();
+			throw ce;
+		}
 
 		// Run the launch, mark server as starting, add debug listeners, etc
 		ILaunch launch2 = wc.launch("run", monitor);
