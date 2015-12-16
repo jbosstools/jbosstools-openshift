@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,11 +38,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.variables.VariablesPlugin;
-import org.eclipse.egit.core.internal.util.ProjectUtil;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -70,8 +67,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -97,6 +92,7 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -868,10 +864,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					try {
 						List<String> repos = EGitUtils.getRemoteGitRepos(project);
 						if (repos == null || repos.isEmpty()) {
-							status = ValidationStatus.error(
+							status = ValidationStatus.warning(
 									NLS.bind("A remote Git repository using the HTTP(S) protocol must be defined on project {0}", projectName));
-						} else {
-							status = getGitDirtyStatus(project);
 						}
 					} catch (CoreException e) {
 						status = ValidationStatus.error(
@@ -916,22 +910,6 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		}
 	}
 
-	private IStatus getGitDirtyStatus(org.eclipse.core.resources.IProject project) {
-		try {
-			if (EGitUtils.isDirty(project, false, new NullProgressMonitor())) {
-				return ValidationStatus.error(NLS.bind(
-						"The project {0} has uncommitted changes. Please commit those changes first.",
-						project.getName()));
-			} else {
-				return ValidationStatus.ok();
-			}
-		} catch (NoWorkTreeException | IOException | GitAPIException e) {
-			return ValidationStatus.error(NLS.bind(
-					"The git repository for project {0} looks corrupt. Please fix it before using it.",
-					project.getName()));
-		}
-	}
-
 	private void filterTemplates(Text text, org.eclipse.core.resources.IProject project) {
 		String tags = findMatchingTags(project);
 		if (tags != null && !text.isDisposed()) {
@@ -954,4 +932,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			throw new RuntimeException(ex);
 		}
 	}
+	
+	@Override
+	protected void setupWizardPageSupport(DataBindingContext dbc) {
+		ParametrizableWizardPageSupport.create(
+				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
+				dbc);
+	}
+
 }
