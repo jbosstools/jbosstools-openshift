@@ -476,7 +476,8 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		if (client == null) {
 			if (other.client != null)
 				return false;
-		} else if (!client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
+		} else if (other.client == null
+				|| !client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
 			return false;
 		return true;
 	}
