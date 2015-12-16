@@ -93,8 +93,9 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	private boolean dockerConnectionExists(DockerConnectionManager mgr, String dockerHost) {
 		IDockerConnection[] cons = mgr.getConnections();
 		String httpHost = dockerHost.replace("tcp://", "http://");
+		String httpsHost = dockerHost.replace("tcp://", "https://");
 		for( int i = 0; i < cons.length; i++ ) {
-			if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost)) {
+			if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost) || cons[i].getUri().equals(httpsHost)) {
 				return true;
 			}
 		}
