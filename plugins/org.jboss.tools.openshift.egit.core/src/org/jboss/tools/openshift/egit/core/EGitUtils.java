@@ -1510,7 +1510,7 @@ public class EGitUtils {
 	 */
 	public static String getDefaultRemoteRepo(org.eclipse.core.resources.IProject project) throws CoreException {
 		Stream<String> stream = getRemoteGitReposFilteredStream(project);
-		return stream == null ? null : stream.findFirst().get();
+		return stream == null ? null : stream.findFirst().orElse(null);
 	}
 
 	private static Stream<String> getRemoteGitReposFilteredStream(IProject project) throws CoreException {
