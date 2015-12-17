@@ -11,7 +11,7 @@
  * based on org.eclipse.jface.databinding.wizard.WizardPageSupport
  *
  *******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.server;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import java.util.Collection;
 import java.util.Iterator;
