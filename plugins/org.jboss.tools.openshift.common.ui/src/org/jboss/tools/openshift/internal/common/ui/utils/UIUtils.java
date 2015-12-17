@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
@@ -44,33 +45,17 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 /**
  * @author André Dietisheim
  */
 public class UIUtils {
 	
-	private static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
-
-	public static void showOpenShiftExplorerView() {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getActivePage()
-					.showView(OPENSHIFT_EXPLORER_VIEW_ID);
-				} catch (PartInitException e) {
-					OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to show the OpenShift Explorer view", e);
-				}
-			}
-		});
-	}
+	public static final String PACKAGE_EXPLORER_ID = "org.eclipse.jdt.ui.PackageExplorer";
+	public static final String PROJECT_EXPLORER_ID = "org.eclipse.ui.navigator.ProjectExplorer";
+	public static final String RESOURCE_NAVIGATOR_ID = "org.eclipse.ui.views.ResourceNavigator";
 	
 	public static void selectAllOnFocus(final Text text) {
 		final FocusListener onFocus = new FocusAdapter() {
@@ -279,6 +264,41 @@ public class UIUtils {
 
 	public static boolean isSingleSelection(ISelection selection) {
 		return areNumOfElementsSelected(1, selection);
+	}
+
+	/**
+	 * Returns the first selected element that's of the given type, in the view identified by the given id.
+	 * Returns {@code null} if the view is not opened, doesn't exist or the selected element is not of the requested type.
+	 * 
+	 * @param viewId the id of the view whose selection we'll look at
+	 * @param clazz the type of selected item that you get
+	 * @return the selected item of the given type in the given view. 
+	 */
+	public static <T> T getFirstSelectedElement(String viewId, Class<T> clazz) {
+		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		ISelection selection = workbenchWindow.getSelectionService().getSelection(viewId);
+		return getFirstElement(selection, clazz);
+	}
+	
+	/**
+	 * Returns the 1st project that's selected in the following views (in a fallback order):
+	 * <ul>
+	 * <li>package explorer</li>
+	 * <li>project explorer</li>
+	 * <li>resource navigator</li>
+	 * </ul>
+	 * @return the project selected in package-, project-explorer or navigator (in this order of prescedence).
+	 */
+	public static IProject getFirstSelectedProject() {
+		IProject project = getFirstSelectedElement(PACKAGE_EXPLORER_ID, IProject.class);
+		if (project == null) {
+			project = getFirstSelectedElement(PROJECT_EXPLORER_ID, IProject.class);
+			if (project == null) {
+				project = getFirstSelectedElement(RESOURCE_NAVIGATOR_ID, IProject.class);
+			}
+		}
+		return project;
+
 	}
 	
 	public static void copyBackground(Control source, Control destination) {

@@ -42,14 +42,12 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -64,8 +62,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
@@ -76,8 +72,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -118,7 +114,7 @@ private ServerSettingsViewModel model;
 
 					@Override
 					public void setMessage(String message, int type) {
-						((WizardPage) handle).setMessage(message, type);
+						WizardFragmentUtils.getWizardPage(handle).setMessage(message, type);
 					}
 
 					@Override
@@ -137,7 +133,7 @@ private ServerSettingsViewModel model;
 		
 		loadResources(model, WizardFragmentUtils.getWizardPage(handle).getWizard().getContainer());
 		
-		IProject selectedProject = getSelectedWorkbenchProject();
+		IProject selectedProject = UIUtils.getFirstSelectedProject();
 		if (selectedProject != null) {
 			model.setDeployProject(selectedProject);
 		}
@@ -508,12 +504,6 @@ private ServerSettingsViewModel model;
 		} catch (InvocationTargetException | InterruptedException e) {
 			// swallow intentionally
 		}
-	}
-
-	private IProject getSelectedWorkbenchProject() {
-		IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		ISelection selection = win.getSelectionService().getSelection();
-		return UIUtils.getFirstElement(selection, IProject.class);
 	}
 
 	@Override
