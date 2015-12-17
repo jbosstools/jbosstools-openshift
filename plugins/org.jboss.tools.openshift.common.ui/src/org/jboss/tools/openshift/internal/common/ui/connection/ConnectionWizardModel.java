@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
@@ -20,6 +21,10 @@ public class ConnectionWizardModel implements IConnectionAware<IConnection> {
 	
 	protected IConnection connection;
 	private Object context;
+
+	public ConnectionWizardModel(Class<? extends IConnection> connectionType) {
+		this(ConnectionsRegistrySingleton.getInstance().getRecentConnection(connectionType), null);
+	}
 
 	public ConnectionWizardModel(final IConnection connection, Object context) {
 		this.connection = connection;

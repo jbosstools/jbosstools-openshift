@@ -103,7 +103,7 @@ public class ConnectionWizardFragment extends WizardFragment {
 		private IWizardHandle wizardHandle;
 
 		private WrappedConnectionWizardPage(IWizardHandle wizardHandle) {
-			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(null, null), Connection.class);
+			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class), Connection.class);
 			this.wizardHandle = wizardHandle;
 		}
 

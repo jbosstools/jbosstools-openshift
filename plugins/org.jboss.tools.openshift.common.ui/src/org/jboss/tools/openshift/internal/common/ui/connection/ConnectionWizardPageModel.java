@@ -343,6 +343,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 				if (connection.connect()) {
 					connection.enablePromptCredentials(true);
 					wizardModel.setConnection(connection);
+					ConnectionsRegistrySingleton.getInstance().setRecent(connection);
 					connection.notifyUsage();
 				} else {
 					String message = NLS.bind("Unable to connect to {0}", connection.getHost());

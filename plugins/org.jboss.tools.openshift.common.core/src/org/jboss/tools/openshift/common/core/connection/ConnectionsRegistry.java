@@ -171,6 +171,7 @@ public class ConnectionsRegistry {
 	@SuppressWarnings("unchecked")
 	public <T extends IConnection> T getRecentConnection(Class<T> clazz) {
 		if (recentConnection == null
+				|| clazz == null
 				|| !clazz.isAssignableFrom(recentConnection.getClass())) {
 			return null;
 		}

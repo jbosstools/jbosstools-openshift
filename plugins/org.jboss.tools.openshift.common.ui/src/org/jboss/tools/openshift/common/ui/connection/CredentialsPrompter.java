@@ -40,7 +40,7 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 						}
 						
 						final ConnectionWizard connectToOpenShiftWizard =
-								new ConnectionWizard(connection, false, context);
+								new ConnectionWizard(connection, context);
 						WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
 					}
 				});
