@@ -22,7 +22,7 @@ import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.job.DeployImageJob;
@@ -75,7 +75,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 									message).open();
 						}
 					});
-					UIUtils.showOpenShiftExplorerView();
+					OpenShiftUIUtils.showOpenShiftExplorerView();
 				}
 			}
 		});

@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -121,7 +122,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 							new NewApplicationSummaryDialog(getShell(), createJob, message).open();
 						}
 					});
-					UIUtils.showOpenShiftExplorerView();
+					OpenShiftUIUtils.showOpenShiftExplorerView();
 					if (model.getEclipseProject() != null) {
 						//No need to import the project from git, it's already here
 						return;
