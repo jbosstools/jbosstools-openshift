@@ -92,6 +92,11 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 private ServerSettingsViewModel model;
 
+	public ServerSettingsWizardFragment() {
+		// no finishing wizard before input provided in this page
+		setComplete(false);
+	}
+
 	@Override
 	public boolean hasComposite() {
 		return true;
