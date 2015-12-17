@@ -29,15 +29,15 @@ public class ConnectionWizard extends Wizard {
 	}
 	
 	public ConnectionWizard(final IConnection connection) {
-		this(connection, true, null);
+		this(connection, null);
 	}
 
 	/**
 	 * Constructor to use when connection to use is known.
 	 * @param context  A context that is useful to ConnectionEditors
 	 */
-	public ConnectionWizard(final IConnection connection, boolean allowConnectionChange, Object context) {
-		this.page = new ConnectionWizardPage(this, new ConnectionWizardModel(connection, context), allowConnectionChange);
+	public ConnectionWizard(final IConnection connection, Object context) {
+		this.page = new ConnectionWizardPage(this, new ConnectionWizardModel(connection, context));
 		setNeedsProgressMonitor(true);
 	}
 	
