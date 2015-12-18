@@ -13,8 +13,8 @@ package org.jboss.tools.openshift.express.internal.core.server;
 import org.eclipse.osgi.util.NLS;
 
 public class ExpressServerMessages extends NLS {
-	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.express.internal.core.server.OpenShiftServerMessages"; //$NON-NLS-1$
-	
+	private static final String BUNDLE_NAME = ExpressServerMessages.class.getName(); //$NON-NLS-1$
+
 	static {
 		// load message values from bundle file
 		NLS.initializeMessages(BUNDLE_NAME, ExpressServerMessages.class);		
