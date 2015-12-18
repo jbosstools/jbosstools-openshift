@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.Platform;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 
 public class CommandLocationLookupStrategy {
 	private static final String LINUX_WHICH = "which ";
@@ -91,7 +92,7 @@ public class CommandLocationLookupStrategy {
 		}
 		String ret = searchPath(System.getenv(pathvar), delim, cmd);
 		if( ret == null ) {
-			ret = runCommand(which + cmd, timeout, true);
+			ret = runCommandAndVerify(which + cmd, timeout);
 		}
 		return ret;
 	}
@@ -106,11 +107,11 @@ public class CommandLocationLookupStrategy {
 		String[] roots = null;
 		if( existingPath.isEmpty() && pathCommand != null) {
 			// Path should never be empty, we have to discover the path (OSX when eclipse launched via .app)
-			String pathresult = runCommand(pathCommand, false);
+			String pathresult = runCommand(pathCommand);
 			roots = pathresult.split(delim);
 		} else
 			roots = existingPath.split(delim);
-		ArrayList<String> list = new ArrayList(Arrays.asList(roots));
+		ArrayList<String> list = new ArrayList<String>(Arrays.asList(roots));
 		if( !list.contains(folder)) {
 			list.add(folder);
 		}
@@ -144,57 +145,99 @@ public class CommandLocationLookupStrategy {
 		}
 		return null;
 	}
-	private  String runCommand(final String cmd, int timeout, boolean verifyFileExists) {
+	private  String runCommandAndVerify(final String cmd, int timeout) {
 		if( timeout == -1 ) {
-			return runCommand(cmd, verifyFileExists);
+			return runCommandAndVerify(cmd);
 		} else {
 			String path = ThreadUtils.runWithTimeout(timeout, new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					return runCommand(cmd, verifyFileExists);
+					return runCommandAndVerify(cmd);
 				}
 			});
 			return path;
 		}
 	}
 	
-	private  String runCommand(String cmd, boolean verifyFileExists) {
-		return runCommand(new String[]{cmd}, verifyFileExists);
+	private  String runCommandAndVerify(String cmd) {
+		Process p = createProcess(cmd);
+		if( p != null ) {
+			String result = readProcess(p);
+			// verify the output is a file path that exists
+			if( result != null && !result.isEmpty() && new File(result).exists())
+				return result;
+		}
+		return null;
 	}
 	
-	private  String runCommand(String cmd[], boolean verifyFileExists) {
-		Process p = null;
+	private String runCommand(String cmd[]) {
+		Process p = createProcess(cmd);
+		if( p != null ) {
+			String result = readProcess(p);
+			return result;
+		}
+		return null;
+	}
+	
+	/**
+	 * Use runtime.exec(String[]) 
+	 * @param cmd
+	 * @return
+	 */
+	private Process createProcess(String cmd[]) {
 		try {
-			if( cmd.length > 1 ) 
-				p = Runtime.getRuntime().exec(cmd);
-			else 
-				p = Runtime.getRuntime().exec(cmd[0]);
+			return Runtime.getRuntime().exec(cmd);
+		} catch(IOException ioe) {
+			OpenShiftCommonCoreActivator.log(ioe);
+			return null;
+		}
+	}
+	
+	/**
+	 * Use runtime.exec(String) 
+	 * @param cmd
+	 * @return
+	 */
+	private Process createProcess(String cmd) {
+		try {
+			return Runtime.getRuntime().exec(cmd);
+		} catch(IOException ioe) {
+			OpenShiftCommonCoreActivator.log(ioe);
+			return null;
+		}
+	}
+
+	
+	private String readProcess(Process p) {
+		try {
+			p.waitFor();
+		} catch(InterruptedException ie) {
+			// Ignore, expected
+		}
+		InputStream is = null;
+		if(p.exitValue() == 0) {
+			is = p.getInputStream();
+		} else {
+			// For debugging only
+			//is = p.getErrorStream();
+		}
+		if( is != null ) {
 			try {
-				p.waitFor();
-			} catch(InterruptedException ie) {
-				// Ignore, expected
-			}
-			InputStream is = null;
-			if(p.exitValue() == 0) {
-				is = p.getInputStream();
-			} else {
-				// For debugging only
-				//is = p.getErrorStream();
-			}
-			if( is != null ) {
 				java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
 				String cmdOutput = s.hasNext() ? s.next() : "";
 				if( !cmdOutput.isEmpty()) {
 					cmdOutput = StringUtils.trim(cmdOutput);
-					if( !verifyFileExists || new File(cmdOutput).exists())
-						return cmdOutput;
+					return cmdOutput;
 				}
-			}
-		} catch(IOException ioe) {
-			// Ignore this
-		} finally {
-			if( p != null ) {
-				p.destroy();
+			} finally {
+				try {
+					if( p != null ) {
+						p.destroy();
+					}
+					is.close();
+				} catch(IOException ioe) {
+					// ignore
+				}
 			}
 		}
 		return null;
