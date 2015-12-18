@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -43,7 +44,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
@@ -289,18 +294,79 @@ public class UIUtils {
 	 * </ul>
 	 * @return the project selected in package-, project-explorer or navigator (in this order of prescedence).
 	 */
-	public static IProject getFirstSelectedProject() {
-		IProject project = getFirstSelectedElement(PACKAGE_EXPLORER_ID, IProject.class);
-		if (project == null) {
-			project = getFirstSelectedElement(PROJECT_EXPLORER_ID, IProject.class);
-			if (project == null) {
-				project = getFirstSelectedElement(RESOURCE_NAVIGATOR_ID, IProject.class);
-			}
+	public static IProject getFirstSelectedWorkbenchProject() {
+		IViewPart part = getVisibleProjectsView();
+		if (part == null) {
+			return null;
 		}
-		return project;
+		return getFirstSelectedElement(part.getSite().getId(), IProject.class);
+	}
 
+	/**
+	 * Returns the 1st visible part among the following ones:
+	 * <ul>
+	 * <li>package explorer</li>
+	 * <li>project explorer</li>
+	 * <li>resource navigator</li>
+	 * </ul>
+	 * @return
+	 */
+	public static IViewPart getVisibleProjectsView() {
+		return getFirstVisibleViewPart(PACKAGE_EXPLORER_ID, PROJECT_EXPLORER_ID, RESOURCE_NAVIGATOR_ID);
 	}
 	
+	public static IViewPart getFirstVisibleViewPart(String... partIds) {
+		List<IViewPart> parts = getVisibleViewParts(partIds);
+		if (parts.isEmpty()) {
+			return null;
+		}
+		return parts.get(0);		
+	}
+
+	/**
+	 * Returns the visible workbench parts which match the given ids. If no ids
+	 * are given all visible parts are returned.
+	 * 
+	 * @param partIds
+	 * @return
+	 * 
+	 * @see IWorkbenchPart
+	 */
+	public static List<IViewPart> getVisibleViewParts(String... partIds) {
+		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchPage page = workbenchWindow.getActivePage();
+		final List<String> partIdsList = new ArrayList<>();
+		List<IViewPart> parts = null;
+		if (partIds != null) {
+			parts = new ArrayList<>(partIds.length);
+		}
+
+		for(IViewReference viewReference : page.getViewReferences()) {
+			String partId = viewReference.getId();
+			if (partIdsList == null
+				|| partIdsList.isEmpty()
+				|| partIdsList.contains(partId)) {
+				IViewPart part = viewReference.getView(false);
+				if (part != null
+					&& page.isPartVisible(part)) {
+					parts.add(part);
+				}
+			}
+		}
+
+		parts.stream().sorted((part1, part2) -> {
+			int indexPart1 = partIdsList.indexOf(part1.getSite().getId());
+			int indexPart2 = partIdsList.indexOf(part1.getSite().getId());
+			if (indexPart1 > indexPart2) {
+				return 1;
+			} else {
+				return -1;
+			}
+		});
+		
+		return parts;
+	}
+
 	public static void copyBackground(Control source, Control destination) {
 		destination.setBackground(source.getBackground());
 	}
