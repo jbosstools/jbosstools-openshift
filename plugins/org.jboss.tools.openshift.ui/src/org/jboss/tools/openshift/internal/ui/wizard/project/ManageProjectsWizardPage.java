@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -151,7 +152,14 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WizardUtils.openWizardDialog(new NewProjectWizard(pageModel.getConnection(), pageModel.getProjects()), getShell());
+				NewProjectWizard newProjectWizard = new NewProjectWizard(pageModel.getConnection(), pageModel.getProjects());
+				int res = WizardUtils.openWizardDialog(newProjectWizard, getShell());
+				if (res == IDialogConstants.OK_ID) {
+					IProject newOrSelectedProject = newProjectWizard.getProject();
+					if (newOrSelectedProject != null) {
+						pageModel.setSelectedProject(newOrSelectedProject);
+					}
+				}
 			}
 		};
 	}
