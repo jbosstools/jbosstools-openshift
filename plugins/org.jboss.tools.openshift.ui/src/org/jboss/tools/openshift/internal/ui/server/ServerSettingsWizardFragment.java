@@ -133,7 +133,7 @@ private ServerSettingsViewModel model;
 		
 		loadResources(model, WizardFragmentUtils.getWizardPage(handle).getWizard().getContainer());
 		
-		IProject selectedProject = UIUtils.getFirstSelectedProject();
+		IProject selectedProject = UIUtils.getFirstSelectedWorkbenchProject();
 		if (selectedProject != null) {
 			model.setDeployProject(selectedProject);
 		}
