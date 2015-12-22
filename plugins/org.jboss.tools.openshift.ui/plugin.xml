@@ -19,7 +19,7 @@
 			contentProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider"
 			id="org.jboss.tools.openshift.ui.explorer.navigatorContent"
 			labelProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider"
-			name="org.jboss.tools.openshift.ui.explorer.navigatorContent">
+			name="OpenShift 3 Explorer Content">
 			<possibleChildren>
 				<or>
 					<instanceof
