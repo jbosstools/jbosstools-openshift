@@ -143,11 +143,11 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	private ITemplateListPageModel model;
 	private TreeViewer templatesViewer;
-	
+
 	public TemplateListPage(IWizard wizard, ITemplateListPageModel model) {
-		super("Select template", 
-				"Server template choices may be filtered by typing the name of a tag in the text field.", 
-				"templateList", 
+		super("Select template",
+				"Server template choices may be filtered by typing the name of a tag in the text field.",
+				"templateList",
 				wizard);
 		this.model = model;
 	}
@@ -176,7 +176,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			}
 		});
 
-		IObservableValue useLocalTemplateObservable = 
+		IObservableValue useLocalTemplateObservable =
 				BeanProperties.value(ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model);
 		ValueBindingBuilder
 			.bind(new TabFolderSelectionProperty().observe(tabContainer))
@@ -221,12 +221,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.align(SWT.FILL, SWT.CENTER)
 				.grab(true, false)
 				.applyTo(existingProjectNameText);
-		
+
 		ISWTObservableValue projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
 
 		IObservableValue eclipseProjectObservable = BeanProperties.value(
 				ITemplateListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
-		
+
 		ValueBindingBuilder
 			.bind(projectNameTextObservable)
 			.converting(new Converter(String.class, org.eclipse.core.resources.IProject.class) {
@@ -238,7 +238,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			})
 			.to(eclipseProjectObservable)
 			.converting(new Converter(org.eclipse.core.resources.IProject.class, String.class) {
-				
+
 				@Override
 				public Object convert(Object fromObject) {
 					return fromObject == null?"": ((org.eclipse.core.resources.IProject)fromObject).getName();
@@ -248,7 +248,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		// project name content assist
 		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
-		
+
 		FieldDecoration contentProposalFieldIndicator =
 				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
 		dec.setImage(contentProposalFieldIndicator.getImage());
@@ -266,7 +266,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.grab(false, false)
 				.applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects());
-		
+
 		Link gitLabel = new Link(parent, SWT.NONE);
 		gitLabel.setText("The project needs to be <a>shared with Git</a> and have a remote repository accessible by OpenShift");
 		gitLabel.addSelectionListener(new SelectionAdapter() {
@@ -284,7 +284,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			}
 		});
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(gitLabel);
-		
+
 		eclipseProjectObservable.addValueChangeListener(new IValueChangeListener() {
 
 			@Override
@@ -299,14 +299,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	/**
 	 * Open a dialog box to select an open project when clicking on the 'Browse' button.
-	 * 
+	 *
 	 * @return
 	 */
 	private SelectionListener onBrowseProjects() {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SelectExistingProjectDialog dialog = 
+				SelectExistingProjectDialog dialog =
 						new SelectExistingProjectDialog(model.getEclipseProject() == null? null: model.getEclipseProject().getName(), getShell());
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
@@ -334,7 +334,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
 
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
-		Binding selectedProjectBinding = 
+		Binding selectedProjectBinding =
 				ValueBindingBuilder.bind(selectedProjectObservable)
 					.converting(new ObservableTreeItem2ModelConverter(IProject.class))
 					.validatingAfterConvert(new IValidator() {
@@ -361,19 +361,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
 			.applyTo(manageProjectsLink);
-		manageProjectsLink.addListener(SWT.MouseDown, onManageProjectsClicked());
-		
+
+		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
+
 		Label filler = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).span(3, 1)
 			.applyTo(filler);
 	}
 
-	private Listener onManageProjectsClicked() {
-		return new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
+	private void onManageProjectsClicked() {
 				try {
 					// run in job to enforce busy cursor which doesnt work otherwise
 					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
@@ -386,7 +383,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						@Override
 						protected IStatus updateUI(IProgressMonitor monitor) {
 							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
-							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open(); 
+							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open();
 							// reload projects to reflect changes that happened in projects wizard
 							if (manageProjectsWizard.hasChanged()) {
 								loadResources(templatesViewer, model);
@@ -399,13 +396,11 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							};
 							return Status.OK_STATUS;
 						}
-											
+
 					}, getContainer());
 				} catch (InvocationTargetException | InterruptedException e) {
 					// swallow intentionnally
 				}
-			}
-		};
 	}
 
 	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, IObservableValue useLocalTemplate, DataBindingContext dbc) {
@@ -421,7 +416,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText("Select a local template:");
 		GridDataFactory.fillDefaults().span(3,1).applyTo(lbl);
-		
+
 		// local template file name
 		Text txtLocalTemplateFileName = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
@@ -433,7 +428,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.to(BeanProperties.value(
 						ITemplateListPageModel.PROPERTY_LOCAL_TEMPLATE_FILENAME).observe(model))
 				.validatingBeforeSet( o -> isFile(o.toString())?
-						ValidationStatus.ok(): 
+						ValidationStatus.ok():
 						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"))
 				.in(dbc);
 
@@ -445,7 +440,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.applyTo(btnBrowseFiles);
 
 		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
-		
+
 		// browse button
 		Button btnBrowseWorkspaceFiles = new Button(parent, SWT.NONE);
 		btnBrowseWorkspaceFiles.setText("Workspace...");
@@ -457,7 +452,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 
 		localTemplatesTab.setControl(parent);
-		
+
 		return localTemplateFilename;
 	}
 
@@ -485,10 +480,10 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				dialog.setMessage("Select an OpenShift template (*.json)");
 				dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
 				dialog.addFilter(new ViewerFilter() {
-					
+
 					@Override
 					public boolean select(Viewer viewer, Object parentElement, Object element) {
-						return element instanceof IContainer 
+						return element instanceof IContainer
 								|| (element instanceof IFile && ((IFile)element).getFileExtension().equals("json"));
 					}
 				});
@@ -505,7 +500,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				if (res != null) {
 					dialog.setInitialSelection(res);
 				}
-				
+
 				return dialog;
 			}
 		};
@@ -523,13 +518,13 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 			ErrorDialog.openError(getShell(), "Template Error",
-					NLS.bind("The file \"{0}\" is not an OpenShift template.", 
+					NLS.bind("The file \"{0}\" is not an OpenShift template.",
 							file),
 					status);
 		} catch (UnsupportedVersionException ex) {
 			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
-			ErrorDialog.openError(getShell(), "Template Error", 
+			ErrorDialog.openError(getShell(), "Template Error",
 					NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file),
 					status);
 		} catch (OpenShiftException ex) {
@@ -540,9 +535,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					status);
 		}
 	}
-	
+
 	private boolean isFile(String path) {
-		return StringUtils.isNotBlank(path) && 
+		return StringUtils.isNotBlank(path) &&
 				Files.isRegularFile(Paths.get(substituteVariables(path)));
 	}
 
@@ -572,16 +567,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				filterTemplates(txtTemplateFilter, (org.eclipse.core.resources.IProject)event.getObservableValue().getValue());
 			}
 		});
-		
+
 		filterTemplates(txtTemplateFilter, model.getEclipseProject());
-		
+
 		// the list of templates
 		this.templatesViewer = createServerTemplatesViewer(parent, txtTemplateFilter);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
-		
-		IObservableValue selectedViewerServerTemplate = 
+
+		IObservableValue selectedViewerServerTemplate =
 				ViewerProperties.singleSelection().observe(templatesViewer);
 		ValueBindingBuilder
 			.bind(selectedViewerServerTemplate)
@@ -602,7 +597,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	}
 
 	private void createDetailsGroup(Composite parent, DataBindingContext dbc) {
-		
+
 		// details
 		Group detailsGroup = new Group(parent, SWT.NONE);
 		detailsGroup.setText("Template details");
@@ -632,7 +627,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.align(SWT.RIGHT, SWT.CENTER)
 				.applyTo(btnDetails);
 
-		IObservableValue selectedTemplate = 
+		IObservableValue selectedTemplate =
 				BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnDetails))
@@ -642,9 +637,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
 
-		
+
 	}
-	
+
 	private IDoubleClickListener onServerTemplateDoubleClicked() {
 		return new IDoubleClickListener() {
 	        @Override
@@ -661,7 +656,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	private TreeViewer createServerTemplatesViewer(Composite parent, final Text templateFilterText) {
 		TreeViewer viewer = new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
-				new IListProperty[] { 
+				new IListProperty[] {
 						BeanProperties.list(ITemplateListPageModel.PROPERTY_TEMPLATES),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 		ObservableListTreeContentProvider contentProvider = new ObservableListTreeContentProvider(
@@ -690,7 +685,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					|| !(((ObservableTreeItem) element).getModel() instanceof ITemplate)) {
 				return true;
 			}
-			ITemplate template = (ITemplate) ((ObservableTreeItem) element).getModel(); 
+			ITemplate template = (ITemplate) ((ObservableTreeItem) element).getModel();
 			return ResourceUtils.isMatching(filterText.getText(), template);
 		}
 	}
@@ -723,13 +718,13 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ITemplate template = model.getSelectedTemplate();
-				new ResourceSummaryDialog(getShell(), 
+				new ResourceSummaryDialog(getShell(),
 						template.getItems(),
 						"Template Details",
-						NLS.bind("The following resources will be created by using template\n\"{0}\":", template.getName()), 
+						NLS.bind("The following resources will be created by using template\n\"{0}\":", template.getName()),
 						new ResourceDetailsLabelProvider(), new ResourceDetailsContentProvider()).open();
 			}
-			
+
 		};
 	}
 
@@ -746,7 +741,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	private IValueChangeListener onConnectionChanged() {
 		return new IValueChangeListener() {
 
-			@Override 
+			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				loadResources(templatesViewer, model);
 				templatesViewer.expandAll();
@@ -775,7 +770,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 								List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
 								Connection connection = model.getConnection();
 								NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
-								if (Dialog.CANCEL == 
+								if (Dialog.CANCEL ==
 										WizardUtils.openWizardDialog(newProjectWizard, getShell())) {
 									WizardUtils.close(getWizard());
 									return Status.CANCEL_STATUS;
@@ -824,10 +819,10 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	private static boolean hasTemplate(Object item) {
 		return item instanceof ITemplate ||
-			   item instanceof ObservableTreeItem && 
+			   item instanceof ObservableTreeItem &&
 			   ((ObservableTreeItem)item).getModel() instanceof ITemplate;
 	}
-	
+
 	/**
 	 * A validator that validates this page based on the choice to use a local
 	 * or server template and the settings that are required therefore.
@@ -842,8 +837,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		private IObservableList mutableTargets = new WritableList();
 		private Composite composite;
-		
-		public TemplateListPageValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
+
+		public TemplateListPageValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename,
 				IObservableValue serverTemplate, IObservableValue selectedTemplate, IObservableValue projectNameObservable, Composite composite) {
 			this.useLocalTemplate = useLocalTemplate;
 			useLocalTemplate.getValue();
@@ -858,7 +853,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		protected IStatus validate() {
 			IStatus status = ValidationStatus.ok();
 			mutableTargets.clear();
-			
+
 			final String projectName = (String) projectNameObservable.getValue();
 
 			if (!StringUtils.isEmpty(projectName)) {
@@ -876,7 +871,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							status = ValidationStatus.error(
 									NLS.bind("A remote Git repository using the HTTP(S) protocol must be defined on project {0}", projectName));
 						} else {
-							status = getGitDirtyStatus(project);						
+							status = getGitDirtyStatus(project);
 						}
 					} catch (CoreException e) {
 						status = ValidationStatus.error(
@@ -892,7 +887,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			} else {
 				if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
 					String localTemplate = (String)localTemplateFilename.getValue();
-					if (StringUtils.isNotEmpty(localTemplate)){ 
+					if (StringUtils.isNotEmpty(localTemplate)){
 						if (!isFile(localTemplate)) {
 							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
 							mutableTargets.add(localTemplateFilename);
@@ -905,13 +900,13 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					if (selectedTemplate.getValue() == null){
 						status = ValidationStatus.cancel("Please select a server template.");
 						mutableTargets.add(serverTemplate);
-					} 
+					}
 				}
-			}			
+			}
 			// force redraw since removed decorations somehow stay visible, GTK3 bug?
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
 			composite.redraw();
-			
+
 			return status;
 		}
 
@@ -920,7 +915,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			return mutableTargets;
 		}
 	}
-	
+
 	private IStatus getGitDirtyStatus(org.eclipse.core.resources.IProject project) {
 		try {
 			if (EGitUtils.isDirty(project, false, new NullProgressMonitor())) {

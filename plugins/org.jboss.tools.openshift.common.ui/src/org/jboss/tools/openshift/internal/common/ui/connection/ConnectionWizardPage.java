@@ -37,11 +37,13 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -123,7 +125,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);;
 		showHideSignupLink();
-		signupLink.addListener(SWT.MouseDown, onSignupLinkClicked());
+		StyledTextUtils.emulateLinkAction(signupLink, r->onSignupLinkClicked());
 		IObservableValue signupUrlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SIGNUPURL).observe(pageModel);
 		signupUrlObservable.addValueChangeListener(new IValueChangeListener() {
 
@@ -140,7 +142,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		showHideUserdocLink();
 		IObservableValue userdocUrlObservable = BeanProperties
 				.value(ConnectionWizardPageModel.PROPERTY_USERDOCURL).observe(pageModel);
-		userdocLink.addSelectionListener(onUserdocLinkClicked(userdocUrlObservable));
+		StyledTextUtils.emulateLinkAction(userdocLink, r->onUserdocLinkClicked(userdocUrlObservable));
 		userdocUrlObservable.addValueChangeListener(new IValueChangeListener() {
 
 			@Override
@@ -336,39 +338,28 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	protected Listener onSignupLinkClicked() {
-		return new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				String signupUrl = pageModel.getSignupUrl();
-				if (StringUtils.isEmpty(signupUrl)) {
-					return;
-				}
-				new BrowserUtility().checkedCreateInternalBrowser(
-						signupUrl,
-						signupUrl,
-						OpenShiftCommonUIActivator.PLUGIN_ID,
-						OpenShiftCommonUIActivator.getDefault().getLog());
-				WizardUtils.close(getWizard());
-			}
-		};
+	protected void onSignupLinkClicked() {
+		String signupUrl = pageModel.getSignupUrl();
+		if (StringUtils.isEmpty(signupUrl)) {
+			return;
+		}
+		new BrowserUtility().checkedCreateInternalBrowser(
+				signupUrl,
+				signupUrl,
+				OpenShiftCommonUIActivator.PLUGIN_ID,
+				OpenShiftCommonUIActivator.getDefault().getLog());
+		WizardUtils.close(getWizard());
 	}
 
-	protected SelectionAdapter onUserdocLinkClicked(final IObservableValue userdocUrlObservable) {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				String userdocUrl = (String) userdocUrlObservable.getValue();
-				if (StringUtils.isEmpty(userdocUrl)) {
-					return;
-				}
-				new BrowserUtility().checkedCreateExternalBrowser(
-						userdocUrl,
-						OpenShiftCommonUIActivator.PLUGIN_ID,
-						OpenShiftCommonUIActivator.getDefault().getLog());
-			}
-		};
+	protected void onUserdocLinkClicked(final IObservableValue userdocUrlObservable) {
+		String userdocUrl = (String) userdocUrlObservable.getValue();
+		if (StringUtils.isEmpty(userdocUrl)) {
+			return;
+		}
+		new BrowserUtility().checkedCreateExternalBrowser(
+				userdocUrl,
+				OpenShiftCommonUIActivator.PLUGIN_ID,
+				OpenShiftCommonUIActivator.getDefault().getLog());
 	}
 
 	@Override

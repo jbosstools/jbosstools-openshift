@@ -125,7 +125,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		if(authDetails != null) {
 			authDetails.getRequestTokenLink();
 		}
-		tokenRequestLink.addListener(SWT.MouseDown, onRetrieveLinkClicked(tokenRequestLink.getShell()));
+		StyledTextUtils.emulateLinkAction(tokenRequestLink, r->onRetrieveLinkClicked(tokenRequestLink.getShell()));
 		tokenRequestLink.setCursor(new Cursor(tokenRequestLink.getShell().getDisplay(), SWT.CURSOR_HAND));
 
 		//token
@@ -196,11 +196,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		return IAuthorizationContext.AUTHSCHEME_OAUTH;
 	}
 
-	private Listener onRetrieveLinkClicked(final Shell shell) {
-		return new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
+	private void onRetrieveLinkClicked(final Shell shell) {
 				if (StringUtils.isBlank(pageModel.getHost())) {
 					return;
 				}
@@ -247,8 +243,6 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				} catch (InvocationTargetException | InterruptedException ex) {
 					showErrorDialog(shell,ex);
 				}				
-			}
-		};
 	}
 	
 	private void showErrorDialog(final Shell shell, final Throwable e) {
