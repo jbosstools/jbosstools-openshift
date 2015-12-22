@@ -322,14 +322,10 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
 			.applyTo(manageProjectsLink);
-		manageProjectsLink.addListener(SWT.MouseDown, onManageProjectsClicked());
+		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
 	}
 
-	private Listener onManageProjectsClicked() {
-		return new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
+	private void onManageProjectsClicked() {
 				try {
 					// run in job to enforce busy cursor which doesnt work otherwise
 					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
@@ -359,7 +355,5 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				} catch (InvocationTargetException | InterruptedException e) {
 					// swallow intentionnally
 				}
-			}
-		};
 	}
 }

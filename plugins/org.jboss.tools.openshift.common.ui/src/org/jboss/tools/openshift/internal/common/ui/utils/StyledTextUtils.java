@@ -20,7 +20,10 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
@@ -51,6 +54,51 @@ public class StyledTextUtils {
 		styledText.setEditable(false);
 		styledText.setCursor(new Cursor(styledText.getShell().getDisplay(), SWT.CURSOR_HAND));
 		return styledText;
+	}
+
+	public static void emulateLinkAction(final StyledText styledText, EmulatedLinkClickListener listener) {
+		Listener mouseListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				int offset = getOffsetAtEvent(styledText, event);
+				if(offset < 0) {
+					return;
+				}
+				StyleRange r = styledText.getStyleRangeAtOffset(offset);
+				if(event.type == SWT.MouseUp) {
+					if(r != null) {
+						listener.handleClick(r);
+					}
+				} else if(event.type == SWT.MouseMove) {
+					if(r != null) {
+						styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+					} else {
+						styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
+					}
+				}
+
+			}
+		};
+		styledText.addListener(SWT.MouseMove, mouseListener);
+		styledText.addListener(SWT.MouseUp, mouseListener);
+	}
+
+	private static int getOffsetAtEvent(StyledText styledText, Event event) {
+		Point p = new Point(event.x, event.y);
+		int offset = -1;
+		try {
+			offset = styledText.getOffsetAtLocation(p);
+		} catch (IllegalArgumentException e) {
+			//ignore
+		}
+		if(offset < 0 || offset >= styledText.getCharCount()) {
+			return -1;
+		}
+		return offset;
+	}
+
+	public static interface EmulatedLinkClickListener {
+		public void handleClick(StyleRange range);
 	}
 
 	/**
