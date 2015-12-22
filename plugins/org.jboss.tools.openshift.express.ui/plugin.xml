@@ -150,7 +150,7 @@
 			id="org.jboss.tools.openshift.express.ui.explorer.navigatorContent"
 			contentProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerContentProvider"
 			labelProvider="org.jboss.tools.openshift.express.internal.ui.explorer.ExpressExplorerLabelProvider"
-			name="OpenShift Explorer Express Content">
+			name="OpenShift 2 Explorer Content">
 			<triggerPoints>
 				<instanceof
 					value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
