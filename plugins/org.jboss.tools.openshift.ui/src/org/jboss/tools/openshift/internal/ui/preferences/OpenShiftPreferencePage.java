@@ -14,7 +14,6 @@ import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -29,7 +28,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
-import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryName;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
@@ -40,45 +39,6 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 
 	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
 			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
-	
-	public enum OCBinaryName {
-
-		WINDOWS("oc.exe", new String[] { "exe" }), 
-		OTHER("oc", new String[] {});
-		
-		private String name;
-		private String[] extensions;
-		private CommandLocationBinary locationBinary;
-		private OCBinaryName(String name, String[] extensions) {
-			this.name = name;
-			this.extensions = extensions;
-		}
-
-		public String getName() {
-			return name;
-		};
-
-		public String[] getExtensions() {
-			return extensions;
-		};
-
-		public String getLocation() {
-			if( locationBinary == null ) {
-				locationBinary = new CommandLocationBinary("oc");
-				locationBinary.addPlatformLocation(Platform.OS_LINUX, "/usr/bin/oc");
-				locationBinary.setDefaultPlatform(Platform.OS_LINUX);
-			}
-			return locationBinary.findLocation();
-		}
-		
-		public static OCBinaryName getInstance() {
-			if (SystemUtils.IS_OS_WINDOWS) {
-				return WINDOWS;
-			} else {
-				return OTHER;
-			}
-		}
-	}
 	
 	private FileFieldEditor cliLocationEditor;
 	private OCBinaryName ocBinary;
