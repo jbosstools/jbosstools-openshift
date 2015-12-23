@@ -33,18 +33,20 @@ public class DeployImageNameValidator implements IValidator {
 			+ "with the character '-' allowed anywhere except first or last position.";
 
 	private final IStatus FAILED;
+	private final IStatus EMPTY_CANCEL;
 	
 	public DeployImageNameValidator() {
 		FAILED = ValidationStatus.error(failureMessage);
+		EMPTY_CANCEL = ValidationStatus.cancel("Please provide a valid resource name.");
 	}
 	
 	@Override
 	public IStatus validate(Object paramObject) {
-		if(!(paramObject instanceof String))
+		if(paramObject != null && !(paramObject instanceof String))
 			return ValidationStatus.cancel("Name is not an instance of a string");
 		String value= (String) paramObject;
 		if(StringUtils.isEmpty(value))
-			return FAILED;
+			return EMPTY_CANCEL;
 		if(value.length() > MAXLENGTH) {
 			return ValidationStatus.error(NLS.bind("Maximum name length is {0} characters", MAXLENGTH));
 		}
