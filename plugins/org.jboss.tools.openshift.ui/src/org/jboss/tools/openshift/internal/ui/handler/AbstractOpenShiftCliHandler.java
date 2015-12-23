@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
-import org.jboss.tools.openshift.internal.ui.preferences.OpenShiftPreferencePage.OCBinaryName;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryName;
 
 import com.openshift.restclient.capability.resources.IPortForwardable;
 

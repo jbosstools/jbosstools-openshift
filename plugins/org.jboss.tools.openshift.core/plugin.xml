@@ -86,6 +86,11 @@
 			sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer"/>
 	</extension>
 
+   <extension point="org.eclipse.core.runtime.preferences">
+      <initializer class="org.jboss.tools.openshift.internal.core.preferences.OpenShiftCorePreferenceInitializer"/>
+   </extension>
+
+
 	<!-- UI integration: credentials pompt -->
    	<extension-point id="org.jboss.tools.openshift.core.credentialsPrompterUI" 
    		name="CredentialsPrompterUI" 
