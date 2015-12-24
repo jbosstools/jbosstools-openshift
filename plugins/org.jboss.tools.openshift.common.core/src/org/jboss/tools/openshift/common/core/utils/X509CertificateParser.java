@@ -28,6 +28,9 @@ import org.eclipse.core.runtime.Assert;
  * @author Andre Dietisheim
  */
 public class X509CertificateParser {
+	public static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss";
+	public static final String ISSUED_ON_PREFIX = "Issued On: ";
+	public static final String EXPIRES_ON_PREFIX = "Expires On: ";
 
 		private static final String HEX_CHARS = new String("0123456789ABCDEF");
 		
@@ -74,10 +77,10 @@ public class X509CertificateParser {
 		}
 
 		private String getValidity(X509Certificate certificate) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss");
+			SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 			return new StringBuilder()
-				.append("Issued On: ").append(dateFormat.format(certificate.getNotBefore())).append('\n')
-				.append("Expires On: ").append(dateFormat.format(certificate.getNotAfter()))
+				.append(ISSUED_ON_PREFIX).append(dateFormat.format(certificate.getNotBefore())).append('\n')
+				.append(EXPIRES_ON_PREFIX).append(dateFormat.format(certificate.getNotAfter()))
 				.toString();
 		}
 		
