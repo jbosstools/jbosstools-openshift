@@ -40,6 +40,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.preferences.SSLCertificatesPreference;
 
 import com.openshift.restclient.ISSLCertificateCallback;
 
@@ -53,18 +54,23 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
 
 	// TODO: store certificates and decision in Eclipse preferences
-	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<X509Certificate, Boolean>();
+//	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<X509Certificate, Boolean>();
 	
 	@Override
 	public boolean allowCertificate(final X509Certificate[] certificateChain) {
-
-		if(allowByCertificate.containsKey(certificateChain[0])) {
-			return allowByCertificate.get(certificateChain[0]);
-		};
+		Boolean result = SSLCertificatesPreference.getInstance().getAllowedByCertificate(certificateChain[0]);
+		if(result != null) {
+			return result;
+		}
+		
+//		if(allowByCertificate.containsKey(certificateChain[0])) {
+//			return allowByCertificate.get(certificateChain[0]);
+//		};
 		
 		boolean allow = openCertificateDialog(certificateChain);
 		if (rememberDecision) {
-			allowByCertificate.put(certificateChain[0], allow);
+//			allowByCertificate.put(certificateChain[0], allow);
+			SSLCertificatesPreference.getInstance().setAllowedByCertificate(certificateChain[0], allow);
 		}
 		return allow;
 	}
@@ -94,6 +100,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 		private SSLCertificateDialog(Shell parentShell, X509Certificate[] certificateChain) {
 			super(parentShell);
 			this.certificateChain = certificateChain;
+			setHelpAvailable(false);
 		}
 
 		@Override
@@ -107,7 +114,6 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			parent.getShell().setText("Untrusted SSL Certificate");
 			setTitle("Do you accept the following untrusted SSL certificate?");
 			setTitleImage(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-			setDialogHelpAvailable(false);
 		}
 
 		@Override
@@ -126,7 +132,8 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			writeCertificate(certificateChain, certificateText);
 			
 			Button rememberCheckbox = new Button(container, SWT.CHECK);
-			rememberCheckbox.setText("Remember decision for the current Eclipse session");
+//			rememberCheckbox.setText("Remember decision for the current Eclipse session");
+			rememberCheckbox.setText("Remember decision (it can be changed in preferences 'OpenShift 3/SSL certificates')");
 			rememberCheckbox.setSelection(rememberDecision);
 			rememberCheckbox.addSelectionListener(onRememberCertificate(certificateChain[0]));
 			GridDataFactory.fillDefaults()
@@ -141,65 +148,14 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.NO_LABEL, false);
 		}
 
+		SSLCertificateUIHelper certificateUIHelper = new SSLCertificateUIHelper();
+
 		private void writeCertificate(X509Certificate[] certificateChain, StyledText styledText) {
-			List<StyleRange> styles = new ArrayList<StyleRange>();
-			StringBuilder builder = new StringBuilder();
 			if (certificateChain == null
 					|| certificateChain.length == 0) {
 				return;
 			}
-
-			createTextAndStyle(certificateChain[0], builder, styles);
-			styledText.setText(builder.toString());
-			setStyleRanges(styledText, styles);
-		}
-
-		private void createTextAndStyle(X509Certificate certificate, StringBuilder builder, List<StyleRange> styles) {
-			if (certificate == null) {
-				return;
-			}
-			
-			X509CertificateParser certificateParser = new X509CertificateParser(certificate);
-			appendLabeledValue("Issued By:\n", certificateParser.getIssuer(), builder, styles);
-			appendLabeledValue("Validity:\n", certificateParser.getValidity(), builder, styles);
-			appendLabeledValue("SHA1 Fingerprint:\n", certificateParser.getFingerprint(), builder, styles);
-		}
-
-		private void appendLabeledValue(String label, String value, StringBuilder builder, List<StyleRange> styles) {
-			appendLabel(label, builder, styles);
-			appendValue(value, builder);
-		}
-
-		private void appendValue(String value, StringBuilder builder) {
-			builder
-					.append(value)
-					.append(StringUtils.getLineSeparator())
-					.append(StringUtils.getLineSeparator());
-		}
-
-		private void appendLabel(String label, StringBuilder builder, List<StyleRange> styles) {
-			StyleRange styleRange = startBoldStyleRange(builder);
-			builder.append(label);
-			finishBoldStyleRange(builder, styleRange);
-			styles.add(styleRange);
-		}
-
-		private StyleRange startBoldStyleRange(StringBuilder builder) {
-			StyleRange styleRange = new StyleRange();
-			styleRange.start = builder.length();
-			styleRange.fontStyle = SWT.BOLD;
-			return styleRange;
-		}
-
-		private StyleRange finishBoldStyleRange(StringBuilder builder, StyleRange styleRange) {
-			styleRange.length = builder.length() - styleRange.start;
-			return styleRange;
-		}
-
-		private void setStyleRanges(StyledText logText, List<StyleRange> styles) {
-			for (StyleRange style : styles) {
-				logText.setStyleRange(style);
-			}
+			certificateUIHelper.writeCertificate(certificateChain[0], styledText);
 		}
 
 		private SelectionListener onRememberCertificate(final X509Certificate certificate) {
