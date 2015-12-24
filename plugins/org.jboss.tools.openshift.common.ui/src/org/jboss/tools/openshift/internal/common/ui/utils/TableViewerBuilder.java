@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -124,7 +125,7 @@ public class TableViewerBuilder {
 		}
 
 		public TableViewerBuilder buildColumn() {
-			if(cellToolTipProvider != null) {
+			if(cellToolTipProvider != null || cellLabelProvider instanceof IToolTipProvider) {
 				ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE); 
 			}
 			TableViewerColumn column = new TableViewerColumn(viewer, alignement);
@@ -141,7 +142,7 @@ public class TableViewerBuilder {
 					, "set either IColumnLabelProvider or CellLabelProvider");
 			Assert.isLegal((cellLabelProvider != null && tooltipProvider == null)
 					|| cellLabelProvider == null
-					, "cannot use ITooltipProvider with with CellLabelProvider");
+					, "cannot use ITooltipProvider with CellLabelProvider");
 			if (labelProvider != null) {
 				column.setLabelProvider(new CellLabelProvider() {
 
