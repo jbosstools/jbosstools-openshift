@@ -20,6 +20,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -34,7 +39,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueWizardModel;
@@ -143,23 +147,30 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				final Label label = UIUtils.getFirstElement(viewer.getSelection(),Label.class);
-				IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>(label)
-					.windowTitle(RESOURCE_LABEL)
-					.title("Edit Label")
-					.description("Edit the resource label.")
-					.keyLabel(LABEL)
-					.groupLabel(LABEL)
-					.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
-					.valueAfterConvertValidator(new LabelValueValidator())
-					.build();
-				OkCancelButtonWizardDialog dialog =
-						new OkCancelButtonWizardDialog(getShell(),
-								new KeyValueWizard<Label>(label, dialogModel));
-				if(OkCancelButtonWizardDialog.OK == dialog.open()) {
-					model.updateLabel(label, dialogModel.getKey(), dialogModel.getValue());
-				}
+				editLabel(label);
 			}
 		};
+	}
+
+	private void editLabel(Label label) {
+		if (label == null || isReadOnly(label)) {
+			return;
+		}
+		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>(label)
+			.windowTitle(RESOURCE_LABEL)
+			.title("Edit Label")
+			.description("Edit the resource label.")
+			.keyLabel(LABEL)
+			.groupLabel(LABEL)
+			.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
+			.valueAfterConvertValidator(new LabelValueValidator())
+			.build();
+		OkCancelButtonWizardDialog dialog =
+				new OkCancelButtonWizardDialog(getShell(),
+						new KeyValueWizard<Label>(label, dialogModel));
+		if(OkCancelButtonWizardDialog.OK == dialog.open()) {
+			model.updateLabel(label, dialogModel.getKey(), dialogModel.getValue());
+		}
 	}
 
 	private SelectionListener onAdd() {
@@ -190,25 +201,25 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
+
 		this.viewer = new TableViewerBuilder(table, tableContainer)
 				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<Label>() {
+				.<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
 					@Override
 					public String getValue(Label label) {
 						return label.getName();
 					}
-				})
+				}))
 				.name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.column(new IColumnLabelProvider<Label>() {
-
+				.<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
 					@Override
 					public String getValue(Label label) {
 						return label.getValue();
 					}
-				
-				})
+				}))
 				.name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
 				.buildViewer();
+		viewer.addDoubleClickListener(e -> editLabel((Label)((IStructuredSelection)e.getSelection()).getFirstElement()));
 		viewer.setComparator(new ViewerComparator() {
 
 			@Override
@@ -221,10 +232,38 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		});
 		return viewer;
 	}
-	
+
+	private abstract class LabelTextProvider extends ColumnLabelProvider implements IStyledLabelProvider {
+
+		@Override
+		public String getToolTipText(Object label) {
+			return isReadOnly((Label)label)?"This label can not be modified":null;
+		}
+
+		@Override
+		public String getText(Object element) {
+			return getStyledText(element).getString();
+		}
+
+		@Override
+		public StyledString getStyledText(Object element) {
+			StyledString styledString= new StyledString();
+			Label label = (Label)element;
+			String text = getValue(label);
+			if (isReadOnly(label)) {
+				styledString.append(text, StyledString.QUALIFIER_STYLER);
+			} else {
+				styledString.append(text);
+			}
+			return styledString;
+		}
+
+		abstract public String getValue(Label label);
+	}
+
 	/*
 	 * Only allow editing or removal of labels that are not
-	 * deamed readonly.  Following the lead of the webconsole here
+	 * deemed readonly.  Following the lead of the webconsole here
 	 */
 	private class IsNotNullOrReadOnlyBooleanConverter extends Converter{
 
@@ -235,8 +274,12 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		@Override
 		public Object convert(Object arg) {
 			if(arg == null) return Boolean.FALSE;
-			return !model.getReadOnlyLabels().contains(((Label) arg).getName());
+			return !isReadOnly((Label)arg);
 		}
 		
+	}
+
+	private boolean isReadOnly(Label label) {
+		return model.getReadOnlyLabels().contains(label.getName());
 	}
 }
