@@ -41,6 +41,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 
 	public static final String PROPERTY_FORWARDABLE_PORTS = "forwardablePorts";
 	public static final String PROPERTY_PORT_FORWARDING = "portForwarding";
+	public static final String PROPERTY_PORT_FORWARDING_ALLOWED = "portForwardingAllowed";
 	public static final String PROPERTY_USE_FREE_PORTS = "useFreePorts";
 	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<IPod, IPortForwardable>();
 
@@ -73,6 +74,10 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		return isPortForwarding(pod);
 	}
 
+	public boolean isPortForwardingAllowed() {
+		return !getForwardablePorts().isEmpty() && !isPortForwarding(pod);
+	}
+
 	public Collection<IPortForwardable.PortPair> getForwardablePorts(){
 		return ports;
 	}
@@ -94,13 +99,13 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				cap.forwardPorts(ports.toArray(new IPortForwardable.PortPair []{}));
 				stream.println("done.");
 				ConsoleUtils.displayConsoleView(console);
-				firePropertyChange(PROPERTY_PORT_FORWARDING, false, getPortForwarding());
 				return cap;
 			}
 		}, null);
 		if(portForwardable != null) {
 			REGISTRY.put(pod, portForwardable);
 		}
+		firePropertyChange(PROPERTY_PORT_FORWARDING, false, getPortForwarding());
 	}
 	
 	private boolean isPortForwarding(IPod pod) {

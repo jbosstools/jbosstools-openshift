@@ -114,36 +114,18 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		IObservableValue portForwardingStartedObservable = BeanProperties.value(
 				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
 
-		IObservableValue forwardablePortsModelObservable =
-				BeanProperties.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
+		IObservableValue portForwardingAllowedObservable = BeanProperties.value(
+				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING_ALLOWED).observe(wizardModel);
 
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
-			.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
+			.notUpdating(portForwardingAllowedObservable).in(dbc);
 
 		
-		Converter collectionToBooleanConverter = new Converter(Collection.class, Boolean.class) {
-			
-			@Override
-			public Object convert(Object fromObject) {
-				if(fromObject instanceof Collection<?>) {
-					return !((Collection<?>) fromObject).isEmpty();
-				}
-				return Boolean.FALSE;
-			}
-			
-		};
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
-			.notUpdating(forwardablePortsModelObservable).converting(collectionToBooleanConverter).in(dbc);
-
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(stopButton))
 				.notUpdating(portForwardingStartedObservable).in(dbc);
 		
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
-				.notUpdating(portForwardingStartedObservable).converting(new InvertingBooleanConverter()).in(dbc);
-
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
-		.notUpdating(forwardablePortsModelObservable).converting(collectionToBooleanConverter).in(dbc);
-
+				.notUpdating(portForwardingAllowedObservable).in(dbc);
 
 	}
 
