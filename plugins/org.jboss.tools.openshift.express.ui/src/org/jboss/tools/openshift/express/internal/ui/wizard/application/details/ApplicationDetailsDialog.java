@@ -47,6 +47,7 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	public ApplicationDetailsDialog(IApplication application, Shell parentShell) {
 		super(parentShell);
 		this.application = application;
+		setHelpAvailable(false);
 	}
 
 	@Override
@@ -120,7 +121,6 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		parent.getShell().setText("Application Details");
 		setTitle(NLS.bind("Details of Application {0}", application.getName()));
 		setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-		setDialogHelpAvailable(false);
 	}
 
 	@Override

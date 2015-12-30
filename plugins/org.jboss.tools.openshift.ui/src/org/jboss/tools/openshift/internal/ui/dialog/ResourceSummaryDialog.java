@@ -57,6 +57,7 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		this.message = message;
 		this.labelProvider = labelProvider;
 		this.contentProvider = contetProvider;
+		setHelpAvailable(false);
 	}
 	
 	@Override
@@ -123,7 +124,6 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		parent.getShell().setText(dialogTitle);
 		setTitle(message);
 		setTitleImage(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-		setDialogHelpAvailable(false);
 	}
 	
 	@Override
