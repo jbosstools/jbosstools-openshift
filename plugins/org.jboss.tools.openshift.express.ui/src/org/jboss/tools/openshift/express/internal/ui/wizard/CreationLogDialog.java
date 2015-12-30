@@ -51,6 +51,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 		super(parentShell);
 		this.logEntries = logEntries;
 		this.links = new ArrayList<Link>();
+		setHelpAvailable(false);
 	}
 	
 	@Override
@@ -64,7 +65,6 @@ public class CreationLogDialog extends TitleAreaDialog {
 		parent.getShell().setText("Embedded Cartridges");
 		setTitle("Please make note of the credentials and url that were reported\nwhen your cartridges were embedded / application was created. ");
 		setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-		setDialogHelpAvailable(false);
 	}
 
 	@Override

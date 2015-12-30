@@ -94,6 +94,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 		private SSLCertificateDialog(Shell parentShell, X509Certificate[] certificateChain) {
 			super(parentShell);
 			this.certificateChain = certificateChain;
+			setHelpAvailable(false);
 		}
 
 		@Override
@@ -107,7 +108,6 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			parent.getShell().setText("Untrusted SSL Certificate");
 			setTitle("Do you accept the following untrusted SSL certificate?");
 			setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-			setDialogHelpAvailable(false);
 		}
 
 		@Override
