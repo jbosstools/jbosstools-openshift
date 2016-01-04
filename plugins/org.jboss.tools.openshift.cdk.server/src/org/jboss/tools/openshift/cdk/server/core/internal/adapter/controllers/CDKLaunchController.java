@@ -163,18 +163,23 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 			throw ce;
 		}
 
-		// Run the launch, mark server as starting, add debug listeners, etc
-		ILaunch launch2 = wc.launch("run", monitor);
-		final IProcess[] processes = launch2.getProcesses();
-		
-		if( processes != null && processes.length >= 1 && processes[0] != null ) {
-			IDebugEventSetListener debug = getDebugListener(processes);
-			if( beh != null ) {
-				final IProcess launched = processes[0];
-				beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, launched);
-				beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+		try {
+			// Run the launch, mark server as starting, add debug listeners, etc
+			ILaunch launch2 = wc.launch("run", monitor);
+			final IProcess[] processes = launch2.getProcesses();
+			
+			if( processes != null && processes.length >= 1 && processes[0] != null ) {
+				IDebugEventSetListener debug = getDebugListener(processes);
+				if( beh != null ) {
+					final IProcess launched = processes[0];
+					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, launched);
+					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+				}
+				DebugPlugin.getDefault().addDebugEventListener(debug);
 			}
-			DebugPlugin.getDefault().addDebugEventListener(debug);
+		} catch(CoreException ce) {
+			beh.setServerStopped();
+			throw ce;
 		}
 	}
 
