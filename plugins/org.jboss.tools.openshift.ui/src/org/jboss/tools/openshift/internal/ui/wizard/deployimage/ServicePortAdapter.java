@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.common.databinding.ObservablePojo;
 
 import com.openshift.restclient.model.IPort;

@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -39,28 +40,31 @@ import com.openshift.restclient.model.route.IRoute;
 public class Deployment extends ObservablePojo {
 
 	public static final String PROP_BUILDS = getProperty(ResourceKind.BUILD);
+	public static final String PROP_BUILD_CONFIGS = getProperty(ResourceKind.BUILD_CONFIG);
+	public static final String PROP_DEPLOYMENT_CONFIGS = getProperty(ResourceKind.DEPLOYMENT_CONFIG);
+	public static final String PROP_IMAGE_STREAMS = getProperty(ResourceKind.IMAGE_STREAM);
 	public static final String PROP_PODS = getProperty(ResourceKind.BUILD);
 	public static final String PROP_ROUTES = getProperty(ResourceKind.ROUTE);
 	public static final String PROP_REPLICATION_CONTROLLERS = getProperty(ResourceKind.REPLICATION_CONTROLLER);
-	public static final String PROP_BUILD_CONFIGS = getProperty(ResourceKind.BUILD_CONFIG);
 
 	private IService service;
 	private Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
 	
 	public Deployment(IService service) {
 		this.service = service;
-		for (String kind : new String [] {ResourceKind.BUILD, ResourceKind.POD, ResourceKind.ROUTE, ResourceKind.REPLICATION_CONTROLLER, ResourceKind.BUILD_CONFIG}) {
+		for (String kind : new String [] {
+				ResourceKind.BUILD, 
+				ResourceKind.BUILD_CONFIG,
+				ResourceKind.DEPLOYMENT_CONFIG,
+				ResourceKind.IMAGE_STREAM,
+				ResourceKind.POD, 
+				ResourceKind.ROUTE, 
+				ResourceKind.REPLICATION_CONTROLLER, 
+			}) {
 			resources.put(kind, new ArrayList<>());
 		}
 	}
 	
-	public Deployment(IService service, Collection<IRoute> routes, Collection<IBuild> builds, Collection<IPod> pods, Collection<IReplicationController> rcs) {
-		this.service = service;
-		resources.put(ResourceKind.BUILD, init(builds));
-		resources.put(ResourceKind.POD, init(pods));
-		resources.put(ResourceKind.ROUTE, init(routes));
-		resources.put(ResourceKind.REPLICATION_CONTROLLER, init(rcs));
-	}
 	private <T extends IResource> List<IResourceUIModel> init(Collection<T> resources) {
 		if(resources != null) {
 			return resources.stream().map(r->new OpenShiftResourceUIModel(r)).collect(Collectors.toList());
@@ -70,6 +74,26 @@ public class Deployment extends ObservablePojo {
 	
 	public IService getService() {
 		return this.service;
+	}
+	
+	public Collection<IResourceUIModel> getImageStreams() {
+		return resources.get(ResourceKind.IMAGE_STREAM);	
+	}
+	
+	public void setImageStreams(Collection<IResourceUIModel> models) {
+		firePropertyChange(PROP_IMAGE_STREAMS, resources.get(ResourceKind.IMAGE_STREAM), resources.put(ResourceKind.IMAGE_STREAM, new ArrayList<>(models)));
+	}
+	
+	public void setImageStreamResources(Collection<IResource> streams) {
+		firePropertyChange(PROP_IMAGE_STREAMS, resources.get(ResourceKind.IMAGE_STREAM), resources.put(ResourceKind.IMAGE_STREAM, init(streams)));
+	}
+
+	public Collection<IResourceUIModel> getDeploymentConfigs() {
+		return resources.get(ResourceKind.DEPLOYMENT_CONFIG);	
+	}
+	
+	public void setDeploymentConfigs(Collection<IResourceUIModel> models) {
+		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, new ArrayList<>(models)));
 	}
 	
 	public Collection<IResourceUIModel> getBuilds() {
