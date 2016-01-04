@@ -812,6 +812,12 @@
 			id="org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage"
 			name="%openshift.preferences.page.title">
 		</page>
+		<page
+			category="org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage"
+			class="org.jboss.tools.openshift.internal.ui.preferences.SSLCertificatesPreferencePage"
+			id="org.jboss.tools.openshift.ui.preferences.SSLCertificatesPreferencePage"
+			name="%openshift.preferences.page.certificates.title">
+		</page>
 	</extension>
  
  	<!-- OpenShift 3 server adapter icon -->
