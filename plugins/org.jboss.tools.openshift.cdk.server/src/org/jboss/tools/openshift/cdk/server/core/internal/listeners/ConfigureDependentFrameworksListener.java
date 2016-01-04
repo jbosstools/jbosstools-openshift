@@ -10,16 +10,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.IStreamListener;
-import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.DockerException;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
@@ -28,7 +24,6 @@ import org.eclipse.linuxtools.internal.docker.core.DockerConnection.Builder;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
-import org.jboss.ide.eclipse.as.core.server.IServerStatePoller.PollingException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
@@ -55,8 +50,10 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	
 	private void launchChange(IServer server) {
 		ADBInfo adb = loadADBInfo(server);
-		configureOpenshift(server, adb);
-		configureDocker(server, adb);
+		if( adb != null ) {
+			configureOpenshift(server, adb);
+			configureDocker(server, adb);
+		}
 	}
 	
 
@@ -199,11 +196,11 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 			env.put(passKey, cdkServer.getPassword());
 		}
 		
+		HashMap<String,String> adbEnv = new HashMap<String,String>();
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
 			String setEnvVarCommand = Platform.getOS().equals(Platform.OS_WIN32) ? "setx " : "export ";
 			String setEnvVarDelim = Platform.getOS().equals(Platform.OS_WIN32) ? " " : "=";
-			HashMap<String,String> adbEnv = new HashMap<String,String>();
 			Iterator<String> lineIterator = Arrays.asList(lines).iterator();
 			while(lineIterator.hasNext()) {
 				String oneAppend = lineIterator.next();
@@ -221,29 +218,25 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 				}
 			}
 			return new ADBInfo(adbEnv);
-		} catch(IOException ce) {
-			ce.printStackTrace(); // TODO log
+		} catch( URISyntaxException urise) {
+			CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
+		} catch(IOException | TimeoutException ce) {
+			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant adbinfo. ", ce);
 		}
 		return null;
 	}
 	
 	private static class ADBInfo {
-		// Mocked
 		private int openshiftPort = 8443;
 		private String openshiftHost = "https://10.1.2.2";
 		
 		private HashMap<String,String> env;
-		public ADBInfo(HashMap<String,String> env) {
+		public ADBInfo(HashMap<String,String> env) throws URISyntaxException {
 			this.env = env;
-			try {
-				String dockerHost = env.get("DOCKER_HOST");
-				URI url = new URI(dockerHost);
-				String h = url.getHost();
-				openshiftHost = "https://" + h;
-				//openshiftPort = url.getPort();  // i don't believe this is the correct port. This is for docker
-			} catch(URISyntaxException murle) {
-				murle.printStackTrace();
-			}
+			String dockerHost = env.get("DOCKER_HOST");
+			URI url = new URI(dockerHost);
+			String h = url.getHost();
+			openshiftHost = "https://" + h;
 		}
 		
 	}
