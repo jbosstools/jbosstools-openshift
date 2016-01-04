@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -159,6 +160,8 @@ public class VagrantPoller implements IServerStatePoller2 {
   	        return parseOutput(lines);
     	} catch(PollingException pe) {
     		aborted = pe;
+    	} catch(TimeoutException te) {
+    		aborted = new PollingException(te.getMessage(), te);
     	} catch(IOException ioe) {
     		// TODO
     		ioe.printStackTrace();

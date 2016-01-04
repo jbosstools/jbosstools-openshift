@@ -3,16 +3,21 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ATTR_ARGS;
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ENVIRONMENT_VARS_KEY;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -24,6 +29,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class VagrantLaunchUtility {
 	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args, String launchConfigName) throws CoreException {
@@ -101,15 +107,9 @@ public class VagrantLaunchUtility {
 		Map<String, String> original = new HashMap<>(System.getenv());
 
 		// Add new environment on top of existing
-		Iterator<String> additonal = env.keySet().iterator();
-		String k;
-		while (additonal.hasNext()) {
-			k = additonal.next();
-			original.put(k, env.get(k));
-		}
+		original.putAll(env);
 
-		// Convert the combined map into a form that can be used to launch
-		// process
+		// Convert the combined map into a form that can be used to launch process
 		ArrayList<String> ret = new ArrayList<>();
 		Iterator<String> it = original.keySet().iterator();
 		String working = null;
@@ -120,32 +120,94 @@ public class VagrantLaunchUtility {
 		return ret.toArray(new String[ret.size()]);
 	}
 
-	public static String[] call(String rootCommand, String[] args, File vagrantDir,
-			Map<String, String> env) throws IOException {
+	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env)
+			throws IOException, TimeoutException {
+		return call(rootCommand, args, vagrantDir, env, 30000);
+	}
+
+	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
+			int timeout) throws IOException, TimeoutException {
+
 		String[] envp = (env == null ? null : convertEnvironment(env));
 
-		List<String> result = new ArrayList<>();
 		List<String> cmd = new ArrayList<>();
 		cmd.add(rootCommand);
 		cmd.addAll(Arrays.asList(args));
-		Process p = Runtime.getRuntime().exec(cmd.toArray(new String[0]),
-				envp, vagrantDir);
-		BufferedReader buff = new BufferedReader(
-				new InputStreamReader(p.getInputStream()));
-		try {
-			if (p.waitFor() == 0) {
-				String line;
-				while ((line = buff.readLine()) != null) {
-					result.add(line);
-				}
-			} else {
-				return new String[0];
+		final Process p = Runtime.getRuntime().exec(cmd.toArray(new String[0]), envp, vagrantDir);
+
+		InputStream errStream = p.getErrorStream();
+		InputStream inStream = p.getInputStream();
+
+		Integer exitCode = ThreadUtils.runWithTimeout(timeout, new Callable<Integer>() {
+			@Override
+		 	public Integer call() throws Exception {
+				return p.waitFor();
 			}
-		} catch(InterruptedException ie) {
-			// ignore
+		});
+		
+		try ( StreamGobbler inGobbler = new StreamGobbler(inStream); 
+				StreamGobbler errGobbler = new StreamGobbler(errStream)) {
+			
+			new Thread(inGobbler).start();
+			new Thread(errGobbler).start();
+
+			if( exitCode == null ) {
+				// Timeout reached
+				inGobbler.cancel();
+				errGobbler.cancel();
+				p.destroyForcibly();
+				throw new TimeoutException(getTimeoutError(inGobbler.getLines(), errGobbler.getLines()));
+			}
+			List<String> ret = inGobbler.getLines();
+			return (String[]) ret.toArray(new String[ret.size()]);
 		}
-		return result.toArray(new String[0]);
 	}
 	
+	private static String getTimeoutError(List<String> output, List<String> err) {
+		StringBuilder msg = new StringBuilder();
+		msg.append("Process output:\n");
+		output.forEach(line -> msg.append("   ").append(line));
+		err.forEach(line -> msg.append("   ").append(line));
+		return msg.toString();
+	}
 	
+	private static class StreamGobbler implements Runnable, AutoCloseable {
+		private Scanner inScanner;
+		private ArrayList<String> lines;
+		private boolean canceled = false;
+		private BufferedInputStream is;
+		public StreamGobbler(InputStream inStream) {
+			lines = new ArrayList<>();
+			is = new BufferedInputStream(inStream);
+			inScanner = new Scanner(is);
+		}
+
+		@Override
+		public void run() {
+			while (inScanner.hasNextLine() && !isCanceled()) {
+				synchronized(this) {
+					if( !isCanceled()) {
+						lines.add(inScanner.nextLine());
+					}
+				}
+			}
+		}
+		public synchronized boolean isCanceled() {
+			return canceled;
+		}
+		public synchronized void cancel() {
+			canceled = true;
+		}
+		public synchronized List<String> getLines() {
+			return new ArrayList<>(lines);
+		}
+		public void close() {
+			try {
+				if( is != null )
+					is.close();
+			} catch(IOException ioe) {
+				// ignore
+			}
+		}
+	}
 }
