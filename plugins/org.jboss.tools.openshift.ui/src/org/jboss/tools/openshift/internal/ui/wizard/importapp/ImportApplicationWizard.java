@@ -28,7 +28,6 @@ import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.explorer.ResourceGrouping;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
@@ -87,12 +86,6 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 				if (project != null) {
 					setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(project));
 					model.setSelectedItem(project);
-				} else {
-					ResourceGrouping grouping = UIUtils.getFirstElement(selection, ResourceGrouping.class);
-					if (grouping != null) {
-						setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(grouping.getProject()));
-						model.setSelectedItem(grouping.getProject());
-					}
 				}
 			}
 		}

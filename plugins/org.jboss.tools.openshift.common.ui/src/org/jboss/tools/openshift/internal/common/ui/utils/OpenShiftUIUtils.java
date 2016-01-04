@@ -20,7 +20,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
  */
 public class OpenShiftUIUtils {
 
-	private static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
+	public static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
 	
 	public static void showOpenShiftExplorerView() {
 		Display.getDefault().asyncExec(new Runnable() {

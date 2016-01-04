@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
+import java.util.Collection;
+
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
@@ -18,6 +20,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.ui.models.Deployment;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -56,10 +60,10 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof ResourceGrouping) {
-			return OpenShiftCommonImages.FOLDER;
-		} else if (element instanceof IResource) {
-			IResource resource = (IResource) element;
+		if (element instanceof Deployment) {
+			return OpenShiftImages.GEAR_IMG;
+		} else if (element instanceof IResource || element instanceof IResourceUIModel) {
+			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD_CONFIG:
 				return OpenShiftImages.BUILDCONFIG_IMG;
@@ -81,8 +85,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
 	public StyledString getStyledText(Object element) {
-		if (element instanceof IResource) {
-			IResource resource = (IResource) element;
+		if (element instanceof IResource || element instanceof IResourceUIModel) {
+			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD:
 				return getStyledText((IBuild) resource);
@@ -109,12 +113,23 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				break;
 			}
 		}
-		if (element instanceof ResourceGrouping) {
-			return getStyledText((ResourceGrouping) element);
-		} else if (element instanceof Connection) {
+		 if (element instanceof Connection) {
 			return getStyledText((Connection) element);
 		}
+		if (element instanceof Deployment) {
+			Deployment d = (Deployment) element;
+			return style(d.getService().getName(), formatRoute(d.getRoutes()));
+		}
 		return super.getStyledText(element);
+	}
+
+	private String formatRoute(Collection<IResourceUIModel> routes) {
+		if(routes.size() > 0) {
+			IRoute route = (IRoute)routes.iterator().next().getResource();
+			return route.getURL();
+			
+		}
+		return "";
 	}
 
 	private StyledString getStyledText(IService service) {
@@ -160,10 +175,6 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		return style(prefix, conn.toString());
 	}
 
-	private StyledString getStyledText(ResourceGrouping grouping) {
-		return new StyledString(StringUtils.humanize((grouping).getKind() + "s"));
-	}
-	
 	private StyledString getStyledText(ITemplate template) {
 		String tags = (String) template.accept(new CapabilityVisitor<ITags, Object>() {
 			@Override
