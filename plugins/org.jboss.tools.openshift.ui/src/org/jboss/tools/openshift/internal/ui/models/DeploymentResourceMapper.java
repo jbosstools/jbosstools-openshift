@@ -37,6 +37,7 @@ import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
@@ -84,38 +85,74 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		List<IPod> pods = load(ResourceKind.POD);
 		List<IDeploymentConfig> deployConfigs = load(ResourceKind.DEPLOYMENT_CONFIG);
 		List<IBuildConfig> buildConfigs = load(ResourceKind.BUILD_CONFIG);
+		List<IImageStream> imageStreams = load(ResourceKind.IMAGE_STREAM);
 		
 		imageRefToDeployConfigs = mapImageRefToDeployConfigs(deployConfigs);
 
-		mapBuildsToDeploymentConfigs(builds);
+		
 		mapChildToParent(pods, rcs, DEPLOYMENT_NAME);
 		mapChildToParent(rcs, deployConfigs, DEPLOYMENT_CONFIG_NAME);
 		mapChildToParent(pods, builds, BUILD_NAME);
-		mapChildToParent(builds, buildConfigs, BUILD_CONFIG_NAME);
-
+		mapChildToParent(builds, buildConfigs, BUILD_CONFIG_NAME, true);
 		
-
+		mapBuildConfigsToImageStreams(buildConfigs, imageStreams);
+		mapBuildsToDeploymentConfigs(builds);
+		mapServicesToRepControllers(services, rcs);
 		Map<String, Collection<IRoute>> serviceToRoutes = mapServiceToRoutes(project.getName());
 
 		//serice by name->deployment  join selector
 		//service by name ->dc->deployment
 		for (IService service : services) {
 			Deployment deployment = new Deployment(service);
-			List<IPod> servicePods = selectPodsForService(service, pods);
-			List<IBuild> appBuilds = getBuildsForDeployment(pods, builds);
-			List<IResource> appBuildConfigs = getBuildConfigsForBuilds(appBuilds);
+			Collection<IPod> servicePods = selectPodsForService(service, pods);
+			Collection<IBuild> appBuilds = getBuildsForDeployment(pods, builds);
+			Collection<IResource> appBuildConfigs = getBuildConfigsForBuilds(appBuilds);
 			
 			deployment.setBuildResources(appBuilds);
 			deployment.setPodResources(servicePods);
 			deployment.setRouteResources(serviceToRoutes.get(service.getName()));
 			deployment.setBuildConfigResources(appBuildConfigs);
+			deployment.setReplicationControllerResources(getReplicationControllersFor(service));
+			deployment.setImageStreamResources(getImageStreamsFor(appBuildConfigs));
 			
 			mapResourcesFor(deployment);
 			deployments.add(deployment);
 		}
 	}
-	private List<IResource> getBuildConfigsForBuilds(Collection<IBuild> builds){
-		List<IResource> buildConfigs = new ArrayList<>();
+	private void mapBuildConfigsToImageStreams(List<IBuildConfig> buildConfigs, List<IImageStream> is) {
+		Map<String, IImageStream> tagsToStreams = new HashMap<>();
+		for (IImageStream stream : is) {
+			String name = stream.getName();
+			Collection<String> tags = stream.getTagNames();
+			for (String tag : tags) {
+				String key = name + ":" + tag;
+				tagsToStreams.put(key, stream);
+			}
+		}
+		buildConfigs.forEach(bc-> createRelation(bc, tagsToStreams.get(bc.getBuildOutputReference().getName())));
+	}
+	
+	private Collection<IReplicationController> getReplicationControllersFor(IService service) {
+		Collection<IResource> rcs = relationMap.get(getKey(service, ResourceKind.REPLICATION_CONTROLLER));
+		if(rcs == null) {
+			return new HashSet<>();
+		}
+		return rcs.stream().map(r-> (IReplicationController)r).collect(Collectors.toSet()); 
+	}
+	
+	private Collection<IResource> getImageStreamsFor(Collection<IResource> appBuildConfigs) {
+		Collection<IResource> imageStreams = new HashSet<>();
+		for (IResource buildConfig : appBuildConfigs) {
+			Collection<IResource> streams = relationMap.get(getKey(buildConfig, ResourceKind.IMAGE_STREAM));
+			if(streams != null) {
+				imageStreams.addAll(streams);
+			}
+		}
+		return imageStreams;
+	}
+	
+	private Collection<IResource> getBuildConfigsForBuilds(Collection<IBuild> builds){
+		Collection<IResource> buildConfigs = new HashSet<>();
 		for (IBuild build : builds) {
 			Collection<IResource> configs = relationMap.get(getKey(build, ResourceKind.BUILD_CONFIG));
 			if(configs != null) {
@@ -191,23 +228,24 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	}
 	
 	private void createRelation(IResource start, IResource end) {
+		if(start == null || end == null) return;
 		String startKey = getKey(start, end.getKind());
 		if(!relationMap.containsKey(startKey)) {
-			relationMap.put(startKey, Collections.synchronizedList(new ArrayList<>()));
+			relationMap.put(startKey, Collections.synchronizedSet(new HashSet<>()));
 		}
 		relationMap.get(startKey).add(end);
 		String endKey = getKey(end, start.getKind());
 		if(!relationMap.containsKey(endKey)) {
-			relationMap.put(endKey, Collections.synchronizedList(new ArrayList<>()));
+			relationMap.put(endKey, Collections.synchronizedSet(new HashSet<>()));
 		}
 		relationMap.get(endKey).add(start);
 	}
 
-	private List<IPod> selectPodsForService(IService service, List<IPod> pods) {
+	private Collection<IPod> selectPodsForService(IService service, List<IPod> pods) {
 		final Map<String, String> serviceSelector = service.getSelector();
 		return pods.stream()
 			.filter(p->selectorsOverlap(serviceSelector, p.getLabels()))
-			.collect(Collectors.toList());
+			.collect(Collectors.toSet());
 	}
 	
 	private boolean selectorsOverlap(Map<String, String> source, Map<String, String> target) {
@@ -259,21 +297,16 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		}
 		return map;
     }
-	private Map<IService, List<IReplicationController>> mapServicesToRepControllers(Collection<IService> services, Collection<IReplicationController> rcs){
-		Map<IService, List<IReplicationController>> map = new HashMap<>(services.size());
+	private void mapServicesToRepControllers(Collection<IService> services, Collection<IReplicationController> rcs){
 		for (IReplicationController rc : rcs) {
 			Map<String, String> deploymentSelector = rc.getReplicaSelector();
 			for (IService service : services) {
 				Map<String, String> serviceSelector = service.getSelector();
 				if(selectorsJoin(serviceSelector, deploymentSelector)) {
-					if(!map.containsKey(service)) {
-						map.put(service, Collections.synchronizedList(new ArrayList<>()));
-					}
-					map.get(service).add(rc);
+					createRelation(service, rc);
 				}
 			}		
 		}
-		return map;
 	}
 	
 	/**
@@ -294,8 +327,8 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		return true;
 	}
 	
-	private List<IBuild> getBuildsForDeployment(List<IPod> pods, List<IBuild> builds) {
-		List<IBuild> buildsForDeployment = new ArrayList<IBuild>();
+	private Collection<IBuild> getBuildsForDeployment(List<IPod> pods, List<IBuild> builds) {
+		Collection<IBuild> buildsForDeployment = new HashSet<IBuild>();
 		for (IBuild build : builds) {
 			String buildImageRef = imageRef(build, this.project);
 			if(imageRefToDeployConfigs.containsKey(buildImageRef)) {

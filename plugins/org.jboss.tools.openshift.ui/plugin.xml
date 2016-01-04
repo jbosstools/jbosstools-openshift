@@ -536,6 +536,34 @@
            style="push">
      </command>
   </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.BuildConfigsTab">
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.DeploymentConfigsTab">
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.PodsTab">
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.ReplicationControllersTab">
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.ImageStreamsTab">
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab">
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.ResourceTab">
+  </menuContribution>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -940,8 +968,44 @@
          contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
       <propertyTab
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
-            id="org.jboss.tools.openshift.ui.properties.tab.BuildsTab"
+            id="org.jboss.tools.openshift.ui.properties.tab.builds"
             label="%openshift.explorer.properties.tab.builds">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.builds"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.buildConfigs"
+            label="%openshift.explorer.properties.tab.buildConfigs">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
+            label="%openshift.explorer.properties.tab.deploymentConfigs">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.pods"
+            label="%openshift.explorer.properties.tab.pods">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
+            label="%openshift.explorer.properties.tab.replicationControllers">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.imageStreams"
+            label="%openshift.explorer.properties.tab.imageStreams">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.routes"
+            label="%openshift.explorer.properties.tab.routes">
       </propertyTab>
    </propertyTabs>
 </extension>
@@ -952,8 +1016,53 @@
       <propertySection
             class="org.jboss.tools.openshift.internal.ui.property.tabbed.BuildsPropertySection"
             enablesFor="1"
-            id="org.jboss.tools.openshift.ui.properties.tab.builds"
-            tab="org.jboss.tools.openshift.ui.properties.tab.BuildsTab">
+            id="org.jboss.tools.openshift.ui.properties.tab.section.builds"
+            tab="org.jboss.tools.openshift.ui.properties.tab.builds">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.buildConfigs"
+            tab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.pods"
+            tab="org.jboss.tools.openshift.ui.properties.tab.pods">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.imageStreams"
+            tab="org.jboss.tools.openshift.ui.properties.tab.imageStreams">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.replicationControllers"
+            tab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.routes"
+            tab="org.jboss.tools.openshift.ui.properties.tab.routes">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
          </input>
