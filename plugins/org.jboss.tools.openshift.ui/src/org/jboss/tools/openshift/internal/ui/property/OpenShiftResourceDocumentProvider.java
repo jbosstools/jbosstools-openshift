@@ -32,6 +32,7 @@ import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.texteditor.AbstractDocumentProvider;
 import org.jboss.tools.common.jobs.ChainedJob;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
 
@@ -81,13 +82,24 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 		Connection connection = input.getConnection();
 		String resourceName = input.getName();
 		IResource newResource = connection.getResourceFactory().create(document.get());
+
+		final Exception[] exceptions = new Exception[1];
+
 		ChainedJob updateResourceJob = new ChainedJob("Update "+resourceName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					client.update(newResource);//should run in job as well
-				} catch (OpenShiftException e) {
-					String problem = e.getStatus()==null?e.getMessage():e.getStatus().getMessage();
+					client.update(newResource);
+				} catch (Exception e) {
+					exceptions[0] = e;
+					Display.getDefault().asyncExec(() -> setDirty(element));
+					String problem = e.getMessage();
+					if (e instanceof OpenShiftException) {
+						OpenShiftException oe = (OpenShiftException)e;
+						if (oe.getStatus()!=null) {
+							problem = oe.getStatus().getMessage();
+						}
+					}
 					String projectName = resource.getProject() == null? "unknown":resource.getProject().getName();
 					IStatus error =	OpenShiftUIActivator.statusFactory().errorStatus(
 							NLS.bind("Could not update \"{0}\" for project \"{1}\" : {2}", new String[]{resourceName, projectName, problem}), e);
@@ -105,13 +117,15 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 				Collection<IResource> refreshed = refreshResourceJob.getRefreshedResources();
 				if (!refreshed.isEmpty()) {
 					Display.getDefault().asyncExec(() -> {
-					  IResource updatedResource = refreshed.iterator().next();
-					  input.setResource(updatedResource);
-					  try {
-						docProvider.resetDocument(input);
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
+						IResource updatedResource = refreshed.iterator().next();
+						input.setResource(updatedResource);
+						try {
+							docProvider.resetDocument(input);
+						} catch (Exception e) {
+							exceptions[0] = e;
+							setDirty(element);
+							throw new RuntimeException(e);
+						}
 					});
 				}
 			}
@@ -120,6 +134,11 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 		updateResourceJob.schedule();
 		Shell shell = Display.getCurrent().getActiveShell();
 		service.showInDialog(shell, updateResourceJob);
+		// In the really really unlikely event the jobs finished before the end of this method call,
+		// we need to ensure the dirty flag stays set to true
+		if(exceptions[0] != null) {
+			throw new CoreException(OpenShiftUIActivator.statusFactory().errorStatus(exceptions[0]));
+		}
 	}
 
 	@Override
@@ -144,5 +163,13 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 	@Override
 	public boolean isModifiable(Object element) {
 		return getInput(element) != null;
+	}
+
+	private void setDirty(Object element) {
+		ElementInfo elementInfo = getElementInfo(element);
+		if (elementInfo != null) {
+			elementInfo.fCanBeSaved = true;
+			fireElementDirtyStateChanged(element, true);
+		}
 	}
 }
