@@ -166,12 +166,8 @@ public class VagrantLaunchUtility {
 	private static String getTimeoutError(List<String> output, List<String> err) {
 		StringBuilder msg = new StringBuilder();
 		msg.append("Process output:\n");
-        for(String line : output){
-		  msg.append("   ").append(line);
-        }
-        for(String line : err){
-		  msg.append("   ").append(line);
-        }
+		output.forEach(line -> msg.append("   ").append(line));
+		err.forEach(line -> msg.append("   ").append(line));
 		return msg.toString();
 	}
 	
