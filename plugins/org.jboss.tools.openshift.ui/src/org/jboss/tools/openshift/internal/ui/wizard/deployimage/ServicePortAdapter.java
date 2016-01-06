@@ -22,22 +22,23 @@ import com.openshift.restclient.model.IServicePort;
  */
 class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	
+	private static final String TARGET_PORT = "targetPort";
 	private String name;
 	private int port;
-	private int containerPort;
+	private String containerPort;
 	private String protocol;
 
 	ServicePortAdapter(IPort port){
 		name = port.getName();
 		this.port = port.getContainerPort();
-		containerPort = port.getContainerPort();
+		containerPort = String.valueOf(port.getContainerPort());
 		protocol = port.getProtocol();
 	}
 	
 	ServicePortAdapter(IServicePort port) {
 		this.name = port.getName();
 		this.port = port.getPort();
-		this.containerPort = port.getTargetPort() == 0 ? this.port : port.getTargetPort();
+		this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
 		this.protocol = port.getProtocol();
 	}
 
@@ -65,13 +66,18 @@ class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	}
 
 	@Override
-	public int getTargetPort() {
+	public String getTargetPort() {
 		return containerPort;
 	}
 
 	@Override
 	public void setTargetPort(int port) {
-		firePropertyChange("targetPort", this.containerPort, this.containerPort = port);
+		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(port));
+	}
+	
+	@Override
+	public void setTargetPort(String intOrString) {
+		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(intOrString));
 	}
 
 	@Override
@@ -89,7 +95,7 @@ class ServicePortAdapter extends ObservablePojo implements IServicePort{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + port;
-		result = prime * result + containerPort;
+		result = prime * result + ((containerPort == null) ? 0 : containerPort.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
 		return result;
@@ -106,7 +112,10 @@ class ServicePortAdapter extends ObservablePojo implements IServicePort{
 		ServicePortAdapter other = (ServicePortAdapter) obj;
 		if (port != other.port)
 			return false;
-		if (containerPort != other.containerPort)
+		if (containerPort == null) {
+			if (other.containerPort != null)
+				return false;
+		} else if (!containerPort.equals(other.containerPort))
 			return false;
 		if (name == null) {
 			if (other.name != null)
