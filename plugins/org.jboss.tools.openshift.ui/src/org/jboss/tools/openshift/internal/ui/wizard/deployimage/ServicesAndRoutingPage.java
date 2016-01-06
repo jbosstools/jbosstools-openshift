@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -167,23 +168,26 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			public void widgetSelected(SelectionEvent e) {
 				String message = "Add a port to be exposed by the service";
 				ServicePortAdapter port = new ServicePortAdapter();
-				port.setPort(Collections.max(model.getServicePorts(), new Comparator<IServicePort>() {
-
-					@Override
-					public int compare(IServicePort first, IServicePort second) {
-						return Integer.compare(first.getPort(), second.getPort());
-					}
-					
-				}).getPort() + 1);
-				port.setTargetPort(Collections.max(model.getServicePorts(), new Comparator<IServicePort>() {
-
-					@Override
-					public int compare(IServicePort first, IServicePort second) {
-						return Integer.compare(first.getTargetPort(), second.getTargetPort());
-					}
-					
-				}).getPort() + 1);
-				ServicePortDialog dialog = new ServicePortDialog(port, message, model.getServicePorts());
+				List<IServicePort> servicePorts = model.getServicePorts();
+				if(!servicePorts.isEmpty()) {
+					port.setPort(Collections.max(servicePorts, new Comparator<IServicePort>() {
+						
+						@Override
+						public int compare(IServicePort first, IServicePort second) {
+							return Integer.compare(first.getPort(), second.getPort());
+						}
+						
+					}).getPort() + 1);
+					port.setTargetPort(Collections.max(servicePorts, new Comparator<IServicePort>() {
+						
+						@Override
+						public int compare(IServicePort first, IServicePort second) {
+							return first.getTargetPort().compareTo(second.getTargetPort());
+						}
+						
+					}).getPort() + 1);
+				}
+				ServicePortDialog dialog = new ServicePortDialog(port, message, servicePorts);
 				if(Window.OK == dialog.open()) {
 					port.setName(NLS.bind("{0}-tcp", port.getPort()));
 					model.addServicePort(port);
@@ -243,7 +247,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				.column(new IColumnLabelProvider<IServicePort>() {
 					@Override
 					public String getValue(IServicePort port) {
-						return "" + port.getTargetPort();
+						return port.getTargetPort();
 					}
 				})
 				.name("Pod Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()

@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -25,12 +26,12 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
@@ -45,7 +46,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	private IServicePort model;
 	private List<IServicePort> ports;
 	private final int servicePort;
-	private final int podPort;
+	private final String podPort;
 
 	public ServicePortDialog(IServicePort model, String message, List<IServicePort> ports) {
 		super("Configure Service Ports", message, "", null);
@@ -65,7 +66,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
 		GridLayoutFactory.fillDefaults()
-			.numColumns(3)
+			.numColumns(2)
 			.margins(25, 25)
 			.applyTo(dialogArea);
 		
@@ -91,8 +92,6 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 			servicePortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		//filler
-		new Label(dialogArea, SWT.NONE);
 		
 		//pod port
 		Label lblPodPort = new Label(dialogArea, SWT.NONE);
@@ -100,34 +99,27 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.RIGHT, SWT.CENTER).applyTo(lblPodPort);
 
-		//to be replaced by txtbox when supporting named ports
-		final Spinner podPortSpinner = new Spinner(dialogArea, SWT.BORDER);
-		podPortSpinner.setMinimum(1);
-		podPortSpinner.setMaximum(65535);
-		podPortSpinner.setToolTipText("The port exposed by the pod which will accept traffic");
+		Text txtTargetPort = new Text(dialogArea, SWT.BORDER);
+		txtTargetPort.setToolTipText("The port exposed by the pod which will accept traffic.\nIt must be an integer or named port on the pod.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(podPortSpinner);
+			.grab(true, false)
+			.applyTo(txtTargetPort);
+		
 		Binding podPortBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(podPortSpinner))
+				.bind(WidgetProperties.text(SWT.Modify).observe(txtTargetPort))
 				.validatingAfterConvert(new PodPortValidator())
 				.to(BeanProperties.value(PROPERTY_POD_PORT).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				podPortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
-		servicePortSpinner.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				podPortSpinner.setSelection(servicePortSpinner.getSelection());
-			}
-		});
-		
 		Label lbl = new Label(dialogArea, SWT.NONE);
 		lbl.setText("Pod port is linked to service port changes");
 		GridDataFactory.fillDefaults()
-		.align(SWT.FILL, SWT.CENTER)
-		.applyTo(lbl);
+			.align(SWT.FILL, SWT.CENTER)
+			.span(2, 1)
+			.applyTo(lbl);
 	}
 	
 	class ServicePortValidator implements IValidator{
@@ -148,13 +140,24 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	}
 	class PodPortValidator implements IValidator{
 		
+		private final int MAXLENGTH = 63;
+		private final Pattern REGEXP = Pattern.compile("[a-z0-9]([a-z0-9-]*[a-z0-9])*");
+
+		private final IStatus ERROR = ValidationStatus.error("The target port must be at most 15 characters, matching regex [a-z0-9]([a-z0-9-]*[a-z0-9])*, and hyphens cannot be adjacent to other hyphens): e.g. \"http\"");
+		
 		@Override
 		public IStatus validate(Object value) {
-			Integer newPort = (Integer) value;
-			if(newPort != podPort) {
+			if(StringUtils.isEmpty(value)) {
+				return ERROR;
+			}
+			String newPort = (String) value;
+			if(!podPort.equals(newPort)) {
+				if(newPort.length() > MAXLENGTH || !REGEXP.matcher(newPort).matches()) {
+					return ERROR;
+				}
 				for (IServicePort port : ports) {
-					if(newPort.intValue() == port.getTargetPort()) {
-						return ValidationStatus.error("The pod port number must be unique among all the other pod ports exposed by this OpenShift service.");
+					if(port.getTargetPort().equals(newPort)) {
+						return ERROR;
 					}
 				}
 			}
