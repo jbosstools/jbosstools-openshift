@@ -16,6 +16,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 import com.openshift.restclient.model.route.IRoute;
@@ -28,10 +31,32 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 	public SelectRouteDialog(List<IRoute> routes, Shell shell) {
 		super(shell, new RouteLabelProvider());
 		setTitle("Select Route");
-		setMessage("Select the route to open in a browser.");
+
+		setMessage(createMessage(routes));
+
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
 		setElements(routes.toArray());
+	}
+
+	private String createMessage(List<IRoute> routes) {
+		StringBuilder message = new StringBuilder();
+		if(!routes.isEmpty()) {
+			IRoute route = routes.get(0);
+			IConnection connection = ConnectionsRegistryUtil.safeGetConnectionFor(route);
+			if(connection != null) {
+				message.append("Server: ")
+				.append(connection.getUsername()).append(" ").append(connection.getHost())
+				.append(StringUtils.getLineSeparator());
+			}
+			message.append("Project: ")
+				.append(route.getNamespace())
+				.append(StringUtils.getLineSeparator());
+			//Add more space between server/project info and instruction.
+			message.append(StringUtils.getLineSeparator());
+		}
+		message.append("Select the route to open in a browser.");
+		return message.toString();
 	}
 
 	public IRoute getSelectedRoute() {
