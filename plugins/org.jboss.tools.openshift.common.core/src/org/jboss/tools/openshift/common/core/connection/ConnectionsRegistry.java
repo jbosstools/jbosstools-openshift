@@ -48,12 +48,19 @@ public class ConnectionsRegistry {
 	public ConnectionsRegistry() {
 	}
 
-	public void addListener(IConnectionsRegistryListener listener) {
+	public synchronized void addListener(IConnectionsRegistryListener listener) {
 		listeners.add(listener);
 	}
 
-	public void removeListener(IConnectionsRegistryListener listener) {
+	public synchronized void removeListener(IConnectionsRegistryListener listener) {
 		listeners.remove(listener);
+	}
+
+	/**
+	 * @return independent copy of listeners to fire changes. 
+	 */
+	private synchronized List<IConnectionsRegistryListener> getListeners() {
+		return new ArrayList<>(listeners);
 	}
 
 	public void clear() {
@@ -144,7 +151,7 @@ public class ConnectionsRegistry {
 		if (connection == null) {
 			return;
 		}
-		Iterator<IConnectionsRegistryListener> i = listeners.iterator();
+		Iterator<IConnectionsRegistryListener> i = getListeners().iterator();
 		while (i.hasNext()) {
 			IConnectionsRegistryListener l = i.next();
 			switch (event) {
