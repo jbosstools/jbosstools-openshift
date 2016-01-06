@@ -284,36 +284,18 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void openEditDialog(final IParameter parameter) {
-		InputDialog dialog = new InputDialog(getShell(), 
-				"Edit Template Parameter", 
+		EditValueDialog dialog = new EditValueDialog(getShell(), 
+				"Edit Template Parameter",
 				NLS.bind("Please enter a value for {0}.\n{1}", parameter.getName(), parameter.getDescription()), 
+				parameter.getName(), 
 				parameter.getValue(), 
-				parameter.isRequired()? new RequiredValueInputValidator(parameter.getName()) : null) ;
+				parameter.isRequired());
 		if (InputDialog.OK == dialog.open()) {
 			model.updateParameterValue(parameter, dialog.getValue());
 			viewer.refresh();
 		}
 	}
 
-	private static class RequiredValueInputValidator implements IInputValidator {
-		
-		private String field;
-
-		public RequiredValueInputValidator(String field) {
-			this.field = field;
-		}
-
-		@Override
-		public String isValid(String newText) {
-			if (StringUtils.isEmpty(newText)) {
-				return NLS.bind("{0} is a required value, please provide a value.", field);
-			} else {
-				return null;
-			}
-		}
-		
-	}
-	
 	private SelectionListener onReset() {
 		return new SelectionAdapter() {
 			@Override
