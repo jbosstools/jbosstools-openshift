@@ -1007,6 +1007,53 @@
             id="org.jboss.tools.openshift.ui.properties.tab.routes"
             label="%openshift.explorer.properties.tab.routes">
       </propertyTab>
+      <propertyTab
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.builds"
+            label="%openshift.explorer.properties.tab.builds">
+      </propertyTab>
+        <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.builds"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.buildConfigs"
+            label="%openshift.explorer.properties.tab.buildConfigs">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.replicationControllers"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.deploymentConfigs"
+            label="%openshift.explorer.properties.tab.deploymentConfigs">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.deploymentConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.pods"
+            label="%openshift.explorer.properties.tab.pods">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.buildConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.replicationControllers"
+            label="%openshift.explorer.properties.tab.replicationControllers">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.replicationControllers"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.imageStreams"
+            label="%openshift.explorer.properties.tab.imageStreams">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.replicationControllers"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.routes"
+            label="%openshift.explorer.properties.tab.routes">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.routes"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.services"
+            label="%openshift.explorer.properties.tab.services">
+      </propertyTab>
    </propertyTabs>
 </extension>
 <extension
@@ -1021,6 +1068,9 @@
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
          </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+         </input>
       </propertySection>
       <propertySection
             class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
@@ -1029,6 +1079,9 @@
             tab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
          </input>
       </propertySection>
       <propertySection
@@ -1039,6 +1092,9 @@
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
          </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+         </input>
       </propertySection>
       <propertySection
             class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
@@ -1047,6 +1103,9 @@
             tab="org.jboss.tools.openshift.ui.properties.tab.imageStreams">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
          </input>
       </propertySection>
       <propertySection
@@ -1057,6 +1116,9 @@
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
          </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+         </input>
       </propertySection>
       <propertySection
             class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
@@ -1065,6 +1127,9 @@
             tab="org.jboss.tools.openshift.ui.properties.tab.routes">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
          </input>
       </propertySection>
       <propertySection
@@ -1075,6 +1140,18 @@
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
          </input>
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.services"
+            tab="org.jboss.tools.openshift.ui.properties.tab.project.services">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+         </input>
       </propertySection>
    </propertySections>
 </extension>
@@ -1084,6 +1161,9 @@
          contributorId="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
       <propertyCategory
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments">
+      </propertyCategory>
+      <propertyCategory
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects">
       </propertyCategory>
    </propertyContributor>
 </extension>

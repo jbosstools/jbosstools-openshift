@@ -22,9 +22,10 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
-import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
+import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
+import org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
@@ -138,13 +139,15 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		try{
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
-				return connection.getResources(ResourceKind.PROJECT).toArray();
-			} else if (parentElement instanceof IProject) {
-				IProject project = (IProject) parentElement;
-				DeploymentResourceMapper mapper = new DeploymentResourceMapper(ConnectionsRegistryUtil.getConnectionFor(project), project);
-				deploymentCache.put(project.getName(), mapper);
-				WatchManager.getInstance().startWatch(project);
-				return mapper.getDeployments().toArray();
+				for (IProject project :  connection.<IProject>getResources(ResourceKind.PROJECT)) {
+					IProjectAdapter model = new OpenShiftProjectUIModel(project);
+					DeploymentResourceMapper mapper = new DeploymentResourceMapper(ConnectionsRegistryUtil.getConnectionFor(project), model);
+					deploymentCache.put(project.getName(), mapper);
+				}
+				return deploymentCache.values().stream().map(m->m.getProjectAdapter()).toArray();
+			} else if (parentElement instanceof IProjectAdapter) {
+				IProject project = ((IProjectAdapter) parentElement).getProject();
+				return deploymentCache.get(project.getName()).getDeployments().toArray();
 			} else if (parentElement instanceof Deployment) {
 				return ((Deployment) parentElement).getPods().toArray();
 			}
@@ -159,7 +162,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	public boolean hasChildren(Object element) {
 		return element instanceof ConnectionsRegistry
 				|| element instanceof IConnection
-				|| element instanceof IProject
+				|| element instanceof IProjectAdapter
 				|| element instanceof Deployment;
 	}
 }

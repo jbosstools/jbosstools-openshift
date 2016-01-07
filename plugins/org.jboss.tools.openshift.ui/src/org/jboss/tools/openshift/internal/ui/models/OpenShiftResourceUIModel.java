@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
+
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
 
@@ -19,7 +21,7 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class OpenShiftResourceUIModel implements IResourceUIModel{
+public class OpenShiftResourceUIModel extends ObservableUIPojo implements IResourceUIModel{
 
 	private IResource resource;
 
