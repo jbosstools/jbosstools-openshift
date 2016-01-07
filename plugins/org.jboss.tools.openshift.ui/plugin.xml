@@ -978,7 +978,7 @@
             label="%openshift.explorer.properties.tab.buildConfigs">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs"
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
             id="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
             label="%openshift.explorer.properties.tab.deploymentConfigs">
@@ -1063,6 +1063,15 @@
             enablesFor="1"
             id="org.jboss.tools.openshift.ui.properties.tab.section.routes"
             tab="org.jboss.tools.openshift.ui.properties.tab.routes">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.OpenShiftResourcePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.deploymentConfigs"
+            tab="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.Deployment">
          </input>
