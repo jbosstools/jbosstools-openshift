@@ -10,20 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
-
-import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
@@ -34,179 +23,30 @@ import com.openshift.restclient.model.IService;
  * @author jeff.cantrill
  *
  */
-public class Deployment extends ObservablePojo {
+public class Deployment extends ResourcesUIModel{
 
-	public static final String PROP_BUILDS = getProperty(ResourceKind.BUILD);
-	public static final String PROP_BUILD_CONFIGS = getProperty(ResourceKind.BUILD_CONFIG);
-	public static final String PROP_DEPLOYMENT_CONFIGS = getProperty(ResourceKind.DEPLOYMENT_CONFIG);
-	public static final String PROP_IMAGE_STREAMS = getProperty(ResourceKind.IMAGE_STREAM);
-	public static final String PROP_PODS = getProperty(ResourceKind.BUILD);
-	public static final String PROP_ROUTES = getProperty(ResourceKind.ROUTE);
-	public static final String PROP_REPLICATION_CONTROLLERS = getProperty(ResourceKind.REPLICATION_CONTROLLER);
-
-	private IService service;
-	private Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
+	private final IService service;
 	
 	public Deployment(IService service) {
+		super();
 		this.service = service;
-		for (String kind : new String [] {
-				ResourceKind.BUILD, 
-				ResourceKind.BUILD_CONFIG,
-				ResourceKind.DEPLOYMENT_CONFIG,
-				ResourceKind.IMAGE_STREAM,
-				ResourceKind.POD, 
-				ResourceKind.ROUTE, 
-				ResourceKind.REPLICATION_CONTROLLER, 
-			}) {
-			resources.put(kind, new ArrayList<>());
-		}
-	}
-	
-	private <T extends IResource> List<IResourceUIModel> init(Collection<T> resources) {
-		if(resources != null) {
-			return resources.stream().map(r->new OpenShiftResourceUIModel(r)).collect(Collectors.toList());
-		}
-		return new ArrayList<>();
 	}
 	
 	public IService getService() {
 		return this.service;
 	}
 	
-	public Collection<IResourceUIModel> getImageStreams() {
-		return resources.get(ResourceKind.IMAGE_STREAM);	
-	}
-	
-	public void setImageStreams(Collection<IResourceUIModel> models) {
-		firePropertyChange(PROP_IMAGE_STREAMS, resources.get(ResourceKind.IMAGE_STREAM), resources.put(ResourceKind.IMAGE_STREAM, new ArrayList<>(models)));
-	}
-	
-	public void setImageStreamResources(Collection<IResource> streams) {
-		firePropertyChange(PROP_IMAGE_STREAMS, resources.get(ResourceKind.IMAGE_STREAM), resources.put(ResourceKind.IMAGE_STREAM, init(streams)));
+	@Override
+	public Collection<IResourceUIModel> getServices() {
+		return Collections.emptyList();
 	}
 
-	public Collection<IResourceUIModel> getDeploymentConfigs() {
-		return resources.get(ResourceKind.DEPLOYMENT_CONFIG);	
-	}
-	
-	public void setDeploymentConfigs(Collection<IResourceUIModel> models) {
-		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, new ArrayList<>(models)));
-	}
-	
-	public void setDeploymentConfigResources(Collection<IResource> dcs) {
-		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, init(dcs)));
-	}
-	
-	public Collection<IResourceUIModel> getBuilds() {
-		return resources.get(ResourceKind.BUILD);	
-	}
-	
-	public void setBuilds(Collection<IResourceUIModel> builds) {
-		firePropertyChange(PROP_BUILDS, resources.get(ResourceKind.BUILD), resources.put(ResourceKind.BUILD, new ArrayList<>(builds)));
-	}
-	
-	public void setBuildResources(Collection<IBuild> builds) {
-		firePropertyChange(PROP_BUILDS, resources.get(ResourceKind.BUILD), resources.put(ResourceKind.BUILD, init(builds)));
-	}
-	
-	public Collection<IResourceUIModel> getPods() {
-		return resources.get(ResourceKind.POD);
-	}
-	
-	public void setPods(Collection<IResourceUIModel> pods) {
-		firePropertyChange(PROP_PODS, resources.get(ResourceKind.POD), resources.put(ResourceKind.POD, new ArrayList<>(pods)));
+	@Override
+	public void setServices(Collection<IResourceUIModel> services) {
 	}
 
-	public void setPodResources(Collection<IPod> pods) {
-		firePropertyChange(PROP_PODS, resources.get(ResourceKind.POD), resources.put(ResourceKind.POD, init(pods)));
+	@Override
+	public void setServiceResources(Collection<IResource> services) {
 	}
-	
-	public Collection<IResourceUIModel> getRoutes() {
-		return resources.get(ResourceKind.ROUTE);
-	}
-
-	public void setRoutes(Collection<IResourceUIModel> routes) {
-		firePropertyChange(PROP_ROUTES, resources.get(ResourceKind.ROUTE), resources.put(ResourceKind.ROUTE, new ArrayList<>(routes)));
-	}
-	
-	public void setRouteResources(Collection<IResource> routes) {
-		firePropertyChange(PROP_ROUTES, resources.get(ResourceKind.ROUTE), resources.put(ResourceKind.ROUTE, init(routes)));
-	}
-
-	public Collection<IResourceUIModel> getReplicationControllers() {
-		return resources.get(ResourceKind.REPLICATION_CONTROLLER);
-	}
-	
-	public void setReplicationControllers(Collection<IResourceUIModel> rcs) {
-		firePropertyChange(PROP_REPLICATION_CONTROLLERS, resources.get(ResourceKind.REPLICATION_CONTROLLER), resources.put(ResourceKind.REPLICATION_CONTROLLER, new ArrayList<>(rcs)));
-	}
-
-	public void setReplicationControllerResources(Collection<IResource> rcs) {
-		firePropertyChange(PROP_REPLICATION_CONTROLLERS, resources.get(ResourceKind.REPLICATION_CONTROLLER), resources.put(ResourceKind.REPLICATION_CONTROLLER, init(rcs)));
-	}
-	public Collection<IResourceUIModel> getBuildConfigs(){
-		return resources.get(ResourceKind.BUILD_CONFIG);
-	}
-	
-	public void setBuildConfigs(Collection<IResourceUIModel> buildConfigs) {
-		firePropertyChange(PROP_BUILD_CONFIGS, resources.get(ResourceKind.BUILD_CONFIG), resources.put(ResourceKind.BUILD_CONFIG, new ArrayList<>(buildConfigs)));
-	}
-	
-	public void setBuildConfigResources(Collection<IResource> buildConfigs) {
-		firePropertyChange(PROP_BUILD_CONFIGS, resources.get(ResourceKind.BUILD_CONFIG), resources.put(ResourceKind.BUILD_CONFIG, init(buildConfigs)));
-	}
-
-	public void add(IResource resource) {
-		final String property = getProperty(resource.getKind());
-		List<IResourceUIModel> models = resources.get(resource.getKind());
-		if(models != null) {
-			models.add(new OpenShiftResourceUIModel(resource));
-			int index = models.size();
-			fireIndexedPropertyChange(property, index, null, Collections.unmodifiableList(models));
-		}
-	}
-
-	public void remove(IResource resource) {
-		final String property = getProperty(resource.getKind());
-		List<IResourceUIModel> models = resources.get(resource.getKind());
-		if(models != null) {
-			int index = indexOf(models, resource);
-			if(index > -1) {
-				models.remove(index);
-				fireIndexedPropertyChange(property, index, Collections.unmodifiableList(models), null);
-			}
-		}
-	}
-
-	public void update(IResource resource) {
-		final String property = getProperty(resource.getKind());
-		List<IResourceUIModel> models = resources.get(resource.getKind());
-		if(models != null) {
-			int index = indexOf(models, resource);
-			if(index > -1) {
-				List<IResourceUIModel> old = new ArrayList<>(models);
-				models.set(index, new OpenShiftResourceUIModel(resource));
-				fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
-			}
-		}
-	}
-	
-	private int indexOf(List<IResourceUIModel> models, IResource resource) {
-		for (int i = 0; i < models.size(); i++) {
-			IResourceUIModel model = models.get(i);
-			if(model != null) {
-				IResource old = model.getResource();
-				if(old.equals(resource)) {
-					return i;
-				}
-			}
-		}
-		return -1;
-	}
-	
-	private static String getProperty(String kind) {
-		return StringUtils.pluralize(kind.toLowerCase());
-	}
-
 
 }

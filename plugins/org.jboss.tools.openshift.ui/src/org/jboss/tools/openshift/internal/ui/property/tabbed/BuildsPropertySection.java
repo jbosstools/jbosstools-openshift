@@ -145,9 +145,9 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		Deployment deployment = UIUtils.getFirstElement(selection, Deployment.class);
-		if(deployment == null) return;
-		table.setInput(BeanProperties.list(Deployment.PROP_BUILDS).observe(deployment));
+		Object model = UIUtils.getFirstElement(selection);
+		if(model == null) return;
+		table.setInput(BeanProperties.list(Deployment.PROP_BUILDS).observe(model));
 	}
 
 	@Override

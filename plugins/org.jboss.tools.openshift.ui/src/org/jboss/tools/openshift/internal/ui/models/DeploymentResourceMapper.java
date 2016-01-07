@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2015 Red Hat, Inc.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.Trace;
+import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ResourceKind;
@@ -56,19 +58,26 @@ import com.openshift.restclient.model.deploy.IDeploymentTrigger;
  */
 public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	
+	private static enum State {
+		UNINITIALIZED,
+		LOADING,
+		LOADED
+	}
 	private static final String DOCKER_IMAGE_KIND = "DockerImage";
 	private static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 	private static final String IMAGE_STREAM_TAG_KIND = "ImageStreamTag";
 	private static final String RELATION_DELIMITER = "->";
 	private static final Map<String, String[]> RELATIONSHIP_TYPE_MAP = new HashMap<>();
 	
-	private IProject project;
-	private Connection conn;
+	private final IProjectAdapter projectAdapter;
+	private final IProject project;
+	private final Connection conn;
 	private List<Deployment> deployments = Collections.synchronizedList(new ArrayList<>());
 	private Map<IResource, Collection<Deployment>> resourceToDeployments = new ConcurrentHashMap<>();
 	private Map<String, Collection<IDeploymentConfig>> imageRefToDeployConfigs;
 	private Map<String, Collection<IResource>> relationMap = new ConcurrentHashMap<>();
 	private Map<String, IResource> cache = new ConcurrentHashMap<>();
+	private AtomicReference<State> state = new AtomicReference<>(State.UNINITIALIZED);
 
 	static {
 		RELATIONSHIP_TYPE_MAP.put(ResourceKind.BUILD, new String [] {
@@ -78,10 +87,17 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		});
 	}
 
-	public DeploymentResourceMapper(Connection conn, IProject project) {
-		this.project = project;
+	public DeploymentResourceMapper(Connection conn, IProjectAdapter projectAdapter) {
+		this.projectAdapter = projectAdapter;
+		this.project = projectAdapter.getProject();
 		this.conn = conn;
-		
+	}
+	
+	public IProjectAdapter getProjectAdapter() {
+		return this.projectAdapter;
+	}
+	
+	private void buildDeployments() {
 		List<IReplicationController> rcs = load(ResourceKind.REPLICATION_CONTROLLER);
 		List<IService> services = load(ResourceKind.SERVICE);
 		List<IRoute> routes = load(ResourceKind.ROUTE);
@@ -103,7 +119,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		mapBuildsToDeploymentConfigs(builds);
 		mapServicesToRepControllers(services, rcs);
 		mapServicesToRoutes(services, routes);
-
+		
 		for (IService service : services) {
 			Deployment deployment = new Deployment(service);
 			Collection<IPod> appPods = getPodsForService(service, pods);
@@ -121,6 +137,10 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 			
 			cacheDeployment(deployment);
 		}
+	}
+	
+	public boolean isLoading() {
+		return State.LOADING == state.get();
 	}
 	
 	private void cacheDeployment(Deployment deployment) {
@@ -176,6 +196,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	private <T extends IResource> List<T> load(String kind){
 		List<T> resources = conn.getResources(kind, project.getName());
 		resources.forEach(r->cache.put(getCacheKey(r), r));
+		projectAdapter.setResources(resources, kind);
 		return resources;
 	}
 	
@@ -265,9 +286,24 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		}
 		resourceToDeployments.get(resource).add(deployment);
 	}
-
+	
+	public boolean isLoaded() {
+		return State.LOADED == state.get();
+	}
+	
 	public Collection<Deployment> getDeployments(){
-		return deployments;
+		if(state.compareAndSet(State.UNINITIALIZED, State.LOADING)) {
+			synchronized (this) {
+				try {
+					buildDeployments();
+					WatchManager.getInstance().startWatch(project);
+				//catch an exception here and keep the original state?
+				}finally {
+					state.set(State.LOADED);
+				}
+			}
+		}
+		return Collections.unmodifiableCollection(deployments);
 	}
 
 	private void mapServicesToRoutes(Collection<IService> services, Collection<IRoute> routes){
@@ -351,6 +387,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	public synchronized void add(IResource resource) {
 		try {
 			Trace.debug("Trying to add resource to deployment {0}", resource);
+			projectAdapter.add(resource);
 			switch(resource.getKind()) {
 			case ResourceKind.BUILD:
 				mapBuildToDeploymentConfig((IBuild) resource);
@@ -371,6 +408,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	public synchronized void remove(IResource resource) {
 		try {
 			Trace.debug("Trying to remove resource to deployment {0}", resource);
+			projectAdapter.remove(resource);
 			switch(resource.getKind()) {
 			case ResourceKind.BUILD:
 			}
@@ -403,6 +441,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 
 	public synchronized void update(IResource resource) {
 		try {
+			projectAdapter.update(resource);
 			Collection<Deployment> deployments = findDeploymentsFor(resource);
 			if(deployments != null && !deployments.isEmpty()) {
 				for (Deployment deployment : deployments) {

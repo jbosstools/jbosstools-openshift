@@ -99,7 +99,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			case ResourceKind.POD:
 				return getStyledText((IPod) resource);
 			case ResourceKind.PROJECT:
-				return getStyledText((IProject) element);
+				return getStyledText((IProject) resource);
 			case ResourceKind.ROUTE:
 				return getStyledText((IRoute) resource);
 			case ResourceKind.REPLICATION_CONTROLLER:
@@ -108,7 +108,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				IService service = (IService) resource;
 				return getStyledText(service);
 			case ResourceKind.TEMPLATE:
-				return getStyledText((ITemplate) element);
+				return getStyledText((ITemplate) resource);
 			default:
 				break;
 			}
