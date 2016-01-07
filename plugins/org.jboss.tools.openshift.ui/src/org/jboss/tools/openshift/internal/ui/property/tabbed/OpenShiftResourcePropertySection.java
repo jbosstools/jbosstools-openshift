@@ -146,6 +146,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		if(model == null) return;
 		ITabDescriptor tab = page.getSelectedTab();
 		if(tab == null) return;
+		
 		String id = tab.getId();
 		String property = org.apache.commons.lang.StringUtils.right(id, id.length() - id.lastIndexOf(".") - 1);
 		table.setInput(BeanProperties.list(property).observe(model));
