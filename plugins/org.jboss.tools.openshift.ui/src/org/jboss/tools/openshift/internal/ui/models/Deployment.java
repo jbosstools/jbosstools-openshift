@@ -24,11 +24,8 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
-import com.openshift.restclient.model.IImageStream;
-import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
-import com.openshift.restclient.model.route.IRoute;
 
 /**
  * A deployment is the collection of resources
@@ -96,6 +93,10 @@ public class Deployment extends ObservablePojo {
 		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, new ArrayList<>(models)));
 	}
 	
+	public void setDeploymentConfigResources(Collection<IResource> dcs) {
+		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, init(dcs)));
+	}
+	
 	public Collection<IResourceUIModel> getBuilds() {
 		return resources.get(ResourceKind.BUILD);	
 	}
@@ -128,7 +129,7 @@ public class Deployment extends ObservablePojo {
 		firePropertyChange(PROP_ROUTES, resources.get(ResourceKind.ROUTE), resources.put(ResourceKind.ROUTE, new ArrayList<>(routes)));
 	}
 	
-	public void setRouteResources(Collection<IRoute> routes) {
+	public void setRouteResources(Collection<IResource> routes) {
 		firePropertyChange(PROP_ROUTES, resources.get(ResourceKind.ROUTE), resources.put(ResourceKind.ROUTE, init(routes)));
 	}
 
@@ -140,7 +141,7 @@ public class Deployment extends ObservablePojo {
 		firePropertyChange(PROP_REPLICATION_CONTROLLERS, resources.get(ResourceKind.REPLICATION_CONTROLLER), resources.put(ResourceKind.REPLICATION_CONTROLLER, new ArrayList<>(rcs)));
 	}
 
-	public void setReplicationControllerResources(Collection<IReplicationController> rcs) {
+	public void setReplicationControllerResources(Collection<IResource> rcs) {
 		firePropertyChange(PROP_REPLICATION_CONTROLLERS, resources.get(ResourceKind.REPLICATION_CONTROLLER), resources.put(ResourceKind.REPLICATION_CONTROLLER, init(rcs)));
 	}
 	public Collection<IResourceUIModel> getBuildConfigs(){
@@ -206,5 +207,6 @@ public class Deployment extends ObservablePojo {
 	private static String getProperty(String kind) {
 		return StringUtils.pluralize(kind.toLowerCase());
 	}
+
 
 }

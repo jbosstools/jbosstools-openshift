@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.internal.core.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -64,4 +66,25 @@ public class ResourceUtils {
 		return texts.stream().anyMatch((String txt)->{return txt.toLowerCase().contains(_item);});
 	}
 
+	/**
+	 * Determine if the source map overlaps the target map (i.e. Matching a service to a pod). There
+	 * is  match iff the target includes all the the keys from the source and those keys have
+	 * matching values
+	 * 
+	 * @param source
+	 * @param target
+	 * @return true if there is overlap; false; otherwise
+	 */
+	public static boolean selectorsOverlap(Map<String, String> source, Map<String, String> target) {
+		if(source == null || target == null) return false;
+		if(!target.keySet().containsAll(source.keySet())) {
+			return false;
+		}
+		for (String key : source.keySet()) {
+			if(!Objects.deepEquals(target.get(key),source.get(key))) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
