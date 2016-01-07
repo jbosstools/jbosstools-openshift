@@ -145,22 +145,30 @@ public class VagrantLaunchUtility {
 			}
 		});
 		
-		try ( StreamGobbler inGobbler = new StreamGobbler(inStream); 
-				StreamGobbler errGobbler = new StreamGobbler(errStream)) {
-			
-			new Thread(inGobbler).start();
-			new Thread(errGobbler).start();
-
-			if( exitCode == null ) {
-				// Timeout reached
-				inGobbler.cancel();
-				errGobbler.cancel();
-				p.destroyForcibly();
-				throw new TimeoutException(getTimeoutError(inGobbler.getLines(), errGobbler.getLines()));
-			}
-			List<String> ret = inGobbler.getLines();
-			return (String[]) ret.toArray(new String[ret.size()]);
+		List<String> inLines = readStream(inStream);
+		List<String> errLines = readStream(errStream);
+		if( exitCode == null ) {
+			// Timeout reached
+			p.destroyForcibly();
+			throw new TimeoutException(getTimeoutError(inLines, errLines));
 		}
+		
+		return (String[]) inLines.toArray(new String[inLines.size()]);
+	}
+	
+	private static List<String> readStream(InputStream inStream) {
+		ArrayList<String> lines = new ArrayList<>();
+		try (
+			BufferedInputStream is = new BufferedInputStream(inStream);
+			Scanner inScanner = new Scanner(is);
+			) {
+			while (inScanner.hasNextLine()) {
+				lines.add(inScanner.nextLine());
+			}
+		} catch(IOException ioe) {
+			// ignore autoclosed ioexception
+		}
+		return lines;
 	}
 	
 	private static String getTimeoutError(List<String> output, List<String> err) {
@@ -169,45 +177,5 @@ public class VagrantLaunchUtility {
 		output.forEach(line -> msg.append("   ").append(line));
 		err.forEach(line -> msg.append("   ").append(line));
 		return msg.toString();
-	}
-	
-	private static class StreamGobbler implements Runnable, AutoCloseable {
-		private Scanner inScanner;
-		private ArrayList<String> lines;
-		private boolean canceled = false;
-		private BufferedInputStream is;
-		public StreamGobbler(InputStream inStream) {
-			lines = new ArrayList<>();
-			is = new BufferedInputStream(inStream);
-			inScanner = new Scanner(is);
-		}
-
-		@Override
-		public void run() {
-			while (inScanner.hasNextLine() && !isCanceled()) {
-				synchronized(this) {
-					if( !isCanceled()) {
-						lines.add(inScanner.nextLine());
-					}
-				}
-			}
-		}
-		public synchronized boolean isCanceled() {
-			return canceled;
-		}
-		public synchronized void cancel() {
-			canceled = true;
-		}
-		public synchronized List<String> getLines() {
-			return new ArrayList<>(lines);
-		}
-		public void close() {
-			try {
-				if( is != null )
-					is.close();
-			} catch(IOException ioe) {
-				// ignore
-			}
-		}
 	}
 }
