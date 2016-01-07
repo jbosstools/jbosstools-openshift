@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.core.server;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -36,11 +37,14 @@ import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
  */
 public class OpenShiftServerUtils {
+
+	private static final String LIVERELOAD_PORT_KEY = "port";//Key to the port # of the host the LiveReload server need to proxy
 
 	public static final String SERVER_PROJECT_QUALIFIER = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
 
@@ -61,7 +65,7 @@ public class OpenShiftServerUtils {
 		if (service == null) {
 			return null;
 		}
-		
+
 		return new StringBuilder(service.getName())
 				.append(" at OpenShift 3 (")
 				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
@@ -74,15 +78,34 @@ public class OpenShiftServerUtils {
 		String deployProjectName = ProjectUtils.getName(deployProject);
 		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, server);
 	}
-	
+
 	private static String getHost(IService service) {
+		if (service == null) {
+			return null;
+		}
+
 		String host = null;
-		if (service != null) {
+
+		com.openshift.restclient.model.IProject project = service.getProject();
+		if (project != null) {
+
+			//TODO Ideally, we should use a route selected during the Server creation, in case there are several
+			//Until then, we'll fall back on always choosing the 1st route to open a browser
+			IRoute route = getRoute(project.getResources(ResourceKind.ROUTE));
+			if (route != null) {
+				host = route.getURL();
+			}
+		}
+		if (host == null) {
 			host = service.getPortalIP();
 		}
 		return host;
 	}
-	
+
+	private static IRoute getRoute(List<IRoute> routes) {
+		return routes == null || routes.isEmpty()? null : routes.get(0);
+	}
+
 	/**
 	 * Fills the given settings into the given server adapter working copy.
 	 * <b>IMPORTANT:</b> If the server adapter name is matching an existing server adapter, then
@@ -109,7 +132,7 @@ public class OpenShiftServerUtils {
 
 		server.setName(serverName);
 		server.setHost(UrlUtils.getHost(host));
-		
+
 		server.setAttribute(ATTR_CONNECTIONURL, connectionUrl);
 		server.setAttribute(ATTR_DEPLOYPROJECT, deployProjectName);
 		server.setAttribute(ATTR_SOURCE_PATH, sourcePath);
@@ -121,7 +144,9 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT3_MODE_ID);
 		((ServerWorkingCopy) server).setAutoPublishSetting(Server.AUTO_PUBLISH_RESOURCE);
 		server.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, String.valueOf(Boolean.TRUE));
-		server.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
+		int webPort = 80;//TODO should we determine the webPort from the route?
+		server.setAttribute(IJBossToolingConstants.WEB_PORT, webPort);
+		server.setAttribute(LIVERELOAD_PORT_KEY, webPort);//So that we can open via LiveReload
 		server.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, Boolean.FALSE.toString());
 		server.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
