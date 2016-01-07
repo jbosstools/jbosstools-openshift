@@ -89,6 +89,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 private ServerSettingsViewModel model;
 
+	private Control uiHook = null;
+
 	public ServerSettingsWizardFragment() {
 		// no finishing wizard before input provided in this page
 		setComplete(false);
@@ -109,6 +111,7 @@ private ServerSettingsViewModel model;
 		this.model = new ServerSettingsViewModel(server, connection);
 		DataBindingContext dbc = new DataBindingContext();
 		Composite composite = createControls(parent, model, dbc);
+		uiHook = composite.getChildren()[0];
 		new FormPresenterSupport(
 				new IFormPresenter() {
 
@@ -510,15 +513,22 @@ private ServerSettingsViewModel model;
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
 		model.updateServer();
+		uiHook = null;
 	}
 
 	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
+		uiHook = null;
 	}
 
 	@Override
 	public void setComplete(boolean complete) {
 		super.setComplete(complete);
+	}
+
+	@Override
+	public boolean isComplete() {
+		return uiHook != null && !uiHook.isDisposed() && super.isComplete();
 	}
 
 }
