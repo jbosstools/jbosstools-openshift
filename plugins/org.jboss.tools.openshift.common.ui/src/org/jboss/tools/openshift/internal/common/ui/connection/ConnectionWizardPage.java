@@ -221,6 +221,11 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		.to(BeanProperties.value(
 				ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST, IConnection.class).observe(pageModel))
 		.in(dbc);
+		
+		IObservableValue hasDefaultHostObservable =
+				BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HAS_DEFAULT_HOST).observe(pageModel);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(useDefaultServerCheckbox))
+			.notUpdating(hasDefaultHostObservable).in(dbc);
 
 		Label serverLabel = new Label(parent, SWT.NONE);
 		serverLabel.setText("Server:");
