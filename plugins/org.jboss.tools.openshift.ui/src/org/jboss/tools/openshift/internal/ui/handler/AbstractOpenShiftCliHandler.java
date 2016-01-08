@@ -28,8 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryName;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 import com.openshift.restclient.capability.resources.IPortForwardable;
 
@@ -44,17 +43,13 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		//check binary locations
-		String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
-		if (StringUtils.isBlank(location)) {
-			location = OCBinaryName.getInstance().getLocation();
-		}
+		String location = OCBinary.getInstance().getLocation();
 		if(StringUtils.isBlank(location)) {
 			
 			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),
-													"Unknown binary location",
+													"Unknown executable location",
 													null,
-													"The OpenShift Client '"+ OCBinaryName.getInstance().getName()+"' binary can not be found.",
+													"The OpenShift Client '"+ OCBinary.getInstance().getName()+"' executable can not be found.",
 													MessageDialog.ERROR,
 													new String[] { IDialogConstants.OK_LABEL }, 0) {
 				@Override
@@ -63,7 +58,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
 					GridLayoutFactory.fillDefaults().applyTo(container);
 					Link link = new Link(container, SWT.WRAP);
-					link.setText("You must set the binary location in the <a>OpenShift 3 preferences</a>.");
+					link.setText("You must set the executable location in the <a>OpenShift 3 preferences</a>.");
 					link.addSelectionListener(new OpenPreferencesListener(this));
 					container.setFocus();
 					return container;

@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
@@ -22,9 +23,9 @@ public class OpenShiftCorePreferenceInitializer extends AbstractPreferenceInitia
 	@Override
 	public void initializeDefaultPreferences() {
 		IEclipsePreferences defaultPreferences = ((IScopeContext)DefaultScope.INSTANCE).getNode(OpenShiftCoreActivator.PLUGIN_ID);
-		
-		String location = OCBinaryName.getInstance().getLocation();
-		if(location != null && location.length() > 0) {
+
+		String location = OCBinary.getInstance().getSystemPathLocation();
+		if(!StringUtils.isEmpty(location)) {
 			defaultPreferences.put(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, location);
 		}
 	}
