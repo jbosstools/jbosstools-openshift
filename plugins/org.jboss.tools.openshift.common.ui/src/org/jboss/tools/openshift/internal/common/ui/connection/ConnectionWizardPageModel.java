@@ -47,6 +47,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_CONNECTED_STATUS = "connectedStatus";
 	public static final String PROPERTY_SIGNUPURL = "signupUrl";
 	public static final String PROPERTY_USERDOCURL = "userdocUrl";
+	public static final String PROPERTY_HAS_DEFAULT_HOST = "hasDefaultHost";
 
 	private static final IStatus NOT_CONNECTED_STATUS = null;//StatusFactory.infoStatus(OpenShiftCommonCoreActivator.PLUGIN_ID, "not connected");
 
@@ -59,6 +60,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private boolean allowConnectionChange;
 	private IConnectionFactory connectionFactory;
 	private boolean useDefaultHost;
+	private boolean hasDefaultHost;
 	private Collection<String> allHosts;
 	private ConnectionsFactoryTracker connectionsFactory;
 	private String signupUrl;
@@ -137,6 +139,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.connection = connection.clone();
 		this.connectionFactory = connectionsFactory.getByConnection(connection.getClass());
 		this.host = connection.getHost();
+		this.hasDefaultHost = connectionFactory != null && connectionFactory.hasDefaultHost();
 		this.useDefaultHost = connection.isDefaultHost();
 	}
 
@@ -148,7 +151,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			if (host != null) {
 				this.connection = connectionFactory.create(host);
 			}
-			this.useDefaultHost = connectionFactory.hasDefaultHost();
+			this.useDefaultHost = this.hasDefaultHost = connectionFactory.hasDefaultHost();
 		}
 	}
 
@@ -181,6 +184,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
+		firePropertyChange(PROPERTY_HAS_DEFAULT_HOST, this.hasDefaultHost, this.hasDefaultHost = factory != null && factory.hasDefaultHost());
 		firePropertyChange(PROPERTY_SIGNUPURL, this.signupUrl, this.signupUrl = signupUrl);
 		firePropertyChange(PROPERTY_USERDOCURL, this.userdocUrl, this.userdocUrl = userdocUrl);
 		
@@ -283,6 +287,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	public IConnectionFactory getConnectionFactory() {
 		return connectionFactory;
+	}
+
+	public boolean isHasDefaultHost() {
+		return hasDefaultHost;
 	}
 	
 	public Collection<IConnection> getAllConnections() {
