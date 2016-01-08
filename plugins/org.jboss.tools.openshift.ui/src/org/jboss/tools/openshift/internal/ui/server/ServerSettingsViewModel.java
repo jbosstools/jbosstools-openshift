@@ -138,6 +138,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		return project;
 	}
 
+	@Override
 	public void loadResources() {
 		setProjects(loadProjects());
 		super.loadResources();
