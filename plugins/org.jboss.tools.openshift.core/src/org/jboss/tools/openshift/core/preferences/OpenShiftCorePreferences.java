@@ -12,9 +12,11 @@ package org.jboss.tools.openshift.core.preferences;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryName;
 
 /**
  * @author Andre Dietisheim
@@ -61,7 +63,11 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants {
 	}
 	
 	public String getOCBinaryLocation() {
-		return ocBinaryLocation.get();
+		String result = ocBinaryLocation.get();
+		if(StringUtils.isEmpty(result)) {
+			result = OCBinaryName.getInstance().getLocation();
+		}
+		return result;
 	}
 	
 	public void saveOCBinaryLocation(String location) {
