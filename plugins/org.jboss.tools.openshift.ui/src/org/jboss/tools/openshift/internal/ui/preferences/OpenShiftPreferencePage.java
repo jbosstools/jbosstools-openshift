@@ -90,19 +90,38 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	protected void performDefaults() {
 		String location = ocBinary.getLocation();
+		if(location == null) {
+			//We have to update default value in preferences even if it is empty.
+			location = "";
+		}
+		getPreferenceStore().setDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, location);
+
 		if(StringUtils.isBlank(location)) {
 			String message = NLS.bind("Could not find the OpenShift Client binary \"{0}\" on your path.", ocBinary.getName());
 			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
 			MessageDialog.openWarning(getShell(), "No OpenShift Client binary", message);
 			return;
 		}
-		cliLocationEditor.setStringValue(location);
+
+		super.performDefaults();
+
+		//Super implementation changes instance value, we need it clean.
+		getPreferenceStore().setToDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC);
+
+		//Now show a problem if there is one.
+		validateLocation(location);
 	}
 
 	@Override
 	public boolean performOk() {
-		boolean valid = super.performOk() 
-				&& validateLocation(cliLocationEditor.getStringValue());
+		boolean valid = true;
+		if(cliLocationEditor.getStringValue().equals(getPreferenceStore().getDefaultString(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC))) {
+			//Super implementation changes instance value, we need it clean.
+			getPreferenceStore().setToDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC);
+		} else {
+			valid = super.performOk();
+		}
+		valid = validateLocation(cliLocationEditor.getStringValue()) && valid;
 		setValid(valid);
 		return valid;
 	}
