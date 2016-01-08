@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2012 Red Hat, Inc. 
+ * Copyright (c) 2012-2016 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
@@ -52,6 +53,9 @@ public class UrlUtils {
 	
 	private static final Pattern SIMPLE_URL_PATTERN =
 			Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
+
+	private static final Pattern SIMPLE_QUASI_URL_PATTERN = Pattern.compile("^((\\w+:/)?(/*)?(.*@)?)([^:|/]*)(.*)?$");
+
 	private static final String PROPERTY_BASIC = "Basic";
 	private static final String PROPERTY_AUTHORIZATION = "Authorization";
 	
@@ -163,25 +167,28 @@ public class UrlUtils {
 		if (isEmpty(host)) {
 			return false;
 		}
-		return host.indexOf(SCHEME_SEPARATOR) > -1;
+		return host.contains(SCHEME_SEPARATOR);
 	}
 
 	public static String getHost(String url) {
 		if (isEmpty(url)) {
 			return url;
 		}
-		
-		int beginIndex = getHostIndex(url);
-		if (beginIndex == -1) {
-			beginIndex = 0;
+		String host = null;
+		if (url.contains(SCHEME_SEPARATOR)) {
+			try {
+				host = new URI(url).getHost();
+			} catch (URISyntaxException ignored) {
+			}
 		}
-		
-		int endIndex = url.length() - 1;
-		if (url.endsWith("/")) {
-			endIndex -= 1;
+
+		if (host == null) {
+			Matcher m = SIMPLE_QUASI_URL_PATTERN.matcher(url);
+			if (m.find()) {
+				host = m.group(5);
+			}
 		}
-		
-		return url.substring(beginIndex, endIndex);
+		return host;
 	}
 	
 	private static int getHostIndex(String url) {
