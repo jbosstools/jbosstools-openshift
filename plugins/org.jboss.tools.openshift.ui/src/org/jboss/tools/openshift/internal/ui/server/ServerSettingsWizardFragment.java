@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.databinding.Binding;
@@ -67,14 +69,17 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
@@ -86,14 +91,64 @@ import com.openshift.restclient.model.IService;
  * @author Andre Dietisheim
  */
 public class ServerSettingsWizardFragment extends WizardHandleAwareFragment implements ICompletable {
+	static final String IS_LOADING_SERVICES = "isLoadingServices";
 
-private ServerSettingsViewModel model;
+	private ServerSettingsViewModel model;
+	private PropertyChangeListener connectionChangeListener = new PropertyChangeListener() {
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			if(model != null && ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
+				if(evt.getNewValue() == null || evt.getNewValue() instanceof Connection)  {
+					Connection newConnection = (Connection)evt.getNewValue();
+					IWizardContainer wizardContainer = getWizardContainer();
+					if(newConnection != model.getConnection() && wizardContainer != null) {
+						isLoadingServices = true;
+						getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
+						wizardContainer.updateButtons();
+						try {
+							WizardUtils.runInWizard(new Job("Loading services...") {
+
+								@Override
+								protected IStatus run(IProgressMonitor monitor) {
+									try {
+										if(model != null) { //wizard can be closed before start.
+											model.loadResources(newConnection);
+										}
+									} finally {
+										isLoadingServices = false;
+										getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
+									}
+									return Status.OK_STATUS;
+								}
+							}, wizardContainer);
+						} catch (InvocationTargetException | InterruptedException e) {
+							// swallow intentionally
+						} finally {
+							isLoadingServices = false;
+							getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
+							wizardContainer.updateButtons();
+						}
+					}
+				} else if(evt.getNewValue() instanceof NewConnectionMarker) {
+					//do nothing
+				} else {
+					OpenShiftUIActivator.getDefault().getLogger().logError(
+						new IllegalArgumentException("Connection is expected, but " + evt.getNewValue().getClass().getName() + " is fired."));
+				}
+			}
+		}
+	};
 
 	private Control uiHook = null;
+	private boolean isLoadingServices = false;
 
 	public ServerSettingsWizardFragment() {
 		// no finishing wizard before input provided in this page
 		setComplete(false);
+	}
+
+	public PropertyChangeListener getConnectionChangeListener() {
+		return connectionChangeListener;
 	}
 
 	@Override
@@ -103,6 +158,7 @@ private ServerSettingsViewModel model;
 
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
+		super.createComposite(parent, handle); //stores handle
 		handle.setTitle("Create an OpenShift 3 Server Adapter");
 		handle.setDescription("Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.");
 		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
@@ -112,6 +168,7 @@ private ServerSettingsViewModel model;
 		DataBindingContext dbc = new DataBindingContext();
 		Composite composite = createControls(parent, model, dbc);
 		uiHook = composite.getChildren()[0];
+		isLoadingServices = false; //Since wizard fragment is cached and reused, this precaution is needed.
 		new FormPresenterSupport(
 				new IFormPresenter() {
 
@@ -511,14 +568,17 @@ private ServerSettingsViewModel model;
 
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		super.performFinish(monitor);
 		model.updateServer();
 		uiHook = null;
+		model = null;
+		super.performFinish(monitor); //only removes handle, it should be done after successful update only.
 	}
 
 	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
 		uiHook = null;
+		model = null;
+		super.performCancel(monitor);
 	}
 
 	@Override
@@ -528,7 +588,7 @@ private ServerSettingsViewModel model;
 
 	@Override
 	public boolean isComplete() {
-		return uiHook != null && !uiHook.isDisposed() && super.isComplete();
+		return !isLoadingServices && uiHook != null && !uiHook.isDisposed() && super.isComplete();
 	}
 
 }

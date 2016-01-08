@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
@@ -31,4 +36,32 @@ public class WizardHandleAwareFragment extends WizardFragment {
 		return handle;
 	}
 
+	/**
+	 * Helper method to extract wizard container from the handle.
+	 * May return null, if composite is not yet created or if wizard is disposed.
+	 *
+	 * @return
+	 */
+	protected IWizardContainer getWizardContainer() {
+		if(!(handle instanceof WizardPage)) {
+			return null;
+		}
+		WizardPage page = (WizardPage)handle;
+		if(page.getShell() == null || page.getShell().isDisposed()) {
+			return null;
+		}
+		IWizard wizard = page.getWizard();
+		return (wizard == null) ? null : wizard.getContainer();
+	}
+
+	@Override
+	public void performFinish(IProgressMonitor monitor) throws CoreException {
+		super.performFinish(monitor);
+		handle = null;
+	}
+
+	@Override
+	public void performCancel(IProgressMonitor monitor) throws CoreException {
+		handle = null;
+	}
 }

@@ -23,7 +23,12 @@ public class OpenShiftServerWizardFragment extends WizardFragment {
 
 	@Override
 	protected void createChildFragments(List<WizardFragment> list) {
-		list.add(new ConnectionWizardFragment());
-		list.add(new ServerSettingsWizardFragment());
+		ConnectionWizardFragment connectionWizardFragment = new ConnectionWizardFragment();
+		ServerSettingsWizardFragment serverSettingsWizardFragment = new ServerSettingsWizardFragment();
+
+		connectionWizardFragment.addConnectionChangeListener(serverSettingsWizardFragment.getConnectionChangeListener());
+
+		list.add(connectionWizardFragment);
+		list.add(serverSettingsWizardFragment);
 	}
 }

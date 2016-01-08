@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import java.beans.PropertyChangeListener;
+
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -23,6 +25,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage.Direction;
 
 /**
@@ -36,6 +39,11 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
 public class ConnectionWizardFragment extends WizardFragment {
 
 	private WrappedConnectionWizardPage connectionPage;
+	private PropertyChangeListener connectionChangeListener = null;
+
+	public void addConnectionChangeListener(PropertyChangeListener connectionChangeListener) {
+		this.connectionChangeListener = connectionChangeListener;
+	}
 
 	@Override
 	public boolean hasComposite() {
@@ -44,8 +52,14 @@ public class ConnectionWizardFragment extends WizardFragment {
 
 	@Override
 	public boolean isComplete() {
-		return connectionPage != null 
-				&& connectionPage.isPageComplete();
+		if(connectionPage == null || !connectionPage.isPageComplete()) {
+			return false;
+		}
+		if(getTaskModel() != null) {
+			Object isLoadingServices = getTaskModel().getObject(ServerSettingsWizardFragment.IS_LOADING_SERVICES);
+			return !(Boolean.TRUE.equals(isLoadingServices));
+		}
+		return true;
 	}
 
 	@Override
@@ -105,6 +119,9 @@ public class ConnectionWizardFragment extends WizardFragment {
 		private WrappedConnectionWizardPage(IWizardHandle wizardHandle) {
 			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class), Connection.class);
 			this.wizardHandle = wizardHandle;
+			if(connectionChangeListener != null) {
+				getModel().addPropertyChangeListener(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, connectionChangeListener);
+			}
 		}
 
 		@Override

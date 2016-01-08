@@ -101,7 +101,11 @@ public class ServiceViewModel extends ObservablePojo {
 	}
 
 	public void setConnection(Connection connection) {
-		update(connection, this.connections, this.service, this.serviceItems);
+		if(this.connection != connection) {
+			//Clean service items immediately, they should be reloaded later in an ui job.
+			List<ObservableTreeItem> newServiceItems = this.serviceItems.isEmpty() ? this.serviceItems : new ArrayList<>();
+			update(connection, this.connections, null, newServiceItems);
+		}
 	}
 
 	public List<ObservableTreeItem> getServiceItems() {
@@ -150,6 +154,19 @@ public class ServiceViewModel extends ObservablePojo {
 			return;
 		}
 		setServiceItems(loadServices(connection));
+	}
+
+	/**
+	 * On setting new connection externally, resources related to it must be reloaded.
+	 * This method should be invoked in an ui job.
+	 * @param newConnection
+	 */
+	public void loadResources(Connection newConnection) {
+		setConnection(newConnection);
+		if (newConnection == null) {
+			return;
+		}
+		setServiceItems(loadServices(newConnection));
 	}
 
 	private List<Connection> loadConnections() {
