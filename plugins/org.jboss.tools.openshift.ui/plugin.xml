@@ -126,7 +126,7 @@
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
 			<command
-				commandId="org.jboss.tools.openshift.ui.command.resource.delete"
+				commandId="org.eclipse.ui.edit.delete"
 				id="org.jboss.tools.openshift.ui.command.resource.delete"
 				style="push"
 				tooltip="Delete the resource">
@@ -135,6 +135,7 @@
 						<count
 							value="1">
 						</count>
+						<or>
 						<iterate>
 							<and>
 								<instanceof
@@ -145,6 +146,7 @@
 								</not>
 							</and>
 						</iterate>
+						</or>
 					</and>
 				</visibleWhen>
 			</command>
@@ -349,7 +351,7 @@
 			allPopups="false"
         	locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
 			<command
-				commandId="org.jboss.tools.openshift.ui.command.project.delete"
+				commandId="org.eclipse.ui.edit.delete"
 				style="push"
 				icon="icons/globe_delete.png"
 				tooltip="Delete Project">
@@ -360,11 +362,13 @@
 						<count
                     		value="1">
 						</count>
+						<or>
 						<iterate>
 							<instanceof
 								value="com.openshift.restclient.model.IProject">
 							</instanceof>
 						</iterate>
+						</or>
 					</and>
 				</visibleWhen>
 			</command>
@@ -450,7 +454,7 @@
 			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
 			<command
-				commandId="org.jboss.tools.openshift.ui.command.showproperties"
+				commandId="org.eclipse.ui.file.properties"
 				id="org.jboss.tools.openshift.ui.explorer.command.showproperties">
 				<visibleWhen>
 					<with
@@ -516,7 +520,19 @@
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
-			commandId="org.jboss.tools.openshift.ui.command.project.delete">
+			commandId="org.eclipse.ui.edit.delete">
+				<activeWhen>
+					<and>
+						<count
+							value="1">
+						</count>
+						<iterate>
+							<instanceof
+								value="com.openshift.restclient.model.IProject">
+							</instanceof>
+						</iterate>
+					</and>
+				</activeWhen>
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler"
@@ -528,7 +544,24 @@
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler"
-			commandId="org.jboss.tools.openshift.ui.command.resource.delete">
+			commandId="org.eclipse.ui.edit.delete">
+				<activeWhen>
+					<and>
+						<count
+							value="1">
+						</count>
+						<iterate>
+							<and>
+								<instanceof
+									value="com.openshift.restclient.model.IResource" />
+								<not>
+									<instanceof
+										value="com.openshift.restclient.model.IProject" />
+								</not>
+							</and>
+						</iterate>
+					</and>
+				</activeWhen>
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.RefreshResourceHandler"
@@ -556,7 +589,28 @@
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.ShowPropertiesHandler"
-			commandId="org.jboss.tools.openshift.ui.command.showproperties">
+			commandId="org.eclipse.ui.file.properties">
+				<activeWhen>
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+							<iterate
+								ifEmpty="false">
+								<or>
+									<instanceof
+										value="com.openshift.restclient.model.IResource">
+									</instanceof>
+									<instanceof
+										value="org.jboss.tools.openshift.core.connection.Connection">
+									</instanceof>
+								</or>
+							</iterate>
+						</and>
+					</with>
+				</activeWhen>
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.DeployImageHandler"
