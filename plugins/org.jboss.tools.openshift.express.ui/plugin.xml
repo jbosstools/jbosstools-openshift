@@ -610,29 +610,9 @@
 	<extension
            point="org.eclipse.ui.handlers">
         <handler
-              commandId="org.jboss.tools.openshift.express.ui.command.deletedomain"
+              commandId="org.eclipse.ui.edit.delete"
               class="org.jboss.tools.openshift.express.internal.ui.command.DeleteDomainHandler">
-     	</handler>
-	</extension>
-	<extension
-		point="org.eclipse.ui.bindings">
-		<key
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
-			contextId="org.jboss.tools.openshift.explorer.context.domain"
-			sequence="Del" 
-			commandId="org.jboss.tools.openshift.express.ui.command.deletedomain" />
-	</extension>
-	<!-- openshift explorer: delete domain -->
-	<extension
-           point="org.eclipse.ui.menus">
-        <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edit">
-			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.deletedomain"
-				icon="icons/globe_delete.png"
-				id="org.jboss.tools.openshift.express.ui.command.deletedomain"
-				mnemonic="D">
-				<visibleWhen>
+				<activeWhen>
 					<with
 						variable="selection">
 						<count
@@ -644,6 +624,68 @@
 							<instanceof
 								value="com.openshift.client.IDomain" />
 						</iterate>
+					</with>
+				</activeWhen>
+     	</handler>
+	</extension>
+	<extension
+		point="org.eclipse.ui.bindings">
+		<key
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+			contextId="org.jboss.tools.openshift.explorer.context.domain"
+			sequence="Del" 
+			commandId="org.eclipse.ui.edit.delete" />
+	</extension>
+	<!-- openshift explorer: delete domain -->
+	<extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edit">
+			<command
+				commandId="org.eclipse.ui.edit.delete"
+				icon="icons/globe_delete.png"
+				id="org.jboss.tools.openshift.express.ui.command.deletedomain"
+				mnemonic="D">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<count
+							value="1">
+						</count>
+						<or>
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.IDomain" />
+						</iterate>
+						</or>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+
+        <menuContribution
+              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edit">
+			<command
+				commandId="org.eclipse.ui.edit.delete"
+				icon="icons/globe_delete.png"
+				id="org.jboss.tools.openshift.express.ui.command.deleteapp"
+				mnemonic="D">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<count
+							value="1">
+						</count>
+						<or>
+						<iterate
+							ifEmpty="false"
+							operator="or">
+							<instanceof
+								value="com.openshift.client.IApplication" />
+						</iterate>
+						</or>
 					</with>
 				</visibleWhen>
 			</command>
@@ -743,18 +785,29 @@
 	<extension
            point="org.eclipse.ui.handlers">
         <handler
-              commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+              commandId="org.eclipse.ui.edit.delete"
               class="org.jboss.tools.openshift.express.internal.ui.command.DeleteApplicationHandler">
+				<activeWhen>
+					<with
+					variable="selection">
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="com.openshift.client.IApplication" />
+						</iterate>
+					</with>
+				</activeWhen>
      	</handler>
 	</extension>
 	
 	<!-- openshift explorer: delete application -->
-	<extension
+	<!--extension
 		point="org.eclipse.ui.menus">
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
 			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+				commandId="org.eclipse.ui.edit.delete"
 				icon="icons/application_delete.gif"
 				id="org.jboss.tools.openshift.express.ui.command.deleteApplications"
 				mnemonic="D">
@@ -771,7 +824,7 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
-    </extension>
+    </extension-->
 
     <!-- servers view: delete application -->
     <extension
@@ -1306,14 +1359,31 @@
     <extension
            point="org.eclipse.ui.handlers">
         <handler
-              commandId="org.jboss.tools.openshift.express.ui.command.applicationDetails"
+              commandId="org.eclipse.ui.file.properties"
               class="org.jboss.tools.openshift.express.internal.ui.command.ApplicationDetailsHandler">
+				<activeWhen>
+					<with
+						variable="selection">
+							<count
+								value="1" />
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<or>
+								<instanceof
+									value="com.openshift.client.IApplication" />
+								<instanceof
+									value="org.eclipse.wst.server.core.IServer" />
+							</or>
+						</iterate>
+					</with>
+				</activeWhen>
      	</handler>
     </extension>
 	<!-- openshift explorer: application details -->
     <extension
            point="org.eclipse.ui.menus">
-		<menuContribution
+		<!--menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
 			<command
 				commandId="org.jboss.tools.openshift.express.ui.command.applicationDetails"
@@ -1332,9 +1402,9 @@
 					</with>
 				</visibleWhen>
 			</command>
-		</menuContribution>
+		</menuContribution-->
 		<!-- servers view: application details -->
-		<menuContribution
+		<!--menuContribution
 				locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.properties">
 			<command
 				commandId="org.jboss.tools.openshift.express.ui.command.applicationDetails"
@@ -1353,7 +1423,7 @@
 					</with>
 				</visibleWhen>
 			</command>
-		</menuContribution>
+		</menuContribution-->
 	</extension>
 	
 	<!-- domain, connection, cartridge properties -->
@@ -1367,8 +1437,27 @@
     <extension
            point="org.eclipse.ui.handlers">
         <handler
-              commandId="org.jboss.tools.openshift.express.ui.command.showProperties"
+              commandId="org.eclipse.ui.file.properties"
               class="org.jboss.tools.openshift.express.internal.ui.command.ShowPropertiesHandler">
+				<activeWhen>
+					<with
+						variable="selection">
+							<count
+								value="1" />
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<or>
+								<instanceof
+									value="org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection" />
+								<instanceof
+									value="com.openshift.client.IDomain" />
+								<instanceof
+									value="com.openshift.client.cartridge.IEmbeddedCartridge" />
+							</or>
+						</iterate>
+					</with>
+				</activeWhen>
      	</handler>
     </extension>
 	<!-- openshift explorer: properties -->
@@ -1377,7 +1466,7 @@
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
 			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.showProperties"
+				commandId="org.eclipse.ui.file.properties"
 				id="org.jboss.tools.openshift.express.ui.command.showProperties"
 				mnemonic="P">
 				<visibleWhen>
@@ -1395,6 +1484,10 @@
 									value="com.openshift.client.IDomain" />
 								<instanceof
 									value="com.openshift.client.cartridge.IEmbeddedCartridge" />
+								<instanceof
+									value="com.openshift.client.IApplication" />
+							<instanceof
+								value="org.eclipse.wst.server.core.IServer" />
 							</or>
 						</iterate>
 					</with>

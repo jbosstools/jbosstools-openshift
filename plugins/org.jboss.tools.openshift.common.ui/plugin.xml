@@ -268,8 +268,21 @@
 	<extension
 		point="org.eclipse.ui.handlers">
         <handler
-			commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
+			commandId="org.eclipse.ui.edit.delete"
 			class="org.jboss.tools.openshift.internal.common.ui.command.RemoveConnectionHandler">
+				<activeWhen>
+					<with
+					variable="selection">
+						<and>
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="org.jboss.tools.openshift.common.core.connection.IConnection" />
+						</iterate>
+						</and>
+					</with>
+				</activeWhen>
      	</handler>
 	</extension>
 	<extension
@@ -277,7 +290,7 @@
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
 			<command
-				commandId="org.jboss.tools.openshift.express.ui.command.removeconnection"
+				commandId="org.eclipse.ui.edit.delete"
 				icon="icons/delete_edit.gif"
 				id="org.jboss.tools.openshift.express.ui.command.removeconnection"
 				mnemonic="R">
