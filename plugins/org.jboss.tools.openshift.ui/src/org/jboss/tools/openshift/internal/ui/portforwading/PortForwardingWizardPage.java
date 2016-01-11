@@ -276,4 +276,11 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		return true;
 	}
 
+	@Override
+	public void dispose() {
+		if(!wizardModel.getPortForwarding()) {
+			wizardModel.setUseFreePorts(false);
+		}
+		super.dispose();
+	}
 }
