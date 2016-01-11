@@ -27,12 +27,14 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.job.IResourcesModel;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
+import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
@@ -103,7 +105,7 @@ public class RefreshResourceHandler extends AbstractHandler{
 					monitor.beginTask(LOADING_OPEN_SHIFT_INFORMATIONS, IProgressMonitor.UNKNOWN);
 					if (element instanceof IRefreshable) {
 						((IRefreshable) element).refresh();
-						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_REFRESH, null, element);
 					}
 				} catch (OpenShiftException e) {
 					OpenShiftCommonUIActivator.getDefault().getLogger().logError(FAILED_TO_REFRESH_ELEMENT, e);
@@ -130,6 +132,8 @@ public class RefreshResourceHandler extends AbstractHandler{
 			return (IConnection) resource; 
 		} else if (resource instanceof IResource) {
 			return ConnectionsRegistryUtil.getConnectionFor((IResource)resource);
+		} else if (resource instanceof IProjectAdapter) {
+			return ConnectionsRegistryUtil.getConnectionFor(((IProjectAdapter)resource).getProject());
 		}
 		return null;
 	}
