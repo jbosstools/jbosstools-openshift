@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -95,6 +94,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
@@ -459,8 +459,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			public void widgetSelected(SelectionEvent e) {
 				ElementTreeSelectionDialog dialog = createFileDialog(model.getLocalTemplateFileName());
 				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
-					String path = ((IFile)dialog.getFirstResult()).getFullPath().toPortableString();
-					String file = VariablesPlugin.getDefault().getStringVariableManager().generateVariableExpression("workspace_loc", path);
+					String path = ((IFile)dialog.getFirstResult()).getFullPath().toString();
+					String file = VariablesHelper.addWorkspacePrefix(path);
 					setLocalTemplate(file);
 				}
 			}
@@ -534,7 +534,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	private boolean isFile(String path) {
 		return StringUtils.isNotBlank(path) &&
-				Files.isRegularFile(Paths.get(substituteVariables(path)));
+				Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
 	}
 
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder, IObservableValue uploadTemplate, DataBindingContext dbc) {
@@ -925,14 +925,6 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		UIUtils.setVisibleAndExclude(showLink, gitLabel);
 	}
 
-	private String substituteVariables(String string) {
-		try {
-			return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(string);
-		} catch (CoreException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-	
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(
