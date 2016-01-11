@@ -151,4 +151,25 @@
       </subsystemMapping>
    </extension>
    
+   
+   
+   <!-- Show in actions for other views -->
+    <extension point="org.eclipse.ui.navigator.navigatorContent">
+       <actionProvider
+          class="org.jboss.tools.openshift.cdk.server.ui.internal.view.CDKActionProvider"
+          id="org.jboss.tools.openshift.cdk.server.ui.internal.view.CDKActionProvider">
+          <enablement>
+             <instanceof value="org.eclipse.wst.server.core.IServer"></instanceof>
+          </enablement>
+       </actionProvider>
+    </extension>
+  	<extension point="org.eclipse.ui.navigator.viewer">
+    <viewerActionBinding
+          viewerId="org.eclipse.wst.server.ui.ServersView">
+       <includes>
+          <actionExtension
+                pattern="org.jboss.tools.openshift.cdk.server.ui.internal.view.CDKActionProvider"/>
+       </includes>
+    </viewerActionBinding>
+	</extension>
 </plugin>
