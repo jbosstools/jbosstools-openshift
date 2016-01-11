@@ -21,6 +21,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
@@ -87,7 +88,8 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	protected void updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject deployProject) {
 		if (StringUtils.isEmpty(sourcePath)
 				&& ProjectUtils.isAccessible(deployProject)) {
-			sourcePath = deployProject.getLocation().toString();
+			String projectPath = deployProject.getFullPath().toString();
+			sourcePath = VariablesHelper.addWorkspacePrefix(projectPath);
 		}
 		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
 	}

@@ -27,4 +27,7 @@ public class OpenShiftCoreException extends RuntimeException {
 		super(MessageFormat.format(message, arguments), cause);	
 	}
 	
+	public OpenShiftCoreException(Throwable cause) {
+		super(cause);	
+	}
 }

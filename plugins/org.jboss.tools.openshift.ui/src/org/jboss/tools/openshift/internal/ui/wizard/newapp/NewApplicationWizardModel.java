@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -99,13 +99,13 @@ public class NewApplicationWizardModel
 			return null;
 		}
 		ITemplate uploadedTemplate = null;
+		filename = VariablesHelper.replaceVariables(filename);
 		try {
-			filename = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(filename);
 			if (!Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
 			uploadedTemplate = resourceFactory.create(createInputStream(filename));
-		} catch (FileNotFoundException | CoreException e) {
+		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
