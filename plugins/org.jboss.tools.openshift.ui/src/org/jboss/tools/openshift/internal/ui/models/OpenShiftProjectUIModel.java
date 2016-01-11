@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
 
+import org.jboss.tools.openshift.common.core.IRefreshable;
+
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
@@ -23,16 +25,24 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel {
+public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable {
 	
 	public static final String PROP_LOADING = "loading";
 	private final IResourceUIModel resourceModel;
+	private IRefreshable refreshable;
 
 	public OpenShiftProjectUIModel(IProject project) {
 		super();
 		resourceModel = new OpenShiftResourceUIModel(project);
 	}
 	
+	
+	@Override
+	public void refresh() {
+		refreshable.refresh();
+	}
+
+
 	@Override
 	public IProject getProject() {
 		return getResource();
@@ -79,6 +89,11 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 		default:
 		}
 
+	}
+
+
+	public void setRefreshable(IRefreshable refreshable) {
+		this.refreshable = refreshable;
 	}
 	
 }
