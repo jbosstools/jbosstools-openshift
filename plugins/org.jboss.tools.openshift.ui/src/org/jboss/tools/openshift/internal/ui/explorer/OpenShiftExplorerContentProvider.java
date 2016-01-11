@@ -61,6 +61,8 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			}
 		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
 			handleProjectChanges((Connection) connection, oldValue, newValue);
+		} else if (ConnectionProperties.PROPERTY_REFRESH.equals(property)) {
+			refreshViewer(newValue);
 		} else {
 			super.handleConnectionChanged(connection, property, oldValue, newValue);
 		}
@@ -140,8 +142,9 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
 				for (IProject project :  connection.<IProject>getResources(ResourceKind.PROJECT)) {
-					IProjectAdapter model = new OpenShiftProjectUIModel(project);
+					OpenShiftProjectUIModel model = new OpenShiftProjectUIModel(project);
 					DeploymentResourceMapper mapper = new DeploymentResourceMapper(ConnectionsRegistryUtil.getConnectionFor(project), model);
+					model.setRefreshable(mapper);
 					deploymentCache.put(project.getName(), mapper);
 				}
 				return deploymentCache.values().stream().map(m->m.getProjectAdapter()).toArray();

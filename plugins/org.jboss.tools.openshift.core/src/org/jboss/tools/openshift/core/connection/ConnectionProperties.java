@@ -20,4 +20,5 @@ public interface ConnectionProperties {
 	
 	static final String PROPERTY_RESOURCE = "openshift.resource";
 	static final String PROPERTY_PROJECTS = "openshift.projects";
+	static final String PROPERTY_REFRESH = "openshift.resource.refresh";
 }
