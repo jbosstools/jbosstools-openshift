@@ -61,6 +61,13 @@ public class WatchManager {
 	public static WatchManager getInstance() {
 		return Holder.instance;
 	}
+	
+	public 	void stopWatch(IProject project) {
+		if(watches.containsKey(project)){
+			watches.remove(project).stop();
+		}
+	}
+
 	public void startWatch(final IProject project) {
 		if(!watches.containsKey(project)){
 			startWatch(project, 0, 0);
@@ -219,4 +226,5 @@ public class WatchManager {
 		}
 		
 	}
+
 }

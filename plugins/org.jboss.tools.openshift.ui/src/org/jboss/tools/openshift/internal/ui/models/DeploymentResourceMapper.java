@@ -20,12 +20,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.Trace;
@@ -56,7 +58,7 @@ import com.openshift.restclient.model.deploy.IDeploymentTrigger;
  * @author jeff.cantrill
  *
  */
-public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
+public class DeploymentResourceMapper implements OpenShiftAPIAnnotations, IRefreshable{
 	
 	private static enum State {
 		UNINITIALIZED,
@@ -93,49 +95,69 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 		this.conn = conn;
 	}
 	
+	
+	@Override
+	public synchronized void refresh() {
+		WatchManager.getInstance().stopWatch(project);
+		deployments.clear();
+		for (@SuppressWarnings("rawtypes") Map map : new Map[] {resourceToDeployments, imageRefToDeployConfigs, relationMap, cache}) {
+			map.clear();//need to fire events?
+		}
+		state.set(State.UNINITIALIZED);
+		buildDeployments();
+	}
+
+
 	public IProjectAdapter getProjectAdapter() {
 		return this.projectAdapter;
 	}
 	
-	private void buildDeployments() {
-		List<IReplicationController> rcs = load(ResourceKind.REPLICATION_CONTROLLER);
-		List<IService> services = load(ResourceKind.SERVICE);
-		List<IRoute> routes = load(ResourceKind.ROUTE);
-		List<IBuild> builds = load(ResourceKind.BUILD);
-		List<IPod> pods = load(ResourceKind.POD);
-		List<IDeploymentConfig> deployConfigs = load(ResourceKind.DEPLOYMENT_CONFIG);
-		List<IBuildConfig> buildConfigs = load(ResourceKind.BUILD_CONFIG);
-		List<IImageStream> imageStreams = load(ResourceKind.IMAGE_STREAM);
-		
-		imageRefToDeployConfigs = mapImageRefToDeployConfigs(deployConfigs);
-		
-		mapChildToParent(pods, rcs, DEPLOYMENT_NAME);
-		mapChildToParent(pods, deployConfigs, DEPLOYMENT_CONFIG_NAME);
-		mapChildToParent(pods, builds, BUILD_NAME); //build pods	
-		mapChildToParent(rcs, deployConfigs, DEPLOYMENT_CONFIG_NAME);
-		mapChildToParent(builds, buildConfigs, BUILD_CONFIG_NAME, true);
-		
-		mapBuildConfigsToImageStreams(buildConfigs, imageStreams);
-		mapBuildsToDeploymentConfigs(builds);
-		mapServicesToRepControllers(services, rcs);
-		mapServicesToRoutes(services, routes);
-		
-		for (IService service : services) {
-			Deployment deployment = new Deployment(service);
-			Collection<IPod> appPods = getPodsForService(service, pods);
-			Collection<IResource> appRcs = getResourcesFor(service, ResourceKind.REPLICATION_CONTROLLER);
-			Collection<IBuild> appBuilds = getBuildsForPods(appPods, builds);
-			Collection<IResource> appBuildConfigs = getResourcesFor(appBuilds, ResourceKind.BUILD_CONFIG);
-			
-			deployment.setBuildResources(appBuilds);
-			deployment.setPodResources(appPods);
-			deployment.setRouteResources(getResourcesFor(service, ResourceKind.ROUTE));
-			deployment.setBuildConfigResources(appBuildConfigs);
-			deployment.setReplicationControllerResources(appRcs);
-			deployment.setImageStreamResources(getResourcesFor(appBuildConfigs, ResourceKind.IMAGE_STREAM));
-			deployment.setDeploymentConfigResources(getResourcesFor(appPods, ResourceKind.DEPLOYMENT_CONFIG));
-			
-			cacheDeployment(deployment);
+	private synchronized void buildDeployments() {
+		if(state.compareAndSet(State.UNINITIALIZED, State.LOADING)) {
+			try {
+				List<IReplicationController> rcs = load(ResourceKind.REPLICATION_CONTROLLER);
+				List<IService> services = load(ResourceKind.SERVICE);
+				List<IRoute> routes = load(ResourceKind.ROUTE);
+				List<IBuild> builds = load(ResourceKind.BUILD);
+				List<IPod> pods = load(ResourceKind.POD);
+				List<IDeploymentConfig> deployConfigs = load(ResourceKind.DEPLOYMENT_CONFIG);
+				List<IBuildConfig> buildConfigs = load(ResourceKind.BUILD_CONFIG);
+				List<IImageStream> imageStreams = load(ResourceKind.IMAGE_STREAM);
+				
+				imageRefToDeployConfigs = mapImageRefToDeployConfigs(deployConfigs);
+				
+				mapChildToParent(pods, rcs, DEPLOYMENT_NAME);
+				mapChildToParent(pods, deployConfigs, DEPLOYMENT_CONFIG_NAME);
+				mapChildToParent(pods, builds, BUILD_NAME); //build pods	
+				mapChildToParent(rcs, deployConfigs, DEPLOYMENT_CONFIG_NAME);
+				mapChildToParent(builds, buildConfigs, BUILD_CONFIG_NAME, true);
+				
+				mapBuildConfigsToImageStreams(buildConfigs, imageStreams);
+				mapBuildsToDeploymentConfigs(builds);
+				mapServicesToRepControllers(services, rcs);
+				mapServicesToRoutes(services, routes);
+				
+				for (IService service : services) {
+					Deployment deployment = new Deployment(service);
+					Collection<IPod> appPods = getPodsForService(service, pods);
+					Collection<IResource> appRcs = getResourcesFor(service, ResourceKind.REPLICATION_CONTROLLER);
+					Collection<IBuild> appBuilds = getBuildsForPods(appPods, builds);
+					Collection<IResource> appBuildConfigs = getResourcesFor(appBuilds, ResourceKind.BUILD_CONFIG);
+					
+					deployment.setBuildResources(appBuilds);
+					deployment.setPodResources(appPods);
+					deployment.setRouteResources(getResourcesFor(service, ResourceKind.ROUTE));
+					deployment.setBuildConfigResources(appBuildConfigs);
+					deployment.setReplicationControllerResources(appRcs);
+					deployment.setImageStreamResources(getResourcesFor(appBuildConfigs, ResourceKind.IMAGE_STREAM));
+					deployment.setDeploymentConfigResources(getResourcesFor(appPods, ResourceKind.DEPLOYMENT_CONFIG));
+					
+					cacheDeployment(deployment);
+				}
+				WatchManager.getInstance().startWatch(project);
+			}finally {
+				state.set(State.LOADED);
+			}
 		}
 	}
 	
@@ -196,7 +218,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	private <T extends IResource> List<T> load(String kind){
 		List<T> resources = conn.getResources(kind, project.getName());
 		resources.forEach(r->cache.put(getCacheKey(r), r));
-		projectAdapter.setResources(resources, kind);
+		projectAdapter.setResources(new HashSet<>(resources), kind);
 		return resources;
 	}
 	
@@ -292,17 +314,7 @@ public class DeploymentResourceMapper implements OpenShiftAPIAnnotations{
 	}
 	
 	public Collection<Deployment> getDeployments(){
-		if(state.compareAndSet(State.UNINITIALIZED, State.LOADING)) {
-			synchronized (this) {
-				try {
-					buildDeployments();
-					WatchManager.getInstance().startWatch(project);
-				//catch an exception here and keep the original state?
-				}finally {
-					state.set(State.LOADED);
-				}
-			}
-		}
+		buildDeployments();
 		return Collections.unmodifiableCollection(deployments);
 	}
 

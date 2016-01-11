@@ -12,12 +12,16 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
 
+import org.jboss.tools.openshift.common.core.IRefreshable;
+
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-public interface IProjectAdapter extends IResourcesUIModel{
+public interface IProjectAdapter extends IResourcesUIModel, IRefreshable{
 	
 	IProject getProject();
 
 	<T extends IResource> void setResources(Collection<T> resources, String kind);
+	
+	
 }
