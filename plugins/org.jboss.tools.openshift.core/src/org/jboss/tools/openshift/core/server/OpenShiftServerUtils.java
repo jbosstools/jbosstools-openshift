@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.common.core.server.ServerUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -225,7 +226,12 @@ public class OpenShiftServerUtils {
 	
 	public static String getSourcePath(IServerAttributes attributes) {
 		// TODO: implement override project settings with server settings
-		return getProjectAttribute(ATTR_SOURCE_PATH, null, getDeployProject(attributes));
+		String rawSourcePath = getProjectAttribute(ATTR_SOURCE_PATH, null, getDeployProject(attributes));
+		if (org.apache.commons.lang.StringUtils.isBlank(rawSourcePath)) {
+			return rawSourcePath;
+		}
+		String path = VariablesHelper.replaceVariables(rawSourcePath);
+		return path;
 	}
 
 	public static boolean isOverridesProject(IServerAttributes server) {

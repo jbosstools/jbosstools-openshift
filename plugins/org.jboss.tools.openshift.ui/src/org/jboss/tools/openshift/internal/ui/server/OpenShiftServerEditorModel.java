@@ -50,19 +50,19 @@ public class OpenShiftServerEditorModel extends ServerSettingsViewModel {
 
 	@Override
 	protected org.eclipse.core.resources.IProject getProjectOrDefault(org.eclipse.core.resources.IProject project, List<org.eclipse.core.resources.IProject> projects) {
-		// dont default to 1st element
+		// don't default to 1st element
 		return project;
 	}
 
 	@Override
 	protected IService getServiceOrDefault(IService service, List<ObservableTreeItem> services) {
-		// dont default to 1st element
+		// don't default to 1st element
 		return service;
 	}
 
 	@Override
 	protected List<ObservableTreeItem> loadServices(Connection connection) {
-		// dont load
+		// don't load
 		return Collections.emptyList();
 	}	
 }

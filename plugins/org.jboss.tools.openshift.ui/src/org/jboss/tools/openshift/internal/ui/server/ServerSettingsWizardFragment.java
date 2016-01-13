@@ -25,9 +25,11 @@ import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -40,6 +42,7 @@ import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -48,7 +51,9 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -64,6 +69,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
@@ -71,6 +79,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
@@ -347,7 +356,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dialog = new DirectoryDialog(shell, SWT.OPEN);
 				dialog.setText("Choose the source path to sync");
-				dialog.setFilterPath(model.getSourcePath());
+				String sourcePath = VariablesHelper.replaceVariables(model.getSourcePath(), true);
+				dialog.setFilterPath(sourcePath);
 				String filepath = dialog.open();
 				if (!StringUtils.isEmpty(filepath)) {
 					model.setSourcePath(filepath);
@@ -361,15 +371,59 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DirectoryDialog dialog = new DirectoryDialog(shell, SWT.OPEN);
-				dialog.setText("Choose the source path to sync");
-				dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
-				String filepath = dialog.open();
-				if (!StringUtils.isEmpty(filepath)) {
-					model.setSourcePath(filepath);
+				String sourcePath = getWorkspaceRelativePath(model.getSourcePath());
+				ElementTreeSelectionDialog dialog = createWorkspaceFolderDialog(shell, sourcePath);
+				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IContainer) {
+					String path = ((IContainer)dialog.getFirstResult()).getFullPath().toString();
+					String folderPath = VariablesHelper.addWorkspacePrefix(path);
+					model.setSourcePath(folderPath);
 				}
 			}
 		};
+	}
+
+	private String getWorkspaceRelativePath(String sourcePath) {
+		if (org.apache.commons.lang.StringUtils.isBlank(sourcePath) || sourcePath.contains("{")) {
+			return sourcePath;
+		}
+		IPath absolutePath = new Path(sourcePath);
+		IContainer container = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(absolutePath);
+		if (container != null) {
+			return container.getFullPath().toString();
+		}
+		return null;
+	}
+
+	private ElementTreeSelectionDialog createWorkspaceFolderDialog(Shell shell, String selectedFile) {
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+				shell,
+				new WorkbenchLabelProvider(),
+				new WorkbenchContentProvider()
+		);
+		dialog.setTitle("Select a workspace folder");
+		dialog.setMessage("Select a workspace folder to deploy");
+		dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
+		dialog.addFilter(new ViewerFilter() {
+
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return element instanceof IContainer;
+			}
+		});
+		dialog.setAllowMultiple( false );
+		org.eclipse.core.resources.IResource res = model.getDeployProject();
+		if (org.apache.commons.lang.StringUtils.isNotBlank(selectedFile)) {
+			String path = VariablesHelper.getWorkspacePath(selectedFile);
+			org.eclipse.core.resources.IResource member = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+			if (member != null) {
+				res = member;
+			}
+		}
+		if (res != null) {
+			dialog.setInitialSelection(res);
+		}
+
+		return dialog;
 	}
 
 	private void createDeploymentControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
