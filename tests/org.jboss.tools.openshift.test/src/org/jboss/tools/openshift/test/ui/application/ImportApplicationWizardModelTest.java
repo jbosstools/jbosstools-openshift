@@ -27,6 +27,12 @@ public class ImportApplicationWizardModelTest {
 		assertEquals("bar", ImportApplicationWizardModel.extractProjectNameFromURI("http://foo/bar.git"));
 		assertEquals("bar", ImportApplicationWizardModel.extractProjectNameFromURI("http://foo/bar/"));
 		assertEquals("ba.r", ImportApplicationWizardModel.extractProjectNameFromURI("http://foo/ba.r"));
+
+		assertEquals("quickstart", ImportApplicationWizardModel.extractProjectNameFromURI("https://github.com/akram/quickstart"));
+		assertEquals("quickstart", ImportApplicationWizardModel.extractProjectNameFromURI("https://github.com/akram/quickstart.git"));
+		assertEquals("quickstart", ImportApplicationWizardModel.extractProjectNameFromURI("https://github.com/akram/quickstart/"));
+		assertEquals("quickstart", ImportApplicationWizardModel.extractProjectNameFromURI("https://github.com/akram/quickstart.git/"));
+
 	}
 
 }

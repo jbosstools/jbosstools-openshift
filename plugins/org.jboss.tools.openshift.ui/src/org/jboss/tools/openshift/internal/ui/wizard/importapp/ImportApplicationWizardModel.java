@@ -34,8 +34,6 @@ public class ImportApplicationWizardModel
 	extends ObservableUIPojo 
 	implements IBuildConfigPageModel, IGitCloningPageModel {
 
-	private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("([^/]+[^(\\.git)/])(/|\\.git)?$");
-
 	private Connection connection;
 	private ConnectionTreeItem connectionItem;
 	private Object selectedItem;
@@ -141,10 +139,21 @@ public class ImportApplicationWizardModel
 	public static String extractProjectNameFromURI(String uri) {
 		String projectName = null;
 		if (uri != null) {
-			Matcher matcher = PROJECT_NAME_PATTERN.matcher(uri);
-			if (matcher.find()
-					&& matcher.group(1) != null) {
-				projectName = matcher.group(1);
+			uri = uri.trim();
+			while(uri.endsWith("/")) {
+				//Trailing slashes do not matter.
+				uri = uri.substring(0, uri.length() - 1);
+			}
+			if(uri.endsWith(".git")) {
+				uri = uri.substring(0, uri.length() - 4);
+				if(uri.endsWith("/")) { 
+					// '/' before .git is error
+					return null;
+				}
+			}
+			int b = uri.lastIndexOf("/");
+			if(b >= 0) {
+				projectName = uri.substring(b + 1);
 			}
 		}
 		return projectName;
