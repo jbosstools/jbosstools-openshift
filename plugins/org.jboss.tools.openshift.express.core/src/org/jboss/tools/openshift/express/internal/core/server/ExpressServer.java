@@ -40,7 +40,7 @@ public class ExpressServer extends DeployableServer implements IURLProvider, IEx
 	
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ExpressConnectionUtils.getDefaultHostUrl()));
-		getServerWorkingCopy().setName(ServerUtils.getServerName(DEFAULT_SERVER_NAME_BASE)+ " 2");
+		getServerWorkingCopy().setName(ServerUtils.getServerName(DEFAULT_SERVER_NAME_BASE + ExpressServerUtils.AT_OPENSHIFT_2));
 		setAttribute(IDeployableServer.SERVER_MODE, OPENSHIFT_MODE_ID);
 	}
 
