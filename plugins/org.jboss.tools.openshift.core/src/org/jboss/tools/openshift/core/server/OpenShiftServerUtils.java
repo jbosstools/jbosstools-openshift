@@ -63,8 +63,9 @@ public class OpenShiftServerUtils {
 		}
 		
 		return new StringBuilder(service.getName())
-				.append(" OpenShift 3 ")
+				.append(" at OpenShift 3 (")
 				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
+				.append(")")
 				.toString();
 	}
 

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.server.ServerUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
@@ -162,8 +163,12 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	
 	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
 		String connectionUrl = getConnectionUrl(getConnection());
+		//Compute default name
+		String baseServerName = OpenShiftServerUtils.getServerName(getService(), getConnection());
+		//Find a free name based on the computed name
+		String serverName = ServerUtils.getServerName(baseServerName);
 		OpenShiftServerUtils.updateServer(
-				OpenShiftServerUtils.getServerName(getService(), getConnection()), connectionUrl, getService(), sourcePath, podPath, deployProject, server);
+				serverName, connectionUrl, getService(), sourcePath, podPath, deployProject, server);
 		OpenShiftServerUtils.updateServerProject(
 				connectionUrl, getService(), sourcePath, podPath, deployProject);
 	}

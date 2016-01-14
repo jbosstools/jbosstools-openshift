@@ -100,6 +100,7 @@ public class ExpressServerUtils {
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String EXPRESS_SERVER_TYPE = "org.jboss.tools.openshift.express.openshift.server.type";//$NON-NLS-1$
 
+	public static final String AT_OPENSHIFT_2 = " at OpenShift 2";
 	/*
 	 * For use in finding not just the effective value, but values stored either
 	 * in project or server
@@ -391,7 +392,7 @@ public class ExpressServerUtils {
 		if (application == null) {
 			return null;
 		}
-		return ServerUtils.getServerName(application.getName())+ " 2";
+		return ServerUtils.getServerName(application.getName() + AT_OPENSHIFT_2);
 	}
 
 	public static IServer createServer(String serverID) throws CoreException {

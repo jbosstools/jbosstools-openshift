@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 public class ServerUtils {
 
 	public static String getServerName(String baseName) {
-		return ServerUtil.getDefaultServerName(baseName + " at OpenShift");
+		return ServerUtil.getDefaultServerName(baseName);
 	}
 
 	/**
