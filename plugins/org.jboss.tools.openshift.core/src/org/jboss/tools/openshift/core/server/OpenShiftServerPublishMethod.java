@@ -31,9 +31,12 @@ import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
+import com.openshift.restclient.OpenShiftContext;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IRSyncable;
 import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
 import com.openshift.restclient.capability.resources.IRSyncable.PodPeer;
@@ -58,6 +61,17 @@ public class OpenShiftServerPublishMethod  {
 	}
 
 	public int publishFinish(IServer server, IProgressMonitor monitor) throws CoreException {
+		return executeRSync(server, monitor);
+	}
+	
+	public int executeRSync(IServer server, IProgressMonitor monitor) throws CoreException {
+		String location = OCBinary.getInstance().getLocation();
+		if( location == null ) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					"Binary for oc-tools could not be found. Please open the OpenShift 3 Preference Page and set the location of the oc binary."));
+		}
+		
+		
 		IService service = OpenShiftServerUtils.getService(server);
 		if (service == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(

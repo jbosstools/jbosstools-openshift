@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.internal.core;
 
 import java.util.Collection;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
@@ -22,6 +24,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
+import org.jboss.tools.openshift.internal.core.server.resources.OpenshiftResourceChangeListener;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -33,6 +36,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	private static OpenShiftCoreActivator instance;
 	private static BundleContext context;
 	
+	private OpenshiftResourceChangeListener resourceChangeListener;
 	public OpenShiftCoreActivator() {
 		super();
 		instance = this;
@@ -86,11 +90,17 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 				}
 			}
         });
+        
+        // A clone of the auto-publish thread implementation
+        resourceChangeListener = new OpenshiftResourceChangeListener();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
+
 	}
 
     @Override
 	public void stop(BundleContext context) throws Exception {
     	saveAllConnections();
+    	ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
     	super.stop(context);
 	}
 

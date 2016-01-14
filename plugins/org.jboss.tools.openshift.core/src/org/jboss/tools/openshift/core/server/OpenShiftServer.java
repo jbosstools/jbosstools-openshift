@@ -14,8 +14,10 @@ import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.IURLProvider;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServer;
 import org.jboss.ide.eclipse.as.core.server.internal.IExtendedPropertiesProvider;
@@ -31,6 +33,11 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 
 	public static final String OPENSHIFT3_MODE_ID = "openshift3";
 
+	public void setDefaults(IProgressMonitor monitor) {
+		super.setDefaults(monitor);
+		setAttribute(Server.PROP_AUTO_PUBLISH_SETTING, Server.AUTO_PUBLISH_RESOURCE);
+	}
+	
 	@Override
     public IModule[] getRootModules(IModule module) throws CoreException {
         IStatus status = canModifyModules(new IModule[] { module }, null);
