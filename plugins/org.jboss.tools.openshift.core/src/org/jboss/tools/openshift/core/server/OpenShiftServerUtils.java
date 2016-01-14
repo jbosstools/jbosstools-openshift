@@ -119,7 +119,7 @@ public class OpenShiftServerUtils {
 
 	private static void updateServer(IServerWorkingCopy server) {
 		server.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT3_MODE_ID);
-		((ServerWorkingCopy) server).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
+		((ServerWorkingCopy) server).setAutoPublishSetting(Server.AUTO_PUBLISH_RESOURCE);
 		server.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, String.valueOf(Boolean.TRUE));
 		server.setAttribute(IJBossToolingConstants.WEB_PORT, 80);
 		server.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, Boolean.FALSE.toString());
