@@ -200,7 +200,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
 	}
 
-
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(authorize()) {
@@ -209,7 +208,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}
 		return false;
 	}
-	
+
 	private boolean authorize() {
 		client.setAuthorizationStrategy(getAuthorizationStrategy());
 		try {
@@ -220,7 +219,9 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 				credentialsPrompter.promptAndAuthenticate(this, null);
 			} else {
 				setToken(context.getToken());
-				client.setAuthorizationStrategy(new TokenAuthorizationStrategy(getToken()));
+				// TODO: move this logic to openshift-restclient-java
+				TokenAuthorizationStrategy tokenStrategy = new TokenAuthorizationStrategy(getToken(), context.getUser().getName());
+				client.setAuthorizationStrategy(tokenStrategy);
 				updateCredentials(context);
 			}
 		} catch (UnauthorizedException e) {
