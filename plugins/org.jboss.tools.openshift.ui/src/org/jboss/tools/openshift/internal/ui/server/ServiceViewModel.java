@@ -112,8 +112,9 @@ public class ServiceViewModel extends ObservablePojo {
 		return serviceItems;
 	}
 
-	private void setServiceItems(List<ObservableTreeItem> items) {
-		update(this.connection, this.connections, this.service, items);
+	public void setServiceItems(List<ObservableTreeItem> items) {
+		IService newService = containsService(items, this.service) ? this.service : null;
+		update(this.connection, this.connections, newService, items);
 	}
 
 	public IService getService() {
@@ -124,11 +125,27 @@ public class ServiceViewModel extends ObservablePojo {
 		update(this.connection, this.connections, service, this.serviceItems);
 	}
 
-	protected IService getServiceOrDefault(IService service, List<ObservableTreeItem> services) {
-		if (service == null) {
-			service = getDefaultService(services);
+	protected IService getServiceOrDefault(IService service, List<ObservableTreeItem> items) {
+		if (service == null || !containsService(items, service)) {
+			service = getDefaultService(items);
 		}
 		return service;
+	}
+
+	private boolean containsService(List<ObservableTreeItem> items, IService service) {
+		if (service == null || items == null || items.size() == 0) {
+			return false;
+		}
+		for (ObservableTreeItem item : items) {
+			if (item.getModel() instanceof IService) {
+				if(item.getModel() == service) {
+					return true;
+				};
+			} else if(containsService(item.getChildren(), service)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private IService getDefaultService(List<ObservableTreeItem> items) {

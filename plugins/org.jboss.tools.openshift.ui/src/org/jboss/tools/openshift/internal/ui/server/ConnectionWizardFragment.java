@@ -120,7 +120,7 @@ public class ConnectionWizardFragment extends WizardFragment {
 			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class), Connection.class);
 			this.wizardHandle = wizardHandle;
 			if(connectionChangeListener != null) {
-				getModel().addPropertyChangeListener(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, connectionChangeListener);
+				getModel().addPropertyChangeListener(connectionChangeListener);
 			}
 		}
 
