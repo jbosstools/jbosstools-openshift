@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.databinding.Binding;
@@ -55,6 +56,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -78,6 +80,7 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
+import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -104,13 +107,16 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	private ServerSettingsViewModel model;
 	private PropertyChangeListener connectionChangeListener = new PropertyChangeListener() {
+
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			if(model != null && ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
-				if(evt.getNewValue() == null || evt.getNewValue() instanceof Connection)  {
+			if(model != null 
+					&& ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
+				if(evt.getNewValue() instanceof Connection)  {
 					Connection newConnection = (Connection)evt.getNewValue();
 					IWizardContainer wizardContainer = getWizardContainer();
-					if(newConnection != model.getConnection() && wizardContainer != null) {
+					if(newConnection != model.getConnection() 
+							&& wizardContainer != null) {
 						isLoadingServices = true;
 						getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
 						wizardContainer.updateButtons();
@@ -142,7 +148,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					//do nothing
 				} else {
 					OpenShiftUIActivator.getDefault().getLogger().logError(
-						new IllegalArgumentException("Connection is expected, but " + evt.getNewValue().getClass().getName() + " is fired."));
+						new IllegalArgumentException(NLS.bind("Connection is expected, but {0} is fired.", evt.getNewValue().getClass().getName())));
 				}
 			}
 		}
@@ -314,7 +320,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(sourcePathText);
-		ValueBindingBuilder
+		Binding sourcePathBinding = ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(sourcePathText))
 			.validatingAfterConvert(new IValidator() {
 
@@ -322,17 +328,23 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				public IStatus validate(Object value) {
 					String path = (String) value;
 					if (StringUtils.isEmpty(value)) {
-						return ValidationStatus.cancel("Please provide a path to deploy to on the pod.");
+						return ValidationStatus.cancel("Please provide a local path to deploy from.");
 					}
-					if (!Path.isValidPosixPath(path)) {
-						return ValidationStatus.error("Please provide a valid path to deploy to on the pod");
+					if (!isValidSource(path)) {
+						return ValidationStatus.error("Please provide a valid local path to deploy from.");
 					}
 					return ValidationStatus.ok();
+				}
+
+				private boolean isValidSource(String path) {
+					return new File(path).canRead();
 				}
 				
 			})
 			.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_SOURCE_PATH).observe(model))
 			.in(dbc);
+		ControlDecorationSupport.create(
+				sourcePathBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
 		Button browseSourceButton = new Button(container, SWT.PUSH);
 		browseSourceButton.setText("Browse...");
@@ -373,8 +385,9 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			public void widgetSelected(SelectionEvent e) {
 				String sourcePath = getWorkspaceRelativePath(model.getSourcePath());
 				ElementTreeSelectionDialog dialog = createWorkspaceFolderDialog(shell, sourcePath);
-				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IContainer) {
-					String path = ((IContainer)dialog.getFirstResult()).getFullPath().toString();
+				if (dialog.open() == IDialogConstants.OK_ID 
+						&& dialog.getFirstResult() instanceof IContainer) {
+					String path = ((IContainer) dialog.getFirstResult()).getFullPath().toString();
 					String folderPath = VariablesHelper.addWorkspacePrefix(path);
 					model.setSourcePath(folderPath);
 				}
@@ -407,7 +420,13 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return element instanceof IContainer;
+				if (!(element instanceof IContainer)) {
+					return false;
+				}
+				IContainer container = (IContainer) element;
+				return container.isAccessible()
+						&& !ProjectUtils.isInternalPde(container.getName())
+						&& !ProjectUtils.isInternalRSE(container.getName());
 			}
 		});
 		dialog.setAllowMultiple( false );
@@ -437,7 +456,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		GridDataFactory.fillDefaults()
 			.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(deployPathText);
-		ValueBindingBuilder
+		Binding deployPathBinding = ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(deployPathText))
 			.validatingAfterConvert(new IValidator() {
 
@@ -456,6 +475,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			})
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH).observe(model))
 			.in(dbc);
+		ControlDecorationSupport.create(
+				deployPathBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 	}
 
 	private void createServiceControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
@@ -642,7 +663,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public boolean isComplete() {
-		return !isLoadingServices && uiHook != null && !uiHook.isDisposed() && super.isComplete();
+		return !isLoadingServices && uiHook != null 
+				&& !uiHook.isDisposed() && super.isComplete();
 	}
 
 }
