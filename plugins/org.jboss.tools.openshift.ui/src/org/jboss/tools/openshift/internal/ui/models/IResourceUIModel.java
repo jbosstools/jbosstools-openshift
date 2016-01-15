@@ -17,12 +17,13 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public interface IResourceUIModel {
+public interface IResourceUIModel extends IAncestorable {
 
 	/**
 	 * Get the underlying resource for this display model.
 	 * This will throw a cast exception if it can not be cast
 	 * @return
 	 */
-	<T extends IResource> T getResource();
+	IResource getResource();
+	
 }

@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import java.beans.IndexedPropertyChangeEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
 import org.jboss.tools.openshift.common.core.IRefreshable;
+import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -25,33 +29,53 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable {
+public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable, PropertyChangeListener {
 	
 	public static final String PROP_LOADING = "loading";
-	private final IResourceUIModel resourceModel;
-	private IRefreshable refreshable;
+	
+	private final DeploymentResourceMapper mapper;
+	private final IProject project;
 
-	public OpenShiftProjectUIModel(IProject project) {
-		super();
-		resourceModel = new OpenShiftResourceUIModel(project);
+	public OpenShiftProjectUIModel(Connection conn, IProject project) {
+		super(conn);
+		this.project = project;
+		this.mapper = new DeploymentResourceMapper(conn, this);
+		this.mapper.addPropertyChangeListener(PROP_DEPLOYMENTS, this);
 	}
 	
-	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if(evt  instanceof IndexedPropertyChangeEvent) {
+			fireIndexedPropertyChange(evt.getPropertyName(), ((IndexedPropertyChangeEvent)evt).getIndex(), evt.getOldValue(), evt.getNewValue());
+		}else {
+			firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+		}
+			
+	}
+
+	@Override
+	public Collection<Deployment> getDeployments() {
+		return mapper.getDeployments();
+	}
+
+	@Override
+	public void setDeployments(Collection<Deployment> deployment) {
+	}
+
 	@Override
 	public void refresh() {
-		refreshable.refresh();
+		mapper.refresh();
 	}
-
-
+	
 	@Override
 	public IProject getProject() {
-		return getResource();
+		return this.project;
 	}
 
 
 	@Override
-	public <T extends IResource> T getResource() {
-		return resourceModel.getResource();
+	public IResource getResource() {
+		return getProject();
 	}
 
 	public boolean isLoading() {
@@ -91,9 +115,5 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 
 	}
 
-
-	public void setRefreshable(IRefreshable refreshable) {
-		this.refreshable = refreshable;
-	}
 	
 }

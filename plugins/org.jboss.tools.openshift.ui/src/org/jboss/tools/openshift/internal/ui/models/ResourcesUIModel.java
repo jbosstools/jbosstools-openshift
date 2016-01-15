@@ -29,19 +29,26 @@ import com.openshift.restclient.model.IResource;
 
 public abstract class ResourcesUIModel extends ObservableUIPojo implements IResourcesUIModel{
 
-	private Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
+	protected Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
+	private final Object parent;
 	
-	protected ResourcesUIModel() {
+	protected ResourcesUIModel(Object parent) {
+		this.parent = parent;
 		Arrays.asList(KINDS).forEach(k->resources.put(k, Collections.synchronizedList(new ArrayList<>())));
 	}
 	
 	private <T extends IResource> List<IResourceUIModel> init(Collection<T> resources) {
 		if(resources != null) {
-			return resources.stream().map(r->new OpenShiftResourceUIModel(r)).collect(Collectors.toList());
+			return resources.stream().map(r->new OpenShiftResourceUIModel(r,this)).collect(Collectors.toList());
 		}
 		return new ArrayList<>();
 	}
 	
+	@Override
+	public Object getParent() {
+		return this.parent;
+	}
+
 	@Override
 	public Collection<IResourceUIModel> getImageStreams() {
 		return resources.get(ResourceKind.IMAGE_STREAM);	
@@ -166,9 +173,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		final String property = getProperty(resource.getKind());
 		List<IResourceUIModel> models = resources.get(resource.getKind());
 		if(models != null) {
-			models.add(new OpenShiftResourceUIModel(resource));
-			int index = models.size();
-			fireIndexedPropertyChange(property, index, null, Collections.unmodifiableList(models));
+			List<IResourceUIModel> old = new ArrayList<>(models);
+			models.add(new OpenShiftResourceUIModel(resource, this));
+			int index = models.size() - 1;
+			fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
 		}
 	}
 
@@ -179,8 +187,9 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		if(models != null) {
 			int index = indexOf(models, resource);
 			if(index > -1) {
+				List<IResourceUIModel> old = new ArrayList<>(models);
 				models.remove(index);
-				fireIndexedPropertyChange(property, index, Collections.unmodifiableList(models), null);
+				fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
 			}
 		}
 	}
@@ -193,7 +202,7 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 			int index = indexOf(models, resource);
 			if(index > -1) {
 				List<IResourceUIModel> old = new ArrayList<>(models);
-				models.set(index, new OpenShiftResourceUIModel(resource));
+				models.set(index, new OpenShiftResourceUIModel(resource, this));
 				fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
 			}
 		}

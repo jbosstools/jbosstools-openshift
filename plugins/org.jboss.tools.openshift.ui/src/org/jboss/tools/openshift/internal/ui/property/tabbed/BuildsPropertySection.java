@@ -90,8 +90,8 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 				
 				@Override
 				public int compare(Viewer viewer, Object e1, Object e2) {
-					IBuild build1 = ((IResourceUIModel)e1).getResource();
-					IBuild build2 = ((IResourceUIModel)e2).getResource();
+					IBuild build1 = (IBuild)((IResourceUIModel)e1).getResource();
+					IBuild build2 = (IBuild)((IResourceUIModel)e2).getResource();
 					try {
 						return -1 * DateTimeUtils.parse(build1.getCreationTimeStamp())
 								.compareTo(DateTimeUtils.parse(build2.getCreationTimeStamp()));
@@ -104,25 +104,25 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 			.column(new IColumnLabelProvider<IResourceUIModel>() {
 				@Override
 				public String getValue(IResourceUIModel model) {
-					return model.<IBuild>getResource().getName();
+					return ((IBuild)model.getResource()).getName();
 				}
 			}).name("Name").align(SWT.LEFT).weight(1).minWidth(10).buildColumn()
 			.column(new IColumnLabelProvider<IResourceUIModel>() {
 				@Override
 				public String getValue(IResourceUIModel model) {
-					return model.<IBuild>getResource().getAnnotation(BUILD_NUMBER);
+					return ((IBuild)model.getResource()).getAnnotation(BUILD_NUMBER);
 				}
 			}).name("Build").align(SWT.LEFT).weight(1).minWidth(5).buildColumn()
 			.column(new IColumnLabelProvider<IResourceUIModel>() {
 				@Override
 				public String getValue(IResourceUIModel model) {
-					return model.<IBuild>getResource().getStatus();
+					return ((IBuild)model.getResource()).getStatus();
 				}
 			}).name("Status").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
 			.column(new IColumnLabelProvider<IResourceUIModel>() {
 				@Override
 				public String getValue(IResourceUIModel model) {
-					return DateTimeUtils.formatSince(model.<IBuild>getResource().getCreationTimeStamp());
+					return DateTimeUtils.formatSince(model.getResource().getCreationTimeStamp());
 				}
 			}).name("Started").align(SWT.LEFT).weight(1).buildColumn()
 			.buildViewer();
