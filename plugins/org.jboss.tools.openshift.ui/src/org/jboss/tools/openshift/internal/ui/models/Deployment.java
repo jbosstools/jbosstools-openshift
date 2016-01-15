@@ -27,8 +27,8 @@ public class Deployment extends ResourcesUIModel{
 
 	private final IService service;
 	
-	public Deployment(IService service) {
-		super();
+	public Deployment(IService service, IProjectAdapter parent) {
+		super(parent);
 		this.service = service;
 	}
 	
@@ -48,5 +48,10 @@ public class Deployment extends ResourcesUIModel{
 	@Override
 	public void setServiceResources(Collection<IResource> services) {
 	}
-
+	
+	@Override
+	public String toString() {
+		return service.getNamespace() + "/" + service.getName();
+	}
+	
 }

@@ -17,7 +17,7 @@ import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
-public interface IResourcesUIModel {
+public interface IResourcesUIModel extends IAncestorable {
 
 	static final String PROP_BUILDS = "builds";
 	static final String PROP_BUILD_CONFIGS = "buildConfigs";
@@ -38,7 +38,6 @@ public interface IResourcesUIModel {
 		ResourceKind.SERVICE
 	};
 	
-
 	Collection<IResourceUIModel> getBuilds();
 	void setBuilds(Collection<IResourceUIModel> builds);
 	void setBuildResources(Collection<IBuild> builds);

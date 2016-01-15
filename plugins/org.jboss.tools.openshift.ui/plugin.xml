@@ -24,6 +24,12 @@
 				<or>
 					<instanceof
 						value="com.openshift.restclient.model.IResource" />
+     <instanceof
+           value="org.jboss.tools.openshift.internal.ui.models.IResourcesUIModel">
+     </instanceof>
+     <instanceof
+           value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
+     </instanceof>
 				</or>
 			</possibleChildren>
 			<triggerPoints>
@@ -32,6 +38,12 @@
 						value="org.jboss.tools.openshift.core.connection.Connection" />
 					<instanceof
 						value="com.openshift.restclient.model.IProject" />
+     <instanceof
+           value="org.jboss.tools.openshift.internal.ui.models.IResourcesUIModel">
+     </instanceof>
+     <instanceof
+           value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
+     </instanceof>
 				</or>
 			</triggerPoints>
 		</navigatorContent>
@@ -360,9 +372,14 @@
 						</count>
 						<or>
 						<iterate>
-							<instanceof
-								value="com.openshift.restclient.model.IProject">
-							</instanceof>
+         <or>
+            <instanceof
+                  value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
+            </instanceof>
+            <instanceof
+                  value="com.openshift.restclient.model.IProject">
+            </instanceof>
+         </or>
 						</iterate>
 						</or>
 					</and>
