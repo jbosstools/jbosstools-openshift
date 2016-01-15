@@ -229,7 +229,11 @@ public class EGitUtils {
 	}
 
 	public static File getRepositoryPathFor(IProject project) {
-		return new File(project.getLocationURI().getPath(), Constants.DOT_GIT);
+		File f = new File(project.getLocationURI().getPath());
+		while( f != null && !new File(f, Constants.DOT_GIT).exists()) {
+			f = f.getParentFile();
+		}
+		return f == null ? null : new File(f, Constants.DOT_GIT);
 	}
 
 	public static void addToRepository(IProject project, Repository repository,
@@ -254,7 +258,12 @@ public class EGitUtils {
 	 */
 	public static void connect(IProject project, IProgressMonitor monitor)
 			throws CoreException {
-		connect(project, getRepositoryPathFor(project), monitor);
+		File path = getRepositoryPathFor(project);
+		if( path == null ) {
+			throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, 
+					"Unable to locate git repository for project " + project.getName()));
+		}
+		connect(project, path, monitor);
 	}
 
 	/**
