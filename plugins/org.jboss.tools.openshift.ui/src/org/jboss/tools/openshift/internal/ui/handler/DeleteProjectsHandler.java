@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
 import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
+import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 
 import com.openshift.restclient.model.IProject;
 
@@ -35,9 +36,12 @@ public class DeleteProjectsHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		final IProject project = UIUtils.getFirstElement(selection, IProject.class);
+		IProject project = UIUtils.getFirstElement(selection, IProject.class);
 		if(project == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No project selected that we can delete."); //$NON-NLS-1$
+			IProjectAdapter adapter = UIUtils.getFirstElement(selection, IProjectAdapter.class);
+			if(adapter == null || (project = adapter.getProject()) == null) {
+				return OpenShiftUIActivator.statusFactory().cancelStatus("No project selected that we can delete."); //$NON-NLS-1$
+			}
 		}
 		deleteProject(project, HandlerUtil.getActiveShell(event));
 		return null;

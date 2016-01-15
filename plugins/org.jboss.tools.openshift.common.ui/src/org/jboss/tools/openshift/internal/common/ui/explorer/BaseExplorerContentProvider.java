@@ -34,7 +34,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 /**
  * Base content provider to hold common logic for OpenShift Explorer contributions
  */
-public abstract class BaseExplorerContentProvider implements ITreeContentProvider {
+public abstract class BaseExplorerContentProvider implements ITreeContentProvider{
 
 	private static final String MSG_LOADING_RESOURCES = "Loading OpenShift resources...";
 	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
@@ -206,7 +206,6 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 			public void run() {
 				synchronized (viewer) {
 					viewer.remove(parent, objects);
-					viewer.refresh();
 				}
 			}
 		});

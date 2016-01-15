@@ -8,7 +8,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,70 +23,37 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
+import org.jboss.tools.openshift.internal.core.Trace;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
-import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
+import org.jboss.tools.openshift.internal.ui.models.IAncestorable;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IResource;
 
 /**
  * Contributes OpenShift 3 specific content to the OpenShift explorer view
  * 
  * @author jeff.cantrill
  */
-public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider {
+public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider implements PropertyChangeListener {
 	
-	private Map<String, DeploymentResourceMapper> deploymentCache = new HashMap<>();
+	private Map<String, IProjectAdapter> projectCache = new HashMap<>();
 	
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 		if (!(connection instanceof Connection)) {
 			return;
 		}
-		if(ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
-			if (oldValue == null && newValue != null) {
-				// add
-				handleAddResource((IResource) newValue);
-				
-			} else if (oldValue != null && newValue == null) {
-				// delete
-				handleRemoveResource((IResource) oldValue);
-			} else {
-				//update
-				handleUpdateResource((IResource) newValue);
-				updateChildrenFromViewer(newValue);
-			}
-		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
+		if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
 			handleProjectChanges((Connection) connection, oldValue, newValue);
 		} else if (ConnectionProperties.PROPERTY_REFRESH.equals(property)) {
 			refreshViewer(newValue);
-		} else {
-			super.handleConnectionChanged(connection, property, oldValue, newValue);
-		}
-	}
-	
-	private void handleUpdateResource(IResource resource) {
-		final String project = resource.getNamespace();
-		if(!deploymentCache.containsKey(project)) return;
-		deploymentCache.get(project).update(resource);
-	}
-	
-	private void handleAddResource(IResource resource) {
-		final String project = resource.getNamespace();
-		if(!deploymentCache.containsKey(project)) return;
-		deploymentCache.get(project).add(resource);
-	}
-	
-	private void handleRemoveResource(IResource resource) {
-		final String project = resource.getNamespace();
-		if(!deploymentCache.containsKey(project)) return;
-		deploymentCache.get(project).remove(resource);
+		} 
 	}
 	
 	//TODO: Handle updates to a project when needed.  Back-end doesnt support edit of resources(most?) now
@@ -91,21 +61,25 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	private void handleProjectChanges(Connection connection, Object oldValue, Object newValue) {
 		List<IProject> newProjects = (List<IProject>) newValue;
 		List<IProject> oldProjects = (List<IProject>) oldValue;
-		final List<IProject> added = new ArrayList<IProject>();
-		final List<IProject> removed = new ArrayList<IProject>();
+		final List<IProjectAdapter> added = new ArrayList<>();
+		final List<IProjectAdapter> removed = new ArrayList<>();
 		ListDiff diffs = Diffs.computeListDiff(oldProjects, newProjects);
 		diffs.accept(new ListDiffVisitor() {
 			
 			@Override
 			public void handleRemove(int index, Object element) {
 				IProject project = (IProject) element;
-				removed.add(project);
+				if(project != null) {
+					final String key = getCacheKey(connection, project);
+					if(projectCache.containsKey(key)) {
+						removed.add(projectCache.remove(key));
+					}
+				}
 			}
 			
 			@Override
 			public void handleAdd(int index, Object element) {
-				IProject project = (IProject) element;
-				added.add(project);
+				added.add(newProjectAdapter(connection, (IProject) element));
 			}
 		});
 		removeChildrenFromViewer(connection, removed.toArray());
@@ -141,24 +115,93 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		try{
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
-				for (IProject project :  connection.<IProject>getResources(ResourceKind.PROJECT)) {
-					OpenShiftProjectUIModel model = new OpenShiftProjectUIModel(project);
-					DeploymentResourceMapper mapper = new DeploymentResourceMapper(ConnectionsRegistryUtil.getConnectionFor(project), model);
-					model.setRefreshable(mapper);
-					deploymentCache.put(project.getName(), mapper);
+				Collection<IProject> projects = connection.<IProject>getResources(ResourceKind.PROJECT);
+				Collection<IProjectAdapter> children = new ArrayList<>();
+				for (IProject project : projects) {
+					children.add(newProjectAdapter(connection, project));
 				}
-				return deploymentCache.values().stream().map(m->m.getProjectAdapter()).toArray();
+				return children.toArray();
 			} else if (parentElement instanceof IProjectAdapter) {
-				IProject project = ((IProjectAdapter) parentElement).getProject();
-				return deploymentCache.get(project.getName()).getDeployments().toArray();
+				IProjectAdapter adapter = (IProjectAdapter) parentElement;
+				Connection conn = (Connection)adapter.getParent();
+				IProject project = adapter.getProject();
+				Collection<Deployment> deployments = new ArrayList<>(projectCache.get(getCacheKey(conn, project)).getDeployments());
+				for (Deployment deployment : deployments) {
+					deployment.addPropertyChangeListener(IProjectAdapter.PROP_PODS, this);
+				}
+				return deployments.toArray();
 			} else if (parentElement instanceof Deployment) {
-				return ((Deployment) parentElement).getPods().toArray();
+				Collection<IResourceUIModel> pods = ((Deployment) parentElement).getPods();
+				return pods.toArray();
 			}
 		
 		} catch (OpenShiftException e) {
 			addException(parentElement, e);
 		}
 		return new Object[0];
+	}
+	
+	private IProjectAdapter newProjectAdapter(Connection connection, IProject project) {
+		OpenShiftProjectUIModel model = new OpenShiftProjectUIModel(connection, project);
+		model.addPropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
+		projectCache.put(getCacheKey(connection, project), model);
+		return model;
+	}
+	
+	private String getCacheKey(Connection connection, IProject project) {
+		return connection.toString() + "/" + project.getName();
+	}
+	
+	@Override
+	public Object getParent(Object element) {
+		if(element instanceof IAncestorable) {
+			return ((IAncestorable) element).getParent();
+		}
+		return null;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		Object oldValue = event.getOldValue();
+		Object newValue = event.getNewValue();
+		if(oldValue instanceof List && newValue instanceof List) {
+			List oldList = (List)oldValue;
+			List newList = (List)newValue;
+			ListDiff diffs = Diffs.computeListDiff(oldList, newList);
+			List removed = new ArrayList();
+			List added = new ArrayList();
+			diffs.accept(new ListDiffVisitor() {
+				
+				@Override
+				public void handleRemove(int index, Object element) {
+					removed.add(element);
+				}
+				
+				@Override
+				public void handleAdd(int index, Object element) {
+					added.add(element);
+				}
+				
+				
+			});
+			for (Object child : removed) {
+				Object parent = getParent(child);
+				Trace.debug("Explorer remove: parent: {0} / child: {1}", parent, child);
+				removeChildrenFromViewer(parent, child);
+				if(child instanceof Deployment) {
+					((Deployment)child).removePropertyChangeListener(IProjectAdapter.PROP_PODS, this);
+				}
+			}
+			for (Object child : added) {
+				Object parent = getParent(child);
+				Trace.debug("Explorer add: parent: {0} / child: {1}", parent, child);
+				if(child instanceof Deployment) {
+					((Deployment)child).addPropertyChangeListener(IProjectAdapter.PROP_PODS, this);
+				}
+				addChildrenToViewer(parent, child);
+			}
+		}
 	}
 
 	@Override

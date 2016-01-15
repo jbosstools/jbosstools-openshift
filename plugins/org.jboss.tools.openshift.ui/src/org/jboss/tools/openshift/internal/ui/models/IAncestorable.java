@@ -10,23 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
-import java.util.Collection;
-
-import org.jboss.tools.openshift.common.core.IRefreshable;
-
-import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IResource;
-
-public interface IProjectAdapter extends IResourcesUIModel, IRefreshable{
+/**
+ * 
+ * @author jeff.cantrill
+ *
+ */
+public interface IAncestorable {
 	
-	static final String PROP_DEPLOYMENTS = "deployments";
-	
-	IProject getProject();
-
-	<T extends IResource> void setResources(Collection<T> resources, String kind);
-	
-	Collection<Deployment> getDeployments();
-	
-	void setDeployments(Collection<Deployment> deployment);
-	
+	Object getParent();
 }
