@@ -14,6 +14,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -44,6 +45,8 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -57,6 +60,8 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -91,7 +96,6 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSup
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
@@ -106,50 +110,36 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	static final String IS_LOADING_SERVICES = "isLoadingServices";
 
 	private ServerSettingsViewModel model;
+	private boolean needsLoadingServices = true;
+
 	private PropertyChangeListener connectionChangeListener = new PropertyChangeListener() {
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			if(model != null 
-					&& ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
-				if(evt.getNewValue() instanceof Connection)  {
-					Connection newConnection = (Connection)evt.getNewValue();
-					IWizardContainer wizardContainer = getWizardContainer();
-					if(newConnection != model.getConnection() 
-							&& wizardContainer != null) {
-						isLoadingServices = true;
-						getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
-						wizardContainer.updateButtons();
-						try {
-							WizardUtils.runInWizard(new Job("Loading services...") {
+			IWizardContainer wizardContainer = getWizardContainer();
+			if(model == null || wizardContainer == null) {
+				//nothing to update;
+				return;
+			}
 
-								@Override
-								protected IStatus run(IProgressMonitor monitor) {
-									try {
-										if(model != null) { //wizard can be closed before start.
-											model.loadResources(newConnection);
-										}
-									} finally {
-										isLoadingServices = false;
-										getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
-									}
-									return Status.OK_STATUS;
-								}
-							}, wizardContainer);
-						} catch (InvocationTargetException | InterruptedException e) {
-							// swallow intentionally
-						} finally {
-							isLoadingServices = false;
-							getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
-							wizardContainer.updateButtons();
-						}
+			if(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
+				if(evt.getNewValue() == null || evt.getNewValue() instanceof Connection)  {
+					Connection newConnection = (Connection)evt.getNewValue();
+					if(newConnection != model.getConnection() && wizardContainer != null) {
+						needsLoadingServices = true;
+						model.setConnection(newConnection);
+						model.setServiceItems(new ArrayList<>());
+						setComplete(false);
+						wizardContainer.updateButtons();
 					}
-				} else if(evt.getNewValue() instanceof NewConnectionMarker) {
-					//do nothing
 				} else {
-					OpenShiftUIActivator.getDefault().getLogger().logError(
-						new IllegalArgumentException(NLS.bind("Connection is expected, but {0} is fired.", evt.getNewValue().getClass().getName())));
+					//do nothing
 				}
+			} else if(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
+				needsLoadingServices = true;
+				model.setServiceItems(new ArrayList<>());
+				setComplete(false);
+				wizardContainer.updateButtons();
 			}
 		}
 	};
@@ -213,6 +203,14 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			model.setDeployProject(selectedProject);
 		}
 
+		((WizardDialog)((WizardPage)handle).getWizard().getContainer()).addPageChangingListener(new IPageChangingListener() {
+			@Override
+			public void handlePageChanging(PageChangingEvent event) {
+				if(event.getTargetPage() == handle) {
+					reloadServices();
+				}
+			}
+		});
 		return composite;
 	}
 	
@@ -632,12 +630,46 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					model.loadResources();
+					needsLoadingServices = false;
 					//initializing the project combo with the project selected in the workspace
 					return Status.OK_STATUS;
 				}
 			}, container);
 		} catch (InvocationTargetException | InterruptedException e) {
 			// swallow intentionally
+		}
+	}
+
+	private void reloadServices() {
+		if(!needsLoadingServices) {
+			return;
+		}
+		IWizardContainer container = getWizardContainer();
+		if(container == null) {
+			//nothing to update
+			return;
+		}
+		try {
+			isLoadingServices = true;
+			getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
+			container.updateButtons();
+			WizardUtils.runInWizard(new Job("Loading services...") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					//only reload services.
+					model.loadResources(model.getConnection());
+					needsLoadingServices = false;
+					return Status.OK_STATUS;
+				}
+			}, container);
+		} catch (InvocationTargetException | InterruptedException e) {
+			// swallow intentionally
+		} finally {
+			isLoadingServices = false;
+			needsLoadingServices = false;
+			getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
+			container.updateButtons();
 		}
 	}
 
@@ -663,8 +695,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public boolean isComplete() {
-		return !isLoadingServices && uiHook != null 
-				&& !uiHook.isDisposed() && super.isComplete();
+		return !isLoadingServices && uiHook != null && !uiHook.isDisposed() && 
+			!needsLoadingServices && model.getService() != null && super.isComplete();
 	}
 
 }
