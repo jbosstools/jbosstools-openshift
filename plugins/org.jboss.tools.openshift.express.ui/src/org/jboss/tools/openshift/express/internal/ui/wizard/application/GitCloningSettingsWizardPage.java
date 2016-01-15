@@ -106,16 +106,21 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults()
 				.numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
 
+		Composite composite = new Composite(cloneGroup, SWT.NONE);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(3).margins(15, 15).applyTo(composite);
 		// Repo Path Management
-		useDefaultRepoPathButton = new Button(cloneGroup, SWT.CHECK);
+		useDefaultRepoPathButton = new Button(composite, SWT.CHECK);
 		useDefaultRepoPathButton.setText("Use default clone destination");
 		useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRepoPathButton);
-		Label labelForRepoPath = new Label(cloneGroup, SWT.NONE);
+		Label labelForRepoPath = new Label(composite, SWT.NONE);
 		labelForRepoPath.setText("Git Clone Destination:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
 				.applyTo(labelForRepoPath);
-		final Text repoPathText = new Text(cloneGroup, SWT.BORDER);
+		final Text repoPathText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(repoPathText);
 		final IObservableValue repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
@@ -123,7 +128,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH).observe(pageModel);
 		ValueBindingBuilder.bind(repoPathObservable).to(repoPathModelObservable).in(dbc);
 
-		Button browseRepoPathButton = new Button(cloneGroup, SWT.PUSH);
+		Button browseRepoPathButton = new Button(composite, SWT.PUSH);
 		browseRepoPathButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
@@ -153,15 +158,15 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
 		// Remote Name Management
-		useDefaultRemoteNameButton = new Button(cloneGroup, SWT.CHECK);
+		useDefaultRemoteNameButton = new Button(composite, SWT.CHECK);
 		useDefaultRemoteNameButton.setText("Use default remote name");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRemoteNameButton);
 
-		this.remoteNameLabel = new Label(cloneGroup, SWT.NONE);
+		this.remoteNameLabel = new Label(composite, SWT.NONE);
 		remoteNameLabel.setText("Remote name:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
 				.applyTo(remoteNameLabel);
-		remoteNameText = new Text(cloneGroup, SWT.BORDER);
+		remoteNameText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults().span(1, 1).align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER)
 				.grab(true, false).applyTo(remoteNameText);
 
