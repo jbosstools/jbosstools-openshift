@@ -134,27 +134,19 @@
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
 			<command
-				commandId="org.eclipse.ui.edit.delete"
-				id="org.jboss.tools.openshift.ui.command.resource.delete"
-				style="push"
-				tooltip="Delete the resource">
+         commandId="org.jboss.tools.openshift.ui.command.resource.delete"
+         id="org.jboss.tools.openshift.ui.command.resource.delete"
+         label="%openshift.command.delete "
+         style="push"
+         tooltip="Delete the resource">
 				<visibleWhen>
 					<and>
 						<count
 							value="1">
 						</count>
-						<or>
-						<iterate>
-							<and>
-								<instanceof
-									value="com.openshift.restclient.model.IResource" />
-								<not>
-									<instanceof
-										value="com.openshift.restclient.model.IProject" />
-								</not>
-							</and>
-						</iterate>
-						</or>
+      <instanceof
+            value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
+      </instanceof>
 					</and>
 				</visibleWhen>
 			</command>
@@ -359,10 +351,11 @@
 			allPopups="false"
         	locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.showIn">
 			<command
-				commandId="org.eclipse.ui.edit.delete"
-				style="push"
-				icon="icons/globe_delete.png"
-				tooltip="Delete Project">
+         commandId="org.eclipse.ui.edit.delete"
+         icon="icons/globe_delete.png"
+         label="%openshift.command.delete"
+         style="push"
+         tooltip="Delete Project">
 				<visibleWhen
 					checkEnabled="false">
 					<and>
@@ -372,14 +365,9 @@
 						</count>
 						<or>
 						<iterate>
-         <or>
-            <instanceof
-                  value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
-            </instanceof>
-            <instanceof
-                  value="com.openshift.restclient.model.IProject">
-            </instanceof>
-         </or>
+         <instanceof
+               value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
+         </instanceof>
 						</iterate>
 						</or>
 					</and>
@@ -601,9 +589,11 @@
 							value="1">
 						</count>
 						<iterate>
-							<instanceof
-								value="com.openshift.restclient.model.IProject">
-							</instanceof>
+         <or>
+            <instanceof
+                  value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
+            </instanceof>
+         </or>
 						</iterate>
 					</and>
 				</activeWhen>
@@ -791,11 +781,6 @@
 			description="Manage Projects"
 			id="org.jboss.tools.openshift.ui.command.project.manage"
 			name="%openshift.command.project.manage">
-		</command>
-		<command
-			description="Delete Project"
-			id="org.jboss.tools.openshift.ui.command.project.delete"
-			name="%openshift.command.project.delete">
 		</command>
 		<command
 			description="Refresh the Resource"
