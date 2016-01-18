@@ -82,8 +82,8 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				added.add(newProjectAdapter(connection, (IProject) element));
 			}
 		});
-		removeChildrenFromViewer(connection, removed.toArray());
-		addChildrenToViewer(connection, added.toArray());
+		removed.forEach(r->removeChildrenFromViewer(connection, r));
+		added.forEach(a->addChildrenToViewer(connection, a));
 	}
 	
 	@Override
@@ -197,9 +197,16 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				Object parent = getParent(child);
 				Trace.debug("Explorer add: parent: {0} / child: {1}", parent, child);
 				if(child instanceof Deployment) {
-					((Deployment)child).addPropertyChangeListener(IProjectAdapter.PROP_PODS, this);
+					Deployment deployment = (Deployment)child;
+					deployment.addPropertyChangeListener(IProjectAdapter.PROP_PODS, this);
 				}
-				addChildrenToViewer(parent, child);
+				//HACK to fix JBIDE-21458
+				if(parent instanceof IProjectAdapter && oldList.size() == 0 && newList.size() > 0) {
+					IProjectAdapter project = (IProjectAdapter)parent;
+					refreshViewer(project);
+				}else {
+					addChildrenToViewer(parent, child);
+				}
 			}
 		}
 	}
