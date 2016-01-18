@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.internal.core.WatchManager;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
@@ -44,6 +45,7 @@ public class OpenShiftJobs {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				Connection connection = ConnectionsRegistryUtil.getConnectionFor(project);
+				WatchManager.getInstance().stopWatch(project);
 				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
 				IStatus status = super.doRun(monitor);
 				if(status.isOK()) {

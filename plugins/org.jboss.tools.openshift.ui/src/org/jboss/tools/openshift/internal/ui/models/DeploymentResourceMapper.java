@@ -435,6 +435,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			Trace.debug("Trying to add resource to deployment {0}", resource);
 			if(cache.containsKey(getCacheKey(resource))) {
 				Trace.debug("-->Returning early since already processed {0}", resource);
+				return;
 			}
 			cache.put(getCacheKey(resource), resource);
 			projectAdapter.add(resource);
@@ -493,7 +494,8 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		try {
 			Trace.debug("Trying to remove resource to deployment {0}", resource);
 			if(!cache.containsKey(getCacheKey(resource))) {
-				Trace.debug("-->Returning early since already processed {0}", resource);
+				Trace.debug("-->Returning early since dont know about {0}", resource);
+				return;
 			}
 			cache.put(getCacheKey(resource), resource);
 			projectAdapter.remove(resource);
