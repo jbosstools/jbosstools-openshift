@@ -177,7 +177,9 @@ public class WatchManager {
 			state.set(State.STARTING);
 			Trace.info("Starting watch on project {0}", project.getName());
 			IClient client = getClientFor(project);
-			new RestartWatchJob(client).schedule();
+			if(client != null) {
+				new RestartWatchJob(client).schedule();
+			}
 		}
 		
 		private void connect(IClient client) {
@@ -195,7 +197,7 @@ public class WatchManager {
 				}
 			}, null);
 			if(client == null) {
-				throw new OpenShiftException("Unable to start watch.  Project %s does not support IClientCapability", project.getName());
+				Trace.warn("Unable to start watch.  Project {0} does not support IClientCapability", null, project.getName());
 			}
 			return client;
 		}
