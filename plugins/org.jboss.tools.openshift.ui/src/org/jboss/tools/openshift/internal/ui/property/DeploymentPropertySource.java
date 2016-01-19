@@ -10,10 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.property;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -21,7 +18,6 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 
-import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IServicePort;
 
 /**
