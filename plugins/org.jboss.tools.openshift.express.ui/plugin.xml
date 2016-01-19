@@ -1372,6 +1372,23 @@
 							<or>
 								<instanceof
 									value="com.openshift.client.IApplication" />
+							</or>
+						</iterate>
+					</with>
+				</activeWhen>
+     	</handler>
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.applicationDetails"
+              class="org.jboss.tools.openshift.express.internal.ui.command.ApplicationDetailsHandler">
+				<activeWhen>
+					<with
+						variable="selection">
+							<count
+								value="1" />
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<or>
 								<instanceof
 									value="org.eclipse.wst.server.core.IServer" />
 							</or>
@@ -1401,10 +1418,11 @@
 						</and>
 					</with>
 				</visibleWhen>
+
 			</command>
 		</menuContribution-->
 		<!-- servers view: application details -->
-		<!--menuContribution
+		<menuContribution
 				locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.properties">
 			<command
 				commandId="org.jboss.tools.openshift.express.ui.command.applicationDetails"
@@ -1423,7 +1441,8 @@
 					</with>
 				</visibleWhen>
 			</command>
-		</menuContribution-->
+			
+		</menuContribution>
 	</extension>
 	
 	<!-- domain, connection, cartridge properties -->
