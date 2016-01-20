@@ -38,7 +38,7 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 
 	@Override
 	protected void handleEvent(ExecutionEvent event){
-		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getSelectionService().getSelection();
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		IPod pod = UIUtils.getFirstElement(selection, IPod.class);
 		if(pod == null) {
 			pod = getPodFromBuild(selection);

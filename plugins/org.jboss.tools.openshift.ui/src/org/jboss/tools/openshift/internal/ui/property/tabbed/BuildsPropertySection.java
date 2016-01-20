@@ -12,6 +12,7 @@
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
 import java.text.ParseException;
+
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -67,6 +68,7 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 			
 			@Override
 			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+				table.removeSelectionChangedListener(listener);
 			}
 			
 			@Override
@@ -76,6 +78,7 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 			
 			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+				table.addSelectionChangedListener(listener);
 			}
 		});
 	}

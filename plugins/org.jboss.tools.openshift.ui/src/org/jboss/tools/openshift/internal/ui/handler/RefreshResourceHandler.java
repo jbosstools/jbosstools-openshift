@@ -49,7 +49,7 @@ public class RefreshResourceHandler extends AbstractHandler{
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		Object resource = getResource(selection);
 		if (resource != null) {
 			refresh(resource);
@@ -59,11 +59,11 @@ public class RefreshResourceHandler extends AbstractHandler{
 
 	private Object getResource(ISelection selection) {
 		Object resource = UIUtils.getFirstElement(selection, IRefreshable.class);
-		if (resource == null) {
-			resource = UIUtils.getFirstElement(selection, IConnection.class);
-		}
 		if(resource == null) {
 			resource = UIUtils.getFirstElement(selection, IResource.class);
+		}
+		if (resource == null) {
+			resource = UIUtils.getFirstElement(selection, IConnection.class);
 		}
 
 		if(resource == null

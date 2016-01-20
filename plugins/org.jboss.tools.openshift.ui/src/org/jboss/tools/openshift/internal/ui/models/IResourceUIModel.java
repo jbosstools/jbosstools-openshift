@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -17,7 +19,7 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public interface IResourceUIModel extends IAncestorable {
+public interface IResourceUIModel extends IAncestorable, IAdaptable {
 
 	/**
 	 * Get the underlying resource for this display model.
@@ -26,4 +28,14 @@ public interface IResourceUIModel extends IAncestorable {
 	 */
 	IResource getResource();
 	
+	
+
+	@Override
+	default public <R> R getAdapter(Class<R> adapter) {
+		R res = (R) getResource();
+		if (res != null && adapter.isAssignableFrom(res.getClass())) {
+			return res;
+		}
+		return null;
+	}
 }

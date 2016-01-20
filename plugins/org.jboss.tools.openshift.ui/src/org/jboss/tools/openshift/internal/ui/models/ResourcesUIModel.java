@@ -27,7 +27,7 @@ import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
-public abstract class ResourcesUIModel extends ObservableUIPojo implements IResourcesUIModel{
+public abstract class ResourcesUIModel extends ObservableUIPojo implements IResourcesUIModel {
 
 	protected Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
 	private final Object parent;

@@ -49,14 +49,25 @@ import com.openshift.restclient.model.IResource;
  */
 public class OpenShiftResourcePropertySection extends AbstractPropertySection implements OpenShiftAPIAnnotations {
 
-	private static final String CONTEXT_MENU_ID = "popup:org.jboss.tools.openshift.ui.properties.tab.ResourceTab";
 	private TableViewer table;
 	private PropertySheetPage details;
 	private TabbedPropertySheetPage page;
+	private String menuContributionId;
+	
+	public OpenShiftResourcePropertySection() {
+	}
+	
+	public OpenShiftResourcePropertySection(String menuContributionId) {
+		this.menuContributionId = menuContributionId;
+	}
 
 	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		super.createControls(parent, aTabbedPropertySheetPage);
+		createContents(parent, aTabbedPropertySheetPage);
+	}
+		
+	protected void createContents(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		this.page = aTabbedPropertySheetPage;
 		
 		SashForm container = new SashForm(parent, SWT.VERTICAL);
@@ -75,6 +86,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 			
 			@Override
 			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+				table.removeSelectionChangedListener(listener);
 			}
 			
 			@Override
@@ -84,6 +96,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 			
 			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+				table.addSelectionChangedListener(listener);
 			}
 		});
 	}
@@ -130,14 +143,16 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 				details.selectionChanged(null, event.getSelection());
 			}
 		});
-		addContextMenu(table);
+		addContextMenu(viewer);
 		return viewer;
 	}
 	
-	private void addContextMenu(Table table) {
-		IMenuManager contextMenu = UIUtils.createContextMenu(table);
-		UIUtils.registerContributionManager(CONTEXT_MENU_ID, contextMenu, table);
-    }
+	protected void addContextMenu(TableViewer viewer) {
+		if (menuContributionId != null) {
+			final IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getTable());
+			UIUtils.registerContributionManager(menuContributionId, contextMenu, viewer.getTable());
+		}
+	}
 	
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
