@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -63,7 +64,7 @@ import com.openshift.restclient.model.deploy.IDeploymentTrigger;
  * @author jeff.cantrill
  *
  */
-public class DeploymentResourceMapper extends ObservablePojo implements OpenShiftAPIAnnotations, IRefreshable {
+public class DeploymentResourceMapper extends ObservablePojo implements OpenShiftAPIAnnotations, IRefreshable, IRelationCache {
 
 	private static enum State {
 		UNINITIALIZED, LOADING, LOADED
@@ -78,7 +79,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	private final IProjectAdapter projectAdapter;
 	private final IProject project;
 	private final Connection conn;
-	private List<Deployment> deployments = Collections.synchronizedList(new ArrayList<>());
+	private Set<Deployment> deployments = Collections.synchronizedSet(new HashSet<>());
 	private Map<IResource, Collection<Deployment>> resourceToDeployments = new ConcurrentHashMap<>();
 	private Map<String, Collection<IDeploymentConfig>> imageRefToDeployConfigs;
 	private Map<String, Collection<IResource>> relationMap = new ConcurrentHashMap<>();
@@ -135,8 +136,8 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 
 				mapBuildConfigsToImageStreams(buildConfigs, imageStreams);
 				mapBuildsToDeploymentConfigs(builds);
-				mapServicesToRepControllers(services, rcs);
-				mapServicesToRoutes(services, routes);
+
+				mapServices(services, rcs, deployConfigs, routes);
 
 				services.forEach(service -> buildDeploymentFor(service, pods, builds));
 
@@ -147,14 +148,28 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		}
 	}
 	
+	private void mapServices(Collection<IService> services, Collection<IReplicationController> rcs, Collection<IDeploymentConfig> deployConfigs, Collection<IRoute> routes) {
+		mapServicesToRepControllers(services, rcs);
+		mapServicesToDeploymentConfigs(services, deployConfigs);
+		mapServicesToRoutes(services, routes);
+
+	}
+	
 	private void mapPods(Collection<IPod> pods, Collection<IReplicationController> rcs, Collection<IDeploymentConfig> deployConfigs, Collection<IBuild> builds) {
 		mapChildToParent(pods, rcs, DEPLOYMENT_NAME);
 		mapChildToParent(pods, deployConfigs, DEPLOYMENT_CONFIG_NAME);
 		mapChildToParent(pods, builds, BUILD_NAME); // build pods
 	}
 
+		
 	private void buildDeploymentFor(IService service, Collection<IPod> pods, Collection<IBuild> builds) {
 		Deployment deployment = new Deployment(service, this.projectAdapter);
+		initDeployment(deployment, pods, builds);
+		addDeployment(deployment);
+	}
+
+	private void initDeployment(Deployment deployment, Collection<IPod> pods, Collection<IBuild> builds) {
+		IService service = deployment.getService();
 		Collection<IPod> appPods = getPodsForService(service, pods);
 		Collection<IResource> appRcs = getResourcesFor(service, ResourceKind.REPLICATION_CONTROLLER);
 		Collection<IBuild> appBuilds = getBuildsForPods(appPods, builds);
@@ -168,9 +183,8 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		deployment.setBuildConfigResources(appBuildConfigs);
 		deployment.setReplicationControllerResources(appRcs);
 		deployment.setImageStreamResources(getResourcesFor(appBuildConfigs, ResourceKind.IMAGE_STREAM));
-		deployment.setDeploymentConfigResources(getResourcesFor(appPods, ResourceKind.DEPLOYMENT_CONFIG));
-
-		addDeployment(deployment);
+		deployment.setDeploymentConfigResources(getResourcesFor(service, ResourceKind.DEPLOYMENT_CONFIG));
+		mapResourcesFor(deployment);
 	}
 
 	public boolean isLoading() {
@@ -178,7 +192,6 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	}
 
 	private synchronized void addDeployment(Deployment deployment) {
-		mapResourcesFor(deployment);
 		synchronized (deployments) {
 			Collection<Deployment> old = new ArrayList<>(deployments);
 			deployments.add(deployment);
@@ -204,7 +217,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		}
 	}
 
-	private void mapBuildConfigsToImageStreams(List<IBuildConfig> buildConfigs, List<IImageStream> is) {
+	private void mapBuildConfigsToImageStreams(Collection<IBuildConfig> buildConfigs, Collection<IImageStream> is) {
 		Map<String, IImageStream> tagsToStreams = new HashMap<>();
 		for (IImageStream stream : is) {
 			String name = stream.getName();
@@ -217,14 +230,23 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		buildConfigs.forEach(bc -> createRelation(bc, tagsToStreams.get(bc.getBuildOutputReference().getName())));
 	}
 
-	private Collection<IResource> getResourcesFor(IResource resource, String targetKind) {
+	@Override
+	public Collection<IResource> getResourcesFor(IResource resource, String targetKind) {
 		return getResourcesFor(Arrays.asList(resource), targetKind);
 	}
 
+	/**
+	 * Retrieve all the resources that map from the 
+	 * collection of given resources to the specified
+	 * target kind
+	 * @param resources
+	 * @param targetKind
+	 * @return
+	 */
 	private Collection<IResource> getResourcesFor(Collection<? extends IResource> resources, String targetKind) {
 		Collection<IResource> set = new HashSet<>();
 		for (IResource resource : resources) {
-			Collection<IResource> targets = relationMap.get(getKey(resource, targetKind));
+			Collection<IResource> targets = relationMap.get(getRelationKey(resource, targetKind));
 			if (targets != null) {
 				set.addAll(targets);
 			}
@@ -295,7 +317,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	 * @param targetKind
 	 * @return
 	 */
-	private String getKey(IResource resource, String targetKind) {
+	private String getRelationKey(IResource resource, String targetKind) {
 		return getKey(resource.getName(), resource.getKind(), targetKind);
 	}
 
@@ -313,12 +335,12 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	private void createRelation(IResource start, IResource end) {
 		if (start == null || end == null)
 			return;
-		String startKey = getKey(start, end.getKind());
+		String startKey = getRelationKey(start, end.getKind());
 		if (!relationMap.containsKey(startKey)) {
 			relationMap.put(startKey, Collections.synchronizedSet(new HashSet<>()));
 		}
 		relationMap.get(startKey).add(end);
-		String endKey = getKey(end, start.getKind());
+		String endKey = getRelationKey(end, start.getKind());
 		if (!relationMap.containsKey(endKey)) {
 			relationMap.put(endKey, Collections.synchronizedSet(new HashSet<>()));
 		}
@@ -332,7 +354,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	
 	private void mapResourceToDeployment(IResource resource, Deployment deployment) {
 		if (!resourceToDeployments.containsKey(resource)) {
-			resourceToDeployments.put(resource, Collections.synchronizedList(new ArrayList<>()));
+			resourceToDeployments.put(resource, Collections.synchronizedSet(new HashSet<>()));
 		}
 		resourceToDeployments.get(resource).add(deployment);
 	}
@@ -366,6 +388,18 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		}
 	}
 
+	private void mapServicesToDeploymentConfigs(Collection<IService> services, Collection<IDeploymentConfig> dcs) {
+		for (IDeploymentConfig dc : dcs) {
+			Map<String, String> deploymentSelector = dc.getReplicaSelector();
+			for (IService service : services) {
+				Map<String, String> serviceSelector = service.getSelector();
+				if (selectorsOverlap(serviceSelector, deploymentSelector)) {
+					createRelation(service, dc);
+				}
+			}
+		}
+	}
+
 	private Collection<IBuild> getBuildsForPods(Collection<IPod> pods, Collection<IBuild> builds) {
 		Collection<IBuild> buildsForDeployment = new HashSet<IBuild>();
 		List<IDeploymentConfig> dcs = pods.stream().map(p -> getResourcesFor(p, ResourceKind.DEPLOYMENT_CONFIG))
@@ -380,22 +414,24 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		return buildsForDeployment;
 	}
 
-	private Map<String, Collection<IDeploymentConfig>> mapImageRefToDeployConfigs(
-			Collection<IDeploymentConfig> configs) {
-		Map<String, Collection<IDeploymentConfig>> map = new ConcurrentHashMap<>();
+	private Map<String, Collection<IDeploymentConfig>> mapImageRefToDeployConfigs(Collection<IDeploymentConfig> configs) {
+		return mapImageRefToDeployConfigs(new ConcurrentHashMap<>(), configs);
+	}
+	
+	private Map<String, Collection<IDeploymentConfig>> mapImageRefToDeployConfigs(Map<String, Collection<IDeploymentConfig>> map, Collection<IDeploymentConfig> configs){
 		for (IDeploymentConfig dc : configs) {
 			List<IDeploymentTrigger> imageChangeTriggers = filterImageChangeTriggers(dc);
 			for (IDeploymentTrigger trigger : imageChangeTriggers) {
 				String imageRef = imageRef((IDeploymentImageChangeTrigger) trigger, this.project);
 				if (!map.containsKey(imageRef)) {
-					map.put(imageRef, Collections.synchronizedList(new ArrayList<>()));
+					map.put(imageRef, Collections.synchronizedSet(new HashSet<>()));
 				}
 				map.get(imageRef).add(dc);
 			}
 		}
 		return map;
 	}
-
+	
 	private String imageRef(IBuild build, IProject project) {
 		final String kind = build.getOutputKind();
 		if (IMAGE_STREAM_TAG_KIND.equals(kind) || IMAGE_STREAM_IMAGE_KIND.equals(kind)) {
@@ -441,40 +477,71 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			projectAdapter.add(resource);
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD:
-				mapBuildToDeploymentConfig((IBuild) resource);
+				{
+					IBuild build = (IBuild) resource;
+					Collection<IBuild> builds = Arrays.asList(build);
+					mapBuildsToDeploymentConfigs(builds);
+					mapChildToParent(builds, getResourcesOf(ResourceKind.BUILD_CONFIG), BUILD_CONFIG_NAME, true);
+					mapChildToParent(getResourcesOf(ResourceKind.POD), builds, BUILD_NAME); 
+				}
+				break;
+			case ResourceKind.BUILD_CONFIG:
+				IBuildConfig bc = (IBuildConfig) resource;
+				Collection<IBuildConfig> bcs = Arrays.asList(bc);
+				mapChildToParent(getResourcesOf(ResourceKind.BUILD), bcs, BUILD_CONFIG_NAME, true);
+				mapBuildConfigsToImageStreams(bcs, getResourcesOf(ResourceKind.IMAGE_STREAM));
+				break;
+			case ResourceKind.DEPLOYMENT_CONFIG: 
+				IDeploymentConfig dc = (IDeploymentConfig) resource;
+				Collection<IDeploymentConfig> dcs = Arrays.asList(dc);
+				mapImageRefToDeployConfigs(imageRefToDeployConfigs, dcs);
+				mapBuildsToDeploymentConfigs(getResourcesOf(ResourceKind.BUILD));
+				mapServicesToDeploymentConfigs(getResourcesOf(ResourceKind.SERVICE), dcs);
+				mapChildToParent(getResourcesOf(ResourceKind.POD), dcs, DEPLOYMENT_CONFIG_NAME);
+				mapChildToParent(getResourcesOf(ResourceKind.REPLICATION_CONTROLLER), dcs, DEPLOYMENT_CONFIG_NAME);
+				break;
+			case ResourceKind.IMAGE_STREAM:
+				IImageStream is = (IImageStream) resource;
+				mapBuildConfigsToImageStreams(getResourcesOf(ResourceKind.BUILD_CONFIG), Arrays.asList(is));
 				break;
 			case ResourceKind.REPLICATION_CONTROLLER:
-				synchronized (cache) {
+				{
+					IReplicationController rc = (IReplicationController)resource;
+					Collection<IReplicationController> rcs = Arrays.asList(rc);
 					Collection<IDeploymentConfig> deployConfigs = getResourcesOf(ResourceKind.DEPLOYMENT_CONFIG);
-					mapChildToParent(Arrays.asList((IReplicationController)resource), deployConfigs, DEPLOYMENT_CONFIG_NAME);
+					mapChildToParent(getResourcesOf(ResourceKind.POD), rcs, DEPLOYMENT_NAME);
+					mapChildToParent(rcs, deployConfigs, DEPLOYMENT_CONFIG_NAME);
+					mapServicesToRepControllers(getResourcesOf(ResourceKind.SERVICE), rcs);
+					
 				}
 				break;
 			case ResourceKind.SERVICE:
-				synchronized (cache) {
-					List<IService> services = Arrays.asList((IService) resource);
-					mapServicesToRepControllers(services, getResourcesOf(ResourceKind.REPLICATION_CONTROLLER));
-					mapServicesToRoutes(services, getResourcesOf(ResourceKind.ROUTE));
+				{
+					IService service = (IService) resource;
+					mapServices(Arrays.asList(service), getResourcesOf(ResourceKind.REPLICATION_CONTROLLER), getResourcesOf(ResourceKind.DEPLOYMENT_CONFIG), getResourcesOf(ResourceKind.ROUTE));
 					Collection<IPod> pods = getResourcesOf(ResourceKind.POD);
 					Collection<IBuild> builds = getResourcesOf(ResourceKind.BUILD);
-					buildDeploymentFor(services.get(0), pods, builds);
+					buildDeploymentFor(service, pods, builds);
 				}
 				break;
+			case ResourceKind.ROUTE:
+				IRoute route = (IRoute) resource;
+				mapServicesToRoutes(getResourcesOf(ResourceKind.SERVICE), Arrays.asList(route));
+				break;
 			case ResourceKind.POD:
-				synchronized (cache) {
-					IPod pod = (IPod) resource;
-					List<IPod> pods = Arrays.asList(pod);
-					Collection<IReplicationController> rcs = getResourcesOf(ResourceKind.REPLICATION_CONTROLLER);
-					Collection<IDeploymentConfig> deployConfigs = getResourcesOf(ResourceKind.DEPLOYMENT_CONFIG);
-					Collection<IBuild> builds = getResourcesOf(ResourceKind.BUILD);
-					mapPods(pods, rcs, deployConfigs, builds);
-					
-					Map<String,String> podLabels = pod.getLabels();
-					getResourcesOf(ResourceKind.SERVICE)
-						.stream()
-						.filter(s->selectorsOverlap(((IService)s).getSelector(), podLabels))
-						.forEach(s->createRelation(s, pod));
-					
-				}
+				IPod pod = (IPod) resource;
+				List<IPod> pods = Arrays.asList(pod);
+				Collection<IReplicationController> rcs = getResourcesOf(ResourceKind.REPLICATION_CONTROLLER);
+				Collection<IDeploymentConfig> deployConfigs = getResourcesOf(ResourceKind.DEPLOYMENT_CONFIG);
+				Collection<IBuild> builds = getResourcesOf(ResourceKind.BUILD);
+				mapPods(pods, rcs, deployConfigs, builds);
+				
+				Map<String,String> podLabels = pod.getLabels();
+				getResourcesOf(ResourceKind.SERVICE)
+					.stream()
+					.filter(s->selectorsOverlap(((IService)s).getSelector(), podLabels))
+					.forEach(s->createRelation(s, pod));
+				
 				break;
 			}
 			Collection<Deployment> deployments = findDeploymentsFor(resource);
@@ -484,7 +551,6 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 					mapResourceToDeployment(resource, deployment);
 				}
 			}
-			cache.put(getCacheKey(resource), resource);
 		} catch (Exception e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
 		}
@@ -512,10 +578,10 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			}
 			if (RELATIONSHIP_TYPE_MAP.containsKey(resourceKind)) {
 				for (String kind : RELATIONSHIP_TYPE_MAP.get(resourceKind)) {
-					String left = getKey(resource, kind);
+					String left = getRelationKey(resource, kind);
 					if (relationMap.containsKey(left)) {
 						for (IResource target : relationMap.get(left)) {
-							String right = getKey(target, resourceKind);
+							String right = getRelationKey(target, resourceKind);
 							if (relationMap.containsKey(right)) {
 								relationMap.get(right).remove(resource);
 							}
@@ -532,11 +598,10 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 
 	private void removeDeployment(Deployment deployment) {
 		synchronized (deployments) {
-			final int index = deployments.indexOf(deployment);
-			if (index > -1) {
+			if (deployments.contains(deployment)) {
 				Collection<Deployment> old = new ArrayList<>(deployments);
-				deployments.remove(index);
-				fireIndexedPropertyChange(IProjectAdapter.PROP_DEPLOYMENTS, index, old, new ArrayList<>(deployments));
+				deployments.remove(deployment);
+				firePropertyChange(IProjectAdapter.PROP_DEPLOYMENTS, old, new ArrayList<>(deployments));
 			}
 		}
 	}
@@ -548,10 +613,12 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 				Trace.debug("-->Returning early since already have this change: {0}", resource);
 			}
 			projectAdapter.update(resource);
+			cache.put(getCacheKey(resource), resource);
 			Collection<Deployment> deployments = findDeploymentsFor(resource);
 			if (deployments != null && !deployments.isEmpty()) {
 				for (Deployment deployment : deployments) {
 					deployment.update(resource);
+					deployment.reconcile(resource, this);
 				}
 			}
 		} catch (Exception e) {
@@ -577,25 +644,39 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			case ResourceKind.BUILD:
 				path = ResourceKind.DEPLOYMENT_CONFIG;
 				break;
+			case ResourceKind.BUILD_CONFIG:
+				path = ResourceKind.BUILD;
+				break;
 			case ResourceKind.DEPLOYMENT_CONFIG:
-				path = ResourceKind.POD;
+				path = ResourceKind.SERVICE;
+				break;
+			case ResourceKind.IMAGE_STREAM:
+				path = ResourceKind.BUILD_CONFIG;
 				break;
 			case ResourceKind.REPLICATION_CONTROLLER:
-				path = ResourceKind.DEPLOYMENT_CONFIG;
+				path = ResourceKind.SERVICE;
 				break;
 			case ResourceKind.POD:
 				IPod pod = (IPod) resource;
 				if(pod.isAnnotatedWith(BUILD_NAME)) {
-					return getDeploymentsFor(cache.get(getCacheKey(pod.getAnnotation(BUILD_NAME), ResourceKind.BUILD)));
+					String cacheKey = getCacheKey(pod.getAnnotation(BUILD_NAME), ResourceKind.BUILD);
+					if(!cache.containsKey(cacheKey)) {
+						break;
+					}
+					return getDeploymentsFor(cache.get(cacheKey));
 				}else if(pod.isAnnotatedWith(DEPLOYMENT_NAME)) {
-					return getDeploymentsFor(cache.get(getCacheKey(pod.getAnnotation(DEPLOYMENT_NAME), ResourceKind.REPLICATION_CONTROLLER)));
+					String cacheKey = getCacheKey(pod.getAnnotation(DEPLOYMENT_NAME), ResourceKind.REPLICATION_CONTROLLER);
+					if(!cache.containsKey(cacheKey)) {
+						break;
+					}
+					return getDeploymentsFor(cache.get(cacheKey));
 				}
 			default:
 			}
 			if (path != null) {
-				String key = getKey(resource, path);
+				String key = getRelationKey(resource, path);
 				if (relationMap.containsKey(key) && relationMap.get(key) != null) {
-					deployments = new ArrayList<>();
+					deployments = new HashSet<>();
 					for (IResource relation : relationMap.get(key)) {
 						deployments.addAll(findDeploymentsFor(relation));
 					}
@@ -603,7 +684,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 				}
 			}
 		}
-		return Collections.emptyList();
+		return Collections.emptySet();
 	}
 	
 	private Collection<Deployment> getDeploymentsFor(IResource resource){

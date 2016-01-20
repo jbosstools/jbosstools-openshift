@@ -214,7 +214,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		asyncViewerRefresh(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
-					viewer.refresh(objects);
+					viewer.update(objects, null);
 				}
 			}
 		});
