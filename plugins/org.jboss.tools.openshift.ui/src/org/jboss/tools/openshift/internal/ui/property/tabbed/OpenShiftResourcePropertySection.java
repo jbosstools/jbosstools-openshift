@@ -52,6 +52,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	private TableViewer table;
 	private PropertySheetPage details;
 	private TabbedPropertySheetPage page;
+	private ISelectionProvider selectionProvider;
 	private String menuContributionId;
 	
 	public OpenShiftResourcePropertySection() {
@@ -66,7 +67,16 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		super.createControls(parent, aTabbedPropertySheetPage);
 		createContents(parent, aTabbedPropertySheetPage);
 	}
+
+	@Override
+	public void aboutToBeShown() {
+		super.aboutToBeShown();
+		if (page != null) {
+			page.getSite().setSelectionProvider(selectionProvider);
+		}
 		
+	}
+	
 	protected void createContents(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		this.page = aTabbedPropertySheetPage;
 		
@@ -78,7 +88,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 
 		details = new PropertySheetPage();
 		details.createControl(container);
-		aTabbedPropertySheetPage.getSite().setSelectionProvider(new ISelectionProvider() {
+		selectionProvider = new ISelectionProvider() {
 			
 			@Override
 			public void setSelection(ISelection selection) {
@@ -98,7 +108,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {
 				table.addSelectionChangedListener(listener);
 			}
-		});
+		};
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {

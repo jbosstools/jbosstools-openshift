@@ -119,8 +119,8 @@
 							<or>
 								<instanceof
 									value="org.jboss.tools.openshift.common.core.IRefreshable" />
-								<instanceof
-									value="com.openshift.restclient.model.IResource" />
+								<adapt
+									type="com.openshift.restclient.model.IResource" />
 								<instanceof 
 								  value="com.openshift.restclient.OpenShiftException" />
 							</or>
@@ -504,6 +504,12 @@
            style="push">
      </command>
      <separator visible="true" name="org.jboss.tools.openshift.ui.separator3"/>
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <command
            commandId="org.eclipse.ui.edit.delete"
            style="push" />
@@ -537,6 +543,12 @@
         </parameter>
      </command>
      <separator visible="true" name="org.jboss.tools.openshift.ui.separator6" />
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -555,7 +567,13 @@
         mnemonic="C" />
       </menu>
       <separator visible="true" name="org.jboss.tools.openshift.ui.separator7" />
-     <command
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
+       <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
      <command
@@ -581,6 +599,12 @@
         commandId="org.jboss.tools.openshift.ui.command.portforwarding"
         style="push" />
      <separator visible="true" name="org.jboss.tools.openshift.ui.separator9"/>
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -599,6 +623,12 @@
         mnemonic="C" />
       </menu>
       <separator visible="true" name="org.jboss.tools.openshift.ui.separator10"/>
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -617,6 +647,12 @@
         mnemonic="C" />
       </menu>
       <separator visible="true" name="org.jboss.tools.openshift.ui.separator11"/>
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -641,6 +677,12 @@
         mnemonic="C" />
       </menu>
       <separator visible="true" name="org.jboss.tools.openshift.ui.separator12" />
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -650,7 +692,32 @@
   </menuContribution>
   <menuContribution
         allPopups="false"
-        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.ResourceTab">
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.ServicesTab">
+     <menu label="%openshift.explorer.properties.menus.showIn">
+       <command
+        commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
+        icon="icons/open-browser.gif"
+        label="Web Browser"
+        mnemonic="B" />
+        <command
+        commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
+        icon="icons/open-web-console.gif"
+        label="Web Console"
+        mnemonic="C" />
+      </menu>
+      <separator visible="true" name="org.jboss.tools.openshift.ui.separator13"/>
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.editresource"
+           style="push" />
+     <command
+           commandId="org.eclipse.ui.edit.delete"
+           style="push" />
   </menuContribution>
 	</extension>
 	<extension
