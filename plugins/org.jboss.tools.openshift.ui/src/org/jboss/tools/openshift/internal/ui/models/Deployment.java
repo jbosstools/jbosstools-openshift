@@ -13,6 +13,9 @@ package org.jboss.tools.openshift.internal.ui.models;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.core.runtime.IAdaptable;
+
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
@@ -23,7 +26,7 @@ import com.openshift.restclient.model.IService;
  * @author jeff.cantrill
  *
  */
-public class Deployment extends ResourcesUIModel{
+public class Deployment extends ResourcesUIModel implements IAdaptable {
 
 	private final IService service;
 	
@@ -53,6 +56,20 @@ public class Deployment extends ResourcesUIModel{
 	public String toString() {
 		return service.getNamespace() + "/" + service.getName();
 	}
+
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (IBuildConfig.class.equals(adapter)) {
+			Collection<IResourceUIModel> buildConfigs = getBuildConfigs();
+			if (buildConfigs.size() == 1) {
+				return (T) buildConfigs.iterator().next().getResource();
+			}
+		} else if (IService.class.equals(adapter) || IResource.class.equals(adapter)) {
+			return (T) getService();
+		}
+		return null;
+	}
+	
 	
 }
 

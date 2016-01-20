@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.handler;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -25,6 +26,8 @@ import org.jboss.tools.openshift.internal.ui.job.StartBuildJob;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -49,22 +52,29 @@ public class StartBuildHandler extends AbstractHandler{
 	}
 	
 	public IResource getBuildableResource(ISelection selection, String source) {
-		IResource buildAble = UIUtils.getFirstElement(selection, IResource.class);
-		if(buildAble == null) {
-			IResourceUIModel model = UIUtils.getFirstElement(selection, IResourceUIModel.class);
-			if(model != null) {
-				buildAble = model.getResource();
-				//starting from a build instead of cloning
-				if(isStartingFromABuild(buildAble, source)) { 
-					buildAble = loadBuildConfig(buildAble);
-				}
+		IResource buildAble = null;
+		IAdaptable adaptable = UIUtils.getFirstElement(selection, IAdaptable.class);
+		if(adaptable != null) {
+			buildAble = adaptable.getAdapter(IBuildConfig.class);
+			if (buildAble == null) {
+				buildAble = adaptable.getAdapter(IBuild.class);
 			}
+		}
+		if (buildAble == null && adaptable instanceof IResourceUIModel) {
+			buildAble = ((IResourceUIModel)adaptable).getResource();
+		}
+		if(buildAble == null) {
+			buildAble = UIUtils.getFirstElement(selection, IResource.class);
+		}
+		//starting from a build instead of cloning
+		if(isStartingFromABuild(buildAble, source)) { 
+			buildAble = loadBuildConfig(buildAble);
 		}
 		return buildAble;
 	}
 	
 	private boolean isStartingFromABuild(IResource resource, String source) {
-		return ResourceKind.BUILD_CONFIG.equals(source) && ResourceKind.BUILD.equals(resource.getKind());
+		return resource != null && ResourceKind.BUILD_CONFIG.equals(source) && ResourceKind.BUILD.equals(resource.getKind());
 	}
 	
 	private IResource loadBuildConfig(IResource build) {

@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.handler;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
@@ -31,6 +32,7 @@ import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog;
+import org.jboss.tools.openshift.internal.ui.models.Deployment;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
@@ -46,38 +48,32 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
 
-		final ISelection currentSelection = HandlerUtil.getCurrentSelection(event);
+		ISelection currentSelection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		final IRoute route = UIUtils.getFirstElement(currentSelection, IRoute.class);
 
 		//Open route
 		if (route != null) {
 			return openBrowser(shell, route);
 		}
-
+		Deployment deployment = UIUtils.getFirstElement(currentSelection, Deployment.class);
+		if (deployment != null) {
+			new RouteOpenerJob(deployment.getService().getNamespace(), shell) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					this.routes = deployment.getRoutes().stream().map(r -> (IRoute)r.getResource()).collect(Collectors.toList());
+					return Status.OK_STATUS;
+				}
+			}.schedule();
+			return Status.OK_STATUS;
+		}
+		
 		//Open Project
 		final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
 		if (project != null) {
-			new UIUpdatingJob(NLS.bind("Loading routes for project {0}", project.getName())) {
-
-				private List<IRoute> routes;
-
+			new RouteOpenerJob(project.getName(), shell) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					this.routes = project.getResources(ResourceKind.ROUTE);
-					return Status.OK_STATUS;
-				}
-
-				protected IStatus updateUI(IProgressMonitor monitor) {
-					if (routes == null || routes.isEmpty()) {
-						return nothingToOpenDialog(shell);
-					}
-					if (routes.size() == 1) {
-						return openBrowser(shell, routes.get(0));
-					}
-					SelectRouteDialog routeDialog = new SelectRouteDialog(routes, HandlerUtil.getActiveShell(event));
-					if (routeDialog.open() == Dialog.OK) {
-						return openBrowser(shell, routeDialog.getSelectedRoute());
-					}
 					return Status.OK_STATUS;
 				}
 			}.schedule();
@@ -112,6 +108,33 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 		new BrowserUtility().checkedCreateInternalBrowser(url,
 				"", OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 		return Status.OK_STATUS;
+	}
+
+	private abstract class RouteOpenerJob extends UIUpdatingJob {
+		protected List<IRoute> routes;
+		private Shell shell;
+
+		public RouteOpenerJob(String projectName, Shell shell) {
+			super(NLS.bind("Loading routes for project {0}", projectName));
+			this.shell = shell;
+		}
+
+		protected IStatus updateUI(IProgressMonitor monitor) {
+			if (routes == null || routes.isEmpty()) {
+				return nothingToOpenDialog(shell);
+			}
+
+			if (routes.size() == 1) {
+				return openBrowser(shell, routes.get(0));
+			}
+
+			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell);
+			if (routeDialog.open() == Dialog.OK) {
+				return openBrowser(shell, routeDialog.getSelectedRoute());
+			}
+			return Status.OK_STATUS;
+		}
+
 	}
 
 }

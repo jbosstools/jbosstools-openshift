@@ -31,7 +31,7 @@ public class PortForwardingHandler extends AbstractOpenShiftCliHandler {
 
 	@Override
 	protected void handleEvent(ExecutionEvent event){
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		final IPod pod = UIUtils.getFirstElement(selection, IPod.class);
 		if(pod == null) {
 			MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selection", "No pod was selected for port forwarding.");

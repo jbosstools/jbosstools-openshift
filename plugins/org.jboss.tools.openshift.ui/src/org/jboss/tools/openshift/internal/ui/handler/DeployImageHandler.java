@@ -35,7 +35,7 @@ public class DeployImageHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		DeployImageWizardModel model = new DeployImageWizardModel();
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		final IDockerImage image = UIUtils.getFirstElement(selection, IDockerImage.class);
 		if(image != null) {
 			IDockerConnection dockerConnection = image.getConnection();

@@ -30,7 +30,7 @@ public class ShowWebHooksHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		IBuildConfig buildConfig = UIUtils.getFirstElement(selection, IBuildConfig.class);
 		if(buildConfig == null) {
 			return Status.OK_STATUS;
