@@ -1315,9 +1315,6 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.imageStreams"
             tab="org.jboss.tools.openshift.ui.properties.tab.imageStreams">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
-         </input>
-         <input
                type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
          </input>
       </propertySection>

@@ -222,6 +222,9 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				if(child instanceof Deployment) {
 					removeDeploymentListeners((Deployment)child);
 				}
+				if(child instanceof IResourceUIModel && ResourceKind.ROUTE.equals(((IResourceUIModel) child).getResource().getKind())) {
+					updateChildrenFromViewer(parent);
+				}
 			}
 			for (Object child : added) {
 				Object parent = getParent(child);
@@ -229,6 +232,9 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				if(child instanceof Deployment) {
 					Deployment deployment = (Deployment)child;
 					addDeploymentListeners(deployment);
+				}
+				if(child instanceof IResourceUIModel && ResourceKind.ROUTE.equals(((IResourceUIModel) child).getResource().getKind())) {
+					updateChildrenFromViewer(parent);
 				}
 				//HACK to fix JBIDE-21458
 				if(parent instanceof IProjectAdapter && oldList.size() == 0 && newList.size() > 0) {
@@ -244,11 +250,13 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	private void addDeploymentListeners(Deployment deployment) {
 		deployment.addPropertyChangeListener(IProjectAdapter.PROP_PODS, this);
 		deployment.addPropertyChangeListener(IProjectAdapter.PROP_BUILDS, this);
+		deployment.addPropertyChangeListener(IProjectAdapter.PROP_ROUTES, this);
 	}
 
 	private void removeDeploymentListeners(Deployment deployment) {
 		deployment.removePropertyChangeListener(IProjectAdapter.PROP_PODS, this);
 		deployment.removePropertyChangeListener(IProjectAdapter.PROP_BUILDS, this);
+		deployment.removePropertyChangeListener(IProjectAdapter.PROP_ROUTES, this);
 	}
 
 	@Override
