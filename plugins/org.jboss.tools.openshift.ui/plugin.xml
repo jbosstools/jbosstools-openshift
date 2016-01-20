@@ -755,6 +755,23 @@
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler"
 			commandId="org.eclipse.ui.edit.delete">
+				<activeWhen>
+					<or>
+						<count
+							value="1">
+						</count>
+						<iterate>
+							<and>
+								<instanceof
+									value="com.openshift.restclient.model.IResource" />
+								<not>
+									<instanceof
+										value="com.openshift.restclient.model.IProject" />
+								</not>
+							</and>
+						</iterate>
+					</or>
+				</activeWhen>
 		</handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.RefreshResourceHandler"
