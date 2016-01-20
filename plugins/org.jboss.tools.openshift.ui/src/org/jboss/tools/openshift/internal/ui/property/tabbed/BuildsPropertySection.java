@@ -45,13 +45,24 @@ import com.openshift.restclient.model.IBuild;
 public class BuildsPropertySection extends AbstractPropertySection implements OpenShiftAPIAnnotations {
 
 	private static final String CONTEXT_MENU_ID = "popup:org.jboss.tools.openshift.ui.properties.tab.BuildsTab";
+	private TabbedPropertySheetPage page;
+	private ISelectionProvider selectionProvider;
 	private TableViewer table;
 	private PropertySheetPage buildDetails;
+
+
+	@Override
+	public void aboutToBeShown() {
+		super.aboutToBeShown();
+		if (page != null) {
+			page.getSite().setSelectionProvider(selectionProvider);
+		}
+	}
 
 	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		super.createControls(parent, aTabbedPropertySheetPage);
-		
+		this.page = aTabbedPropertySheetPage;
 		SashForm container = new SashForm(parent, SWT.VERTICAL);
 		Composite tableContainer = new Composite(container, SWT.NONE);
 		
@@ -60,7 +71,7 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 
 		buildDetails = new PropertySheetPage();
 		buildDetails.createControl(container);
-		aTabbedPropertySheetPage.getSite().setSelectionProvider(new ISelectionProvider() {
+		selectionProvider = new ISelectionProvider() {
 			
 			@Override
 			public void setSelection(ISelection selection) {
@@ -80,7 +91,7 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {
 				table.addSelectionChangedListener(listener);
 			}
-		});
+		};
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
@@ -143,7 +154,7 @@ public class BuildsPropertySection extends AbstractPropertySection implements Op
 	private void addContextMenu(Table table) {
 		IMenuManager contextMenu = UIUtils.createContextMenu(table);
 		UIUtils.registerContributionManager(CONTEXT_MENU_ID, contextMenu, table);
-    }
+	}
 	
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {

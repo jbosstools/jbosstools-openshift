@@ -33,7 +33,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getSelectionService().getSelection();
+		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		IResource resource = UIUtils.getFirstElement(selection, IResource.class);
 		if(resource == null) {
 			IResourceUIModel model = UIUtils.getFirstElement(selection, IResourceUIModel.class);
