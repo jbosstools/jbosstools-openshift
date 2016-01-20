@@ -112,7 +112,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			OpenShiftServer[] servers2 = getPublishRequiredServers(delta);
 			int size2 = servers2.length;
 			for (int j = 0; j < size2; j++) {
-				handleSpecialProjectChange(servers2[j], delta, changes);
+				handleSpecialProjectChange(servers2[j], delta, changes, event);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 	}
 	
 
-	protected void handleSpecialProjectChange(OpenShiftServer server, IResourceDelta delta,  List<IResource> changes) {
+	protected void handleSpecialProjectChange(OpenShiftServer server, IResourceDelta delta,  List<IResource> changes, IResourceChangeEvent event) {
 		// check for duplicate jobs already waiting and don't create a new one
 		Job[] jobs = Job.getJobManager().find(ServerUtil.SERVER_JOB_FAMILY);
 		if (jobs != null) {
@@ -154,7 +154,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			}
 		}
 		
-		MagicProjectChangeJob job = new MagicProjectChangeJob(server, delta, changes);
+		MagicProjectChangeJob job = new MagicProjectChangeJob(server, delta, changes, event);
 		job.setSystem(true);
 		job.setPriority(Job.BUILD);
 		job.schedule();
@@ -169,11 +169,12 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 		private IResourceChangeEvent event;
 		private List<IResource> changes;
 
-		public MagicProjectChangeJob(OpenShiftServer openshiftServer, IResourceDelta delta, List<IResource> changes) {
+		public MagicProjectChangeJob(OpenShiftServer openshiftServer, IResourceDelta delta, List<IResource> change, IResourceChangeEvent event) {
 			super(NLS.bind(Messages.jobUpdateServer, openshiftServer.getServer().getName()));
 			this.openshiftServer = openshiftServer;
 			this.delta = delta;
 			this.changes = changes;
+			this.event = event;
 			
 			ISchedulingRule[] rules = new ISchedulingRule[2];
 			IResourceRuleFactory ruleFactory = ResourcesPlugin.getWorkspace().getRuleFactory();
@@ -200,9 +201,6 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 					? IServer.PUBLISH_STATE_FULL : IServer.PUBLISH_STATE_INCREMENTAL);
 			((Server)server).setServerPublishState(newState);
 			
-			// TODO set the delta?
-			
-			
 			if (server.getServerState() != IServer.STATE_STOPPED && behaviourDelegate != null)
 				behaviourDelegate.handleResourceChange();
 			
@@ -226,8 +224,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			
 			int time = ((Server)openshiftServer.getServer()).getAutoPublishTime();
 			if (time >= 0) {
-				openshiftServer.getServer().publish(
-						OpenShiftServerBehaviour.PUBLISH_OPENSHIFT_AUTO /* TODO custom kind flag, is it allowed? */, 
+				openshiftServer.getServer().publish(IServer.PUBLISH_INCREMENTAL, 
 						new NullProgressMonitor());
 			}
 		}
