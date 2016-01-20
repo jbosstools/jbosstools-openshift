@@ -19,37 +19,19 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 /**
  * @author Andre Dietisheim
  */
 public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
-	public static final int PUBLISH_OPENSHIFT_AUTO = 100;
-	
 	private IAdaptable publishAdaptableInfo;
 	
 	public IStatus publish(int kind, IProgressMonitor monitor) {
-		// was this a user-initiated publish? 
-		boolean shouldPublish = false;
-		if (publishAdaptableInfo != null) {
-			shouldPublish = "user".equals(publishAdaptableInfo.getAdapter(String.class));
-		}
-		if (shouldPublish) {
-			return super.publish(kind, monitor);
-		} 
-		if( kind == PUBLISH_OPENSHIFT_AUTO ) { 
-			// custom kind flag... not sure if this goes outside the bounds of api ;)
-			// execute our rsync for our magic project
-			try {
-				int serverSyncState = getPublishMethod().executeRSync(getServer(), monitor);
-				setServerPublishState(serverSyncState);
-			} catch(CoreException ce) {
-				OpenShiftCoreActivator.pluginLog().logError("Error executing oc rsync for server " + getServer().getName());
-			}
-		}
-		return Status.OK_STATUS;
+		IStatus ret = super.publish(kind, monitor);
+		setServerPublishState(ret.isOK() ? IServer.PUBLISH_STATE_NONE : IServer.PUBLISH_STATE_INCREMENTAL);
+		return ret;
 	}
 	
 	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info) throws CoreException {
