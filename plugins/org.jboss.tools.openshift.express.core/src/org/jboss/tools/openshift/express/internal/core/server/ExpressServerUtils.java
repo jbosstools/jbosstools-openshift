@@ -36,6 +36,7 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
+import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties.GetWelcomePageURLException;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -132,33 +133,66 @@ public class ExpressServerUtils {
 	 * Look-up the OpenShift application associated with the given server. This
 	 * operation can be time-consuming since it may need to perform a request on
 	 * OpenShift if the user's applications list had not been loaded before.
-	 * Callers should use this methd without blocking the UI.
+	 * Callers should use this method without blocking the UI.
+	 * 
+	 * Never returns null, throws GetApplicationException or OpenShiftException 
+	 * if by any reason the OpenShift application cannot be found.
+	 * That will help ui clients to display problem in a user-friendly way.
 	 * 
 	 * @param server
 	 *            the server
-	 * @return the openshift application or null if it could not be located.
-	 * @throws OpenShiftException
+	 * @return the openshift application or throw exception if it could not be located.
+	 * @throws OpenShiftException, GetApplicationException
 	 */
-	public static IApplication getApplication(IServerAttributes server) {
+	public static IApplication getApplication(IServerAttributes server) throws GetApplicationException {
 		final String appName = getApplicationName(server);
 		if (StringUtils.isEmpty(appName)) {
-			return null;
+			throw new GetApplicationException("No application.");
 		}
 		final ConnectionURL connectionUrl = getConnectionUrl(server);
 		if (connectionUrl == null) {
-			return null;
+			throw new GetApplicationException(NLS.bind("Failed to get connection URL from {0}", server.getName()));
+		}
+		ExpressConnection connection = null;
+		String expectedConnectionProblem = NLS.bind("Failed to find connection {0}", connectionUrl.toString());
+		try {
+			connection = ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, ExpressConnection.class);
+			if (connection != null) {
+				if(!connection.connect()) {
+					throw new GetApplicationException(NLS.bind("Connection {0} is not authenticated.", connectionUrl.toString()));
+				}
+			} else {
+				throw new GetApplicationException(expectedConnectionProblem);
+			}
+		} catch (OpenShiftException e) {
+			throw new GetApplicationException(expectedConnectionProblem, e);
 		}
 		try {
-			ExpressConnection connection = ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, ExpressConnection.class);
-			if (connection == null) {
-				ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not find connection {0}", connectionUrl.toString()));
-				return null;
+			String domainId = getDomainName(server);
+			if(domainId == null) {
+				throw new GetApplicationException(NLS.bind("Failed to find domain id in server {0}", server.getName()));
 			}
-			IDomain domain = connection.getDomain(getDomainName(server));
+			IDomain domain = connection.getDomain(domainId);
+			if(domain == null) {
+				throw new GetApplicationException(NLS.bind("Failed to find domain {0}", domainId));
+			}
 			return connection.getApplication(appName, domain);
 		} catch (OpenShiftException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl), e);
-			return null;
+			String problem = NLS.bind("Failed to retrieve application ''{0}'' at url ''{1}}'", appName, connectionUrl);
+			throw new GetApplicationException(problem, e);
+		}
+
+	}
+
+	public static class GetApplicationException extends Exception {
+		private static final long serialVersionUID = -1754079027457007054L;
+
+		public GetApplicationException(String message) {
+			super(message);
+		}
+
+		public GetApplicationException(String message, Throwable cause) {
+			super(message, cause);
 		}
 	}
 
@@ -212,7 +246,18 @@ public class ExpressServerUtils {
 	}
 		
 	public static String getDeployFolder(IServerAttributes attributes) {
-		return getDeployFolder(attributes, getApplication(attributes));
+		IApplication application = null;
+		try {
+			application = getApplication(attributes);
+		} catch (GetApplicationException e) {
+			Throwable cause = e.getCause();
+			if(cause != null) {
+				ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
+			}
+			//TODO Consider if this method should throw GetApplicationException.
+			//For now its behavior is left as before because there are nor reports of its failure.
+		}
+		return getDeployFolder(attributes, application);
 	}
 
 	public static String getDeployFolder(IServerAttributes attributes, IApplication application) {
@@ -229,7 +274,18 @@ public class ExpressServerUtils {
 	}
 
 	public static String getDefaultDeployFolder(IServerAttributes server) {
-		return getDefaultDeployFolder(getApplication(server));
+		IApplication application = null;
+		try {
+			application = getApplication(server);
+		} catch (GetApplicationException e) {
+			Throwable cause = e.getCause();
+			if(cause != null) {
+				ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
+			}
+			//TODO Consider if this method should throw GetApplicationException.
+			//For now its behavior is left as before because there are nor reports of its failure.
+		}
+		return getDefaultDeployFolder(application);
 	}
 	
 	public static String getDefaultDeployFolder(IApplication application) {

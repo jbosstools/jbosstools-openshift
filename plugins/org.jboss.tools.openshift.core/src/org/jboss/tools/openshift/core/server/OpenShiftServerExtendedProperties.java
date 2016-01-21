@@ -17,7 +17,9 @@ import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerEx
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.IRouteChooser;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
+import org.jboss.tools.openshift.core.connection.Connection;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IService;
@@ -43,9 +45,22 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 	}
 
 	@Override
-	public String getWelcomePageUrl() {
+	public String getWelcomePageUrl() throws GetWelcomePageURLException {
 		String welcomePageUrl = null;
-		IService service = OpenShiftServerUtils.getService(server);
+		try {
+
+		//Get connection explicitly to report failure. Try and connect right now to know if it fails.
+		//Do not catch OpenShiftException, let it be reported. We are more concerned of NPE.
+		Connection connection = OpenShiftServerUtils.getConnection(server);
+		if(connection == null || !connection.connect()) {
+			throw new GetWelcomePageURLException("Connection is not established.");
+		}
+
+		IService service = OpenShiftServerUtils.getService(server, connection);
+		if(service == null) {
+			throw new GetWelcomePageURLException("Service is missing.");
+		}
+
 		IProject project = service.getProject();
 		if (project != null) {
 			List<IRoute> routes = project.getResources(ResourceKind.ROUTE);
@@ -53,9 +68,14 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 			if (route == null) {
 				route = getRoute(routes); 
 			}
+			//Reporting route == null is implemented in getRoute.
 			if (route != null) {
 				welcomePageUrl = route.getURL();
 			}
+		}
+
+		} catch (OpenShiftException e) {
+			throw new GetWelcomePageURLException(e.getMessage(), e);
 		}
 
 		return welcomePageUrl;

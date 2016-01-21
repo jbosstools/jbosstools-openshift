@@ -38,12 +38,18 @@ public class LoadApplicationJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		this.application = ExpressServerUtils.getApplication(server);
+		Throwable failureCause = null;
+		try {
+			this.application = ExpressServerUtils.getApplication(server);
+		} catch (ExpressServerUtils.GetApplicationException e) {
+			//TODO Error status below may use message, but texts should be elaborated. For now, error status is clear enough.
+			failureCause = e.getCause();
+		}
 		if (application == null) {
 			return ExpressUIActivator.createErrorStatus(
 					NLS.bind("Failed to retrieve Application from server adapter {0}.\n" +
 							"Please verify that the associated OpenShift application and workspace project still exist.", 
-							server.getName()));
+							server.getName()), failureCause);
 		}
 		return Status.OK_STATUS;
 	}

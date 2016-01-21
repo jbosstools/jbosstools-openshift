@@ -377,7 +377,11 @@ public class ExpressConnection extends AbstractConnection {
 			return null;
 		}
 		// trigger authentication, domain loading
-		getDomains(); 
+		getDomains();
+		//if authentication failed, user is null
+		if(!isConnected()) {
+			return null;
+		}
 		return user.getDomain(id);
 	}
 
