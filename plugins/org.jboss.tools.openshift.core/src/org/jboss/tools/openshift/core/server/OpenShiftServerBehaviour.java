@@ -22,6 +22,8 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
+import com.openshift.restclient.model.IService;
+
 /**
  * @author Andre Dietisheim
  */
@@ -37,7 +39,13 @@ public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info) throws CoreException {
 		publishAdaptableInfo = info;
 		try {
-			super.publish(kind, modules, monitor, info);
+			IService service = OpenShiftServerUtils.getService(getServer());
+			if( service != null ) {
+				// skip publishing if the service can't be found
+				super.publish(kind, modules, monitor, info);
+			}
+		} catch(com.openshift.restclient.authorization.ResourceForbiddenException rfe) {
+			// Silently swallow
 		} finally {
 			publishAdaptableInfo = null;
 		}

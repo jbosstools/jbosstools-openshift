@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.runtime.core.extract.ExtractUtility;
 import org.jboss.tools.runtime.core.extract.IOverwrite;
 
+import com.openshift.restclient.authorization.ResourceForbiddenException;
 import com.openshift.restclient.model.IService;
 
 /**
@@ -165,7 +166,12 @@ public class OpenShiftServerPublishMethod  {
 		}
 		
 		
-		IService service = OpenShiftServerUtils.getService(server);
+		IService service = null;
+		try {
+			service = OpenShiftServerUtils.getService(server);
+		} catch(ResourceForbiddenException rfe) {
+			// ignore
+		}
 		if (service == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 					NLS.bind("Server {0} could not determine the service to publish to.", server.getName())));
