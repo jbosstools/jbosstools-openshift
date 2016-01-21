@@ -25,7 +25,7 @@ public class OpenShiftCoreUIIntegration {
 
 	private static final String SSLCERTIFICATE_CALLBACK_UI_EXTENSION = "org.jboss.tools.openshift.core.sslCertificateCallbackUI";
 	private static final String CREDENTIALS_PROMPTER_UI_EXTENSION = "org.jboss.tools.openshift.core.credentialsPrompterUI";
-	private static final String BROWSER_EXTENSION = "org.jboss.tools.openshift.core.browser";
+	private static final String ROUTE_CHOOSER_EXTENSION = "org.jboss.tools.openshift.core.routeChooser";
 	
 	private static final String ATTRIBUTE_CLASS = "class";
 
@@ -57,9 +57,9 @@ public class OpenShiftCoreUIIntegration {
 		return credentialPrompter;
 	}
 
-	public IRouteChooser getBrowser() {
+	public IRouteChooser getRouteChooser() {
 		if (browser == null) {
-			this.browser = ExtensionUtils.getFirstExtension(BROWSER_EXTENSION, ATTRIBUTE_CLASS);
+			this.browser = ExtensionUtils.getFirstExtension(ROUTE_CHOOSER_EXTENSION, ATTRIBUTE_CLASS);
 		}
 		return browser;
 	}

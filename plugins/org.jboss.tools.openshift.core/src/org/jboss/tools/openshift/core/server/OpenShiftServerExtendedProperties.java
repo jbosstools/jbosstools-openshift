@@ -58,7 +58,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 	}
 
 	private IRoute getRoute(List<IRoute> routes) {
-		IRouteChooser chooser = OpenShiftCoreUIIntegration.getInstance().getBrowser();
+		IRouteChooser chooser = OpenShiftCoreUIIntegration.getInstance().getRouteChooser();
 		IRoute route = null;
 
 		if (routes == null

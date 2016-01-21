@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.core.IRouteChooser;
@@ -29,7 +30,6 @@ public class RouteChooser implements IRouteChooser {
 	private Shell shell;
 
 	public RouteChooser() {
-		this(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 	}
 
 	public RouteChooser(Shell shell) {
@@ -38,12 +38,19 @@ public class RouteChooser implements IRouteChooser {
 
 	@Override
 	public IRoute chooseRoute(List<IRoute> routes) {
-		SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell);
-		if (Dialog.OK == routeDialog.open()) {
-			return routeDialog.getSelectedRoute();
-		} else {
-			return null;
-		}
+		final IRoute[] selectedRoute = new IRoute[1];
+		Display.getDefault().syncExec(() -> {
+			if (shell == null) {
+				shell = PlatformUI.getWorkbench()
+						.getActiveWorkbenchWindow()
+						.getShell();
+			}
+			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell);
+			if (Dialog.OK == routeDialog.open()) {
+				selectedRoute[0] = routeDialog.getSelectedRoute();
+			}
+		});
+		return selectedRoute[0];
 	}
 
 	@Override
