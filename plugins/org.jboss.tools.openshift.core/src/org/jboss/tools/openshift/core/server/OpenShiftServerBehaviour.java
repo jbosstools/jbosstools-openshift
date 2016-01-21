@@ -18,9 +18,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+
+import com.openshift.restclient.authorization.ResourceForbiddenException;
+import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
@@ -37,7 +42,15 @@ public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info) throws CoreException {
 		publishAdaptableInfo = info;
 		try {
-			super.publish(kind, modules, monitor, info);
+			IService service = OpenShiftServerUtils.getService(getServer());
+			if( service != null ) {
+				// skip publishing if the service can't be found
+				super.publish(kind, modules, monitor, info);
+			}
+		} catch(ResourceForbiddenException rfe) {
+			//XXX On workbench startup, the OpenShift client throws `User "xxx" cannot list all services in the cluster` errors.
+			String msg= NLS.bind("Unable to publish to {0} : {1}", getServer().getName(), rfe.getMessage());
+			OpenShiftCoreActivator.pluginLog().logError(msg);
 		} finally {
 			publishAdaptableInfo = null;
 		}
