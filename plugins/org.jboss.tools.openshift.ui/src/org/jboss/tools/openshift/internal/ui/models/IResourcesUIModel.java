@@ -23,6 +23,7 @@ public interface IResourcesUIModel extends IAncestorable {
 	static final String PROP_BUILD_CONFIGS = "buildConfigs";
 	static final String PROP_DEPLOYMENT_CONFIGS = "deploymentConfigs";
 	static final String PROP_IMAGE_STREAMS = "imageStreams";
+	static final String PROP_IMAGE_STREAM_TAGS = "imageStreamTags";
 	static final String PROP_PODS = "pods";
 	static final String PROP_ROUTES = "routes";
 	static final String PROP_REPLICATION_CONTROLLERS = "replicationControllers";

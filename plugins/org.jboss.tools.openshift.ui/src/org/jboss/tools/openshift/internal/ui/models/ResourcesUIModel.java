@@ -79,6 +79,22 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, init(dcs)));
 	}
 	
+	public Collection<IResourceUIModel> getImageStreamTags() {
+		return resources.get(ResourceKind.IMAGE_STREAM_TAG);	
+	}
+	
+	public void setImageStreamTags(Collection<IResourceUIModel> models) {
+		firePropertyChange(PROP_IMAGE_STREAM_TAGS, 
+				resources.get(ResourceKind.IMAGE_STREAM_TAG), 
+				resources.put(ResourceKind.IMAGE_STREAM_TAG, new ArrayList<>(models)));
+	}
+	
+	public void setImageStreamTagResources(Collection<IResource> istags) {
+		firePropertyChange(PROP_IMAGE_STREAM_TAGS, 
+				resources.get(ResourceKind.IMAGE_STREAM_TAG), 
+				resources.put(ResourceKind.IMAGE_STREAM_TAG, init(istags)));
+	}
+
 	@Override
 	public Collection<IResourceUIModel> getBuilds() {
 		return resources.get(ResourceKind.BUILD);	
@@ -225,4 +241,11 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return StringUtils.pluralize(kind.toLowerCase());
 	}
 
+	public Collection<IResource> getResources(String kind) {
+		if (!resources.containsKey(kind)) {
+			return Collections.emptyList();
+		}
+		return resources.get(kind).stream().map(r -> r.getResource()).collect(Collectors.toList());
+	}
+	
 }
