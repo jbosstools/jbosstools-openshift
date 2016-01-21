@@ -12,9 +12,11 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IService;
@@ -35,8 +37,9 @@ public class OpenShiftServerEditorModel extends ServerSettingsViewModel {
 
   	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
   			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
-  			String sourcePath, String podPath, IService service, List<ObservableTreeItem> serviceItems) {
-  		update(connection, connections, deployProject, projects, sourcePath, podPath, service, serviceItems);
+  			String sourcePath, String podPath, Map<String, DeploymentResourceMapper> deploymentMapperByProjectName, 
+  			IService service, List<ObservableTreeItem> serviceItems) {
+  		update(connection, connections, deployProject, projects, sourcePath, podPath, deploymentMapperByProjectName, service, serviceItems);
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
 
@@ -45,7 +48,8 @@ public class OpenShiftServerEditorModel extends ServerSettingsViewModel {
 	}
 
 	public void setOverrideProject(boolean overrideProject) {
-		update(overrideProject, getConnection(), getConnections(), getDeployProject(), getProjects(), getSourcePath(), getPodPath(), getService(), getServiceItems());
+		update(overrideProject, getConnection(), getConnections(), getDeployProject(), getProjects(), 
+				getSourcePath(), getPodPath(), getImageStreamTags(), getService(), getServiceItems());
 	}
 
 	@Override

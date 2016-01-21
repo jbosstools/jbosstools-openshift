@@ -42,21 +42,21 @@ import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IService;
-import com.openshift.restclient.model.route.IRoute;
-
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IImageStream;
+import com.openshift.restclient.model.IObjectReference;
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.deploy.IDeploymentTrigger;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * Figures out the resources in a project associated with a deployment
@@ -81,7 +81,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	private final Connection conn;
 	private Set<Deployment> deployments = Collections.synchronizedSet(new HashSet<>());
 	private Map<IResource, Collection<Deployment>> resourceToDeployments = new ConcurrentHashMap<>();
-	private Map<String, Collection<IDeploymentConfig>> imageRefToDeployConfigs;
+	private Map<String, Collection<IDeploymentConfig>> imageRefToDeployConfigs = new ConcurrentHashMap<>();
 	private Map<String, Collection<IResource>> relationMap = new ConcurrentHashMap<>();
 	private Map<String, IResource> cache = new ConcurrentHashMap<>();
 	private AtomicReference<State> state = new AtomicReference<>(State.UNINITIALIZED);
@@ -127,7 +127,8 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 				List<IDeploymentConfig> deployConfigs = load(ResourceKind.DEPLOYMENT_CONFIG);
 				List<IBuildConfig> buildConfigs = load(ResourceKind.BUILD_CONFIG);
 				List<IImageStream> imageStreams = load(ResourceKind.IMAGE_STREAM);
-
+				List<IResource> imageStreamTags = load(ResourceKind.IMAGE_STREAM_TAG);
+				
 				imageRefToDeployConfigs = mapImageRefToDeployConfigs(deployConfigs);
 
 				mapPods(pods, rcs, deployConfigs,builds);
@@ -135,6 +136,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 				mapChildToParent(builds, buildConfigs, BUILD_CONFIG_NAME, true);
 
 				mapBuildConfigsToImageStreams(buildConfigs, imageStreams);
+				mapBuildConfigsToImageStreamTags(buildConfigs, imageStreamTags);
 				mapBuildsToDeploymentConfigs(builds);
 
 				mapServices(services, rcs, deployConfigs, routes);
@@ -174,7 +176,8 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		Collection<IResource> appRcs = getResourcesFor(service, ResourceKind.REPLICATION_CONTROLLER);
 		Collection<IBuild> appBuilds = getBuildsForPods(appPods, builds);
 		Collection<IResource> appBuildConfigs = getResourcesFor(appBuilds, ResourceKind.BUILD_CONFIG);
-		
+		Collection<IResource> appImageStreamTags = getResourcesFor(appBuildConfigs, ResourceKind.IMAGE_STREAM_TAG);
+
 		appPods.forEach(p->createRelation(p, service));
 		
 		deployment.setBuildResources(appBuilds);
@@ -184,6 +187,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		deployment.setReplicationControllerResources(appRcs);
 		deployment.setImageStreamResources(getResourcesFor(appBuildConfigs, ResourceKind.IMAGE_STREAM));
 		deployment.setDeploymentConfigResources(getResourcesFor(service, ResourceKind.DEPLOYMENT_CONFIG));
+		deployment.setImageStreamTagResources(appImageStreamTags);
 		mapResourcesFor(deployment);
 	}
 
@@ -208,6 +212,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		mapResourcesToDeployment(deployment.getBuildConfigs(), deployment);
 		mapResourcesToDeployment(deployment.getReplicationControllers(), deployment);
 		mapResourcesToDeployment(deployment.getImageStreams(), deployment);
+		mapResourcesToDeployment(deployment.getImageStreamTags(), deployment);
 		mapResourcesToDeployment(deployment.getDeploymentConfigs(), deployment);
 	}
 
@@ -230,6 +235,18 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		buildConfigs.forEach(bc -> createRelation(bc, tagsToStreams.get(bc.getBuildOutputReference().getName())));
 	}
 
+	private void mapBuildConfigsToImageStreamTags(List<IBuildConfig> buildConfigs, List<IResource> istags) {
+		Map<String, IResource> istagnames = istags.stream()
+				.collect(Collectors.toMap(IResource::getName, Function.identity()));
+		for(IBuildConfig buildConfig : buildConfigs) {
+			IObjectReference reference = buildConfig.getBuildOutputReference();
+			if (ResourceKind.IMAGE_STREAM_TAG.equals(reference.getKind()) 
+					&& istagnames.containsKey(reference.getName())) {
+				createRelation(buildConfig, istagnames.get(reference.getName()));
+			}
+		}
+	}
+	
 	@Override
 	public Collection<IResource> getResourcesFor(IResource resource, String targetKind) {
 		return getResourcesFor(Arrays.asList(resource), targetKind);
@@ -243,7 +260,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	 * @param targetKind
 	 * @return
 	 */
-	private Collection<IResource> getResourcesFor(Collection<? extends IResource> resources, String targetKind) {
+	public Collection<IResource> getResourcesFor(Collection<? extends IResource> resources, String targetKind) {
 		Collection<IResource> set = new HashSet<>();
 		for (IResource resource : resources) {
 			Collection<IResource> targets = relationMap.get(getRelationKey(resource, targetKind));
@@ -631,6 +648,17 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		return cache.containsKey(cacheKey) && Integer.parseInt(cache.get(cacheKey).getResourceVersion()) >= Integer.parseInt(resource.getResourceVersion());
 	}
 
+	public Deployment getDeploymentFor(IService service) {
+		for(Deployment deployment : deployments) {
+			IService deploymentService = deployment.getService();
+			if(deploymentService != null
+					&& deploymentService.equals(service)) {
+				return deployment;
+			}
+		}
+		return null;
+	}
+	
 	private Collection<Deployment> findDeploymentsFor(IResource resource) {
 		if(resource != null) {
 			Trace.debug("Looking for deployment associated with: {0}", resource);
