@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.express.internal.core.server;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils.GetApplicationException;
 
 import com.openshift.client.IApplication;
 
@@ -28,17 +30,24 @@ public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 		return false;
 	}
 	
+	@Override
 	public boolean hasWelcomePage() {
 		return true;
 	}
-	
-	public String getWelcomePageUrl() {
+
+	@Override
+	public String getWelcomePageUrl() throws GetWelcomePageURLException {
 		if (!ExpressServerUtils.isExpressRuntime(server)) {
 			return null;
 		}
-		final IApplication application = ExpressServerUtils.getApplication(server);
-		if (application != null) {
-			return application.getApplicationUrl();
+		
+		try {
+			final IApplication application = ExpressServerUtils.getApplication(server);
+			if (application != null) {
+				return application.getApplicationUrl();
+			}
+		} catch (GetApplicationException e) {
+			throw new GetWelcomePageURLException(e.getMessage(), e.getCause());
 		}
 		return null;
 	}
