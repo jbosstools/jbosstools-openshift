@@ -63,6 +63,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			}
 		}
 		ports = Collections.unmodifiableSet(ports);
+		useFreePorts = !ports.isEmpty() && isPortForwarding(pod);
 	}
 
 	public final String getPodName() {
@@ -110,9 +111,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	
 	private boolean isPortForwarding(IPod pod) {
 		IPortForwardable capability = REGISTRY.get(pod);
-		if(capability == null) return false;
-		return capability.isForwarding();
-	}
+		return capability != null && capability.isForwarding();
+	} 
 	
 	private class ConsoleListener implements IConsoleListener{
 		private IPortForwardable cap;
