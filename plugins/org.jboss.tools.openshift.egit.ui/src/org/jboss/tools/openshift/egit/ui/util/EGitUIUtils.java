@@ -10,9 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.egit.ui.util;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.op.CloneOperation.PostCloneTask;
 import org.eclipse.egit.ui.Activator;
@@ -23,6 +28,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.Version;
 
 /**
  * @author Andre Dietisheim
@@ -41,9 +47,26 @@ public class EGitUIUtils {
 			repositoryUtil.addConfiguredRepository(repository.getDirectory());
 		}
 	};
+	private static final boolean IS_LEGACY_EGIT;
+	private static final String DEFAULT_REPOSITORY_PATH = System.getProperty("user.home")+File.separator+"git";
+	
+	static {
+		Version currentVersion = Platform.getBundle("org.eclipse.egit.ui").getVersion();
+		Version version41 = new Version(4, 1, 0);
+		IS_LEGACY_EGIT = currentVersion.compareTo(version41) < 0;
+	}
+	
 	
 	public static String getEGitDefaultRepositoryPath() {
-		return Activator.getDefault().getPreferenceStore().getString(UIPreferences.DEFAULT_REPO_DIR);
+		if (IS_LEGACY_EGIT) {
+			return Activator.getDefault().getPreferenceStore().getString("default_repository_dir");
+		}
+		try {
+			Method getDefaultRepositoryDir = RepositoryUtil.class.getMethod("getDefaultRepositoryDir");
+			return (String) getDefaultRepositoryDir.invoke(null);
+		} catch (Exception e) {
+		}
+		return DEFAULT_REPOSITORY_PATH;
 	}
 
 	/**
