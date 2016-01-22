@@ -364,7 +364,22 @@ public class NewApplicationWizardModel
 	}
 	
 	private void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalTemplate, null, projects, serverTemplate, localTemplateFilename);
+		update(useLocalTemplate, findProject(projects, this.project), projects, serverTemplate, localTemplateFilename);
+	}
+
+	private IProject findProject(List<ObservableTreeItem> projects, IProject project) {
+		if(project == null || projects == null || projects.isEmpty()) {
+			return null;
+		}
+		for (ObservableTreeItem item: projects) {
+			if(item.getModel() instanceof IProject) {
+				IProject p = (IProject)item.getModel();
+				if(p.getName().equals(project.getName())) {
+					return p;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
