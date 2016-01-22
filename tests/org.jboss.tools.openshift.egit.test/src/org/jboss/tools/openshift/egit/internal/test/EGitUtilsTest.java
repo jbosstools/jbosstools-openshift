@@ -76,8 +76,8 @@ public class EGitUtilsTest {
 		TestRepository testRepository = new TestRepository(TestUtils.createGitDir(project));
 		testRepository.createMockSystemReader(ResourcesPlugin.getWorkspace().getRoot().getLocation());
 		testRepository.setUserAndEmail(GIT_USER, GIT_EMAIL);
-		testRepository.connect(testProject.getProject());
-		testRepository.add(testProject.getFile(".project"));
+		testRepository.connect(project.getProject());
+		testRepository.add(project.getFile(".project"));
 		testRepository.initialCommit();
 		return testRepository;
 	}
@@ -87,7 +87,7 @@ public class EGitUtilsTest {
 		File workspaceDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
 		File clonedRepositoryFile =
 				new File(workspaceDir, "clonedRepository-" + String.valueOf(System.currentTimeMillis()));
-		return testRepository.cloneRepository(clonedRepositoryFile);
+		return repository.cloneRepository(clonedRepositoryFile);
 	}
 
 	@After
