@@ -665,31 +665,6 @@
 			</command>
 		</menuContribution>
 
-        <menuContribution
-              locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.edit">
-			<command
-				commandId="org.eclipse.ui.edit.delete"
-				icon="icons/globe_delete.png"
-				id="org.jboss.tools.openshift.express.ui.command.deleteapp"
-				mnemonic="D">
-				<visibleWhen>
-					<with
-						variable="selection">
-						<count
-							value="1">
-						</count>
-						<or>
-						<iterate
-							ifEmpty="false"
-							operator="or">
-							<instanceof
-								value="com.openshift.client.IApplication" />
-						</iterate>
-						</or>
-					</with>
-				</visibleWhen>
-			</command>
-		</menuContribution>
 	</extension>
 
 	<!-- New Application -->
@@ -802,7 +777,7 @@
 	</extension>
 	
 	<!-- openshift explorer: delete application -->
-	<!--extension
+	<extension
 		point="org.eclipse.ui.menus">
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
@@ -824,7 +799,7 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
-    </extension-->
+    </extension>
 
     <!-- servers view: delete application -->
     <extension

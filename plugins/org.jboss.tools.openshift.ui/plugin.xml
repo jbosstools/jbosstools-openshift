@@ -139,6 +139,13 @@
          style="push"
          tooltip="Delete the resource">
 				<visibleWhen>
+				 <or>
+				  <with variable="activePartId">
+					<equals  value="org.eclipse.ui.views.PropertySheet" />
+				  </with>
+
+				  <with
+						variable="selection">
 					<and>
 						<count
 							value="1">
@@ -151,6 +158,8 @@
             </iterate>
 						</or>
 					</and>
+				  </with>
+				 </or>
 				</visibleWhen>
 			</command>
 			<separator
@@ -730,6 +739,8 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
 			commandId="org.eclipse.ui.edit.delete">
 				<activeWhen>
+				  <with
+						variable="selection">
 					<and>
 						<count
 							value="1">
@@ -742,6 +753,7 @@
          </or>
 						</iterate>
 					</and>
+				  </with>
 				</activeWhen>
 		</handler>
 		<handler
@@ -756,21 +768,39 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler"
 			commandId="org.eclipse.ui.edit.delete">
 				<activeWhen>
-					<or>
+				 <or>
+
+				  <with variable="activePartId">
+					<equals  value="org.eclipse.ui.views.PropertySheet" />
+				  </with>
+
+				  <with
+				  		variable="selection">
+					<and>
 						<count
 							value="1">
 						</count>
 						<iterate>
 							<and>
+							  <or>
+								<adapt
+									type="com.openshift.restclient.model.IResource" />
 								<instanceof
-									value="com.openshift.restclient.model.IResource" />
-								<not>
+									value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel" />
+							  </or>
+							  <not>
+								  <or>
+									<adapt
+										type="com.openshift.restclient.model.IProject" />
 									<instanceof
-										value="com.openshift.restclient.model.IProject" />
-								</not>
+										value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter" />
+								  </or>
+							  </not>
 							</and>
 						</iterate>
-					</or>
+					</and>
+				  </with>
+				 </or>
 				</activeWhen>
 		</handler>
 		<handler
