@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 @SuppressWarnings("rawtypes")
@@ -67,11 +68,17 @@ public class EditValueDialog extends InputDialog {
 			getValidator().setProvider(validator);
 			dbc.addValidationStatusProvider(validator);
 			ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP);
-			setErrorMessage(getValidator().isValid(initialValue));
 		} else {
 			//May happen only if InputDialog implementation changes.
 			OpenShiftUIActivator.getDefault().getLogger().logError(new NullPointerException("Cannot find text widget."));
 		}
+		return control;
+	}
+
+	@Override
+	protected Control createContents(Composite parent) {
+		Control control = super.createContents(parent);
+		setErrorMessage(getValidator().isValid(initialValue));
 		return control;
 	}
 
@@ -130,12 +137,12 @@ public class EditValueDialog extends InputDialog {
 		@Override
 		protected IStatus validate() {
 			String text = (String)textObservable.getValue();
-			if(text == null || text.isEmpty()) {
-				if(required) {
-					return ValidationStatus.error(NLS.bind(PROVIDE_REQUIRED_VALUE, name));
-				}
+			boolean isTextEmpty = StringUtils.isEmpty(text);
+			if(required && isTextEmpty) {
+				return ValidationStatus.error(NLS.bind(PROVIDE_REQUIRED_VALUE, name));
 			}
-			if(text != null && text.equals(initialValue)) {
+			boolean isInitEmpty = StringUtils.isEmpty(initialValue);
+			if((isTextEmpty == isInitEmpty) && (isTextEmpty || text.equals(initialValue))) {
 				return ValidationStatus.cancel(PROVIDE_NEW_VALUE);
 			}
 			return ValidationStatus.ok();
