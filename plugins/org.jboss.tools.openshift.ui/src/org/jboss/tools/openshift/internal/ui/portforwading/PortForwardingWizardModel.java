@@ -63,7 +63,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			}
 		}
 		ports = Collections.unmodifiableSet(ports);
-		useFreePorts = !ports.isEmpty() && isPortForwarding(pod);
+		useFreePorts = computeUsingFreePorts();
 	}
 
 	public final String getPodName() {
@@ -195,6 +195,26 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				bindings.add(key);
 			}
 		}
+	}
+
+	/*
+	 * Called on dialog opening for initialization of 'useFreePorts' flag.
+	 * Returns true only if all of the following is true:
+	 * - there is at least one port,
+	 * - port forwarding is on,
+	 * - each PortPair is set to a port different from its remote port.
+	 * A slim chance that some free port coincided with the default one is neglected.
+	 */
+	private boolean computeUsingFreePorts() {
+		if(ports.isEmpty() || !isPortForwarding(pod)) {
+			return false;
+		}
+		for (IPortForwardable.PortPair port : ports) {
+			if(port.getLocalPort() == port.getRemotePort()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private String computeKey(IPortForwardable.PortPair port) {
