@@ -87,7 +87,7 @@ public class EGitUtilsTest {
 		File workspaceDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
 		File clonedRepositoryFile =
 				new File(workspaceDir, "clonedRepository-" + String.valueOf(System.currentTimeMillis()));
-		return testRepository.cloneRepository(clonedRepositoryFile);
+		return repository.cloneRepository(clonedRepositoryFile);
 	}
 
 	@After
