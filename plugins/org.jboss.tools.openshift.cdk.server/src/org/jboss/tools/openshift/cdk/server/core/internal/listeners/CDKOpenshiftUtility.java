@@ -31,7 +31,6 @@ public class CDKOpenshiftUtility {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
 		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "test-admin";
-		String password = "password";
 		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
 		
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
@@ -50,7 +49,6 @@ public class CDKOpenshiftUtility {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
 		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "test-admin";
-		String password = "password";
 		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
 		
 		ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
@@ -59,7 +57,6 @@ public class CDKOpenshiftUtility {
 		IConnection con = factory.create(soughtHost);
 		((Connection)con).setAuthScheme(authScheme);
 		((Connection)con).setUsername(username);
-		((Connection)con).setPassword(password);
 		ConnectionsRegistrySingleton.getInstance().add(con);
 		return con;
 	}
