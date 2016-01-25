@@ -258,14 +258,6 @@
 		</command>
 	</extension>
 	<extension
-		point="org.eclipse.ui.bindings">
-		<key
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
-			contextId="org.jboss.tools.openshift.explorer.context.connection"
-			sequence="Del" 
-			commandId="org.jboss.tools.openshift.express.ui.command.removeconnection" />
-	</extension>
-	<extension
 		point="org.eclipse.ui.handlers">
         <handler
 			commandId="org.eclipse.ui.edit.delete"
