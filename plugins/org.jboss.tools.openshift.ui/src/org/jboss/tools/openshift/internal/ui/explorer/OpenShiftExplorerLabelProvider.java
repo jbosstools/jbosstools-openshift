@@ -85,6 +85,10 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
 	public StyledString getStyledText(Object element) {
+		if (element instanceof Deployment) {
+			Deployment d = (Deployment) element;
+			return style(d.getService().getName(), formatRoute(d.getRoutes()));
+		}
 		if (element instanceof IResource || element instanceof IResourceUIModel) {
 			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
 			switch (resource.getKind()) {
@@ -115,10 +119,6 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		}
 		 if (element instanceof Connection) {
 			return getStyledText((Connection) element);
-		}
-		if (element instanceof Deployment) {
-			Deployment d = (Deployment) element;
-			return style(d.getService().getName(), formatRoute(d.getRoutes()));
 		}
 		return super.getStyledText(element);
 	}

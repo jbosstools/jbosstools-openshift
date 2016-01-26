@@ -35,6 +35,9 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 			if(adaptableObject instanceof Connection){
 				return new ConnectionPropertySource((Connection) adaptableObject);
 			}
+			if(adaptableObject instanceof Deployment) {
+				return new ServicePropertySource(((Deployment) adaptableObject).getService());
+			}
 			if(adaptableObject instanceof IResource || adaptableObject instanceof IResourceUIModel){
 				IResource resource = adaptableObject instanceof IResourceUIModel ? ((IResourceUIModel) adaptableObject).getResource() :(IResource) adaptableObject;
 				switch(resource.getKind()){
@@ -55,9 +58,6 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 				default:
 					return new ResourcePropertySource<IResource>(resource);
 				}
-			}
-			if(adaptableObject instanceof Deployment) {
-				return new ServicePropertySource(((Deployment) adaptableObject).getService());
 			}
 		}
 		return null;

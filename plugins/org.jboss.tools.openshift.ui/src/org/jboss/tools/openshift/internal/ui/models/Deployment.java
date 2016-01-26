@@ -32,7 +32,7 @@ import com.openshift.restclient.model.IService;
  * @author jeff.cantrill
  *
  */
-public class Deployment extends ResourcesUIModel implements IAdaptable {
+public class Deployment extends ResourcesUIModel implements IResourceUIModel, IAdaptable {
 
 	private final IService service;
 	private final IProject project;
@@ -49,6 +49,11 @@ public class Deployment extends ResourcesUIModel implements IAdaptable {
 		return this.service;
 	}
 	
+	@Override
+	public IResource getResource() {
+		return getService();
+	}
+
 	@Override
 	public Collection<IResourceUIModel> getServices() {
 		return Collections.emptyList();
