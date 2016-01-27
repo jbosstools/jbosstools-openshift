@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
+import org.jboss.tools.common.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.FileUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;

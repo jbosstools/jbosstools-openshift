@@ -63,8 +63,7 @@ Export-Package: org.jboss.tools.openshift.common.ui.connection;
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.common.ui.console,
- org.jboss.tools.openshift.internal.common.ui.databinding;
+ org.jboss.tools.openshift.internal.common.ui.console;
   x-friends:="org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,

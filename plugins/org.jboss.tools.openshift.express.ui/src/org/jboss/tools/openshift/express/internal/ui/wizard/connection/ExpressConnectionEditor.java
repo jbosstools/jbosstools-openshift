@@ -26,6 +26,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.databinding.RequiredStringValidator;
+import org.jboss.tools.common.databinding.TrimmingStringConverter;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
+import org.jboss.tools.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
@@ -34,10 +38,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 import org.jboss.tools.openshift.internal.common.ui.connection.BaseConnectionEditor;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
-import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
-import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 
 /**
  * @author Andre Dietisheim

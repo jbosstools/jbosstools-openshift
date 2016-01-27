@@ -30,7 +30,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.jboss.tools.common.databinding.IsNotNullValidator;
 import org.jboss.tools.common.databinding.ObservablePojo;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
+import org.jboss.tools.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -38,11 +41,8 @@ import org.jboss.tools.openshift.core.connection.ConnectionFactory;
 import org.jboss.tools.openshift.internal.common.ui.connection.BaseConnectionEditor;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
-import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
-import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 
 import com.openshift.restclient.authorization.IAuthorizationContext;
 
