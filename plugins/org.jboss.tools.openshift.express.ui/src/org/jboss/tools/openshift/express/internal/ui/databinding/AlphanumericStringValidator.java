@@ -12,8 +12,8 @@ package org.jboss.tools.openshift.express.internal.ui.databinding;
 
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.jboss.tools.common.ui.databinding.RequiredStringValidator;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
 
 /**
  * @author Andre Dietisheim

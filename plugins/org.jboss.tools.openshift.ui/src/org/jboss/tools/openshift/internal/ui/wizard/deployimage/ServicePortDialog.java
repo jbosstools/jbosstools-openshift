@@ -30,9 +30,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 

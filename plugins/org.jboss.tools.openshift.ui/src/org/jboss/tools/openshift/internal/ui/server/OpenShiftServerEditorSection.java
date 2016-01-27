@@ -60,6 +60,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.utils.FileUtils;
@@ -70,7 +71,6 @@ import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
-import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.DisableAllWidgetsJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 

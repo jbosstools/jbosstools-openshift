@@ -16,9 +16,9 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
-import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 
 /**
  * @author Andre Dietisheim
