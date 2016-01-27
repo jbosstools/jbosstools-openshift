@@ -31,6 +31,7 @@ Export-Package: com.openshift.restclient,
  com.openshift.restclient.model.template,
  com.openshift.restclient.model.user
 Import-Package: org.apache.commons.logging,
+ org.eclipse.core.runtime,
  org.eclipse.debug.internal.core,
  org.eclipse.osgi.service.debug;version="1.2.0",
  org.osgi.framework;version="1.8.0",
@@ -43,3 +44,4 @@ Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
  org.eclipse.jetty.io;bundle-version="9.2.13",
  org.eclipse.jetty.websocket.common;bundle-version="9.2.13",
  org.eclipse.jetty.websocket.api;bundle-version="9.2.13"
+Bundle-Activator: org.jboss.tools.openshift.client.internal.OpenShiftClientActivator
