@@ -36,7 +36,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	public RuntimeDefinition getRuntimeDefinition(File root,
 			IProgressMonitor monitor) {
 		if( validate(root)) {
-			return new RuntimeDefinition(root.getName(), "2.0", CDK_RUNTIME_TYPE, root);
+			return createDefinition(root.getName(), "2.0", CDK_RUNTIME_TYPE, root);
 		}
 		return null;
 	}
