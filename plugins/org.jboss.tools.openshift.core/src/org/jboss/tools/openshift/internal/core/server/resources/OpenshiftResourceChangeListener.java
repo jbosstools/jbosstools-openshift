@@ -173,7 +173,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			super(NLS.bind(Messages.jobUpdateServer, openshiftServer.getServer().getName()));
 			this.openshiftServer = openshiftServer;
 			this.delta = delta;
-			this.changes = changes;
+			this.changes = change;
 			this.event = event;
 			
 			ISchedulingRule[] rules = new ISchedulingRule[2];
