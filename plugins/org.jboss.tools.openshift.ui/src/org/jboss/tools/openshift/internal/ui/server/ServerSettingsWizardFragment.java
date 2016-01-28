@@ -59,7 +59,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -84,7 +83,7 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
+import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
@@ -306,7 +305,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		};
 	}
 
-	private void createSourcePathControls(Composite container, ServerSettingsViewModel model2,
+	private void createSourcePathControls(Composite container, ServerSettingsViewModel model,
 			DataBindingContext dbc) {
 		Label sourcePathLabel = new Label(container, SWT.NONE);
 		sourcePathLabel.setText("Source Path: ");
@@ -325,16 +324,23 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				@Override
 				public IStatus validate(Object value) {
 					String path = (String) value;
-					if (StringUtils.isEmpty(value)) {
+					if (StringUtils.isEmpty(path)) {
 						return ValidationStatus.cancel("Please provide a local path to deploy from.");
 					}
-					if (!isValidSource(path)) {
-						return ValidationStatus.error("Please provide a valid local path to deploy from.");
+					String provideValidPathMessage = "Please provide a valid local path to deploy from.";
+					try {
+						path = VariablesHelper.replaceVariables(path);
+					} catch (OpenShiftCoreException e) {
+						String message = org.apache.commons.lang.StringUtils.substringAfter(e.getMessage(), "Exception:");
+						return ValidationStatus.error(provideValidPathMessage + "\nError: " + message);
+					}
+					if (!isReadableFile(path)) {
+						return ValidationStatus.error(provideValidPathMessage);
 					}
 					return ValidationStatus.ok();
 				}
 
-				private boolean isValidSource(String path) {
+				private boolean isReadableFile(String path) {
 					return new File(path).canRead();
 				}
 				
