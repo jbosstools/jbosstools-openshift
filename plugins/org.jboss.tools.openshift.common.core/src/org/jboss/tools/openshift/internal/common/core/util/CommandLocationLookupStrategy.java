@@ -26,7 +26,7 @@ public class CommandLocationLookupStrategy {
 	private static final String WINDOWS_PATHVAR = "Path";
 
 	public static final CommandLocationLookupStrategy WINDOWS_STRATEGY = 
-			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com"});
+			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com", ".bat"});
 	public static final CommandLocationLookupStrategy LINUX_STRATEGY = 
 			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{});
 	
