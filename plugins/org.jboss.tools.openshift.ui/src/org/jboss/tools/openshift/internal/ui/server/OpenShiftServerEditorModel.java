@@ -16,7 +16,7 @@ import java.util.Map;
 
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
+import org.jboss.tools.openshift.internal.ui.models.IDeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IService;
@@ -37,7 +37,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsViewModel {
 
   	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
   			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
-  			String sourcePath, String podPath, Map<String, DeploymentResourceMapper> deploymentMapperByProjectName, 
+  			String sourcePath, String podPath, Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName, 
   			IService service, List<ObservableTreeItem> serviceItems) {
   		update(connection, connections, deployProject, projects, sourcePath, podPath, deploymentMapperByProjectName, service, serviceItems);
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);

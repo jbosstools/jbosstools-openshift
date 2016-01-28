@@ -30,6 +30,7 @@ public interface IResourceUIModel extends IAncestorable, IAdaptable {
 	
 	
 
+	@SuppressWarnings("unchecked")
 	@Override
 	default public <R> R getAdapter(Class<R> adapter) {
 		R res = (R) getResource();

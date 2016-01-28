@@ -12,23 +12,10 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
 
-import com.openshift.restclient.model.IResource;
+import org.jboss.tools.common.databinding.IObservablePojo;
+import org.jboss.tools.openshift.common.core.IRefreshable;
 
-/**
- * The cache that contains a relation information
- * between resources.
- * 
- * @author jeff.cantrill
- *
- */
-public interface IRelationCache {
+public interface IDeploymentResourceMapper extends IObservablePojo, IRefreshable {
 
-	/**
-	 * Retrieve the collection of resources of the given kind to
-	 * the given resource. 
-	 * @param resource
-	 * @param targetKind
-	 * @return the collection of related resources if known or an empty collection
-	 */
-	Collection<IResource> getResourcesFor(IResource resource, String targetKind);
+	Collection<Deployment> getDeployments();
 }

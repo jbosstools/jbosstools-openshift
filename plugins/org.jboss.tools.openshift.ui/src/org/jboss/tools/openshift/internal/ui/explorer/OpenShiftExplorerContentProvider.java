@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -23,7 +25,6 @@ import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffVisitor;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
@@ -37,6 +38,7 @@ import org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 
 /**
@@ -148,7 +150,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	
 	private Collection<IResourceUIModel> handleDeployment(Deployment deployment) {
 		Collection<IResourceUIModel> models = deployment.getBuilds().stream().filter(b->!isTerminatedBuild((IBuild)b.getResource())).collect(Collectors.toList());
-		models.addAll(deployment.getPods().stream().filter(p->!isBuildPod(p)).collect(Collectors.toList()));
+		models.addAll(deployment.getPods().stream().filter(p->!isBuildPod((IPod)p.getResource())).collect(Collectors.toList()));
 		return models;
 	}
 	
@@ -156,11 +158,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		String phase = build.getStatus();
 		return TERMINATED_STATUS.contains(phase);
 	}
-	
-	private boolean isBuildPod(IResourceUIModel pod) {
-		return pod.getResource().isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME);
-	}
-
 	
 	private IProjectAdapter newProjectAdapter(Connection connection, IProject project) {
 		OpenShiftProjectUIModel model = new OpenShiftProjectUIModel(connection, project);
@@ -206,7 +203,7 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 						if(ResourceKind.BUILD.equals(model.getResource().getKind()) && isTerminatedBuild((IBuild) model.getResource())) {
 							return;
 						}
-						if(ResourceKind.POD.equals(model.getResource().getKind()) && isBuildPod(model)) {
+						if(ResourceKind.POD.equals(model.getResource().getKind()) && isBuildPod((IPod)model.getResource())) {
 							return;
 						}						
 					}
@@ -237,9 +234,8 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 					updateChildrenFromViewer(parent);
 				}
 				//HACK to fix JBIDE-21458
-				if(parent instanceof IProjectAdapter && oldList.size() == 0 && newList.size() > 0) {
-					IProjectAdapter project = (IProjectAdapter)parent;
-					refreshViewer(project);
+				if(newList.size() > 0 && (parent instanceof IProjectAdapter || parent instanceof Deployment)) {
+					refreshViewer(parent);
 				}else {
 					addChildrenToViewer(parent, child);
 				}

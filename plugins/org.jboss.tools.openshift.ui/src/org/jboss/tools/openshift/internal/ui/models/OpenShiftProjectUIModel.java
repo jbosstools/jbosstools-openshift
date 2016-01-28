@@ -33,7 +33,7 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 	
 	public static final String PROP_LOADING = "loading";
 	
-	private final DeploymentResourceMapper mapper;
+	private final IDeploymentResourceMapper mapper;
 	private final IProject project;
 
 	public OpenShiftProjectUIModel(Connection conn, IProject project) {
