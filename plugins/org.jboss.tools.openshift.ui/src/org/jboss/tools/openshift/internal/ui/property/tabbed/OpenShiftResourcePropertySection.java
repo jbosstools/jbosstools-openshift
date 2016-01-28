@@ -24,6 +24,8 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IWorkbenchPart;
@@ -79,8 +81,12 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	
 	protected void createContents(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		this.page = aTabbedPropertySheetPage;
+		parent.setLayout(new GridLayout());
 		
 		SashForm container = new SashForm(parent, SWT.VERTICAL);
+		GridData d = new GridData(GridData.FILL_BOTH);
+		d.widthHint = 100; //A dirty trick that keeps table from growing unlimitedly within scrolled parent composite.
+		container.setLayoutData(d);
 		Composite tableContainer = new Composite(container, SWT.NONE);
 		
 		tableContainer.setLayout(new FillLayout());
