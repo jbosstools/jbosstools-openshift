@@ -29,7 +29,6 @@ import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IOpenShiftWatchListener;
 import com.openshift.restclient.IWatcher;
-import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
@@ -41,7 +40,7 @@ public class WatchManager {
 	private static final int[] FIBONACCI = new int[] { 0, 1, 1, 2, 3, 5, 8, 13, 21 };
 	private static final long BACKOFF_MILLIS = 5000;
 	private static final long BACKOFF_RESET = FIBONACCI[FIBONACCI.length - 1] * BACKOFF_MILLIS * 2;
-	private static final String [] KINDS = new String[] {
+	public static final String [] KINDS = new String[] {
 			ResourceKind.BUILD_CONFIG, 
 			ResourceKind.DEPLOYMENT_CONFIG, 
 			ResourceKind.SERVICE, 
@@ -49,6 +48,7 @@ public class WatchManager {
 			ResourceKind.REPLICATION_CONTROLLER, 
 			ResourceKind.BUILD, 
 			ResourceKind.IMAGE_STREAM, 
+			ResourceKind.IMAGE_STREAM_TAG, 
 			ResourceKind.ROUTE
 	};
 	

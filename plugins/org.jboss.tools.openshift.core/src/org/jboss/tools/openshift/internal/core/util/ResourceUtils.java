@@ -16,14 +16,26 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.ITags;
+import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IObjectReference;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 
 public class ResourceUtils {
+
+	public static final String DOCKER_IMAGE_KIND = "DockerImage";
+	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 
 	/**
 	 * Returns <code>true</code> if the given resource contains the given text
@@ -75,8 +87,11 @@ public class ResourceUtils {
 	 * @param target
 	 * @return true if there is overlap; false; otherwise
 	 */
-	public static boolean selectorsOverlap(Map<String, String> source, Map<String, String> target) {
+	public static boolean containsAll(Map<String, String> source, Map<String, String> target) {
 		if(source == null || target == null) return false;
+		if(!target.keySet().isEmpty() && source.keySet().isEmpty()) {
+			return false;
+		}
 		if(!target.keySet().containsAll(source.keySet())) {
 			return false;
 		}
@@ -86,5 +101,97 @@ public class ResourceUtils {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Find the collection of services whos selectors match the given pod
+	 * @param pod
+	 * @param services
+	 * @return
+	 */
+	public static Collection<IService> getServicesForPod(IPod pod, Collection<IService> services){
+		return services.stream()
+				.filter(s->containsAll(((IService)s).getSelector(), pod.getLabels()))
+				.collect(Collectors.toSet());
+	}
+	
+	/**
+	 * Find the collection of pods that match the selector of the given service
+	 * @param service
+	 * @param pods
+	 * @return
+	 */
+	public static Collection<IPod> getPodsForService(IService service, Collection<IPod> pods) {
+		final Map<String, String> serviceSelector = service.getSelector();
+		return pods.stream()
+				.filter(p -> containsAll(serviceSelector, p.getLabels()))
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * 
+	 * @param pod
+	 * @return true if pod is annotated with the build name; false otherwise;
+	 */
+	public static boolean isBuildPod(IPod pod) {
+		return pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME);
+	}
+	
+	/**
+	 * The image reference for an image change trigger used to correlate a 
+	 * deploymentconfig to a buildconfig
+	 *  
+	 * @param trigger
+	 * @return
+	 */
+	public static String imageRef(IDeploymentImageChangeTrigger trigger) {
+		if(trigger != null) {
+			switch(trigger.getKind()) {
+			case ResourceKind.IMAGE_STREAM_TAG:
+			case IMAGE_STREAM_IMAGE_KIND:
+			case DOCKER_IMAGE_KIND:	
+				return trigger.getFrom().getNameAndTag();
+			}
+		}
+		return "";
+	}
+	
+	/**
+	 * The image reference for an image change trigger used to correlate a 
+	 * buildconfig to a deploymentconfig
+	 *  
+	 * @param trigger
+	 * @return
+	 */
+	public static String imageRef(IBuildConfig config) {
+		if(config != null) {
+			IObjectReference outputRef = config.getBuildOutputReference();
+			switch(outputRef.getKind()) {
+				case ResourceKind.IMAGE_STREAM_TAG:
+				case IMAGE_STREAM_IMAGE_KIND:
+					return outputRef.getName();
+			}
+		}
+		return "";
+	}
+	
+	/**
+	 * The image reference for an image change trigger used to correlate a 
+	 * build to a deploymentconfig
+	 *  
+	 * @param trigger
+	 * @return
+	 */
+	public static String imageRef(IBuild build) {
+		if(build != null) {
+			switch(build.getOutputKind()) {
+				case ResourceKind.IMAGE_STREAM_TAG:
+				case IMAGE_STREAM_IMAGE_KIND:
+				case DOCKER_IMAGE_KIND:
+					return build.getOutputTo().getNameAndTag();
+			}
+		}
+		return "";
+
 	}
 }

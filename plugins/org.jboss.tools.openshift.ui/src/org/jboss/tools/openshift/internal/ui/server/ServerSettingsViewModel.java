@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
+import org.jboss.tools.openshift.internal.ui.models.IDeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
@@ -71,7 +73,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	private String sourcePath;
 	protected String podPath;
 	private IServerWorkingCopy server;
-	private Map<String, DeploymentResourceMapper> deploymentMapperByProjectName;
+	private Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName;
 
 	public ServerSettingsViewModel(IServerWorkingCopy server, Connection connection) {
 		super(connection);
@@ -80,7 +82,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	protected void update(Connection connection, List<Connection> connections, 
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
-			String sourcePath, String podPath, Map<String, DeploymentResourceMapper> deploymentMapperByProjectName, 
+			String sourcePath, String podPath, Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName, 
 			IService service, List<ObservableTreeItem> serviceItems) {
 		update(connection, connections, service, serviceItems);
 		updateProjects(projects);
@@ -120,18 +122,18 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
 	}
 
-	protected void updatePodPath(String newPodPath, Map<String, DeploymentResourceMapper> deploymentResourceMapperByProjectName, IService service) {
+	protected void updatePodPath(String newPodPath, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName, IService service) {
 		this.deploymentMapperByProjectName = deploymentResourceMapperByProjectName;
 		newPodPath = getDeploymentDirectory(service, deploymentResourceMapperByProjectName);
 		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = newPodPath);
 	}
 
-	private String getDeploymentDirectory(IService service, Map<String, DeploymentResourceMapper> deploymentResourceMapperByProjectName) {
+	private String getDeploymentDirectory(IService service, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName) {
 		String deploymentDirectory = null;
 		if (service != null
 				&& deploymentResourceMapperByProjectName != null) {
 			IProject project = service.getProject();
-			DeploymentResourceMapper deploymentMapper = deploymentResourceMapperByProjectName.get(project.getName());
+			IDeploymentResourceMapper deploymentMapper = deploymentResourceMapperByProjectName.get(project.getName());
 			if (deploymentMapper != null) {
 				Collection<IResource> istags = getImageStreamTags(service, deploymentMapper);
 				Iterator<IResource> istagsIterator = istags.iterator();
@@ -165,14 +167,14 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		
 	}
 
-	private Collection<IResource> getImageStreamTags(IService service, DeploymentResourceMapper deploymentMapper) {
-		Collection<IResource> pods = deploymentMapper.getResourcesFor(service, ResourceKind.POD);
-		Collection<IResource> deploymentConfigs = deploymentMapper.getResourcesFor(pods,ResourceKind.DEPLOYMENT_CONFIG);
-		Collection<IResource> builds = deploymentMapper.getResourcesFor(deploymentConfigs, ResourceKind.BUILD);
-		Collection<IResource> buildConfigs = deploymentMapper.getResourcesFor(builds, ResourceKind.BUILD_CONFIG);
-		Collection<IResource> istags = deploymentMapper.getResourcesFor(buildConfigs, ResourceKind.IMAGE_STREAM_TAG);
-		// need to refresh to get full resource WITH labels 
-		return getVerboseResources(istags, getConnection());
+	private Collection<IResource> getImageStreamTags(IService service, IDeploymentResourceMapper deploymentMapper) {
+		Optional<Deployment> deployment = deploymentMapper.getDeployments().stream().filter(d->service.equals(d.getService())).findFirst();
+		if(deployment.isPresent()) {
+			Collection<IResource> istags = deployment.get().getImageStreamTags().stream().map(m->m.getResource()).collect(Collectors.toList());
+			// need to refresh to get full resource WITH labels 
+			return getVerboseResources(istags, getConnection());
+		}
+		return Collections.emptyList();
 	}
 
 	public void setDeployProject(org.eclipse.core.resources.IProject project) {
@@ -233,22 +235,22 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		setImageStreamTags(loadImageStreamTags());
 	}
 
-	private void setImageStreamTags(Map<String, DeploymentResourceMapper> deploymentMapperByProjectName) {
+	private void setImageStreamTags(Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName) {
 		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, podPath, deploymentMapperByProjectName, getService(), getServiceItems());
 	}
 
-	protected Map<String, DeploymentResourceMapper> getImageStreamTags(){
+	protected Map<String, IDeploymentResourceMapper> getImageStreamTags(){
 		return deploymentMapperByProjectName;
 	}
 	
-	private Map<String, DeploymentResourceMapper> loadImageStreamTags() {
-		Map<String, DeploymentResourceMapper> deploymentMapperByProjectName = new HashMap<>();
+	private Map<String, IDeploymentResourceMapper> loadImageStreamTags() {
+		Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName = new HashMap<>();
 		Connection connection = getConnection();
 		if (connection != null) {
 			List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 			if (projects != null) {
 				projects.forEach(project -> {
-					DeploymentResourceMapper deploymentMapper = new DeploymentResourceMapper(connection,
+					IDeploymentResourceMapper deploymentMapper = new DeploymentResourceMapper(connection,
 							new ProjectAdapterFake((IProject) project));
 					deploymentMapper.refresh();
 					deploymentMapperByProjectName.put(project.getName(), deploymentMapper);

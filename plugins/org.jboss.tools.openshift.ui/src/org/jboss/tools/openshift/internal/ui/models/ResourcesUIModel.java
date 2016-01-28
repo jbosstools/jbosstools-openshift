@@ -29,12 +29,21 @@ import com.openshift.restclient.model.IResource;
 
 public abstract class ResourcesUIModel extends ObservableUIPojo implements IResourcesUIModel {
 
+	private static final int NOT_FOUND = -1;
 	protected Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
 	private final Object parent;
 	
 	protected ResourcesUIModel(Object parent) {
 		this.parent = parent;
 		Arrays.asList(KINDS).forEach(k->resources.put(k, Collections.synchronizedList(new ArrayList<>())));
+	}
+	
+	protected boolean hasModelFor(IResource resource) {
+		if(resources.containsKey(resource.getKind())) {
+			List<IResourceUIModel> models = resources.get(resource.getKind());
+			return indexOf(models, resource) > NOT_FOUND;
+		}
+		return false;
 	}
 	
 	private <T extends IResource> List<IResourceUIModel> init(Collection<T> resources) {
@@ -186,23 +195,26 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 
 	@Override
 	public void add(IResource resource) {
+		if(resource == null) return;
 		final String property = getProperty(resource.getKind());
 		List<IResourceUIModel> models = resources.get(resource.getKind());
-		if(models != null) {
+		int index = indexOf(models, resource);
+		if(models != null && index == NOT_FOUND) {
 			List<IResourceUIModel> old = new ArrayList<>(models);
 			models.add(new OpenShiftResourceUIModel(resource, this));
-			int index = models.size() - 1;
+			index = models.size() - 1;
 			fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
 		}
 	}
 
 	@Override
 	public void remove(IResource resource) {
+		if(resource == null) return;
 		final String property = getProperty(resource.getKind());
 		List<IResourceUIModel> models = resources.get(resource.getKind());
 		if(models != null) {
 			int index = indexOf(models, resource);
-			if(index > -1) {
+			if(index > NOT_FOUND) {
 				List<IResourceUIModel> old = new ArrayList<>(models);
 				models.remove(index);
 				fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
@@ -212,11 +224,12 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 
 	@Override
 	public void update(IResource resource) {
+		if(resource == null) return;
 		final String property = getProperty(resource.getKind());
 		List<IResourceUIModel> models = resources.get(resource.getKind());
 		if(models != null) {
 			int index = indexOf(models, resource);
-			if(index > -1) {
+			if(index > NOT_FOUND) {
 				List<IResourceUIModel> old = new ArrayList<>(models);
 				models.set(index, new OpenShiftResourceUIModel(resource, this));
 				fireIndexedPropertyChange(property, index, old, Collections.unmodifiableList(models));
@@ -225,16 +238,18 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 	}
 	
 	private int indexOf(List<IResourceUIModel> models, IResource resource) {
-		for (int i = 0; i < models.size(); i++) {
-			IResourceUIModel model = models.get(i);
-			if(model != null) {
-				IResource old = model.getResource();
-				if(old.equals(resource)) {
-					return i;
+		if(models != null) {
+			for (int i = 0; i < models.size(); i++) {
+				IResourceUIModel model = models.get(i);
+				if(model != null) {
+					IResource old = model.getResource();
+					if(old.equals(resource)) {
+						return i;
+					}
 				}
 			}
 		}
-		return -1;
+		return NOT_FOUND;
 	}
 	
 	private static String getProperty(String kind) {
