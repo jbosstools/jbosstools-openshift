@@ -84,6 +84,7 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -328,8 +329,21 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					if (StringUtils.isEmpty(value)) {
 						return ValidationStatus.cancel("Please provide a local path to deploy from.");
 					}
+					String provideValidPathMessage = "Please provide a valid local path to deploy from.";
+					try {
+						path = VariablesHelper.replaceVariables(path);
+					} catch (OpenShiftCoreException e) {
+						String message = e.getMessage();
+						//Make message user friendly, remove exception name at the beginning, if any.
+						String prefixToMessage = "Exception:";
+						int index = message.indexOf(prefixToMessage);
+						if(index >= 0) {
+							message = message.substring(index + prefixToMessage.length()).trim();
+						}
+						return ValidationStatus.error(provideValidPathMessage + "\n " + message);
+					}
 					if (!isValidSource(path)) {
-						return ValidationStatus.error("Please provide a valid local path to deploy from.");
+						return ValidationStatus.error(provideValidPathMessage);
 					}
 					return ValidationStatus.ok();
 				}
