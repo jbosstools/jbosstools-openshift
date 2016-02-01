@@ -68,6 +68,8 @@
 							<or>
 								<instanceof
 									value="org.jboss.tools.openshift.core.connection.Connection" />
+								<instanceof
+									value="org.jboss.tools.openshift.internal.ui.models.Deployment" />
 								<adapt
 									type="com.openshift.restclient.model.IBuildConfig" />
 								<adapt
