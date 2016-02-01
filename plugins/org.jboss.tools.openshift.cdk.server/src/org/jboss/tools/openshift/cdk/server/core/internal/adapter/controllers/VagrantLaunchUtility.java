@@ -145,12 +145,15 @@ public class VagrantLaunchUtility {
 			}
 		});
 		
-		List<String> inLines = readStream(inStream);
-		List<String> errLines = readStream(errStream);
+		List<String> inLines = null;
 		if( exitCode == null ) {
 			// Timeout reached
 			p.destroyForcibly();
+			inLines = readStream(inStream);
+			List<String> errLines = readStream(errStream);
 			throw new TimeoutException(getTimeoutError(inLines, errLines));
+		} else {
+			inLines = readStream(inStream);
 		}
 		
 		return (String[]) inLines.toArray(new String[inLines.size()]);
