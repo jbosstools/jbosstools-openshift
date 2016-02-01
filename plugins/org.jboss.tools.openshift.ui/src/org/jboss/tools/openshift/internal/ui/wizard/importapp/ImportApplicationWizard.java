@@ -1,6 +1,7 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
- * All rights reserved. This program is made available under the terms of the
+ * Copyright (c) 2015-2016 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
  *
@@ -58,11 +59,11 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
 			setModelConnection(connection);
 			Collection<IBuildConfig> buildConfigs = entry.getValue();
-			if (buildConfigs.size() == 1) {
+			model.setProject(project);
+			if (buildConfigs != null && buildConfigs.size() == 1) {
 				model.setSelectedItem(buildConfigs.iterator().next());
 			} else {
 				model.setSelectedItem(project);
-				//TODO Get BuildConfigWizardPage to only display the buildconfigs passed here
 			}
 		}
 	}
