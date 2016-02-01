@@ -8,6 +8,8 @@ import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.debug.ui.RefreshTab;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.internal.launchConfigurations.ExternalToolsBuildTab;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolsHelpContextIds;
@@ -27,7 +29,19 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 		CommonTab common = new CommonTab();
 		common.setHelpContextId(IExternalToolsHelpContextIds.EXTERNAL_TOOLS_LAUNCH_CONFIGURATION_DIALOG_COMMON_TAB);
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
-			new ProgramMainTab(),
+		        new ProgramMainTab() {
+		            @Override
+		            public void createControl(final Composite parent) {
+		                super.createControl(parent);
+		                parent.getShell().addShellListener(new ShellAdapter() {
+		                    public void shellActivated(ShellEvent e) {
+		                        parent.update();
+		                        parent.layout(true);
+		                        parent.getShell().removeShellListener(this);
+		                    }
+		                });
+		            }
+		        },
 //			refresh,
 //			new ExternalToolsBuildTab(),
 			env,
