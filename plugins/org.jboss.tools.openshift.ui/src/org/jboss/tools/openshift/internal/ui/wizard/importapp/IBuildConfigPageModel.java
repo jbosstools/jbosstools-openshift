@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,6 +17,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IProject;
 
 /**
  * @author Andre Dietisheim
@@ -35,5 +36,9 @@ public interface IBuildConfigPageModel extends IConnectionAware<Connection> {
 	public void loadBuildConfigs();
 
 	public List<ObservableTreeItem> getBuildConfigs();
+
+	void setProject(IProject project);
+
+	IProject getProject();
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,8 +13,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.Path;
@@ -25,6 +24,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.BuildConfigTreeItems.ConnectionTreeItem;
 
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.build.IGitBuildSource;
 
 /**
@@ -40,9 +40,11 @@ public class ImportApplicationWizardModel
 	private String repoPath;
 	private boolean useDefaultRepoPath;
 	private String projectName;
+	private IProject project;
+	
 	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
 
-	ImportApplicationWizardModel() {
+	public ImportApplicationWizardModel() {
 		this.useDefaultRepoPath = true;
 		this.repoPath = getDefaultRepoPath();
 	}
@@ -127,7 +129,7 @@ public class ImportApplicationWizardModel
 	}
 
 	private static String getProjectName(IBuildConfig config) {
-		String projectName = (config == null)?null:extractProjectNameFromURI(config.getSourceURI());
+		String projectName = (config == null)? null:extractProjectNameFromURI(config.getSourceURI());
 		return projectName;
 	}
 
@@ -161,6 +163,9 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setProjectName(String name) {
+		if (name == null && getProject() != null) {
+			name = getProject().getName();
+		}
 		firePropertyChange(PROPERTY_PROJECT_NAME, this.projectName, this.projectName = name);
 	}
 	
@@ -196,7 +201,7 @@ public class ImportApplicationWizardModel
 				return;
 		}
 		connectionItem.load();
-		setBuildConfigs(connectionItem.getChildren());
+		setBuildConfigs(filterBuildConfigs(connectionItem.getChildren()));
 	}
 	
 	private void setBuildConfigs(List<ObservableTreeItem> newBuildConfigs) {
@@ -206,8 +211,20 @@ public class ImportApplicationWizardModel
 		List<ObservableTreeItem> oldItems = new ArrayList<>(this.buildConfigs);
 		List<ObservableTreeItem> newItems = new ArrayList<>(newBuildConfigs);
 		buildConfigs.clear();
-		buildConfigs.addAll(connectionItem.getChildren());
+		buildConfigs.addAll(newItems);
 		firePropertyChange(PROPERTY_BUILDCONFIGS, oldItems, newItems);
+	}
+
+	private List<ObservableTreeItem> filterBuildConfigs(List<ObservableTreeItem> children) {
+		List<ObservableTreeItem> result = children;
+		if (project != null) {
+			result = children.stream()
+					.filter(c -> project.equals(c.getModel()))
+					.map(p -> p.getChildren())
+					.flatMap(l -> l.stream())
+					.collect(Collectors.toList());
+		}
+		return result;
 	}
 
 	@Override
@@ -231,5 +248,15 @@ public class ImportApplicationWizardModel
 			appName = buildConfig.getName();
 		}
 		return appName;
+	}
+
+	@Override
+	public IProject getProject() {
+		return project;
+	}
+
+	@Override
+	public void setProject(IProject project) {
+		this.project = project;
 	}
 }
