@@ -47,14 +47,16 @@ public class CDKDockerUtility {
 	
 	public IDockerConnection findDockerConnection(ADBInfo adb) {
 		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
-		final String dockerHost = adb.env.get("DOCKER_HOST");
+		final String dockerHost = adb == null ? null : adb.env == null ? null : adb.env.get("DOCKER_HOST");
 		
-		IDockerConnection[] cons = mgr.getConnections();
-		String httpHost = dockerHost.replace("tcp://", "http://");
-		String httpsHost = dockerHost.replace("tcp://", "https://");
-		for( int i = 0; i < cons.length; i++ ) {
-			if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost) || cons[i].getUri().equals(httpsHost)) {
-				return cons[i];
+		if( dockerHost != null ) {
+			IDockerConnection[] cons = mgr.getConnections();
+			String httpHost = dockerHost.replace("tcp://", "http://");
+			String httpsHost = dockerHost.replace("tcp://", "https://");
+			for( int i = 0; i < cons.length; i++ ) {
+				if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost) || cons[i].getUri().equals(httpsHost)) {
+					return cons[i];
+				}
 			}
 		}
 		return null;
