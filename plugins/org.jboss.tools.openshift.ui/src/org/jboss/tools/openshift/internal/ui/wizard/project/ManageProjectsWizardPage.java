@@ -52,6 +52,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICo
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
 import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 
@@ -93,6 +94,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				ManageProjectsWizardPageModel.PROPERTY_PROJECTS).observe(pageModel));
 		loadProjects(dbc);
 		initialProjects = getProjects();
+		viewer.setComparator(new ProjectViewerComparator());
 
 		IObservableValue viewerSingleSelection = ViewerProperties.singleSelection().observe(viewer);
 		ValueBindingBuilder.bind(viewerSingleSelection)

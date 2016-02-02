@@ -48,6 +48,7 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.comparators,
  org.jboss.tools.openshift.internal.ui.dialog;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.handler;x-friends:="org.jboss.tools.openshift.test",
