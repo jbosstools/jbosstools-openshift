@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,19 +10,36 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.application;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createObservableTreeItems;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
+import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,24 +56,167 @@ import com.openshift.restclient.model.template.ITemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class NewApplicationWizardModelTest {
 
-	private NewApplicationWizardModel model;
+	private TestableNewApplicationWizardModel model;
 	@Mock
 	private ITemplate template;
 	@Mock
 	private IProject project;
 	@Mock
 	private IResourceFactory factory;
+	private List<ObservableTreeItem> projectItems;
 	
 	@Before
 	public void setup() throws Exception {
-		NewApplicationWizardModel model = new NewApplicationWizardModel();
+		when(project.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
+		createProjectTemplateItems();
+		TestableNewApplicationWizardModel model = new TestableNewApplicationWizardModel();
+		this.projectItems = createProjectTemplateItems();
+		model.setProjectItems(projectItems);
 		model.setProject(project);
 		model.setResourceFactory(factory);
 
 		this.model = spy(model);
 		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString());
 	}
+
+	/**
+	 * Creates a tree of items:
+	 * 
+	 *  - project1
+	 *     - template1
+	 *  - project2
+	 *     - template2
+	 *     - template3
+	 *  - project3
+	 *     - template4
+	 *     - template5
+	 *     - template6
+	 * @return 
+	 */
+	private List<ObservableTreeItem> createProjectTemplateItems() {
+		List<ObservableTreeItem> projectItems = createObservableTreeItems(createResources(3, IProject.class,
+				resource -> {
+					when(resource.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
+					}));
+		for (int i = 0; i < 3; i++) {
+			projectItems.get(i).setChildren(createObservableTreeItems(createResources(i + 1, ITemplate.class)));;
+		}
+		return projectItems;
+	}
+
+	@Test
+	public void getProjectItemsShouldReturnAllItemsSet() {
+		// pre-conditions
+		model.setProjectItems(Collections.emptyList());
+
+		// operations
+		model.setProjectItems(projectItems);
+
+		// verification
+		assertThat(model.getProjectItems()).containsExactlyElementsOf(projectItems);
+	}
+
+	@Test
+	public void setProjectShouldReturnSameProject() {
+		// pre-conditions
+		assertThat(model.getProjectItems().size()).isGreaterThan(2); 
+		IProject project2 = (IProject) model.getProjectItems().get(1).getModel();
+
+		// operations
+		model.setProject(project2);
+
+		// verification
+		assertThat(model.getProject()).isEqualTo(project2);
+	}
+
+	@Test
+	public void setProjectItemsShouldPreserveSelectedProjectIfContained() {
+		// pre-conditions
+		this.projectItems.add(new ObservableTreeItem(project));
+		model.setProject(project);
+		IProject selectedProject = model.getProject(); 
+		assertThat(selectedProject).isNotNull();
+		
+		// operations
+		model.setProjectItems(projectItems);
+
+		// verification
+		assertThat(model.getProject()).isEqualTo(selectedProject);
+	}
 	
+	@Test
+	public void setProjectItemsShouldSelect1stProjectIfCurrentNotContained() {
+		// pre-conditions
+		model.setProject(project);
+
+		// operations
+		model.setProjectItems(projectItems);
+
+		// verification
+		ObservableTreeItem projectItem = projectItems.get(0);
+		assertThat(projectItem).isNotNull();
+		assertThat(model.getProject()).isEqualTo(projectItem.getModel());
+	}
+
+	@Test
+	public void setNullProjectShouldSet1stProject() {
+		// pre-conditions
+
+		// operations
+		model.setProject(null);
+
+		// verification
+		assertThat(model.getProject()).isEqualTo(getProject(0));
+	}
+	
+	@Test
+	public void setNullProjectShouldSetNullIfNoProjectsAvailable() {
+		// pre-conditions
+		model.setProjectItems(Collections.emptyList());
+		
+		// operations
+		model.setProject(null);
+
+		// verification
+		assertThat(model.getProject()).isNull();
+	}
+
+	@Test
+	public void setProjectToProject2ShouldHaveGetTemplatesReturnTemplatesForProject2() {
+		// pre-conditions
+		IProject project2 = getProject(1); 
+
+		// operations
+		model.setProject(project2);
+		List<ObservableTreeItem> templates = model.getTemplates();
+		
+		// verification
+		assertThat(templates).containsAll(getTemplateItemsForProject(1));
+	}
+
+	@Test
+	public void setServerTemplateShouldSetUseLocalTemplateToFalse() {
+		// pre-conditions
+		ITemplate template = ResourceMocks.createResource(ITemplate.class, null);
+
+		// operations
+		model.setServerTemplate(template );
+
+		// verification
+		assertThat(model.isUseLocalTemplate()).isFalse();
+	}
+	
+	@Test
+	public void setLocalTemplateFilenameShouldSetUseLocalTemplateToTrue() {
+		// pre-conditions
+
+		// operations
+		model.setLocalTemplateFileName("test.json");
+
+		// verification
+		assertThat(model.isUseLocalTemplate()).isTrue();
+	}
+
 	@Test
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
@@ -133,5 +293,25 @@ public class NewApplicationWizardModelTest {
 		parameters.put(param.getName(), param );
 		when(template.getParameters()).thenReturn(parameters);
 		return parameters;
+	}
+	
+	private IProject getProject(int i) {
+		assertThat(projectItems.size()).isGreaterThan(i + 1);
+
+		return (IProject) projectItems.get(i).getModel();
+	}
+
+	private List<ObservableTreeItem> getTemplateItemsForProject(int i) {
+		assertThat(projectItems.size()).isGreaterThan(i + 1);
+
+		return projectItems.get(i).getChildren().stream()
+				.collect(Collectors.<ObservableTreeItem>toList());
+	}
+
+	public static class TestableNewApplicationWizardModel extends NewApplicationWizardModel {
+		@Override
+		public void setProjectItems(List<ObservableTreeItem> projects) {
+			super.setProjectItems(projects);
+		}
 	}
 }

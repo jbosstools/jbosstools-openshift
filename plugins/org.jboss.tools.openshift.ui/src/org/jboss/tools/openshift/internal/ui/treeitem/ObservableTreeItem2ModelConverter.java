@@ -38,6 +38,7 @@ public class ObservableTreeItem2ModelConverter extends Converter {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> List<T> convert(List<ObservableTreeItem> items) {
 		if (items == null
 				|| items.size() == 0) {
