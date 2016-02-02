@@ -10,7 +10,6 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +23,17 @@ import org.eclipse.wst.server.core.IServer;
 
 public class CDKDockerUtility {
 
-	public String getNextName(IServer server, DockerConnectionManager mgr) {
+	private DockerConnectionManager mgr;
+
+	public CDKDockerUtility(DockerConnectionManager mgr) {
+		this.mgr = mgr;
+	}
+	
+	public CDKDockerUtility() {
+		this(org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance());
+	}
+	
+	public String getNextName(IServer server) {
 		// Cache all names
 		IDockerConnection[] cons = mgr.getConnections();
 		List<String> names = Arrays.stream(cons).map(IDockerConnection::getName).collect(Collectors.toList());
@@ -46,7 +55,6 @@ public class CDKDockerUtility {
 	}
 	
 	public IDockerConnection findDockerConnection(ADBInfo adb) {
-		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
 		final String dockerHost = adb == null ? null : adb.env == null ? null : adb.env.get("DOCKER_HOST");
 		
 		if( dockerHost != null ) {
@@ -66,20 +74,23 @@ public class CDKDockerUtility {
 		return findDockerConnection(adb) != null;
 	}
 	
-	public void createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
-		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
+	public IDockerConnection buildDockerConnection(IServer server, ADBInfo adb) throws DockerException {
 		final String dockerHost = adb.env.get("DOCKER_HOST");
 
 		final Builder tcpConnectionBuilder = new DockerConnection.Builder()
-				.name(getNextName(server, mgr)).tcpHost(dockerHost);
+				.name(getNextName(server)).tcpHost(dockerHost);
 		String tlsVerifyString = adb.env.get("DOCKER_TLS_VERIFY");
 		boolean tlsVerify = (Integer.parseInt(tlsVerifyString) != 0);
 		if( tlsVerify ) {
 			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
 			tcpConnectionBuilder.tcpCertPath(tlsCertPath);
 		}
-		DockerConnection con = tcpConnectionBuilder.build();
-		IDockerConnection[] other = mgr.getConnections();
+		return tcpConnectionBuilder.build();
+	}
+	
+	public IDockerConnection createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+		IDockerConnection con = buildDockerConnection(server, adb);
 		mgr.addConnection(con);
+		return con;
 	}
 }
