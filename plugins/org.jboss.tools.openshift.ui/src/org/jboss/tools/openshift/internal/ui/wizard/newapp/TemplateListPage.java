@@ -382,7 +382,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open();
 							// reload projects to reflect changes that happened in projects wizard
 							if (manageProjectsWizard.hasChanged()) {
-								loadResources(templatesViewer, model);
+								loadResources(templatesViewer, model, false);
 							}
 							if(Dialog.OK == result) {
 								IProject selectedProject = manageProjectsWizard.getSelectedProject();
@@ -739,17 +739,18 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				loadResources(templatesViewer, model);
+				loadResources(templatesViewer, model, getPreviousPage() == null);
 				templatesViewer.expandAll();
 			}
 		};
 	}
 
-	private void loadResources(final TreeViewer templatesViewer, final ITemplateListPageModel model) {
+	private void loadResources(final TreeViewer templatesViewer, final ITemplateListPageModel model, final boolean closeOnCancel) {
 		if (!model.hasConnection()) {
 			return;
 		}
 		try {
+			final boolean[] closeAfter = new boolean[]{false}; 
 			Job jobs = new JobChainBuilder(
 					new AbstractDelegatingMonitorJob("Loading projects, templates...") {
 
@@ -768,7 +769,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 								NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
 								if (Dialog.CANCEL ==
 										WizardUtils.openWizardDialog(newProjectWizard, getShell())) {
-									WizardUtils.close(getWizard());
+									closeAfter[0] = closeOnCancel;
 									return Status.CANCEL_STATUS;
 								} else {
 									model.loadResources();
@@ -786,6 +787,13 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 						}
 					}).build();
 			WizardUtils.runInWizard(jobs, getContainer());
+			if(closeAfter[0]) {
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						WizardUtils.close(getWizard());
+					}
+				});
+			}
 		} catch (InvocationTargetException | InterruptedException e) {
 			// intentionnally swallowed
 		}
@@ -793,7 +801,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	@Override
 	protected void onPageActivated(final DataBindingContext dbc) {
-		loadResources(templatesViewer, model);
+		loadResources(templatesViewer, model, getPreviousPage() == null);
 		// fix GTK3 combo boxes too small
 		// https://issues.jboss.org/browse/JBIDE-16877,
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425

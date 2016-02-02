@@ -60,7 +60,7 @@ public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardMo
 		} catch (InvocationTargetException | InterruptedException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project", e);
 		}
-		return job.getResult().isOK();
+		return job.getResult() != null && job.getResult().isOK();
 	}
 
 	@Override
