@@ -477,13 +477,13 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								model.setService(OpenShiftServerUtils.getService(server));
 								if (deployProject != null) {
 									model.setDeployProject(deployProject);
 								}
 								if (connection != null) {
 									model.setConnection(connection);
 								}
+								model.setService(OpenShiftServerUtils.getService(server));
 								return Status.OK_STATUS;
 							}
 						})
