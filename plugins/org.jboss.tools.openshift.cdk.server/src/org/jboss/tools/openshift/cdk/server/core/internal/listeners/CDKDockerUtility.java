@@ -10,7 +10,6 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,7 +65,7 @@ public class CDKDockerUtility {
 		return findDockerConnection(adb) != null;
 	}
 	
-	public void createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+	public IDockerConnection buildDockerConnection(IServer server, ADBInfo adb) throws DockerException {
 		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
 		final String dockerHost = adb.env.get("DOCKER_HOST");
 
@@ -78,8 +77,13 @@ public class CDKDockerUtility {
 			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
 			tcpConnectionBuilder.tcpCertPath(tlsCertPath);
 		}
-		DockerConnection con = tcpConnectionBuilder.build();
-		IDockerConnection[] other = mgr.getConnections();
+		return tcpConnectionBuilder.build();
+	}
+	
+	public IDockerConnection createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
+		IDockerConnection con = buildDockerConnection(server, adb);
 		mgr.addConnection(con);
+		return con;
 	}
 }
