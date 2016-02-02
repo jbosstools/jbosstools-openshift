@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -70,18 +71,18 @@ public class NewApplicationWizardModel
 	private IResourceFactory resourceFactory;
 	private org.eclipse.core.resources.IProject eclipseProject;
 
-	private void update(boolean useUploadTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate serverTemplate, String localTemplateFilename) {
-		firePropertyChange(PROPERTY_USE_LOCAL_TEMPLATE, this.useLocalTemplate, this.useLocalTemplate = useUploadTemplate);
+	private void update(boolean useLocalTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate serverTemplate, String localTemplateFilename) {
+		firePropertyChange(PROPERTY_USE_LOCAL_TEMPLATE, this.useLocalTemplate, this.useLocalTemplate = useLocalTemplate);
 		updateProjectItems(projectItems);
-		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getProjectOrDefault(selectedProject, projectItems));
-		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(project, projectItems) );
-		updateSelectedTemplate(useUploadTemplate, serverTemplate, localTemplate, localTemplateFilename);
+		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
+		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
+		updateSelectedTemplate(useLocalTemplate, serverTemplate, localTemplate, localTemplateFilename);
 		updateTemplateParameters(selectedTemplate);
 	}
 
-	private void updateSelectedTemplate(boolean useLoadlTemplate, ITemplate serverTemplate, ITemplate localTemplate, String localTemplateFilename) {
+	private void updateSelectedTemplate(boolean useLocalTemplate, ITemplate serverTemplate, ITemplate localTemplate, String localTemplateFilename) {
 		ITemplate template = null;
-		if (useLoadlTemplate) {
+		if (useLocalTemplate) {
 			if (!ObjectUtils.equals(localTemplateFilename, this.localTemplateFilename)) {
 				template = this.localTemplate = getLocalTemplate(localTemplateFilename);
 				firePropertyChange(PROPERTY_LOCAL_TEMPLATE_FILENAME, this.localTemplateFilename, this.localTemplateFilename = localTemplateFilename);
@@ -98,24 +99,23 @@ public class NewApplicationWizardModel
 		if (StringUtils.isBlank(filename)) {
 			return null;
 		}
-		ITemplate uploadedTemplate = null;
+		ITemplate template = null;
 		filename = VariablesHelper.replaceVariables(filename);
 		try {
 			if (!Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
-			uploadedTemplate = resourceFactory.create(createInputStream(filename));
+			template = resourceFactory.create(createInputStream(filename));
 		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
 		}
-		return uploadedTemplate;
+		return template;
 	}
 	
 	
-	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject,
-			List<ObservableTreeItem> allProjects) {
+	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject, List<ObservableTreeItem> allProjects) {
 		if (allProjects == null) {
 			return null;
 		}
@@ -150,7 +150,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setServerTemplate(ITemplate serverTemplate) {
-		update(this.useLocalTemplate, this.project, this.projectItems, serverTemplate, localTemplateFilename);
+		update(false, this.project, this.projectItems, serverTemplate, localTemplateFilename);
 	}
 
 	@Override
@@ -297,8 +297,8 @@ public class NewApplicationWizardModel
 	}
 
 	@Override
-	public void setUseLocalTemplate(boolean uploadTemplate) {
-		update(uploadTemplate, this.project, this.projectItems, this.serverTemplate, this.localTemplateFilename);
+	public void setUseLocalTemplate(boolean useLocalTemplate) {
+		update(useLocalTemplate, this.project, this.projectItems, this.serverTemplate, this.localTemplateFilename);
 	}
 
 	@Override
@@ -312,7 +312,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setLocalTemplateFileName(String filename) {
-		update(this.useLocalTemplate, this.project, this.projectItems, serverTemplate, filename);
+		update(true, this.project, this.projectItems, serverTemplate, filename);
 	}
 
 	@Override
@@ -363,23 +363,30 @@ public class NewApplicationWizardModel
 		this.resourceFactory = factory;
 	}
 	
-	private void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalTemplate, findProject(projects, this.project), projects, serverTemplate, localTemplateFilename);
+	protected void setProjectItems(List<ObservableTreeItem> projects) {
+		update(useLocalTemplate, findProject(this.project, projects), projects, serverTemplate, localTemplateFilename);
 	}
 
-	private IProject findProject(List<ObservableTreeItem> projects, IProject project) {
-		if(project == null || projects == null || projects.isEmpty()) {
+	private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {
+		if(project == null 
+				|| CollectionUtils.isEmpty(projects)) {
 			return null;
 		}
-		for (ObservableTreeItem item: projects) {
-			if(item.getModel() instanceof IProject) {
-				IProject p = (IProject)item.getModel();
-				if(p.getName().equals(project.getName())) {
-					return p;
+
+		return (IProject) projects.stream()
+			.filter(item -> {
+				if(item.getModel() instanceof IProject) {
+					IProject p = (IProject) item.getModel();
+					if (p != null) {
+						boolean equals =  ObjectUtils.equals(project, p);
+						return equals;
+					}
 				}
-			}
-		}
-		return null;
+				return false;
+			})
+			.findFirst()
+			.map(item -> item.getModel())
+			.orElse(null);
 	}
 
 	@Override
