@@ -96,6 +96,9 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	}
 
 	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
+		if(projects == this.projects) {
+			return; // happens when other properties are changed, avoid unnecessary work
+		}
 		List<org.eclipse.core.resources.IProject> oldProjects = new ArrayList<>(this.projects);
 		// ensure we're not operating on the same list
 		List<org.eclipse.core.resources.IProject> newProjects = new ArrayList<>();
