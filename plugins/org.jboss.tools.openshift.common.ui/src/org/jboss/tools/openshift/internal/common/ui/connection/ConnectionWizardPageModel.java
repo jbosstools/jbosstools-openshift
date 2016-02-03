@@ -48,8 +48,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SIGNUPURL = "signupUrl";
 	public static final String PROPERTY_USERDOCURL = "userdocUrl";
 	public static final String PROPERTY_HAS_DEFAULT_HOST = "hasDefaultHost";
-
-	private static final IStatus NOT_CONNECTED_STATUS = null;//StatusFactory.infoStatus(OpenShiftCommonCoreActivator.PLUGIN_ID, "not connected");
+	private static final IStatus NOT_CONNECTED_STATUS = null;
 
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
@@ -57,7 +56,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private IConnection connection;
 	private IStatus connectionFactoryError;
 	private String host;
-	private boolean allowConnectionChange;
 	private IConnectionFactory connectionFactory;
 	private boolean useDefaultHost;
 	private boolean hasDefaultHost;
@@ -71,15 +69,14 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Class<? extends IConnection> connectionType;
 	private IConnectionAware<IConnection> wizardModel;
 	
-	ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, 
+	protected ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, 
 			Class<? extends IConnection> connectionType, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
 		this.allConnections = filterAllConnections(editedConnection, allConnections, connectionType, allowConnectionChange);
 		this.connectionType = connectionType;
 		this.wizardModel = wizardModel;
 		this.allHosts = createAllHosts(allConnections);
-		this.allowConnectionChange = allowConnectionChange;
 		this.connectionsFactory = createConnectionsFactory();
-		init(editedConnection, connectionType);
+		init(editedConnection, connectionType, connectionFactory);
 	}
 
 	private Collection<IConnection> filterAllConnections(IConnection editedConnection, Collection<IConnection> allConnections,
@@ -117,7 +114,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return connectionsFactory;
 	}
 	
-	private void init(IConnection editedConnection, Class<? extends IConnection> connectionType) {
+	private void init(IConnection editedConnection, Class<? extends IConnection> connectionType, IConnectionFactory connectionFactory) {
 		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
 		initConnection(editedConnection, connectionType);
@@ -262,6 +259,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private String getUserdocUrl(IConnectionFactory factory) {
+		if (factory == null) {
+			return null;
+		}
 		return factory.getUserDocUrl();
 	}
 

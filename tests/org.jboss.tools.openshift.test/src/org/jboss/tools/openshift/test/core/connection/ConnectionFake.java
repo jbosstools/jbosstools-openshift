@@ -24,7 +24,7 @@ public class ConnectionFake extends AbstractConnection {
 	private String username;
 	private String password;
 	
-	ConnectionFake(String host) {
+	protected ConnectionFake(String host) {
 		super(host);
 	}
 
