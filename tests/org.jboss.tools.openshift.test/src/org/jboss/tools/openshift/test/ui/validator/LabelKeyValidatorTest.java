@@ -28,7 +28,8 @@ public class LabelKeyValidatorTest {
 	@Before
 	public void setup() {
 		Collection<String> readonly = Arrays.asList("readonlykey");
-		validator = new LabelKeyValidator(readonly);
+		Collection<String> used = Arrays.asList("somekey");
+		validator = new LabelKeyValidator(readonly, used);
 	}
 	
 	@Test
@@ -39,6 +40,11 @@ public class LabelKeyValidatorTest {
 	@Test
 	public void readonlyKeyShouldBeInvalid() {
 		assertStatus(ValidationStatus.error("some error message"), "readonlykey");
+	}
+	
+	@Test
+	public void usedKeyShouldBeInvalid() {
+		assertStatus(ValidationStatus.error("some error message"), "somekey");
 	}
 	
 	@Test

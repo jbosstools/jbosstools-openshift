@@ -13,6 +13,10 @@ package org.jboss.tools.openshift.internal.common.ui.wizard;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.MultiValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -35,10 +39,14 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShiftWizardPage {
 
 	private IKeyValueWizardModel<T> model;
+	private String initialKey;
+	private String initialValue;
 
 	public KeyValueWizardPage(IWizard wizard, IKeyValueWizardModel<T> model) {
 		super(model.getTitle(), model.getDescription(), "", wizard);
 		this.model = model;
+		initialKey = model.getKey();
+		initialValue = model.getValue();
 	}
 
 	@Override
@@ -66,12 +74,14 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 		Text nameText = new Text(composite, SWT.BORDER);
 		nameText.setEditable(model.isKeyEditable());
 
+		IObservableValue keyModel = BeanProperties.value(IKeyValueWizardModel.PROPERTY_KEY).observe(model);
+		IObservableValue keyTextObservable = WidgetProperties.text(SWT.Modify).observe(nameText);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
 		Binding nameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
+				.bind(keyTextObservable)
 				.validatingAfterConvert(model.getKeyAfterConvertValidator())
-				.to(BeanProperties.value(IKeyValueWizardModel.PROPERTY_KEY).observe(model))
+				.to(keyModel)
 				.in(dbc);
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -84,12 +94,40 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 		Text valueText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
+		IObservableValue valueModel = BeanProperties.value(IKeyValueWizardModel.PROPERTY_VALUE).observe(model);
+		IObservableValue valueTextObservable = WidgetProperties.text(SWT.Modify).observe(valueText);
 		Binding valeuBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(valueText))
+				.bind(valueTextObservable)
 				.validatingAfterConvert(model.getValueAfterConvertValidator())
-				.to(BeanProperties.value(IKeyValueWizardModel.PROPERTY_VALUE).observe(model))
+				.to(valueModel)
 				.in(dbc);
 		ControlDecorationSupport.create(
 				valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+
+		if(initialKey != null && !initialKey.isEmpty()) {
+			DataChangedValidator validator = new DataChangedValidator(keyTextObservable, valueTextObservable);
+			dbc.addValidationStatusProvider(validator);
+		}
+	}
+
+	class DataChangedValidator extends MultiValidator {
+		IObservableValue keyTextObservable;
+		IObservableValue valueTextObservable;
+
+		public DataChangedValidator(IObservableValue keyTextObservable, IObservableValue valueTextObservable) {
+			this.keyTextObservable = keyTextObservable;
+			this.valueTextObservable = valueTextObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			String key = (String)keyTextObservable.getValue();
+			String value = (String)valueTextObservable.getValue();
+			if(initialKey != null && initialKey.equals(key)
+					&& initialValue != null && initialValue.equals(value)) {
+				return ValidationStatus.cancel("Provide new values.");
+			}
+			return ValidationStatus.ok();
+		}
 	}
 }

@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.common;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
@@ -156,13 +159,15 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		if (label == null || isReadOnly(label)) {
 			return;
 		}
+		Set<String> usedKeys = getUsedKeys();
+		usedKeys.remove(label.getKey());
 		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>(label)
 			.windowTitle(RESOURCE_LABEL)
 			.title("Edit Label")
 			.description("Edit the resource label.")
 			.keyLabel(LABEL)
 			.groupLabel(LABEL)
-			.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
+			.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), usedKeys))
 			.valueAfterConvertValidator(new LabelValueValidator())
 			.build();
 		OkCancelButtonWizardDialog dialog =
@@ -171,6 +176,10 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 			model.updateLabel(label, dialogModel.getKey(), dialogModel.getValue());
 		}
+	}
+
+	Set<String> getUsedKeys() {
+		return model.getLabels().stream().map(l -> l.getKey()).collect(Collectors.toSet());
 	}
 
 	private SelectionListener onAdd() {
@@ -183,7 +192,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 						.description("Add a resource label.")
 						.keyLabel(LABEL)
 						.groupLabel(LABEL)
-						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels()))
+						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), getUsedKeys()))
 						.valueAfterConvertValidator(new LabelValueValidator())
 						.build();
 				OkCancelButtonWizardDialog dialog =
