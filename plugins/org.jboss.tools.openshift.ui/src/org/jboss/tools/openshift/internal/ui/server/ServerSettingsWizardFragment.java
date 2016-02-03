@@ -481,6 +481,10 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			.in(dbc);
 		ControlDecorationSupport.create(
 				deployPathBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+		IObservableValue podPathEditable = BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH_EDITABLE).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.editable().observe(deployPathText))
+			.notUpdating(podPathEditable).in(dbc);
 	}
 
 	private void createServiceControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {

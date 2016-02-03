@@ -57,6 +57,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	public static final String PROPERTY_PROJECTS = "projects";
 	public static final String PROPERTY_SOURCE_PATH = "sourcePath";
 	public static final String PROPERTY_POD_PATH = "podPath";
+	public static final String PROPERTY_POD_PATH_EDITABLE = "podPathEditable";
 
 	// "image->"dockerImageMetadata"->"Config"->"Labels"->"com.redhat.deployments-dir"
 	private static final Pattern PATTERN_REDHAT_DEPLOYMENTS_DIR = Pattern.compile("\"com\\.redhat\\.deployments-dir\"[^\"]*\"([^\"]*)\","); 
@@ -71,6 +72,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	protected List<org.eclipse.core.resources.IProject> projects = new ArrayList<>();
 	private String sourcePath;
 	protected String podPath;
+	protected String inferredPodPath = null;
 	private IServerWorkingCopy server;
 	private Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName;
 
@@ -83,7 +85,10 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
 			String sourcePath, String podPath, Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName, 
 			IService service, List<ObservableTreeItem> serviceItems) {
+		boolean serviceOrDeploymentChanged = this.deploymentMapperByProjectName != deploymentMapperByProjectName;
+		IService oldService = getService();
 		update(connection, connections, service, serviceItems);
+		serviceOrDeploymentChanged |= (oldService != getService());
 		updateProjects(projects);
 		if (this.deployProject != deployProject) {
 			//project changed, reset default sourcePath
@@ -91,7 +96,11 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		}
 		deployProject = updateDeployProject(deployProject, projects);
 		updateSourcePath(sourcePath, deployProject);
-		updatePodPath(podPath, deploymentMapperByProjectName, service);
+		if(serviceOrDeploymentChanged) {
+			updatePodPath(podPath, deploymentMapperByProjectName, service);
+		} else {
+			updatePodPath(podPath);
+		}
 	}
 
 	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
@@ -126,11 +135,23 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	protected void updatePodPath(String newPodPath, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName, IService service) {
 		this.deploymentMapperByProjectName = deploymentResourceMapperByProjectName;
-		newPodPath = getDeploymentDirectory(service, deploymentResourceMapperByProjectName);
+		String inferredPodPath = getInferredDeploymentDirectory(service, deploymentResourceMapperByProjectName, newPodPath);
+		firePropertyChange(PROPERTY_POD_PATH_EDITABLE, this.inferredPodPath == null, (this.inferredPodPath = inferredPodPath) == null);
+		if(inferredPodPath != null) {
+			newPodPath = inferredPodPath;
+		} else if (newPodPath == null) {
+			newPodPath = DEFAULT_DEPLOYMENT_DIR;
+		}
+		updatePodPath(newPodPath);
+	}
+
+	//Should only be called after newPodPath is revalidated against directories 
+	//inferred from image stream tags.
+	private void updatePodPath(String newPodPath) {
 		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = newPodPath);
 	}
 
-	private String getDeploymentDirectory(IService service, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName) {
+	private String getInferredDeploymentDirectory(IService service, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName, String selectedDeploymentDirectory) {
 		String deploymentDirectory = null;
 		if (service != null
 				&& deploymentResourceMapperByProjectName != null) {
@@ -138,22 +159,29 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			if (deploymentMapper != null) {
 				Collection<IResource> istags = deploymentMapper.getImageStreamTagsFor(service);
 				Iterator<IResource> istagsIterator = istags.iterator();
-				if (istagsIterator.hasNext()) {
+				while (istagsIterator.hasNext()) {
 					IResource imageStreamTag = istagsIterator.next();
 					String imageStreamTagJson = imageStreamTag.toJson(true);
-					if ((deploymentDirectory = matchFirstGroup(imageStreamTagJson, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-						if ((deploymentDirectory = matchFirstGroup(imageStreamTagJson, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-							deploymentDirectory = matchFirstGroup(imageStreamTagJson, PATTERN_WOKRING_DIR);
+					String dir = null;
+					if ((dir = matchFirstGroup(imageStreamTagJson, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
+						if ((dir = matchFirstGroup(imageStreamTagJson, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+							dir = matchFirstGroup(imageStreamTagJson, PATTERN_WOKRING_DIR);
+						}
+					}
+					if(dir != null) {
+						if(dir.equals(selectedDeploymentDirectory)) {
+							deploymentDirectory = dir;
+							//The selected directory is inferred. Do not look for another.
+							break;
+						} else if(deploymentDirectory == null) {
+							//Remember the first one found. Continue to look for coincidence with selected directory.
+							deploymentDirectory  = dir;
 						}
 					}
 				}
 			}
 		}
 
-		if (StringUtils.isEmpty(deploymentDirectory)) {
-			deploymentDirectory = DEFAULT_DEPLOYMENT_DIR;
-		}
-		
 		return deploymentDirectory;
 	}
 
@@ -202,6 +230,10 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	public String getPodPath() {
 		return podPath;
+	}
+
+	public boolean isPodPathEditable() {
+		return inferredPodPath == null;
 	}
 
 	@Override
