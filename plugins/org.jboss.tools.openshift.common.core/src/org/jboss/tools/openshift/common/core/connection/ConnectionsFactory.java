@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
@@ -100,6 +101,8 @@ public class ConnectionsFactory implements IConnectionsFactory {
 
 	@Override
 	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz) {
-		return new ArrayList<IConnectionFactory>(connectionFactories);
+		return connectionFactories.stream()
+				.filter(factory -> clazz == null || factory.canCreate(clazz))
+				.collect(Collectors.toList());
 	}
 }

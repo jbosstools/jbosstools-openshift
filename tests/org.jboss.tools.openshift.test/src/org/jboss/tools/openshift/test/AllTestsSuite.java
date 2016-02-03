@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011-2014 Red Hat, Inc.
+ * Copyright (c) 2014-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
+import org.jboss.tools.openshift.test.common.core.connection.ConnectionsFactoryTest;
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
+import org.jboss.tools.openshift.test.common.ui.utils.ConnectionWizardPageModelTest;
 import org.jboss.tools.openshift.test.core.LazySSLCertificateCallbackTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionPersistencyTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
@@ -65,7 +67,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	StringUtilsTest.class,
 	TemplateParameterColumnLabelProviderTest.class,
 	URIUtilsTest.class,
-	WebhooksPropertySourceTest.class
+	WebhooksPropertySourceTest.class,
+	ConnectionWizardPageModelTest.class,
+	ConnectionsFactoryTest.class
 	// triggers secure storage prompt
 	//SecureStorageTest.class
 })
