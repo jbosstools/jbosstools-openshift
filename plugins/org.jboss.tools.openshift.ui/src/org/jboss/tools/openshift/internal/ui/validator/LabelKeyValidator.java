@@ -27,6 +27,7 @@ public class LabelKeyValidator extends LabelValueValidator {
 	public static final int SUBDOMAIN_MAXLENGTH = 253;
 	private static final Pattern SUBDOMAIN_REGEXP = Pattern.compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$");
 	private Collection<String> readonlykeys;
+	private Collection<String> usedKeys;
 
 	private static final String failureMessage = "A valid label key has the form [domain/]name where name is required,"
 			+ " must be 63 characters or less, beginning and ending with an "
@@ -36,9 +37,10 @@ public class LabelKeyValidator extends LabelValueValidator {
 	
 	private final IStatus FAILED = ValidationStatus.error(failureMessage);
 	
-	public LabelKeyValidator(Collection<String> readonlykeys) {
+	public LabelKeyValidator(Collection<String> readonlykeys, Collection<String> usedKeys) {
 		super("label key");
 		this.readonlykeys = readonlykeys != null ? readonlykeys : new ArrayList<String>(0);
+		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<String>(0);
 	}
 	
 	@Override
@@ -50,6 +52,9 @@ public class LabelKeyValidator extends LabelValueValidator {
 			return getFailedStatus();
 		if(readonlykeys.contains(value)) {
 			return ValidationStatus.error("Adding a label with a key that is the same as a readonly label is not allowed");
+		}
+		if(usedKeys.contains(value)) {
+			return ValidationStatus.error("A label with this key exists");
 		}
 		String [] parts = value.split("/");
 		switch(parts.length) {
