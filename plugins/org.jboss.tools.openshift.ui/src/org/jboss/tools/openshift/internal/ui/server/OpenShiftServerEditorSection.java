@@ -484,6 +484,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 									model.setConnection(connection);
 								}
 								model.setService(OpenShiftServerUtils.getService(server));
+								String podPath = OpenShiftServerUtils.getPodPath(server);
+								if(!StringUtils.isEmpty(podPath)) {
+									model.setPodPath(podPath);
+								}
 								return Status.OK_STATUS;
 							}
 						})
