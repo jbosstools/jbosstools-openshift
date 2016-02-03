@@ -25,6 +25,7 @@ import com.openshift.restclient.model.IResource;
 import org.jboss.tools.openshift.internal.ui.property.PrefixPropertySourceKey;
 import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;
 import org.jboss.tools.openshift.internal.ui.property.ResourcePropertySource;
+import org.jboss.tools.openshift.internal.ui.property.ResourcePropertySource.Ids;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -50,6 +51,7 @@ public class ResourcePropertySourceTest {
 		when(resource.getAnnotation("efg")).thenReturn("def");
 		when(resource.getCreationTimeStamp()).thenReturn("2014");
 		when(resource.getNamespace()).thenReturn("anamespace");
+		when(resource.getResourceVersion()).thenReturn("9999");
 
 		source = new ResourcePropertySource<IResource>(resource);
 	}
@@ -59,6 +61,7 @@ public class ResourcePropertySourceTest {
 		assertEquals("aname", source.getPropertyValue(ResourcePropertySource.Ids.Name));
 		assertEquals("anamespace", source.getPropertyValue(ResourcePropertySource.Ids.Namespace));
 		assertEquals("2014", source.getPropertyValue(ResourcePropertySource.Ids.Created));
+		assertEquals("9999", source.getPropertyValue(ResourcePropertySource.Ids.ResourceVersion));
 		assertEquals("abc", source.getPropertyValue(new PrefixPropertySourceKey("Annotations", "xyz")));
 		assertEquals("def", source.getPropertyValue(new PrefixPropertySourceKey("Annotations", "efg")));
 		assertEquals("bar", source.getPropertyValue(new PrefixPropertySourceKey("Labels", "foo")));
@@ -70,6 +73,7 @@ public class ResourcePropertySourceTest {
 				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Name, "Name", "Basic"),
 				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Created, "Creation Timestamp", "Basic"),
 				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Namespace, "Namespace", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.ResourceVersion, "Resource Version", "Basic"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "xyz"), "xyz", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "efg"), "efg", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "foo"), "foo", "Labels"),
