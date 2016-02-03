@@ -10,9 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.core.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Andre Dietisheim
@@ -62,14 +60,5 @@ public class CollectionUtils {
 		}
 		
 		return collection.iterator().next();
-	}
-	
-	public static <E> List<E> toList(E[] elements) {
-		List<E> list = new ArrayList<E>(elements.length);
-		for (E element : elements) {
-			list.add(element);
-		}
-		return list;
-	}
-	
+	}	
 }
