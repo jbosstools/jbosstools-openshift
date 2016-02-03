@@ -17,11 +17,15 @@ import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
@@ -33,6 +37,8 @@ import com.openshift.restclient.model.IProject;
  * @author Andre Dietisheim
  */
 public class ImportApplicationHandler extends AbstractHandler {
+
+	private static final String NO_BUILD_CONFIG_MSG = "No Build configuration to import";
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -55,6 +61,10 @@ public class ImportApplicationHandler extends AbstractHandler {
 		} else {
 			project = buildConfig.getProject();
 			buildConfigs = Collections.singleton(buildConfig);
+		}
+		if (buildConfigs == null || buildConfigs.isEmpty()) {
+			MessageDialog.openWarning(HandlerUtil.getActiveShell(event),NO_BUILD_CONFIG_MSG, NO_BUILD_CONFIG_MSG);
+			return OpenShiftUIActivator.statusFactory().cancelStatus(NO_BUILD_CONFIG_MSG);
 		}
 		if (project != null) {
 			projectsAndBuildConfigs = Collections.singletonMap(project, buildConfigs);
