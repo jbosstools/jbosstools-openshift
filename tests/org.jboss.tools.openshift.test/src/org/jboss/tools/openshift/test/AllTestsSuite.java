@@ -24,6 +24,8 @@ import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
+import org.jboss.tools.openshift.test.ui.comparators.CreationTimestampComparatorTest;
+import org.jboss.tools.openshift.test.ui.comparators.ProjectViewerComparatorTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.job.CreateApplicationFromTemplateJobTest;
@@ -52,10 +54,12 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionTest.class,
 	ConnectionURLTest.class,
 	CreateApplicationFromTemplateJobTest.class,
+	CreationTimestampComparatorTest.class,
 	ExtTextPropertyDescriptorTest.class,
 	LabelKeyValidatorTest.class,
 	LabelValueValidatorTest.class,
 	ProjectNameValidatorTest.class,
+	ProjectViewerComparatorTest.class,
 	LazySSLCertificateCallbackTest.class, 
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,

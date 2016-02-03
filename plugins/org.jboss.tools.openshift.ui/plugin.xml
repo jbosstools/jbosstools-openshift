@@ -100,6 +100,24 @@
 					</and>
 				</visibleWhen>
 			</command>
+   <command
+         commandId="org.jboss.tools.openshift.ui.command.explorer.triggerdeploy"
+         label="%openshift.command.deploymentconfig.deploy"
+         style="push"
+         tooltip="Deploy latest resources from deployment config">
+      <visibleWhen
+            checkEnabled="false">
+         <and>
+            <count
+                  value="1">
+            </count>
+            <iterate>
+               <instanceof
+                     value="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               </instanceof></iterate>
+         </and>
+      </visibleWhen>
+   </command>
 		</menuContribution>
 		
 		<!-- openshift explorer context menu: refresh resource -->
@@ -582,6 +600,20 @@
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
         tooltip="Refresh the resource" />
+     <separator
+           name="org.jboss.tools.openshift.ui.separator1"
+           visible="true">
+     </separator>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.deploy"
+           label="%openshift.command.deploymentconfig.deploy"
+           style="push"
+           tooltip="Trigger the latest deployment of a deployment config">
+     </command>
+     <separator
+           name="org.jboss.tools.openshift.ui.separator2"
+           visible="true">
+     </separator>
        <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -865,6 +897,14 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.EditResourceHandler"
 			commandId="org.jboss.tools.openshift.ui.command.editresource">
 		</handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.TriggerDeploymentHandler"
+        commandId="org.jboss.tools.openshift.ui.command.deploy">
+  </handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.TriggerDeploymentHandler"
+        commandId="org.jboss.tools.openshift.ui.command.explorer.triggerdeploy">
+  </handler>
 	</extension>
 	
 	<!-- adapters -->

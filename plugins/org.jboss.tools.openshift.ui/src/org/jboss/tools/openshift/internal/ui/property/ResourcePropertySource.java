@@ -52,7 +52,8 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 		 IPropertyDescriptor[] common = new IPropertyDescriptor[]{
 				new ExtTextPropertyDescriptor(Ids.Name, CATEGORY),
 				new ExtTextPropertyDescriptor(Ids.Created, "Creation Timestamp", CATEGORY),
-				new ExtTextPropertyDescriptor(Ids.Namespace, CATEGORY)
+				new ExtTextPropertyDescriptor(Ids.Namespace, CATEGORY),
+				new ExtTextPropertyDescriptor(Ids.ResourceVersion, "Resource Version", CATEGORY)
 		};
 		 List<IPropertyDescriptor> annotations = buildPropertyDescriptors(ANNOTATIONS, resource.getAnnotations());
 		 common =  (IPropertyDescriptor[]) ArrayUtils.addAll(common, annotations.toArray());
@@ -77,6 +78,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 			case Name: return resource.getName();
 			case Namespace: return resource.getNamespace();
 			case Created: return resource.getCreationTimeStamp();
+			case ResourceVersion: return resource.getResourceVersion();
 			default:
 			}
 		}
@@ -109,6 +111,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	public static enum Ids{
 		Created,
 		Name,
-		Namespace
+		Namespace, 
+		ResourceVersion
 	}
 }

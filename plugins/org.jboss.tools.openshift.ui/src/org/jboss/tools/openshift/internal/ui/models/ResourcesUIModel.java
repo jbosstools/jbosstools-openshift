@@ -253,7 +253,7 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 	}
 	
 	private static String getProperty(String kind) {
-		return StringUtils.pluralize(kind.toLowerCase());
+		return StringUtils.pluralize(org.apache.commons.lang.StringUtils.uncapitalize(kind));
 	}
 
 	public Collection<IResource> getResources(String kind) {
