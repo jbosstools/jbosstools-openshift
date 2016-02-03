@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,6 +10,8 @@
  ******************************************************************************/
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
+
+import java.text.ParseException;
 
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.action.IMenuManager;
@@ -35,6 +37,7 @@ import org.eclipse.ui.views.properties.tabbed.ITabDescriptor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -137,14 +140,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	}
 
 	protected void setSorter(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder.sorter(new ViewerSorter() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				IResource r1 = ((IResourceUIModel)e1).getResource();
-				IResource r2 = ((IResourceUIModel)e2).getResource();
-				return r1.getName().compareTo(r2.getName());
-			}
-		});
+		tableViewerBuilder.sorter(createNameSorter());
 	}
 
 	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
@@ -163,7 +159,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	protected void addCreatedColumn(TableViewerBuilder tableViewerBuilder) {
 		tableViewerBuilder
 		.column((IResourceUIModel model) -> {
-				return model.getResource().getCreationTimeStamp();
+				return DateTimeUtils.formatSince(model.getResource().getCreationTimeStamp());
 		}).name("Created").align(SWT.LEFT).weight(1).minWidth(5).buildColumn();
 	}
 
@@ -217,5 +213,33 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		if(!DisposeUtils.isDisposed(this.details.getControl())) {
 			this.details.refresh();
 		}
+	}
+	
+
+	protected ViewerSorter createCreatedBySorter() {
+		return new ViewerSorter() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				IResource r1 = ((IResourceUIModel)e1).getResource();
+				IResource r2 = ((IResourceUIModel)e2).getResource();
+				try {
+					return -1 * DateTimeUtils.parse(r1.getCreationTimeStamp())
+							.compareTo(DateTimeUtils.parse(r2.getCreationTimeStamp()));
+				} catch (ParseException e) {
+				}
+				return 0;
+			}
+		};
+	}
+	
+	protected ViewerSorter createNameSorter() {
+		return new ViewerSorter() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				IResource r1 = ((IResourceUIModel)e1).getResource();
+				IResource r2 = ((IResourceUIModel)e2).getResource();
+				return r1.getName().compareTo(r2.getName());
+			}
+		};
 	}
 }

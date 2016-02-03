@@ -37,4 +37,9 @@ public class PodsPropertySection extends OpenShiftResourcePropertySection {
 		}).name("Status").align(SWT.LEFT).weight(1).minWidth(10).buildColumn();
 		addCreatedColumn(tableViewerBuilder);
 	}
+	
+	@Override
+	protected void setSorter(TableViewerBuilder tableViewerBuilder) {
+		tableViewerBuilder.sorter(createCreatedBySorter());
+	}
 }
