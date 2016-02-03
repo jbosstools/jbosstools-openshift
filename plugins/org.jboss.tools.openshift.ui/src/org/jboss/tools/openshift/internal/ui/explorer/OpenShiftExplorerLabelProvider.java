@@ -75,6 +75,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				return OpenShiftCommonImages.GLOBE_IMG;
 			case ResourceKind.SERVICE:
 				return OpenShiftImages.GEAR_IMG;
+			case ResourceKind.BUILD:
+				return OpenShiftImages.BUILD_IMG;
 			default:
 				return OpenShiftCommonImages.FILE;
 			}

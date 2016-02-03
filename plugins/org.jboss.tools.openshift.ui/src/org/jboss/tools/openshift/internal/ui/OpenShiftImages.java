@@ -43,8 +43,10 @@ public class OpenShiftImages {
 	public static final Image COPY_TO_CLIPBOARD_IMG = repo.getImage("copy-to-clipboard.gif"); //$NON-NLS-1$ 
 	public static final ImageDescriptor OPEN_WEB_CONSOLE = repo.create("open-web-console.gif"); //$NON-NLS-1$ 
 	public static final Image OPEN_WEB_CONSOLE_IMG = repo.getImage("open-web-console.gif"); //$NON-NLS-1$ 
+	public static final ImageDescriptor BUILD = repo.create("build.png"); //$NON-NLS-1$
+	public static final Image BUILD_IMG = repo.getImage("build.png"); //$NON-NLS-1$
 
-	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<String, ImageDescriptor>();
+	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
 	/**
 	 * Get an image to represent an application image (e.g. template details)
