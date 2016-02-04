@@ -62,11 +62,11 @@ public class ImportApplicationHandler extends AbstractHandler {
 			project = buildConfig.getProject();
 			buildConfigs = Collections.singleton(buildConfig);
 		}
-		if (buildConfigs == null || buildConfigs.isEmpty()) {
-			MessageDialog.openWarning(HandlerUtil.getActiveShell(event),NO_BUILD_CONFIG_MSG, NO_BUILD_CONFIG_MSG);
-			return OpenShiftUIActivator.statusFactory().cancelStatus(NO_BUILD_CONFIG_MSG);
-		}
 		if (project != null) {
+			if (buildConfigs == null || buildConfigs.isEmpty()) {
+				MessageDialog.openWarning(HandlerUtil.getActiveShell(event),NO_BUILD_CONFIG_MSG, NO_BUILD_CONFIG_MSG);
+				return OpenShiftUIActivator.statusFactory().cancelStatus(NO_BUILD_CONFIG_MSG);
+			}
 			projectsAndBuildConfigs = Collections.singletonMap(project, buildConfigs);
 		}
 		
