@@ -33,6 +33,7 @@ public interface IResourcesUIModel extends IAncestorable {
 		ResourceKind.BUILD_CONFIG,
 		ResourceKind.DEPLOYMENT_CONFIG,
 		ResourceKind.IMAGE_STREAM,
+		ResourceKind.IMAGE_STREAM_TAG,
 		ResourceKind.POD, 
 		ResourceKind.ROUTE, 
 		ResourceKind.REPLICATION_CONTROLLER,
