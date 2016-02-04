@@ -41,6 +41,11 @@ public class ObservableResourceCache implements IResourceCache {
 	private Set<IResourceCacheListener> listeners = Collections.synchronizedSet(new HashSet<>());
 	
 	@Override
+	public void dispose() {
+		flush();
+	}
+
+	@Override
 	public synchronized void flush() {
 		Collection<IResource> clone = new ArrayList<>(cache.values());
 		clone.forEach(r->remove(r));

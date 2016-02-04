@@ -25,8 +25,8 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
-import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
+import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.core.Trace;
 import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -40,22 +40,30 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 
 	private IProjectAdapter projectAdapter;
 	private IProject project;
-	private Connection conn;
+	private IOpenShiftConnection conn;
 	private IConnectionsRegistryListener connectionListener = new ConnectionListener();
 	private AtomicReference<State> state = new AtomicReference<>(State.UNINITIALIZED);
 	private Set<Deployment> deployments = Collections.synchronizedSet(new HashSet<>());
-	private ObservableResourceCache cache = new ObservableResourceCache();
+	private IResourceCache cache = new ObservableResourceCache();
 
 	private static enum State {
 		UNINITIALIZED, LOADING, LOADED
 	}
 
-	public DeploymentResourceMapper(Connection conn, IProjectAdapter projectAdapter) {
+	public DeploymentResourceMapper(IOpenShiftConnection conn, IProjectAdapter projectAdapter) {
 		this.projectAdapter = projectAdapter;
 		this.project = projectAdapter.getProject();
 		this.conn = conn;
 	}
 	
+	@Override
+	public void dispose() {
+		super.dispose();
+		 ConnectionsRegistrySingleton.getInstance().removeListener(connectionListener);	
+		 cache.dispose();
+		 deployments.clear();
+	}
+
 	@Override
 	public synchronized void refresh() {
 		deployments.forEach(d->cache.removeListener(d));
@@ -147,7 +155,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		}
 	}
 	
-	private void init(Deployment d, ObservableResourceCache cache, String kind) {
+	private void init(Deployment d, IResourceCache cache, String kind) {
 		if(ResourceKind.SERVICE.equals(kind)) return;
 		for(IResource resource : cache.getResourcesOf(kind)) {
 			d.handleAddToCache(cache, resource);

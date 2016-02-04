@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import java.beans.PropertyChangeListener;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -361,6 +362,14 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			this.project = project;
 		}
 
+		
+		@Override
+		public void dispose() {
+			// TODO Auto-generated method stub
+			
+		}
+
+
 		@Override
 		public Collection<IResourceUIModel> getBuilds() {
 			return null;
@@ -503,6 +512,18 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 		@Override
 		public void setDeployments(Collection<Deployment> deployment) {
+		}
+
+		@Override
+		public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}
