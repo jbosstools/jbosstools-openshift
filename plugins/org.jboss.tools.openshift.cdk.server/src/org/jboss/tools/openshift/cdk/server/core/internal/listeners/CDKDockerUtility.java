@@ -10,7 +10,6 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,14 +46,16 @@ public class CDKDockerUtility {
 	
 	public IDockerConnection findDockerConnection(ADBInfo adb) {
 		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
-		final String dockerHost = adb.env.get("DOCKER_HOST");
+		final String dockerHost = adb == null ? null : adb.env == null ? null : adb.env.get("DOCKER_HOST");
 		
-		IDockerConnection[] cons = mgr.getConnections();
-		String httpHost = dockerHost.replace("tcp://", "http://");
-		String httpsHost = dockerHost.replace("tcp://", "https://");
-		for( int i = 0; i < cons.length; i++ ) {
-			if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost) || cons[i].getUri().equals(httpsHost)) {
-				return cons[i];
+		if( dockerHost != null ) {
+			IDockerConnection[] cons = mgr.getConnections();
+			String httpHost = dockerHost.replace("tcp://", "http://");
+			String httpsHost = dockerHost.replace("tcp://", "https://");
+			for( int i = 0; i < cons.length; i++ ) {
+				if( cons[i].getUri().equals(dockerHost) || cons[i].getUri().equals(httpHost) || cons[i].getUri().equals(httpsHost)) {
+					return cons[i];
+				}
 			}
 		}
 		return null;
@@ -64,7 +65,7 @@ public class CDKDockerUtility {
 		return findDockerConnection(adb) != null;
 	}
 	
-	public void createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+	public IDockerConnection buildDockerConnection(IServer server, ADBInfo adb) throws DockerException {
 		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
 		final String dockerHost = adb.env.get("DOCKER_HOST");
 
@@ -76,8 +77,13 @@ public class CDKDockerUtility {
 			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
 			tcpConnectionBuilder.tcpCertPath(tlsCertPath);
 		}
-		DockerConnection con = tcpConnectionBuilder.build();
-		IDockerConnection[] other = mgr.getConnections();
+		return tcpConnectionBuilder.build();
+	}
+	
+	public IDockerConnection createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+		DockerConnectionManager mgr = org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance();
+		IDockerConnection con = buildDockerConnection(server, adb);
 		mgr.addConnection(con);
+		return con;
 	}
 }
