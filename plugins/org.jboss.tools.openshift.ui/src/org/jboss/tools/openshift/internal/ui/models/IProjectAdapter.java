@@ -10,14 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
+import org.eclipse.ui.services.IDisposable;
 import org.jboss.tools.openshift.common.core.IRefreshable;
 
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-public interface IProjectAdapter extends IResourcesUIModel, IRefreshable{
+public interface IProjectAdapter extends IResourcesUIModel, IRefreshable, IDisposable{
 	
 	static final String PROP_DEPLOYMENTS = "deployments";
 	
@@ -29,4 +31,7 @@ public interface IProjectAdapter extends IResourcesUIModel, IRefreshable{
 	
 	void setDeployments(Collection<Deployment> deployment);
 	
+	void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
+	
+	void removePropertyChangeListener(String propertyName, PropertyChangeListener listener);
 }

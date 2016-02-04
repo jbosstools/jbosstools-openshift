@@ -12,10 +12,12 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
 
+import org.eclipse.ui.services.IDisposable;
+
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IResource;
 
-public interface IResourceCache {
+public interface IResourceCache extends IDisposable {
 	
 	/**
 	 * 

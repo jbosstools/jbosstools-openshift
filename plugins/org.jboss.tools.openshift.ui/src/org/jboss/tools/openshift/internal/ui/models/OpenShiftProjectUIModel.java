@@ -16,7 +16,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
 import org.jboss.tools.openshift.common.core.IRefreshable;
-import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -29,20 +29,27 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable, PropertyChangeListener {
+public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable, PropertyChangeListener{
 	
 	public static final String PROP_LOADING = "loading";
 	
 	private final IDeploymentResourceMapper mapper;
 	private final IProject project;
 
-	public OpenShiftProjectUIModel(Connection conn, IProject project) {
+	public OpenShiftProjectUIModel(IOpenShiftConnection conn, IProject project) {
 		super(conn);
 		this.project = project;
 		this.mapper = new DeploymentResourceMapper(conn, this);
 		this.mapper.addPropertyChangeListener(PROP_DEPLOYMENTS, this);
 	}
 	
+	@Override
+	public void dispose() {
+		super.dispose();
+		mapper.dispose();
+	}
+
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if(evt  instanceof IndexedPropertyChangeEvent) {

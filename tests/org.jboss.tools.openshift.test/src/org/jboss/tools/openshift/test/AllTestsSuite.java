@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabe
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.job.CreateApplicationFromTemplateJobTest;
+import org.jboss.tools.openshift.test.ui.models.OpenShiftProjectCacheTest;
 import org.jboss.tools.openshift.test.ui.portforwarding.PortForwardingWizardModelTest;
 import org.jboss.tools.openshift.test.ui.property.ConnectionPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
@@ -59,6 +60,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	NewApplicationWizardModelTest.class,
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
+	OpenShiftProjectCacheTest.class,
 	OpenShiftSecureStorageKeyTest.class,
 	PortForwardingWizardModelTest.class,
 	PortSpecAdapterTest.class,

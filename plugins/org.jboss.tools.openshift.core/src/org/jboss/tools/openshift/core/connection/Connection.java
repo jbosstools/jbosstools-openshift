@@ -50,7 +50,7 @@ import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
 
-public class Connection extends ObservablePojo implements IConnection, IRefreshable {
+public class Connection extends ObservablePojo implements IConnection, IRefreshable, IOpenShiftConnection {
 
 	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
 	private static final String SECURE_STORAGE_PASSWORD = "password";
@@ -350,10 +350,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return List<IResource>
 	 * @throws OpenShiftException
 	 */
+	@Override
 	public <T extends IResource> List<T> getResources(String kind) {
 		return getResources(kind,"");
 	}
 	
+	@Override
 	public <T extends IResource> List<T> getResources(String kind, String namespace) {
 		try {
 			if(client.getAuthorizationStrategy() == null) {

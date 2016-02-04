@@ -15,9 +15,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.observable.Diffs;
@@ -32,70 +30,42 @@ import org.jboss.tools.openshift.internal.core.Trace;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.models.IAncestorable;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
+import org.jboss.tools.openshift.internal.ui.models.IProjectCache;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
-import org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel;
+import org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectCache;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IProject;
 
 /**
  * Contributes OpenShift 3 specific content to the OpenShift explorer view
  * 
  * @author jeff.cantrill
  */
-public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider implements PropertyChangeListener {
+public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvider 
+	implements PropertyChangeListener, IProjectCache.IProjectCacheListener {
 	
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
-	private Map<String, IProjectAdapter> projectCache = new HashMap<>();
+	private static final IProjectCache cache = new OpenShiftProjectCache();
+	
+	public OpenShiftExplorerContentProvider() {
+		super();
+		cache.addListener(this);
+	}
 	
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 		if (!(connection instanceof Connection)) {
 			return;
 		}
-		if (ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
-			handleProjectChanges((Connection) connection, oldValue, newValue);
-		} else if (ConnectionProperties.PROPERTY_REFRESH.equals(property)) {
+		if (ConnectionProperties.PROPERTY_REFRESH.equals(property)){
+			if(newValue instanceof Connection) {
+				cache.flushFor((Connection) newValue);
+			}
 			refreshViewer(newValue);
 		} 
-	}
-	
-	//TODO: Handle updates to a project when needed.  Back-end doesnt support edit of resources(most?) now
-	@SuppressWarnings("unchecked")
-	private void handleProjectChanges(Connection connection, Object oldValue, Object newValue) {
-		List<IProject> newProjects = (List<IProject>) newValue;
-		List<IProject> oldProjects = (List<IProject>) oldValue;
-		final List<IProjectAdapter> added = new ArrayList<>();
-		final List<IProjectAdapter> removed = new ArrayList<>();
-		ListDiff diffs = Diffs.computeListDiff(oldProjects, newProjects);
-		diffs.accept(new ListDiffVisitor() {
-			
-			@Override
-			public void handleRemove(int index, Object element) {
-				IProject project = (IProject) element;
-				if(project != null) {
-					final String key = getCacheKey(connection, project);
-					if(projectCache.containsKey(key)) {
-						removed.add(projectCache.remove(key));
-					}
-				}
-			}
-			
-			@Override
-			public void handleAdd(int index, Object element) {
-				added.add(newProjectAdapter(connection, (IProject) element));
-			}
-		});
-		removed.forEach(r->removeChildrenFromViewer(connection, r));
-		added.forEach(a->addChildrenToViewer(connection, a));
-	}
-	
-	@Override
-	protected void handleConnectionRemoved(IConnection connection) {
-		super.handleConnectionRemoved(connection);
 	}
 
 	/**
@@ -122,17 +92,10 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		try{
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
-				Collection<IProject> projects = connection.<IProject>getResources(ResourceKind.PROJECT);
-				Collection<IProjectAdapter> children = new ArrayList<>();
-				for (IProject project : projects) {
-					children.add(newProjectAdapter(connection, project));
-				}
-				return children.toArray();
+				return cache.getProjectsFor(connection).toArray();
 			} else if (parentElement instanceof IProjectAdapter) {
 				IProjectAdapter adapter = (IProjectAdapter) parentElement;
-				Connection conn = (Connection)adapter.getParent();
-				IProject project = adapter.getProject();
-				Collection<Deployment> deployments = new ArrayList<>(projectCache.get(getCacheKey(conn, project)).getDeployments());
+				Collection<Deployment> deployments = new ArrayList<>(adapter.getDeployments());
 				for (Deployment deployment : deployments) {
 					addDeploymentListeners(deployment);
 				}
@@ -159,17 +122,27 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		return TERMINATED_STATUS.contains(phase);
 	}
 	
-	private IProjectAdapter newProjectAdapter(Connection connection, IProject project) {
-		OpenShiftProjectUIModel model = new OpenShiftProjectUIModel(connection, project);
-		model.addPropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
-		projectCache.put(getCacheKey(connection, project), model);
-		return model;
+	@Override
+	public void handleAddToCache(IProjectCache cache, IProjectAdapter adapter) {
+		adapter.addPropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
+		if(adapter.getParent() instanceof Connection && cache.getProjectsFor((Connection)adapter.getParent()).size() == 1) {
+			refreshViewer(adapter.getParent());
+		}else {
+			addChildrenToViewer(adapter.getParent(), adapter);
+		}
 	}
-	
-	private String getCacheKey(Connection connection, IProject project) {
-		return connection.toString() + "/" + project.getName();
+
+	@Override
+	public void handleRemoveFromCache(IProjectCache cache, IProjectAdapter adapter) {
+		adapter.removePropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
+		removeChildrenFromViewer(adapter.getParent(), adapter);
 	}
-	
+
+	@Override
+	public void handleUpdateToCache(IProjectCache cache, IProjectAdapter adapter) {
+		updateChildrenFromViewer(adapter);
+	}
+
 	@Override
 	public Object getParent(Object element) {
 		if(element instanceof IAncestorable) {
