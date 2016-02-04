@@ -43,4 +43,22 @@ public class StringUtilsTest {
 		assertEquals("http://foo.bar", StringUtils.removeTrailingSlashes("http://foo.bar/"));
 		assertEquals("a", StringUtils.removeTrailingSlashes("a//"));
 	}
+
+	@Test
+	public void testShortenParts(){
+		String[] parts = new String[]{"I am 18 chars long", "7 chars", "?"};
+		StringUtils.shorten(parts, 12);
+		assertEquals("I a...ng", parts[0]);
+		assertEquals("...", parts[1]);
+		assertEquals("?", parts[2]);
+	}
+
+	@Test
+	public void testShortenPartsWithNull(){
+		String[] parts = new String[]{"I am 18 chars long", null, "7 chars"};
+		StringUtils.shorten(parts, 12);
+		assertEquals("I a...ng", parts[0]);
+		assertEquals("7...", parts[2]);
+		assertNull(parts[1]);
+	}
 }

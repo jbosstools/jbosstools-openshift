@@ -83,7 +83,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	@Test
 	public void getStyledTextForAReplicationController(){
 		IReplicationController rc = givenAResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER);
-		Map<String, String> selector = new HashMap<String, String>();
+		Map<String, String> selector = new HashMap<>();
 		selector.put("foo", "bar");
 		when(rc.getReplicaSelector()).thenReturn(selector);
 		
@@ -102,10 +102,21 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 
 	@Test
+	public void getStyledTextForAPodWithLongNames() {
+		provider.setLabelLimit(10);
+		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
+
+		String status = "Chilling";
+		when(pod.getStatus()).thenReturn(status);
+		String exp = "s...e C...g";
+		assertEquals(exp, provider.getStyledText(pod).getString());
+	}
+	
+	@Test
 	public void getStyledTextForAPodWithoutLabels(){
 		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
 		when(pod.getIP()).thenReturn("172.17.2.226");
-		Map<String, String> labels = new HashMap<String, String>();
+		Map<String, String> labels = new HashMap<>();
 		when(pod.getLabels()).thenReturn(labels);
 		
 		assertEquals(pod.getName(), provider.getStyledText(pod).getString());
@@ -117,7 +128,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(service.getPortalIP()).thenReturn("172.17.2.226");
 		when(service.getPort()).thenReturn(5432);
 		when(service.getTargetPort()).thenReturn("3306");
-		Map<String, String> labels = new HashMap<String, String>();
+		Map<String, String> labels = new HashMap<>();
 		labels.put("foo", "bar");
 		when(service.getSelector()).thenReturn(labels);
 		
@@ -135,12 +146,23 @@ public class OpenShiftExplorerLabelProviderTest {
 	@Test
 	public void getStyledTextForADeploymentConfig(){
 		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
-		Map<String, String> selector = new HashMap<String, String>();
+		Map<String, String> selector = new HashMap<>();
 		selector.put("name", "foo");
 		selector.put("deployment", "bar");
 		when(config.getReplicaSelector()).thenReturn(selector );
 		
 		assertEquals(config.getName() + " selector: deployment=bar,name=foo", provider.getStyledText(config).getString());
+	}
+	
+	@Test
+	public void getStyledTextForADeploymentConfigWithLongNames(){
+		provider.setLabelLimit(120);
+		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
+		Map<String, String> selector = new HashMap<>();
+		selector.put("name", "foo01234567890123456789012345678901234567890123456789");
+		selector.put("deployment", "bar01234567890123456789012345678901234567890123456789");
+		when(config.getReplicaSelector()).thenReturn(selector );
+		assertEquals("someName selector: deployment=bar0123456789012345678901234567890...=foo01234567890123456789012345678901234567890123456789", provider.getStyledText(config).getString());
 	}
 	
 	@Test
