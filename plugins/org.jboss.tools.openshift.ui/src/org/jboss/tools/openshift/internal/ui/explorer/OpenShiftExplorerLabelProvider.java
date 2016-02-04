@@ -43,7 +43,25 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author Andre Dietisheim
  */
 public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider { 
+	//Limit for label length = baseText.length + qualifiedText.length
+	private static final int DEFAULT_LABEL_LIMIT = 60;
 
+	private int labelLimit;
+
+	public OpenShiftExplorerLabelProvider() {
+		setLabelLimit(DEFAULT_LABEL_LIMIT);
+	}
+
+	/**
+	 * Set limit of label length in characters. 
+	 * @param limit
+	 */
+	public void setLabelLimit(int limit) {
+		if(limit <= 0) {
+			throw new IllegalArgumentException("Label limit cannot be less than 1: " + limit);
+		}
+		labelLimit = limit;
+	}
 	
 	@Override
 	public String getText(Object element) {
@@ -51,7 +69,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 			IProject project = (IProject) element;
 			String name = project.getName();
 			if(org.apache.commons.lang.StringUtils.isNotEmpty(project.getDisplayName())) {
-				name = project.getDisplayName() + " (" + name + ")";
+				String[] parts = new String[]{project.getDisplayName(), name};
+				applyEllipses(parts);
+				name = parts[0] + " (" + parts[1] + ")";
 			}
 			return name;
 		}
@@ -186,7 +206,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		}, null);
 		return style(template.getName(), tags);
 	}
-	
+
 	private StyledString getStyledText(IProject project) {
 		if(org.apache.commons.lang.StringUtils.isNotBlank(project.getDisplayName())) {
 			return style(project.getDisplayName(), project.getName());
@@ -195,6 +215,10 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 
 	private StyledString style(String baseText, String qualifiedText) {
+		String[] parts = new String[]{baseText, qualifiedText};
+		applyEllipses(parts);
+		baseText = parts[0];
+		qualifiedText = parts[1];
 		StyledString value = new StyledString(baseText);
 		if(org.apache.commons.lang.StringUtils.isNotBlank(qualifiedText)) {
 			value.append(" ")
@@ -204,4 +228,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		return value;
 	}
 
+	private void applyEllipses(String[] parts) {
+		StringUtils.shorten(parts, labelLimit);
+	}
 }

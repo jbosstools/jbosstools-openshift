@@ -45,6 +45,11 @@ public class StringUtils {
 		return String.valueOf(value);
 	}
 	
+	/** 
+	 * Returns true if value is null or empty string.
+	 * @param value
+	 * @return
+	 */
 	public static boolean isEmpty(String value) {
 		return value == null
 				|| value.length() == 0;
@@ -150,10 +155,94 @@ public class StringUtils {
 			return text;
 		}
 		int availableCharacters = maxLength - SHORTENING_MARKER.length();
-		return new StringBuilder(text.substring(0, availableCharacters / 2))
+		if(availableCharacters <= 0) {
+			//Did we ask for it? Yeah, we got it.
+			return SHORTENING_MARKER;
+		}
+		//This is how computer enhances math:
+		//availableCharacters = (availableCharacters + 1) / 2 + availableCharacters / 2
+		return new StringBuilder(text.substring(0, (availableCharacters + 1) / 2))
 				.append(SHORTENING_MARKER)
 				.append(text.substring(text.length() - availableCharacters / 2, text.length()))
 				.toString();
+	}
+
+	/**
+	 * 
+	 * @param parts
+	 * @param maxLength
+	 * @return Passed array parts with modified elements.
+	 */
+	public static String[] shorten(String[] parts, int maxLength) {
+		if(parts == null || parts.length == 0) {
+			return parts;
+		} else if(parts.length == 1) {
+			parts[0] = shorten(parts[0], maxLength);
+		} else if(parts.length == 2) {
+			//Let's take most useful case 2 separately.
+			int length0 = isEmpty(parts[0]) ? 0 : parts[0].length();
+			int length1 = isEmpty(parts[1]) ? 0 : parts[1].length();
+			if(length0 + length1 > maxLength) {
+				int partLimit = maxLength / 2;
+					if(length1 <= partLimit) {
+						parts[0] = shorten(parts[0],  maxLength - length1);
+					} else if(length0 <= partLimit) {
+						parts[1] = shorten(parts[1],  maxLength - length0);
+					} else {
+						parts[0] = shorten(parts[0], partLimit);
+						parts[1] = shorten(parts[1], partLimit);
+					}
+			}
+		} else {
+			//Let's be cool mathematicians here.
+			int[] lengths = new int[parts.length];
+			int totalLength = 0;
+			for (int i = 0; i < parts.length; i++) {
+				lengths[i] = isEmpty(parts[i]) ? 0 : parts[i].length();
+				totalLength += lengths[i];
+			}
+			if(totalLength > maxLength) {
+				int totalCut = totalLength - maxLength;
+				//Let's distribute that cut proportionally.
+				int[] cuts = new int[parts.length];
+				int currentCut = 0;
+				for (int i = 0; i < parts.length; i++) {
+					if(lengths[i] >= SHORTENING_MARKER.length()) {
+						//Cannot cut more than adding ellipses is going to cut.
+						cuts[i] = (lengths[i] * totalCut) / totalLength;
+						currentCut += cuts[i];
+					}
+				}
+				//Distribute a few last chars to cut, carefully, one by one.
+				while (currentCut < totalCut) {
+					boolean changed = false;
+					for (int i = 0; i < parts.length; i++) {
+						if(lengths[i] - cuts[i] > SHORTENING_MARKER.length()) {
+							//Still remembering that ellipses replace that much. 
+							cuts[i]++;
+							currentCut++;
+							if(currentCut == totalCut) {
+								break;
+							}
+							changed = true;
+						}
+					}
+					if(!changed) {
+						//At this moment, it is possible that currentCut < totalCut,
+						//but there is nothing to take anymore, I swear. 
+						break;
+					}
+				}				
+				//Measured seven times, now cut them once.
+				for (int i = 0; i < parts.length; i++) {
+					if(cuts[i] > 0) {
+						parts[i] = shorten(parts[i], parts[i].length() - cuts[i]);
+					}
+				}				
+			}
+		}
+		
+		return parts;
 	}
 
 	public static String getWithoutSuffix(String string, String suffix) {
