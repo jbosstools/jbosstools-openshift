@@ -149,6 +149,38 @@ public class ConnectionTest {
 		assertEquals(connection.getHost(), clonedConnection.getHost());
 	}
 
+	@Test
+	public void shouldNotCredentialsEqualIfDifferentToken() throws Exception {
+		Connection two = (Connection)connection.clone();
+		two.setToken("tokenTwo");
+		assertEquals(connection, two);
+		assertFalse(two.credentialsEqual(connection));
+	}
+
+	@Test
+	public void shouldNotCredentialsEqualIfDifferentPassword() throws Exception {
+		Connection two = (Connection)connection.clone();
+		two.setPassword("passwordTwo");
+		assertEquals(connection, two);
+		assertFalse(two.credentialsEqual(connection));
+	}
+
+	@Test
+	public void shouldNotCredentialsEqualIfDifferentUsername() throws Exception {
+		Connection two = (Connection)connection.clone();
+		two.setUsername("userTwo");
+		assertNotEquals(connection, two);
+		assertFalse(two.credentialsEqual(connection));
+	}
+
+	@Test
+	public void shouldCredentialsEqualForClone() throws Exception {
+		Connection two = (Connection)connection.clone();
+		assertEquals(connection, two);
+		assertTrue(two.credentialsEqual(connection));
+	}
+
+
 //	@Test
 //	public void nullHostShouldBeDefaultHost() {
 //		// pre-conditions
