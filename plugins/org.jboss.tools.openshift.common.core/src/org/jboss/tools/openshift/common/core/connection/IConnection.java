@@ -56,4 +56,14 @@ public interface IConnection {
 	public void notifyUsage();
 
 	public void enablePromptCredentials(boolean enable);
+
+	/**
+	 * Returns true if and only if connections are equal and
+	 * credentials like userName and password are equal. 
+	 * Default implementation compares userName and password.
+	 * Other implementations may override it to compare other data, e.g. token.
+	 * @param connection
+	 * @return
+	 */
+	public boolean credentialsEqual(IConnection connection);
 }

@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.common.core.connection;
 
+import java.util.Objects;
+
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
@@ -78,11 +80,23 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 			return false;
 		}
 		AbstractConnection other = (AbstractConnection) obj;
-		if (host == null) {
-			if (other.host != null) {
-				return false;
-			}
-		} else if (!host.equals(other.host)) {
+		if(!Objects.equals(host, other.host)) {
+			return false;
+		}
+		if(!Objects.equals(getUsername(), other.getUsername())) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean credentialsEqual(IConnection connection) {
+		if(!equals(connection)) {
+			return false;
+		}
+		//It is safe to cast now.
+		AbstractConnection other = (AbstractConnection)connection;
+		if(!Objects.equals(getPassword(), other.getPassword())) {
 			return false;
 		}
 		return true;

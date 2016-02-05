@@ -279,6 +279,8 @@ public class ConnectionsRegistry {
 		
 		//serious change = username changed
 		boolean seriousChange = !updatedConnection.equals(currentConnection);
+		//change requiring refresh = password or token changed
+		boolean credentialsChange = !updatedConnection.credentialsEqual(currentConnection);
 		
 		//in case of a serious change, we perform remove+add instead of just updating+emitting change event
 		// because the connection hashcode will change, refreshing it in the treeview will cause `widget is disposed` errors
@@ -288,6 +290,9 @@ public class ConnectionsRegistry {
 		currentConnection.update(updatedConnection);
 		if (seriousChange) {
 			add(currentConnection);
+		} else if(credentialsChange) {
+			//Property is defined in org.jboss.tools.openshift.core.connection.ConnectionProperties
+			fireChange(currentConnection, CHANGED, "openshift.resource.refresh", currentConnection, currentConnection);
 		}
 		this.recentConnection = currentConnection;
 	}
