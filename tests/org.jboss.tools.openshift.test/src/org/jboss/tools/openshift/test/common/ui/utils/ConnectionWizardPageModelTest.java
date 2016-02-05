@@ -103,6 +103,25 @@ public class ConnectionWizardPageModelTest {
 	}
 
 	@Test
+	public void getAllHostsShouldOnlyContainUniqueHosts() {
+		// pre-condition
+		assertThat(allConnections).isNotEmpty();
+		allConnections.add(allConnections.get(0)); // add duplicate host
+		
+		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
+				editedConnection, 
+				allConnections,
+				null,
+				false,
+				wizardModel); 
+		// operation
+		Collection<String> allHosts = model.getAllHosts();
+
+		// verification
+		assertThat(allHosts).containsOnly(this.allHosts);
+	}
+
+	@Test
 	public void shouldBeEditingNewConnectionGivenEditedConnectionIsNull() {
 		// pre-condition
 		TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(

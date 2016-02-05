@@ -100,7 +100,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return allConnections.stream()
 				.map(connection -> connection.getHost())
 				.filter(host -> !StringUtils.isEmpty(host))
-				.collect(Collectors.toSet());
+				.distinct()
+				.collect(Collectors.toList());
 	}
 
 	protected ConnectionsFactoryTracker createConnectionsFactory() {
