@@ -15,6 +15,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.Assert;
@@ -480,6 +481,23 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		} else if (other.client == null
 				|| !client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
 			return false;
+		return true;
+	}
+
+	@Override
+	public boolean credentialsEqual(IConnection connection) {
+		if(!equals(connection)) {
+			return false;
+		}
+		//It is safe to cast now.
+		Connection other = (Connection)connection;
+		//User name is already compared
+		if(!Objects.equals(password, other.password)) {
+			return false;
+		}
+		if(!Objects.equals(token, other.token)) {
+			return false;
+		}
 		return true;
 	}
 
