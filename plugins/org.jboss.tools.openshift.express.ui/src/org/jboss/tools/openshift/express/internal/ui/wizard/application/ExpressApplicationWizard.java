@@ -36,6 +36,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.ui.wizard.NewApplicationWorkbenchWizard;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
@@ -415,6 +416,9 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		updateModel(selection, getModel());
+		if(getModel().getConnection() != null) {
+			ConnectionsRegistrySingleton.getInstance().setRecent(getModel().getConnection());
+		}
 	}
 
 	private void updateModel(IStructuredSelection selection, IOpenShiftApplicationWizardModel model) {

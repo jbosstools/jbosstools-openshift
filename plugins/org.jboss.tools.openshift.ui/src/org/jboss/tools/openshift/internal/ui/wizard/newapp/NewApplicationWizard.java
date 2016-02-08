@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.common.ui.JobUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
@@ -78,9 +79,13 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 		} else {
 			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
 			if (resource != null) {
-				model.setConnection(ConnectionsRegistryUtil.safeGetConnectionFor(resource));
+				connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
+				model.setConnection(connection);
 				model.setProject(resource.getProject());
 			} 
+		}
+		if(connection != null) {
+			ConnectionsRegistrySingleton.getInstance().setRecent(connection);
 		}
 	}
 
