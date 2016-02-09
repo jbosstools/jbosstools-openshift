@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.jboss.tools.openshift.internal.ui.property.UneditablePropertyDescriptor;
 
 import com.openshift.restclient.model.build.BuildTriggerType;
 import com.openshift.restclient.model.build.IBuildTrigger;
@@ -39,9 +39,9 @@ public class ImageChangePropertySource implements IPropertySource {
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("image", "Image"),
-				new TextPropertyDescriptor("from", "From"),
-				new TextPropertyDescriptor("tag", "Tag")
+				new UneditablePropertyDescriptor("image", "Image"),
+				new UneditablePropertyDescriptor("from", "From"),
+				new UneditablePropertyDescriptor("tag", "Tag")
 		};
 	}
 

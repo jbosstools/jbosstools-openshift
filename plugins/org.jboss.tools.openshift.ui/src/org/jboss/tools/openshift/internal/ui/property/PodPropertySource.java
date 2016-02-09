@@ -9,7 +9,6 @@
 package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.openshift.restclient.model.IPod;
 
@@ -22,10 +21,10 @@ public class PodPropertySource extends ResourcePropertySource<IPod> {
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("ip", "IP"),
-				new TextPropertyDescriptor("host", "Host"),
-				new TextPropertyDescriptor("images", "Image(s)"),
-				new TextPropertyDescriptor("status", "Status"),
+				new UneditablePropertyDescriptor("ip", "IP"),
+				new UneditablePropertyDescriptor("host", "Host"),
+				new UneditablePropertyDescriptor("images", "Image(s)"),
+				new UneditablePropertyDescriptor("status", "Status"),
 		};
 	}
 

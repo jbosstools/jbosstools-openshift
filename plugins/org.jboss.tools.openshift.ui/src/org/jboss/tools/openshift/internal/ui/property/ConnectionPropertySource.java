@@ -10,7 +10,6 @@ package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 public class ConnectionPropertySource implements IPropertySource {
@@ -32,8 +31,8 @@ public class ConnectionPropertySource implements IPropertySource {
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor(HOST, "Host"),
-				new TextPropertyDescriptor(USERNAME, "User Name")
+				new UneditablePropertyDescriptor(HOST, "Host"),
+				new UneditablePropertyDescriptor(USERNAME, "User Name")
 		};
 	}
 

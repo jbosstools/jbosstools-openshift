@@ -10,7 +10,6 @@ package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.openshift.restclient.model.route.IRoute;
 
@@ -29,8 +28,8 @@ public class RoutePropertySource extends ResourcePropertySource<IRoute> {
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor(HOST_PATH, "URI"),
-				new TextPropertyDescriptor(SERVICE, "Service"),
+				new UneditablePropertyDescriptor(HOST_PATH, "URI"),
+				new UneditablePropertyDescriptor(SERVICE, "Service"),
 		};
 	}
 
