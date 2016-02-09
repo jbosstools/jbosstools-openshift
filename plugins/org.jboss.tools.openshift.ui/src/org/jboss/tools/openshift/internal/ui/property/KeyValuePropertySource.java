@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 public class KeyValuePropertySource implements IPropertySource {
 
@@ -56,7 +55,7 @@ public class KeyValuePropertySource implements IPropertySource {
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		List<IPropertyDescriptor> desc = new ArrayList<IPropertyDescriptor>(map.size());
 		for (Map.Entry<String, String> entry : map.entrySet()) {
-			desc.add(new TextPropertyDescriptor(entry.getKey(), entry.getKey()));
+			desc.add(new UneditablePropertyDescriptor(entry.getKey(), entry.getKey()));
 		}
 		return desc.toArray(new IPropertyDescriptor[]{});
 	}

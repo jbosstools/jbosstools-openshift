@@ -9,7 +9,6 @@
 package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.restclient.model.IService;
@@ -23,10 +22,10 @@ public class ServicePropertySource extends ResourcePropertySource<IService>{
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("selector", "Selector"),
-				new TextPropertyDescriptor("port", "Port"),
-				new TextPropertyDescriptor("portalIp", "IP"),
-				new TextPropertyDescriptor("containerPort", "Container Port")
+				new UneditablePropertyDescriptor("selector", "Selector"),
+				new UneditablePropertyDescriptor("port", "Port"),
+				new UneditablePropertyDescriptor("portalIp", "IP"),
+				new UneditablePropertyDescriptor("containerPort", "Container Port")
 		};
 	}
 

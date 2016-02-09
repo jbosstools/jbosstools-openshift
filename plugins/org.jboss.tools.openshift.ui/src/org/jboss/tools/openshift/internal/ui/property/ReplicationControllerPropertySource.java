@@ -9,7 +9,6 @@
 package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.restclient.model.IReplicationController;
@@ -23,9 +22,9 @@ public class ReplicationControllerPropertySource extends ResourcePropertySource<
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("replicas", "Replicas"),
-				new TextPropertyDescriptor("selector", "Selector"),
-				new TextPropertyDescriptor("images", "Image(s)"),
+				new UneditablePropertyDescriptor("replicas", "Replicas"),
+				new UneditablePropertyDescriptor("selector", "Selector"),
+				new UneditablePropertyDescriptor("images", "Image(s)"),
 		};
 	}
 

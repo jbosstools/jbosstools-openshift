@@ -9,7 +9,6 @@
 package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 
@@ -31,18 +30,18 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-			new TextPropertyDescriptor("status", "Status"),
-			new TextPropertyDescriptor("started", "Started"),
-			new TextPropertyDescriptor("duration", "Duration"),
-			new TextPropertyDescriptor("build.config", "Build Configuration"),
-			new TextPropertyDescriptor("build.strategy", "Build Strategy"),
-			new TextPropertyDescriptor("builder.image", "Builder Image"),
-			new TextPropertyDescriptor("source.type", "Source Type"),
-			new TextPropertyDescriptor("source.repo", "Source Repo"),
-			new TextPropertyDescriptor("source.ref", "Source Ref."),
-			new TextPropertyDescriptor("source.contextDir", "Source Context Dir."),
-			new TextPropertyDescriptor("output.image", "Output Image"),
-			new TextPropertyDescriptor("push.secret", "Push Secret")
+			new UneditablePropertyDescriptor("status", "Status"),
+			new UneditablePropertyDescriptor("started", "Started"),
+			new UneditablePropertyDescriptor("duration", "Duration"),
+			new UneditablePropertyDescriptor("build.config", "Build Configuration"),
+			new UneditablePropertyDescriptor("build.strategy", "Build Strategy"),
+			new UneditablePropertyDescriptor("builder.image", "Builder Image"),
+			new UneditablePropertyDescriptor("source.type", "Source Type"),
+			new UneditablePropertyDescriptor("source.repo", "Source Repo"),
+			new UneditablePropertyDescriptor("source.ref", "Source Ref."),
+			new UneditablePropertyDescriptor("source.contextDir", "Source Context Dir."),
+			new UneditablePropertyDescriptor("output.image", "Output Image"),
+			new UneditablePropertyDescriptor("push.secret", "Push Secret")
 		};
 	}
 

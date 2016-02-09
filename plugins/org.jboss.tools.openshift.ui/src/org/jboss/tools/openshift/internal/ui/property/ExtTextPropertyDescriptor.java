@@ -8,13 +8,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.property;
 
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
-
 /**
  * Extended implementation to facilitate
  * setting the property category
  */
-public class ExtTextPropertyDescriptor extends TextPropertyDescriptor {
+public class ExtTextPropertyDescriptor extends UneditablePropertyDescriptor {
 
 	/**
 	 * Create a TextPropertyDescriptor defaulting the displayName
