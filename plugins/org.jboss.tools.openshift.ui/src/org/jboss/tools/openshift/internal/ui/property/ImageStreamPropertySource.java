@@ -9,7 +9,6 @@
 package org.jboss.tools.openshift.internal.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.openshift.restclient.model.IImageStream;
 
@@ -27,7 +26,7 @@ public class ImageStreamPropertySource extends ResourcePropertySource<IImageStre
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor(REGISTRY, "Registry")
+				new UneditablePropertyDescriptor(REGISTRY, "Registry")
 		};
 	}
 

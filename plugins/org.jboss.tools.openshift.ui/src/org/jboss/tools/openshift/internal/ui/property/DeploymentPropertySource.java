@@ -15,7 +15,6 @@ import java.util.List;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 
 import com.openshift.restclient.model.IServicePort;
@@ -47,7 +46,7 @@ public class DeploymentPropertySource implements IPropertySource {
 				new ExtTextPropertyDescriptor("service.route", "Route", "Service"),
 				new ExtTextPropertyDescriptor("deployment.name", "Name", "Deployment"),
 				new ExtTextPropertyDescriptor("deployment.date", "Date", "Deployment"),
-				new TextPropertyDescriptor("pods", "Pods") //running, pending, succeeded/ failed/ unknown
+				new UneditablePropertyDescriptor("pods", "Pods") //running, pending, succeeded/ failed/ unknown
 		};
 	}
 	
