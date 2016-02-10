@@ -56,6 +56,8 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class DeployImageJob extends AbstractDelegatingMonitorJob implements IResourcesModel{
 	
+	private static final String DOCKER_IMAGE_KIND = "DockerImage";
+
 	private static final String SELECTOR_KEY = "deploymentconfig";
 	
 	private IDeployImageParameters parameters;
@@ -89,7 +91,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		}catch(Exception e) {
 			return new Status(IStatus.ERROR, 
 					OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind("Unable to create resources to deploy image '{0}'", parameters.getImage()),
+					NLS.bind("Unable to create resources to deploy image {0}", parameters.getImage()),
 					e);
 		}
 		return Status.OK_STATUS;
@@ -172,6 +174,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 
 	private IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
 		IImageStream imageStream = factory.stub(ResourceKind.IMAGE_STREAM, name, parameters.getProject().getName());
+		imageStream.addTag(imageUri.getTag(), DOCKER_IMAGE_KIND, imageUri.getUriWithoutTag());
 		return imageStream;
 	}
 
