@@ -48,7 +48,6 @@ public class WatchManager {
 			ResourceKind.REPLICATION_CONTROLLER, 
 			ResourceKind.BUILD, 
 			ResourceKind.IMAGE_STREAM, 
-			ResourceKind.IMAGE_STREAM_TAG, 
 			ResourceKind.ROUTE
 	};
 	
