@@ -18,8 +18,8 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.openshift.restclient.model.IResource;
 
-public class ResourcePropertySource<T extends IResource> implements IPropertySource {
 	
+public class ResourcePropertySource<T extends IResource> implements IPropertySource {
 	private static final String ANNOTATIONS = "Annotations";
 	private static final String CATEGORY = "Basic";
 	private static final String LABELS = "Labels";
@@ -111,7 +111,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	public static enum Ids{
 		Created,
 		Name,
-		Namespace, 
+		Namespace,
 		ResourceVersion
 	}
 }
