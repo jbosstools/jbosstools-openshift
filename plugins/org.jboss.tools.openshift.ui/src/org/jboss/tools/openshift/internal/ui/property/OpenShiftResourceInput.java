@@ -1,4 +1,5 @@
-/*******************************************************************************
+/********************************************************************************
+ *
  * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
@@ -53,7 +54,7 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 						.append(input.getName()+".json");
 			}
 
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public Object getAdapter(Class adapter) {
 				return null;
 			}
@@ -98,6 +99,7 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 		return storage.getName();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(Class adapter) {
 		return null;
 	}
