@@ -114,8 +114,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
 		initConnection(editedConnection, connectionType);
-		this.signupUrl = getSignupUrl(host, connectionFactory);
-		this.userdocUrl = getUserdocUrl(connectionFactory);
+		this.signupUrl = getSignupUrl(host, this.connectionFactory);
+		this.userdocUrl = getUserdocUrl(this.connectionFactory);
 	}
 
 	private void initConnection(IConnection editedConnection, Class<? extends IConnection> connectionType) {

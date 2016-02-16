@@ -26,6 +26,7 @@ public class NewConnectionHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final ConnectionWizard connectionWizard = new ConnectionWizard(null);
+		connectionWizard.setWindowTitle("New OpenShift Connection");
 		WizardUtils.openWizardDialog(connectionWizard, HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;
 	}
