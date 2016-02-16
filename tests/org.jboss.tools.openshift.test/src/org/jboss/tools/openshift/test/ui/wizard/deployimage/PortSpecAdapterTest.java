@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.test.ui.wizard.deployimage;
 
 import static org.junit.Assert.*;
 
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.PortSpecAdapter;
+import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.junit.Test;
 
 import com.openshift.restclient.model.IPort;

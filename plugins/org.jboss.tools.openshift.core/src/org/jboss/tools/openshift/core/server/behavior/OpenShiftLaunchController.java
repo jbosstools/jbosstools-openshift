@@ -10,13 +10,21 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.core.server.behavior;
 
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
@@ -24,15 +32,25 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
+import org.jboss.tools.openshift.internal.core.server.debug.DebuggingContext;
+import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
+import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugUtils;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.capability.resources.IPortForwardable;
+import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
+import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IService;
 
 public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
 
+	private static final String DEBUG_MODE = "debug";
 
 	/**
 	 * Get access to the ControllableServerBehavior
@@ -50,20 +68,87 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		IControllableServerBehavior beh = getServerBehavior(configuration);
-		if( beh != null ) {
-			((ControllableServerBehavior)beh).setServerStarting();
-			int state = pollState();
-			if( state == IServer.STATE_STARTED) {
-				((ControllableServerBehavior)beh).setServerStarted();
-				((ControllableServerBehavior)getControllableBehavior()).setRunMode(mode);
-			} else {
-				((ControllableServerBehavior)beh).setServerStopped();
-				((ControllableServerBehavior)getControllableBehavior()).setRunMode(null);
-			}
-		} else {
-			// TODO throw error
+		IControllableServerBehavior serverBehavior = getServerBehavior(configuration);
+		if( !(serverBehavior instanceof ControllableServerBehavior )) {
+			throw toCoreException("Unable to find a IControllableServerBehavior instance");
 		}
+		ControllableServerBehavior beh = (ControllableServerBehavior) serverBehavior;
+		
+		beh.setServerStarting();
+		
+		IServer server = beh.getServer();
+		
+		IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
+		if (dc == null) {
+			throw toCoreException("No deployment config was found for "+server.getName());
+		}
+		
+		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
+		if( DEBUG_MODE.equals(mode)) {
+			startDebugging(server, dc, debugContext, monitor);
+		} else {//run, profile
+			stopDebugging(dc, debugContext, monitor);
+		}
+		
+		int state = pollState();
+		if( state == IServer.STATE_STARTED) {
+			beh.setServerStarted();
+			beh.setRunMode(mode);
+		} else {
+			beh.setServerStopped();
+			((ControllableServerBehavior)getControllableBehavior()).setRunMode(null);
+		}
+	}
+
+
+	private void startDebugging(IServer server, IDeploymentConfig dc, DebuggingContext debugContext,
+			IProgressMonitor monitor) throws CoreException {
+		int remotePort = debugContext.getDebugPort();
+		if( remotePort == -1 ) {
+			debugContext.setDebugPort(8787);//TODO get default port from server settings?
+		}
+		IDebugListener listener = new IDebugListener() {
+			
+			public void onDebugChange(DebuggingContext debuggingContext, IProgressMonitor monitor)
+					throws CoreException {
+				if (debuggingContext.getPod() == null) {
+					throw toCoreException("Unable to connect to remote pod");
+				}
+				int localPort = mapPortForwarding(debuggingContext, monitor);
+				
+				if(isJavaProject(server)) {
+					attachRemoteDebugger(server, localPort, monitor);
+				}					
+			}
+
+			@Override
+			public void onPodRestart(DebuggingContext debuggingContext, IProgressMonitor monitor)
+					throws CoreException {
+				onDebugChange(debuggingContext, monitor);
+			}
+		};
+		debugContext.setDebugListener(listener);
+		OpenShiftDebugUtils.get().enableDebugMode(dc, debugContext, monitor);
+	}
+
+
+	private void stopDebugging(IDeploymentConfig dc, DebuggingContext debugContext, IProgressMonitor monitor)
+			throws CoreException {
+		IDebugListener listener = new IDebugListener() {
+			
+			public void onDebugChange(DebuggingContext debuggingContext, IProgressMonitor monitor)
+					throws CoreException {
+				//that will automatically kill the remote debugger
+				unMapPortForwarding(debuggingContext.getPod());
+			}
+
+			@Override
+			public void onPodRestart(DebuggingContext debuggingContext, IProgressMonitor monitor)
+					throws CoreException {
+			}
+		};
+		debugContext.setDebugListener(listener);
+		OpenShiftDebugUtils.get().disableDebugMode(dc, debugContext, monitor);
 	}
 
 	protected int pollState() {
@@ -92,5 +177,131 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			IProgressMonitor monitor) throws CoreException {
 		// Do Nothing
 	}
+	
+	private boolean isJavaProject(IServer server) {
+		IProject p = OpenShiftServerUtils.getDeployProject(server);
+		try {
+			return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
+		} catch (CoreException e) {
+			OpenShiftCoreActivator.pluginLog().logError(e);
+		}
+		return false;
+	}
 
+	/**
+	 * Unmap the port forwarding. 
+	 * @throws CoreException 
+	 */
+	private void unMapPortForwarding(IPod pod) throws CoreException {
+		if (pod != null) {
+			try {
+				PortForwardingUtils.stopPortForwarding(pod, null);
+			} catch (IOException e) {
+				throw toCoreException("Unable to stop port forawrding", e);
+			}
+		}
+	}
+	
+	/**
+	 * Map the remote port to a local port. 
+	 * Return the local port in use, or -1 if failed
+	 * @param server
+	 * @param remotePort
+	 * @return the local debug port or -1 if port forwarding did not start or was cancelled.
+	 */
+	private int mapPortForwarding(DebuggingContext debuggingContext, IProgressMonitor monitor) {
+		
+		monitor.subTask("Enabling port forwarding");
+		IPod pod = debuggingContext.getPod();
+		int remotePort = debuggingContext.getDebugPort();
+		if (pod == null || remotePort < 1) {
+			//nothing we can do
+			return -1;
+		}
+		Set<PortPair> ports = PortForwardingUtils.getForwardablePorts(pod);
+		Optional<PortPair> debugPort = ports.stream().filter(p -> remotePort == p.getRemotePort()).findFirst();
+		if (!debugPort.isPresent() || monitor.isCanceled()) {
+			return -1;
+		}
+		
+		if (PortForwardingUtils.isPortForwardingStarted(pod)) {
+			int p = debugPort.get().getLocalPort();
+			return p;
+		} 
+		
+		for (IPortForwardable.PortPair port : ports) {
+			if(monitor.isCanceled()) {
+				return -1;
+			}
+			port.setLocalPort(SocketUtil.findFreePort());
+			monitor.worked(1);
+		}
+		
+		PortForwardingUtils.startPortForwarding(pod, ports);
+		
+		if (PortForwardingUtils.isPortForwardingStarted(pod)) {
+			int p = debugPort.get().getLocalPort();
+			return p;
+		}
+		//maybe throw exception?
+		return -1;
+	}
+	
+	private void attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor) throws CoreException {
+		monitor.subTask("Attaching remote debugger");
+		
+		OpenShiftDebugUtils debugUtils = OpenShiftDebugUtils.get();
+		ILaunchConfiguration debuggerLaunchConfig = debugUtils.getRemoteDebuggerLaunchConfiguration(server);
+		ILaunchConfigurationWorkingCopy workingCopy;
+		if (debuggerLaunchConfig == null) {
+			workingCopy = debugUtils.createRemoteDebuggerLaunchConfiguration(server);
+		} else {
+			if (debugUtils.isRunning(debuggerLaunchConfig, localDebugPort)) {
+				return;
+			}
+			workingCopy = debuggerLaunchConfig.getWorkingCopy();
+		}
+				
+		
+		IProject project = OpenShiftServerUtils.getDeployProject(server);
+		debugUtils.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, localDebugPort);
+		debuggerLaunchConfig = workingCopy.doSave();
+		
+		long elapsed = 0;
+		long increment = 1_000;
+		long maxWait =  60_000; //TODO Get from server settings?
+		boolean launched = false;
+		monitor.subTask("Waiting for remote debug port availability");
+		while(!launched && elapsed < maxWait) {
+			try {
+				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
+				debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
+				launched = true;
+			} catch (Exception e) {
+				if (monitor.isCanceled()) {
+					break;
+				}
+				try {
+					Thread.sleep(increment);
+					elapsed+=increment;
+				} catch (InterruptedException ie) {
+				}
+			}
+	    }
+		
+		if (!launched){
+			throw toCoreException("Unable to start a remote debugger to localhost:"+localDebugPort);
+		}
+		
+	    monitor.worked(10);
+	}
+
+	
+	private CoreException toCoreException(String msg, Exception e) {
+		return new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, msg, e));
+	}
+	
+	private CoreException toCoreException(String msg) {
+		return toCoreException(msg, null);
+	}
 }

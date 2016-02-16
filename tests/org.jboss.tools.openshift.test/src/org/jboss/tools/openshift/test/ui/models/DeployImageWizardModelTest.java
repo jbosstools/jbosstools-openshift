@@ -23,9 +23,9 @@ import java.util.HashSet;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
+import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.PortSpecAdapter;
 import org.junit.Test;
 import org.mockito.Mockito;
 

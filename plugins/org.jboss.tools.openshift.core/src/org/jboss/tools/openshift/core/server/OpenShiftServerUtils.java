@@ -40,6 +40,7 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -47,6 +48,8 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  */
 public class OpenShiftServerUtils {
+
+	private static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
 
 	private static final String LIVERELOAD_PORT_KEY = "port";//Key to the port # of the host the LiveReload server need to proxy
 
@@ -326,5 +329,26 @@ public class OpenShiftServerUtils {
 	 */
 	public static String getProjectAttribute(String name, String defaultValue, IProject project) {
 		return ServerUtils.getProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project);
+	}
+	
+	public static IDeploymentConfig getDeploymentConfig(IServerAttributes attributes) {
+		IService service = getService(attributes);
+		if (service == null) {
+			return null;
+		}
+		//TODO use annotations instead of labels
+		String dcName = service.getPods().stream().filter(p -> p.getLabels().containsKey(DEPLOYMENT_CONFIG_KEY))
+				.findFirst()
+				.map(p -> p.getLabels().get(DEPLOYMENT_CONFIG_KEY))
+				.orElse(null);
+		if (dcName == null) {
+			return null;
+		}
+		Connection connection = getConnection(attributes);
+		if (connection == null) {
+			return null;
+		}
+		IDeploymentConfig dc = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, service.getNamespace(), dcName);
+		return dc;
 	}
 }

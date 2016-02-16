@@ -37,6 +37,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
+import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
