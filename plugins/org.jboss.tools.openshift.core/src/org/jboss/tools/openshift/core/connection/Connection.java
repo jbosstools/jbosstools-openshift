@@ -369,6 +369,17 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}
 	}
 
+	@Override
+	public <T extends IResource> T getResource(String kind, String namespace, String name) {
+		try {
+			if(client.getAuthorizationStrategy() == null) {
+				client.setAuthorizationStrategy(getAuthorizationStrategy());
+			}
+			return client.get(kind, name, namespace);
+		} catch (UnauthorizedException e) {
+			return retryGet("Unauthorized.  Trying to reauthenticate", e, kind, name, namespace);
+		}
+	}
 	/**
 	 * Get or refresh a resource
 	 * 
@@ -382,16 +393,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			}
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
-			return retryGet("Unauthorized.  Trying to reauthenticate", e, resource);
+			return retryGet("Unauthorized.  Trying to reauthenticate", e, resource.getKind(), resource.getName(), resource.getNamespace());
 		}
 	}
 	
-	private <T extends IResource> T retryGet(String message, OpenShiftException e, IResource resource){
+	private <T extends IResource> T retryGet(String message, OpenShiftException e, String kind, String name, String namespace){
 		OpenShiftCoreActivator.pluginLog().logInfo(message);
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
-			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
+			return client.get(kind, name, namespace);
 		}
 		throw e;
 	}

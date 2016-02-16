@@ -15,9 +15,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
@@ -29,9 +31,11 @@ import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.core.Trace;
 import org.jboss.tools.openshift.internal.core.WatchManager;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -73,6 +77,23 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		buildDeployments();
 	}
 	
+	
+	@Override
+	public Collection<IResource> getImageStreamTagsFor(IService service) {
+		Optional<Deployment> deployment = deployments.stream().filter(d->service.equals(d.getService())).findFirst();
+		if(deployment.isPresent()) {
+			Set<String> imageRefs = deployment.get()
+				.getBuildConfigs()
+				.stream()
+				.map(bc->ResourceUtils.imageRef((IBuildConfig) bc.getResource())).collect(Collectors.toSet());
+			final String projectName = service.getNamespace();
+			return imageRefs.stream()
+					.map(ref->conn.<IResource>getResource(ResourceKind.IMAGE_STREAM_TAG, projectName, ref))
+					.collect(Collectors.toSet());
+		}
+		return Collections.emptySet();
+	}
+
 	@Override
 	public Collection<Deployment> getDeployments() {
 		buildDeployments();

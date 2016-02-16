@@ -15,7 +15,20 @@ import java.util.Collection;
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.common.core.IRefreshable;
 
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
+
 public interface IDeploymentResourceMapper extends IObservablePojo, IRefreshable {
 
 	Collection<Deployment> getDeployments();
+	
+	/**
+	 * Retrieve the ImageStreamTags associated with the given
+	 * service.  This will most likely trigger a call to the
+	 * server since ImageStreamTags are not a watchable resource
+	 * 
+	 * @param service
+	 * @return The collection of imagestreamtags or an empty collection
+	 */
+	Collection<IResource> getImageStreamTagsFor(IService service);
 }
