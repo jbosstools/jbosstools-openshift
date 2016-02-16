@@ -66,10 +66,26 @@ public class EditResourceHandler extends OpenInWebBrowserHandler {
 		   IWorkbenchPage page = window.getActivePage();
 		   if (page != null) {
 			   IEditorRegistry editorRegistry= PlatformUI.getWorkbench().getEditorRegistry();
+			   String defaultJsonEditorId = getDefaultJSONEditorDescriptorId(editorRegistry);
 			   IEditorDescriptor editorDescriptor = editorRegistry.getDefaultEditor(resource.getName()+".json", null);
-			   String editorId = editorDescriptor == null?"org.eclipse.ui.DefaultTextEditor":editorDescriptor.getId();
-			   page.openEditor(input, editorId);
+			   String editorId = editorDescriptor == null?defaultJsonEditorId:editorDescriptor.getId();
+			   try {
+				   page.openEditor(input, editorId);
+			   } catch (PartInitException O_o) {
+				   if (defaultJsonEditorId.equals(editorId)){
+					   throw O_o;
+				   }
+				   //try to fall back on default editor
+				   page.openEditor(input, defaultJsonEditorId);
+			   }
 		   }
-		
+	}
+	
+	private String getDefaultJSONEditorDescriptorId(IEditorRegistry editorRegistry) {
+		IEditorDescriptor editorDescriptor = editorRegistry.findEditor("org.eclipse.wst.json.ui.JSONEditor");
+		if (editorDescriptor == null) {
+			editorDescriptor = editorRegistry.findEditor("org.eclipse.ui.DefaultTextEditor");
+		}
+		return editorDescriptor.getId();
 	}
 }
