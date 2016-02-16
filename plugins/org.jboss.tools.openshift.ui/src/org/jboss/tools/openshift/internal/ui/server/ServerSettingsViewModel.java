@@ -20,10 +20,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
@@ -136,10 +134,9 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		String deploymentDirectory = null;
 		if (service != null
 				&& deploymentResourceMapperByProjectName != null) {
-			IProject project = service.getProject();
-			IDeploymentResourceMapper deploymentMapper = deploymentResourceMapperByProjectName.get(project.getName());
+			IDeploymentResourceMapper deploymentMapper = deploymentResourceMapperByProjectName.get(service.getNamespace());
 			if (deploymentMapper != null) {
-				Collection<IResource> istags = getImageStreamTags(service, deploymentMapper);
+				Collection<IResource> istags = deploymentMapper.getImageStreamTagsFor(service);
 				Iterator<IResource> istagsIterator = istags.iterator();
 				if (istagsIterator.hasNext()) {
 					IResource imageStreamTag = istagsIterator.next();
@@ -169,16 +166,6 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			return null;
 		}
 		
-	}
-
-	private Collection<IResource> getImageStreamTags(IService service, IDeploymentResourceMapper deploymentMapper) {
-		Optional<Deployment> deployment = deploymentMapper.getDeployments().stream().filter(d->service.equals(d.getService())).findFirst();
-		if(deployment.isPresent()) {
-			Collection<IResource> istags = deployment.get().getImageStreamTags().stream().map(m->m.getResource()).collect(Collectors.toList());
-			// need to refresh to get full resource WITH labels 
-			return getVerboseResources(istags, getConnection());
-		}
-		return Collections.emptyList();
 	}
 
 	public void setDeployProject(org.eclipse.core.resources.IProject project) {
@@ -262,23 +249,6 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			}
 		}
 		return deploymentMapperByProjectName;
-	}
-
-	/**
-	 * Returns the verbose version of the resources by requesting them individually. 
-	 * When listing all resources you only get a compact short version. 
-	 * To get the full-blown resource WITH labels etc you have to query them individually.
-	 * 
-	 * @param resources
-	 * @param connection
-	 * @return
-	 */
-	private List<IResource> getVerboseResources(Collection<IResource> resources, Connection connection) {
-		if (resources == null
-				|| resources.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return resources.stream().map(r -> (IResource) connection.getResource(r)).collect(Collectors.toList());
 	}
 
 	protected List<org.eclipse.core.resources.IProject> loadProjects() {

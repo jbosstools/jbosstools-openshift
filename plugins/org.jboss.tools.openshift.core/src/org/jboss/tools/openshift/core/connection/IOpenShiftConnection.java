@@ -31,6 +31,15 @@ public interface IOpenShiftConnection {
 	<T extends IResource> List<T> getResources(String kind);
 	
 	<T extends IResource> List<T> getResources(String kind, String namespace);
+
+	/**
+	 * Retrieve a resource by name
+	 * @param kind
+	 * @param namespace
+	 * @param name
+	 * @return
+	 */
+	<T extends IResource> T getResource(String kind, String namespace, String name);
 	
 	String getUsername();
 }
