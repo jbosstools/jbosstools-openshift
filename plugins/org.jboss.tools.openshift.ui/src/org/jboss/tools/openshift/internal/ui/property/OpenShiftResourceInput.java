@@ -60,6 +60,7 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 
 			public String getName() {
 				StringBuilder sb = new StringBuilder()
+						.append("[").append(input.getNamespace()).append("]")
 						.append(StringUtils.humanize(input.getKind()))
 						.append(":")
 						.append(input.getName())
