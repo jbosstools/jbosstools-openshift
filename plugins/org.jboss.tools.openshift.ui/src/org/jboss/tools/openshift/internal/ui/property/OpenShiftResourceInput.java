@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IPersistableElement;
@@ -47,7 +48,9 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 			}
 
 			public IPath getFullPath() {
-				return null;
+				return new Path(input.getNamespace())
+						.append(input.getKind())
+						.append(input.getName()+".json");
 			}
 
 			@SuppressWarnings("unchecked")
@@ -56,8 +59,12 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 			}
 
 			public String getName() {
-				StringBuilder sb = new StringBuilder(StringUtils.humanize(input.getKind()));
-				return sb.append(" : ").append(input.getName()).toString();
+				StringBuilder sb = new StringBuilder()
+						.append(StringUtils.humanize(input.getKind()))
+						.append(":")
+						.append(input.getName())
+						.append(".json");
+				return sb.toString();
 			}
 
 			public boolean isReadOnly() {
