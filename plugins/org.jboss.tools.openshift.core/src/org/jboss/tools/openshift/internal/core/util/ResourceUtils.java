@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +27,7 @@ import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
@@ -80,7 +82,7 @@ public class ResourceUtils {
 
 	/**
 	 * Determine if the source map overlaps the target map (i.e. Matching a service to a pod). There
-	 * is  match iff the target includes all the the keys from the source and those keys have
+	 * is  match if the target includes all the the keys from the source and those keys have
 	 * matching values
 	 * 
 	 * @param source
@@ -123,11 +125,21 @@ public class ResourceUtils {
 	 */
 	public static Collection<IPod> getPodsForService(IService service, Collection<IPod> pods) {
 		final Map<String, String> serviceSelector = service.getSelector();
+		return getPodsForSelector(serviceSelector, pods);
+	}
+
+	/**
+	 * Find the collection of pods that match the given selector
+	 * @param selector
+	 * @param pods
+	 * @return
+	 */
+	public static Collection<IPod> getPodsForSelector(Map<String, String> serviceSelector, Collection<IPod> pods) {
 		return pods.stream()
 				.filter(p -> containsAll(serviceSelector, p.getLabels()))
 				.collect(Collectors.toSet());
 	}
-
+	
 	/**
 	 * 
 	 * @param pod
@@ -193,5 +205,17 @@ public class ResourceUtils {
 		}
 		return "";
 
+	}
+	
+	/**
+	 * Find the collection of pods for the given deployment config
+	 * @param deploymentConfig
+	 * @param pods
+	 * @return
+	 */
+	public static Collection<IPod> getPodsForDeploymentConfig(IDeploymentConfig deploymentConfig) {
+		List<IPod> pods = deploymentConfig.getProject().getResources(ResourceKind.POD);
+		Map<String, String> selector = deploymentConfig.getReplicaSelector();
+		return getPodsForSelector(selector, pods);
 	}
 }

@@ -26,7 +26,8 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.lang;bundle-version="2.6.0",
  org.eclipse.core.variables,
  org.eclipse.jst.j2ee;bundle-version="1.1.850",
- org.jboss.tools.runtime.core;bundle-version="3.1.1"
+ org.jboss.tools.runtime.core;bundle-version="3.1.1",
+ org.eclipse.jdt.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
@@ -36,8 +37,10 @@ Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.opens
  org.jboss.tools.openshift.core.server.behavior,
  org.jboss.tools.openshift.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.internal.core.models;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.portforwarding;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
 Service-Component: META-INF/connectionFactory.xml
 

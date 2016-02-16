@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
+package org.jboss.tools.openshift.internal.core.models;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
@@ -38,7 +38,16 @@ public class PortSpecAdapter implements IPort{
 		}
 		port = Integer.valueOf(parts[0]);
 		protocol = parts[1].toUpperCase(); 
-		name = NLS.bind("{0}-{1}", port, protocol.toLowerCase());
+		name = getName(port, protocol);
+	}
+	
+	public PortSpecAdapter(String name, String protocol, int port){
+		if(StringUtils.isBlank(protocol)){
+			throw new IllegalArgumentException("protocol must be set");
+		}
+		this.port = port;
+		this.protocol = protocol; 
+		this.name = (name == null)?getName(port, protocol):name;
 	}
 	
 	@Override
@@ -91,5 +100,9 @@ public class PortSpecAdapter implements IPort{
 	}
 	
 	
+	
+	private String getName(int port, String protocol) {
+		return NLS.bind("{0}-{1}", port, protocol.toLowerCase());
+	}
 	
 }
