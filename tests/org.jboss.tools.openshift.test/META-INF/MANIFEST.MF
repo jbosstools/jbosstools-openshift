@@ -22,7 +22,8 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.lang;bundle-version="2.6.0",
  org.apache.commons.logging;bundle-version="1.1.1",
  org.assertj.core;bundle-version="2.1.0",
- org.apache.commons.collections
+ org.apache.commons.collections,
+ org.eclipse.linuxtools.docker.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openshift.client,
  org.eclipse.core.databinding.validation,

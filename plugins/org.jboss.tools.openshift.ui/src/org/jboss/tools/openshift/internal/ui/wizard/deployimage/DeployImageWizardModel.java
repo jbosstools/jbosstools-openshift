@@ -467,12 +467,9 @@ public class DeployImageWizardModel
 		if (dockerConnection == null || StringUtils.isBlank(image)) {
 			return false;
 		}
-		String[] imageDetails = image.split(":");
-		if (imageDetails.length > 2) {
-			return false;
-		}
-		String repo = imageDetails[0];
-		String tag = (imageDetails.length == 1)?"latest":imageDetails[1];
+		DockerImageURI imageName = new DockerImageURI(image);
+		String repo =  imageName.getUriWithoutTag();
+		String tag = StringUtils.defaultIfBlank(imageName.getTag(),"latest");
 		return dockerConnection.hasImage(repo, tag);
 	}
 

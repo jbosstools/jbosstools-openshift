@@ -107,7 +107,7 @@ public class OpenShiftServerBehaviour extends ServerBehaviourDelegate {
 	public IStatus canStart(String launchMode) {
 		return Status.CANCEL_STATUS;
 	}
-
+	
 	@Override
 	public IStatus canRestart(String mode) {
 		return Status.CANCEL_STATUS;
