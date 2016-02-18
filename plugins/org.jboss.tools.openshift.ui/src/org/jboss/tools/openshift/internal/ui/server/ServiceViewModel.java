@@ -247,12 +247,7 @@ public class ServiceViewModel extends ObservablePojo {
 	}
 
 	public void loadResources() {
-		setConnections(loadConnections());
-		if (connection == null) {
-			return;
-		}
-		loadRoutes(connection);
-		setServiceItems(loadServices(connection));
+		loadResources(getConnection());
 	}
 
 	/**
@@ -262,11 +257,11 @@ public class ServiceViewModel extends ObservablePojo {
 	 */
 	public void loadResources(Connection newConnection) {
 		setConnection(newConnection);
-		if (newConnection == null) {
-			return;
+		setConnections(loadConnections());
+		if (newConnection != null) {
+			loadRoutes(newConnection);
+			setServiceItems(loadServices(newConnection));
 		}
-		loadRoutes(newConnection);
-		setServiceItems(loadServices(newConnection));
 	}
 
 	void loadRoutes(Connection newConnection) {
@@ -282,6 +277,9 @@ public class ServiceViewModel extends ObservablePojo {
 	}
 
 	protected List<ObservableTreeItem> loadServices(Connection connection) {
+		if (connection == null) {
+			return null;
+		}
 		ObservableTreeItem connectionItem = ServiceTreeItemsFactory.INSTANCE.create(connection);
 		connectionItem.load();
 		return connectionItem.getChildren();

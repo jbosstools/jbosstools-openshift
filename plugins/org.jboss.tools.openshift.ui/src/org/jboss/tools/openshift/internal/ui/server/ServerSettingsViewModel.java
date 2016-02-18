@@ -15,7 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +36,6 @@ import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IDeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
-import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.OpenShiftException;
@@ -157,25 +155,25 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 				&& deploymentResourceMapperByProjectName != null) {
 			IDeploymentResourceMapper deploymentMapper = deploymentResourceMapperByProjectName.get(service.getNamespace());
 			if (deploymentMapper != null) {
-				Collection<IResource> istags = deploymentMapper.getImageStreamTagsFor(service);
-				Iterator<IResource> istagsIterator = istags.iterator();
-				while (istagsIterator.hasNext()) {
-					IResource imageStreamTag = istagsIterator.next();
-					String imageStreamTagJson = imageStreamTag.toJson(true);
+				for (Iterator<IResource> istagsIterator = deploymentMapper.getImageStreamTagsFor(service).iterator(); 
+						istagsIterator.hasNext();) {
+					String imageStreamTag = istagsIterator.next().toJson(true);
 					String dir = null;
-					if ((dir = matchFirstGroup(imageStreamTagJson, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-						if ((dir = matchFirstGroup(imageStreamTagJson, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-							dir = matchFirstGroup(imageStreamTagJson, PATTERN_WOKRING_DIR);
+					if ((dir = matchFirstGroup(imageStreamTag, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
+						if ((dir = matchFirstGroup(imageStreamTag, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+							dir = matchFirstGroup(imageStreamTag, PATTERN_WOKRING_DIR);
 						}
 					}
-					if(dir != null) {
-						if(dir.equals(selectedDeploymentDirectory)) {
+					if (dir != null) {
+						if (dir.equals(selectedDeploymentDirectory)) {
 							deploymentDirectory = dir;
-							//The selected directory is inferred. Do not look for another.
+							// The selected directory is inferred. Do not look
+							// for another.
 							break;
-						} else if(deploymentDirectory == null) {
-							//Remember the first one found. Continue to look for coincidence with selected directory.
-							deploymentDirectory  = dir;
+						} else if (deploymentDirectory == null) {
+							// Remember the first one found. Continue to look
+							// for coincidence with selected directory.
+							deploymentDirectory = dir;
 						}
 					}
 				}
@@ -253,12 +251,16 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	@Override
 	public void loadResources() {
-		super.loadResources();
-		setProjects(loadProjects());
-		setImageStreamTags(loadImageStreamTags());
+		loadResources(getConnection());
 	}
 
-	private void setImageStreamTags(Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName) {
+	public void loadResources(Connection newConnection) {
+		super.loadResources(newConnection);
+		setProjects(loadProjects());
+		setDeploymentMappers(createDeploymentMappers(newConnection));
+	}
+
+	private void setDeploymentMappers(Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName) {
 		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, podPath, deploymentMapperByProjectName, getService(), getServiceItems());
 	}
 
@@ -266,15 +268,14 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		return deploymentMapperByProjectName;
 	}
 	
-	private Map<String, IDeploymentResourceMapper> loadImageStreamTags() {
+	private Map<String, IDeploymentResourceMapper> createDeploymentMappers(Connection connection) {
 		Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName = new HashMap<>();
-		Connection connection = getConnection();
 		if (connection != null) {
 			List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 			if (projects != null) {
 				projects.forEach(project -> {
-					IDeploymentResourceMapper deploymentMapper = new DeploymentResourceMapper(connection,
-							new ProjectAdapterFake((IProject) project));
+					IDeploymentResourceMapper deploymentMapper = 
+							new DeploymentResourceMapper(connection, new ProjectAdapterFake((IProject) project));
 					deploymentMapper.refresh();
 					deploymentMapperByProjectName.put(project.getName(), deploymentMapper);
 				});
@@ -285,12 +286,6 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	protected List<org.eclipse.core.resources.IProject> loadProjects() {
 		return ProjectUtils.getAllAccessibleProjects();
-	}
-
-	protected List<ObservableTreeItem> loadServices(Connection connection) {
-		ObservableTreeItem connectionItem = ServiceTreeItemsFactory.INSTANCE.create(connection);
-		connectionItem.load();
-		return connectionItem.getChildren();
 	}
 
 	public void updateServer() {
@@ -319,45 +314,12 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			throw new OpenShiftException(e, "Could not get url for connection {0}", connection.getHost());
 		}
 	}
-	
+
 	protected IServerWorkingCopy getServer() {
 		return server;
 	}
 
-	static class ServiceTreeItemsFactory implements IModelFactory {
-
-		private static final ServiceTreeItemsFactory INSTANCE = new ServiceTreeItemsFactory();
-			
-		@SuppressWarnings("unchecked")
-		public <T> List<T> createChildren(Object parent) {
-			if (parent instanceof Connection) {
-				return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
-			} else if (parent instanceof IProject) {
-				return (List<T>) ((IProject) parent).getResources(ResourceKind.SERVICE);
-			}
-			return Collections.emptyList();
-		}
-
-		public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
-			if (openShiftObjects == null) {
-				return Collections.emptyList();
-			}
-			List<ObservableTreeItem> items = new ArrayList<>();
-			for (Object openShiftObject : openShiftObjects) {
-				ObservableTreeItem item = create(openShiftObject);
-				if (item != null) {
-					items.add(item);
-				}
-			}
-			return items;
-		}
-
-		public ObservableTreeItem create(Object object) {
-			return new ObservableTreeItem(object, this);
-		}
-	}
-
-	public static class ProjectAdapterFake implements IProjectAdapter {
+	private static class ProjectAdapterFake implements IProjectAdapter {
 
 		private IProject project;
 

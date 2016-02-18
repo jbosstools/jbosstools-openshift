@@ -59,8 +59,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -166,9 +164,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		super.createComposite(parent, handle); //stores handle
-		handle.setTitle("Create an OpenShift 3 Server Adapter");
-		handle.setDescription("Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.");
-		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+		initWizardHandle(handle);
+		
 		IServerWorkingCopy server = OpenShiftServerTaskModelAccessor.getServer(getTaskModel());
 		Connection connection = OpenShiftServerTaskModelAccessor.getConnection(getTaskModel());
 		this.model = new ServerSettingsViewModel(server, connection);
@@ -199,21 +196,33 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			dbc);
 		
 		loadResources(model, WizardFragmentUtils.getWizardPage(handle).getWizard().getContainer());
-		
-		IProject selectedProject = UIUtils.getFirstSelectedWorkbenchProject();
-		if (selectedProject != null) {
-			model.setDeployProject(selectedProject);
-		}
+		setDeploymentProject(UIUtils.getFirstSelectedWorkbenchProject());		
+		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging(handle));
 
-		((WizardDialog)((WizardPage)handle).getWizard().getContainer()).addPageChangingListener(new IPageChangingListener() {
+		return composite;
+	}
+
+	private void initWizardHandle(IWizardHandle handle) {
+		handle.setTitle("Create an OpenShift 3 Server Adapter");
+		handle.setDescription("Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.");
+		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+	}
+
+	private IPageChangingListener onPageChanging(IWizardHandle handle) {
+		return new IPageChangingListener() {
 			@Override
 			public void handlePageChanging(PageChangingEvent event) {
 				if(event.getTargetPage() == handle) {
 					reloadServices();
 				}
 			}
-		});
-		return composite;
+		};
+	}
+
+	private void setDeploymentProject(IProject project) {
+		if (project != null) {
+			model.setDeployProject(project);
+		}
 	}
 	
 	private Composite createControls(Composite parent, ServerSettingsViewModel model, DataBindingContext dbc) {
@@ -695,7 +704,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	}
 
 	private void reloadServices() {
-		if(!needsLoadingServices) {
+		if(!needsLoadingServices || getWizardContainer() == null) {
 			return;
 		}
 		IWizardContainer container = getWizardContainer();
@@ -703,6 +712,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			//nothing to update
 			return;
 		}
+
 		try {
 			isLoadingServices = true;
 			getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
