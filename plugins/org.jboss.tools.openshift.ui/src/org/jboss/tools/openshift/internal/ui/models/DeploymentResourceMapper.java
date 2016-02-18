@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -79,19 +80,31 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	
 	
 	@Override
+	public Map<IService, Collection<IResource>> getAllImageStreamTags() {
+		return deployments.stream()
+				.collect(Collectors.toMap(
+						deployment -> deployment.getService(), 
+						deployment -> getImageStreamTagsFor(deployment)));
+	}
+
+	@Override
 	public Collection<IResource> getImageStreamTagsFor(IService service) {
 		Optional<Deployment> deployment = deployments.stream().filter(d->service.equals(d.getService())).findFirst();
 		if(deployment.isPresent()) {
-			Set<String> imageRefs = deployment.get()
+			return getImageStreamTagsFor(deployment.get());
+		}
+		return Collections.emptySet();
+	}
+
+	private Collection<IResource> getImageStreamTagsFor(Deployment deployment) {
+			Set<String> imageRefs = deployment
 				.getBuildConfigs()
 				.stream()
 				.map(bc->ResourceUtils.imageRef((IBuildConfig) bc.getResource())).collect(Collectors.toSet());
-			final String projectName = service.getNamespace();
+			final String projectName = deployment.getService().getNamespace();
 			return imageRefs.stream()
 					.map(ref->conn.<IResource>getResource(ResourceKind.IMAGE_STREAM_TAG, projectName, ref))
 					.collect(Collectors.toSet());
-		}
-		return Collections.emptySet();
 	}
 
 	@Override

@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.openshift.common.core.IRefreshable;
@@ -31,4 +32,6 @@ public interface IDeploymentResourceMapper extends IObservablePojo, IRefreshable
 	 * @return The collection of imagestreamtags or an empty collection
 	 */
 	Collection<IResource> getImageStreamTagsFor(IService service);
+
+	Map<IService, Collection<IResource>> getAllImageStreamTags();
 }
