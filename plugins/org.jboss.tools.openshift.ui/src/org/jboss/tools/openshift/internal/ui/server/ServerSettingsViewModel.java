@@ -16,12 +16,12 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
@@ -37,7 +37,6 @@ import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IDeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
-import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.OpenShiftException;
@@ -74,7 +73,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	protected String podPath;
 	protected String inferredPodPath = null;
 	private IServerWorkingCopy server;
-	private Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName;
+	private Map<String, ProjectImageStreamTags> imageStreamTagsMap;
 
 	public ServerSettingsViewModel(IServerWorkingCopy server, Connection connection) {
 		super(connection);
@@ -83,9 +82,9 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	protected void update(Connection connection, List<Connection> connections, 
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
-			String sourcePath, String podPath, Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName, 
+			String sourcePath, String podPath, Map<String, ProjectImageStreamTags> imageStreamsMap, 
 			IService service, List<ObservableTreeItem> serviceItems) {
-		boolean serviceOrDeploymentChanged = this.deploymentMapperByProjectName != deploymentMapperByProjectName;
+		boolean serviceOrDeploymentChanged = this.imageStreamTagsMap != imageStreamsMap;
 		IService oldService = getService();
 		update(connection, connections, service, serviceItems);
 		serviceOrDeploymentChanged |= (oldService != getService());
@@ -97,7 +96,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		deployProject = updateDeployProject(deployProject, projects);
 		updateSourcePath(sourcePath, deployProject);
 		if(serviceOrDeploymentChanged) {
-			updatePodPath(podPath, deploymentMapperByProjectName, service);
+			updatePodPath(podPath, imageStreamsMap, service);
 		} else {
 			updatePodPath(podPath);
 		}
@@ -133,9 +132,9 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
 	}
 
-	protected void updatePodPath(String newPodPath, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName, IService service) {
-		this.deploymentMapperByProjectName = deploymentResourceMapperByProjectName;
-		String inferredPodPath = getInferredDeploymentDirectory(service, deploymentResourceMapperByProjectName, newPodPath);
+	protected void updatePodPath(String newPodPath, Map<String, ProjectImageStreamTags> imageStreamsMap, IService service) {
+		this.imageStreamTagsMap = imageStreamsMap;
+		String inferredPodPath = getInferredDeploymentDirectory(service, imageStreamsMap, newPodPath);
 		firePropertyChange(PROPERTY_POD_PATH_EDITABLE, this.inferredPodPath == null, (this.inferredPodPath = inferredPodPath) == null);
 		if(inferredPodPath != null) {
 			newPodPath = inferredPodPath;
@@ -151,31 +150,31 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = newPodPath);
 	}
 
-	private String getInferredDeploymentDirectory(IService service, Map<String, IDeploymentResourceMapper> deploymentResourceMapperByProjectName, String selectedDeploymentDirectory) {
+	private String getInferredDeploymentDirectory(IService service, Map<String, ProjectImageStreamTags> imageStreamsMap, String selectedDeploymentDirectory) {
 		String deploymentDirectory = null;
 		if (service != null
-				&& deploymentResourceMapperByProjectName != null) {
-			IDeploymentResourceMapper deploymentMapper = deploymentResourceMapperByProjectName.get(service.getNamespace());
-			if (deploymentMapper != null) {
-				Collection<IResource> istags = deploymentMapper.getImageStreamTagsFor(service);
-				Iterator<IResource> istagsIterator = istags.iterator();
-				while (istagsIterator.hasNext()) {
-					IResource imageStreamTag = istagsIterator.next();
-					String imageStreamTagJson = imageStreamTag.toJson(true);
+				&& imageStreamsMap != null) {
+			ProjectImageStreamTags imageStreams = imageStreamsMap.get(service.getNamespace());
+			if (imageStreams != null) {
+				for (Iterator<IResource> istagsIterator = imageStreams.getImageStreamTags(service).iterator(); 
+						istagsIterator.hasNext();) {
+					String imageStreamTag = istagsIterator.next().toJson(true);
 					String dir = null;
-					if ((dir = matchFirstGroup(imageStreamTagJson, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-						if ((dir = matchFirstGroup(imageStreamTagJson, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-							dir = matchFirstGroup(imageStreamTagJson, PATTERN_WOKRING_DIR);
+					if ((dir = matchFirstGroup(imageStreamTag, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
+						if ((dir = matchFirstGroup(imageStreamTag, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+							dir = matchFirstGroup(imageStreamTag, PATTERN_WOKRING_DIR);
 						}
 					}
-					if(dir != null) {
-						if(dir.equals(selectedDeploymentDirectory)) {
+					if (dir != null) {
+						if (dir.equals(selectedDeploymentDirectory)) {
 							deploymentDirectory = dir;
-							//The selected directory is inferred. Do not look for another.
+							// The selected directory is inferred. Do not look
+							// for another.
 							break;
-						} else if(deploymentDirectory == null) {
-							//Remember the first one found. Continue to look for coincidence with selected directory.
-							deploymentDirectory  = dir;
+						} else if (deploymentDirectory == null) {
+							// Remember the first one found. Continue to look
+							// for coincidence with selected directory.
+							deploymentDirectory = dir;
 						}
 					}
 				}
@@ -198,7 +197,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	public void setDeployProject(org.eclipse.core.resources.IProject project) {
 		update(getConnection(), getConnections(), project, this.projects, this.sourcePath, 
-				this.podPath, this.deploymentMapperByProjectName, getService(), getServiceItems());
+				this.podPath, this.imageStreamTagsMap, getService(), getServiceItems());
 	}
 
 	public org.eclipse.core.resources.IProject getDeployProject() {
@@ -207,7 +206,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	protected void setProjects(List<org.eclipse.core.resources.IProject> projects) {
 		update(getConnection(), getConnections(), this.deployProject, projects, this.sourcePath, 
-				this.podPath, this.deploymentMapperByProjectName, getService(), getServiceItems());
+				this.podPath, this.imageStreamTagsMap, getService(), getServiceItems());
 	}
 
 	public List<org.eclipse.core.resources.IProject> getProjects() {
@@ -216,7 +215,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	
 	public void setSourcePath(String sourcePath) {
 		update(getConnection(), getConnections(), this.deployProject, this.projects, sourcePath, 
-				this.podPath, this.deploymentMapperByProjectName, getService(), getServiceItems());
+				this.podPath, this.imageStreamTagsMap, getService(), getServiceItems());
 	}
 
 	public String getSourcePath() {
@@ -225,7 +224,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	public void setPodPath(String podPath) {
 		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, 
-				podPath, this.deploymentMapperByProjectName, getService(), getServiceItems());
+				podPath, this.imageStreamTagsMap, getService(), getServiceItems());
 	}
 
 	public String getPodPath() {
@@ -240,7 +239,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	public void setService(IService service) {
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
-				this.sourcePath, podPath, deploymentMapperByProjectName, 
+				this.sourcePath, podPath, imageStreamTagsMap, 
 				service, getServiceItems());
 	}
 	
@@ -253,44 +252,40 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 	@Override
 	public void loadResources() {
-		super.loadResources();
+		loadResources(getConnection());
+	}
+
+	public void loadResources(Connection newConnection) {
+		super.loadResources(newConnection);
 		setProjects(loadProjects());
-		setImageStreamTags(loadImageStreamTags());
+		setImageStreamTagsMap(createImageStreamTagsMap(newConnection));
 	}
 
-	private void setImageStreamTags(Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName) {
-		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, podPath, deploymentMapperByProjectName, getService(), getServiceItems());
+	private void setImageStreamTagsMap(Map<String, ProjectImageStreamTags> imageStreamsMap) {
+		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, podPath, imageStreamsMap, getService(), getServiceItems());
 	}
 
-	protected Map<String, IDeploymentResourceMapper> getImageStreamTags(){
-		return deploymentMapperByProjectName;
+	protected Map<String, ProjectImageStreamTags> getImageStreamTagsMap(){
+		return imageStreamTagsMap;
 	}
 	
-	private Map<String, IDeploymentResourceMapper> loadImageStreamTags() {
-		Map<String, IDeploymentResourceMapper> deploymentMapperByProjectName = new HashMap<>();
-		Connection connection = getConnection();
+	private Map<String, ProjectImageStreamTags> createImageStreamTagsMap(Connection connection) {
 		if (connection != null) {
 			List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 			if (projects != null) {
-				projects.forEach(project -> {
-					IDeploymentResourceMapper deploymentMapper = new DeploymentResourceMapper(connection,
-							new ProjectAdapterFake((IProject) project));
-					deploymentMapper.refresh();
-					deploymentMapperByProjectName.put(project.getName(), deploymentMapper);
-				});
+				return projects.stream()
+						.collect(Collectors.toMap(
+								project -> project.getName(), 
+								project -> new ProjectImageStreamTags(project, connection))
+				);
 			}
 		}
-		return deploymentMapperByProjectName;
+		return Collections.emptyMap();
+
 	}
 
 	protected List<org.eclipse.core.resources.IProject> loadProjects() {
 		return ProjectUtils.getAllAccessibleProjects();
-	}
-
-	protected List<ObservableTreeItem> loadServices(Connection connection) {
-		ObservableTreeItem connectionItem = ServiceTreeItemsFactory.INSTANCE.create(connection);
-		connectionItem.load();
-		return connectionItem.getChildren();
 	}
 
 	public void updateServer() {
@@ -319,59 +314,42 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 			throw new OpenShiftException(e, "Could not get url for connection {0}", connection.getHost());
 		}
 	}
-	
+
 	protected IServerWorkingCopy getServer() {
 		return server;
 	}
 
-	static class ServiceTreeItemsFactory implements IModelFactory {
+	public static class ProjectImageStreamTags {
 
-		private static final ServiceTreeItemsFactory INSTANCE = new ServiceTreeItemsFactory();
-			
-		@SuppressWarnings("unchecked")
-		public <T> List<T> createChildren(Object parent) {
-			if (parent instanceof Connection) {
-				return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
-			} else if (parent instanceof IProject) {
-				return (List<T>) ((IProject) parent).getResources(ResourceKind.SERVICE);
-			}
-			return Collections.emptyList();
+		private Map<IService, Collection<IResource>> imageStreamTagsByService;
+
+		public ProjectImageStreamTags(IProject project, Connection connection) {
+			this.imageStreamTagsByService = createImageStreamsMap(project, connection);
 		}
-
-		public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
-			if (openShiftObjects == null) {
-				return Collections.emptyList();
-			}
-			List<ObservableTreeItem> items = new ArrayList<>();
-			for (Object openShiftObject : openShiftObjects) {
-				ObservableTreeItem item = create(openShiftObject);
-				if (item != null) {
-					items.add(item);
-				}
-			}
-			return items;
+		
+		private Map<IService, Collection<IResource>> createImageStreamsMap(IProject project, Connection connection) {
+			IDeploymentResourceMapper deploymentMapper = 
+					new DeploymentResourceMapper(connection, new ProjectAdapterFake((IProject) project));
+			deploymentMapper.refresh();
+			return deploymentMapper.getAllImageStreamTags();
 		}
-
-		public ObservableTreeItem create(Object object) {
-			return new ObservableTreeItem(object, this);
+		
+		public Collection<IResource> getImageStreamTags(IService service) {
+			return imageStreamTagsByService.get(service);
 		}
 	}
-
-	public static class ProjectAdapterFake implements IProjectAdapter {
+	
+	private static class ProjectAdapterFake implements IProjectAdapter {
 
 		private IProject project;
 
 		private ProjectAdapterFake(IProject project) {
 			this.project = project;
 		}
-
 		
 		@Override
 		public void dispose() {
-			// TODO Auto-generated method stub
-			
 		}
-
 
 		@Override
 		public Collection<IResourceUIModel> getBuilds() {
@@ -519,16 +497,12 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 
 		@Override
 		public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}
-	
+
 }
