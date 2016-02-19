@@ -82,6 +82,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
@@ -95,9 +96,11 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSup
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.IGitCloningPageModel;
 
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -224,6 +227,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		createSourcePathControls(container, model, dbc);
 		createDeploymentControls(container, model, dbc);
 		createServiceControls(container, model, dbc);
+		createRouteControls(container, model, dbc);
 
 		return container;
 	}
@@ -550,6 +554,46 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			.notUpdatingParticipant()
 			.in(dbc);
 		new ServiceDetailViews(selectedService, detailsContainer, dbc).createControls();
+	}
+
+	private void createRouteControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
+		Group defaultRouteGroup = new Group(container, SWT.NONE);
+		defaultRouteGroup.setText("Default Route");
+		GridDataFactory.fillDefaults()
+			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(defaultRouteGroup);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(2).margins(10,10)
+			.applyTo(defaultRouteGroup);
+
+		Button selectDefaultRouteButton = new Button(defaultRouteGroup, SWT.CHECK);
+		selectDefaultRouteButton.setText("Select Route:");
+		selectDefaultRouteButton.setToolTipText("Uncheck if you want to select route in a dialog");
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(1, 1).applyTo(selectDefaultRouteButton);
+
+		StructuredViewer routesViewer = new ComboViewer(defaultRouteGroup);
+		GridDataFactory.fillDefaults()
+			.span(1,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(routesViewer.getControl());
+
+		routesViewer.setContentProvider(new ObservableListContentProvider());
+		routesViewer.setLabelProvider(new RouteLabelProvider());
+		routesViewer.setInput(
+				BeanProperties.list(ServerSettingsViewModel.PROPERTY_ROUTES).observe(model));
+
+		IObservableValue selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
+		Binding selectedRouteBinding =
+				ValueBindingBuilder.bind(selectedRouteObservable)
+					.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_ROUTE).observe(model))
+					.in(dbc);
+
+		final IObservableValue isSelectDefaultRouteObservable =
+				WidgetProperties.selection().observe(selectDefaultRouteButton);
+		final IObservableValue selectDefaultRouteModelObservable = BeanProperties.value(
+				ServerSettingsViewModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
+		ValueBindingBuilder.bind(isSelectDefaultRouteObservable).to(selectDefaultRouteModelObservable).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(routesViewer.getControl()))
+			.notUpdating(selectDefaultRouteModelObservable).in(dbc);
 	}
 
 	private IListChangeListener onServiceItemsChanged(final TreeViewer servicesViewer) {
