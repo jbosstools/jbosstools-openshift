@@ -52,6 +52,7 @@ public class OpenShiftServerUtils {
 	public static final String ATTR_DEPLOYPROJECT = "org.jboss.tools.openshift.DeployProject"; //$NON-NLS-1$
 	public static final String ATTR_SOURCE_PATH = "org.jboss.tools.openshift.SourcePath"; //$NON-NLS-1$
 	public static final String ATTR_POD_PATH = "org.jboss.tools.openshift.PodPath"; //$NON-NLS-1$
+	public static final String ATTR_ROUTE = "org.jboss.tools.openshift.Route"; //$NON-NLS-1$
 
 	public static final String ATTR_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.IgnoreContextRoot";//$NON-NLS-1$
 	public static final String ATTR_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.Override";//$NON-NLS-1$
@@ -74,9 +75,13 @@ public class OpenShiftServerUtils {
 	}
 
 	public static void updateServer(String serverName, String connectionUrl, IService service, String podPath, String sourcePath, IProject deployProject, IServerWorkingCopy server) {
+		updateServer(serverName, connectionUrl, service, podPath, sourcePath, deployProject, null, server);
+	}
+
+	public static void updateServer(String serverName, String connectionUrl, IService service, String podPath, String sourcePath, IProject deployProject, String routeURL, IServerWorkingCopy server) {
 		String host = getHost(service);
 		String deployProjectName = ProjectUtils.getName(deployProject);
-		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, server);
+		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, server);
 	}
 
 	private static String getHost(IService service) {
@@ -128,6 +133,10 @@ public class OpenShiftServerUtils {
 	 *            the application name for the server adapter
 	 */
 	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName, String serviceId, String sourcePath, String podPath, IServerWorkingCopy server) {
+		updateServer(serverName, host, connectionUrl, deployProjectName, serviceId, sourcePath, podPath, null, server);
+	}
+
+	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName, String serviceId, String sourcePath, String podPath, String routeURL, IServerWorkingCopy server) {
 		updateServer(server);
 
 		server.setName(serverName);
@@ -138,6 +147,7 @@ public class OpenShiftServerUtils {
 		server.setAttribute(ATTR_SOURCE_PATH, sourcePath);
 		server.setAttribute(ATTR_POD_PATH, podPath);
 		server.setAttribute(ATTR_SERVICE, serviceId);
+		server.setAttribute(ATTR_ROUTE, routeURL);
 	}
 
 	private static void updateServer(IServerWorkingCopy server) {
@@ -153,16 +163,29 @@ public class OpenShiftServerUtils {
 	}
 	
 	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, IProject project) {
-		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, project);
+		updateServerProject(connectionUrl, service, sourcePath, podPath, project);
+	}
+
+	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, String routeURL, IProject project) {
+		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, project);
 	}
 
 	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, IProject project) {
+		updateServerProject(connectionUrl, serviceId, sourcePath, podPath, null, project);
+	}
+
+	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, String routeURL, IProject project) {
 		IEclipsePreferences node = ServerUtils.getProjectNode(SERVER_PROJECT_QUALIFIER, project);
 		node.put(ATTR_CONNECTIONURL, connectionUrl);
 		node.put(ATTR_DEPLOYPROJECT, project.getName());
 		node.put(ATTR_SOURCE_PATH, sourcePath);
 		node.put(ATTR_POD_PATH, podPath);
 		node.put(ATTR_SERVICE, serviceId);
+		if(StringUtils.isEmpty(routeURL)) {
+			node.remove(ATTR_ROUTE);
+		} else {
+			node.put(ATTR_ROUTE, routeURL);
+		}
 		try {
 			node.flush();
 		} catch (BackingStoreException e) {
@@ -243,6 +266,10 @@ public class OpenShiftServerUtils {
 		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, 
 				connection.getResources(ResourceKind.SERVICE, 
 						OpenShiftResourceUniqueId.getProject(uniqueId)));
+	}
+
+	public static String getRouteURL(IServerAttributes attributes) {
+		return getProjectAttribute(ATTR_ROUTE, null, getDeployProject(attributes));
 	}
 
 	public static String getPodPath(IServerAttributes attributes) {

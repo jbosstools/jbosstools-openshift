@@ -69,7 +69,7 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 		}
 	}
 	
-	private static class RouteLabelProvider extends LabelProvider {
+	public static class RouteLabelProvider extends LabelProvider {
 
 		@Override
 		public Image getImage(Object element) {

@@ -303,10 +303,11 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		String baseServerName = OpenShiftServerUtils.getServerName(getService(), getConnection());
 		//Find a free name based on the computed name
 		String serverName = ServerUtils.getServerName(baseServerName);
+		String routeURL = isSelectDefaultRoute() && getRoute() != null ? getRoute().getURL() : null;
 		OpenShiftServerUtils.updateServer(
-				serverName, connectionUrl, getService(), sourcePath, podPath, deployProject, server);
+				serverName, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
 		OpenShiftServerUtils.updateServerProject(
-				connectionUrl, getService(), sourcePath, podPath, deployProject);
+				connectionUrl, getService(), sourcePath, podPath, routeURL, deployProject);
 	}
 
 	private String getConnectionUrl(Connection connection) {

@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.IRouteChooser;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 
@@ -48,7 +49,10 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		IProject project = service.getProject();
 		if (project != null) {
 			List<IRoute> routes = project.getResources(ResourceKind.ROUTE);
-			IRoute route = getRoute(routes);
+			IRoute route = getRoute(OpenShiftServerUtils.getRouteURL(server), routes);
+			if (route == null) {
+				route = getRoute(routes); 
+			}
 			if (route != null) {
 				welcomePageUrl = route.getURL();
 			}
@@ -57,6 +61,28 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		return welcomePageUrl;
 	}
 
+	/**
+	 * Looks for a route with the given url in the list.
+	 * @param url
+	 * @param routes
+	 * @return
+	 */
+	private IRoute getRoute(String url, List<IRoute> routes) {
+		if(!StringUtils.isEmpty(url)) {
+			for (IRoute route: routes) {
+				if(url.equals(route.getURL())) {
+					return route;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Opens a dialog for user to select a route from the list.
+	 * @param routes
+	 * @return
+	 */
 	private IRoute getRoute(List<IRoute> routes) {
 		IRouteChooser chooser = OpenShiftCoreUIIntegration.getInstance().getRouteChooser();
 		IRoute route = null;
