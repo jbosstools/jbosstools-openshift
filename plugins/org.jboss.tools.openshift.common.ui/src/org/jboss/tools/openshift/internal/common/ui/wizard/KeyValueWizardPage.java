@@ -68,6 +68,9 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 
 		Label nameLabel = new Label(composite, SWT.NONE);
 		nameLabel.setText(model.getKeyLabel()+":");
+		if(model.getKeyDescription() != null) {
+			nameLabel.setToolTipText(model.getKeyDescription());
+		}
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
@@ -88,6 +91,9 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 
 		Label valueLabel = new Label(composite, SWT.NONE);
 		valueLabel.setText(model.getValueLabel()+":");
+		if(model.getValueDescription() != null) {
+			valueLabel.setToolTipText(model.getValueDescription());
+		}
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 

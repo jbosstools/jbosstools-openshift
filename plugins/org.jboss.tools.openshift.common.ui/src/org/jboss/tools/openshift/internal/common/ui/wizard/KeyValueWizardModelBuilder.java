@@ -28,6 +28,8 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 	private String value;
 	private String keyLabel = "Name";
 	private String valueLabel = "Value";
+	private String keyDescription;
+	private String valueDescription;
 	private String windowTitle = "";
 	private boolean keyEditable = true;;
 
@@ -54,6 +56,8 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 				keyEditable);
 		model.setKey(key);
 		model.setValue(value);
+		model.setKeyDescription(keyDescription);
+		model.setValueDescription(valueDescription);
 		return model;
 	}		
 	public KeyValueWizardModelBuilder<T> editableKey(boolean editable){
@@ -67,6 +71,16 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 	
 	public KeyValueWizardModelBuilder<T>  valueLabel(String label) {
 		this.valueLabel = label;
+		return this;
+	}
+	
+	public KeyValueWizardModelBuilder<T>  keyDescription(String keyDescription) {
+		this.keyDescription = keyDescription;
+		return this;
+	}
+	
+	public KeyValueWizardModelBuilder<T>  valueDescription(String valueDescription) {
+		this.valueDescription = valueDescription;
 		return this;
 	}
 	

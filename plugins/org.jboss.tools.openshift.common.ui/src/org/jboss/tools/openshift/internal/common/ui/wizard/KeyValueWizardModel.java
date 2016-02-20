@@ -25,6 +25,8 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	private String key;
 	private String value;
 	private String description;
+	private String keyDescription;
+	private String valueDescription;
 	private String groupLabel;
 	private IValidator keyAfterConvertValidator;
 	private IValidator valueAfterConvertValidator;
@@ -65,7 +67,25 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	public String getDescription() {
 		return description;
 	}
+
+	@Override
+	public String getKeyDescription() {
+		return keyDescription;
+	}
+
+	public void setKeyDescription(String s) {
+		keyDescription = s;
+	}
+
+	@Override
+	public String getValueDescription() {
+		return valueDescription;
+	}
 	
+	public void setValueDescription(String s) {
+		valueDescription = s;
+	}
+
 	@Override
 	public String getGroupLabel() {
 		return groupLabel;

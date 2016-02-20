@@ -61,6 +61,7 @@ public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 		lblName.setText(OpenShiftUIMessages.Name);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(lblName);
+		lblName.setToolTipText(ProjectNameValidator.projectNameDescription);
 		
 		Text txtName = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
