@@ -40,6 +40,9 @@ public class OpenShiftProjectCacheTest {
 	
 	@Mock
 	private IProject project;
+	@Mock
+	private IProject project2;
+
 	@Mock 
 	private TestConnection conn;
 	@Mock
@@ -62,6 +65,10 @@ public class OpenShiftProjectCacheTest {
 	
 	@Test
 	public void testConnectionChanged() {
+		//That excludes loading projects from connection when adapters list is empty.
+		//Loading would hide failure at firing project add, and cause failure at firing project remove.
+		when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Collections.emptyList());
+
 		//project add
 		cache.connectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS, Collections.emptyList(), Arrays.asList(project));
 
@@ -77,6 +84,32 @@ public class OpenShiftProjectCacheTest {
 		thenListenersAreNotifiedOfAdd(1);
 	}
 	
+	@Test
+	public void testConnectionWithSeveralProjectsChanged() {
+		when(project.getName()).thenReturn("project1");
+		when(project2.getName()).thenReturn("project2");
+		when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(project, project2));
+
+		//provide initial loading 
+		List<IProjectAdapter> adapters = new ArrayList<>(cache.getProjectsFor(conn));
+		assertEquals(2, adapters.size());
+
+		//project remove
+		cache.connectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS, Arrays.asList(project, project2), Arrays.asList(project));
+		adapters = new ArrayList<>(cache.getProjectsFor(conn));
+		assertAdapters(adapters);
+
+		//project add
+		cache.connectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS, Arrays.asList(project), Arrays.asList(project, project2));
+
+		adapters = new ArrayList<>(cache.getProjectsFor(conn));
+		assertEquals(2, adapters.size());
+
+
+		thenListenersAreNotifiedOfRemoval(1);
+		thenListenersAreNotifiedOfAdd(3); //Twice at loading plus once at adding.
+	}
+
 	@Test
 	public void testFlushForWhenUnknownConnection() {
 		cache.flushFor(conn);
