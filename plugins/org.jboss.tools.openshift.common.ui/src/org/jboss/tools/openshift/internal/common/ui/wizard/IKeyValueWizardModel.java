@@ -29,6 +29,17 @@ public interface IKeyValueWizardModel<T extends IKeyValueItem> {
 	String getTitle();
 	String getDescription();
 	String getWindowTitle();
+
+	/**
+	 * Used as tooltip at key input label.
+	 * @return
+	 */
+	String getKeyDescription();
+	/**
+	 * Used as tooltip at value input label.
+	 * @return
+	 */
+	String getValueDescription();
 	
 	/**
 	 * Retrieve the validator to be applied after the key is converted
