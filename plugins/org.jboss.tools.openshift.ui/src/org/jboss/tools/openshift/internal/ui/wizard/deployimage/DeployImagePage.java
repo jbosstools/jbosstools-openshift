@@ -243,7 +243,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.applyTo(connectionViewer.getControl());
 		
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
-		connectionViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
+		//not an ObservableTreeItemLabelProvider because property returns Collection<Connection>
+		connectionViewer.setLabelProvider(new OpenShiftExplorerLabelProvider());
 		connectionViewer.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_CONNECTIONS).observe(model));
 		
