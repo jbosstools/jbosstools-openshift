@@ -11,6 +11,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -41,6 +42,8 @@ public class EditValueDialog extends InputDialog {
 	String initialValue;
 	boolean required;
 
+	private IValidator valueValidator;
+
 	public EditValueDialog(Shell shell, 
 			String title, String message, String name, String initialValue, boolean required) {
 		super(shell, title, message, initialValue, new InputValidator());
@@ -48,6 +51,10 @@ public class EditValueDialog extends InputDialog {
 		this.initialValue = initialValue;
 		this.required = required;
 		model = new InputModel();
+	}
+
+	public void setValueValidator(IValidator valueValidator) {
+		this.valueValidator = valueValidator;
 	}
 
 	@Override
@@ -144,6 +151,9 @@ public class EditValueDialog extends InputDialog {
 			boolean isInitEmpty = StringUtils.isEmpty(initialValue);
 			if((isTextEmpty == isInitEmpty) && (isTextEmpty || text.equals(initialValue))) {
 				return ValidationStatus.cancel(PROVIDE_NEW_VALUE);
+			}
+			if(valueValidator != null) {
+				return valueValidator.validate(text);
 			}
 			return ValidationStatus.ok();
 		}

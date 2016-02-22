@@ -18,6 +18,7 @@ import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.map.ObservableMap;
 import org.eclipse.core.databinding.observable.map.WritableMap;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
@@ -25,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerCellDecorationManager;
@@ -225,11 +226,15 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 							private IStatus validate(IParameter parameter) {
 								if (parameter.isRequired()) {
 									if (StringUtils.isEmpty(parameter.getValue())
-											&& StringUtils.isEmpty(parameter.getGeneratorName())) {
+													&& StringUtils.isEmpty(parameter.getGeneratorName())) {
 										return ValidationStatus.error(
 												NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
 									};
 								} 
+								IStatus status = gitSourceValidator.validate(parameter);
+								if(!status.isOK()) {
+									return status;
+								}
 								return ValidationStatus.ok();
 							}
 
@@ -273,6 +278,73 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		});
 		return viewer;
 	}
+
+	private static boolean isGitSourceParameterName(String name) {
+		return ITemplateParametersPageModel.PARAMETER_SOURCE_REPOSITORY_URL.equals(name)
+				|| ITemplateParametersPageModel.PARAMETER_GIT_URI.equals(name);
+	}
+
+	GitSourceValidator gitSourceValidator = new GitSourceValidator();
+
+	/**
+	 * Validates only non-empty value and if it is not valid, then returns 
+	 * error status for a required parameter and warning status for an optional parameter.
+	 */
+	class GitSourceValidator implements IValidator {
+		private IParameter parameter;
+
+		public GitSourceValidator() {
+		}
+	
+		public void setParameter(IParameter parameter) {
+			this.parameter = parameter;
+		}
+
+		@Override
+		public IStatus validate(Object value) {
+			IParameter parameter = null;
+			String paramaterValue = null;
+			if(value instanceof IParameter) {
+				//The case in cell editor
+				parameter = (IParameter)value;
+				paramaterValue = parameter.getValue();
+			} else if(value instanceof String) {
+				//The case in edit dialog
+				parameter = this.parameter;
+				paramaterValue = (String)value;
+			}
+			if(parameter != null && !StringUtils.isEmpty(paramaterValue)) {
+				String message = validateGitSource(parameter.getName(), paramaterValue);
+				if(message != null) {
+					if(parameter.isRequired()) {
+						return ValidationStatus.error(message);
+					} else {
+						//Normally, git source url parameter should be marked as required,
+						//but if by some reason it is not, let's return a warning.
+						return ValidationStatus.warning(message);
+					}
+				}
+			}
+			return ValidationStatus.ok();
+		}
+		
+		private String validateGitSource(String name, String value) {
+			if(StringUtils.isEmpty(value)) {
+				return null;
+			}
+			if(isGitSourceParameterName(name)) {
+				if(!UrlUtils.isValid(value)) {
+					return NLS.bind("Parameter {0} is not a valid URL.", name);
+				}
+				if(!value.startsWith("http://")
+						&& !value.startsWith("https://")) {
+					return NLS.bind("Parameter {0} should be an http(s) connection.", name);
+				}
+			}
+			return null;
+		}
+
+	}
 	
 	private SelectionListener onEdit() {
 		return new SelectionAdapter() {
@@ -290,6 +362,11 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 				parameter.getName(), 
 				parameter.getValue(), 
 				parameter.isRequired());
+		if(isGitSourceParameterName(parameter.getName())) {
+			GitSourceValidator valueValidator = new GitSourceValidator();
+			valueValidator.setParameter(parameter);
+			dialog.setValueValidator(valueValidator);
+		}
 		if (InputDialog.OK == dialog.open()) {
 			model.updateParameterValue(parameter, dialog.getValue());
 			viewer.refresh();
