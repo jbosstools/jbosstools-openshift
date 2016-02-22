@@ -18,6 +18,8 @@ import com.openshift.restclient.model.template.IParameter;
  * @author jeff.cantrill
  */
 public interface ITemplateParametersPageModel {
+	static final String PARAMETER_SOURCE_REPOSITORY_URL = "SOURCE_REPOSITORY_URL";
+	static final String PARAMETER_GIT_URI = "GIT_URI"; //legacy key
 	
 	static final String PROPERTY_SELECTED_PARAMETER = "selectedParameter";
 	static final String PROPERTY_PARAMETERS = "parameters";

@@ -245,8 +245,8 @@ public class NewApplicationWizardModel
 			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
 		}
 		if (gitRepo != null) {
-			projectParams.put("SOURCE_REPOSITORY_URL", gitRepo);
-			projectParams.put("GIT_URI", gitRepo);//legacy key
+			projectParams.put(PARAMETER_SOURCE_REPOSITORY_URL, gitRepo);
+			projectParams.put(PARAMETER_GIT_URI, gitRepo);//legacy key
 			
 			String branch;
 			try {
