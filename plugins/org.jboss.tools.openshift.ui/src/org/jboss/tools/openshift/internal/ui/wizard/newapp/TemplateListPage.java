@@ -66,6 +66,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -756,7 +757,13 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 						@Override
 						protected IStatus doRun(IProgressMonitor monitor) {
-							model.loadResources();
+							try {
+								model.loadResources();
+							} catch (OpenShiftException e) {
+								closeAfter[0] = closeOnCancel;
+								String problem = e.getStatus() == null ? e.getMessage() : e.getStatus().getMessage();
+								return	OpenShiftUIActivator.statusFactory().errorStatus(problem, e);
+							}
 							return Status.OK_STATUS;
 						}
 					}).runWhenSuccessfullyDone(new UIJob("Verifying required project...") {
@@ -788,11 +795,15 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					}).build();
 			WizardUtils.runInWizard(jobs, getContainer());
 			if(closeAfter[0]) {
+				if(Display.getCurrent() != null) {
+					WizardUtils.close(getWizard());
+				} else {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						WizardUtils.close(getWizard());
 					}
 				});
+				}
 			}
 		} catch (InvocationTargetException | InterruptedException e) {
 			// intentionnally swallowed
