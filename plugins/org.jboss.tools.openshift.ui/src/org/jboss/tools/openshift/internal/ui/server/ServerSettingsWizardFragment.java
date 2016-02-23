@@ -67,6 +67,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -76,6 +77,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
@@ -222,13 +226,11 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			.numColumns(4)
 			.margins(10, 10)
 			.applyTo(container);
-		
 		createProjectControls(container, model, dbc);
 		createSourcePathControls(container, model, dbc);
 		createDeploymentControls(container, model, dbc);
 		createServiceControls(container, model, dbc);
 		createRouteControls(container, model, dbc);
-
 		return container;
 	}
 
@@ -536,13 +538,18 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				.in(dbc);
 
 		// details
-		Label detailsLabel = new Label(servicesGroup, SWT.NONE);
-		detailsLabel.setText("Service Details:");
+		ExpandableComposite expandable = new ExpandableComposite(servicesGroup, SWT.None);
 		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL)
-				.applyTo(detailsLabel);
-
-		Composite detailsContainer = new Composite(servicesGroup, SWT.NONE);
+			.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+			.applyTo(expandable);
+		expandable.setText("Service Details");
+		expandable.setExpanded(true);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(0, 0).applyTo(expandable);
+		GridDataFactory.fillDefaults()
+		.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+		.applyTo(expandable);
+		
+		Composite detailsContainer = new Composite(expandable, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
 				.applyTo(detailsContainer);
@@ -554,13 +561,26 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			.notUpdatingParticipant()
 			.in(dbc);
 		new ServiceDetailViews(selectedService, detailsContainer, dbc).createControls();
+		
+		expandable.setClient(detailsContainer);
+		expandable.addExpansionListener(new IExpansionListener() {
+			@Override
+			public void expansionStateChanging(ExpansionEvent e) {
+			}
+			
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				servicesGroup.update();
+				servicesGroup.layout(true);
+			}
+		});
 	}
 
 	private void createRouteControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
 		Group defaultRouteGroup = new Group(container, SWT.NONE);
 		defaultRouteGroup.setText("Default Route");
 		GridDataFactory.fillDefaults()
-			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
+			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
 			.applyTo(defaultRouteGroup);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(2).margins(10,10)
