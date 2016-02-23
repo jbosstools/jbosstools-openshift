@@ -16,7 +16,6 @@ import java.util.Collection;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -34,19 +33,23 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
@@ -117,6 +120,9 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		IObservableValue portForwardingAllowedObservable = BeanProperties.value(
 				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING_ALLOWED).observe(wizardModel);
 
+		IObservableValue freePortSearchAllowedObservable = BeanProperties.value(
+				PortForwardingWizardModel.PROPERTY_FREE_PORT_SEARCH_ALLOWED).observe(wizardModel);
+
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
 			.notUpdating(portForwardingAllowedObservable).in(dbc);
 
@@ -125,7 +131,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 				.notUpdating(portForwardingStartedObservable).in(dbc);
 		
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
-				.notUpdating(portForwardingAllowedObservable).in(dbc);
+				.notUpdating(freePortSearchAllowedObservable).in(dbc);
 
 	}
 
@@ -134,6 +140,12 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if(!wizardModel.checkPortForwardingAllowed()) {
+					//This is rather a testing case, it is not very probable at normal usage.
+					viewer.refresh(true);
+					MessageDialog.openWarning(getShell(), "Warning", "Some ports are in use now.");
+					return;
+				}
 				try {
 					WizardUtils.runInWizard(new Job("Starting port forwarding...") {
 						@Override
@@ -190,11 +202,22 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 
 		}, viewer, tableLayout);
 
-		createTableColumn("Local Port", 2, new CellLabelProvider() {
+		createTableColumn("Local Port", 2, new StyledCellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
 				IPortForwardable.PortPair port = (IPortForwardable.PortPair) cell.getElement();
-				cell.setText(Integer.toString(port.getLocalPort()));
+				int local = port.getLocalPort();
+				if(wizardModel.getPortForwarding() || !PortForwardingWizardModel.isPortInUse(local)) {
+					cell.setText(Integer.toString(local));
+					cell.setStyleRanges(new StyleRange[0]);
+				} else {
+					String text = Integer.toString(local) + " (in use)";
+					StyledString styledString = new StyledString();
+					styledString.append(text, usedPortStyler);
+					cell.setText(styledString.toString());
+					cell.setStyleRanges(styledString.getStyleRanges());
+				}
+				super.update(cell);
 			}
 		}, viewer, tableLayout);
 
@@ -226,6 +249,13 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 //		
 		return viewer;
 	}
+
+	StyledString.Styler usedPortStyler = new StyledString.Styler() {
+		@Override
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_RED);
+		}
+	};
 
 	private void createTableColumn(String name, int weight, CellLabelProvider cellLabelProvider, TableViewer viewer,
 			TableColumnLayout layout) {
