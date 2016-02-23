@@ -11,6 +11,9 @@
 package org.jboss.tools.openshift.internal.ui.portforwading;
 
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +45,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	public static final String PROPERTY_FORWARDABLE_PORTS = "forwardablePorts";
 	public static final String PROPERTY_PORT_FORWARDING = "portForwarding";
 	public static final String PROPERTY_PORT_FORWARDING_ALLOWED = "portForwardingAllowed";
+	public static final String PROPERTY_FREE_PORT_SEARCH_ALLOWED = "freePortSearchAllowed";
 	public static final String PROPERTY_USE_FREE_PORTS = "useFreePorts";
 	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<IPod, IPortForwardable>();
 
@@ -49,6 +53,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	private final IPod pod;
 	private final ConsoleListener consoleListener = new ConsoleListener();
 	private Set<IPortForwardable.PortPair> ports = new HashSet<IPortForwardable.PortPair>();
+	
+	private boolean isPortForwardingAllowed = false;
 
 	public PortForwardingWizardModel(final IPod pod) {
 		this.pod = pod;
@@ -64,6 +70,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		}
 		ports = Collections.unmodifiableSet(ports);
 		useFreePorts = computeUsingFreePorts();
+		updatePortForwardingAllowed();
 	}
 
 	public final String getPodName() {
@@ -75,8 +82,55 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		return isPortForwarding(pod);
 	}
 
+	/**
+	 * Since we do not listen to port changes and do not poll them regularly,
+	 * on start port forwarding which assumes that it is allowed, 
+	 * actual state should be checked.
+	 * 
+	 * @return
+	 */
+	public boolean checkPortForwardingAllowed() {
+		updatePortForwardingAllowed();
+		return isPortForwardingAllowed();
+	}
+
 	public boolean isPortForwardingAllowed() {
+		return isPortForwardingAllowed;
+	}
+
+	void updatePortForwardingAllowed() {
+		boolean newValue = !getForwardablePorts().isEmpty() && !isPortForwarding(pod) && !hasPortInUse();
+		firePropertyChange(PROPERTY_PORT_FORWARDING_ALLOWED, isPortForwardingAllowed, isPortForwardingAllowed = newValue);
+	}
+
+	public boolean isFreePortSearchAllowed() {
 		return !getForwardablePorts().isEmpty() && !isPortForwarding(pod);
+	}
+
+	private boolean hasPortInUse() {
+		for (IPortForwardable.PortPair port : ports) {
+			if(isPortInUse(port.getLocalPort())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isPortInUse(int port) {
+		if(port < 0 || port >= 65536) {
+			return false;
+		}
+		try {
+			new ServerSocket(port).close();
+			return false;
+		} catch (IOException e) {
+			//success
+		}
+		try (Socket socket = new Socket("localhost", port)) {
+			return true; //success
+		} catch (IOException e) {
+			return false;
+		}
 	}
 
 	public Collection<IPortForwardable.PortPair> getForwardablePorts(){
@@ -107,6 +161,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			REGISTRY.put(pod, portForwardable);
 		}
 		firePropertyChange(PROPERTY_PORT_FORWARDING, false, getPortForwarding());
+		updatePortForwardingAllowed();
 	}
 	
 	private boolean isPortForwarding(IPod pod) {
@@ -159,6 +214,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			stream.println("done.");
 			ConsoleUtils.displayConsoleView(console);
 			firePropertyChange(PROPERTY_PORT_FORWARDING, true, getPortForwarding());
+			updatePortForwardingAllowed();
 		}finally {
 			ConsoleUtils.deregisterConsoleListener(consoleListener);					
 		}
@@ -176,7 +232,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		firePropertyChange(PROPERTY_USE_FREE_PORTS, this.useFreePorts, this.useFreePorts = useFreePorts);
 	}
 
-	private void updateLocalPortBindings(final boolean useFreePorts){
+	private void updateLocalPortBindings(final boolean useFreePorts) {
 		final List<String> bindings = new ArrayList<String>();
 		// update local bindings while avoiding duplicates
 		for (IPortForwardable.PortPair port : ports) {
@@ -195,6 +251,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				bindings.add(key);
 			}
 		}
+		updatePortForwardingAllowed();
 	}
 
 	/*
