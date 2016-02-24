@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.common.databinding.IObservablePojo;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
@@ -28,6 +31,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
@@ -337,13 +341,17 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IStatus connect() {
-		if (isConnected()) {
+		if (isConnected() && listener.secureStoreException == null) {
 			return Status.OK_STATUS;
 		}
 		IStatus status = Status.OK_STATUS;
+		listener.secureStoreException = null;
 		try {
 			this.connection = createConnection();
 			if(connection != null) {
+				if(connection instanceof IObservablePojo) {
+					((IObservablePojo)connection).addPropertyChangeListener(listener);
+				}
 				if (connection.connect()) {
 					connection.enablePromptCredentials(true);
 					wizardModel.setConnection(connection);
@@ -359,9 +367,29 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
 					NLS.bind("The server type, credentials, or auth scheme might be incorrect. {0}", e.getMessage()));
 			OpenShiftCommonUIActivator.log(e);
+		} finally {
+			if(connection instanceof IObservablePojo) {
+				((IObservablePojo)connection).removePropertyChangeListener(listener);
+			}
 		}
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
 		return status;
+	}
+
+	StorageAccessListener listener = new StorageAccessListener();
+	
+	class StorageAccessListener implements PropertyChangeListener {
+		SecureStoreException secureStoreException = null;
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			if(SecureStoreException.ID.equals(evt.getPropertyName()) && evt.getNewValue() instanceof SecureStoreException) {
+				secureStoreException = (SecureStoreException)evt.getNewValue();
+			}			
+		}
+	}
+
+	SecureStoreException getRecentSecureStoreException() {
+		return listener.secureStoreException;
 	}
 
 	private IConnection createConnection() {

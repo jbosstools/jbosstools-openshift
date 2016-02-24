@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.equinox.security.storage.StorageException;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.IRefreshable;
@@ -155,8 +156,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	public void save() {
 		//not using getters here because for save there should be no reason
 		//to trigger a load from storage.
-		saveOrClear(SECURE_STORAGE_PASSWORD, this.password, isRememberPassword(), getSecureStore(getHost(), getUsername()));
-		saveOrClear(SECURE_STORAGE_TOKEN, this.token, isRememberToken(), getSecureStore(getHost(), getUsername()));
+		boolean success = saveOrClear(SECURE_STORAGE_PASSWORD, this.password, isRememberPassword(), getSecureStore(getHost(), getUsername()));
+		if(success) {
+			//Avoid second secure storage prompt.
+			saveOrClear(SECURE_STORAGE_TOKEN, this.token, isRememberToken(), getSecureStore(getHost(), getUsername()));
+		}
 		ConnectionURL url = ConnectionURL.safeForConnection(this);
 		if(url != null) {
 			OpenShiftCorePreferences.INSTANCE.saveAuthScheme(url.toString(), getAuthScheme());
@@ -179,7 +183,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return value;
 	}
 
-	private void saveOrClear(String id, String value, boolean saveOrClear, SecureStore store) {
+	private boolean saveOrClear(String id, String value, boolean saveOrClear, SecureStore store) {
 		if (store != null) {
 			try {
 				if (saveOrClear
@@ -189,11 +193,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 					store.remove(id);
 				}
 			} catch (SecureStoreException e) {
+				firePropertyChange(SecureStoreException.ID, null, e);
 				OpenShiftCoreActivator.logError("Exception saving connection property", e);
+				if(e.getCause() instanceof StorageException) {
+					return false;
+				}
 			}
 		}
+		return true;
 	}
-	
+
 	/**
 	 * Returns a secure store for the current host and username
 	 */
