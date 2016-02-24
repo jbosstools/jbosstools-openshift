@@ -52,7 +52,7 @@ public class ADBInfo {
 	
 	public static ADBInfo loadADBInfo(IServer server) {
 		
-		String[] args = new String[]{CDKConstants.VAGRANT_CMD_ADBINFO, CDKConstants.VAGRANT_FLAG_NO_COLOR};
+		String[] args = new String[]{CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
 		HashMap<String,String> env = new HashMap<String,String>(System.getenv());
 		
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
