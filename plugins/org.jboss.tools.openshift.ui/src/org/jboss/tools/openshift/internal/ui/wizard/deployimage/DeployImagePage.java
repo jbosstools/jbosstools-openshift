@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
@@ -243,8 +244,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.applyTo(connectionViewer.getControl());
 		
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
-		//not an ObservableTreeItemLabelProvider because property returns Collection<Connection>
-		connectionViewer.setLabelProvider(new OpenShiftExplorerLabelProvider());
+		connectionViewer.setLabelProvider(new ConnectionColumLabelProvider());
 		connectionViewer.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_CONNECTIONS).observe(model));
 		
