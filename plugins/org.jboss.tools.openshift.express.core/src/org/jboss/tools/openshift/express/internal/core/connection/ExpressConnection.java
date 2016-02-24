@@ -509,6 +509,7 @@ public class ExpressConnection extends AbstractConnection {
 					store.remove(SECURE_STORAGE_PASSWORD);
 				}
 			} catch (SecureStoreException e) {
+				firePropertyChange(SecureStoreException.ID, null, e);
 				//ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 		}
@@ -591,7 +592,6 @@ public class ExpressConnection extends AbstractConnection {
 		setRememberPassword(otherConnection.isRememberPassword());
 		setUser(otherConnection.user);
 		this.sslCallback = otherConnection.sslCallback;
-		
 	}
 	
 	@Override
