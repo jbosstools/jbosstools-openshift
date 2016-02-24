@@ -14,6 +14,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -33,10 +35,13 @@ public class ShowPropertiesHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				try {
-					PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getActivePage()
-					.showView("org.eclipse.ui.views.PropertySheet");
+					IWorkbenchPage page = PlatformUI.getWorkbench()
+							.getActiveWorkbenchWindow()
+							.getActivePage();
+					IWorkbenchPart active = page.getActivePart();
+					IWorkbenchPart part = page.showView("org.eclipse.ui.views.PropertySheet");
+					page.activate(active);
+					page.activate(part);
 				} catch (PartInitException e) {
 					OpenShiftUIActivator.getDefault().getLogger().logError("Failed to show the Properties view", e);
 				}
