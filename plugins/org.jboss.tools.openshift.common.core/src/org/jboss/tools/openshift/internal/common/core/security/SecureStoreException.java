@@ -15,6 +15,7 @@ package org.jboss.tools.openshift.internal.common.core.security;
  *
  */
 public class SecureStoreException extends Exception {
+	public static final String ID = "secureStoreException";
 
 	/** generated serialVersionUID. */
 	private static final long serialVersionUID = -1732042851833545771L;
