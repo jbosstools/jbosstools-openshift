@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -38,6 +39,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -47,6 +49,11 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.fieldassist.AutoCompleteField;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -65,7 +72,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -93,16 +99,17 @@ import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
+import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
-import org.jboss.tools.openshift.internal.ui.wizard.importapp.IGitCloningPageModel;
 
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -228,75 +235,48 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			model.setDeployProject(project);
 		}
 	}
+
+	private int numColumns = 4;
 	
 	private Composite createControls(Composite parent, ServerSettingsViewModel model, DataBindingContext dbc) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
-			.numColumns(4)
+			.numColumns(numColumns)
 			.margins(10, 10)
 			.applyTo(container);
 		createProjectControls(container, model, dbc);
-		createSourcePathControls(container, model, dbc);
-		createDeploymentControls(container, model, dbc);
 		createServiceControls(container, model, dbc);
-		createRouteControls(container, model, dbc);
+		createAdvancedGroup(container, dbc);
 		return container;
 	}
 
-	private void createProjectControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
-		Label projectLabel = new Label(container, SWT.NONE);
-		projectLabel.setText("Eclipse Project: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(projectLabel);
-
-		StructuredViewer projectsViewer = new ComboViewer(container);
-		GridDataFactory.fillDefaults()
-			.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-			.applyTo(projectsViewer.getControl());
-
-		projectsViewer.setContentProvider(new ObservableListContentProvider());
-		projectsViewer.setLabelProvider(new ColumnLabelProvider() {
+	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
+		DialogAdvancedPart advancedPart = new DialogAdvancedPart() {
+			
+			@Override
+			protected void createAdvancedContent(Composite advancedComposite) {
+				createSourcePathControls(advancedComposite, model, dbc);
+				createDeploymentControls(advancedComposite, model, dbc);
+				createRouteControls(advancedComposite, model, dbc);
+			}
 
 			@Override
-			public String getText(Object element) {
-				if (!(element instanceof IProject)) {
-					return null;
-				}
-
-				return ((IProject) element).getName();
+			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
+				return gridLayoutFactory.numColumns(numColumns).margins(0, 0);
 			}
-		});
-		projectsViewer.setInput(
-				BeanProperties.list(ServerSettingsViewModel.PROPERTY_PROJECTS).observe(model));
+		};
+		advancedPart.createAdvancedGroup(parent, numColumns);
+	}
 
-		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
-		Binding selectedProjectBinding = 
-				ValueBindingBuilder.bind(selectedProjectObservable)
-					.validatingAfterConvert(new IValidator() {
-
-						@Override
-						public IStatus validate(Object value) {
-							if (value instanceof IProject) {
-								return ValidationStatus.ok();
-							}
-							return ValidationStatus.cancel("Please choose a project to deploy.");
-						}
-					})
-					.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_DEPLOYPROJECT)
-					.observe(model))
-					.in(dbc);
-		ControlDecorationSupport.create(
-				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-
-		// browse projects
-		Button browseProjectsButton = new Button(container, SWT.NONE);
-		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
-				.hint(100, SWT.DEFAULT)
-				.applyTo(browseProjectsButton);
-		browseProjectsButton.addSelectionListener(onBrowseProjects(model, browseProjectsButton.getShell()));
+	private void createProjectControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
+		IObservableValue eclipseProjectObservable = BeanProperties.value(
+				ServerSettingsViewModel.PROPERTY_DEPLOYPROJECT).observe(model);
+		new SelectProjectComponentBuilder()
+			.setTextLabel("Eclipse Project: ")
+			.setHorisontalSpan(2)
+			.setEclipseProjectObservable(eclipseProjectObservable)
+			.setSelectionListener(onBrowseProjects(model, container.getShell()))
+			.build(container, dbc);
 	}
 
 	/**
@@ -586,21 +566,27 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	}
 
 	private void createRouteControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
-		Group defaultRouteGroup = new Group(container, SWT.NONE);
-		defaultRouteGroup.setText("Default Route");
+		Group routeGroup = new Group(container, SWT.NONE);
+		routeGroup.setText("Route");
 		GridDataFactory.fillDefaults()
 			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
-			.applyTo(defaultRouteGroup);
+			.applyTo(routeGroup);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(2).margins(10,10)
-			.applyTo(defaultRouteGroup);
+			.applyTo(routeGroup);
 
-		Button selectDefaultRouteButton = new Button(defaultRouteGroup, SWT.CHECK);
-		selectDefaultRouteButton.setText("Select Route:");
-		selectDefaultRouteButton.setToolTipText("Uncheck if you want to select route in a dialog");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(1, 1).applyTo(selectDefaultRouteButton);
+		Button promptRouteButton = new Button(routeGroup, SWT.CHECK);
+		promptRouteButton.setSelection(true);
+		promptRouteButton.setText("Choose route when multiple routes available to show in browser");
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(promptRouteButton);
 
-		StructuredViewer routesViewer = new ComboViewer(defaultRouteGroup);
+		Label routeLabel = new Label(routeGroup, SWT.NONE);
+		routeLabel.setText("Use Route: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(routeLabel);
+
+		StructuredViewer routesViewer = new ComboViewer(routeGroup);
 		GridDataFactory.fillDefaults()
 			.span(1,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(routesViewer.getControl());
@@ -616,11 +602,15 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_ROUTE).observe(model))
 					.in(dbc);
 
-		final IObservableValue isSelectDefaultRouteObservable =
-				WidgetProperties.selection().observe(selectDefaultRouteButton);
+		final IObservableValue isSelectRouteObservable =
+				WidgetProperties.selection().observe(promptRouteButton);
 		final IObservableValue selectDefaultRouteModelObservable = BeanProperties.value(
 				ServerSettingsViewModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
-		ValueBindingBuilder.bind(isSelectDefaultRouteObservable).to(selectDefaultRouteModelObservable).in(dbc);
+		ValueBindingBuilder.bind(isSelectRouteObservable)
+			.converting(new InvertingBooleanConverter())
+			.to(selectDefaultRouteModelObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(routesViewer.getControl()))
 			.notUpdating(selectDefaultRouteModelObservable).in(dbc);
 	}
