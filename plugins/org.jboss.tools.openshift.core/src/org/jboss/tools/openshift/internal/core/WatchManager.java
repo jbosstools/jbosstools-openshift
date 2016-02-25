@@ -207,21 +207,17 @@ public class WatchManager {
 			IResource newItem = null;
 			IResource oldItem = null;
 			int index = resources.indexOf(resource);
-			switch(change) {
-			case ADDED:
+			if (ChangeType.ADDED.equals(change)) {
 				resources.add(resource);
 				newItem = resource;
-				break;
-			case DELETED:
+			} else if (ChangeType.DELETED.equals(change)) {
 				oldItem = index > NOT_FOUND ? resources.remove(index) : resource;
-				break;
-			case MODIFIED:
+			} else if (ChangeType.MODIFIED.equals(change)) {				
 				if(index > NOT_FOUND) {
 					oldItem = resources.remove(index);
 				}
 				resources.add(resource);
 				newItem = resource;
-				break;
 			}
 			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_RESOURCE, oldItem, newItem);
 		}
