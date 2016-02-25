@@ -50,7 +50,6 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -72,7 +71,6 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 import org.jboss.tools.openshift.express.internal.core.util.CartridgeToStringConverter;
 import org.jboss.tools.openshift.express.internal.core.util.ExpressResourceLabelUtils;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
-import org.jboss.tools.openshift.express.internal.ui.utils.DialogChildVisibilityAdapter;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EmbeddableCartridgeViewerSorter;
 import org.jboss.tools.openshift.express.internal.ui.viewer.EqualityComparer;
@@ -86,6 +84,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2Boolea
 import org.jboss.tools.openshift.internal.common.ui.databinding.MultiConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -115,8 +114,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	private ApplicationConfigurationWizardPageModel pageModel;
 	private Text applicationNameText;
 	private OpenShiftApplicationWizardModel wizardModel;
-	private Button advancedButton;
-	private DialogChildVisibilityAdapter advancedSectionVisibilityAdapter;
+
+	private DialogAdvancedPart advancedPart;
 
 	ApplicationConfigurationWizardPage(IWizard wizard, OpenShiftApplicationWizardModel wizardModel) {
 		super("New or existing OpenShift Application", "", "New or existing OpenShift Application, wizard", wizard);
@@ -366,9 +365,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					cartridgesGroup.setText(getCartridgesListLabel(template));
 					if (template instanceof IQuickstartApplicationTemplate) {
 						IQuickstartApplicationTemplate quickstart = (IQuickstartApplicationTemplate) template;
-						showAdvancedSection(!StringUtils.isEmpty(quickstart.getInitialGitUrl()));
+						advancedPart.showAdvancedSection(!StringUtils.isEmpty(quickstart.getInitialGitUrl()));
 					} else {
-						showAdvancedSection(false);
+						advancedPart.showAdvancedSection(false);
 					}
 				}
 			}
@@ -480,18 +479,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	}
 	
 	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
-		// advanced button
-		this.advancedButton = new Button(parent, SWT.NONE);
-		advancedButton.setText(getAdvancedButtonLabel(false));
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(3, 1).applyTo(advancedButton);
-
-		// advanced composite
-		Composite advancedComposite = new Composite(parent, SWT.NONE);
-		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).create();
-		advancedComposite.setLayoutData(advancedCompositeGridData);
-		GridLayoutFactory.fillDefaults().applyTo(advancedComposite);
+		// advanced part
+		advancedPart = new DialogAdvancedPart() {
+			
+			@Override
+			protected void createAdvancedContent(Composite advancedComposite) {
+				doCreateAdvancedContent(advancedComposite, dbc);
+			}
+		};
+		
+		advancedPart.createAdvancedGroup(parent, 3);
+	}
+	
+	private void doCreateAdvancedContent(Composite advancedComposite, DataBindingContext dbc) {
 
 		// source group
 		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
@@ -559,10 +559,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
 		ControlDecorationSupport.create(
 				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-
-		this.advancedSectionVisibilityAdapter = new DialogChildVisibilityAdapter(advancedComposite, false);
-		advancedButton.addSelectionListener(
-				onAdvancedClicked());
 
 		// explanation
 		StyledText sourceCodeExplanationText = new StyledText(sourceGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
@@ -746,29 +742,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				}
 			}
 		};
-	}
-
-	private SelectionListener onAdvancedClicked() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				showAdvancedSection(!advancedSectionVisibilityAdapter.isVisible());
-			}
-		};
-	}
-
-	protected void showAdvancedSection(boolean visible) {
-		advancedSectionVisibilityAdapter.setVisible(visible);
-		advancedButton.setText(getAdvancedButtonLabel(visible));
-	}
-
-	protected String getAdvancedButtonLabel(boolean visible) {
-		if (visible) {
-			return " << Advanced ";
-		} else {
-			return " Advanced >> ";
-		}
 	}
 
 	private SelectionListener onBrowseEnvironmentVariables(final DataBindingContext dbc) {

@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
@@ -49,11 +48,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.fieldassist.AutoCompleteField;
-import org.eclipse.jface.fieldassist.ControlDecoration;
-import org.eclipse.jface.fieldassist.FieldDecoration;
-import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -66,7 +60,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -102,6 +95,7 @@ import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
+import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelectionProperty;
@@ -206,64 +200,16 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	}
 
 	private IObservableValue createEclipseProjectControls(Composite parent, DataBindingContext dbc) {
-		// existing project
-		Label existingProjectLabel = new Label(parent, SWT.NONE);
-		existingProjectLabel.setText("Use existing workspace project:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.applyTo(existingProjectLabel);
-
-		final Text existingProjectNameText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.grab(true, false)
-				.applyTo(existingProjectNameText);
-
-		ISWTObservableValue projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
-
 		IObservableValue eclipseProjectObservable = BeanProperties.value(
 				ITemplateListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
-
-		ValueBindingBuilder
-			.bind(projectNameTextObservable)
-			.converting(new Converter(String.class, org.eclipse.core.resources.IProject.class) {
-				@Override
-				public Object convert(Object fromObject) {
-					String name = (String)fromObject;
-					return ProjectUtils.getProject(name);
-				}
-			})
-			.to(eclipseProjectObservable)
-			.converting(new Converter(org.eclipse.core.resources.IProject.class, String.class) {
-
-				@Override
-				public Object convert(Object fromObject) {
-					return fromObject == null?"": ((org.eclipse.core.resources.IProject)fromObject).getName();
-				}
-			})
-			.in(dbc);
-
-		// project name content assist
-		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
-
-		FieldDecoration contentProposalFieldIndicator =
-				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
-		dec.setImage(contentProposalFieldIndicator.getImage());
-		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
-		dec.setShowOnlyOnFocus(true);
-
-		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllAccessibleProjectNames());
-
-		// browse projects
-		Button browseProjectsButton = new Button(parent, SWT.NONE);
-		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
-				.hint(100, SWT.DEFAULT)
-				.grab(false, false)
-				.applyTo(browseProjectsButton);
-		browseProjectsButton.addSelectionListener(onBrowseProjects());
-
+		SelectProjectComponentBuilder builder = new SelectProjectComponentBuilder();
+		builder
+			.setTextLabel("Use existing workspace project:")
+			.setHorisontalSpan(1)
+			.setEclipseProjectObservable(eclipseProjectObservable)
+			.setSelectionListener(onBrowseProjects())
+			.build(parent, dbc);
+		
 		Link gitLabel = new Link(parent, SWT.NONE);
 		gitLabel.setText("The project needs to be <a>shared with Git</a> and have a remote repository accessible by OpenShift");
 		gitLabel.addSelectionListener(new SelectionAdapter() {
@@ -291,7 +237,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			}
 		});
 		toggleEgitLink(gitLabel, model.getEclipseProject());
-		return projectNameTextObservable;
+		return builder.getProjectNameTextObservable();
 	}
 
 	/**
