@@ -8,9 +8,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.validator;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -30,13 +31,16 @@ public class EnvironmentVarKeyValidator implements IValidator {
 			+ "including the character '_', allowed anywhere except first position.";
 
 	private final IStatus FAILED;
+	private static final IStatus NAME_IS_USED_ERROR = ValidationStatus.error("An environment variable with this name already exists");
+	private Collection<String> usedKeys;
 	
-	public EnvironmentVarKeyValidator() {
-		this("environment variable name");
+	public EnvironmentVarKeyValidator(Collection<String> usedKeys) {
+		this("environment variable name", usedKeys);
 	}
 	
-	public EnvironmentVarKeyValidator(String element) {
+	public EnvironmentVarKeyValidator(String element, Collection<String> usedKeys) {
 		FAILED = ValidationStatus.error(NLS.bind(failureMessage, element));
+		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<String>(0);
 	}
 
 	@Override
@@ -46,6 +50,9 @@ public class EnvironmentVarKeyValidator implements IValidator {
 		String value= (String) paramObject;
 		if(!CIDENTIFIER_REGEXP.matcher(value).matches()) {
 			return FAILED;
+		}
+		if(usedKeys.contains(value)) {
+			return NAME_IS_USED_ERROR;
 		}
 		
 		return ValidationStatus.OK_STATUS;
