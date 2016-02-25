@@ -11,6 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -273,6 +277,8 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		
 		private void handleEvent() {
 			EnvironmentVariable var = UIUtils.getFirstElement(envViewer.getSelection(), EnvironmentVariable.class);
+			Set<String> usedKeys = model.getEnvironmentVariables().stream().map(v -> v.getKey()).collect(Collectors.toSet());
+			usedKeys.remove(var.getKey());
 			IKeyValueWizardModel<IKeyValueItem> dialogModel = new KeyValueWizardModelBuilder<IKeyValueItem>(var)
 					.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
 					.title("Edit " + ENVIRONMENT_VARIABLE_LABEL)
@@ -280,7 +286,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 					.keyLabel(ENVIRONMENT_VARIABLE_LABEL)
 					.editableKey(var.isNew())
 					.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
-					.keyAfterConvertValidator(new EnvironmentVarKeyValidator())
+					.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
 					.build();
 			OkCancelButtonWizardDialog dialog =
 					new OkCancelButtonWizardDialog(getShell(),
@@ -296,13 +302,14 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				Set<String> usedKeys = model.getEnvironmentVariables().stream().map(v -> v.getKey()).collect(Collectors.toSet());
 				IKeyValueWizardModel<KeyValueItem> dialogModel = new KeyValueWizardModelBuilder<KeyValueItem>()
 						.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
 						.title("Add " + ENVIRONMENT_VARIABLE_LABEL)
 						.description(NLS.bind("Add an {0}.", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))
 						.keyLabel("Name")
 						.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
-						.keyAfterConvertValidator(new EnvironmentVarKeyValidator())
+						.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
 						.build();
 				OkCancelButtonWizardDialog dialog =
 						new OkCancelButtonWizardDialog(getShell(),
