@@ -18,9 +18,11 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,9 +33,9 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
-import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.eclipse.swt.widgets.Display;
+import org.jboss.dmr.ModelNode;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
@@ -45,10 +47,12 @@ import org.jboss.tools.openshift.internal.ui.wizard.deployimage.search.DockerHub
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IServicePort;
+import com.openshift.restclient.model.image.IImageStreamImport;
 
 /**
  * The Wizard model to support deploying an image to OpenShift
@@ -59,6 +63,7 @@ public class DeployImageWizardModel
 		extends ResourceLabelsPageModel 
 		implements IDeployImageParameters{
 
+	private static final String STATUS_SUCCESS = "Success";
 	private static final int DEFAULT_REPLICA_COUNT = 1;
 	private Connection connection;
 	private IProject project;
@@ -86,6 +91,7 @@ public class DeployImageWizardModel
 	private boolean imageInfoInitialized;
 	private ArrayList<IServicePort> imagePorts;
 	private boolean originatedFromDockerExplorer;
+	private IDockerImageMetadata imageMeta;
 	
 	private final List<String> imageNames = new ArrayList<>();
 	
@@ -237,17 +243,12 @@ public class DeployImageWizardModel
 	}
 	
 	private synchronized void initContainerInfo() {
-		if(imageInfoInitialized || dockerConnection == null) return;
-		if(!imageExistsLocally(getImage())) {
-			return;
-		}
-		IDockerImageInfo info = dockerConnection.getImageInfo(getImage());
+		IDockerImageMetadata info = getDockerMetaData();
 		if(info == null) return;
-		IDockerContainerConfig imageConfig = info.config();
-		setEnvVars(imageConfig.env());
+		setEnvVars(info.env());
 		
 		List<IPort> portSpecs = new ArrayList<>();
-		Set<String> specs = imageConfig.exposedPorts();
+		Set<String> specs = info.exposedPorts();
 		for (String spec : specs) {
 			try {
 				portSpecs.add(new PortSpecAdapter(spec));
@@ -256,8 +257,28 @@ public class DeployImageWizardModel
 			}
 		}
 		setPortSpecs(portSpecs);
-		setVolumes(new ArrayList<>(imageConfig.volumes()));
+		setVolumes(new ArrayList<>(info.volumes()));
 		imageInfoInitialized = true;
+	}
+	
+	private IDockerImageMetadata getDockerMetaData() {
+		if(imageMeta != null) {//pulled by importImageStream
+			return imageMeta;
+		}
+		if(imageInfoInitialized || dockerConnection == null) 
+			return null;
+		DockerImageURI image = new DockerImageURI(getImage());
+		String repo =  image.getUriWithoutTag();
+		String tag = StringUtils.defaultIfBlank(image.getTag(),"latest");
+		if(dockerConnection.hasImage(repo, tag)) {
+			IDockerImageInfo info = dockerConnection.getImageInfo(getImage());
+			return new DockerConfigMetaData(info);
+		}
+		if(importDockerMetaData(image)) {
+			//try again to import - setImage w/o imageExists
+			return imageMeta;
+		}
+		return null;
 	}
 	
 	private void setEnvVars(List<String> env) {
@@ -473,6 +494,9 @@ public class DeployImageWizardModel
 	public void setDockerConnection(IDockerConnection dockerConnection) {
 		firePropertyChange(PROPERTY_DOCKER_CONNECTION, this.dockerConnection, this.dockerConnection = dockerConnection);
 		this.imageNames.clear();
+		if(dockerConnection == null) {
+			return;
+		}
 		this.imageNames.addAll(dockerConnection.getImages().stream()
 				.filter(image -> !image.isDangling() && !image.isIntermediateImage())
 				.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
@@ -483,12 +507,38 @@ public class DeployImageWizardModel
 		if (dockerConnection == null || StringUtils.isBlank(imageName)) {
 			return false;
 		}
-		final DockerImageURI imageURI = new DockerImageURI(imageName);
-		final String repo = imageURI.getUriWithoutTag();
-		final String tag = StringUtils.defaultIfBlank(imageURI.getTag(), DockerImageURI.LATEST);
-		return dockerConnection.hasImage(repo, tag);
+		DockerImageURI uri = new DockerImageURI(imageName);
+		String repo =  uri.getUriWithoutTag();
+		boolean hasImage = dockerConnection.hasImage(repo, uri.getTag());
+		if(!hasImage) {
+			return importDockerMetaData(uri);
+		}
+		//make sure to reset if based on fetching from docker connection
+		imageMeta = null; 
+		return hasImage;
 	}
-
+	
+	@SuppressWarnings("rawtypes")
+	private boolean importDockerMetaData(DockerImageURI image) {
+		if(this.project != null && project.supports(IImageStreamImportCapability.class)) {
+			IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
+			try {
+				IImageStreamImport streamImport = cap.importImageMetadata(image);
+				Optional status = streamImport.getImageStatus()
+						.stream()
+						.filter(s->STATUS_SUCCESS.equalsIgnoreCase(s.getStatus()))
+						.findFirst();
+				if(status.isPresent()) {
+					this.imageMeta = new ImportImageMetaData(streamImport.getImageJsonFor(image));
+					return true;
+				}
+			}catch(OpenShiftException e) {
+				OpenShiftUIActivator.getDefault().getLogger().logError(e);
+			}
+		}
+		return false;
+	}
+	
 	@Override
 	public boolean imageExistsRemotely(String imageName) {
 		try {
@@ -519,5 +569,75 @@ public class DeployImageWizardModel
 	@Override
 	public Map<String, String> getImageEnvVars() {
 		return Collections.unmodifiableMap(this.imageEnvVars);
+	}
+	
+	private interface IDockerImageMetadata {
+		Set<String> exposedPorts();
+		List<String> env();
+		Set<String> volumes();
+	}
+	
+	private static class DockerConfigMetaData implements IDockerImageMetadata {
+
+		private IDockerImageInfo info;
+
+		public DockerConfigMetaData(IDockerImageInfo info) {
+			this.info = info;
+		}
+
+		@Override
+		public Set<String> exposedPorts() {
+			return info.containerConfig().exposedPorts();
+		}
+
+		@Override
+		public List<String> env() {
+			return info.containerConfig().env();
+		}
+
+		@Override
+		public Set<String> volumes() {
+			return info.containerConfig().volumes();
+		}
+		
+	}
+	private static class ImportImageMetaData implements IDockerImageMetadata {
+
+		private static final String[] ROOT = new String [] {"image","dockerImageMetadata","ContainerConfig"};
+		private static final String[] PORTS = (String [])ArrayUtils.add(ROOT, "ExposedPorts");
+		private static final String[] ENV = (String [])ArrayUtils.add(ROOT, "Env");
+		private static final String[] VOLUMES = (String [])ArrayUtils.add(ROOT, "Volumes");
+		private ModelNode node;
+
+		public ImportImageMetaData(String json) {
+			this.node = ModelNode.fromJSONString(json);
+		}
+
+		@Override
+		public Set<String> exposedPorts(){
+			ModelNode ports = node.get(PORTS);
+			if(ports.isDefined()) {
+				return ports.keys();
+			}
+			return Collections.emptySet();
+		}
+		
+		@Override
+		public List<String> env(){
+			ModelNode env = node.get(ENV);
+			if(env.isDefined()) {
+				return env.asList().stream().map(n->n.asString()).collect(Collectors.toList());
+			}
+			return Collections.emptyList();
+		}
+		
+		@Override
+		public Set<String> volumes(){
+			ModelNode volumes = node.get(VOLUMES);
+			if(volumes.isDefined()) {
+				return volumes.keys();
+			}
+			return Collections.emptySet();
+		}
 	}
 }

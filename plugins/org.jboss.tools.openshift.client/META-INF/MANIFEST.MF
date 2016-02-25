@@ -44,5 +44,7 @@ Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
  org.eclipse.jetty.util;bundle-version="9.2.13",
  org.eclipse.jetty.io;bundle-version="9.2.13",
  org.eclipse.jetty.websocket.common;bundle-version="9.2.13",
- org.eclipse.jetty.websocket.api;bundle-version="9.2.13"
+ org.eclipse.jetty.websocket.api;bundle-version="9.2.13",
+ org.eclipse.jetty.client;bundle-version="9.2.13",
+ org.eclipse.jetty.http;bundle-version="9.2.13"
 Bundle-Activator: org.jboss.tools.openshift.client.internal.OpenShiftClientActivator

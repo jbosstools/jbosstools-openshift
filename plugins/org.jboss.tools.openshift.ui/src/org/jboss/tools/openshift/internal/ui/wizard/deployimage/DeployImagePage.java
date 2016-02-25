@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
@@ -92,6 +93,11 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	protected DeployImagePage(IWizard wizard, IDeployImagePageModel model) {
 		super("Deploy an Image", PAGE_DESCRIPTION, "Deployment Config Settings Page", wizard);
 		this.model = model;
+	}
+	
+	@Override
+	protected void setupWizardPageSupport(DataBindingContext dbc) {
+		ParametrizableWizardPageSupport.create(IStatus.ERROR |  IStatus.CANCEL, this, dbc);
 	}
 
 	/**

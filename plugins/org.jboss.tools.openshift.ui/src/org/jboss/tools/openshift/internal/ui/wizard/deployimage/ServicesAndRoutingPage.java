@@ -16,6 +16,11 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.validation.MultiValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
@@ -116,8 +121,19 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
 				.in(dbc);
 		portsViewer.setContentProvider(new ObservableListContentProvider());
-		portsViewer.setInput(BeanProperties.list(
-				IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model));
+		IObservableList portsObservable = BeanProperties.list(
+				IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+		portsViewer.setInput(portsObservable);
+		dbc.addValidationStatusProvider(new MultiValidator() {
+			
+			@Override
+			protected IStatus validate() {
+				if(portsObservable.isEmpty()) {
+					return ValidationStatus.error("At least 1 port is required when generating the service for the deployed image");
+				}
+				return Status.OK_STATUS;
+			}
+		});
 	
 		Button btnAdd = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()

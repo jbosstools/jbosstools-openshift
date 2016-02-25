@@ -10,30 +10,57 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.models;
 
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
 
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
+import com.openshift.restclient.images.DockerImageURI;
+import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IStatus;
+import com.openshift.restclient.model.image.IImageStreamImport;
+
+@RunWith(MockitoJUnitRunner.class)
 public class DeployImageWizardModelTest {
 
 	private DeployImageWizardModel model;
 	private IDockerConnection dockerConnection;
+	@Mock
+	private IProject project;
+	@Mock
+	private IImageStreamImportCapability cap;
+	@Mock
+	private IImageStreamImport streamImport;
+	@Mock
+	private IStatus status;
 	
 	@Before
 	public void setUp() {
 		model = new DeployImageWizardModel();
 		dockerConnection = mock(IDockerConnection.class);
 		model.setDockerConnection(dockerConnection);
+
+		model.setProject(project);
+		when(project.supports(IImageStreamImportCapability.class)).thenReturn(true);
+		when(project.getCapability(IImageStreamImportCapability.class)).thenReturn(cap);
+		
+		when(status.getStatus()).thenReturn("Success");
+		when(cap.importImageMetadata(any(DockerImageURI.class))).thenReturn(streamImport);
+		when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
 	}
-	
 	
 	@Test
 	public void testImageExistsLocally() {
+		model.setProject(null);
 		assertFalse(model.imageExistsLocally(null));
 		assertFalse(model.imageExistsLocally(" "));
 		
@@ -54,4 +81,5 @@ public class DeployImageWizardModelTest {
 		assertFalse(model.imageExistsLocally("foo/bar"));
 		
 	}
+
 }

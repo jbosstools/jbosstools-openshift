@@ -56,8 +56,6 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class DeployImageJob extends AbstractDelegatingMonitorJob implements IResourcesModel{
 	
-	private static final String DOCKER_IMAGE_KIND = "DockerImage";
-
 	private static final String SELECTOR_KEY = "deploymentconfig";
 	
 	private IDeployImageParameters parameters;
@@ -118,12 +116,10 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 	private Map<String, IResource> generateResources(final IResourceFactory factory, final String name) {
 		final IProject project = parameters.getProject();
 		DockerImageURI sourceImage = new DockerImageURI(parameters.getImage());
-		DockerImageURI imageUri = new DockerImageURI(sourceImage.getUriWithoutHost());
-
 		
 		Map<String, IResource> resources = new HashMap<String, IResource>(4);
 
-		resources.put(ResourceKind.IMAGE_STREAM, stubImageStream(factory, name, project, imageUri));
+		resources.put(ResourceKind.IMAGE_STREAM, stubImageStream(factory, name, project, sourceImage));
 		
 		resources.put(ResourceKind.SERVICE, stubService(factory, name, SELECTOR_KEY, name));
 		
@@ -131,7 +127,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 			resources.put(ResourceKind.ROUTE, stubRoute(factory, name, resources.get(ResourceKind.SERVICE).getName()));
 		}
 		
-		resources.put(ResourceKind.DEPLOYMENT_CONFIG, stubDeploymentConfig(factory, name, imageUri));
+		resources.put(ResourceKind.DEPLOYMENT_CONFIG, stubDeploymentConfig(factory, name, sourceImage));
 		
 		for (IResource resource : resources.values()) {
 			addLabelsToResource(resource);
@@ -151,13 +147,14 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.setReplicaSelector(SELECTOR_KEY, name);
 		
 		Map<String, String> envs = getModifiedEnvVars(parameters.getEnvironmentVariables(), parameters.getImageEnvVars());
-		dc.addContainer(dc.getName(), new DockerImageURI(imageUri.getNameAndTag()), new HashSet<IPort>(parameters.getPortSpecs()), envs, parameters.getVolumes());
+		dc.addContainer(dc.getName(), imageUri, new HashSet<IPort>(parameters.getPortSpecs()), envs, parameters.getVolumes());
 		
 		dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
 		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) dc.addTrigger(DeploymentTriggerType.IMAGE_CHANGE);
 		imageChangeTrigger.setAutomatic(true);
 		imageChangeTrigger.setContainerName(imageUri.getName());
 		imageChangeTrigger.setFrom(new DockerImageURI(imageUri.getNameAndTag()));
+		imageChangeTrigger.setKind(ResourceKind.IMAGE_STREAM_TAG);
 		return dc;
 	}
 	
@@ -174,7 +171,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 
 	private IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
 		IImageStream imageStream = factory.stub(ResourceKind.IMAGE_STREAM, name, parameters.getProject().getName());
-		imageStream.addTag(imageUri.getTag(), DOCKER_IMAGE_KIND, imageUri.getUriWithoutTag());
+		imageStream.setDockerImageRepository(imageUri.getUriWithoutTag());
 		return imageStream;
 	}
 
