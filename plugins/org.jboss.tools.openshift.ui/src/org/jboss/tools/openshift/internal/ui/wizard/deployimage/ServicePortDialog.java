@@ -151,12 +151,12 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 				return ERROR;
 			}
 			String newPort = (String) value;
-			if(!podPort.equals(newPort)) {
+			if(!newPort.equals(podPort)) {
 				if(newPort.length() > MAXLENGTH || !REGEXP.matcher(newPort).matches()) {
 					return ERROR;
 				}
 				for (IServicePort port : ports) {
-					if(port.getTargetPort().equals(newPort)) {
+					if(newPort.equals(port.getTargetPort())) {
 						return ERROR;
 					}
 				}
