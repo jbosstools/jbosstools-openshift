@@ -55,7 +55,7 @@ public class DeployImageHandler extends AbstractHandler {
 		}
 
 		
-		WizardUtils.openWizardDialog(600, 1500, new DeployImageWizard(model), HandlerUtil.getActiveShell(event));
+		WizardUtils.openWizardDialog(600, 1500, new DeployImageWizard(model), HandlerUtil.getActiveWorkbenchWindow(event).getShell());
 		return null;
 	}
 }
