@@ -32,7 +32,7 @@ public class EnvironmentVarKeyValidator implements IValidator {
 	private final IStatus FAILED;
 	
 	public EnvironmentVarKeyValidator() {
-		this("environment variable value");
+		this("environment variable name");
 	}
 	
 	public EnvironmentVarKeyValidator(String element) {
