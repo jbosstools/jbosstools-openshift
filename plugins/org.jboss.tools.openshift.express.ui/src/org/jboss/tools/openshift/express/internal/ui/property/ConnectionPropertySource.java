@@ -119,7 +119,7 @@ public class ConnectionPropertySource implements IPropertySource {
 	private void loadRemoteDetails(final ExpressConnection connection) throws OpenShiftException {
 		IRunnableWithProgress longRunning = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InterruptedException {
-				monitor.beginTask("Loading ExpressConnection Details", 200);
+				monitor.beginTask("Loading OpenShift 2 connection details", 200);
 				try {
 					if (!connection.isConnected()
 							&& connection.canPromptForPassword()) {
