@@ -31,7 +31,7 @@ public class EnvironmentVarKeyValidator implements IValidator {
 			+ "including the character '_', allowed anywhere except first position.";
 
 	private final IStatus FAILED;
-	private static final IStatus NAME_IS_USED_ERROR = ValidationStatus.error("An enviaronment variable with this name exists");
+	private static final IStatus NAME_IS_USED_ERROR = ValidationStatus.error("An environment variable with this name already exists");
 	private Collection<String> usedKeys;
 	
 	public EnvironmentVarKeyValidator(Collection<String> usedKeys) {
