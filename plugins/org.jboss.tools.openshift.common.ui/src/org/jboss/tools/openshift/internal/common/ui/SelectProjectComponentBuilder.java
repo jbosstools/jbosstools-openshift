@@ -27,6 +27,7 @@ import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 
 public class SelectProjectComponentBuilder {
@@ -42,6 +44,7 @@ public class SelectProjectComponentBuilder {
 	String browseLabel = "Browse...";
 	String errorText = "Select an existing project";
 	int hSpan = 1;
+	boolean required = true;
 
 	IObservableValue eclipseProjectObservable;
 	SelectionListener selectionListener;
@@ -60,7 +63,7 @@ public class SelectProjectComponentBuilder {
 		final Text existingProjectNameText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
-				.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.span(hSpan, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(existingProjectNameText);
 		
 		projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
@@ -73,7 +76,11 @@ public class SelectProjectComponentBuilder {
 					if(value instanceof String) {
 						return ValidationStatus.ok();
 					} else if(value == null) {
-						return ValidationStatus.error("Select an existing project");
+						if(required) {
+							return ValidationStatus.error("Select an existing project");
+						} else if(!StringUtils.isEmpty(existingProjectNameText.getText())) {
+							return ValidationStatus.error(NLS.bind("Project {0} does not exist", existingProjectNameText.getText()));
+						}
 					}
 					return ValidationStatus.ok();
 				}
@@ -123,7 +130,7 @@ public class SelectProjectComponentBuilder {
 	 * Set value of label at text input. Has only effect if called before build().
 	 *  
 	 * @param label
-	 * @return
+	 * @return self for chaining
 	 */
 	public SelectProjectComponentBuilder setTextLabel(String label) {
 		textLabel = label;
@@ -134,7 +141,7 @@ public class SelectProjectComponentBuilder {
 	 * Set value of model observable. Has only effect if called before build().
 	 *  
 	 * @param label
-	 * @return
+	 * @return self for chaining
 	 */
 	public SelectProjectComponentBuilder setEclipseProjectObservable(IObservableValue eclipseProjectObservable) {
 		this.eclipseProjectObservable = eclipseProjectObservable;
@@ -155,11 +162,23 @@ public class SelectProjectComponentBuilder {
 	}
 
 	/**
+	 * By default input is required.
+	 * Set to false if selecting a project is not required.
+	 * Has only effect if called before build().
+	 * @param required
+	 * @return self for chaining
+	 */
+	public SelectProjectComponentBuilder setRequired(boolean required) {
+		this.required = required;
+		return this;
+	}
+
+	/**
 	 * Set selection listener that will run a customized dialog and consume selected project.
 	 * Has only effect if called before build().
 	 *  
 	 * @param label
-	 * @return
+	 * @return self for chaining
 	 */
 	public SelectProjectComponentBuilder setSelectionListener(SelectionListener listener) {
 		selectionListener = listener;

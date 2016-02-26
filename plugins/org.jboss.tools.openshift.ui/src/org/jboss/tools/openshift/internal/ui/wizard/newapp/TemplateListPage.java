@@ -206,6 +206,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		builder
 			.setTextLabel("Use existing workspace project:")
 			.setHorisontalSpan(1)
+			.setRequired(false)
 			.setEclipseProjectObservable(eclipseProjectObservable)
 			.setSelectionListener(onBrowseProjects())
 			.build(parent, dbc);
