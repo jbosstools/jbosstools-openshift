@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2016 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ATTR_ARGS;
@@ -9,26 +19,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class VagrantLaunchUtility {
@@ -124,10 +135,14 @@ public class VagrantLaunchUtility {
 			throws IOException, TimeoutException {
 		return call(rootCommand, args, vagrantDir, env, 30000);
 	}
-
+	
+	private static void ensureCommandOnPath(String rootCommand, Map<String, String> env) {
+		CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
+	}
+	
 	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
 			int timeout) throws IOException, TimeoutException {
-
+		ensureCommandOnPath(rootCommand, env);
 		String[] envp = (env == null ? null : convertEnvironment(env));
 
 		List<String> cmd = new ArrayList<>();

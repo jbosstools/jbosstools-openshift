@@ -14,37 +14,54 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.Platform;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 
 public class CommandLocationLookupStrategy {
-	private static final String LINUX_WHICH = "which ";
-	private static final String WINDOWS_WHERE = "where ";
+	private static final String LINUX_WHICH = "which";
+	private static final String WINDOWS_WHERE = "where";
 	private static final String LINUX_PATHVAR = "PATH";
 	private static final String WINDOWS_PATHVAR = "Path";
 
 	public static final CommandLocationLookupStrategy WINDOWS_STRATEGY = 
-			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com", ".bat"});
+			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com", ".bat"}, null);
 	public static final CommandLocationLookupStrategy LINUX_STRATEGY = 
-			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{});
+			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{}, null);
+	public static final CommandLocationLookupStrategy MAC_STRATEGY = 
+			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{}, new String[]{"bash", "-l", "-i", "-c", "echo $PATH"}, true);
 	
 	public static CommandLocationLookupStrategy get() {
 		String os = Platform.getOS();
 		if( Platform.OS_WIN32.equals(os)) {
 			return WINDOWS_STRATEGY;
 		}
+		if( Platform.OS_MACOSX.equals(os)) {
+			return MAC_STRATEGY;
+		}
 		return LINUX_STRATEGY;
 	}
 	
 	private String which, delim, pathvar;
+	private String[] pathCommand;
 	private String[] suffixes;
-	public CommandLocationLookupStrategy(String which, String delim, String pathvar, String[] suffixes) {
+	private boolean preferSystemPath;
+	public CommandLocationLookupStrategy(String which, String delim, String pathvar, String[] suffixes, String[] pathCommand) {
+		this(which, delim, pathvar, suffixes, pathCommand, false);
+	}
+	
+	public CommandLocationLookupStrategy(String which, String delim, String pathvar, String[] suffixes, String[] pathCommand, boolean preferSystemPath) {
 		this.which = which;
 		this.delim = delim;
 		this.pathvar = pathvar;
 		this.suffixes = suffixes;
+		this.pathCommand = pathCommand;
+		this.preferSystemPath = preferSystemPath;
 	}
 	
 	public String search(CommandLocationBinary binary) {
@@ -82,9 +99,55 @@ public class CommandLocationLookupStrategy {
 		}
 		String ret = searchPath(System.getenv(pathvar), delim, cmd);
 		if( ret == null ) {
-			ret = runCommand(which + cmd, timeout);
+			// run which / where
+			ret = runCommandAndVerify(new String[]{which, cmd}, timeout);
 		}
 		return ret;
+	}
+	
+	
+
+	/**
+	 * Ensure the given folder is on the path in the provided environment map, 
+	 * or append to existing path in provided environment.
+	 *   
+	 * If the provided environment has no path variable, fetch an environment from
+	 * either the currently running environment (if preferSystemPath is false) or 
+	 * from the system via pathCommand member variable) if preferSystemPath is true. 
+	 * 
+	 * @param env
+	 * @param folder
+	 */
+	public void ensureOnPath( Map<String, String> env, String folder) {
+		HashMap<String,String> processEnv = new HashMap<String,String>(System.getenv());
+		if( env.get(pathvar) == null ) {
+			if( preferSystemPath ) {
+				String pathresult = runCommand(pathCommand);
+				processEnv.put(pathvar, pathresult);
+			}
+			String newPath = ensureFolderOnPath(processEnv.get(pathvar), folder);
+			env.put(pathvar, newPath);
+		} else {
+			String newPath = ensureFolderOnPath(env.get(pathvar), folder);
+			env.put(pathvar, newPath);
+		}
+	}
+
+	/**
+	 * Append the given folder to the existing path if not already present
+	 * 
+	 * @param existingPath
+	 * @param folder
+	 * @return
+	 */
+	private String ensureFolderOnPath(String existingPath, String folder) {
+		existingPath = (existingPath == null ? "" : existingPath);
+		String[] roots = existingPath.split(delim);
+		ArrayList<String> list = new ArrayList<String>(Arrays.asList(roots));
+		if( !list.contains(folder)) {
+			list.add(folder);
+		}
+		return String.join(delim, list);
 	}
 	
 	/**
@@ -114,47 +177,110 @@ public class CommandLocationLookupStrategy {
 		}
 		return null;
 	}
-	
-	private  String runCommand(final String cmd, int timeout) {
+	private  String runCommandAndVerify(final String[] cmd, int timeout) {
 		if( timeout == -1 ) {
-			return runCommand(cmd);
+			return runCommandAndVerify(cmd);
 		} else {
 			String path = ThreadUtils.runWithTimeout(timeout, new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					return runCommand(cmd);
+					return runCommandAndVerify(cmd);
 				}
 			});
 			return path;
 		}
 	}
 	
-	private  String runCommand(String cmd) {
-
-		Process p = null;
+	private  String runCommandAndVerify(String[] cmd) {
+		Process p = createProcess(cmd, preferSystemPath);
+		if( p != null ) {
+			String result = readProcess(p);
+			// verify the output is a file path that exists
+			if( result != null && !result.isEmpty() && new File(result).exists())
+				return result;
+		}
+		return null;
+	}
+	
+	private String runCommand(String cmd[]) {
+		Process p = createProcess(cmd);
+		if( p != null ) {
+			String result = readProcess(p);
+			return result;
+		}
+		return null;
+	}
+	
+	/**
+	 * Use runtime.exec(String[]) to run a command.
+	 * This method *does not* respect the preferSystemPath  member variable
+	 * and will run with whatever the default environment is. 
+	 * 
+	 * @param cmd
+	 * @return
+	 */
+	private Process createProcess(String cmd[]) {
 		try {
-			p = Runtime.getRuntime().exec(cmd);
-			try {
-				p.waitFor();
-			} catch(InterruptedException ie) {
-				// Ignore, expected
+			return Runtime.getRuntime().exec(cmd);
+		} catch(IOException ioe) {
+			OpenShiftCommonCoreActivator.log(ioe);
+			return null;
+		}
+	}
+	
+	/**
+	 * Use runtime.exec(String) 
+	 * @param cmd
+	 * @return
+	 */
+	private Process createProcess(String[] cmd, boolean useSystemPath) {
+		try {
+			if( useSystemPath) {
+				String pathresult = runCommand(pathCommand);
+				ProcessBuilder pb = new ProcessBuilder(cmd);
+				Map<String,String> env = pb.environment();
+				env.put(pathvar, pathresult);
+				return pb.start();
+			} else {
+				return Runtime.getRuntime().exec(cmd);
 			}
-			if(p.exitValue() == 0) {
-				InputStream is = p.getInputStream();
+		} catch(IOException ioe) {
+			OpenShiftCommonCoreActivator.log(ioe);
+			return null;
+		}
+	}
+
+	
+	private String readProcess(Process p) {
+		try {
+			p.waitFor();
+		} catch(InterruptedException ie) {
+			// Ignore, expected
+		}
+		InputStream is = null;
+		if(p.exitValue() == 0) {
+			is = p.getInputStream();
+		} else {
+			// For debugging only
+			//is = p.getErrorStream();
+		}
+		if( is != null ) {
+			try {
 				java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
 				String cmdOutput = s.hasNext() ? s.next() : "";
 				if( !cmdOutput.isEmpty()) {
 					cmdOutput = StringUtils.trim(cmdOutput);
-					if( new File(cmdOutput).exists())
-						return cmdOutput;
+					return cmdOutput;
 				}
-			}
-
-		} catch(IOException ioe) {
-			// Ignore this
-		} finally {
-			if( p != null ) {
-				p.destroy();
+			} finally {
+				try {
+					if( p != null ) {
+						p.destroy();
+					}
+					is.close();
+				} catch(IOException ioe) {
+					// ignore
+				}
 			}
 		}
 		return null;
