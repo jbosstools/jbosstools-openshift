@@ -154,7 +154,7 @@ public class ExpressServerWizardComposite {
 	}
 
 	private void initWidgets() {
-		connectionComboViewer.setInput(ConnectionsRegistrySingleton.getInstance().getAll());
+		connectionComboViewer.setInput(ConnectionsRegistrySingleton.getInstance().getAll(ExpressConnection.class));
 		selectConnectionCombo(connection);
 		domainComboViewer.setInput(domains);
 		selectDomainCombo(domain);
