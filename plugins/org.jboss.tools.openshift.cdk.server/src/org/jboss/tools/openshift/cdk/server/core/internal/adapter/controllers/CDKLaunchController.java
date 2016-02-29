@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugEvent;
@@ -49,6 +50,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 import org.jboss.tools.openshift.cdk.server.ui.internal.util.TerminalUtility;
+import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class CDKLaunchController extends AbstractSubsystemController implements ILaunchServerController, IExternalLaunchConstants {
 	private static final String FLAG_INITIALIZED = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.launch.isInitialized";
@@ -88,6 +90,13 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
 			env.put(userKey, cdkServer.getUsername());
     	}
+		
+    	String vLoc = CDKConstantUtility.getVagrantLocation();
+		if( vLoc != null ) {
+			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
+			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
+		}
+
     	if( Platform.getOS().equals(Platform.OS_WIN32)) {
     		// We need to set the cygwin flag
     		env.put("VAGRANT_DETECTED_OS", "cygwin");
