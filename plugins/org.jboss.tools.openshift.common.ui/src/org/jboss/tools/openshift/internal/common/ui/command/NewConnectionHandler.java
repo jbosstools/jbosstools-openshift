@@ -16,6 +16,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 
 /**
@@ -25,8 +26,7 @@ public class NewConnectionHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final ConnectionWizard connectionWizard = new ConnectionWizard(null);
-		connectionWizard.setWindowTitle("New OpenShift Connection");
+		final ConnectionWizard connectionWizard = new ConnectionWizard((IConnection) null);
 		WizardUtils.openWizardDialog(connectionWizard, HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;
 	}
