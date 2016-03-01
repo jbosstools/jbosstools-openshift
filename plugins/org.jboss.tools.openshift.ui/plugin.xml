@@ -940,7 +940,7 @@
  </factory>
  <factory
        adaptableType="org.jboss.tools.openshift.internal.common.ui.explorer.OpenShiftExplorerView"
-       class="org.jboss.tools.openshift.internal.ui.property.tabbed.ExplorerViewTabbedPropertyAdapterFactory">
+       class="org.jboss.tools.openshift.internal.common.ui.explorer.ExplorerViewTabbedPropertyAdapterFactory">
     <adapter
           type="org.eclipse.ui.views.properties.IPropertySheetPage">
     </adapter>
