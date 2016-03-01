@@ -78,6 +78,10 @@
         </view>
     </extension>
     
+	<extension point="org.eclipse.ui.contexts">
+    	<context id="org.jboss.tools.openshift.explorer.context.connection" name="OpenShift Explorer Connection Context" parentId="org.eclipse.ui.contexts.window" />
+	</extension>
+
     <extension point="org.eclipse.ui.perspectiveExtensions">
 		<perspectiveExtension targetID="org.jboss.tools.common.ui.JBossPerspective">
 			<view relative="org.eclipse.ui.views.ProblemView"

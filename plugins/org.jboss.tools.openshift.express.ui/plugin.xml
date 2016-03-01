@@ -128,7 +128,6 @@
 	<extension point="org.eclipse.ui.contexts">
     	<context id="org.jboss.tools.openshift.explorer.context.application" name="OpenShift Explorer Application Context" parentId="org.eclipse.ui.contexts.window" />
     	<context id="org.jboss.tools.openshift.explorer.context.domain" name="OpenShift Explorer Domain Context" parentId="org.eclipse.ui.contexts.window" />
-    	<context id="org.jboss.tools.openshift.explorer.context.connection" name="OpenShift Explorer Connection Context" parentId="org.eclipse.ui.contexts.window" />
 	</extension>
 	
 	<!-- OpenShift Explorer view: content -->
