@@ -57,6 +57,14 @@ public class OpenShiftProjectCacheTest {
 	}
 	
 	@Test
+	public void testGetProjectForOnlyMakesInitialCallToServer() {
+		when(conn.getResources(ResourceKind.PROJECT)).thenReturn(new ArrayList<>());
+		cache.getProjectsFor(conn);
+		cache.getProjectsFor(conn);
+		verify(conn, times(1)).getResources(ResourceKind.PROJECT);
+	}
+	
+	@Test
 	public void testConnectionRemoved() {
 		cache.getProjectsFor(conn);
 		cache.connectionRemoved(conn);

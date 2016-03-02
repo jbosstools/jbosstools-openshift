@@ -23,7 +23,9 @@ import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.core.WatchManager;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.http.IHttpConstants;
 import com.openshift.restclient.model.IProject;
 
 /**
@@ -32,6 +34,9 @@ import com.openshift.restclient.model.IProject;
  * @author Fred Bricon
  */
 public class OpenShiftJobs {
+	
+	private static final long PROJECT_DELETE_DELAY = 500;
+	private static final long MAX_PROJECT_DELETE_DELAY = 5000;
 
 	private OpenShiftJobs() {}
 	
@@ -49,18 +54,44 @@ public class OpenShiftJobs {
 				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
 				IStatus status = super.doRun(monitor);
 				if(status.isOK()) {
-					List<IProject> newProjects = new ArrayList<>(oldProjects);
-					newProjects.remove(project);
-					ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-							connection , 
-							ConnectionProperties.PROPERTY_PROJECTS, 
-							oldProjects, 
-							newProjects);
+					if(waitForServerToReconcileProjectDelete(connection, project)) {
+						List<IProject> newProjects = new ArrayList<>(oldProjects);
+						newProjects.remove(project);
+						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
+								connection , 
+								ConnectionProperties.PROPERTY_PROJECTS, 
+								oldProjects, 
+								newProjects);
+						
+					}
 				}
 				return status;
+			}
+
+			private boolean waitForServerToReconcileProjectDelete(Connection conn, IProject project) {
+				boolean deleted = false;
+				long sleep = 0;
+				do {
+					try {
+						conn.getResource(project);
+						Thread.sleep(PROJECT_DELETE_DELAY);
+					} catch (InterruptedException e1) {
+					} catch(OpenShiftException ex) {
+						if(ex.getStatus() != null) {
+							final int code = ex.getStatus().getCode();
+							if(code == IHttpConstants.STATUS_NOT_FOUND || code == IHttpConstants.STATUS_FORBIDDEN) {
+								deleted = true;
+							}
+						}
+					}finally {
+						sleep = sleep + PROJECT_DELETE_DELAY;
+					}
+				}while(!deleted && sleep < MAX_PROJECT_DELETE_DELAY);
+				return deleted;
 			}
 		};
 		
 		return deleteProjectJob;
 	}
+	
 }

@@ -809,20 +809,20 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
 			commandId="org.eclipse.ui.edit.delete">
 				<activeWhen>
-				  <with
-						variable="selection">
-					<and>
-						<count
-							value="1">
-						</count>
-						<iterate>
-         <or>
-            <instanceof
-                  value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
-            </instanceof>
-         </or>
-						</iterate>
-					</and>
+				  <with variable="selection">
+					<count
+						value="1">
+					</count>
+					<iterate>
+				         <instanceof
+				               value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
+				         </instanceof>
+					      <test
+					            forcePluginActivation="true"
+					            property="org.jboss.tools.openshift.ui.isDeleting"
+					            value="false">
+					      </test>
+					</iterate>
 				  </with>
 				</activeWhen>
 		</handler>
@@ -1499,5 +1499,15 @@
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects">
       </propertyCategory>
    </propertyContributor>
+</extension>
+<extension
+      point="org.eclipse.core.expressions.propertyTesters">
+   <propertyTester
+         class="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
+         id="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
+         namespace="org.jboss.tools.openshift.ui"
+         properties="isDeleting"
+         type="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
+   </propertyTester>
 </extension>
 </plugin>

@@ -36,6 +36,7 @@ import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
 import org.jboss.tools.openshift.test.ui.property.ResourcePropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.build.BuildConfigPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTest;
+import org.jboss.tools.openshift.test.ui.propertytester.OpenShiftResourcePropertyTesterTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.ProjectNameValidatorTest;
@@ -65,6 +66,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
 	OpenShiftProjectCacheTest.class,
+	OpenShiftResourcePropertyTesterTest.class,
 	OpenShiftSecureStorageKeyTest.class,
 	PortForwardingWizardModelTest.class,
 	PortSpecAdapterTest.class,

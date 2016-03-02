@@ -21,9 +21,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 
 /**
  * @author Rob Stryker
@@ -151,24 +157,36 @@ public class ConnectionsRegistry {
 		if (connection == null) {
 			return;
 		}
-		Iterator<IConnectionsRegistryListener> i = getListeners().iterator();
-		while (i.hasNext()) {
-			IConnectionsRegistryListener l = i.next();
-			switch (event) {
-			case ADDED:
-				l.connectionAdded(connection);
-				break;
-			case REMOVED:
-				l.connectionRemoved(connection);
-				break;
-			case CHANGED:
-				l.connectionChanged(connection, property, oldValue, newValue);
-				break;
-
-			default:
-				break;
+		Job job = new AbstractDelegatingMonitorJob("Connection Changed") {
+		
+			@Override
+			protected IStatus doRun(IProgressMonitor monitor) {
+				try {
+					Iterator<IConnectionsRegistryListener> i = getListeners().iterator();
+					while (i.hasNext()) {
+						IConnectionsRegistryListener l = i.next();
+						switch (event) {
+						case ADDED:
+							l.connectionAdded(connection);
+							break;
+						case REMOVED:
+							l.connectionRemoved(connection);
+							break;
+						case CHANGED:
+							l.connectionChanged(connection, property, oldValue, newValue);
+							break;
+							
+						default:
+							break;
+						}
+					}
+				}catch(Exception e) {
+					return new Status(IStatus.ERROR,OpenShiftCommonCoreActivator.PLUGIN_ID,"Exception while notifying of a connection change",e);
+				}	
+				return Status.OK_STATUS;
 			}
-		}
+		};
+		job.schedule();
 	}
 
 	public IConnection getRecentConnection() {

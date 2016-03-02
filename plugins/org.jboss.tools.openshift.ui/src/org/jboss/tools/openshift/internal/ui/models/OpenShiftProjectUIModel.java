@@ -14,6 +14,7 @@ import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
@@ -35,6 +36,7 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 	
 	private final IDeploymentResourceMapper mapper;
 	private final IProject project;
+	private AtomicBoolean deleting = new AtomicBoolean(false);
 
 	public OpenShiftProjectUIModel(IOpenShiftConnection conn, IProject project) {
 		super(conn);
@@ -48,7 +50,16 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 		super.dispose();
 		mapper.dispose();
 	}
+	
+	@Override
+	public void setDeleting(boolean deleting) {
+		this.deleting.set(deleting);
+	}
 
+	@Override
+	public boolean isDeleting() {
+		return deleting.get();
+	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
