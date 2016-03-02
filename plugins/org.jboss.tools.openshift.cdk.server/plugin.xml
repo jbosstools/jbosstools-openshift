@@ -16,7 +16,7 @@
             runtime="true"
             runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
             startBeforePublish="false"
-            startTimeout="900000"
+            startTimeout="1800000"
             stopTimeout="900000"
             supportsRemoteHosts="false"/>
     </extension>
