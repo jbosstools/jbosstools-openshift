@@ -765,6 +765,21 @@
 					</with>
 				</activeWhen>
      	</handler>
+        <handler
+              commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+              class="org.jboss.tools.openshift.express.internal.ui.command.DeleteApplicationHandler">
+				<activeWhen>
+					<with
+					variable="selection">
+						<iterate
+							ifEmpty="false"
+							operator="and">
+							<instanceof
+								value="org.eclipse.wst.server.core.IServer" />
+						</iterate>
+					</with>
+				</activeWhen>
+     	</handler>
 	</extension>
 	
 	<!-- openshift explorer: delete application -->
@@ -799,6 +814,7 @@
               locationURI="popup:org.jboss.tools.openshift.express.serverviewer.openshift?after=group.edit">
           <command
                 commandId="org.jboss.tools.openshift.express.ui.command.deleteApplications"
+                label="%openshift.command.application.delete.with.server"
                 icon="icons/application_delete.gif"
                 id="org.jboss.tools.openshift.express.ui.command.deleteapplication"
                 mnemonic="D">
