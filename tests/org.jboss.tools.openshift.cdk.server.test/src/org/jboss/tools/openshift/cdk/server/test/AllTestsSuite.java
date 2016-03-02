@@ -11,13 +11,15 @@
 package org.jboss.tools.openshift.cdk.server.test;
 
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKDockerUtilityTest;
+import org.jboss.tools.openshift.cdk.server.test.internal.CDKOpenshiftUtilityTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	CDKDockerUtilityTest.class
+	CDKDockerUtilityTest.class,
+	CDKOpenshiftUtilityTest.class
 })
 /**
  * @author Andre Dietisheim
