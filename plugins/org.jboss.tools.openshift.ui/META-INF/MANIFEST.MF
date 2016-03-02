@@ -44,19 +44,21 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.apache.commons.lang;bundle-version="2.6.0",
  org.apache.commons.collections;bundle-version="3.2.0",
  org.eclipse.ui.workbench.texteditor,
- org.eclipse.ui.editors
+ org.eclipse.ui.editors,
+ org.eclipse.core.expressions;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test",
- org.jboss.tools.openshift.internal.ui.comparators,
+ org.jboss.tools.openshift.internal.ui.comparators;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.dialog;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.handler;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.job;x-friends:="org.jboss.tools.openshift.test",
- org.jboss.tools.openshift.internal.ui.models,
+ org.jboss.tools.openshift.internal.ui.models;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.portforwading;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.property;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.property.build;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.propertytester;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.treeitem;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.validator;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.webhooks;x-friends:="org.jboss.tools.openshift.test",

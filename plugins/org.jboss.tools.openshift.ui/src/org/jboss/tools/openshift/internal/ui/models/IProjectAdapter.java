@@ -24,6 +24,17 @@ public interface IProjectAdapter extends IResourcesUIModel, IRefreshable, IDispo
 	static final String PROP_DEPLOYMENTS = "deployments";
 	
 	IProject getProject();
+	
+	/**
+	 * Calling marks this 
+	 */
+	void setDeleting(boolean deleting);
+	
+	/**
+	 * determine if this project is being deleted. 
+	 * @return
+	 */
+	boolean isDeleting();
 
 	<T extends IResource> void setResources(Collection<T> resources, String kind);
 	

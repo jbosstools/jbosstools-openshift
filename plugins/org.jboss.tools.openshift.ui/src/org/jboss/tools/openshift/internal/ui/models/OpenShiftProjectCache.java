@@ -12,12 +12,12 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,7 +45,7 @@ import com.openshift.restclient.model.IProject;
 public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistryListener {
 
 	private Map<String, Set<IProjectAdapter>> cache = new ConcurrentHashMap<String, Set<IProjectAdapter>>();
-	private Set<IProjectCacheListener> listeners = Collections.synchronizedSet(new HashSet<>());
+	private Set<IProjectCacheListener> listeners = new CopyOnWriteArraySet<>();
 
 	public OpenShiftProjectCache() {
 		ConnectionsRegistrySingleton.getInstance().addListener(this);
@@ -53,21 +53,24 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 	
 	@Override
 	public Collection<IProjectAdapter> getProjectsFor(final IOpenShiftConnection conn) {
-		String key = getCacheKey(conn);
-		Set<IProjectAdapter> adapters = getOrCreateEntry(key);
-		if (adapters.isEmpty()) {
-			// new entry
-			Collection<IProject> projects = conn.<IProject>getResources(ResourceKind.PROJECT);
-			for (IProject project : projects) {
-				IProjectAdapter adapter = addNewProjectAdapter(adapters, conn, project);
-				notifyAdd(adapter);
+		Set<IProjectAdapter> adapters = null;
+		boolean initialize = false;
+		synchronized (cache) {
+			if(initialize = !hasCacheFor(conn)) {
+				// new entry
+				adapters = createEntry(conn);
 			}
-		} else {
-			// existing entry
-			adapters = getEntry(key);
 		}
-
-		return new ArrayList<>(adapters);
+		if(initialize) {
+			Collection<IProject> projects = conn.<IProject>getResources(ResourceKind.PROJECT);
+			synchronized (adapters) {
+				for (IProject p : projects) {
+					addNewProjectAdapter(adapters, conn, p);
+				}
+			}
+			adapters.forEach(a->notifyAdd(a));
+		}
+		return new ArrayList<>(getCacheFor(conn));
 	}
 
 	@Override
@@ -88,27 +91,34 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 				&& (oldValue instanceof List)
 				&& (newValue instanceof List)) {
 			IOpenShiftConnection openshiftConnection = (IOpenShiftConnection) connection;
-			String key = getCacheKey(openshiftConnection);
-			Set<IProjectAdapter> adapters = getOrCreateEntry(key);
+			Set<IProjectAdapter> adapters;
+			synchronized (cache) {
+				adapters = getCacheFor(openshiftConnection);
+				if(adapters == null) { //called where cache was not initialized for the connection
+					adapters = createEntry(openshiftConnection);
+				}
+			}
 			addAndRemoveAdaptersFor((List<IProject>) newValue, (List<IProject>) oldValue, openshiftConnection, adapters);
 		}
 	}
 
-	private Set<IProjectAdapter> getEntry(String key) {
-		return cache.get(key);
+	private boolean hasCacheFor(IOpenShiftConnection conn) {
+		final String key = getCacheKey(conn);
+		return cache.containsKey(key);
 	}
-
-	private Set<IProjectAdapter> getOrCreateEntry(String key) {
+	
+	private Set<IProjectAdapter> getCacheFor(IOpenShiftConnection conn) {
 		synchronized (cache) {
-			Set<IProjectAdapter> adapters = getEntry(key);
-			if (adapters == null) {
-				adapters = createEntry(key);
+			final String key = getCacheKey(conn);
+			if(cache.containsKey(key)) {
+				return cache.get(key);
 			}
-			return adapters;
 		}
+		return null;
 	}
 
-	private Set<IProjectAdapter> createEntry(String key) {
+	private Set<IProjectAdapter> createEntry(IOpenShiftConnection conn) {
+		final String key = getCacheKey(conn);
 		Set<IProjectAdapter> adapters = new HashSet<>();
 		cache.put(key, adapters);
 		return adapters;
@@ -181,9 +191,9 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 		if (adapter == null) {
 			return;
 		}
-		synchronized (listeners) {
+		for (IProjectCacheListener l : listeners) {
 			try {
-				listeners.forEach(l -> l.handleAddToCache(this, adapter));
+				l.handleAddToCache(this, adapter);
 			} catch (Exception e) {
 				Trace.error("Exception while trying to notify cache listener", e);
 			}
@@ -191,10 +201,12 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 	}
 
 	private void notifyRemove(Collection<IProjectAdapter> adapters) {
+		IProjectAdapter [] copy;
 		synchronized (adapters) {
-			for (IProjectAdapter adapter : adapters) {
-				notifyRemove(adapter);
-			}
+			copy = adapters.toArray(new IProjectAdapter [] {});
+		}
+		for (IProjectAdapter adapter : copy) {
+			notifyRemove(adapter);
 		}
 	}
 
@@ -202,12 +214,13 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 		if (adapter == null) {
 			return;
 		}
-		synchronized (listeners) {
+		for (IProjectCacheListener l : listeners) {
 			try {
-				listeners.forEach(l -> l.handleRemoveFromCache(this, adapter));
+				l.handleRemoveFromCache(this, adapter);
 			} catch (Exception e) {
 				Trace.error("Exception while trying to notify cache listener", e);
 			}
+			
 		}
 	}
 
