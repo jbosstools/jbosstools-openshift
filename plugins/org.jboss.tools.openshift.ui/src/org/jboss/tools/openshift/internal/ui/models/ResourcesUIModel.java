@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -237,7 +236,7 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 	}
 	
 	private static String getProperty(String kind) {
-		return StringUtils.pluralize(org.apache.commons.lang.StringUtils.uncapitalize(kind));
+		return ResourceKind.pluralize(kind);
 	}
 
 	public Collection<IResource> getResources(String kind) {
