@@ -16,6 +16,7 @@ import java.util.Properties;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
@@ -25,6 +26,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 public class CDKOpenshiftUtility {
 	private static String DOTCDK_AUTH_SCHEME = "openshift.auth.scheme";
 	private static String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
+	private static String DOTCDK_AUTH_PASS = "openshift.auth.password";
+	
 
 
 	public IConnection findExistingOpenshiftConnection(IServer server, ADBInfo adb) {
@@ -46,9 +49,27 @@ public class CDKOpenshiftUtility {
 	}
 	
 	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb) {
+		return createOpenshiftConnection(server, adb, ConnectionsRegistrySingleton.getInstance());
+	}
+	
+	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb, ConnectionsRegistry registry) {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
-		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "test-admin";
+		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "openshift-dev";
+		
+		String password = null;
+		if( dotcdkProps.containsKey(DOTCDK_AUTH_PASS) ) {
+			password = dotcdkProps.getProperty(DOTCDK_AUTH_PASS);
+		} else {
+			// If the .cdk file only has a username set and no password, we don't want to set a password.  
+			// We can assume the user hand-modified hte username and so maybe has their own custom password they want to enter by hand
+			if( dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ) {
+				// .cdk file set a username and no password.  leave as null
+			} else {
+				// .cdk did not set a username OR password... so we will set the default password to devel
+				password = "devel";
+			}
+		}
 		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
 		
 		ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
@@ -57,7 +78,13 @@ public class CDKOpenshiftUtility {
 		IConnection con = factory.create(soughtHost);
 		((Connection)con).setAuthScheme(authScheme);
 		((Connection)con).setUsername(username);
-		ConnectionsRegistrySingleton.getInstance().add(con);
+
+		if( password != null ) {
+			((Connection)con).setPassword(password);
+		}
+		
+		if( registry != null )
+			registry.add(con);
 		return con;
 	}
 	
