@@ -16,4 +16,9 @@ import org.eclipse.wst.server.core.model.RuntimeDelegate;
  * @author Rob Stryker
  */
 public class OpenShiftRuntime extends RuntimeDelegate {
+	
+	/** The Runtime Type ID (as defined in plugin.xml) */
+	public static final String RUNTIME_TYPE_ID = "org.jboss.tools.openshift.core.server.OpenShiftRuntime";
+	
+
 }

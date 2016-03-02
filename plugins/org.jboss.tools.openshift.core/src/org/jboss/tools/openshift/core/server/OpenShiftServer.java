@@ -31,6 +31,9 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
  */
 public class OpenShiftServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
 
+	/** The Server Type ID (as defined in plugin.xml) */
+	public static final String SERVER_TYPE_ID = "org.jboss.tools.openshift.server.type";
+	
 	public static final String OPENSHIFT3_MODE_ID = "openshift3";
 
 	public void setDefaults(IProgressMonitor monitor) {

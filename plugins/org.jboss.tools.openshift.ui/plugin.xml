@@ -441,6 +441,32 @@
 		</menuContribution>
 		<menuContribution
 			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+				id="org.jboss.tools.openshift.ui.command.serverAdapter"
+				icon="icons/openshift-logo-white-icon.png"
+				tooltip="Open or create a Server Adapter for the selected resource">
+				<visibleWhen>
+					<with
+						variable="selection">
+						<and>
+							<count
+								value="1">
+							</count>
+		                	<iterate
+								ifEmpty="false"
+								operator="and">
+								<adapt
+									type="org.jboss.tools.openshift.internal.ui.models.Deployment" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+		<menuContribution
+			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.properties">
 			<command
 				commandId="org.eclipse.ui.file.properties"
@@ -724,6 +750,12 @@
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
         tooltip="Refresh the resource" />
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+        id="org.jboss.tools.openshift.ui.command.serverAdapter"
+        icon="icons/openshift-logo-white-icon.png"
+        style="push"/>
+        
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -756,6 +788,12 @@
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
+     <command
+        commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+        id="org.jboss.tools.openshift.ui.command.serverAdapter"
+        icon="icons/openshift-logo-white-icon.png"
+        style="push"/>
+     
      <command
            commandId="org.eclipse.ui.edit.delete"
            style="push" />
@@ -1096,6 +1134,21 @@
     </extension>
 	<!-- openshift explorer: import application -->
 
+    <!-- Create/Select Server Adapter -->
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			id="org.jboss.tools.openshift.ui.command.serverAdapter"
+			name="%openshift.command.serverAdapter">
+		</command>
+	</extension>
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler
+              commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+              class="org.jboss.tools.openshift.internal.ui.handler.ServerAdapterHandler">
+    	</handler>
+	</extension>
 	<!-- Open In Browser -->
 	<extension
 		point="org.eclipse.ui.commands">

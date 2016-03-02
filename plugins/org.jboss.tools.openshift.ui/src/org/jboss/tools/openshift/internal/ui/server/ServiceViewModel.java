@@ -22,6 +22,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
+import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
@@ -96,7 +97,7 @@ public class ServiceViewModel extends ObservablePojo {
 		}
 	}
 
-	protected void updateService(IService service, List<ObservableTreeItem> serviceItems) {
+	protected void updateService(final IService service, final List<ObservableTreeItem> serviceItems) {
 		IService newService = getServiceOrDefault(service, serviceItems);
 		if(newService != this.service) {
 			boolean needUpdateRoutes = newService == null || this.service == null || newService.getProject() != this.service.getProject();
@@ -174,7 +175,7 @@ public class ServiceViewModel extends ObservablePojo {
 	}
 
 	public void setServiceItems(List<ObservableTreeItem> items) {
-		IService newService = containsService(items, this.service) ? this.service : null;
+		IService newService = ObservableTreeItemUtils.contains(items, this.service) ? this.service : null;
 		update(this.connection, this.connections, newService, items);
 	}
 
@@ -206,46 +207,34 @@ public class ServiceViewModel extends ObservablePojo {
 		updateRoute(newRoute);
 	}
 
-	protected IService getServiceOrDefault(IService service, List<ObservableTreeItem> items) {
-		if (service == null || !containsService(items, service)) {
-			service = getDefaultService(items);
+	protected IService getServiceOrDefault(final IService service, final List<ObservableTreeItem> items) {
+		if (service == null || !ObservableTreeItemUtils.contains(items, service)) {
+			return items.stream().flatMap(ObservableTreeItemUtils::flatten)
+					.filter(item -> item.getModel() instanceof IService).map(item -> (IService) item.getModel())
+					.findFirst().orElseGet(() -> null);
 		}
 		return service;
 	}
 
-	private boolean containsService(List<ObservableTreeItem> items, IService service) {
-		if (service == null || items == null || items.size() == 0) {
-			return false;
+	/**
+	 * @param serviceName
+	 *            the name of the {@link IService} to look-up
+	 * @return the matching {@link IService} previously loaded or
+	 *         <code>null</code> if the {@code serviceItems} were not loaded or
+	 *         not match was found.
+	 */
+	public IService getService(final String serviceName) {
+		if(this.serviceItems != null) {
+			return this.serviceItems.stream().flatMap(ObservableTreeItemUtils::flatten)
+					.filter(item -> item.getModel() instanceof IService).map(item -> (IService) item.getModel())
+					.filter(service -> service.getName().equals(serviceName)).findFirst().orElseGet(() -> null);
 		}
-		for (ObservableTreeItem item : items) {
-			if (item.getModel() instanceof IService) {
-				if(item.getModel() == service) {
-					return true;
-				};
-			} else if(containsService(item.getChildren(), service)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private IService getDefaultService(List<ObservableTreeItem> items) {
-		if (items == null 
-				|| items.size() == 0) {
-			return null;
-		}
-		
-		for (ObservableTreeItem item : items) {
-			if (item.getModel() instanceof IService) {
-				return (IService) item.getModel();
-			} else {
-				return getDefaultService(item.getChildren());
-			}
-		}
-		
 		return null;
 	}
-
+	
+	/**
+	 * Loads the resource from the current {@link Connection}.
+	 */
 	public void loadResources() {
 		loadResources(getConnection());
 	}
@@ -253,20 +242,20 @@ public class ServiceViewModel extends ObservablePojo {
 	/**
 	 * On setting new connection externally, resources related to it must be reloaded.
 	 * This method should be invoked in an ui job.
-	 * @param newConnection
+	 * @param connection the connection to use to load the resources.
 	 */
-	public void loadResources(Connection newConnection) {
-		setConnection(newConnection);
+	public void loadResources(final Connection connection) {
+		setConnection(connection);
 		setConnections(loadConnections());
-		if (newConnection != null) {
-			loadRoutes(newConnection);
-			setServiceItems(loadServices(newConnection));
+		if (connection != null) {
+			loadRoutes(connection);
+			setServiceItems(loadServices(connection));
 		}
 	}
 
-	void loadRoutes(Connection newConnection) {
+	void loadRoutes(Connection connection) {
 		routeMap.clear();
-		List<IProject> projects = newConnection.getResources(ResourceKind.PROJECT);
+		List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 		if(projects != null) {
 			projects.stream().forEach(project -> routeMap.put(project, project.getResources(ResourceKind.ROUTE)));
 		}

@@ -33,6 +33,7 @@ Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.opens
  org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.server;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
