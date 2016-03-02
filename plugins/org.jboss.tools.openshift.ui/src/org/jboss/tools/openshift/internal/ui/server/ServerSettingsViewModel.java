@@ -350,6 +350,17 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		@Override
 		public void dispose() {
 		}
+		
+		
+		@Override
+		public void setDeleting(boolean deleting) {
+		}
+
+		@Override
+		public boolean isDeleting() {
+			// TODO Auto-generated method stub
+			return false;
+		}
 
 		@Override
 		public Collection<IResourceUIModel> getBuilds() {

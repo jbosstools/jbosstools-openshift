@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.internal.ui.handler;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
@@ -36,21 +38,16 @@ public class DeleteProjectsHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		IProject project = UIUtils.getFirstElement(selection, IProject.class);
-		if(project == null) {
-			IProjectAdapter adapter = UIUtils.getFirstElement(selection, IProjectAdapter.class);
-			if(adapter == null || (project = adapter.getProject()) == null) {
-				return OpenShiftUIActivator.statusFactory().cancelStatus("No project selected that we can delete."); //$NON-NLS-1$
-			}
+		IProjectAdapter adapter = UIUtils.getFirstElement(selection, IProjectAdapter.class);
+		if(adapter == null || adapter.getProject() == null) {
+			return OpenShiftUIActivator.statusFactory().cancelStatus("No project selected that we can delete."); //$NON-NLS-1$
 		}
-		deleteProject(project, HandlerUtil.getActiveShell(event));
+		deleteProject(adapter, HandlerUtil.getActiveShell(event));
 		return null;
 	}
 	
-	private void deleteProject(final IProject project, Shell shell) {
-		if (project == null) {
-			return;
-		}
+	private void deleteProject(final IProjectAdapter adapter, Shell shell) {
+		IProject project = adapter.getProject();
 		boolean confirm = MessageDialog.openConfirm(shell, 
 				OpenShiftUIMessages.ProjectDeletionDialogTitle, 
 				NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, project.getName()));
@@ -58,6 +55,17 @@ public class DeleteProjectsHandler extends AbstractHandler {
 			return;
 		}
 		DeleteResourceJob job = OpenShiftJobs.createDeleteProjectJob(project);
+		job.addJobChangeListener(new JobChangeAdapter() {
+
+			@Override
+			public void done(IJobChangeEvent event) {
+				if(!event.getResult().isOK()) {
+					adapter.setDeleting(false);
+				}
+			}
+			
+		});
+		adapter.setDeleting(true);
 		job.schedule();
 	}
 

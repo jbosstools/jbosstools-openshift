@@ -77,8 +77,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		if(parentElement instanceof ConnectionsRegistry){
 			ConnectionsRegistry registry = (ConnectionsRegistry) parentElement;
 			return registry.getAll(Connection.class).toArray();
-		} else if (parentElement instanceof Connection) {
-			return ((Connection) parentElement).getResources(ResourceKind.PROJECT).toArray();
 		} else {
 			return new Object[0];
 		}
