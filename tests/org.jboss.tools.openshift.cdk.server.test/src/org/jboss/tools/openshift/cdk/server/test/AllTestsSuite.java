@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.cdk.server.test;
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKDockerUtilityTest;
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKLaunchControllerTest;
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKOpenshiftUtilityTest;
+import org.jboss.tools.openshift.cdk.server.test.internal.VagrantPollerTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -21,7 +22,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	CDKDockerUtilityTest.class,
 	CDKOpenshiftUtilityTest.class,
-	CDKLaunchControllerTest.class
+	CDKLaunchControllerTest.class,
+	VagrantPollerTest.class
 })
 /**
  * @author Andre Dietisheim

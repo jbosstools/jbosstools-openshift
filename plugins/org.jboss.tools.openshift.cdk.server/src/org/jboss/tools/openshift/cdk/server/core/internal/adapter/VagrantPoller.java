@@ -186,27 +186,33 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 	
 	
-	private int parseOutput(String[] lines) {
+	protected int parseOutput(String[] lines) {
 		HashMap<String, VagrantStatus> status = new HashMap<String, VagrantStatus>();
 		if( lines != null && lines.length > 0 ) {
 			for( int i = 0; i < lines.length; i++ ) {
 				String[] csv = lines[i].split(",");
-				String timestamp = csv[0];
-				String vmId = csv[1];
-				if( vmId != null && !vmId.isEmpty() ) {
-					VagrantStatus vs = status.get(vmId);
-					if( vs == null ) {
-						vs = new VagrantStatus(vmId);
-						status.put(vmId, vs);
-					}
-					String k = csv[2];
-					String v = csv[3];
-					if( k != null ) {
-						vs.setProperty(k,v);
-					}
-				} else {
-					return IStatus.INFO;
-				}
+				if( csv.length >=2 ) { // avoid arrayindex errors
+					String timestamp = csv[0];
+					String vmId = csv[1];
+					if( vmId != null && !vmId.isEmpty() ) {
+						VagrantStatus vs = status.get(vmId);
+						if( vs == null ) {
+							vs = new VagrantStatus(vmId);
+							status.put(vmId, vs);
+						}
+						String k = csv[2];
+						String v = csv[3];
+						if( k != null ) {
+							vs.setProperty(k,v);
+						}
+					} //else {
+					  // The given line has no vm id, so it is not relevant here. 
+					  //}
+				} //else {
+				  // The given line isn't csv or doesn't have at least 2 items in the csv array
+				  // and so should be ignored
+				  //return IStatus.INFO;
+				  //}
 			}
 		}		
 		Collection<VagrantStatus> stats = status.values();
