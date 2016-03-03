@@ -16,6 +16,7 @@ import java.util.Properties;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
@@ -48,9 +49,10 @@ public class CDKOpenshiftUtility {
 	}
 	
 	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb) {
-		return createOpenshiftConnection(server, adb, true);
+		return createOpenshiftConnection(server, adb, ConnectionsRegistrySingleton.getInstance());
 	}
-	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb, boolean add) {
+	
+	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb, ConnectionsRegistry registry) {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
 		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "openshift-dev";
@@ -81,8 +83,8 @@ public class CDKOpenshiftUtility {
 			((Connection)con).setPassword(password);
 		}
 		
-		if( add ) 
-			ConnectionsRegistrySingleton.getInstance().add(con);
+		if( registry != null )
+			registry.add(con);
 		return con;
 	}
 	

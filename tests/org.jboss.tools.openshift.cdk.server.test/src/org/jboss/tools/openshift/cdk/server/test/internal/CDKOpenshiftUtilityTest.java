@@ -1,7 +1,18 @@
+/******************************************************************************* 
+ * Copyright (c) 2016 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,6 +30,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ADBInfo;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.junit.Test;
 
@@ -32,25 +44,38 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		IServer s = mockServer("openshift33");
 		
 		createCDKFile("Basic", null, null);
-		IConnection con = util.createOpenshiftConnection(s, adb, false);
+		IConnection con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "openshift-dev");
 		assertEquals(con.getPassword(), "devel");
 		
 		createCDKFile("Basic", "test", null);
-		con = util.createOpenshiftConnection(s, adb, false);
+		con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "test");
 		assertEquals(con.getPassword(), null);
 
 		createCDKFile("Basic", "test", "pass");
-		con = util.createOpenshiftConnection(s, adb, false);
+		con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "test");
 		assertEquals(con.getPassword(), "pass");
-		
 	}
-	
+
+	@Test
+	public void testOpenshiftConnectionAdded() throws Exception {
+		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
+		ADBInfo adb = createADB();
+		IServer s = mockServer("openshift33");
+		
+		createCDKFile("Basic", null, null);
+		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
+		
+		IConnection con = util.createOpenshiftConnection(s, adb, registry);
+		assertNotNull(con);
+		verify(registry).add(con);
+	}
+
 	
 	private void createCDKFile(String authType, String user, String pass ) {
 		File f = new File(getDotCDKFile());
