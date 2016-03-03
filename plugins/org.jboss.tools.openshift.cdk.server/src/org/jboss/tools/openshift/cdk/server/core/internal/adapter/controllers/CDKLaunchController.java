@@ -53,7 +53,7 @@ import org.jboss.tools.openshift.cdk.server.ui.internal.util.TerminalUtility;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class CDKLaunchController extends AbstractSubsystemController implements ILaunchServerController, IExternalLaunchConstants {
-	private static final String FLAG_INITIALIZED = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.launch.isInitialized";
+	public static final String FLAG_INITIALIZED = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.launch.isInitialized";
 	
 	@Override
 	public IStatus canStart(String launchMode) {
@@ -104,25 +104,32 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
 	}
 	
-	private void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException {
+	public void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException {
 		final IServer s = ServerUtil.getServer(wc);
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		//for testing purposes.
+		//we can't mock final methods like getServer(), so we need to be creative 
+		initialize(wc, cdkServer.getUsername(), cdkServer.getServer());
+	}
+	
+	//NOT API! Made public for testing purposes
+	public void initialize(ILaunchConfigurationWorkingCopy wc, String userName, IServer server) throws CoreException {
 		wc.setAttribute(FLAG_INITIALIZED, true);
-		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
+		String workingDir = server.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		wc.setAttribute(ATTR_WORKING_DIR, workingDir);
-    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+    	boolean passCredentials = server.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
     	if( passCredentials) {
     		// These environment variables are visible AND persisted in the launch configuration.
     		// It is not safe to persist the password here, but rather add it on-the-fly to the 
     		// program launch later on. 
     		HashMap<String, String> env = new HashMap<String, String>();
-			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
-			env.put(userKey, cdkServer.getUsername());
+			String userKey = server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+			env.put(userKey, userName);
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
     	}
 		wc.setAttribute(ATTR_LOCATION, CDKConstantUtility.getVagrantLocation());
 		
-		String args =  CDKConstants.VAGRANT_CMD_UP + " " + CDKConstants.VAGRANT_FLAG_PROVISION + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
+		String args =  CDKConstants.VAGRANT_CMD_UP + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
 		wc.setAttribute(ATTR_ARGS, args);
 	}
 	
