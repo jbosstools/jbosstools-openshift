@@ -96,11 +96,6 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
 			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
 		}
-
-    	if( Platform.getOS().equals(Platform.OS_WIN32)) {
-    		// We need to set the cygwin flag
-    		env.put("VAGRANT_DETECTED_OS", "cygwin");
-    	}
 		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
 	}
 	
