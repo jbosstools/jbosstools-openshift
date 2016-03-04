@@ -92,7 +92,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
     	}
 		
     	String vLoc = CDKConstantUtility.getVagrantLocation();
-		if( vLoc != null ) {
+		if( vLoc != null && Platform.getOS().equals(Platform.OS_MACOSX) ) {
 			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
 			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
 		}
