@@ -97,8 +97,13 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		toolkit.adapt(c);
 		section.setClient(c);
 
-		initWidgets();
-		addListeners();
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				initWidgets();
+				addListeners();
+			}
+		});
 	}
 
 	protected void initWidgets() {
