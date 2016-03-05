@@ -204,7 +204,14 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 				return NLS.bind("({0})", org.apache.commons.lang.StringUtils.join(capability.getTags(), ", "));
 			}
 		}, null);
-		return style(template.getName(), tags);
+		StringBuilder qualifier = new StringBuilder();
+		if(!StringUtils.isEmpty(tags)) {
+			qualifier.append(tags);
+		}
+		if(!StringUtils.isEmpty(template.getNamespace())) {
+			qualifier.append(" - ").append(template.getNamespace());
+		}
+		return style(template.getName(), qualifier.toString());
 	}
 
 	private StyledString getStyledText(IProject project) {
