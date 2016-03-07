@@ -38,44 +38,46 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardD
 
 import com.openshift.restclient.model.IServicePort;
 
+/**
+ * Dialog to configure the port mapping for a Docker Image to be deployed.
+ */
 public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 
 	static final String PROPERTY_SERVICE_PORT = "port";
 	static final String PROPERTY_POD_PORT = "targetPort";
 	
-	private IServicePort model;
-	private List<IServicePort> ports;
-	private final int servicePort;
-	private final String podPort;
+	private final IServicePort model;
+	private final List<IServicePort> ports;
 
-	public ServicePortDialog(IServicePort model, String message, List<IServicePort> ports) {
+	/**
+	 * Constructor
+	 * @param model
+	 * @param message
+	 * @param ports
+	 */
+	public ServicePortDialog(final IServicePort model, final String message, final List<IServicePort> ports) {
 		super("Configure Service Ports", message, "", null);
 		this.model = model;
 		this.ports = ports;
-		this.servicePort = model.getPort();
-		this.podPort = model.getTargetPort();
 	}
 	
-	
 	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+	protected void doCreateControls(final Composite parent, final DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults()
 			.margins(1, 1).applyTo(parent);
-		
-		Composite dialogArea = new Composite(parent, SWT.NONE);
+		final Composite dialogArea = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(2)
-			.margins(25, 25)
 			.applyTo(dialogArea);
 		
 		//service port
-		Label lblServicePort = new Label(dialogArea, SWT.NONE);
-		lblServicePort.setText("Service port:");
+		final Label servicePortLabel = new Label(dialogArea, SWT.NONE);
+		servicePortLabel.setText("Service port:");
 		GridDataFactory.fillDefaults()
 			.align(SWT.RIGHT, SWT.CENTER)
-			.applyTo(lblServicePort);
+			.applyTo(servicePortLabel);
 		
 		final Spinner servicePortSpinner = new Spinner(dialogArea, SWT.BORDER);
 		servicePortSpinner.setMinimum(1);
@@ -85,79 +87,112 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(servicePortSpinner);
-		Binding servicePortBinding = ValueBindingBuilder
+		final Binding servicePortBinding = ValueBindingBuilder
 				.bind(WidgetProperties.selection().observe(servicePortSpinner))
-				.validatingAfterConvert(new ServicePortValidator())
+				.validatingAfterConvert(new ServicePortValidator(model.getPort(), this.ports))
 				.to(BeanProperties.value(PROPERTY_SERVICE_PORT).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(
 			servicePortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
-		//pod port
-		Label lblPodPort = new Label(dialogArea, SWT.NONE);
-		lblPodPort.setText("Pod port:");
+		// Pod port
+		final Label podPortLabel = new Label(dialogArea, SWT.NONE);
+		podPortLabel.setText("Pod port:");
 		GridDataFactory.fillDefaults()
-			.align(SWT.RIGHT, SWT.CENTER).applyTo(lblPodPort);
+			.align(SWT.RIGHT, SWT.CENTER).applyTo(podPortLabel);
 
-		Text txtTargetPort = new Text(dialogArea, SWT.BORDER);
-		txtTargetPort.setToolTipText("The port exposed by the pod which will accept traffic.\nIt must be an integer or named port on the pod.");
+		final Text podPortText = new Text(dialogArea, SWT.BORDER);
+		podPortText.setToolTipText("The port exposed by the pod which will accept traffic.\nIt must be an integer or the name of a port in the backend Pods.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
-			.applyTo(txtTargetPort);
+			.applyTo(podPortText);
 		
-		Binding podPortBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(txtTargetPort))
-				.validatingAfterConvert(new PodPortValidator())
+		final Binding podPortBinding = ValueBindingBuilder
+				.bind(WidgetProperties.text(SWT.Modify).observe(podPortText))
+				.validatingAfterConvert(new PodPortValidator(this.model.getTargetPort(), this.ports))
 				.to(BeanProperties.value(PROPERTY_POD_PORT).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(
 				podPortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
-		Label lbl = new Label(dialogArea, SWT.NONE);
-		lbl.setText("Pod port is linked to service port changes");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.span(2, 1)
-			.applyTo(lbl);
 	}
 	
-	class ServicePortValidator implements IValidator{
+	/**
+	 * Validates the Service Port
+	 */
+	static class ServicePortValidator implements IValidator{
 
+		private static final IStatus SERVICE_PORT_ERROR = ValidationStatus.error("The service port number must be unique among all the other ports exposed by this OpenShift service.");
+		
+		private final int servicePort;
+		
+		private final List<IServicePort> ports;
+		
+		public ServicePortValidator(final int servicePort, final List<IServicePort> ports) {
+			this.servicePort = servicePort;
+			this.ports = ports;
+		}
+		
 		@Override
 		public IStatus validate(Object value) {
 			Integer newPort = (Integer) value;
 			if(servicePort != newPort) {
 				for (IServicePort port : ports) {
 					if(newPort.intValue() == port.getPort()) {
-						return ValidationStatus.error("The service port number must be unique among all the other ports exposed by this OpenShift service.");
+						return SERVICE_PORT_ERROR;
 					}
 				}
 			}
 			return ValidationStatus.OK_STATUS;
 		}
-		
 	}
-	class PodPortValidator implements IValidator{
 		
-		private final int MAXLENGTH = 63;
-		private final Pattern REGEXP = Pattern.compile("[a-z0-9]([a-z0-9-]*[a-z0-9])*");
+	/**
+	 * Validates the input Pod port
+	 */
+	static class PodPortValidator implements IValidator {
+		
+		private static final int POD_PORT_MAXLENGTH = 63;
+		
+		private static final Pattern POD_PORT_REGEXP = Pattern.compile("[a-z0-9]([a-z0-9-]*[a-z0-9])*");
 
-		private final IStatus ERROR = ValidationStatus.error("The target port must be at most 15 characters, matching regex [a-z0-9]([a-z0-9-]*[a-z0-9])*, and hyphens cannot be adjacent to other hyphens): e.g. \"http\"");
+		private static final IStatus ERROR_STATUS = ValidationStatus.error("The Pod port must be a unique integer\nor a name matching [a-z0-9]([a-z0-9-]*[a-z0-9])*");
+
+		private static final IStatus CANCEL_STATUS = ValidationStatus.cancel("The Pod port must be a unique integer\nor the name of a port in the backend pods.");
+		
+		private final String podPort;
+		
+		private final List<IServicePort> ports;
+		
+		public PodPortValidator(final String podPort, final List<IServicePort> ports) {
+			this.podPort = podPort;
+			this.ports = ports;
+		}
 		
 		@Override
-		public IStatus validate(Object value) {
+		public IStatus validate(final Object value) {
+			// port cannot be empty
 			if(StringUtils.isEmpty(value)) {
-				return ERROR;
+				return CANCEL_STATUS;
 			}
-			String newPort = (String) value;
-			if(!newPort.equals(podPort)) {
-				if(newPort.length() > MAXLENGTH || !REGEXP.matcher(newPort).matches()) {
-					return ERROR;
-				}
-				for (IServicePort port : ports) {
-					if(newPort.equals(port.getTargetPort())) {
-						return ERROR;
+			final String newPodPort = (String) value;
+			if (!newPodPort.equals(podPort)) {
+				try {
+					final long portNumber = Long.valueOf(value.toString());
+					// validate range
+					if (portNumber < 0 || portNumber > 65535) {
+						return ERROR_STATUS;
+					}
+				} catch (NumberFormatException e) {
+					// port name must match the regular expression
+					// TODO: validate against backend pod ports.
+					if (newPodPort.length() > POD_PORT_MAXLENGTH || !POD_PORT_REGEXP.matcher(newPodPort).matches()) {
+						return ERROR_STATUS;
+					}
+					for (IServicePort port : ports) {
+						if (newPodPort.equals(port.getTargetPort())) {
+							return ERROR_STATUS;
+						}
 					}
 				}
 			}
@@ -166,6 +201,12 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		
 	}
 	
+	/**
+	 * Opens this dialog.
+	 * 
+	 * @return the return code, ie, the value of the button that the user
+	 *         clicked to close the dialog.
+	 */
 	public int open() {
 		final IWizardPage page = this;
 		Wizard wizard = new Wizard() {
