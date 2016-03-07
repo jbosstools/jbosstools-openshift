@@ -337,14 +337,11 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			@Override
 			public IContentProposal[] getProposals(final String contents,
 					final int position) {
-				final List<IContentProposal> proposals = new ArrayList<>();
-				for (String imageName : model.getImageNames()) {
-					if (imageName.contains(contents)) {
-						proposals.add(new ContentProposal(imageName, imageName,
-								null, position));
-					}
-				}
-				return proposals.toArray(new IContentProposal[0]);
+				IContentProposal[] proposals = model.getImageNames().stream()
+						.filter(n -> !n.contains("<none>") && n.contains(contents))
+						.map(n -> new ContentProposal(n, n, null, position))
+						.toArray(size -> new IContentProposal[size]);
+				return proposals;
 			}
 		};
 	}
