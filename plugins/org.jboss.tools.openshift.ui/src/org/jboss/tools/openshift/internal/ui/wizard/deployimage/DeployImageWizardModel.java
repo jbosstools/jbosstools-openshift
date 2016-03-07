@@ -83,8 +83,7 @@ public class DeployImageWizardModel
 	private ArrayList<IServicePort> imagePorts;
 	private boolean originatedFromDockerExplorer;
 	
-	public DeployImageWizardModel() {
-	}
+	private final List<String> imageNames = new ArrayList<>();
 	
 	public void setOriginatedFromDockerExplorer(boolean orig) {
 		this.originatedFromDockerExplorer = orig;
@@ -128,6 +127,11 @@ public class DeployImageWizardModel
 		return connection;
 	}
 	
+	/**
+	 * Loads all projects for the given {@code connection} and sets this model's project from the given {@code project}.
+	 * @param connection the connection from which the projects will be retrieved
+	 * @param project the project to set in the model
+	 */
 	public void initModel(final Connection connection, final IProject project) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 		if(this.connection != null) {
@@ -280,12 +284,13 @@ public class DeployImageWizardModel
 		return volumes;
 	}
 	
-	public void setPortSpecs(List<IPort> portSpecs) {
+	private void setPortSpecs(List<IPort> portSpecs) {
 		firePropertyChange(PROPERTY_PORT_SPECS, 
 				this.portSpecs, 
 				this.portSpecs = portSpecs);
 		setServicePortsFromPorts(portSpecs);
 	}
+	
 	private void setServicePortsFromPorts(List<IPort> portSpecs) {
 		this.imagePorts = new ArrayList<>(portSpecs.size());
 		List<IServicePort> servicePorts = new ArrayList<>(portSpecs.size());
@@ -460,6 +465,8 @@ public class DeployImageWizardModel
 	@Override
 	public void setDockerConnection(IDockerConnection dockerConnection) {
 		firePropertyChange(PROPERTY_DOCKER_CONNECTION, this.dockerConnection, this.dockerConnection = dockerConnection);
+		this.imageNames.clear();
+		this.imageNames.addAll(dockerConnection.getImages().stream().flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
 	}
 
 	@Override
@@ -473,6 +480,11 @@ public class DeployImageWizardModel
 		return dockerConnection.hasImage(repo, tag);
 	}
 
+	@Override
+	public List<String> getImageNames() {
+		return this.imageNames;
+	}
+	
 	@Override
 	public void resetServicePorts() {
 		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp)).collect(Collectors.toList());
