@@ -115,10 +115,13 @@ public class ConnectionRegistryTest {
 	@Test
 	public void shouldNotifyAddition() {
 		// pre-conditions
+		change.setCountDown(1);
 
 		// operations
 		registry.add(connection);
-
+		
+		change.waitForNotification();
+		
 		// verifications
 		assertTrue(change.isAdditionNotified());
 		assertEquals(connection, change.getConnection());
@@ -127,13 +130,16 @@ public class ConnectionRegistryTest {
 	@Test
 	public void shouldNotifyConnectionChange() {
 		// pre-conditions
+		change.setCountDown(2);
 		registry.add(connection);
 
 		// operations
 		connection.setUsername("foo");
-
+		
+		change.waitForNotification();
+		
 		// verifications
-		assertTrue(change.isChangeNotified());
+		assertTrue("Exp. a notification to the listener and there was none", change.isChangeNotified());
 		assertEquals(connection, change.getConnection());
 		assertEquals("username", change.getProperty());
 		assertEquals(null, change.getOldValue());
@@ -143,16 +149,19 @@ public class ConnectionRegistryTest {
 	@Test
 	public void shouldNotNotifyConnectionChangeAfterRemoval() {
 		// pre-conditions
+		change.setCountDown(2);
 		registry.add(connection);
 		registry.remove(connection);
+		
+		change.waitForNotification();
 		change.reset();
 
 		// operations
 		connection.setUsername("foo");
 
 		// verifications
-		assertFalse(change.isChangeNotified());
-		assertTrue(change.getConnection() == null);
+		assertFalse("Exp. no notification to the listener and there was", change.isChangeNotified());
+		assertTrue("Exp. the connection to be null", change.getConnection() == null);
 	}
 
 	@Test
@@ -212,13 +221,15 @@ public class ConnectionRegistryTest {
 	@Test
 	public void shouldNotifyRemoval() {
 		// pre-conditions
+		change.setCountDown(2);
 		registry.add(connection);
 
 		// operations
 		registry.remove(connection);
-
+		
+		change.waitForNotification();
 		// verifications
-		assertTrue(change.isRemovalNotified());
+		assertTrue("Exp. a notification to the listener and there was none", change.isRemovalNotified());
 		assertEquals(connection, change.getConnection());
 	}
 
