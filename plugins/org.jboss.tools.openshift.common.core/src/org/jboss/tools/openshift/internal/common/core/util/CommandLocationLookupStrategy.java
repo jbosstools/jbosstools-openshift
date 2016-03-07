@@ -29,12 +29,19 @@ public class CommandLocationLookupStrategy {
 	private static final String LINUX_PATHVAR = "PATH";
 	private static final String WINDOWS_PATHVAR = "Path";
 
+	private static final String LINUX_SEPARATOR = ":";
+	private static final String WIN_SEPARATOR = ";";	
+	
 	public static final CommandLocationLookupStrategy WINDOWS_STRATEGY = 
-			new CommandLocationLookupStrategy(WINDOWS_WHERE, ";", WINDOWS_PATHVAR, new String[]{".exe", ".com", ".bat"}, null);
+			new CommandLocationLookupStrategy(WINDOWS_WHERE, WIN_SEPARATOR,
+					// Windows can use either separator or path variable
+					// based on whether eclipse was launched from cygwin or not
+					System.getenv().get(WINDOWS_PATHVAR) == null ? LINUX_PATHVAR : WINDOWS_PATHVAR,
+					new String[]{".exe", ".com"}, null);
 	public static final CommandLocationLookupStrategy LINUX_STRATEGY = 
-			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{}, null);
+			new CommandLocationLookupStrategy(LINUX_WHICH, LINUX_SEPARATOR, LINUX_PATHVAR, new String[]{}, null);
 	public static final CommandLocationLookupStrategy MAC_STRATEGY = 
-			new CommandLocationLookupStrategy(LINUX_WHICH, ":", LINUX_PATHVAR, new String[]{}, new String[]{"bash", "-l", "-i", "-c", "echo $PATH"}, true);
+			new CommandLocationLookupStrategy(LINUX_WHICH, LINUX_SEPARATOR, LINUX_PATHVAR, new String[]{}, new String[]{"bash", "-l", "-i", "-c", "echo $PATH"}, true);
 	
 	public static CommandLocationLookupStrategy get() {
 		String os = Platform.getOS();
