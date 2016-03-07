@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -27,6 +29,11 @@ import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ContentProposal;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -36,14 +43,17 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
+import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.ui.wizards.ImageSearch;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -95,73 +105,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		}
 		createProjectControl(parent, dbc);
 		
-		//Image
-		Label lblImage = new Label(parent, SWT.NONE);
-		lblImage.setText("Image: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblImage);
-		Text txtImage = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.applyTo(txtImage);
-		IObservableValue imageTextObservable = 
-				WidgetProperties.text(SWT.Modify).observeDelayed(500, txtImage);
-		Binding imageBinding = ValueBindingBuilder
-			.bind(imageTextObservable)
-			.validatingAfterConvert(new DockerImageValidator() {
-				@Override
-				public IStatus additionalValidation(String imageName) {
-					if (!model.imageExists(imageName)) {
-						return ValidationStatus.cancel("This docker image was not pulled in the selected Docker connection. Mapping ports will not be possible.");
-					}
-					return ValidationStatus.ok();
-				}
-			})
-			.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE).observe(model))
-			.in(dbc);
-		ControlDecorationSupport.create(
-				imageBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		createImageNameControls(parent, dbc);
 
-		//browse
-		Button btnDockerSearch = new Button(parent, SWT.NONE);
-		btnDockerSearch.setText("Search...");
-		btnDockerSearch.setToolTipText("Look-up an image by browsing the docker daemon");
-		btnDockerSearch.addSelectionListener(onSearch(txtImage));
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(btnDockerSearch);
-
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(btnDockerSearch))
-				.notUpdatingParticipant()
-				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
-
-		//Resource Name
-		Label lblName = new Label(parent, SWT.NONE);
-		lblName.setText("Resource Name: ");
-		lblName.setToolTipText("The name used to identify the resources that will support the deployed image.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblName);
-		Text txtName = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2, 1)
-			.applyTo(txtName);
-		IObservableValue nameTextObservable = 
-				WidgetProperties.text(SWT.Modify).observe(txtName);
-		Binding nameBinding = ValueBindingBuilder
-				.bind(nameTextObservable)
-				.validatingAfterConvert(new DeployImageNameValidator())
-				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_NAME).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		createResourceNameControls(parent, dbc);
 	}
 
 	private SelectionAdapter onSearch(Text txtImage) {
@@ -324,35 +270,139 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
 	}
 
-	private void onManageProjectsClicked() {
-				try {
-					// run in job to enforce busy cursor which doesnt work otherwise
-					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+	private void createImageNameControls(final Composite parent, final DataBindingContext dbc) {
+		//Image
+		final Label imageNameLabel = new Label(parent, SWT.NONE);
+		imageNameLabel.setText("Image: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(imageNameLabel);
+		final Text imageNameText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.applyTo(imageNameText);
+		final IObservableValue imageNameTextObservable = 
+				WidgetProperties.text(SWT.Modify).observeDelayed(500, imageNameText);
+		final IObservableValue imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE).observe(model);
+		Binding imageBinding = ValueBindingBuilder.bind(imageNameTextObservable)
+				.validatingAfterConvert(new DockerImageValidator())
+				.to(imageNameObservable).in(dbc);
+		ControlDecorationSupport.create(
+				imageBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		new ContentProposalAdapter(imageNameText,
+				// override the text value before content assist was invoked and
+				// move the cursor to the end of the selected value
+				new TextContentAdapter() {
+					@Override
+					public void insertControlContents(Control control,
+							String text, int cursorPosition) {
+						final Text imageNameText = (Text) control;
+						final Point selection = imageNameText.getSelection();
+						imageNameText.setText(text);
+						selection.x = text.length();
+						selection.y = selection.x;
+						imageNameText.setSelection(selection);
+					}
+				}, getImageNameContentProposalProvider(imageNameText),
+				null, null);
+		//browse
+		Button btnDockerSearch = new Button(parent, SWT.NONE);
+		btnDockerSearch.setText("Search...");
+		btnDockerSearch.setToolTipText("Look-up an image by browsing the docker daemon");
+		btnDockerSearch.addSelectionListener(onSearch(imageNameText));
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(btnDockerSearch);
+	
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnDockerSearch))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
+				.converting(new IsNotNull2BooleanConverter())
+				.in(dbc);
+	}
 
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							return Status.OK_STATUS;
-						}
+	/**
+	 * Creates an {@link IContentProposalProvider} to propose
+	 * {@link IDockerImage} names based on the current text.
+	 * 
+	 * @param items
+	 * @return
+	 */
+	private IContentProposalProvider getImageNameContentProposalProvider(
+			final Text imageNameText) {
+		return new IContentProposalProvider() {
 
-						@Override
-						protected IStatus updateUI(IProgressMonitor monitor) {
-							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
-							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open(); 
-							// reload projects to reflect changes that happened in projects wizard
-							if (manageProjectsWizard.hasChanged()) {
-								model.setProjects(manageProjectsWizard.getProjects());
-							}
-							if(Dialog.OK == result) {
-								IProject selectedProject = manageProjectsWizard.getSelectedProject();
-								if (selectedProject != null) {
-									model.setProject(selectedProject);
-								}
-							}
-							return Status.OK_STATUS;
-						}
-					}, getContainer());
-				} catch (InvocationTargetException | InterruptedException e) {
-					// swallow intentionnally
+			@Override
+			public IContentProposal[] getProposals(final String contents,
+					final int position) {
+				final List<IContentProposal> proposals = new ArrayList<>();
+				for (String imageName : model.getImageNames()) {
+					if (imageName.contains(contents)) {
+						proposals.add(new ContentProposal(imageName, imageName,
+								null, position));
+					}
 				}
+				return proposals.toArray(new IContentProposal[0]);
+			}
+		};
+	}
+	private void createResourceNameControls(final Composite parent, final DataBindingContext dbc) {
+		//Resource Name
+		final Label resourceNameLabel = new Label(parent, SWT.NONE);
+		resourceNameLabel.setText("Resource Name: ");
+		resourceNameLabel.setToolTipText("The name used to identify the resources that will support the deployed image.");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(resourceNameLabel);
+		final Text resourceNameText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.span(2, 1)
+			.applyTo(resourceNameText);
+		final IObservableValue resourceNameTextObservable = 
+				WidgetProperties.text(SWT.Modify).observe(resourceNameText);
+		final Binding nameBinding = ValueBindingBuilder
+				.bind(resourceNameTextObservable)
+				.validatingAfterConvert(new DeployImageNameValidator())
+				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_NAME).observe(model))
+				.in(dbc);
+		ControlDecorationSupport.create(
+				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+	}
+
+	private void onManageProjectsClicked() {
+		try {
+			// run in job to enforce busy cursor which doesnt work otherwise
+			WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					return Status.OK_STATUS;
+				}
+
+				@Override
+				protected IStatus updateUI(IProgressMonitor monitor) {
+					ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
+					int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open();
+					// reload projects to reflect changes that happened in
+					// projects wizard
+					if (manageProjectsWizard.hasChanged()) {
+						model.setProjects(manageProjectsWizard.getProjects());
+					}
+					if (Dialog.OK == result) {
+						IProject selectedProject = manageProjectsWizard.getSelectedProject();
+						if (selectedProject != null) {
+							model.setProject(selectedProject);
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			}, getContainer());
+		} catch (InvocationTargetException | InterruptedException e) {
+			// swallow intentionnally
+		}
 	}
 }

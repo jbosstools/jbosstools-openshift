@@ -86,4 +86,9 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return true if the image exists in the docker registry
 	 */
 	boolean imageExists(String image);
+	
+	/**
+	 * @return the list of names of all images for the current Docker connection.
+	 */
+	List<String> getImageNames();
 }
