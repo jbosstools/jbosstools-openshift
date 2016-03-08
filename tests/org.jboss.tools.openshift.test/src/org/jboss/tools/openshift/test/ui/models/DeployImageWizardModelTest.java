@@ -33,25 +33,25 @@ public class DeployImageWizardModelTest {
 	
 	
 	@Test
-	public void testImageExists() {
-		assertFalse(model.imageExists(null));
-		assertFalse(model.imageExists(" "));
+	public void testImageExistsLocally() {
+		assertFalse(model.imageExistsLocally(null));
+		assertFalse(model.imageExistsLocally(" "));
 		
 		//no tag
-		model.imageExists("foo/bar");
+		model.imageExistsLocally("foo/bar");
 		verify(dockerConnection).hasImage("foo/bar", "latest");
 		
 		//has tag
-		model.imageExists("foo/bar:asf34fs");
+		model.imageExistsLocally("foo/bar:asf34fs");
 		verify(dockerConnection).hasImage("foo/bar", "asf34fs");
 		
 		//has registry+port and tag
-		model.imageExists("host:1234/foo/bar:asf34fs");
+		model.imageExistsLocally("host:1234/foo/bar:asf34fs");
 		verify(dockerConnection).hasImage("host:1234/foo/bar", "asf34fs");
 		
 		//
 		model.setDockerConnection(null);
-		assertFalse(model.imageExists("foo/bar"));
+		assertFalse(model.imageExistsLocally("foo/bar"));
 		
 	}
 }

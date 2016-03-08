@@ -28,10 +28,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
+import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
@@ -39,7 +41,9 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.deployimage.search.DockerHubRegistry;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IPort;
@@ -234,6 +238,9 @@ public class DeployImageWizardModel
 	
 	private synchronized void initContainerInfo() {
 		if(imageInfoInitialized || dockerConnection == null) return;
+		if(!imageExistsLocally(getImage())) {
+			return;
+		}
 		IDockerImageInfo info = dockerConnection.getImageInfo(getImage());
 		if(info == null) return;
 		IDockerContainerConfig imageConfig = info.config();
@@ -470,21 +477,37 @@ public class DeployImageWizardModel
 	}
 
 	@Override
-	public boolean imageExists(String image) {
-		if (dockerConnection == null || StringUtils.isBlank(image)) {
+	public boolean imageExistsLocally(final String imageName) {
+		if (dockerConnection == null || StringUtils.isBlank(imageName)) {
 			return false;
 		}
-		DockerImageURI imageName = new DockerImageURI(image);
-		String repo =  imageName.getUriWithoutTag();
-		String tag = StringUtils.defaultIfBlank(imageName.getTag(),"latest");
+		final DockerImageURI imageURI = new DockerImageURI(imageName);
+		final String repo = imageURI.getUriWithoutTag();
+		final String tag = StringUtils.defaultIfBlank(imageURI.getTag(), DockerImageURI.LATEST);
 		return dockerConnection.hasImage(repo, tag);
 	}
 
 	@Override
+	public boolean imageExistsRemotely(String imageName) {
+		try {
+			final DockerImageURI imageURI = new DockerImageURI(imageName);
+			final String repo =  imageURI.getUriWithoutTag();
+			final List<String> registryTags = new DockerHubRegistry().getTags(repo);
+			if(registryTags.contains(imageURI.getTag())) {
+				return true;
+			}
+		} catch (OpenShiftException e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to search Docker Image",
+					e.getMessage());
+		}
+		return false;
+	}
+	
+	@Override
 	public List<String> getImageNames() {
 		return this.imageNames;
 	}
-	
+
 	@Override
 	public void resetServicePorts() {
 		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp)).collect(Collectors.toList());

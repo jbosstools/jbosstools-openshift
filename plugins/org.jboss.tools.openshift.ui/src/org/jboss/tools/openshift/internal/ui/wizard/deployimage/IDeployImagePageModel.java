@@ -81,11 +81,18 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	void setImage(String image);
 	
 	/**
-	 * 
-	 * @param image
-	 * @return true if the image exists in the docker registry
+	 * Checks if an image with the given name exists in the selected Docker daemon
+	 * @param imageName the full name of the image to search locally
+	 * @return true if the image exists in the select Docker's registry cache
 	 */
-	boolean imageExists(String image);
+	boolean imageExistsLocally(String imageName);
+
+	/**
+	 * Checks if an image with the given name exists in a remote registry
+	 * @param imageName the full name of the image to search remotely
+	 * @return true if the image exists in a remote registry
+	 */
+	boolean imageExistsRemotely(String imageName);
 	
 	/**
 	 * @return the list of names of all images for the current Docker connection.

@@ -23,6 +23,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -34,6 +35,7 @@ import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -66,6 +68,7 @@ import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
@@ -91,22 +94,84 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		this.model = model;
 	}
 
+	/**
+	 * Callback that gets called when this page is going to be deactivated. This
+	 * is the chance to do a one-time remote call to the selected Docker daemon
+	 * to check if an image with the given name exists in the local cache or in
+	 * the remote registry (Docker Hub). This kind of validation is a
+	 * long-running process, so it should not be performed during the field
+	 * validation.
+	 * 
+	 * @param progress
+	 *            the direction that the wizard is moving: backwards/forwards
+	 * @param event
+	 *            the page changing event that may be use to veto the change
+	 * @param dbc
+	 *            the current data binding context
+	 */
+	protected void onPageWillGetDeactivated(Direction progress, PageChangingEvent event, DataBindingContext dbc) {
+		
+		/**
+		 * Inner class to perform the image search in the selected Docker daemon cache or on the remote registry. 
+		 */
+		class ImageValidatorJob extends Job {
+
+			public ImageValidatorJob(String name) {
+				super(name);
+			}
+
+			private boolean imageExistsLocally = false;
+			private boolean imageExistsRemotely = false;
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				this.imageExistsLocally = model.imageExistsLocally(model.getImage());
+				if(!imageExistsLocally) {
+					this.imageExistsRemotely = model.imageExistsRemotely(model.getImage());
+				}
+				return Status.OK_STATUS;
+			}
+		}
+		
+		final ImageValidatorJob imageValidator = new ImageValidatorJob("Looking-up the selected Docker image...");
+		try {
+			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer());
+			if (imageValidator.imageExistsLocally) {
+				return;
+			} else if (imageValidator.imageExistsRemotely) {
+				if (!MessageDialog.openConfirm(getShell(), "Missing Docker Image",
+						"The metadata for the Docker image named '" + model.getImage()
+								+ "' will need to be pulled before opening the next page.")) {
+					event.doit = false;
+				}
+			} 
+			// validation job was not cancelled but no image was found
+			else if(validatorJobStatus.isOK()){
+				MessageDialog.openError(getShell(), "Error",
+						"No Docker image named '" + model.getImage() + "' could be found.");
+				event.doit = false;
+			}
+			// validation job was cancelled
+			else {
+				event.doit = false;
+			}
+		} catch (InvocationTargetException | InterruptedException e) {
+			final String message = "Failed to verify if an image named '" + model.getImage() + "' exists.";
+			MessageDialog.openError(getShell(), "Error", message);
+			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
+		}
+	}
+
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3)
-			.margins(10, 10)
-			.applyTo(parent);
-
-		if(model.originatedFromDockerExplorer()) {
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
+		if (model.originatedFromDockerExplorer()) {
 			createConnectionControl(parent, dbc);
-		}else {
+		} else {
 			createDockerConnectionControl(parent, dbc);
 		}
 		createProjectControl(parent, dbc);
-		
 		createImageNameControls(parent, dbc);
-
 		createResourceNameControls(parent, dbc);
 	}
 
@@ -120,10 +185,10 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				}
 				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText());
 				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
+					//this bypasses validation
 					model.setImage(wizard.getSelectedImage());
 				}
 			}
-			
 		};
 	}
 	
@@ -290,6 +355,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.to(imageNameObservable).in(dbc);
 		ControlDecorationSupport.create(
 				imageBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
 		new ContentProposalAdapter(imageNameText,
 				// override the text value before content assist was invoked and
 				// move the cursor to the end of the selected value
@@ -371,6 +437,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		
 	}
 
 	private void onManageProjectsClicked() {
@@ -405,4 +472,5 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			// swallow intentionnally
 		}
 	}
+	
 }
