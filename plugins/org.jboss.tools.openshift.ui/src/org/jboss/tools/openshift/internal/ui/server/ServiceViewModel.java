@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,11 +11,9 @@
 package org.jboss.tools.openshift.internal.ui.server;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -27,7 +25,6 @@ import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IService;
-import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
@@ -39,19 +36,11 @@ public class ServiceViewModel extends ObservablePojo {
 	public static final String PROPERTY_SERVICE = "service";
 	public static final String PROPERTY_SERVICE_ITEMS = "serviceItems";
 
-	public static final String PROPERTY_SELECT_DEFAULT_ROUTE = "selectDefaultRoute";
-	public static final String PROPERTY_ROUTE = "route";
-	public static final String PROPERTY_ROUTES = "routes";
-	
+	private boolean isLoaded = false;
 	private Connection connection;
 	private List<Connection> connections = new ArrayList<>();
 	private List<ObservableTreeItem> serviceItems = new ArrayList<>();
-	private IService service;
-	private boolean selectDefaultRoute = false;
-	private List<IRoute> routes = new ArrayList<>();
-	private IRoute route;
-	
-	private Map<IProject, List<IRoute>> routeMap = new HashMap<>();
+	protected IService service;
 
 	public ServiceViewModel(Connection connection) {
 		this(null, connection);
@@ -97,57 +86,14 @@ public class ServiceViewModel extends ObservablePojo {
 		}
 	}
 
-	protected void updateService(final IService service, final List<ObservableTreeItem> serviceItems) {
+	protected IService updateService(final IService service, final List<ObservableTreeItem> serviceItems) {
+		if (!isLoaded) {
+			return service;
+		}
+
 		IService newService = getServiceOrDefault(service, serviceItems);
-		if(newService != this.service) {
-			boolean needUpdateRoutes = newService == null || this.service == null || newService.getProject() != this.service.getProject();
-			firePropertyChange(PROPERTY_SERVICE, null, this.service = newService);
-			if(needUpdateRoutes) {
-				updateRoutes();
-			}
-		}
-	}
-
-	/**
-	 * Replaces choices in the route selector as needed.
-	 * If choices are replaced calls updateRoute() to reset its selected value.
-	 */
-	protected void updateRoutes() {
-		IRoute routeToReset = null;
-		if(this.service == null && !routes.isEmpty()) {
-			List<IRoute> oldRoutes = new ArrayList<>(this.routes);
-			this.routes.clear();
-			firePropertyChange(PROPERTY_ROUTES, oldRoutes, this.routes);
-			routeToReset = null;
-		} else if(this.service != null) {
-			List<IRoute> oldRoutes = new ArrayList<>(this.routes);
-			this.routes.clear();
-			List<IRoute> newRoutes = routeMap.get(this.service.getProject());
-			if(newRoutes != null) {
-				this.routes.addAll(newRoutes);
-			}
-			routeToReset = this.route;
-			firePropertyChange(PROPERTY_ROUTES, oldRoutes, this.routes);
-		} else {
-			return; //No need to reset the selected route.
-		}
-		setRoute(routeToReset);
-	}
-
-	/**
-	 * Called when route is chosen in the route selector and when choices in the route selector 
-	 * are replaced because of change in selected service.
-	 * @param route
-	 */
-	protected void updateRoute(IRoute route) {
-		if(route != null && !this.routes.contains(route)) {
-			//clean to kick combo.
-			firePropertyChange(PROPERTY_ROUTE, this.route, this.route = null);
-		}
-		if(route == null || !this.routes.contains(route)) {
-			route = this.routes.isEmpty() ? null : this.routes.get(0);
-		}
-		firePropertyChange(PROPERTY_ROUTE, this.route, this.route = route);
+		firePropertyChange(PROPERTY_SERVICE, null, this.service = newService);
+		return newService;
 	}
 
 	public void setConnections(List<Connection> connections) {
@@ -164,9 +110,7 @@ public class ServiceViewModel extends ObservablePojo {
 
 	public void setConnection(Connection connection) {
 		if(this.connection != connection) {
-			//Clean service items immediately, they should be reloaded later in an ui job.
-			List<ObservableTreeItem> newServiceItems = this.serviceItems.isEmpty() ? this.serviceItems : new ArrayList<>();
-			update(connection, this.connections, null, newServiceItems);
+			update(connection, this.connections, null, Collections.emptyList());
 		}
 	}
 
@@ -174,44 +118,42 @@ public class ServiceViewModel extends ObservablePojo {
 		return serviceItems;
 	}
 
-	public void setServiceItems(List<ObservableTreeItem> items) {
-		IService newService = ObservableTreeItemUtils.contains(items, this.service) ? this.service : null;
-		update(this.connection, this.connections, newService, items);
+	protected void setServiceItems(List<ObservableTreeItem> items) {
+		update(this.connection, this.connections, this.service, items);
 	}
 
 	public IService getService() {
+		if (!isLoaded) {
+			return null;
+		}
+		// reveal selected service only once model is loaded
 		return service;
 	}
 	
 	public void setService(IService service) {
 		update(this.connection, this.connections, service, this.serviceItems);
 	}
-
-	public boolean isSelectDefaultRoute() {
-		return selectDefaultRoute;
-	}
-
-	public void setSelectDefaultRoute(boolean selectDefaultRoute) {
-		firePropertyChange(PROPERTY_SELECT_DEFAULT_ROUTE, this.selectDefaultRoute, this.selectDefaultRoute = selectDefaultRoute);
-	}
-
-	public List<IRoute> getRoutes() {
-		return routes;
-	}
-
-	public IRoute getRoute() {
-		return route;
-	}
-
-	public void setRoute(IRoute newRoute) {
-		updateRoute(newRoute);
+	
+	protected IProject getOpenShiftProject(IService service) {
+		if (service == null
+				|| serviceItems.isEmpty()) {
+			return null;
+		}
+		Optional<ObservableTreeItem> projectItem = serviceItems.stream()
+				.filter(item -> ObservableTreeItemUtils.getItemFor(service, item.getChildren()) != null)
+				.findFirst();
+		if(projectItem.isPresent()) {
+			return (IProject) projectItem.get().getModel();
+		} else {
+			return null;
+		}
+		
 	}
 
 	protected IService getServiceOrDefault(final IService service, final List<ObservableTreeItem> items) {
-		if (service == null || !ObservableTreeItemUtils.contains(items, service)) {
-			return items.stream().flatMap(ObservableTreeItemUtils::flatten)
-					.filter(item -> item.getModel() instanceof IService).map(item -> (IService) item.getModel())
-					.findFirst().orElseGet(() -> null);
+		if (service == null
+				|| !ObservableTreeItemUtils.contains(service, items)) {
+			return ObservableTreeItemUtils.getFirstModel(IService.class, items);
 		}
 		return service;
 	}
@@ -245,20 +187,15 @@ public class ServiceViewModel extends ObservablePojo {
 	 * @param connection the connection to use to load the resources.
 	 */
 	public void loadResources(final Connection connection) {
+		this.isLoaded = false;
 		setConnection(connection);
 		setConnections(loadConnections());
 		if (connection != null) {
-			loadRoutes(connection);
-			setServiceItems(loadServices(connection));
+			List<ObservableTreeItem> serviceItems = loadServices(connection);
+			setServiceItems(serviceItems);
 		}
-	}
-
-	void loadRoutes(Connection connection) {
-		routeMap.clear();
-		List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
-		if(projects != null) {
-			projects.stream().forEach(project -> routeMap.put(project, project.getResources(ResourceKind.ROUTE)));
-		}
+		this.isLoaded = true;
+		update(this.connection, this.connections, this.service, this.serviceItems);
 	}
 
 	private List<Connection> loadConnections() {
@@ -278,6 +215,16 @@ public class ServiceViewModel extends ObservablePojo {
 
 		private static final ServiceTreeItemsFactory INSTANCE = new ServiceTreeItemsFactory();
 			
+		/**
+		 * Creates a service items tree with the following structure:
+		 * connection
+		 * 	|_ project
+		 *	|	|_ service
+		 *	|	|_ service
+		 *	|_project
+		 *		|_service  
+		 */
+		@Override
 		@SuppressWarnings("unchecked")
 		public <T> List<T> createChildren(Object parent) {
 			if (parent instanceof Connection) {
@@ -288,20 +235,7 @@ public class ServiceViewModel extends ObservablePojo {
 			return Collections.emptyList();
 		}
 
-		public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
-			if (openShiftObjects == null) {
-				return Collections.emptyList();
-			}
-			List<ObservableTreeItem> items = new ArrayList<>();
-			for (Object openShiftObject : openShiftObjects) {
-				ObservableTreeItem item = create(openShiftObject);
-				if (item != null) {
-					items.add(item);
-				}
-			}
-			return items;
-		}
-
+		@Override
 		public ObservableTreeItem create(Object object) {
 			return new ObservableTreeItem(object, this);
 		}

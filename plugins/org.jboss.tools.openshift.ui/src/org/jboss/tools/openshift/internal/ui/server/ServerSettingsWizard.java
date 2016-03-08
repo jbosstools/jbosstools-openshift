@@ -17,10 +17,10 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * A single-page wizard to configure a Server Adapter from the OpenShift
@@ -47,8 +47,8 @@ public class ServerSettingsWizard extends Wizard {
 	 * @param connection the current OpenShift {@link Connection}
 	 * @param service the selected service
 	 */
-	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IService service) {
-		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, service);
+	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IService service, final IRoute route) {
+		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, service, route);
 	}
 	
 	@Override
@@ -58,11 +58,8 @@ public class ServerSettingsWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
-		this.serverSettingsWizardPage.getModel().updateServer();
 		try {
-			IServerWorkingCopy wc = this.serverSettingsWizardPage.getModel().getServer();
-			wc.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
-			this.createdServer = wc.save(true, new NullProgressMonitor());
+			this.createdServer = serverSettingsWizardPage.saveServer(new NullProgressMonitor());
 		} catch (CoreException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Failed to create the Server Adapter", e);
 		}

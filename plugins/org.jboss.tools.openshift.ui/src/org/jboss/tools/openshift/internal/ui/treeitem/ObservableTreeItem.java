@@ -111,4 +111,10 @@ public class ObservableTreeItem extends ObservableUIPojo {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "ObservableTreeItem [children=" + children + ", model=" + model + "]";
+	}
+
 }

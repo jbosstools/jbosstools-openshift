@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.models.IResourceCache.IResourceCacheListener;
 
 import com.openshift.restclient.ResourceKind;
@@ -298,7 +299,7 @@ public class Deployment extends ResourcesUIModel
 	}
 
 	private void handleRoute(IResourceCache cache, IRoute route) {
-		if(service.getName().equals(route.getServiceName()) && !hasModelFor(route)) {
+		if(ResourceUtils.areRelated(route, service) && !hasModelFor(route)) {
 			add(route);
 		}
 	}

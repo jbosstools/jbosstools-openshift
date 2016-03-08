@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.util;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +22,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.egit.core.EGitUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -33,6 +38,8 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
+import com.openshift.restclient.model.image.IImageStreamImport;
+import com.openshift.restclient.model.route.IRoute;
 
 public class ResourceUtils {
 
@@ -51,8 +58,8 @@ public class ResourceUtils {
 		if (StringUtils.isBlank(filterText)) {
 			return true;
 		}
-
-		final Set<String> items = new HashSet<>(Arrays.asList(filterText.replaceAll(",", " ").toLowerCase().split(" ")));
+		final Set<String> items = new HashSet<>(Arrays.asList(
+				filterText.replaceAll(",", " ").toLowerCase().split(" ")));
 		if (containsAll(template.getName(), items)) {
 			return true;
 		}
@@ -217,5 +224,162 @@ public class ResourceUtils {
 		List<IPod> pods = deploymentConfig.getProject().getResources(ResourceKind.POD);
 		Map<String, String> selector = deploymentConfig.getReplicaSelector();
 		return getPodsForSelector(selector, pods);
+	}
+
+	/**
+	 * Returns the first route that's found and matches the given service.
+	 * 
+	 * @param service
+	 * @param routes
+	 * @return
+	 */
+	public static IRoute getRouteForService(final IService service, Collection<IRoute> routes) {
+		List<IRoute> matchingRoutes = ResourceUtils.getRoutesForService(service, routes);
+		if (matchingRoutes.isEmpty()) {
+			return null;
+		} else {
+			return matchingRoutes.get(0);
+		}
+	}
+
+	/**
+	 * Returns the routes from the given routes that match the given service.
+	 * 
+	 * @param service
+	 * @param routes
+	 * @return
+	 */
+	public static List<IRoute> getRoutesForService(final IService service, Collection<IRoute> routes) {
+		if (routes == null
+				|| routes.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return routes.stream()
+				.filter(r -> ResourceUtils.areRelated(r, service))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns {@code true} if the given route points to the given service and
+	 * the given service is the service that the given route points to.
+	 * 
+	 * @param route
+	 * @param service
+	 * @return
+	 * 
+	 * @see IRoute#getServiceName()
+	 * @see IService#getName()
+	 */
+	public static boolean areRelated(IRoute route, IService service) {
+		if (service != null 
+				&& !StringUtils.isEmpty(service.getName())
+				&& route != null) {
+			return service.getName().equals(route.getServiceName());
+		}
+		return false;
+	}
+
+
+	/**
+	 * Returns build configs of the given list of build configs
+	 * that match the given service.
+	 * 
+	 * @param service
+	 * @param buildConfigs
+	 * @return
+	 * 
+	 * @see #areRelated(IBuildConfig, IService)
+	 * @see IBuildConfig
+	 * @see IService
+	 */
+	public static List<IBuildConfig> getBuildConfigsForService(IService service, List<IBuildConfig> buildConfigs) {
+		if (buildConfigs == null
+				|| buildConfigs.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		return buildConfigs.stream()
+				.filter(bc -> ResourceUtils.areRelated(bc, service))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns the first build config out of the given list of build configs
+	 * that matches the given service.
+	 * 
+	 * @param service
+	 *            the service that the build configs shall match
+	 * @param buildConfigs
+	 *            the build configs that shall be introspected
+	 * @return
+	 * 
+	 * @see #getBuildConfigsForService(IService, List)
+	 * @see #areRelated(IBuildConfig, IService)
+	 * @see IBuildConfig
+	 * @see IService
+	 */
+	public static IBuildConfig getBuildConfigForService(IService service, List<IBuildConfig> buildConfigs) {
+		List<IBuildConfig> matchinBuildConfigs = getBuildConfigsForService(service, buildConfigs);
+		if (matchinBuildConfigs.isEmpty()) {
+			return null;
+		} else {
+			return matchinBuildConfigs.get(0);
+		}
+	}
+
+	/**
+	 * Returns {@code true} if the given build config matches the name of the
+	 * given service.
+	 * 
+	 * @param config
+	 * @param service
+	 * @return
+	 */
+	public static boolean areRelated(final IBuildConfig config, final IService service) {
+		if (service != null 
+				&& !StringUtils.isEmpty(service.getName())
+				&& config != null) {
+			return service.getName().equals(config.getName());
+		}
+		return false;
+	}
+
+	/**
+	 * Returns git controlled workspace projects that match the uri of the given build config.
+	 *   
+	 * @param buildConfig the build config whose source git shall be matched
+	 * @param workspaceProjects all workspace projects that shall be inspected
+	 * @return
+	 * 
+	 * @see IBuildConfig#getSourceURI()
+	 * @see org.eclipse.core.resources.IProject
+	 * @see EGitUtils#isSharedWithGit(org.eclipse.core.resources.IProject)
+	 */
+	public static org.eclipse.core.resources.IProject getWorkspaceProjectForBuildConfig(
+			IBuildConfig buildConfig, List<org.eclipse.core.resources.IProject> workspaceProjects) {
+		if (workspaceProjects == null
+				|| workspaceProjects.isEmpty()) {
+			return null;
+		}
+		
+		return workspaceProjects.stream()
+			// only git shared projects
+			.filter(project -> EGitUtils.isSharedWithGit(project))
+			.filter(project -> {
+					try {
+						return EGitUtils.getAllRemoteURIs(project)
+								.contains(new URIish(buildConfig.getSourceURI()));
+					} catch (CoreException | URISyntaxException e) {
+						return false;
+					}
+				}
+	
+				)
+			.findFirst().orElseGet(() -> null);
+	}
+
+	public static boolean isSuccessful(IImageStreamImport imageStreamImport) {
+		return imageStreamImport.getImageStatus().stream()
+				.filter(s -> s.isSuccess()).findFirst().isPresent();
 	}
 }
