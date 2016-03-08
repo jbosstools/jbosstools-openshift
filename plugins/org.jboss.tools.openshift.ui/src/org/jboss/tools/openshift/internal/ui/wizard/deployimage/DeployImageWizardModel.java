@@ -466,7 +466,9 @@ public class DeployImageWizardModel
 	public void setDockerConnection(IDockerConnection dockerConnection) {
 		firePropertyChange(PROPERTY_DOCKER_CONNECTION, this.dockerConnection, this.dockerConnection = dockerConnection);
 		this.imageNames.clear();
-		this.imageNames.addAll(dockerConnection.getImages().stream().flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
+		this.imageNames.addAll(dockerConnection.getImages().stream()
+				.filter(image -> !image.isDangling() && !image.isIntermediateImage())
+				.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
 	}
 
 	@Override
