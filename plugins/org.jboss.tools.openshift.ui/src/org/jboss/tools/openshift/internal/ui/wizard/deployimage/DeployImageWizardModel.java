@@ -37,7 +37,9 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
+import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
@@ -60,8 +62,8 @@ public class DeployImageWizardModel
 		extends ResourceLabelsPageModel 
 		implements IDeployImageParameters{
 
-	private static final String STATUS_SUCCESS = "Success";
 	private static final int DEFAULT_REPLICA_COUNT = 1;
+
 	private Connection connection;
 	private IProject project;
 	private String resourceName;
@@ -481,8 +483,7 @@ public class DeployImageWizardModel
 			final IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
 			try {
 				final IImageStreamImport streamImport = cap.importImageMetadata(imageURI);
-				if (streamImport.getImageStatus().stream().filter(s -> STATUS_SUCCESS.equalsIgnoreCase(s.getStatus()))
-						.findFirst().isPresent()) {
+				if (ResourceUtils.isSuccessful(streamImport)) {
 					return new ImportImageMetaData(streamImport.getImageJsonFor(imageURI));
 				}
 			} catch (OpenShiftException e) {
@@ -506,12 +507,6 @@ public class DeployImageWizardModel
 	@Override
 	public Map<String, String> getImageEnvVars() {
 		return Collections.unmodifiableMap(this.imageEnvVars);
-	}
-	
-	private interface IDockerImageMetadata {
-		Set<String> exposedPorts();
-		List<String> env();
-		Set<String> volumes();
 	}
 	
 	private static class DockerConfigMetaData implements IDockerImageMetadata {
@@ -538,6 +533,7 @@ public class DeployImageWizardModel
 		}
 		
 	}
+
 	private static class ImportImageMetaData implements IDockerImageMetadata {
 
 		private static final String[] ROOT = new String [] {"image","dockerImageMetadata","ContainerConfig"};

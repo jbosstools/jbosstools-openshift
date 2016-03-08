@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.util.stream.Stream;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -25,6 +23,7 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -54,9 +53,9 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -88,7 +87,6 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
@@ -102,8 +100,6 @@ import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemCo
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 
-import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
@@ -119,11 +115,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	protected boolean isLoadingResources = false;
 	protected Control uiHook = null;
 
-	private final IService defaultService;
-	private final IRoute defaultRoute;
-	private final IProject defaultEclipseProject;
-
-
 	/**
 	 * Default constructor.
 	 * @param wizard the parent {@link IWizard} 
@@ -131,13 +122,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	 * @param connection the current OpenShift {@link Connection}
 	 */
 	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection) {
-		super("Server Settings", "Create an OpenShift 3 Server Adapter",
-				"Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.",
-				wizard);
-		this.model = new ServerSettingsViewModel(server, connection);
-		this.defaultService = null;
-		this.defaultRoute = null;
-		this.defaultEclipseProject = null;
+		this(wizard, server, connection, null, null);
 	}
 
 	/**
@@ -147,32 +132,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	 * @param connection the current OpenShift {@link Connection}
 	 * @param service the selected service
 	 */
-	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, final IService service) {
-		super("Server Settings", "Create an OpenShift 3 Server Adapter",
-				"Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.",
+	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, final IService service, final IRoute route) {
+		super("Server Settings", "Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", "Create an OpenShift 3 Server Adapter", 
 				wizard);
-		this.model = new ServerSettingsViewModel(server, connection);
-		this.defaultService = service;
-		this.defaultRoute = service.getProject().getResources(ResourceKind.ROUTE).stream()
-				.map(resource -> (IRoute) resource).filter(route -> route.getServiceName().equals(service.getName()))
-				.findAny().orElseGet(() -> null);
-		final IBuildConfig buildConfig = service.getProject().getResources(ResourceKind.BUILD_CONFIG).stream()
-				.map(resource -> (IBuildConfig) resource).filter(config -> config.getName().equals(service.getName()))
-				.findAny().orElseGet(() -> null);
-		if(buildConfig != null) {
-			this.defaultEclipseProject = Stream.of(ResourcesPlugin.getWorkspace().getRoot().getProjects())
-					.filter(project -> EGitUtils.isShared(project)).filter(project -> {
-						try {
-							return EGitUtils.getAllRemoteURIs(project).contains(new URIish(buildConfig.getSourceURI()));
-						} catch (CoreException | URISyntaxException e) {
-							return false;
-						}
-					}
-
-			).findFirst().orElseGet(() -> null);
-		} else {
-			this.defaultEclipseProject = null;
-		}
+		this.model = new ServerSettingsViewModel(service, route, server, connection);
 	}
 	
 	/**
@@ -190,7 +153,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 	
 	/**
-	 * @return a boolean flag to indicate if this page is currently loading resources from OpenShift.
+	 * @return a boolean flag to serverSettingsWizardPageindicate if this page is currently loading resources from OpenShift.
 	 */
 	public boolean isLoadingResources() {
 		return isLoadingResources;
@@ -243,21 +206,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				protected IStatus run(IProgressMonitor monitor) {
 					ServerSettingsWizardPage.this.model.loadResources();
 					ServerSettingsWizardPage.this.needsLoadingResources = false;
-					//initializing the service tree with the service selected in the workspace
-					if (ServerSettingsWizardPage.this.defaultService != null) {
-						// retrieve the Service object
-						final IService selectedService = ServerSettingsWizardPage.this.model
-								.getService(ServerSettingsWizardPage.this.defaultService.getName());
-						ServerSettingsWizardPage.this.model.setService(selectedService);
-					}
-					if (ServerSettingsWizardPage.this.defaultRoute != null) {
-						ServerSettingsWizardPage.this.model.setSelectDefaultRoute(true);
-						ServerSettingsWizardPage.this.model.setRoute(ServerSettingsWizardPage.this.defaultRoute);
-					}
-					if (ServerSettingsWizardPage.this.defaultEclipseProject != null) {
-						ServerSettingsWizardPage.this.model
-								.setDeployProject(ServerSettingsWizardPage.this.defaultEclipseProject);
-					}
 					return Status.OK_STATUS;
 				}
 			}, container);
@@ -459,7 +407,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		);
 		dialog.setTitle("Select a workspace folder");
 		dialog.setMessage("Select a workspace folder to deploy");
-		dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
+		dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
 		dialog.addFilter(new ViewerFilter() {
 
 			@Override
@@ -473,7 +421,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 						&& !ProjectUtils.isInternalRSE(container.getName());
 			}
 		});
-		dialog.setAllowMultiple( false );
+		dialog.setAllowMultiple(false);
 		org.eclipse.core.resources.IResource res = model.getDeployProject();
 		if (org.apache.commons.lang.StringUtils.isNotBlank(selectedFile)) {
 			String path = VariablesHelper.getWorkspacePath(selectedFile);
@@ -561,9 +509,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 					public IStatus validate(Object value) {
 						if (!(value instanceof IService)) {
 							return ValidationStatus.cancel("Please select a service that this adapter will be bound to.");
-						} else {
-							return ValidationStatus.ok();
 						}
+						return ValidationStatus.ok();
 						
 					}
 				})
@@ -618,21 +565,29 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
 			.applyTo(routeGroup);
 		GridLayoutFactory.fillDefaults()
-			.numColumns(2).margins(10,10)
 			.applyTo(routeGroup);
 
-		Button promptRouteButton = new Button(routeGroup, SWT.CHECK);
+		// additional nesting required because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+		Composite routeContainer = new Composite(routeGroup, SWT.None);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(routeContainer);
+		GridLayoutFactory.fillDefaults()
+			.margins(10,10).numColumns(2)
+			.applyTo(routeContainer);
+		
+		Button promptRouteButton = new Button(routeContainer, SWT.CHECK);
 		promptRouteButton.setSelection(true);
-		promptRouteButton.setText("Choose route when multiple routes available to show in browser");
+		promptRouteButton.setText("Prompt for route when multiple routes available to show in browser");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(promptRouteButton);
 
-		Label routeLabel = new Label(routeGroup, SWT.NONE);
+		Label routeLabel = new Label(routeContainer, SWT.NONE);
 		routeLabel.setText("Use Route: ");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(routeLabel);
 
-		StructuredViewer routesViewer = new ComboViewer(routeGroup);
+		StructuredViewer routesViewer = new ComboViewer(routeContainer);
 		GridDataFactory.fillDefaults()
 			.span(1,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(routesViewer.getControl());
@@ -646,17 +601,23 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		ValueBindingBuilder.bind(selectedRouteObservable)
 				.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_ROUTE).observe(model)).in(dbc);
 
-		final IObservableValue isSelectRouteObservable =
+		final IObservableValue isSelectDefaultRouteObservable =
 				WidgetProperties.selection().observe(promptRouteButton);
-		final IObservableValue selectDefaultRouteModelObservable = BeanProperties.value(
-				ServerSettingsViewModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
-		ValueBindingBuilder.bind(isSelectRouteObservable)
+		final IObservableValue selectDefaultRouteModelObservable = 
+				BeanProperties.value(ServerSettingsViewModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
+		ValueBindingBuilder
+			.bind(isSelectDefaultRouteObservable)
 			.converting(new InvertingBooleanConverter())
 			.to(selectDefaultRouteModelObservable)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(routesViewer.getControl()))
-			.notUpdating(selectDefaultRouteModelObservable).in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(routesViewer.getControl()))
+			.notUpdating(selectDefaultRouteModelObservable)
+			.in(dbc);
+		RouteValidator routeValidator = new RouteValidator(isSelectDefaultRouteObservable, selectedRouteObservable);
+		dbc.addValidationStatusProvider(routeValidator);
+		ControlDecorationSupport.create(routeValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 	}
 
 	private IListChangeListener onServiceItemsChanged(final TreeViewer servicesViewer) {
@@ -681,6 +642,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		applicationTemplatesViewer.setContentProvider(contentProvider);
 		applicationTemplatesViewer.setLabelProvider(new ServicesViewLabelProvider());
 		applicationTemplatesViewer.addFilter(new ServiceViewerFilter(selectorText));
+		applicationTemplatesViewer.setSorter(new ViewerSorter());
 		applicationTemplatesViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
 		applicationTemplatesViewer.setInput(model);
 		return applicationTemplatesViewer;
@@ -748,4 +710,31 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         return !isLoadingResources && uiHook != null && !uiHook.isDisposed() && 
     			!needsLoadingResources && model != null && model.getService() != null && super.isPageComplete();
     }
+
+    public IServer saveServer(IProgressMonitor monitor) throws CoreException {
+    	model.updateServer();
+		return model.saveServer(monitor);
+	}
+	
+	class RouteValidator extends MultiValidator {
+
+		private IObservableValue useDefaultRoute;
+		private IObservableValue selectedRoute;
+
+		public RouteValidator(IObservableValue useDefaultRoute, IObservableValue selectedRoute) {
+			this.useDefaultRoute = useDefaultRoute;
+			this.selectedRoute = selectedRoute;
+		}
+
+		@Override
+		protected IStatus validate() {
+			if (!Boolean.valueOf((Boolean) useDefaultRoute.getValue())) {
+				if (selectedRoute.getValue() == null) {
+					return ValidationStatus.cancel("You have to choose a route that will be used for this server adapter.");
+				}
+			}
+			return ValidationStatus.ok();
+		}
+		
+	}
 }

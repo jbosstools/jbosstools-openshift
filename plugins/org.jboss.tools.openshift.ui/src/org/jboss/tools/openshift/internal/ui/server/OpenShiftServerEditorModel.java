@@ -18,7 +18,9 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
@@ -37,8 +39,13 @@ public class OpenShiftServerEditorModel extends ServerSettingsViewModel {
   	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
   			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
   			String sourcePath, String podPath, Map<String, ProjectImageStreamTags> deploymentMapperByProjectName, 
-  			IService service, List<ObservableTreeItem> serviceItems) {
-  		update(connection, connections, deployProject, projects, sourcePath, podPath, deploymentMapperByProjectName, service, serviceItems);
+  			IService service, List<ObservableTreeItem> serviceItems, 
+  			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject) {
+  		update(connection, connections, 
+  				deployProject, projects, 
+  				sourcePath, podPath, deploymentMapperByProjectName, 
+  				service, serviceItems, 
+  				route, isSelectDefaultRoute, routesByProject);
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
 
@@ -48,7 +55,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsViewModel {
 
 	public void setOverrideProject(boolean overrideProject) {
 		update(overrideProject, getConnection(), getConnections(), getDeployProject(), getProjects(), 
-				getSourcePath(), getPodPath(), getImageStreamTagsMap(), getService(), getServiceItems());
+				getSourcePath(), getPodPath(), getImageStreamTagsMap(), getService(), getServiceItems(), getRoute(), isSelectDefaultRoute(), getAllRoutes());
 	}
 
 	@Override

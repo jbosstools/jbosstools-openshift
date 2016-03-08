@@ -8,11 +8,16 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.treeitem;
+package org.jboss.tools.openshift.internal.core;
 
 import java.util.List;
+import java.util.Set;
 
-public interface IModelFactory {
-	public <T> List<T> createChildren(Object model);
-	public ObservableTreeItem create(Object model);
+public interface IDockerImageMetadata {
+
+	Set<String> exposedPorts();
+	
+	List<String> env();
+	
+	Set<String> volumes();
 }

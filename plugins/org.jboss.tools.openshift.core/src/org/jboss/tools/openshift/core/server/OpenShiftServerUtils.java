@@ -12,15 +12,20 @@ package org.jboss.tools.openshift.core.server;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
+import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.eclipse.wst.server.core.model.ModuleDelegate;
@@ -42,7 +47,6 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IService;
-import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
@@ -70,6 +74,24 @@ public class OpenShiftServerUtils {
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.openshift.server.type";//$NON-NLS-1$
 
 	public static final String SERVER_START_ON_CREATION = "org.jboss.tools.openshift.SERVER_START_ON_CREATION";
+
+	public static IServer findServerForService(String serviceName) {
+		final IServerType serverType = getServerType();
+		final Optional<IServer> match = Stream.of(ServerCore.getServers())
+				.filter(server -> server.getServerType()
+						.equals(serverType)
+						&& server.getAttribute(OpenShiftServerUtils.ATTR_SERVICE, "").equals(serviceName))
+				.findAny();
+		if (match.isPresent()) {
+			return match.get();
+		} else {
+			return null;
+		}
+	}
+	
+	public static IServerType getServerType() {
+		return ServerCore.findServerType(OpenShiftServer.SERVER_TYPE_ID);
+	}
 	
 	public static String getServerName(IService service, Connection connection) {
 		if (service == null) {
@@ -89,36 +111,9 @@ public class OpenShiftServerUtils {
 	}
 
 	public static void updateServer(String serverName, String connectionUrl, IService service, String podPath, String sourcePath, IProject deployProject, String routeURL, IServerWorkingCopy server) {
-		String host = getHost(service);
 		String deployProjectName = ProjectUtils.getName(deployProject);
+		String host = UrlUtils.getHost(routeURL);
 		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, server);
-	}
-
-	private static String getHost(IService service) {
-		if (service == null) {
-			return null;
-		}
-
-		String host = null;
-
-		com.openshift.restclient.model.IProject project = service.getProject();
-		if (project != null) {
-
-			//TODO Ideally, we should use a route selected during the Server creation, in case there are several
-			//Until then, we'll fall back on always choosing the 1st route to open a browser
-			IRoute route = getRoute(project.getResources(ResourceKind.ROUTE));
-			if (route != null) {
-				host = route.getURL();
-			}
-		}
-		if (host == null) {
-			host = service.getPortalIP();
-		}
-		return host;
-	}
-
-	private static IRoute getRoute(List<IRoute> routes) {
-		return routes == null || routes.isEmpty()? null : routes.get(0);
 	}
 
 	/**
@@ -151,7 +146,7 @@ public class OpenShiftServerUtils {
 		updateServer(server);
 
 		server.setName(serverName);
-		server.setHost(UrlUtils.getHost(host));
+		server.setHost(host);
 
 		server.setAttribute(ATTR_CONNECTIONURL, connectionUrl);
 		server.setAttribute(ATTR_DEPLOYPROJECT, deployProjectName);
@@ -243,6 +238,12 @@ public class OpenShiftServerUtils {
 		return OPENSHIFT_SERVER_TYPE.equals(server.getServerType().getId());
 	}
 
+	public static IServerWorkingCopy create(String name) throws CoreException {
+		final IServerWorkingCopy serverWorkingCopy = 
+				(IServerWorkingCopy) getServerType().createServer(name, null, null);
+		return serverWorkingCopy;
+	}
+	
 //	public static ConnectionURL getConnectionUrl(IServerAttributes attributes) {
 //		try {
 //			String connectionUrlString = getProjectAttribute(
