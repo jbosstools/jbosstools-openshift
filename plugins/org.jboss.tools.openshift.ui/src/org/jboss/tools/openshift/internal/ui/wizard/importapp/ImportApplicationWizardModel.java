@@ -41,6 +41,7 @@ public class ImportApplicationWizardModel
 	private boolean useDefaultRepoPath;
 	private String projectName;
 	private IProject project;
+	private boolean skipClone = false;
 	
 	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
 
@@ -258,5 +259,15 @@ public class ImportApplicationWizardModel
 	@Override
 	public void setProject(IProject project) {
 		this.project = project;
+	}
+
+	@Override
+	public boolean getSkipClone() {
+		return skipClone;
+	}
+
+	@Override
+	public void setSkipClone(boolean b) {
+		skipClone = b;
 	}
 }

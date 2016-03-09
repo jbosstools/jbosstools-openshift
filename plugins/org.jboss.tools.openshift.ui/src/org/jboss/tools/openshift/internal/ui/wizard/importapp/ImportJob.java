@@ -41,6 +41,12 @@ public class ImportJob extends WorkspaceJob {
 	private String gitRef;
 	private Collection<String> filters;
 
+	/**
+	 * A constructor to clone from a git url and then import the project
+	 * @param gitUrl
+	 * @param cloneDestination
+	 * @param delegatingMonitor
+	 */
 	public ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
 		super("Importing project to workspace...");
 		setRule(ResourcesPlugin.getWorkspace().getRoot());
@@ -49,12 +55,33 @@ public class ImportJob extends WorkspaceJob {
 		this.delegatingMonitor = delegatingMonitor;
 	}
 
+	
+	/**
+	 * A constructor to clone from a git url and then import the project
+	 * @param gitUrl
+	 * @param cloneDestination
+	 * @param delegatingMonitor
+	 */
+	public ImportJob(File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
+		super("Importing project to workspace...");
+		setRule(ResourcesPlugin.getWorkspace().getRoot());
+		this.gitUrl = null;
+		this.cloneDestination = cloneDestination;
+		this.delegatingMonitor = delegatingMonitor;
+	}
+
+	
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
 			delegatingMonitor.add(monitor);
-			new ImportNewProject(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
-			return Status.OK_STATUS;
+			if( gitUrl == null ) {
+				new ImportNewProject(cloneDestination, filters).execute(delegatingMonitor);
+				return Status.OK_STATUS;
+			} else {
+				new ImportNewProject(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
+				return Status.OK_STATUS;
+			}
 		} catch (final WontOverwriteException e) {
 			openError("Project already present", e.getMessage());
 			return Status.CANCEL_STATUS;
