@@ -103,17 +103,32 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public boolean performFinish() {
-		boolean success = importProject();
+		boolean success = false;
+		if( model.getSkipClone()) {
+			success = importProjectSkipClone();
+		} else {
+			success = importProject();
+		}
 		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
 		return success;
 	}
 
+	private boolean importProjectSkipClone() {
+		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
+		ImportJob importJob = new ImportJob(model.getCloneDestination(), delegatingMonitor)
+				.setGitRef(model.getGitRef());
+		return importProject(importJob, delegatingMonitor);
+	}
+
 	private boolean importProject() {
+		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
+		ImportJob importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor)
+				.setGitRef(model.getGitRef());
+		return importProject(importJob, delegatingMonitor);
+	}
+
+	private boolean importProject(ImportJob importJob, DelegatingProgressMonitor delegatingMonitor) {
 		try {
-			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			ImportJob importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor)
-					.setGitRef(model.getGitRef());
-			
 			String gitContextDir = model.getGitContextDir();
 			if (!StringUtils.isEmptyOrNull(gitContextDir)) {
 				importJob.setFilters(Collections.singleton(gitContextDir));
@@ -126,7 +141,7 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 			return false;
 		}
 	}
-
+	
 	@Override
 	public Connection getConnection() {
 		return model.getConnection();

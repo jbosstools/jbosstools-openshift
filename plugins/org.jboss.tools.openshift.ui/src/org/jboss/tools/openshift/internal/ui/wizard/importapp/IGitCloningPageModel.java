@@ -17,6 +17,7 @@ public interface IGitCloningPageModel {
 
 	public String PROPERTY_REPOSITORY_PATH = "repositoryPath";
 	public String PROPERTY_USE_DEFAULT_REPOSITORY_PATH = "useDefaultRepositoryPath";
+	public String PROPERTY_SKIP_CLONE_ONLY_IMPORT = "skipCloneOnlyImport";
 	public String PROPERTY_PROJECT_NAME = "projectName";
 	
 	public void setRepositoryPath(String path);
@@ -29,5 +30,8 @@ public interface IGitCloningPageModel {
 	public String getProjectName();
 
 	public String getApplicationName();
+	
+	public boolean getSkipClone();
+	public void setSkipClone(boolean b);
 
 }

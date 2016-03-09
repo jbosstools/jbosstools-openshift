@@ -46,14 +46,38 @@ public class ImportNewProject {
 	private String gitUrl;
 	private String gitRef;
 	private Collection<String> filters;
+	private boolean skipClone;
 
+	/**
+	 * Constructor to both clone the repository and import the filtered projects
+	 * @param gitUrl
+	 * @param gitRef
+	 * @param cloneDestination
+	 * @param filters
+	 */
 	public ImportNewProject(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters) {
 		this.gitUrl = gitUrl;
 		this.gitRef = gitRef;
 		this.cloneDestination = cloneDestination;
 		this.filters = sanitize(filters);
+		this.skipClone = false;
 	}
 
+	
+	/**
+	 * Constructor to skip the clone and simply import the filtered projects from the destination
+	 * @param cloneDestination
+	 * @param filters
+	 */
+	public ImportNewProject(File cloneDestination, Collection<String> filters) {
+		this.cloneDestination = cloneDestination;
+		this.filters = sanitize(filters);
+		this.skipClone = true;
+	}
+
+	
+	
+	
 	/**
 	 * Imports the (new) project that the user has chosen into the workspace.
 	 * 
@@ -71,17 +95,26 @@ public class ImportNewProject {
 	public void execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
+		File repositoryFolder = null;
+		if( !skipClone ) {
+			repositoryFolder = executeClone(monitor);
+		} else {
+			repositoryFolder = cloneDestination;
+		}
+		
+		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
+		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+	}
+	
+	
+	private File executeClone(IProgressMonitor monitor) throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		if (cloneDestinationExists()) {
 			throw new WontOverwriteException(
 					NLS.bind("There's already a folder at {0}. The new OpenShift project would overwrite it. " +
 							"Please choose another destination to clone to.",
 							getCloneDestination().getAbsolutePath()));
 		}
-
-		File repositoryFolder =
-				cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
-		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
-		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+		return cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
 	}
 	
 	/**
