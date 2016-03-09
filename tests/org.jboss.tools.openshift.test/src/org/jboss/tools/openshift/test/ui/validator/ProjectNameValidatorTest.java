@@ -12,20 +12,16 @@ package org.jboss.tools.openshift.test.ui.validator;
 
 import java.util.Arrays;
 
-import org.eclipse.core.databinding.validation.IValidator;
 import org.jboss.tools.openshift.internal.ui.validator.ProjectNameValidator;
 import org.junit.Test;
 
 /**
  * @author jeff.cantrill
  */
-public class ProjectNameValidatorTest extends LabelValueValidatorTest {
+public class ProjectNameValidatorTest extends AbstractValidatorTest {
 
-	private ProjectNameValidator validator = new ProjectNameValidator("default message", Arrays.asList("nope","back off"));
-
-	@Override
-	protected IValidator getValidator() {
-		return validator;
+	public ProjectNameValidatorTest() {
+		super(new ProjectNameValidator("default message", Arrays.asList("nope","back off")));
 	}
 
 	@Test
@@ -58,24 +54,20 @@ public class ProjectNameValidatorTest extends LabelValueValidatorTest {
 		assertPass("projectname");
 	}
 
-	@Override
 	public void emptyValueShouldBeInvalid() {
 		assertCancel("");
 	}
 
-	@Override
 	public void valueWithSlashesShouldBeInValid() {
 		// Should be invalid, as opposed to regular LabelValueValidator behavior
 		assertFailure("abcd.efg/a23");
 	}
 
-	@Override
 	public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
 		// Should be invalid, as opposed to regular LabelValueValidator behavior
 		assertFailure("abcd.efg_k-123");
 	}
 
-	@Override
 	public void nullValueShouldBeInvalid() {
 		assertFailure(null);
 	}
