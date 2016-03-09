@@ -22,7 +22,7 @@ import org.eclipse.osgi.util.NLS;
  * 
  * @author Jeff Cantrill
  */
-public class DeployImageNameValidator implements IValidator {
+public class ServiceNameValidator implements IValidator {
 
 	private static final String CHAR_FMT = "[a-z0-9]";
 	private static final String EXT_CHAR_FMT = "[-a-z0-9]";
@@ -35,7 +35,7 @@ public class DeployImageNameValidator implements IValidator {
 	private final IStatus FAILED;
 	private final IStatus EMPTY_CANCEL;
 	
-	public DeployImageNameValidator() {
+	public ServiceNameValidator() {
 		FAILED = ValidationStatus.error(failureMessage);
 		EMPTY_CANCEL = ValidationStatus.cancel("Please provide a valid resource name.");
 	}
@@ -45,7 +45,7 @@ public class DeployImageNameValidator implements IValidator {
 		if(paramObject != null && !(paramObject instanceof String))
 			return ValidationStatus.cancel("Name is not an instance of a string");
 		String value= (String) paramObject;
-		if(StringUtils.isEmpty(value))
+		if(StringUtils.isBlank(value))
 			return EMPTY_CANCEL;
 		if(value.length() > MAXLENGTH) {
 			return ValidationStatus.error(NLS.bind("Maximum name length is {0} characters", MAXLENGTH));

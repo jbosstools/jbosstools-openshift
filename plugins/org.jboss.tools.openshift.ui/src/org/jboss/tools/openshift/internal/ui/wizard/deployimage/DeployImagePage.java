@@ -11,14 +11,13 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -73,7 +72,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
-import org.jboss.tools.openshift.internal.ui.validator.DeployImageNameValidator;
+import org.jboss.tools.openshift.internal.ui.validator.ServiceNameValidator;
 import org.jboss.tools.openshift.internal.ui.validator.DockerImageValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
@@ -433,11 +432,25 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				WidgetProperties.text(SWT.Modify).observe(resourceNameText);
 		final Binding nameBinding = ValueBindingBuilder
 				.bind(resourceNameTextObservable)
-				.validatingAfterConvert(new DeployImageNameValidator())
 				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_NAME).observe(model))
 				.in(dbc);
+		dbc.addValidationStatusProvider(new DeployImageNameValidator(resourceNameTextObservable));
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		
+	}
+	
+	private static class DeployImageNameValidator extends MultiValidator{
+		
+		private ServiceNameValidator validator = new ServiceNameValidator();
+		final private IObservableValue observable;
+		DeployImageNameValidator(IObservableValue observable){
+			this.observable = observable;
+		}
+		@Override
+		protected IStatus validate() {
+			return validator.validate(observable.getValue());
+		}
 		
 	}
 
