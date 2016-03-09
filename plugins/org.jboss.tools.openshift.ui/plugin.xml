@@ -1270,6 +1270,15 @@
 		</fragment>
 	</extension>
 	
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="org.jboss.tools.openshift.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
+            description="Launch Tabs for OpenShift 3 Server"
+            id="org.jboss.tools.openshift.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
+            type="org.jboss.tools.openshift.internal.core.behaviour.launchType"/>
+   </extension>
+
 	<!-- Core UI Integration: ssl certificate callback -->
  	<extension
 		point="org.jboss.tools.openshift.core.sslCertificateCallbackUI">
