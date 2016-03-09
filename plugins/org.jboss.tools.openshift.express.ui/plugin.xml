@@ -77,6 +77,14 @@
 		</fragment>
 	</extension>
 
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="org.jboss.tools.openshift.express.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
+            description="Launch Tabs for OpenShift 2 Server"
+            id="org.jboss.tools.openshift.express.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
+            type="org.jboss.tools.openshift.express.internal.core.behaviour.launchType"/>
+   </extension>
 	<!-- openshift tail files console -->
     <extension
           point="org.eclipse.ui.console.consolePageParticipants">
