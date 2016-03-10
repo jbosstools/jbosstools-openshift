@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -43,6 +44,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.restclient.authorization.IAuthorizationContext;
 
@@ -64,11 +66,14 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private DetailViewModel detailViewModel = new DetailViewModel();
 
 	private Button rememberTokenCheckbox;
+	private Button rememberPasswordCheckbox;
 	private ComboViewer authTypeViewer;
 	private IObservableValue rememberTokenObservable;
+	private IObservableValue rememberPasswordObservable;
 	private IObservableValue detailViewObservable;
 	private IObservableValue authSchemeObservable;
 	private Binding rememberTokenBinding;
+	private Binding rememberPasswordBinding;
 	private Binding selectedAuthTypeBinding;
 	
 	private class DetailViewModel extends ObservablePojo{
@@ -123,7 +128,9 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 		//remember token
 		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		this.rememberPasswordObservable = new WritableValue(Boolean.FALSE, Boolean.class);
 		this.rememberTokenCheckbox = new Button(parent, SWT.CHECK); //parent is reset further down
+		this.rememberPasswordCheckbox = new Button(parent, SWT.CHECK); //parent is reset further down
 
 		this.detailViewObservable = 
 				BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class).observe(detailViewModel);
@@ -134,7 +141,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, 
 				new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, rememberTokenCheckbox, authSchemeObservable));
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, 
-				new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable, rememberTokenCheckbox));
+				new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberPasswordObservable, rememberPasswordCheckbox));
 
 		// auth type
 		Label authTypeLabel = new Label(composite, SWT.NONE);
@@ -169,6 +176,12 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		this.rememberTokenCheckbox.setParent(composite);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberTokenCheckbox);
+		this.rememberPasswordCheckbox.setParent(composite);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckbox);
+		
+		UIUtils.setVisibleAndExclude(false, rememberTokenCheckbox);
+		UIUtils.setVisibleAndExclude(false, rememberPasswordCheckbox);
 		
 		return composite;
 	}
@@ -202,6 +215,10 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox))
 				.to(rememberTokenObservable)
 				.in(dbc);
+		this.rememberPasswordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckbox))
+				.to(rememberPasswordObservable)
+				.in(dbc);
 
 	}
 
@@ -213,6 +230,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 	private void disposeBindings() {
 		DataBindingUtils.dispose(rememberTokenBinding);
+		DataBindingUtils.dispose(rememberPasswordBinding);
 		DataBindingUtils.dispose(selectedAuthTypeBinding);
 		for (IDetailView view : stackedViews.getDetailViews()) {
 			view.dispose();

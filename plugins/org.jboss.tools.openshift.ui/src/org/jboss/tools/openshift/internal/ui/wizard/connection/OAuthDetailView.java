@@ -74,6 +74,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringCo
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ClientFactory;
@@ -145,11 +146,13 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
 		rememberTokenCheckbox.setText("&Save token (could trigger secure storage login)");
+		UIUtils.setVisibleAndExclude(true, rememberTokenCheckbox);
 	}
 	
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dispose();
+		UIUtils.setVisibleAndExclude(false, rememberTokenCheckbox);
 	}
 
 	@Override

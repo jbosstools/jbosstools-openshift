@@ -137,7 +137,6 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	@Override
 	public boolean isRememberPassword() {
 		return rememberPassword;
-		
 	}
 
 	public boolean isRememberToken() {
@@ -156,10 +155,22 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	public void save() {
 		//not using getters here because for save there should be no reason
 		//to trigger a load from storage.
-		boolean success = saveOrClear(SECURE_STORAGE_PASSWORD, this.password, isRememberPassword(), getSecureStore(getHost(), getUsername()));
-		if(success) {
-			//Avoid second secure storage prompt.
-			saveOrClear(SECURE_STORAGE_TOKEN, this.token, isRememberToken(), getSecureStore(getHost(), getUsername()));
+		if(!IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())) {
+			boolean success = saveOrClear(SECURE_STORAGE_PASSWORD, this.password, isRememberPassword(), getSecureStore(getHost(), getUsername()));
+			if(success) { //Avoid second secure storage prompt.
+				//Password is stored, token should be cleared.
+				setRememberToken(false);
+				token = null;
+				saveOrClear(SECURE_STORAGE_TOKEN, null, false, getSecureStore(getHost(), getUsername()));
+			}
+		} else {
+			boolean success = saveOrClear(SECURE_STORAGE_TOKEN, this.token, isRememberToken(), getSecureStore(getHost(), getUsername()));
+			if(success) { //Avoid second secure storage prompt.
+				//Token is stored, password should be cleared.
+				setRememberPassword(false);
+				password = null;
+				saveOrClear(SECURE_STORAGE_PASSWORD, null, false, getSecureStore(getHost(), getUsername()));
+			}
 		}
 		ConnectionURL url = ConnectionURL.safeForConnection(this);
 		if(url != null) {
@@ -300,6 +311,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		connection.setUsername(username);
 		connection.setPassword(password);
 		connection.setRememberPassword(rememberPassword);
+		connection.setRememberToken(rememberToken);
 		connection.setToken(token);
 		connection.setAuthScheme(authScheme);
 		connection.promptCredentialsEnabled = promptCredentialsEnabled;
