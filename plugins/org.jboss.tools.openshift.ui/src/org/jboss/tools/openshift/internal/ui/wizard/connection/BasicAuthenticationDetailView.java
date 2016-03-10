@@ -22,8 +22,10 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -37,6 +39,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringVa
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.restclient.authorization.IAuthorizationContext;
 
@@ -54,12 +57,11 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	private IObservableValue rememberPasswordObservable;
 	private IValueChangeListener changeListener;
 	private IConnectionAuthenticationProvider connectionAuthProvider;
-	private Button chkRememberToken;
+	private Button rememberPasswordCheckbox;
+	private Binding rememberPasswordBinding;
 	
-	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context, IObservableValue rememberPasswordObservable, Button chkRememberToken) {
+	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context) {
 		this.changeListener = changeListener;
-		this.rememberPasswordObservable = rememberPasswordObservable;
-		this.chkRememberToken = chkRememberToken;
 	}
 	
 	@Override
@@ -88,6 +90,12 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 		this.passwordObservable = new WritableValue(null, String.class);
 
+		this.rememberPasswordObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		this.rememberPasswordCheckbox = new Button(composite, SWT.CHECK);
+		rememberPasswordCheckbox.setText("&Save password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckbox);
+		
 		return composite;
 	}
 
@@ -100,7 +108,10 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		chkRememberToken.setText("&Save password (could trigger secure storage login)");
+		this.rememberPasswordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckbox))
+				.to(rememberPasswordObservable)
+				.in(dbc);
 	}
 	
 	@Override
@@ -119,6 +130,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		disposeBindings();
+		DataBindingUtils.dispose(rememberPasswordBinding);
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
@@ -186,8 +198,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 					connection.setUsername((String) usernameObservable.getValue());
 					connection.setPassword((String) passwordObservable.getValue());
 					connection.setRememberPassword(
-							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
-					connection.setRememberToken(
 							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
 				}
 			});

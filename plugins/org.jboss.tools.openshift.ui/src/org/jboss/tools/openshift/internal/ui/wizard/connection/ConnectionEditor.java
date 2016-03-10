@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -43,6 +44,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews.IDetailView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 import com.openshift.restclient.authorization.IAuthorizationContext;
 
@@ -63,12 +65,10 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private ConnectionEditorStackedDetailViews stackedViews ;
 	private DetailViewModel detailViewModel = new DetailViewModel();
 
-	private Button rememberTokenCheckbox;
 	private ComboViewer authTypeViewer;
 	private IObservableValue rememberTokenObservable;
 	private IObservableValue detailViewObservable;
 	private IObservableValue authSchemeObservable;
-	private Binding rememberTokenBinding;
 	private Binding selectedAuthTypeBinding;
 	
 	private class DetailViewModel extends ObservablePojo{
@@ -121,20 +121,17 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
 
-		//remember token
-		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
-		this.rememberTokenCheckbox = new Button(parent, SWT.CHECK); //parent is reset further down
-
 		this.detailViewObservable = 
 				BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class).observe(detailViewModel);
 		this.authSchemeObservable = 
 				BeanProperties.value("authScheme", String.class).observe(detailViewModel);
-		
 		//detail views
+		OAuthDetailView oAuthDetailView = new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), authSchemeObservable);
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, 
-				new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), rememberTokenObservable, rememberTokenCheckbox, authSchemeObservable));
+				oAuthDetailView);
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, 
-				new BasicAuthenticationDetailView(changeListener, pageModel.getContext(), rememberTokenObservable, rememberTokenCheckbox));
+				new BasicAuthenticationDetailView(changeListener, pageModel.getContext()));
+		rememberTokenObservable = oAuthDetailView.getRememberTokenObservable();
 
 		// auth type
 		Label authTypeLabel = new Label(composite, SWT.NONE);
@@ -165,11 +162,6 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				dbc);
 		stackedViews.createControls(false);
 		
-		//remember token
-		this.rememberTokenCheckbox.setParent(composite);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberTokenCheckbox);
-		
 		return composite;
 	}
 	
@@ -197,12 +189,6 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		ControlDecorationSupport
 				.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		
-		// remember token
-		this.rememberTokenBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox))
-				.to(rememberTokenObservable)
-				.in(dbc);
-
 	}
 
 	@Override
@@ -212,7 +198,6 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	}
 
 	private void disposeBindings() {
-		DataBindingUtils.dispose(rememberTokenBinding);
 		DataBindingUtils.dispose(selectedAuthTypeBinding);
 		for (IDetailView view : stackedViews.getDetailViews()) {
 			view.dispose();
