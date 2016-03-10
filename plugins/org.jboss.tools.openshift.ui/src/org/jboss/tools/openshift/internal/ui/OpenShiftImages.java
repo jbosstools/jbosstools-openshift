@@ -33,18 +33,22 @@ public class OpenShiftImages {
 
 	public static final ImageDescriptor BLOCKS = repo.create("blocks.png"); //$NON-NLS-1$ 
 	public static final Image BLOCKS_IMG = repo.getImage("blocks.png"); //$NON-NLS-1$ 
-	public static final ImageDescriptor BUILDCONFIG = repo.create("buildconfig.png"); //$NON-NLS-1$ 
-	public static final Image BUILDCONFIG_IMG = repo.getImage("buildconfig.png"); //$NON-NLS-1$ 
-	public static final ImageDescriptor GEAR = repo.create("gear.png"); //$NON-NLS-1$ 
-	public static final Image GEAR_IMG = repo.getImage("gear.png"); //$NON-NLS-1$ 
-	public static final ImageDescriptor LAYER = repo.create("layer.png"); //$NON-NLS-1$ 
-	public static final Image LAYER_IMG = repo.getImage("layer.png"); //$NON-NLS-1$ 
-	public static final ImageDescriptor COPY_TO_CLIPBOARD = repo.create("copy-to-clipboard.gif"); //$NON-NLS-1$ 
-	public static final Image COPY_TO_CLIPBOARD_IMG = repo.getImage("copy-to-clipboard.gif"); //$NON-NLS-1$ 
-	public static final ImageDescriptor OPEN_WEB_CONSOLE = repo.create("open-web-console.gif"); //$NON-NLS-1$ 
-	public static final Image OPEN_WEB_CONSOLE_IMG = repo.getImage("open-web-console.gif"); //$NON-NLS-1$ 
 	public static final ImageDescriptor BUILD = repo.create("build.png"); //$NON-NLS-1$
 	public static final Image BUILD_IMG = repo.getImage("build.png"); //$NON-NLS-1$
+	public static final ImageDescriptor BUILDCONFIG = repo.create("buildconfig.png"); //$NON-NLS-1$ 
+	public static final Image BUILDCONFIG_IMG = repo.getImage("buildconfig.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor COPY_TO_CLIPBOARD = repo.create("copy-to-clipboard.gif"); //$NON-NLS-1$ 
+	public static final Image COPY_TO_CLIPBOARD_IMG = repo.getImage("copy-to-clipboard.gif"); //$NON-NLS-1$ 
+	public static final ImageDescriptor IMAGE = repo.create("image.png"); //$NON-NLS-1$ 
+	public static final Image IMAGE_IMG = repo.getImage("image.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor OPEN_WEB_CONSOLE = repo.create("open-web-console.gif"); //$NON-NLS-1$ 
+	public static final Image OPEN_WEB_CONSOLE_IMG = repo.getImage("open-web-console.gif"); //$NON-NLS-1$ 
+	public static final ImageDescriptor PROJECT = repo.create("project.png"); //$NON-NLS-1$
+	public static final Image PROJECT_IMG = repo.getImage("project.png"); //$NON-NLS-1$
+	public static final ImageDescriptor SERVICE = repo.create("service.png"); //$NON-NLS-1$ 
+	public static final Image SERVICE_IMG = repo.getImage("service.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor ROUTE = repo.create("route.png"); //$NON-NLS-1$
+	public static final Image ROUTE_IMG = repo.getImage("route.png"); //$NON-NLS-1$
 
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
