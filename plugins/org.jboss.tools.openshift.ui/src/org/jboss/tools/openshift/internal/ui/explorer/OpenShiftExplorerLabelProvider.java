@@ -81,22 +81,24 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof Deployment) {
-			return OpenShiftImages.GEAR_IMG;
+			return OpenShiftImages.SERVICE_IMG;
 		} else if (element instanceof IResource || element instanceof IResourceUIModel) {
 			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
 			switch (resource.getKind()) {
+			case ResourceKind.BUILD:
+				return OpenShiftImages.BUILD_IMG;
 			case ResourceKind.BUILD_CONFIG:
 				return OpenShiftImages.BUILDCONFIG_IMG;
 			case ResourceKind.IMAGE_STREAM:
-				return OpenShiftImages.LAYER_IMG;
+				return OpenShiftImages.IMAGE_IMG;
 			case ResourceKind.POD:
 				return OpenShiftImages.BLOCKS_IMG;
 			case ResourceKind.PROJECT:
-				return OpenShiftCommonImages.GLOBE_IMG;
+				return OpenShiftImages.PROJECT_IMG;
+			case ResourceKind.ROUTE:
+				return OpenShiftImages.ROUTE_IMG;
 			case ResourceKind.SERVICE:
-				return OpenShiftImages.GEAR_IMG;
-			case ResourceKind.BUILD:
-				return OpenShiftImages.BUILD_IMG;
+				return OpenShiftImages.SERVICE_IMG;
 			default:
 				return OpenShiftCommonImages.FILE;
 			}
