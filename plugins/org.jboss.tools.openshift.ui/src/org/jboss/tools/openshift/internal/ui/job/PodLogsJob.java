@@ -41,24 +41,23 @@ import com.openshift.restclient.model.IPod;
 public class PodLogsJob extends AbstractDelegatingMonitorJob {
 	private static final String DOCUMENT_IS_CLOSED = "Document is closed";
 
-	private static final Map<IPod, ConsoleStreamPipe> REGISTRY = new HashMap<IPod, ConsoleStreamPipe>();
+	private static final Map<Key, ConsoleStreamPipe> REGISTRY = new HashMap<>();
 
+	private final Key key;
 
-	private IPod pod;
-
-	public PodLogsJob(IPod pod) {
+	public PodLogsJob(IPod pod, String containerName) {
 		super("FollowPodLogsJob");
-		this.pod = pod;
+		this.key = new Key(pod, containerName);
 	}
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			monitor.worked(IProgressMonitor.UNKNOWN);
-			if(REGISTRY.containsKey(pod)) {
+			if(REGISTRY.containsKey(key)) {
 				showConsole();
 			}else {
-				ConsoleStreamPipe pipe = pod.accept(new CapabilityVisitor<IPodLogRetrieval, ConsoleStreamPipe>() {
+				ConsoleStreamPipe pipe = key.pod.accept(new CapabilityVisitor<IPodLogRetrieval, ConsoleStreamPipe>() {
 
 					@Override
 					public ConsoleStreamPipe visit(final IPodLogRetrieval capability) {
@@ -69,7 +68,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 				}, null);
 				if(pipe != null) {
-					REGISTRY.put(pod, pipe);
+					REGISTRY.put(key, pipe);
 				}
 			}
 		}finally {
@@ -85,8 +84,52 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 	}
 	
 	private String getMessageConsoleName() {
-		return NLS.bind("{0}\\{1} log", pod.getNamespace(), pod.getName());
+		IPod pod = key.pod;
+		return NLS.bind("{0}\\{1}\\{2} log", new Object[] {pod.getNamespace(), pod.getName(), key.container});
 	}	
+	
+	
+	private static class Key{
+		final IPod pod;
+		final String container;
+		
+		Key(IPod pod, String containerName){
+			this.pod = pod;
+			this.container = containerName;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((container == null) ? 0 : container.hashCode());
+			result = prime * result + ((pod == null) ? 0 : pod.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Key other = (Key) obj;
+			if (container == null) {
+				if (other.container != null)
+					return false;
+			} else if (!container.equals(other.container))
+				return false;
+			if (pod == null) {
+				if (other.pod != null)
+					return false;
+			} else if (!pod.equals(other.pod))
+				return false;
+			return true;
+		}
+		
+	}
 	
 	private class ConsoleStreamPipe implements Runnable {
 		
@@ -108,7 +151,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 			final MessageConsole console = showConsole();
 			final MessageConsoleStream stream = console.newMessageStream();
 			try {
-				final InputStream logs = new BufferedInputStream(capability.getLogs(true));
+				final InputStream logs = new BufferedInputStream(capability.getLogs(true, key.container));
 				int c;
 				while(running && (c = logs.read()) != -1){
 					if(!stream.isClosed()) {
@@ -141,7 +184,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 				if(console.getName().equals(messageConsoleName)) {
 					try {
 						pipe.stop();
-						REGISTRY.remove(pod);
+						REGISTRY.remove(key);
 						return;
 					}finally {
 						ConsoleUtils.deregisterConsoleListener(this);

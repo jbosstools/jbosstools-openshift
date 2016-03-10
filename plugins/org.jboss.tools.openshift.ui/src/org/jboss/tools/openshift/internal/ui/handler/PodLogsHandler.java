@@ -10,13 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -27,6 +33,7 @@ import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
+import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
@@ -59,7 +66,29 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Logs Unavailable", NLS.bind("The log is unavailable while the pod is in {0} state.", pod.getStatus()));
 			return;
 		}
-		new PodLogsJob(pod).schedule();
+		Collection<IContainer> containers = pod.getContainers();
+		if(containers.isEmpty()) {
+			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Logs Unavailable", "There are no containers from which to retrieve logs");
+			return;
+		}
+		String containerName = null;
+		if(containers.size() > 1) {
+			List<String> names = containers.stream().map(c->c.getName()).collect(Collectors.toList());
+			Collections.sort(names);
+			ElementListSelectionDialog dialog = new ElementListSelectionDialog(HandlerUtil.getActiveShell(event), new LabelProvider());
+			dialog.setElements(names.toArray());
+			dialog.setTitle("Pod Containers");
+			dialog.setMessage("Select a pod container");
+			dialog.setMultipleSelection(false);
+			int result = dialog.open();
+			if(Window.CANCEL == result) {
+				return;
+			}
+			containerName = (String) dialog.getFirstResult();
+		}else if (containers.size() == 1){
+			containerName = containers.iterator().next().getName();
+		}
+		new PodLogsJob(pod, containerName).schedule();
 	}
 
 	private IPod getPodFromBuild(ISelection selection) {
