@@ -10,8 +10,12 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
+import java.util.ArrayList;
+
+import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 import org.junit.Test;
 
@@ -24,20 +28,43 @@ public class VagrantPollerTest extends TestCase {
 		VagrantPollerSub sub = new VagrantPollerSub();
 
 		String[] output = vagrant18_out(CDKConstants.STATE_RUNNING);
-		assertEquals(IStatus.OK, sub.parseOutput2(output));
+		assertEquals(IStatus.OK, sub.parseOutput2(output).getSeverity());
 		
 		output = vagrant18_out(CDKConstants.STATE_POWEROFF);
-		assertEquals(IStatus.ERROR, sub.parseOutput2(output));
+		assertEquals(IStatus.ERROR, sub.parseOutput2(output).getSeverity());
 		
 		output = vagrant18_out(CDKConstants.STATE_SHUTOFF);
-		assertEquals(IStatus.ERROR, sub.parseOutput2(output));
+		assertEquals(IStatus.ERROR, sub.parseOutput2(output).getSeverity());
 		
 		output = vagrant17_out(CDKConstants.STATE_RUNNING);
-		assertEquals(IStatus.OK, sub.parseOutput2(output));
+		assertEquals(IStatus.OK, sub.parseOutput2(output).getSeverity());
 		output = vagrant17_out(CDKConstants.STATE_POWEROFF);
-		assertEquals(IStatus.ERROR, sub.parseOutput2(output));
+		assertEquals(IStatus.ERROR, sub.parseOutput2(output).getSeverity());
 		output = vagrant17_out(CDKConstants.STATE_SHUTOFF);
-		assertEquals(IStatus.ERROR, sub.parseOutput2(output));
+		assertEquals(IStatus.ERROR, sub.parseOutput2(output).getSeverity());
+		
+	}
+	
+	@Test
+	public void testErrorStatus() {
+		final ArrayList<IStatus> statList = new ArrayList<IStatus>();
+		ILogListener listener = new ILogListener() {
+			public void logging(IStatus status, String plugin) {
+				statList.add(status);
+			}
+		};
+		CDKCoreActivator.getDefault().getLog().addLogListener(listener);
+
+		
+		String[] output = vagrant18_error();
+		assertTrue(statList.size() == 0);
+		VagrantPollerSub sub = new VagrantPollerSub();
+		assertTrue(statList.size() == 0);
+		IStatus result = sub.parseOutput2(output);
+		CDKCoreActivator.getDefault().getLog().removeLogListener(listener);
+		
+		assertEquals(IStatus.ERROR, result.getSeverity());
+		assertTrue(statList.size() == 1);
 		
 	}
 	
@@ -52,10 +79,12 @@ public class VagrantPollerTest extends TestCase {
 				"1457045944,cdk,state-human-short," + state,
 				"1457045944,cdk,state-human-long,The blahblahtruncated\n"};
 	}
-	
+	private String[] vagrant18_error() {
+		return new String[]{"1457536005,,error-exit,Vagrant::Errors::ProviderNotUsable,The provider 'virtualbox' that was requested to back the machine\n'cdk' is reporting that it isn't usable on this system. The\nreason is shown below:\n\nVagrant could not detect VirtualBox! Make sure VirtualBox is properly installed.\nVagrant uses the `VBoxManage` binary that ships with VirtualBox%!(VAGRANT_COMMA) and requires\nthis to be available on the PATH. If VirtualBox is installed%!(VAGRANT_COMMA) please find the\n`VBoxManage` binary and add it to the PATH environmental variable"};
+	}
 	
 	private class VagrantPollerSub extends VagrantPoller {
-		public int parseOutput2(String[] lines) {
+		public IStatus parseOutput2(String[] lines) {
 			return parseOutput(lines);
 		}
 	}
