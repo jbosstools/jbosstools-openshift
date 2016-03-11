@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -43,7 +44,6 @@ public class ADBInfo {
 		}
 	}
 	
-	
 	/**
 	 * Run the remote vagrant command to create an adbinfo from a server
 	 * @param server
@@ -53,19 +53,12 @@ public class ADBInfo {
 	public static ADBInfo loadADBInfo(IServer server) {
 		
 		String[] args = new String[]{CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
-		HashMap<String,String> env = new HashMap<String,String>(System.getenv());
+    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+
+    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, cdkServer.getPassword());
 		
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
-		
-    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
-		if( passCredentials ) {
-			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
-			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
-			env.put(userKey, cdkServer.getUsername());
-			env.put(passKey, cdkServer.getPassword());
-		}
-		
+
 		HashMap<String,String> adbEnv = new HashMap<String,String>();
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);

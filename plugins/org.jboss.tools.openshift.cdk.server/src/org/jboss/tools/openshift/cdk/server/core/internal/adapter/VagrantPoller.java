@@ -17,9 +17,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -30,6 +32,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKLaunchEnvironmentUtil;
 
 public class VagrantPoller implements IServerStatePoller2 {
 	private IServer server;
@@ -71,8 +74,10 @@ public class VagrantPoller implements IServerStatePoller2 {
 		setStateInternal(false, state);
     	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
     	String pass = cdkServer.getPassword();
+    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, pass);
 		while(aborted == null && !canceled && !done) {
-			int status = onePing(server, pass);
+			IStatus stat = onePing(server, env);
+			int status = stat.getSeverity();
 			boolean completeUp = ( status == IStatus.OK && expectedState);
 			boolean completeDown = (status == IStatus.ERROR && !expectedState);
 			if( completeUp || completeDown) {
@@ -135,26 +140,16 @@ public class VagrantPoller implements IServerStatePoller2 {
 	// This *could* prompt for a password, so dont use this method for repeated calls
 	private int onePing(IServer server) {
     	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-    	return onePing(server, cdkServer.getPassword());
+    	IStatus stat = onePing(server, CDKLaunchEnvironmentUtil.createEnvironment(server, cdkServer.getPassword()));
+    	return stat.getSeverity();
 	}
-	
-	private int onePing(IServer server, String password) {
+		
+	private IStatus onePing(IServer server, Map<String,String> env) {
 
 		String[] args = new String[]{CDKConstants.VAGRANT_CMD_STATUS, 
 				CDKConstants.VAGRANT_FLAG_MACHINE_READABLE, CDKConstants.VAGRANT_FLAG_NO_COLOR};
-		HashMap<String,String> env = new HashMap<String,String>(System.getenv());
-		
-    	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
-		
-    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
-		if( passCredentials ) {
-			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
-			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
-			env.put(userKey, cdkServer.getUsername());
-			env.put(passKey, password);
-		}
-		
+    	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);		
+
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
   	        return parseOutput(lines);
@@ -166,7 +161,7 @@ public class VagrantPoller implements IServerStatePoller2 {
     		// TODO
     		ioe.printStackTrace();
     	}
-		return IStatus.INFO;
+		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
 	}
 	
 	private class VagrantStatus implements CDKConstants {
@@ -186,7 +181,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 	
 	
-	protected int parseOutput(String[] lines) {
+	protected IStatus parseOutput(String[] lines) {
 		HashMap<String, VagrantStatus> status = new HashMap<String, VagrantStatus>();
 		if( lines != null && lines.length > 0 ) {
 			for( int i = 0; i < lines.length; i++ ) {
@@ -205,9 +200,23 @@ public class VagrantPoller implements IServerStatePoller2 {
 						if( k != null ) {
 							vs.setProperty(k,v);
 						}
-					} //else {
-					  // The given line has no vm id, so it is not relevant here. 
-					  //}
+					} else {
+					   if( csv.length >= 3) {
+						   if( csv[2].equals("error-exit")) {
+							   CoreException ce = null;
+							   IStatus s = null;
+							   if( csv.length >= 5) {
+								   s = CDKCoreActivator.statusFactory().errorStatus(csv[4]);
+							   } else {
+								   s = CDKCoreActivator.statusFactory().errorStatus("An error occurred while checking CDK state.");
+							   }
+							   
+							   ce = new CoreException(s);
+							   CDKCoreActivator.pluginLog().logError("Unable to access CDK status via vagrant status.", ce);
+							   return s;
+						   }
+					   }
+					  }
 				} //else {
 				  // The given line isn't csv or doesn't have at least 2 items in the csv array
 				  // and so should be ignored
@@ -217,15 +226,15 @@ public class VagrantPoller implements IServerStatePoller2 {
 		}		
 		Collection<VagrantStatus> stats = status.values();
 		if( stats.size() == 0 ) {
-			return IStatus.ERROR;
+			return CDKCoreActivator.statusFactory().errorStatus("Unable to retrieve vagrant status for the given CDK");
 		}
 		if( allRunning(stats)) {
-			return IStatus.OK;
+			return Status.OK_STATUS;
 		}
 		if( allStopped(stats)) {
-			return IStatus.ERROR;
+			return CDKCoreActivator.statusFactory().errorStatus("Vagrant status indicates the CDK is stopped: " + String.join("\n", Arrays.asList(lines)));
 		}
-		return IStatus.INFO;
+		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
 	}
 	
 	private boolean allRunning(Collection<VagrantStatus> stats) {
