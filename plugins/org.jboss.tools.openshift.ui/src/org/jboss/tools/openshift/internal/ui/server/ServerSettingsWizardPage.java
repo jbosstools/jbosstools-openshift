@@ -114,9 +114,10 @@ import com.openshift.restclient.model.route.IRoute;
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
 	static final String IS_LOADING_SERVICES = "isLoadingServices";
 
-	private final ServerSettingsViewModel model;
-	private boolean needsLoadingResources = true;
-	private boolean isLoadingResources = false;
+	protected ServerSettingsViewModel model;
+	protected boolean needsLoadingResources = true;
+	protected boolean isLoadingResources = false;
+	protected Control uiHook = null;
 
 	private final IService defaultService;
 	private final IRoute defaultRoute;
@@ -287,6 +288,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		createProjectControls(container, model, dbc);
 		createServiceControls(container, model, dbc);
 		createAdvancedGroup(container, dbc);
+		uiHook = container;
 		return container;
 	}
 
@@ -731,34 +733,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		};
 	}
 
-	void reloadServices() {
-		final IWizardContainer container = getContainer();
-		if(!needsLoadingResources || container == null) {
-			return;
-		}
-
-		try {
-			//getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
-			this.isLoadingResources = true;
-			container.updateButtons();
-			WizardUtils.runInWizard(new Job("Loading services...") {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					//only reload services.
-					ServerSettingsWizardPage.this.model.loadResources(model.getConnection());
-					ServerSettingsWizardPage.this.needsLoadingResources = false;
-					return Status.OK_STATUS;
-				}
-			}, container);
-		} catch (InvocationTargetException | InterruptedException e) {
-			// swallow intentionally
-		} finally {
-			this.needsLoadingResources = false;
-			this.isLoadingResources = false;
-			//getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingServices);
-			container.updateButtons();
-		}
+	@Override
+	public void dispose() {
+		super.dispose();
+		uiHook = null;
+		//not good set model to null here
 	}
 
+    @Override
+	public boolean isPageComplete() {
+        return !isLoadingResources && uiHook != null && !uiHook.isDisposed() && 
+    			!needsLoadingResources && model != null && model.getService() != null && super.isPageComplete();
+    }
 }
