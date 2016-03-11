@@ -203,20 +203,53 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	public void stopPortForwarding() {
 		if(!isPortForwarding(pod)) return;
 		IPortForwardable cap = REGISTRY.remove(pod);
+		MessageConsoleStream stream = null;
 		try {
 			final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
-			MessageConsoleStream stream = console.newMessageStream();
+			stream = console.newMessageStream();
 			stream.println("Stopping port-forwarding...");
 			cap.stop();
+			waitForStoppingProcessComplete(stream);
+
 			for (IPortForwardable.PortPair port : ports) {
 				stream.println(NLS.bind("{0} {1} -> {2}", new Object [] {port.getName(), port.getLocalPort(), port.getRemotePort()}));
 			}
-			stream.println("done.");
+			if(!hasPortInUse()) {
+				stream.println("done.");
+			} else {
+				stream.println("Ports remain in use yet. Stopping ports is requested and eventually will be completed.");
+			}
 			ConsoleUtils.displayConsoleView(console);
 			firePropertyChange(PROPERTY_PORT_FORWARDING, true, getPortForwarding());
 			updatePortForwardingAllowed();
 		}finally {
+			if(stream != null) {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
 			ConsoleUtils.deregisterConsoleListener(consoleListener);					
+		}
+	}
+
+	/**
+	 * Wait up to 5 seconds until the forcibly destroyed process really dies.
+	 * 
+	 * @param stream
+	 */
+	private void waitForStoppingProcessComplete(MessageConsoleStream stream) {
+		for (int i = 0; i < 50 && hasPortInUse(); i++) {
+			if(i % 10 == 0) {
+				//report once a second;
+				stream.println("Waiting for port-forwarding to stop...");
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				break;
+			}
 		}
 	}
 
