@@ -12,9 +12,10 @@ package org.jboss.tools.openshift.internal.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,7 +52,7 @@ public class WatchManager {
 			ResourceKind.ROUTE
 	};
 	
-	private Map<IProject, IWatcher> watches = Collections.synchronizedMap(new HashMap<>());
+	private Map<IProject, ConcurrentMap<String,IWatcher>> watches = new ConcurrentHashMap<>();
 	
 	private static class Holder {
 		static WatchManager instance = new WatchManager();
@@ -61,22 +62,28 @@ public class WatchManager {
 		return Holder.instance;
 	}
 	
-	public 	void stopWatch(IProject project) {
-		if(watches.containsKey(project)){
-			watches.remove(project).stop();
+	public void stopWatch(IProject project) {
+		Map<String, IWatcher>  watchList = watches.remove(project);
+		if(watchList != null) {
+			watchList.values().forEach(w->w.stop());
 		}
 	}
 
 	public void startWatch(final IProject project) {
-		if(!watches.containsKey(project)){
-			startWatch(project, 0, 0);
+		ConcurrentMap<String, IWatcher> kindMap = new ConcurrentHashMap<>();
+		if(watches.putIfAbsent(project, kindMap) == null){
+			final Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
+			if(conn == null) return;
+			for (String kind: KINDS) {
+				WatchListener listener = new WatchListener(project, conn, kind, 0, 0);
+				startWatch(project, 0, 0, listener);
+			}
 		}
 	}
 	
-	private void startWatch(final IProject project, int backoff, long lastConnect) {
-		final Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
-		final WatchListener listener = new WatchListener(project, conn, backoff, lastConnect);
-		listener.start();
+	private void startWatch(final IProject project, int backoff, long lastConnect, WatchListener listener) {
+		if(listener == null) return;
+		listener.start(backoff, lastConnect);
 	}
 
 	private static enum State {
@@ -91,17 +98,20 @@ public class WatchManager {
 		
 		final private Connection conn;
 		final private IProject project;
+		final private String kind;
 		private int backoff = 0;
 		private long lastConnect = 0;
 		private AtomicReference<State> state = new AtomicReference<>(State.DISCONNECTED);
 		private List<IResource> resources = Collections.synchronizedList(new ArrayList<>());
 
-		public WatchListener(IProject project, Connection conn, int backoff, long lastConnect) {
-			Trace.debug("Adding WatchListener for {0}", project.getName());
+
+		public WatchListener(IProject project, Connection conn, String kind, int backoff, long lastConnect) {
+			Trace.debug("Adding WatchListener for {0} and kind {1}", project.getName(), kind);
 			this.project = project;
 			this.conn = conn;
 			this.backoff = backoff;
 			this.lastConnect = lastConnect;
+			this.kind = kind;
 			
 			if(System.currentTimeMillis() - lastConnect > BACKOFF_RESET) {
 				backoff = 0;
@@ -124,25 +134,26 @@ public class WatchManager {
 
 		@Override
 		public void error(Throwable err) {
-			Trace.warn("Reconnecting. There was an error watching connection {0}:", err, conn.toString());
+			Trace.warn("Reconnecting. There was an error watching connection {0}: ", err, conn.toString());
 			restart();
 		}
 		
-		private synchronized void restart() {
-			if(state.get() == State.DISCONNECTED) {
-				Trace.debug("Restart called but returning early because already disconnected");
+		private void restart() {
+			if(state.get() == State.STARTING) {
+				Trace.debug("Returning early from restart.  Already starting for project {0} and kind {1}", project.getName(), kind);
 				return;
 			}
-			state.set(State.DISCONNECTED);
-			Trace.debug("Rescheduling watch job for project {0}", project.getName());
-			startWatch(project, backoff, lastConnect);
+			Trace.debug("Rescheduling watch job for project {0} and kind {1}", project.getName(), kind);
+			startWatch(project, backoff, lastConnect, this);
 		}
-		
+
+
+
 		private class RestartWatchJob extends Job{
 			private IClient client;
 
 			RestartWatchJob(IClient client){
-				super("");
+				super("OpenShift WatchMananger Job");
 				this.client = client;
 			}
 
@@ -151,16 +162,16 @@ public class WatchManager {
 				try {
 					connect(client);
 				}catch(Exception e) {
-					Trace.debug("Exception starting watch on project {0}",e,project.getName());
+					Trace.debug("Exception starting watch on project {0} and {1} kind",e,project.getName(), kind);
 					backoff++;
 					if(backoff >= FIBONACCI.length) {
-						Trace.info("Exceeded backoff attempts trying to reconnect watch for {0}",project.getName());
+						Trace.info("Exceeded backoff attempts trying to reconnect watch for {0} and kind {1}",project.getName(), kind);
 						watches.remove(project);
 						state.set(State.DISCONNECTED);
 						return Status.OK_STATUS;
 					}
 					final long delay = FIBONACCI[backoff] * BACKOFF_MILLIS;
-					Trace.debug("Delaying watch restart by {0}ms", delay);
+					Trace.debug("Delaying watch restart by {0}ms for project {1} and kind {2} ", delay, project.getName(), kind);
 					new RestartWatchJob(client).schedule(delay);
 				}
 				return Status.OK_STATUS;
@@ -168,13 +179,14 @@ public class WatchManager {
 			
 		}
 		
-		public void start() {
-			if(state.get() == State.STARTING) {
+		public void start(int backoff, long lastConnect){
+			if(state.getAndSet(State.STARTING) == State.STARTING) {
 				Trace.debug("In the process of starting watch already.  Returning early");
 				return;
 			}
-			state.set(State.STARTING);
-			Trace.info("Starting watch on project {0}", project.getName());
+			this.backoff = backoff;
+			this.lastConnect = lastConnect;
+			Trace.info("Starting watch on project {0} for kind {1}", project.getName(), kind);
 			IClient client = getClientFor(project);
 			if(client != null) {
 				new RestartWatchJob(client).schedule();
@@ -182,9 +194,12 @@ public class WatchManager {
 		}
 		
 		private void connect(IClient client) {
-			watches.put(project, client.watch(project.getName(), this, KINDS));
-			state.set(State.CONNECTED);
-			lastConnect = System.currentTimeMillis();
+			if(watches.containsKey(project)) {
+				Map<String, IWatcher> all = watches.get(project);
+				all.put(kind, client.watch(project.getName(), this, kind));
+				state.set(State.CONNECTED);
+				lastConnect = System.currentTimeMillis();
+			}
 		}
 		
 		private IClient getClientFor(IProject project) {
