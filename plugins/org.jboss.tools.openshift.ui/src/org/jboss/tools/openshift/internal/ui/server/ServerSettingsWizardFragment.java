@@ -12,10 +12,14 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -30,6 +34,7 @@ import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
@@ -55,7 +60,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				if(evt.getNewValue() == null || evt.getNewValue() instanceof Connection)  {
 					Connection newConnection = (Connection)evt.getNewValue();
 					if(newConnection != serverSettingsWizardPage.getModel().getConnection() && wizardContainer != null) {
-						//needsLoadingServices = true;
+						serverSettingsWizardPage.needsLoadingResources = true;
 						serverSettingsWizardPage.getModel().setConnection(newConnection);
 						serverSettingsWizardPage.getModel().setServiceItems(new ArrayList<>());
 						serverSettingsWizardPage.setComplete(false);
@@ -65,7 +70,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					//do nothing
 				}
 			} else if(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
-				//needsLoadingServices = true;
+				serverSettingsWizardPage.needsLoadingResources = true;
 				serverSettingsWizardPage.getModel().setServiceItems(new ArrayList<>());
 				serverSettingsWizardPage.setComplete(false);
 				wizardContainer.updateButtons();
@@ -102,11 +107,13 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		if(this.serverSettingsWizardPage != null) {
 			this.serverSettingsWizardPage.getModel().updateServer();
 		}
+		serverSettingsWizardPage.unhook();
 		super.performFinish(monitor); //only removes handle, it should be done after successful update only.
 	}
 
 	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
+		serverSettingsWizardPage.unhook();
 		super.performCancel(monitor);
 	}
 
@@ -175,7 +182,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	}
 
 	
-	static class ServerSettingsWizardPageWrapper extends ServerSettingsWizardPage {
+	class ServerSettingsWizardPageWrapper extends ServerSettingsWizardPage {
 		private IWizardHandle wizardHandle;
 
 		private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
@@ -205,6 +212,42 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
 			onPageWillGetDeactivated(direction, event, null);
 		}
+
+		void reloadServices() {
+			final IWizardContainer container = getContainer();
+			if(!needsLoadingResources || container == null) {
+				return;
+			}
+
+			try {
+				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
+				this.isLoadingResources = true;
+				container.updateButtons();
+				WizardUtils.runInWizard(new Job("Loading services...") {
+
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						//only reload services.
+						ServerSettingsWizardPageWrapper.this.model.loadResources(model.getConnection());
+						ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
+						return Status.OK_STATUS;
+					}
+				}, container);
+			} catch (InvocationTargetException | InterruptedException e) {
+				// swallow intentionally
+			} finally {
+				this.needsLoadingResources = false;
+				this.isLoadingResources = false;
+				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
+				container.updateButtons();
+			}
+		}
+	
+		void unhook() {
+			uiHook = null;
+			model = null;
+		}
+
 	}
 
 }
