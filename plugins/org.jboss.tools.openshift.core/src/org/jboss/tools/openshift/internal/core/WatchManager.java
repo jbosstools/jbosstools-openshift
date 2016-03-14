@@ -15,11 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.core.internal.runtime.Log;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,7 +25,6 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
-import org.omg.PortableInterceptor.DISCARDING;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IOpenShiftWatchListener;
@@ -73,26 +69,23 @@ public class WatchManager {
 
 	public void startWatch(final IProject project) {
 		if(!watches.containsKey(project)){
-			startWatch(project, 0, 0, null);
+			startWatch(project, 0, 0);
 		}
 	}
 	
-	private void startWatch(final IProject project, int backoff, long lastConnect, WatchListener listener) {
+	private void startWatch(final IProject project, int backoff, long lastConnect) {
 		final Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
-		if(listener == null) {
-			listener = new WatchListener(project, conn, backoff, lastConnect);
-		}
-		listener.start(backoff, lastConnect);
+		final WatchListener listener = new WatchListener(project, conn, backoff, lastConnect);
+		listener.start();
 	}
 
 	private static enum State {
 		STARTING,
 		CONNECTED,
-		RESTARTING,
 		DISCONNECTED
 	}
 	
-	private class WatchListener implements IOpenShiftWatchListener, Runnable{
+	private class WatchListener implements IOpenShiftWatchListener{
 		
 		private static final int NOT_FOUND = -1;
 		
@@ -102,7 +95,6 @@ public class WatchManager {
 		private long lastConnect = 0;
 		private AtomicReference<State> state = new AtomicReference<>(State.DISCONNECTED);
 		private List<IResource> resources = Collections.synchronizedList(new ArrayList<>());
-		private CyclicBarrier barrier;
 
 		public WatchListener(IProject project, Connection conn, int backoff, long lastConnect) {
 			Trace.debug("Adding WatchListener for {0}", project.getName());
@@ -110,7 +102,6 @@ public class WatchManager {
 			this.conn = conn;
 			this.backoff = backoff;
 			this.lastConnect = lastConnect;
-			barrier = new CyclicBarrier(KINDS.length, this);
 			
 			if(System.currentTimeMillis() - lastConnect > BACKOFF_RESET) {
 				backoff = 0;
@@ -137,28 +128,16 @@ public class WatchManager {
 			restart();
 		}
 		
-		private void restart() {
-			try {
-				barrier.await();
-			} catch (InterruptedException | BrokenBarrierException e) {
-				Trace.error("There was an error awaing barrier restart", e);
-			}finally{
-				barrier.reset();
-			}
-		}
-		
-		
-		@Override
-		public void run() {
-			if(state.get() == State.STARTING) {
+		private synchronized void restart() {
+			if(state.get() == State.DISCONNECTED) {
+				Trace.debug("Restart called but returning early because already disconnected");
 				return;
 			}
+			state.set(State.DISCONNECTED);
 			Trace.debug("Rescheduling watch job for project {0}", project.getName());
-			startWatch(project, backoff, lastConnect, this);
+			startWatch(project, backoff, lastConnect);
 		}
-
-
-
+		
 		private class RestartWatchJob extends Job{
 			private IClient client;
 
@@ -189,13 +168,12 @@ public class WatchManager {
 			
 		}
 		
-		public void start(int backoff, long lastConnect){
-			if(state.getAndSet(State.STARTING) == State.STARTING) {
+		public void start() {
+			if(state.get() == State.STARTING) {
 				Trace.debug("In the process of starting watch already.  Returning early");
 				return;
 			}
-			this.backoff = backoff;
-			this.lastConnect = lastConnect;
+			state.set(State.STARTING);
 			Trace.info("Starting watch on project {0}", project.getName());
 			IClient client = getClientFor(project);
 			if(client != null) {
@@ -204,12 +182,9 @@ public class WatchManager {
 		}
 		
 		private void connect(IClient client) {
-			IWatcher old = watches.put(project, client.watch(project.getName(), this, KINDS));
+			watches.put(project, client.watch(project.getName(), this, KINDS));
 			state.set(State.CONNECTED);
 			lastConnect = System.currentTimeMillis();
-			if(old != null) {
-				old.stop();
-			}
 		}
 		
 		private IClient getClientFor(IProject project) {
