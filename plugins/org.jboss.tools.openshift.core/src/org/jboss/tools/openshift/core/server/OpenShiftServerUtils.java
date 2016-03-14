@@ -15,12 +15,16 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
+import org.eclipse.wst.server.core.model.ModuleDelegate;
+import org.eclipse.wst.server.core.util.ProjectModule;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
@@ -74,6 +78,7 @@ public class OpenShiftServerUtils {
 				.toString();
 	}
 
+	@Deprecated // no callers
 	public static void updateServer(String serverName, String connectionUrl, IService service, String podPath, String sourcePath, IProject deployProject, IServerWorkingCopy server) {
 		updateServer(serverName, connectionUrl, service, podPath, sourcePath, deployProject, null, server);
 	}
@@ -131,6 +136,7 @@ public class OpenShiftServerUtils {
 	 *            the remote for the server adapter
 	 * @param applicationName
 	 *            the application name for the server adapter
+	 * @deprecated no callers
 	 */
 	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName, String serviceId, String sourcePath, String podPath, IServerWorkingCopy server) {
 		updateServer(serverName, host, connectionUrl, deployProjectName, serviceId, sourcePath, podPath, null, server);
@@ -193,6 +199,18 @@ public class OpenShiftServerUtils {
 		}
 	}
 
+
+	public static IModule findProjectModule(IProject p) {
+		IModule[] all = org.eclipse.wst.server.core.ServerUtil.getModules(p);
+		for( int i = 0; i < all.length; i++ ) {
+			ModuleDelegate md = (ModuleDelegate)all[i].loadAdapter(ModuleDelegate.class, new NullProgressMonitor());
+			if( md instanceof ProjectModule && !(md instanceof org.eclipse.jst.j2ee.internal.deployables.BinaryFileModuleDelegate)) {
+				return all[i];
+			}
+		}
+		return null;
+	}
+	
 	public static IProject getDeployProject(IServerAttributes attributes) {
 		// TODO: implement override project settings with server settings
 		return ProjectUtils.getProject(getDeployProjectName(attributes));
