@@ -20,6 +20,8 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.security.OpenShiftSecureStorageKeyTest;
+import org.jboss.tools.openshift.test.core.server.OpenShiftModuleDeploymentPrefsUtilTest;
+import org.jboss.tools.openshift.test.core.server.OpenShiftSubsystemTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
@@ -77,9 +79,12 @@ import org.junit.runners.Suite.SuiteClasses;
 	URIUtilsTest.class,
 	WebhooksPropertySourceTest.class,
 	ConnectionWizardPageModelTest.class,
-	ConnectionsFactoryTest.class
+	ConnectionsFactoryTest.class,
 	// triggers secure storage prompt
 	//SecureStorageTest.class
+	
+	OpenShiftSubsystemTest.class, 
+	OpenShiftModuleDeploymentPrefsUtilTest.class
 })
 /**
  * @author Andre Dietisheim
