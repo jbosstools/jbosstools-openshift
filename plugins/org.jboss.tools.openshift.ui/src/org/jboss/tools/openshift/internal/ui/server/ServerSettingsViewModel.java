@@ -23,13 +23,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerUtil;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.server.ServerUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
@@ -51,6 +57,7 @@ import com.openshift.restclient.model.IService;
  * @author Andre Dietisheim
  */
 public class ServerSettingsViewModel extends ServiceViewModel {
+	
 
 	public static final String PROPERTY_DEPLOYPROJECT = "deployProject";
 	public static final String PROPERTY_PROJECTS = "projects";
@@ -294,6 +301,7 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 	
 	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
 		String connectionUrl = getConnectionUrl(getConnection());
+		
 		//Compute default name
 		String baseServerName = OpenShiftServerUtils.getServerName(getService(), getConnection());
 		//Find a free name based on the computed name
@@ -301,8 +309,33 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		String routeURL = isSelectDefaultRoute() && getRoute() != null ? getRoute().getURL() : null;
 		OpenShiftServerUtils.updateServer(
 				serverName, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
+		
+		// Set the profile
+		String profile = getProfileId();
+		ServerProfileModel.setProfile(server, profile);
+		
 		OpenShiftServerUtils.updateServerProject(
 				connectionUrl, getService(), sourcePath, podPath, routeURL, deployProject);
+		
+		IModule[] matchingModules = ServerUtil.getModules(deployProject);
+		if( matchingModules != null && matchingModules.length > 0) {
+			try {
+				server.modifyModules(matchingModules, new IModule[]{}, new NullProgressMonitor());
+			} catch(CoreException ce) {
+				throw new OpenShiftException(ce, "Could not get add modules to server ", server.getName());
+			}
+		}
+	}
+	
+	private String getProfileId() {
+		// currently supported profiles are openshift3   or   openshift3.eap
+		// we need to determine if the current service represents an app that requires
+		// eap-style behavior or normal behavior
+		String template = getService().getLabels().get("template");
+		if( template != null && template.startsWith("eap")) {
+			return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP;
+		}
+		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
 	}
 
 	private String getConnectionUrl(Connection connection) {
