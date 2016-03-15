@@ -67,7 +67,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 						@Override
 						public void run() {
 							final String message = NLS.bind(
-									"Results of deploying image \"{0}\".",  getModel().getName());
+									"Results of deploying image \"{0}\".",  getModel().getResourceName());
 							new ResourceSummaryDialog(
 									getShell(), 
 									deployJob.getResources(),

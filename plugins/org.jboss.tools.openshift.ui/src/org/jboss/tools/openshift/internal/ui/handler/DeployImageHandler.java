@@ -41,7 +41,7 @@ public class DeployImageHandler extends AbstractHandler {
 			IDockerConnection dockerConnection = image.getConnection();
 			model.setOriginatedFromDockerExplorer(true);
 			model.setDockerConnection(dockerConnection);
-			model.setImage(image.repo());
+			model.setImageName(image.repo());
 		}else{
 			final IProject project = UIUtils.getFirstElement(selection, IProject.class);
 			if(project != null) {

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,11 +29,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
-import org.eclipse.swt.widgets.Display;
 import org.jboss.dmr.ModelNode;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -43,7 +40,6 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.search.DockerHubRegistry;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
@@ -67,8 +63,8 @@ public class DeployImageWizardModel
 	private static final int DEFAULT_REPLICA_COUNT = 1;
 	private Connection connection;
 	private IProject project;
-	private String name;
-	private String image;
+	private String resourceName;
+	private String imageName;
 	private Collection<IProject> projects = Collections.emptyList();
 
 	private List<EnvironmentVariable> environmentVariables = Collections.emptyList();
@@ -88,7 +84,6 @@ public class DeployImageWizardModel
 	IServicePort selectedServicePort = null;
 	
 	private IDockerConnection dockerConnection;
-	private boolean imageInfoInitialized;
 	private ArrayList<IServicePort> imagePorts;
 	private boolean originatedFromDockerExplorer;
 	private IDockerImageMetadata imageMeta;
@@ -205,90 +200,57 @@ public class DeployImageWizardModel
 	}
 
 	@Override
-	public String getName() {
-		return this.name;
+	public String getResourceName() {
+		return this.resourceName;
 	}
 
 	@Override
-	public void setName(String name) {
-		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
+	public void setResourceName(String resourceName) {
+		firePropertyChange(PROPERTY_RESOURCE_NAME, this.resourceName, this.resourceName = resourceName);
 	}
 
 	@Override
-	public String getImage() {
-		return this.image;
+	public String getImageName() {
+		return this.imageName;
 	}
 
 	@Override
-	public void setImage(String image) {
-		if(StringUtils.isBlank(image)) return;
-		firePropertyChange(PROPERTY_IMAGE, this.image, this.image = image);
-		DockerImageURI uri = new DockerImageURI(image);
-		setName(uri.getName());
-		resetImageInfo();
-		initContainerInfo();
+	public void setImageName(final String imageName) {
+		if(StringUtils.isBlank(imageName)) {
+			return;
+		}
+		firePropertyChange(PROPERTY_IMAGE_NAME, this.imageName, this.imageName = imageName);
+		final DockerImageURI uri = new DockerImageURI(imageName);
+		setResourceName(uri.getName());
 	}
 	
-	private void resetImageInfo() {
-		setEnvironmentVariables(new ArrayList<>());
-		setVolumes(new ArrayList<>());
-		setPortSpecs(new ArrayList<>());
+	@Override
+	public boolean initializeContainerInfo() {
+		this.imageMeta = lookupImageMetadata();
+		if (this.imageMeta == null) {
+			return false;
+		}
+		final List<EnvironmentVariable> envVars = this.imageMeta.env().stream().filter(env -> env.indexOf('=') != -1)
+				.map(env -> env.split("=")).map(splittedEnv -> new EnvironmentVariable(splittedEnv[0], splittedEnv[1]))
+				.collect(Collectors.toList());
+		setEnvironmentVariables(envVars);
+		final List<IPort> portSpecs = this.imageMeta.exposedPorts().stream().map(spec -> new PortSpecAdapter(spec))
+				.collect(Collectors.toList());
+		setPortSpecs(portSpecs);
+		if(this.imageMeta.volumes() != null && !this.imageMeta.volumes().isEmpty()) {
+			setVolumes(new ArrayList<>(this.imageMeta.volumes()));
+		} else {
+			setVolumes(new ArrayList<>());
+		}
 		setReplicas(DEFAULT_REPLICA_COUNT);
-		imageInfoInitialized = false;
+		return true;
 	}
-
+	
 	@Override
 	public List<EnvironmentVariable> getEnvironmentVariables() {
 		return environmentVariables;
 	}
 	
-	private synchronized void initContainerInfo() {
-		IDockerImageMetadata info = getDockerMetaData();
-		if(info == null) return;
-		setEnvVars(info.env());
-		
-		List<IPort> portSpecs = new ArrayList<>();
-		Set<String> specs = info.exposedPorts();
-		for (String spec : specs) {
-			try {
-				portSpecs.add(new PortSpecAdapter(spec));
-			}catch(IllegalArgumentException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logError(e);
-			}
-		}
-		setPortSpecs(portSpecs);
-		setVolumes(new ArrayList<>(info.volumes()));
-		imageInfoInitialized = true;
-	}
-	
-	private IDockerImageMetadata getDockerMetaData() {
-		if(imageMeta != null) {//pulled by importImageStream
-			return imageMeta;
-		}
-		if(imageInfoInitialized || dockerConnection == null) 
-			return null;
-		DockerImageURI image = new DockerImageURI(getImage());
-		String repo =  image.getUriWithoutTag();
-		String tag = StringUtils.defaultIfBlank(image.getTag(),"latest");
-		if(dockerConnection.hasImage(repo, tag)) {
-			IDockerImageInfo info = dockerConnection.getImageInfo(getImage());
-			return new DockerConfigMetaData(info);
-		}
-		if(importDockerMetaData(image)) {
-			//try again to import - setImage w/o imageExists
-			return imageMeta;
-		}
-		return null;
-	}
-	
-	private void setEnvVars(List<String> env) {
-		List<EnvironmentVariable> envVars = new ArrayList<>(env.size());
-		for (String var : env) {
-			String[] split = var.split("=");
-			envVars.add(new EnvironmentVariable(split[0], split[1]));
-		}
-		setEnvironmentVariables(envVars);
-	}
 	@Override
 	public void setEnvironmentVariables(List<EnvironmentVariable> envVars) {
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, 
@@ -502,57 +464,31 @@ public class DeployImageWizardModel
 				.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
 	}
 
-	@Override
-	public boolean imageExistsLocally(final String imageName) {
-		if (dockerConnection == null || StringUtils.isBlank(imageName)) {
-			return false;
-		}
-		DockerImageURI uri = new DockerImageURI(imageName);
-		String repo =  uri.getUriWithoutTag();
-		boolean hasImage = dockerConnection.hasImage(repo, uri.getTag());
-		if(!hasImage) {
-			return importDockerMetaData(uri);
-		}
-		//make sure to reset if based on fetching from docker connection
-		imageMeta = null; 
-		return hasImage;
-	}
 	
-	@SuppressWarnings("rawtypes")
-	private boolean importDockerMetaData(DockerImageURI image) {
-		if(this.project != null && project.supports(IImageStreamImportCapability.class)) {
-			IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
+	
+	private IDockerImageMetadata lookupImageMetadata() {
+		if (dockerConnection == null || StringUtils.isBlank(this.imageName)) {
+			return null;
+		}
+		final DockerImageURI imageURI = new DockerImageURI(this.imageName);
+		final String repo = imageURI.getUriWithoutTag();
+		final String tag = StringUtils.defaultIfBlank(imageURI.getTag(), "latest");
+		if (dockerConnection.hasImage(repo, tag)) {
+			final IDockerImageInfo info = dockerConnection.getImageInfo(this.imageName);
+			return new DockerConfigMetaData(info);
+		} else if (this.project != null && project.supports(IImageStreamImportCapability.class)) {
+			final IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
 			try {
-				IImageStreamImport streamImport = cap.importImageMetadata(image);
-				Optional status = streamImport.getImageStatus()
-						.stream()
-						.filter(s->STATUS_SUCCESS.equalsIgnoreCase(s.getStatus()))
-						.findFirst();
-				if(status.isPresent()) {
-					this.imageMeta = new ImportImageMetaData(streamImport.getImageJsonFor(image));
-					return true;
+				final IImageStreamImport streamImport = cap.importImageMetadata(imageURI);
+				if (streamImport.getImageStatus().stream().filter(s -> STATUS_SUCCESS.equalsIgnoreCase(s.getStatus()))
+						.findFirst().isPresent()) {
+					return new ImportImageMetaData(streamImport.getImageJsonFor(imageURI));
 				}
-			}catch(OpenShiftException e) {
+			} catch (OpenShiftException e) {
 				OpenShiftUIActivator.getDefault().getLogger().logError(e);
 			}
 		}
-		return false;
-	}
-	
-	@Override
-	public boolean imageExistsRemotely(String imageName) {
-		try {
-			final DockerImageURI imageURI = new DockerImageURI(imageName);
-			final String repo =  imageURI.getUriWithoutTag();
-			final List<String> registryTags = new DockerHubRegistry().getTags(repo);
-			if(registryTags.contains(imageURI.getTag())) {
-				return true;
-			}
-		} catch (OpenShiftException e) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to search Docker Image",
-					e.getMessage());
-		}
-		return false;
+		return null;
 	}
 	
 	@Override
@@ -607,9 +543,9 @@ public class DeployImageWizardModel
 		private static final String[] PORTS = (String [])ArrayUtils.add(ROOT, "ExposedPorts");
 		private static final String[] ENV = (String [])ArrayUtils.add(ROOT, "Env");
 		private static final String[] VOLUMES = (String [])ArrayUtils.add(ROOT, "Volumes");
-		private ModelNode node;
+		private final ModelNode node;
 
-		public ImportImageMetaData(String json) {
+		public ImportImageMetaData(final String json) {
 			this.node = ModelNode.fromJSONString(json);
 		}
 
