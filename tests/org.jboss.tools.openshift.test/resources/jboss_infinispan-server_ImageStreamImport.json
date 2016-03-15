@@ -1,0 +1,112 @@
+{ "image" : { "dockerImageLayers" : [ { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:196355c4b639d30f63444b2b00b2a5f24cfc8b274cefd2428294c06da0e0ba5d",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:833495e2e417afdb64c6dbf8d393c927025471cd0787c3f45aae2f2097b41be7",
+            "size" : 0
+          },
+          { "name" : "sha256:70c1882a134d1458ea37a86aab02de52900a6b62ca7e586a6bafc0e8a7679ebe",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:24e5c2759a019c32e893f46044ab65b2ace121a75029f75a133b0fefbdbccbf2",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:c141cdef0ee7288df9ab123fa2326fa493864ccc03b85724372ca0257f1d458b",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          },
+          { "name" : "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
+            "size" : 0
+          }
+        ],
+      "dockerImageMetadata" : { "Architecture" : "amd64",
+          "Config" : { "Cmd" : [ "/opt/jboss/infinispan-server/bin/standalone.sh",
+                  "-b",
+                  "0.0.0.0"
+                ],
+              "Env" : [ "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                  "JAVA_HOME=/usr/lib/jvm/java",
+                  "INFINISPAN_SERVER_HOME=/opt/jboss/infinispan-server",
+                  "INFINISPAN_VERSION=8.2.0.Final"
+                ],
+              "Hostname" : "0bc4c5093a7b",
+              "Image" : "sha256:372b2032fbbb34aa7b92c381dd76451a96480d98ec2faaa659a22fb0db6fc70a",
+              "Labels" : { "build-date" : "2016-03-04",
+                  "license" : "GPLv2",
+                  "name" : "CentOS Base Image",
+                  "vendor" : "CentOS"
+                },
+              "User" : "jboss",
+              "WorkingDir" : "/opt/jboss"
+            },
+          "Container" : "18b5908c5510742f941fa6cffd50ef58412d6aea4bd5d84876b573e4e4bffa22",
+          "ContainerConfig" : { "Cmd" : [ "/bin/sh",
+                  "-c",
+                  "#(nop) CMD [\"/opt/jboss/infinispan-server/bin/standalone.sh\" \"-b\" \"0.0.0.0\"]"
+                ],
+              "Env" : [ "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                  "JAVA_HOME=/usr/lib/jvm/java",
+                  "INFINISPAN_SERVER_HOME=/opt/jboss/infinispan-server",
+                  "INFINISPAN_VERSION=8.2.0.Final"
+                ],
+              "Hostname" : "0bc4c5093a7b",
+              "Image" : "sha256:372b2032fbbb34aa7b92c381dd76451a96480d98ec2faaa659a22fb0db6fc70a",
+              "Labels" : { "build-date" : "2016-03-04",
+                  "license" : "GPLv2",
+                  "name" : "CentOS Base Image",
+                  "vendor" : "CentOS"
+                },
+              "User" : "jboss",
+              "WorkingDir" : "/opt/jboss"
+            },
+          "Created" : "2016-03-09T11:50:07Z",
+          "DockerVersion" : "1.10.2",
+          "Id" : "141205cf24586e16b48d42d93cd03d57dd8307e9cd4f1ef77ab1e4320a1f097b",
+          "Parent" : "8bb456f5ee9806279f4eb94916ef97db8974796489d7713a1bf071003ab6cf1e",
+          "apiVersion" : "1.0",
+          "kind" : "DockerImage"
+        },
+      "dockerImageMetadataVersion" : "1.0",
+      "dockerImageReference" : "jboss/infinispan-server@sha256:8613bec96ddf9d4c67d3f2a927a3802d3209431e989f965dcb290198dbe0656f",
+      "metadata" : { "name" : "sha256:8613bec96ddf9d4c67d3f2a927a3802d3209431e989f965dcb290198dbe0656f" }
+    },
+  "status" : { "status" : "Success" },
+  "tag" : "latest"
+}

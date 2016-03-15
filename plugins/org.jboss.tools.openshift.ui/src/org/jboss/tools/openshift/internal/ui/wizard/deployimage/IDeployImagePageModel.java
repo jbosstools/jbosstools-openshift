@@ -31,8 +31,8 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	static final String PROPERTY_DOCKER_CONNECTION = "dockerConnection";
 	static final String PROPERTY_PROJECTS = "projects";
 	static final String PROPERTY_PROJECT = "project";
-	static final String PROPERTY_NAME = "name";
-	static final String PROPERTY_IMAGE = "image";
+	static final String PROPERTY_RESOURCE_NAME = "resourceName";
+	static final String PROPERTY_IMAGE_NAME = "imageName";
 	
 	/**
 	 * 
@@ -67,35 +67,40 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	void setProject(IProject project);
 	
 	/**
-	 * The name to be used for the deployed resources
-	 * @return
+	 * @return the name to be used for the deployed resources
 	 */
-	String getName();
-	void setName(String name);
+	String getResourceName();
 	
 	/**
-	 * The docker image to use
-	 * @return
+	 * Sets the name to be used for the deployed resources
+	 * @param resourceName the name to be used for the deployed resources
 	 */
-	String getImage();
-	void setImage(String image);
+	void setResourceName(String resourceName);
 	
 	/**
-	 * Checks if an image with the given name exists in the selected Docker daemon
-	 * @param imageName the full name of the image to search locally
-	 * @return true if the image exists in the select Docker's registry cache
+	 * @return the name of the Docker Image to use
 	 */
-	boolean imageExistsLocally(String imageName);
-
+	String getImageName();
+	
 	/**
-	 * Checks if an image with the given name exists in a remote registry
-	 * @param imageName the full name of the image to search remotely
-	 * @return true if the image exists in a remote registry
+	 * Sets the name of the Docker Image to use
+	 * @param imageName the name of the Docker Image to use
 	 */
-	boolean imageExistsRemotely(String imageName);
+	void setImageName(String imageName);
 	
 	/**
 	 * @return the list of names of all images for the current Docker connection.
 	 */
 	List<String> getImageNames();
+	
+	/**
+	 * Initializes the container info from the selected Docker Image.
+	 * 
+	 * <p>
+	 * <strong>Note:</strong> This operation can be consuming since it may
+	 * involve remote calls to retrive the Docker Image metadata.
+	 * 
+	 * @return <code>true</code> if the initialization succeeded, <code>false</code> otherwise.
+	 */
+	boolean initializeContainerInfo();
 }

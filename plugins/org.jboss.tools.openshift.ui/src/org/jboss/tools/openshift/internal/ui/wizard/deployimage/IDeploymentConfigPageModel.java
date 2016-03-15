@@ -32,7 +32,7 @@ public interface IDeploymentConfigPageModel {
 
 	String PROPERTY_REPLICAS = "replicas";
 	
-	String getName();
+	String getResourceName();
 
 	List<EnvironmentVariable> getEnvironmentVariables();
 	void setEnvironmentVariables(List<EnvironmentVariable> envVars);
