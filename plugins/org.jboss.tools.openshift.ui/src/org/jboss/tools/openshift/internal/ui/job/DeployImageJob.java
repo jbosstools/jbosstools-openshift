@@ -75,7 +75,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		try {
 			final Connection connection = parameters.getConnection();
 			final IResourceFactory factory = connection.getResourceFactory();
-			final String name = parameters.getName();
+			final String name = parameters.getResourceName();
 			Map<String, IResource> resources = generateResources(factory, name);
 			
 			//validate 
@@ -89,7 +89,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		}catch(Exception e) {
 			return new Status(IStatus.ERROR, 
 					OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind("Unable to create resources to deploy image {0}", parameters.getImage()),
+					NLS.bind("Unable to create resources to deploy image {0}", parameters.getImageName()),
 					e);
 		}
 		return Status.OK_STATUS;
@@ -115,7 +115,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 
 	private Map<String, IResource> generateResources(final IResourceFactory factory, final String name) {
 		final IProject project = parameters.getProject();
-		DockerImageURI sourceImage = new DockerImageURI(parameters.getImage());
+		DockerImageURI sourceImage = new DockerImageURI(parameters.getImageName());
 		
 		Map<String, IResource> resources = new HashMap<String, IResource>(4);
 

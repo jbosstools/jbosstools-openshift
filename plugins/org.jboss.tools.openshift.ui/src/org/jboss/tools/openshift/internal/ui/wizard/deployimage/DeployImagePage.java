@@ -114,7 +114,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	 * @param dbc
 	 *            the current data binding context
 	 */
-	protected void onPageWillGetDeactivated(Direction progress, PageChangingEvent event, DataBindingContext dbc) {
+	protected void onPageWillGetDeactivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
 		
 		/**
 		 * Inner class to perform the image search in the selected Docker daemon cache or on the remote registry. 
@@ -125,43 +125,25 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				super(name);
 			}
 
-			private boolean imageExistsLocally = false;
-			private boolean imageExistsRemotely = false;
-			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				this.imageExistsLocally = model.imageExistsLocally(model.getImage());
-				if(!imageExistsLocally) {
-					this.imageExistsRemotely = model.imageExistsRemotely(model.getImage());
+				if(model.initializeContainerInfo()) {
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
+				return Status.CANCEL_STATUS;
 			}
 		}
 		
 		final ImageValidatorJob imageValidator = new ImageValidatorJob("Looking-up the selected Docker image...");
 		try {
 			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer());
-			if (imageValidator.imageExistsLocally) {
-				return;
-			} else if (imageValidator.imageExistsRemotely) {
-				if (!MessageDialog.openConfirm(getShell(), "Missing Docker Image",
-						"The metadata for the Docker image named '" + model.getImage()
-								+ "' will need to be pulled before opening the next page.")) {
-					event.doit = false;
-				}
-			} 
-			// validation job was not cancelled but no image was found
-			else if(validatorJobStatus.isOK()){
+			if (!validatorJobStatus.isOK()) {
 				MessageDialog.openError(getShell(), "Error",
-						"No Docker image named '" + model.getImage() + "' could be found.");
-				event.doit = false;
-			}
-			// validation job was cancelled
-			else {
+						"No Docker image named '" + model.getImageName() + "' could be found.");
 				event.doit = false;
 			}
 		} catch (InvocationTargetException | InterruptedException e) {
-			final String message = "Failed to verify if an image named '" + model.getImage() + "' exists.";
+			final String message = "Failed to look-up metadata for a Docker image named '" + model.getImageName() + "'.";
 			MessageDialog.openError(getShell(), "Error", message);
 			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 		}
@@ -191,7 +173,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText());
 				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
 					//this bypasses validation
-					model.setImage(wizard.getSelectedImage());
+					model.setImageName(wizard.getSelectedImage());
 				}
 			}
 		};
@@ -343,7 +325,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	private void createImageNameControls(final Composite parent, final DataBindingContext dbc) {
 		//Image
 		final Label imageNameLabel = new Label(parent, SWT.NONE);
-		imageNameLabel.setText("Image: ");
+		imageNameLabel.setText("Image Name: ");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(imageNameLabel);
@@ -354,7 +336,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.applyTo(imageNameText);
 		final IObservableValue imageNameTextObservable = 
 				WidgetProperties.text(SWT.Modify).observeDelayed(500, imageNameText);
-		final IObservableValue imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE).observe(model);
+		final IObservableValue imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
 		Binding imageBinding = ValueBindingBuilder.bind(imageNameTextObservable)
 				.validatingAfterConvert(new DockerImageValidator())
 				.to(imageNameObservable).in(dbc);
@@ -432,7 +414,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				WidgetProperties.text(SWT.Modify).observe(resourceNameText);
 		final Binding nameBinding = ValueBindingBuilder
 				.bind(resourceNameTextObservable)
-				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_NAME).observe(model))
+				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_RESOURCE_NAME).observe(model))
 				.in(dbc);
 		dbc.addValidationStatusProvider(new DeployImageNameValidator(resourceNameTextObservable));
 		ControlDecorationSupport.create(

@@ -225,7 +225,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 				IDeploymentConfigPageModel.PROPERTY_VOLUMES).observe(model));
 		
 		Label lblNotice = new Label(sectionContainer, SWT.WRAP);
-		lblNotice.setText(NLS.bind("NOTICE: This image might use an EmptyDir volume. Data in EmptyDir volumes is not persisted across deployments.", model.getName()));
+		lblNotice.setText(NLS.bind("NOTICE: This image might use an EmptyDir volume. Data in EmptyDir volumes is not persisted across deployments.", model.getResourceName()));
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL)
 			.span(2,2)
