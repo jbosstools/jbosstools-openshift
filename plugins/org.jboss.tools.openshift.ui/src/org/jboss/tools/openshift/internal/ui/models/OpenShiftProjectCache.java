@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,24 +54,27 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 	
 	@Override
 	public Collection<IProjectAdapter> getProjectsFor(final IOpenShiftConnection conn) {
-		Set<IProjectAdapter> adapters = null;
-		boolean initialize = false;
-		synchronized (cache) {
-			if(initialize = !hasCacheFor(conn)) {
-				// new entry
-				adapters = createEntry(conn);
-			}
-		}
-		if(initialize) {
+		Set<IProjectAdapter> adapters = getCacheFor(conn);
+		if(adapters == null) {
 			Collection<IProject> projects = conn.<IProject>getResources(ResourceKind.PROJECT);
-			synchronized (adapters) {
-				for (IProject p : projects) {
-					addNewProjectAdapter(adapters, conn, p);
+			boolean initialize = false;
+			synchronized (cache) {
+				adapters = getCacheFor(conn);
+				if(adapters == null) {
+					initialize = true;
+					adapters = createEntry(conn);
 				}
 			}
-			adapters.forEach(a->notifyAdd(a));
+			if(initialize) {
+				synchronized (adapters) {
+					for (IProject p : projects) {
+						addNewProjectAdapter(adapters, conn, p);
+					}
+				}
+				adapters.forEach(a->notifyAdd(a));
+			}
 		}
-		return new ArrayList<>(getCacheFor(conn));
+		return new ArrayList<>(adapters);
 	}
 
 	@Override
@@ -106,7 +110,13 @@ public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistr
 		final String key = getCacheKey(conn);
 		return cache.containsKey(key);
 	}
-	
+
+	/**
+	 * Returns set of project adapters or null if they are not initialized for the connection.
+	 * 
+	 * @param conn
+	 * @return
+	 */
 	private Set<IProjectAdapter> getCacheFor(IOpenShiftConnection conn) {
 		synchronized (cache) {
 			final String key = getCacheKey(conn);
