@@ -98,20 +98,24 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private IAuthorizationDetails authDetails;
 	private ConnectionWizardPageModel pageModel;
 	private Button rememberTokenCheckbox;
+	private Binding rememberTokenBinding;
 
 	private IWizard wizard;
 
 	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, 
-			IObservableValue rememberTokenObservable, Button rememberTokenCheckbox, IObservableValue authSchemeObservable) {
+			IObservableValue authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
-		this.rememberTokenObservable = rememberTokenObservable;
+		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
 		this.authSchemeObservable = authSchemeObservable;
 		this.changeListener = changeListener;
-		this.rememberTokenCheckbox = rememberTokenCheckbox;
 		if (context instanceof IAuthorizationDetails) {
 			this.authDetails = (IAuthorizationDetails) context;
 		}
+	}
+
+	IObservableValue getRememberTokenObservable() {
+		return rememberTokenObservable;
 	}
 	
 	@Override
@@ -139,20 +143,27 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(tokenText);
 		this.tokenObservable = new WritableValue(null, String.class);
 
+		this.rememberTokenCheckbox = new Button(composite, SWT.CHECK);
+		rememberTokenCheckbox.setText("&Save token (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+		.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberTokenCheckbox);
+
 		return composite;
 	}
 	
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		rememberTokenCheckbox.setText("&Save token (could trigger secure storage login)");
-		UIUtils.setVisibleAndExclude(true, rememberTokenCheckbox);
+		this.rememberTokenBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox))
+				.to(rememberTokenObservable)
+				.in(dbc);
 	}
 	
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dispose();
-		UIUtils.setVisibleAndExclude(false, rememberTokenCheckbox);
+		DataBindingUtils.dispose(rememberTokenBinding);
 	}
 
 	@Override

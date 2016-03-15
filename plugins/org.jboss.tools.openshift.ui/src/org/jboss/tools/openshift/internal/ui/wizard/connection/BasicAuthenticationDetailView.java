@@ -57,12 +57,11 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	private IObservableValue rememberPasswordObservable;
 	private IValueChangeListener changeListener;
 	private IConnectionAuthenticationProvider connectionAuthProvider;
-	private Button chkRememberToken;
+	private Button rememberPasswordCheckbox;
+	private Binding rememberPasswordBinding;
 	
-	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context, IObservableValue rememberPasswordObservable, Button chkRememberToken) {
+	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context) {
 		this.changeListener = changeListener;
-		this.rememberPasswordObservable = rememberPasswordObservable;
-		this.chkRememberToken = chkRememberToken;
 	}
 	
 	@Override
@@ -91,6 +90,12 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 		this.passwordObservable = new WritableValue(null, String.class);
 
+		this.rememberPasswordObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		this.rememberPasswordCheckbox = new Button(composite, SWT.CHECK);
+		rememberPasswordCheckbox.setText("&Save password (could trigger secure storage login)");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckbox);
+		
 		return composite;
 	}
 
@@ -103,8 +108,10 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
-		chkRememberToken.setText("&Save password (could trigger secure storage login)");
-		UIUtils.setVisibleAndExclude(true, chkRememberToken);
+		this.rememberPasswordBinding = ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckbox))
+				.to(rememberPasswordObservable)
+				.in(dbc);
 	}
 	
 	@Override
@@ -123,7 +130,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		disposeBindings();
-		UIUtils.setVisibleAndExclude(false, chkRememberToken);
+		DataBindingUtils.dispose(rememberPasswordBinding);
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
@@ -192,8 +199,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 					connection.setPassword((String) passwordObservable.getValue());
 					connection.setRememberPassword(
 							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
-//					connection.setRememberToken(
-//							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
 				}
 			});
 
