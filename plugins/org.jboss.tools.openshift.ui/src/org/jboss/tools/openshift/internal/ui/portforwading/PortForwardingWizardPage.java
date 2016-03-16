@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.portforwading;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
@@ -53,6 +54,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.OpenShiftException;
@@ -66,10 +68,12 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 	
 	private static final IPluginLog LOG = OpenShiftUIActivator.getDefault().getLogger();
 	private final PortForwardingWizardModel wizardModel;
-	private TableViewer viewer;
-	private Button startButton;
-	private Button stopButton;
 
+	/**
+	 * Constructor.
+	 * @param wizardModel the wizard model
+	 * @param portForwardingWizard the parent wizard
+	 */
 	public PortForwardingWizardPage(final PortForwardingWizardModel wizardModel, final PortForwardingWizard portForwardingWizard) {
 		super("Port forwarding", null,
 				"PortForwardingWizardPage", portForwardingWizard);
@@ -85,18 +89,18 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(container);
 
 		Composite tableContainer = new Composite(container, SWT.NONE);
-		this.viewer = createTable(tableContainer, dbc);
+		final TableViewer viewer = createTable(tableContainer, dbc);
 		GridDataFactory.fillDefaults().span(1, 3).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 
-		startButton = new Button(container, SWT.PUSH);
+		final Button startButton = new Button(container, SWT.PUSH);
 		startButton.setText("Start All");
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(startButton);
-		startButton.addSelectionListener(onStartPortForwarding());
+		startButton.addSelectionListener(onStartPortForwarding(viewer));
 
-		stopButton = new Button(container, SWT.PUSH);
+		final Button stopButton = new Button(container, SWT.PUSH);
 		stopButton.setText("Stop All");
 		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(stopButton);
-		stopButton.addSelectionListener(onStopPortForwarding());
+		stopButton.addSelectionListener(onStopPortForwarding(viewer));
 
 		final Button findFreesPortButton = new Button(container, SWT.CHECK);
 		findFreesPortButton.setText("Find free local ports for remote ports");
@@ -109,7 +113,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		findFreePortsButtonObservable.addValueChangeListener(new IValueChangeListener() {
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				refreshViewerInput(wizardModel.getForwardablePorts());
+				refreshViewerInput(viewer);
 			}
 		});
 
@@ -136,7 +140,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 
-	private SelectionListener onStartPortForwarding() {
+	private SelectionListener onStartPortForwarding(final TableViewer viewer) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -151,7 +155,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							wizardModel.startPortForwarding();
-							refreshViewerInput(wizardModel.getForwardablePorts());
+							refreshViewerInput(viewer);
 							return Status.OK_STATUS;
 						}
 					}, getContainer(), getDataBindingContext());
@@ -163,7 +167,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private SelectionListener onStopPortForwarding() {
+	private SelectionListener onStopPortForwarding(final TableViewer viewer) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -171,8 +175,17 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 					WizardUtils.runInWizard(new Job("Stopping port forwarding...") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							wizardModel.stopPortForwarding();
-							refreshViewerInput(wizardModel.getForwardablePorts());
+							try {
+								wizardModel.stopPortForwarding();
+							} catch (IOException e) {
+								Display.getDefault()
+										.syncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
+												"Error", "Failed to close console inputstream while stopping port-forwarding: "
+														+ e.getMessage()));
+								OpenShiftUIActivator.getDefault().getLogger().logError(
+										"Failed to close console inputstream while stopping port-forwarding", e);
+							}
+							refreshViewerInput(viewer);
 							return Status.OK_STATUS;
 						}
 					}, getContainer(), getDataBindingContext());
@@ -207,7 +220,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 			public void update(ViewerCell cell) {
 				IPortForwardable.PortPair port = (IPortForwardable.PortPair) cell.getElement();
 				int local = port.getLocalPort();
-				if(wizardModel.getPortForwarding() || !PortForwardingWizardModel.isPortInUse(local)) {
+				if(wizardModel.getPortForwarding() || !PortForwardingUtils.isPortInUse(local)) {
 					cell.setText(Integer.toString(local));
 					cell.setStyleRanges(new StyleRange[0]);
 				} else {
@@ -265,7 +278,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
 	}
 
-	private void refreshViewerInput(Collection<IPortForwardable.PortPair> ports) {
+	private void refreshViewerInput(final TableViewer viewer) {
 		getShell().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
