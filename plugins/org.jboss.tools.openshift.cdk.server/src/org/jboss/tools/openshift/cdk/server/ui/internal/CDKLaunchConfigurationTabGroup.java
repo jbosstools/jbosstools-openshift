@@ -1,7 +1,7 @@
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.internal.ui.SWTFactory;
-import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.EnvironmentTab;
@@ -10,8 +10,8 @@ import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.externaltools.internal.launchConfigurations.ExternalToolsBuildTab;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolsHelpContextIds;
 import org.eclipse.ui.externaltools.internal.program.launchConfigurations.ProgramMainTab;
 
@@ -29,19 +29,22 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 		CommonTab common = new CommonTab();
 		common.setHelpContextId(IExternalToolsHelpContextIds.EXTERNAL_TOOLS_LAUNCH_CONFIGURATION_DIALOG_COMMON_TAB);
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
-		        new ProgramMainTab() {
-		            @Override
-		            public void createControl(final Composite parent) {
-		                super.createControl(parent);
-		                parent.getShell().addShellListener(new ShellAdapter() {
-		                    public void shellActivated(ShellEvent e) {
-		                        parent.update();
-		                        parent.layout(true);
-		                        parent.getShell().removeShellListener(this);
-		                    }
-		                });
-		            }
-		        },
+				new ProgramMainTab() {
+					@Override
+					public void createControl(final Composite parent) {
+						super.createControl(parent);
+						if (Platform.OS_LINUX.equals(Platform.getOS())) {
+							getShell().addShellListener(new ShellAdapter() {
+								public void shellActivated(ShellEvent e) {
+									Point size = getShell().getSize();
+									getShell().pack(true);
+									getShell().setSize(size);
+									getShell().removeShellListener(this);
+								}
+							});
+						}
+					}
+				},
 //			refresh,
 //			new ExternalToolsBuildTab(),
 			env,
