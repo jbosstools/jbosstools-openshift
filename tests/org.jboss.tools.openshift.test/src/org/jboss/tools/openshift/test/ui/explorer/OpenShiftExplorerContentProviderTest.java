@@ -46,12 +46,15 @@ public class OpenShiftExplorerContentProviderTest {
 	@Before
 	public void setup() throws Exception{
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8442")); 
+
 		connection = spy(new Connection(client, null, null));
-		connection.setUsername("foo");
+		when(connection.ownsResource(any(IResource.class))).thenReturn(true);
+		when(connection.getUsername()).thenReturn("hookaboo");
+		
 		registry = ConnectionsRegistrySingleton.getInstance();
 		registry.add(connection);
+		
 		provider = new OpenShiftExplorerContentProvider();
-		doReturn(true).when(connection).ownsResource(any(IResource.class));
 	}
 	
 	@After
