@@ -307,17 +307,6 @@ public class EGitUtilsTest {
 	}
 	
 	@Test
-	public void changedButNotCommittedIsDirty() throws Exception {
-		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
-		File file = testRepository.createFile("a.txt", "ethnica");
-		testRepository.addAndCommit(file, "commit-by-junit-tests");
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
-		FileUtil.writeFileDefault(file, "depeche-mode");
-		testRepository.add(file);
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
-	}
-
-	@Test
 	public void modifiedButNotCommittedIsDirty() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		File file = testRepository.createFile("a.txt", "protonica");
@@ -329,9 +318,8 @@ public class EGitUtilsTest {
 	@Test
 	public void removedButNotCommittedIsDirty() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
-		File file = testRepository.createFile("a.txt", "protonica");
+		File file = testRepository.createFile("a.txt", "pink floyd");
 		testRepository.addAndCommit(file, "commit-by-junit-tests");
-		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		file.delete();
 		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 	}
