@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -25,13 +24,13 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
@@ -42,6 +41,7 @@ import com.openshift.restclient.model.IServicePort;
  * Dialog to configure the port mapping for a Docker Image to be deployed.
  */
 public class ServicePortDialog extends AbstractOpenShiftWizardPage {
+	static final String UNIQUE_ERROR = "The {0} port number must be unique among all the other ports exposed by this OpenShift service.";
 
 	static final String PROPERTY_SERVICE_PORT = "port";
 	static final String PROPERTY_POD_PORT = "targetPort";
@@ -122,7 +122,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	 */
 	static class ServicePortValidator implements IValidator{
 
-		private static final IStatus SERVICE_PORT_ERROR = ValidationStatus.error("The service port number must be unique among all the other ports exposed by this OpenShift service.");
+		private static final IStatus SERVICE_PORT_ERROR = ValidationStatus.error(NLS.bind(UNIQUE_ERROR, "service"));
 		
 		private final int servicePort;
 		
@@ -147,60 +147,6 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		}
 	}
 		
-	/**
-	 * Validates the input Pod port
-	 */
-	static class PodPortValidator implements IValidator {
-		
-		private static final int POD_PORT_MAXLENGTH = 63;
-		
-		private static final Pattern POD_PORT_REGEXP = Pattern.compile("[a-z0-9]([a-z0-9-]*[a-z0-9])*");
-
-		private static final IStatus ERROR_STATUS = ValidationStatus.error("The Pod port must be a unique integer\nor a name matching [a-z0-9]([a-z0-9-]*[a-z0-9])*");
-
-		private static final IStatus CANCEL_STATUS = ValidationStatus.cancel("The Pod port must be a unique integer\nor the name of a port in the backend pods.");
-		
-		private final String podPort;
-		
-		private final List<IServicePort> ports;
-		
-		public PodPortValidator(final String podPort, final List<IServicePort> ports) {
-			this.podPort = podPort;
-			this.ports = ports;
-		}
-		
-		@Override
-		public IStatus validate(final Object value) {
-			// port cannot be empty
-			if(StringUtils.isEmpty(value)) {
-				return CANCEL_STATUS;
-			}
-			final String newPodPort = (String) value;
-			if (!newPodPort.equals(podPort)) {
-				try {
-					final long portNumber = Long.valueOf(value.toString());
-					// validate range
-					if (portNumber < 0 || portNumber > 65535) {
-						return ERROR_STATUS;
-					}
-				} catch (NumberFormatException e) {
-					// port name must match the regular expression
-					// TODO: validate against backend pod ports.
-					if (newPodPort.length() > POD_PORT_MAXLENGTH || !POD_PORT_REGEXP.matcher(newPodPort).matches()) {
-						return ERROR_STATUS;
-					}
-					for (IServicePort port : ports) {
-						if (newPodPort.equals(port.getTargetPort())) {
-							return ERROR_STATUS;
-						}
-					}
-				}
-			}
-			return ValidationStatus.OK_STATUS;
-		}
-		
-	}
-	
 	/**
 	 * Opens this dialog.
 	 * 

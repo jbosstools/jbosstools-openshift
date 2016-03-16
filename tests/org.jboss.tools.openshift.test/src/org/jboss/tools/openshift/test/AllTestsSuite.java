@@ -41,6 +41,7 @@ import org.jboss.tools.openshift.test.ui.property.build.WebhooksPropertySourceTe
 import org.jboss.tools.openshift.test.ui.propertytester.OpenShiftResourcePropertyTesterTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
+import org.jboss.tools.openshift.test.ui.validator.PodPortValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.ProjectNameValidatorTest;
 import org.jboss.tools.openshift.test.ui.wizard.deployimage.PortSpecAdapterTest;
 import org.junit.runner.RunWith;
@@ -84,7 +85,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	//SecureStorageTest.class
 	
 	OpenShiftSubsystemTest.class, 
-	OpenShiftModuleDeploymentPrefsUtilTest.class
+	OpenShiftModuleDeploymentPrefsUtilTest.class,
+	
+	PodPortValidatorTest.class
 })
 /**
  * @author Andre Dietisheim

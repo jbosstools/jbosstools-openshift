@@ -207,6 +207,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				if(Window.OK == dialog.open()) {
 					port.setName(NLS.bind("{0}-tcp", port.getPort()));
 					model.addServicePort(port);
+					model.setSelectedServicePort(port);
 				}
 			}
 			
