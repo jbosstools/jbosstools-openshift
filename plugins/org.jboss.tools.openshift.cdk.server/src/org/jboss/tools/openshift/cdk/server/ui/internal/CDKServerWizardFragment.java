@@ -51,6 +51,13 @@ public class CDKServerWizardFragment extends WizardFragment {
 	public boolean hasComposite() {
 		return true;
 	}
+	
+
+	public boolean isComplete() {
+		// Only one instance created per workspace, so we need to workaround this
+		return browseButton != null && !browseButton.isDisposed() && super.isComplete();
+	}
+	
 	public ImageDescriptor getImageDescriptor() {
 		return CDKCoreActivator.getDefault().getSharedImages().descriptor(CDKCoreActivator.CDK_WIZBAN);
 	}
