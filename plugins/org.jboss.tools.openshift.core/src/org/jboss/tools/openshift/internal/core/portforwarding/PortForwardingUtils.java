@@ -53,14 +53,13 @@ public class PortForwardingUtils {
 		if (port < 0 || port >= 65536) {
 			return false;
 		}
-		try {
-			new ServerSocket(port).close();
-			return false;
+		try (ServerSocket socket = new ServerSocket(port)){
+			//not in use apparently
 		} catch (IOException e) {
-			// success
+			return true;//in use
 		}
 		try (Socket socket = new Socket("localhost", port)) {
-			return true; // success
+			return true; // in use
 		} catch (IOException e) {
 			return false;
 		}
@@ -179,7 +178,24 @@ public class PortForwardingUtils {
 			portForwarding.stop();
 		}
 		final List<PortPair> ports = Arrays.asList(portForwarding.getPortPairs());
-		for (int i = 0; i < 50 && PortForwardingUtils.hasPortInUse(ports); i++) {
+		waitForPortsToGetFree(ports, 5, stream);
+		return portForwarding;
+	}
+
+	/**
+	 * Polls the given ports for given time.
+	 * Returns true if all ports get free, returns false otherwise.
+	 * @param ports
+	 * @param stream
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean waitForPortsToGetFree(Collection<PortPair> ports, int pollingTimeSeconds, OutputStream stream) throws IOException {
+		int pollCount = pollingTimeSeconds * 10; //One poll per 100 ms.
+		for (int i = 0; i < pollCount; i++) {
+			if(!PortForwardingUtils.hasPortInUse(ports)) {
+				return true;
+			}
 			if (i % 10 == 0) {
 				// report once a second;
 				if(stream != null) {
@@ -192,6 +208,6 @@ public class PortForwardingUtils {
 				break;
 			}
 		}
-		return portForwarding;
+		return false;
 	}
 }
