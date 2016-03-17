@@ -1528,4 +1528,12 @@
          type="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
    </propertyTester>
 </extension>
+
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/openshift-logo-white-icon.png"
+            configTypeID="org.jboss.tools.openshift.internal.core.behaviour.launchType"
+            id="org.jboss.tools.openshift.internal.core.behaviour.launchIcon"/>
+   </extension>
+
 </plugin>

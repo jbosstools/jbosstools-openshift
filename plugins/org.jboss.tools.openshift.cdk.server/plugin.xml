@@ -172,4 +172,13 @@
        </includes>
     </viewerActionBinding>
 	</extension>
+	
+	
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/cdk_box_16.png"
+            configTypeID="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
+            id="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchIcon"/>
+   </extension>
+	
 </plugin>
