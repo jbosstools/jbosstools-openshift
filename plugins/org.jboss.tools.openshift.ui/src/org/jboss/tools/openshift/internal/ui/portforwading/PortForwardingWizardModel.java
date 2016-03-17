@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.portforwading;
 
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -177,6 +178,19 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			updatePortForwardingAllowed();
 		} finally {
 			ConsoleUtils.deregisterConsoleListener(consoleListener);
+		}
+	}
+
+	boolean waitForPortsToGetFree(int timeSeconds) {
+		try {
+			boolean result = (timeSeconds == 0) 
+				? !PortForwardingUtils.hasPortInUse(ports)
+				: PortForwardingUtils.waitForPortsToGetFree(ports, timeSeconds, System.out);
+			updatePortForwardingAllowed();
+			return result;
+		} catch (IOException e) {
+			//Ignore, with System.out it cannot happen
+			return false;
 		}
 	}
 

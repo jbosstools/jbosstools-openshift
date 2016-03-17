@@ -186,6 +186,16 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 										"Failed to close console inputstream while stopping port-forwarding", e);
 							}
 							refreshViewerInput(viewer);
+							if(!wizardModel.isPortForwardingAllowed()) {
+								//Ports remain in use after a reasonable wait. 
+								//Lets give UI a break and then repeat waiting.
+								Display.getDefault().asyncExec(new Runnable() {
+									@Override
+									public void run() {
+										waitForPortsToGetFree(viewer);
+									}
+								});
+							}
 							return Status.OK_STATUS;
 						}
 					}, getContainer(), getDataBindingContext());
@@ -195,6 +205,30 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 		};
+	}
+
+	private void waitForPortsToGetFree(final TableViewer viewer) {
+		//Try, if ports got free while this task was in wait, one poll is fast.
+		if(wizardModel.waitForPortsToGetFree(0)) {
+			return;
+		}
+		try {
+			WizardUtils.runInWizard(new Job("Waiting for ports to get free...") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					if(!wizardModel.waitForPortsToGetFree(5)) {
+						Display.getDefault()
+							.asyncExec(() -> MessageDialog.openWarning(Display.getDefault().getActiveShell(),
+									"Warning", "Ports remain in use. Try free ports."));
+					}
+					refreshViewerInput(viewer);
+					return Status.OK_STATUS;
+				}
+			}, getContainer(), getDataBindingContext());
+		} catch (InvocationTargetException | InterruptedException e1) {
+			LOG.logError(e1);
+			MessageDialog.openError(getShell(), "Error while waiting for ports to get free", e1.getMessage());
+		}
 	}
 
 	protected TableViewer createTable(Composite tableContainer, DataBindingContext dbc) {
