@@ -12,4 +12,5 @@
 	     then change this to packaging=eclipse-test-plugin to make Tycho RUN the tests rather than just 
 	     compiling sources -->
 	<packaging>eclipse-test-plugin</packaging>
+	
 </project>
