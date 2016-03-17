@@ -84,6 +84,7 @@ public class PortForwardingUtilsTest {
 		Mockito.when(pod.accept(Mockito.any(CapabilityVisitor.class), Mockito.any(IPortForwardable.class)))
 				.thenReturn(portForwardable);
 		Mockito.when(portForwardable.isForwarding()).thenReturn(true);
+		Mockito.when(portForwardable.getPortPairs()).thenReturn(new PortPair[]{port});
 		PortForwardingUtils.startPortForwarding(pod, port);
 		// when
 		final IPortForwardable stopPortForwarding = PortForwardingUtils.stopPortForwarding(pod, null);
