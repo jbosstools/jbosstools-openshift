@@ -104,16 +104,18 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		if(this.serverSettingsWizardPage != null) {
-			this.serverSettingsWizardPage.getModel().updateServer();
+		if(serverSettingsWizardPage != null) {
+			serverSettingsWizardPage.getModel().updateServer();
+			serverSettingsWizardPage.unhook();
 		}
-		serverSettingsWizardPage.unhook();
 		super.performFinish(monitor); //only removes handle, it should be done after successful update only.
 	}
 
 	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
-		serverSettingsWizardPage.unhook();
+		if(serverSettingsWizardPage != null) {
+			serverSettingsWizardPage.unhook();
+		}
 		super.performCancel(monitor);
 	}
 
@@ -165,7 +167,9 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		return new IPageChangingListener() {
 			@Override
 			public void handlePageChanging(PageChangingEvent event) {
-				serverSettingsWizardPage.reloadServices();
+				if(serverSettingsWizardPage != null) {
+					serverSettingsWizardPage.reloadServices();
+				}
 			}
 		};
 	}
