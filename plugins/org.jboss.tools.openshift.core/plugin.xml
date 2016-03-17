@@ -120,15 +120,9 @@
          </subsystemMapping>
 
      <!-- Shutdown -->
-         <subsystem
-            system="shutdown"
-            id="shutdown.automatic.fail"
-            name="Cannot Shutdown Server"
-            class="org.jboss.tools.openshift.core.server.behavior.UnstoppableShutdownController">
-         </subsystem>
          <subsystemMapping
-            id="shutdown.automatic.fail"
-            mappedId="shutdown.automatic.fail"
+            id="shutdown.noop.default"
+            mappedId="shutdown.noop.default"
             serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
          
