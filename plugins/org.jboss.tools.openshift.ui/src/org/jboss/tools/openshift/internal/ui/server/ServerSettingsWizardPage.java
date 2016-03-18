@@ -332,6 +332,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			public void widgetSelected(SelectionEvent e) {
 				SelectExistingProjectDialog dialog = 
 						new SelectExistingProjectDialog("Select a project to deploy", shell);
+				if(model.getDeployProject() != null) {
+					dialog.setInitialSelections(new Object[]{model.getDeployProject()});
+				}
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
 					if (selectedProject instanceof IProject) {
