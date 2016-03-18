@@ -14,6 +14,11 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.IServerLifecycleListener;
+import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
@@ -24,6 +29,8 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
+import org.jboss.tools.openshift.core.server.OpenShiftServer;
+import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.server.resources.OpenshiftResourceChangeListener;
 import org.osgi.framework.BundleContext;
 
@@ -35,7 +42,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
 	private static OpenShiftCoreActivator instance;
 	private static BundleContext context;
-	
+	private IServerLifecycleListener serverListener;
 	private OpenshiftResourceChangeListener resourceChangeListener;
 	public OpenShiftCoreActivator() {
 		super();
@@ -90,7 +97,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 				}
 			}
         });
-        
+        ServerCore.addServerLifecycleListener(getServerListener());
         // A clone of the auto-publish thread implementation
         resourceChangeListener = new OpenshiftResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
@@ -101,9 +108,35 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	public void stop(BundleContext context) throws Exception {
     	saveAllConnections();
     	ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+    	ServerCore.removeServerLifecycleListener(getServerListener());
     	super.stop(context);
 	}
 
+	private IServerLifecycleListener getServerListener() {
+		if( serverListener == null ) {
+			serverListener = new IServerLifecycleListener() {
+				public void serverRemoved(IServer server) {
+				}
+				public void serverChanged(IServer server) {
+				}
+				public void serverAdded(IServer server) {
+					if( server != null ) {
+						String typeId = server.getServerType().getId();
+						if( OpenShiftServer.SERVER_TYPE_ID.equals(typeId)) {
+							if( server.getAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false)) {
+								try {
+									server.start("run", new NullProgressMonitor());
+								} catch(CoreException ce) {
+									pluginLog().logError("Error starting server", ce);
+								}
+							}
+						}
+					}
+				}
+			};
+		}
+		return serverListener;
+	}
 	/**
 	 * Get the IPluginLog for this plugin. This method 
 	 * helps to make logging easier, for example:

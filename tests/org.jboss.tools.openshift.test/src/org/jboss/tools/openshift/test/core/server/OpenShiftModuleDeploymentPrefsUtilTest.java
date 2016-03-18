@@ -42,7 +42,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 	@Test
 	public void testOutputName() throws Exception {
 		// Create server
-		IServer s1 = createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
+		IServer s1 =  OpenShiftServerTestUtility.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
 		
 		// Make a web module 
 		when(module1.getName()).thenReturn("webProject");
@@ -104,19 +104,6 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 			return super.getOutputNameFromSettings(server, module);
 		}
 	}
-	
-
-	private IServer createOpenshift3Server(String name, String profile) throws CoreException {
-		IServerType type = ServerCore.findServerType("org.jboss.tools.openshift.server.type");
-		IServerWorkingCopy wc = type.createServer(name, null, null);
-		OpenShiftServerUtils.updateServer(name, "http://www.example.com", "dummy", 
-				"dummy", "dummy", "dummy", "dummy", "dummy", wc);
-		if( profile != null ) {
-			ServerProfileModel.setProfile(wc, profile);
-		}
-		return wc.save(false, null);
-	}
-	
 
 	@After
 	public void tearDown() {

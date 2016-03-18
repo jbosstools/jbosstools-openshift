@@ -45,13 +45,13 @@ public class OpenShiftSubsystemTest extends TestCase {
 	
 	@Test 
 	public void testSubsystemsNull() throws Exception {
-		IServer s1 = createOpenshift3Server("example", null);
+		IServer s1 =  OpenShiftServerTestUtility.createOpenshift3Server("example", null);
 		testOpenshift3Standard(s1);
 	}
 
 	@Test 
 	public void testSubsystemsStandard() throws Exception {
-		IServer s1 = createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
+		IServer s1 =  OpenShiftServerTestUtility.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
 		testOpenshift3Standard(s1);
 	}
 
@@ -80,7 +80,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 	
 	@Test
 	public void testSubsystemsEAP() throws Exception {
-		IServer s1 = createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP);
+		IServer s1 = OpenShiftServerTestUtility.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP);
 		IControllableServerBehavior beh = (IControllableServerBehavior)s1.loadAdapter(IControllableServerBehavior.class, new NullProgressMonitor());
 		String[] systems = new String[]{
 				IControllableServerBehavior.SYSTEM_LAUNCH, IControllableServerBehavior.SYSTEM_MODULES,
@@ -101,17 +101,5 @@ public class OpenShiftSubsystemTest extends TestCase {
 			ISubsystemController c = beh.getController(systems[i]);
 			assertEquals(expected[i], c.getClass().getName());
 		}
-	}
-	
-	
-	private IServer createOpenshift3Server(String name, String profile) throws CoreException {
-		IServerType type = ServerCore.findServerType("org.jboss.tools.openshift.server.type");
-		IServerWorkingCopy wc = type.createServer(name, null, null);
-		OpenShiftServerUtils.updateServer(name, "http://www.example.com", "dummy", 
-				"dummy", "dummy", "dummy", "dummy", "dummy", wc);
-		if( profile != null ) {
-			ServerProfileModel.setProfile(wc, profile);
-		}
-		return wc.save(false, null);
 	}
 }

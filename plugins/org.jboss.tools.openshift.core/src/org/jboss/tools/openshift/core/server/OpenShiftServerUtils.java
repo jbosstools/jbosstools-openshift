@@ -66,6 +66,8 @@ public class OpenShiftServerUtils {
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.openshift.server.type";//$NON-NLS-1$
 
+	public static final String SERVER_START_ON_CREATION = "org.jboss.tools.openshift.SERVER_START_ON_CREATION";
+	
 	public static String getServerName(IService service, Connection connection) {
 		if (service == null) {
 			return null;

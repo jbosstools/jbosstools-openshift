@@ -17,6 +17,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.model.IService;
@@ -59,7 +60,9 @@ public class ServerSettingsWizard extends Wizard {
 	public boolean performFinish() {
 		this.serverSettingsWizardPage.getModel().updateServer();
 		try {
-			this.createdServer = this.serverSettingsWizardPage.getModel().getServer().save(true, new NullProgressMonitor());
+			IServerWorkingCopy wc = this.serverSettingsWizardPage.getModel().getServer();
+			wc.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
+			this.createdServer = wc.save(true, new NullProgressMonitor());
 		} catch (CoreException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Failed to create the Server Adapter", e);
 		}
