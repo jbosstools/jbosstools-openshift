@@ -64,7 +64,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 				IModuleDeployPathController.SYSTEM_ID
 		};
 		String[] expected = new String[]{
-			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpLaunchController",
+			"org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController",
 			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpModuleController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController",
 			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpShutdownController",
@@ -89,7 +89,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 				IModuleDeployPathController.SYSTEM_ID
 		};
 		String[] expected = new String[]{
-			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpLaunchController",
+			"org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController",
 			"org.jboss.ide.eclipse.as.core.server.internal.v7.JBoss7FSModuleStateVerifier",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController",
 			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpShutdownController",
