@@ -16,6 +16,8 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -60,7 +62,6 @@ public class ServiceDetailViews extends AbstractStackedDetailViews {
 			Composite container = setControl(new Composite(parent, SWT.None));
 			GridLayoutFactory.fillDefaults()
 					.numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
-
 			this.nameText = createLabeledValue("Name:", container);
 			this.namespaceText = createLabeledValue("Namespace:", container);
 			this.labelsText = createLabeledValue("Labels:", container);
@@ -70,6 +71,21 @@ public class ServiceDetailViews extends AbstractStackedDetailViews {
 
 			return container;
 		}
+
+		FocusListener fl = new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(e.getSource() instanceof StyledText) {
+					((StyledText)e.getSource()).setSelection(0, 0);
+				}
+			}
+
+		};
 
 		private StyledText createLabeledValue(String labelText, Composite container) {
 			Label label = new Label(container, SWT.NONE);
@@ -81,6 +97,7 @@ public class ServiceDetailViews extends AbstractStackedDetailViews {
 			StyledTextUtils.setTransparent(styledText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
+			styledText.addFocusListener(fl);
 			return styledText;
 		}
 
