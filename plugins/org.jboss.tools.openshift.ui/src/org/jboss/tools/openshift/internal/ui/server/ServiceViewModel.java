@@ -124,7 +124,9 @@ public class ServiceViewModel extends ObservablePojo {
 			this.routes.clear();
 			List<IRoute> newRoutes = routeMap.get(this.service.getProject());
 			if(newRoutes != null) {
-				this.routes.addAll(newRoutes);
+				newRoutes.stream()
+					.filter((route)->service.getName().equals(route.getServiceName()))
+					.forEach((route)->this.routes.add(route));
 			}
 			routeToReset = this.route;
 			firePropertyChange(PROPERTY_ROUTES, oldRoutes, this.routes);
