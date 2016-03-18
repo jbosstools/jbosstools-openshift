@@ -20,6 +20,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -32,12 +33,17 @@ import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferen
  */
 public class SelectExistingProjectDialog extends SelectProjectDialog {
 
-	StringPreferenceValue showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftCommonUIActivator.PLUGIN_ID);
+	StringPreferenceValue showAllPreferences;
 	private boolean showAll;
 	
 	public SelectExistingProjectDialog(String message, Shell shell) {
 		super(shell);
 		setMessage(NLS.bind("{0}.\nOnly non-shared projects or Git projects allowed.", message));
+	}
+
+	@Override
+	protected void initRestrictions() {
+		showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftCommonUIActivator.PLUGIN_ID);
 		this.showAll = getShowAllPreferences();
 	}
 
@@ -69,10 +75,31 @@ public class SelectExistingProjectDialog extends SelectProjectDialog {
 				if (e.widget instanceof Button) {
 					showAll = ((Button) e.widget).getSelection();
 					showAllPreferences.set(String.valueOf(showAll));
-					setListElements(getProjects());
+					Object[] currentlySelected = getSelectedElements();
+					Object[] newProjects = getProjects();
+					setListElements(newProjects);
+					if(currentlySelected != null && currentlySelected.length == 1 && newProjects.length > 0) {
+						//this is a single selection dialog
+						for (Object project: newProjects) {
+							if(project.equals(currentlySelected[0])) {
+								restoreSelection(currentlySelected);
+								break;
+							}
+						}
+					}
 				}
 			}
 		};
+	}
+
+	void restoreSelection(final Object[] selection) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				setSelection(selection);
+				updateOkState();
+			}
+		});
 	}
 
 	@Override

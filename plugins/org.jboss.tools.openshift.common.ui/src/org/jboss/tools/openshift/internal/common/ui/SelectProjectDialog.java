@@ -33,7 +33,15 @@ public class SelectProjectDialog extends ElementListSelectionDialog {
 		setMessage("Select an existing project.");
 		setMultipleSelection(false);
 		setAllowDuplicates(false);
+		initRestrictions();
 		setElements(getProjects());
+	}
+
+	/**
+	 * Initializes the state that affects the result of getProject().
+	 * This method is called once at starting the dialog before the first call of getProject(). 
+	 */
+	protected void initRestrictions() {
 	}
 
 	protected Object[] getProjects() {
