@@ -153,7 +153,7 @@ public class WatchManager {
 			private IClient client;
 
 			RestartWatchJob(IClient client){
-				super("OpenShift WatchMananger Job");
+				super("OpenShift WatchManager Job");
 				this.client = client;
 			}
 
