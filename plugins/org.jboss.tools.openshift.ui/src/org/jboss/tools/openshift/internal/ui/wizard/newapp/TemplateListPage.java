@@ -259,6 +259,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			public void widgetSelected(SelectionEvent e) {
 				SelectExistingProjectDialog dialog = 
 						new SelectExistingProjectDialog(model.getEclipseProject() == null? null: model.getEclipseProject().getName(), getShell());
+				if(model.getEclipseProject() != null) {
+					dialog.setInitialSelections(new Object[]{model.getEclipseProject()});
+				}
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
 					model.setEclipseProject(((org.eclipse.core.resources.IProject) selectedProject));
