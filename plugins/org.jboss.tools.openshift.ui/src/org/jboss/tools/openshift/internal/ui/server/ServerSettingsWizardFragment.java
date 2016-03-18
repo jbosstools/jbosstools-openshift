@@ -36,6 +36,7 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -106,6 +107,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		if(serverSettingsWizardPage != null) {
 			serverSettingsWizardPage.getModel().updateServer();
+			serverSettingsWizardPage.getModel().getServer().setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
 			serverSettingsWizardPage.unhook();
 		}
 		super.performFinish(monitor); //only removes handle, it should be done after successful update only.
