@@ -191,7 +191,7 @@
 			<command
 				commandId="org.jboss.tools.openshift.ui.command.project.new"
 				style="push"
-				icon="icons/globe_new.png"
+				icon="icons/project.png"
 				tooltip="Create a new project">
 				<visibleWhen
 					checkEnabled="false">
@@ -1020,12 +1020,12 @@
 		<command
 			description="Create a new application from a template"
 			id="org.jboss.tools.openshift.ui.command.application.new"
-			name="Application">
+			name="Application...">
 		</command>
 		<command
 			description="Create a new project"
 			id="org.jboss.tools.openshift.ui.command.project.new"
-			name="Project">
+			name="Project...">
 		</command>
 		<command
 			description="Delete the Resource"
