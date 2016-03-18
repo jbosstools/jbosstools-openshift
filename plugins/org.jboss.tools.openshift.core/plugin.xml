@@ -112,10 +112,16 @@
    	<extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
   
-     <!-- Launching (no-op) -->
+     <!-- Launching (no-op with a quick poll) -->
+         <subsystem
+            system="launch"
+            id="launch.noop.openshift"
+            name="OpenShift Launch Controller"
+            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController">
+         </subsystem>
          <subsystemMapping
-            id="launch.noop.default"
-            mappedId="launch.noop.default"
+            id="launch.noop.openshift"
+            mappedId="launch.noop.openshift"
             serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
 
