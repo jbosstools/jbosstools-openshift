@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary
 
 public enum OCBinary {
 
-	WINDOWS("oc.exe", new String[] { "*.exe","*.cmd","*.bat" }), 
+	WINDOWS("oc.exe", new String[] { "*.exe"}), 
 	OTHER("oc", new String[] {});
 	
 	private static final String OC_DEFAULTLOCATION_LINUX = "/usr/bin/oc";

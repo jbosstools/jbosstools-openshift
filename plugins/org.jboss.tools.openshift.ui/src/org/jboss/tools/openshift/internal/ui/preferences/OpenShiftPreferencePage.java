@@ -18,7 +18,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -40,7 +41,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
 			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
 	
-	private FileFieldEditor cliLocationEditor;
+	private CliFileEditor cliLocationEditor;
 	private OCBinary ocBinary;
 	
 	public OpenShiftPreferencePage() {
@@ -61,32 +62,17 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 																  OpenShiftUIActivator.getDefault().getLog());
 			}
 		});
-		this.cliLocationEditor = 
-				new FileFieldEditor(
-						IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, 
-						NLS.bind("''{0}'' executable location", ocBinary.getName()), getFieldEditorParent()) {
-
-							@Override
-							public boolean doCheckState() {
-								return validateLocation(getStringValue());
-							}
-			
-		};
+		this.cliLocationEditor = new CliFileEditor();
 		cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
 		cliLocationEditor.setFileExtensions(ocBinary.getExtensions());
 		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
     }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent event) {
-        performOk();
-    }
 	
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(OpenShiftUIActivator.getDefault().getCorePreferenceStore());
 	}
-	
+
 	@Override
 	protected void performDefaults() {
 		String location = ocBinary.getSystemPathLocation();
@@ -108,8 +94,6 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		//Super implementation changes instance value, we need it clean.
 		getPreferenceStore().setToDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC);
 
-		//Now show a problem if there is one.
-		validateLocation(location);
 	}
 
 	@Override
@@ -126,24 +110,45 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		return valid;
 	}
 
-	
 	private boolean validateLocation(String location) {
 		if(StringUtils.isBlank(location)) {
 			return true;
 		}
 		File file = new File(location);
+		//Error messages have to be set to field editor, not directly to the page.
 		if(!ocBinary.getName().equals(file.getName())) {
-			setErrorMessage(NLS.bind("{0} is not the OpenShift Client ''{1}'' executable.", file.getName(), ocBinary.getName()));
+			cliLocationEditor.setErrorMessage(NLS.bind("{0} is not the OpenShift Client ''{1}'' executable.", file.getName(), ocBinary.getName()));
 			return false;
 		}
 		if(!file.exists()) {
-			setErrorMessage(NLS.bind("{0} was not found.", file));
+			cliLocationEditor.setErrorMessage(NLS.bind("{0} was not found.", file));
 			return false;
 		}
 		if(!file.canExecute()) {
-			setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
+			cliLocationEditor.setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
 			return false;
 		}
 		return true;
+	}
+
+	class CliFileEditor extends FileFieldEditor {
+		public CliFileEditor() {
+			//Validation strategy should be set in constructor, later setting it has no effect.
+			super(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC,
+					NLS.bind("''{0}'' executable location", ocBinary.getName()), false, StringFieldEditor.VALIDATE_ON_KEY_STROKE, getFieldEditorParent());
+		}
+
+		@Override
+		protected boolean checkState() {
+			//We have to return the default error message that is used 
+			//by super implementation if file does not exist. 
+			setErrorMessage(JFaceResources.getString("FileFieldEditor.errorMessage"));
+			return super.checkState();
+		}
+
+		@Override
+		public boolean doCheckState() {
+			return validateLocation(getStringValue());
+		}
 	}
 }
