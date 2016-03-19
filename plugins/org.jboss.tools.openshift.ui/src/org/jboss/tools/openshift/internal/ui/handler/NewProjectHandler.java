@@ -51,7 +51,7 @@ public class NewProjectHandler extends AbstractHandler {
 		return null;
 	}
 
-	private void openNewProjectDialog(final Connection connection, final Shell shell) {
+	public static void openNewProjectDialog(final Connection connection, final Shell shell) {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {

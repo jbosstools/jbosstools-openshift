@@ -90,7 +90,11 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 		try{
 			if (parentElement instanceof Connection) {
 				Connection connection = (Connection) parentElement;
-				return cache.getProjectsFor(connection).toArray();
+				Object[] result = cache.getProjectsFor(connection).toArray();
+				if(result == null || result.length == 0) {
+					result = new Object[]{new NewProjectLinkNode(connection)};
+				}
+				return result;
 			} else if (parentElement instanceof IProjectAdapter) {
 				IProjectAdapter adapter = (IProjectAdapter) parentElement;
 				Collection<Deployment> deployments = new ArrayList<>(adapter.getDeployments());
