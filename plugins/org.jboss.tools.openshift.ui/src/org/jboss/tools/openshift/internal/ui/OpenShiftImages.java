@@ -49,6 +49,8 @@ public class OpenShiftImages {
 	public static final Image SERVICE_IMG = repo.getImage("service.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor ROUTE = repo.create("route.png"); //$NON-NLS-1$
 	public static final Image ROUTE_IMG = repo.getImage("route.png"); //$NON-NLS-1$
+	public static final ImageDescriptor PROJECT_NEW = repo.create("project.png"); //$NON-NLS-1$
+	public static final Image PROJECT_NEW_IMG = repo.getImage("project.png"); //$NON-NLS-1$
 
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 

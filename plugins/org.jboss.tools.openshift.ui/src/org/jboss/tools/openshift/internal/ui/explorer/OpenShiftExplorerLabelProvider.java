@@ -14,7 +14,10 @@ import java.util.Collection;
 
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
@@ -82,6 +85,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof Deployment) {
 			return OpenShiftImages.SERVICE_IMG;
+		} else if(element instanceof NewProjectLinkNode) {
+			return OpenShiftImages.PROJECT_NEW_IMG;
 		} else if (element instanceof IResource || element instanceof IResourceUIModel) {
 			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
 			switch (resource.getKind()) {
@@ -112,6 +117,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 		if (element instanceof Deployment) {
 			Deployment d = (Deployment) element;
 			return style(d.getService().getName(), formatRoute(d.getRoutes()));
+		} else if(element instanceof NewProjectLinkNode) {
+			return getStyledText((NewProjectLinkNode)element);
 		}
 		if (element instanceof IResource || element instanceof IResourceUIModel) {
 			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
@@ -239,5 +246,19 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	private void applyEllipses(String[] parts) {
 		StringUtils.shorten(parts, labelLimit);
+	}
+
+	private StyledString getStyledText(NewProjectLinkNode node) {
+		StyledString value = new StyledString();
+		value.append(node.toString(), new StyledString.Styler() {
+
+			@Override
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.underline = true;
+				textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			}
+
+		});
+		return value;
 	}
 }
