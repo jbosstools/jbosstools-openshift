@@ -30,6 +30,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
+import com.openshift.restclient.OpenShiftContext;
+import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 
 /**
@@ -67,7 +69,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 			dialog.open();
 			return null;
 		}
-		System.setProperty(IPortForwardable.OPENSHIFT_BINARY_LOCATION, location);
+		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
 		handleEvent(event);
 		return null;
 	}
