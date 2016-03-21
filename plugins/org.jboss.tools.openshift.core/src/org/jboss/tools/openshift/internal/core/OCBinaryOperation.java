@@ -8,9 +8,8 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/ 
-package org.jboss.tools.openshift.core.server;
+package org.jboss.tools.openshift.internal.core;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.MultiStatus;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
@@ -23,7 +22,7 @@ import com.openshift.restclient.capability.IBinaryCapability;
  */
 public abstract class OCBinaryOperation {
 
-	public void run(MultiStatus status) throws CoreException {
+	public void run(MultiStatus status) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
 		String location = OCBinary.getInstance().getLocation();
 		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
@@ -34,10 +33,6 @@ public abstract class OCBinaryOperation {
 				OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, oldLocation);
 			}
 		}
-		if (!status.isOK()) {
-			throw new CoreException(status);
-		};
-		
 	}
 	
 	protected abstract void runOCBinary(MultiStatus multiStatus);

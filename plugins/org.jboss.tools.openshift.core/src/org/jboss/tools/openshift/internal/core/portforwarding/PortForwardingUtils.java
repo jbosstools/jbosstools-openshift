@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.core.runtime.MultiStatus;
+import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
+
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
@@ -122,10 +125,14 @@ public class PortForwardingUtils {
 		}
 		final IPortForwardable portForwarding = pod
 				.accept(new CapabilityVisitor<IPortForwardable, IPortForwardable>() {
-
 					@Override
 					public IPortForwardable visit(final IPortForwardable portForwarding) {
-						portForwarding.forwardPorts(ports.toArray(new IPortForwardable.PortPair[] {}));
+						new OCBinaryOperation() {
+							@Override
+							protected void runOCBinary(MultiStatus multiStatus) {
+								portForwarding.forwardPorts(ports.toArray(new IPortForwardable.PortPair[] {}));
+							}
+						}.run(null);
 						return portForwarding;
 					}
 				}, null);
