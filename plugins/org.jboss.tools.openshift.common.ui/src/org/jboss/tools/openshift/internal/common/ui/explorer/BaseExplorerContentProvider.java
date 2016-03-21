@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
@@ -224,11 +225,14 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		asyncViewerRefresh(new Runnable() {
 			public void run() {
 				synchronized (viewer) {
-					if(object != null) {
+					//final TreePath[] treePaths = viewer.getExpandedTreePaths();
+					if (object != null) {
 						viewer.refresh(object);
-					}else {
+					} else {
 						viewer.refresh();
 					}
+					// This line causes an endless load on linux when a node has zero children. (JCantrill)
+					//viewer.setExpandedTreePaths(treePaths);
 				}
 			}
 		});
@@ -278,9 +282,6 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		
 		private List<Object> children = new ArrayList<Object>();
 
-		public LoadingStub() {
-		}
-		
 		public void add(Exception e) {
 			children.add(e);
 		}

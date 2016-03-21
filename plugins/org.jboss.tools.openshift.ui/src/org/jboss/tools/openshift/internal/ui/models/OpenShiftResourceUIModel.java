@@ -27,11 +27,18 @@ public class OpenShiftResourceUIModel extends ObservableUIPojo implements IResou
 	private final String tostring;
 	private final Object parent;
 
-	public OpenShiftResourceUIModel(IResource resource, IResourcesUIModel parent){
-		if(resource == null)
+	/**
+	 * Constructor
+	 * @param resource the underlying OpenShift {@link IResource}
+	 * @param parent the parent {@link IResourcesUIModel}
+	 */
+	public OpenShiftResourceUIModel(final IResource resource, final IResourcesUIModel parent){
+		if(resource == null) {
 			throw new OpenShiftException("A null resource was passed while trying to create a display model");
-		if(parent == null)
+		}
+		if(parent == null) {
 			throw new OpenShiftException("A null parent was passed while trying to create a display model");
+		}
 		this.parent = parent;
 		this.resource = resource;
 		this.tostring = resource.getNamespace() + "/" + resource.getKind() + "/" + resource.getName() + "/" + resource.getResourceVersion();
@@ -44,9 +51,7 @@ public class OpenShiftResourceUIModel extends ObservableUIPojo implements IResou
 
 
 	/**
-	 * Get the underlying resource for this display model.
-	 * This will throw a cast exception if it can not be cast
-	 * @return
+	 * @return the underlying resource for this display model.
 	 */
 	@Override
 	public IResource getResource() {

@@ -21,6 +21,9 @@ import com.openshift.restclient.model.IService;
 
 public interface IDeploymentResourceMapper extends IObservablePojo, IRefreshable {
 
+	/**
+	 * @return the {@link Deployment}
+	 */
 	Collection<Deployment> getDeployments();
 	
 	/**
@@ -33,5 +36,17 @@ public interface IDeploymentResourceMapper extends IObservablePojo, IRefreshable
 	 */
 	Collection<IResource> getImageStreamTagsFor(IService service);
 
+	/**
+	 * @return the collection of Image stream tags indexed by their parent {@link IService}
+	 */
 	Map<IService, Collection<IResource>> getAllImageStreamTags();
+	
+	/**
+	 * @param kind the kind of resources to return
+	 * @return the OpenShift {@link IResource} of the given {@code kind}.
+	 */
+	<T extends IResource> Collection<T> getResourcesOf(String kind);
+
+	
+	
 }

@@ -62,12 +62,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.IMAGE_STREAM);	
 	}
 	
-	@Override
 	public void setImageStreams(Collection<IResourceUIModel> models) {
 		firePropertyChange(PROP_IMAGE_STREAMS, resources.get(ResourceKind.IMAGE_STREAM), resources.put(ResourceKind.IMAGE_STREAM, new ArrayList<>(models)));
 	}
 	
-	@Override
 	public void setImageStreamResources(Collection<IResource> streams) {
 		firePropertyChange(PROP_IMAGE_STREAMS, resources.get(ResourceKind.IMAGE_STREAM), resources.put(ResourceKind.IMAGE_STREAM, init(streams)));
 	}
@@ -77,12 +75,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.DEPLOYMENT_CONFIG);	
 	}
 	
-	@Override
 	public void setDeploymentConfigs(Collection<IResourceUIModel> models) {
 		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, new ArrayList<>(models)));
 	}
 	
-	@Override
 	public void setDeploymentConfigResources(Collection<IResource> dcs) {
 		firePropertyChange(PROP_DEPLOYMENT_CONFIGS, resources.get(ResourceKind.DEPLOYMENT_CONFIG), resources.put(ResourceKind.DEPLOYMENT_CONFIG, init(dcs)));
 	}
@@ -92,7 +88,6 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.BUILD);	
 	}
 	
-	@Override
 	public void setBuilds(Collection<IResourceUIModel> builds) {
 		firePropertyChange(PROP_BUILDS, resources.get(ResourceKind.BUILD), resources.put(ResourceKind.BUILD, new ArrayList<>(builds)));
 	}
@@ -106,12 +101,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.POD);
 	}
 	
-	@Override
 	public void setPods(Collection<IResourceUIModel> pods) {
 		firePropertyChange(PROP_PODS, resources.get(ResourceKind.POD), resources.put(ResourceKind.POD, new ArrayList<>(pods)));
 	}
 
-	@Override
 	public void setPodResources(Collection<IPod> pods) {
 		firePropertyChange(PROP_PODS, resources.get(ResourceKind.POD), resources.put(ResourceKind.POD, init(pods)));
 	}
@@ -121,12 +114,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.ROUTE);
 	}
 
-	@Override
 	public void setRoutes(Collection<IResourceUIModel> routes) {
 		firePropertyChange(PROP_ROUTES, resources.get(ResourceKind.ROUTE), resources.put(ResourceKind.ROUTE, new ArrayList<>(routes)));
 	}
 	
-	@Override
 	public void setRouteResources(Collection<IResource> routes) {
 		firePropertyChange(PROP_ROUTES, resources.get(ResourceKind.ROUTE), resources.put(ResourceKind.ROUTE, init(routes)));
 	}
@@ -136,12 +127,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.REPLICATION_CONTROLLER);
 	}
 	
-	@Override
 	public void setReplicationControllers(Collection<IResourceUIModel> rcs) {
 		firePropertyChange(PROP_REPLICATION_CONTROLLERS, resources.get(ResourceKind.REPLICATION_CONTROLLER), resources.put(ResourceKind.REPLICATION_CONTROLLER, new ArrayList<>(rcs)));
 	}
 
-	@Override
 	public void setReplicationControllerResources(Collection<IResource> rcs) {
 		firePropertyChange(PROP_REPLICATION_CONTROLLERS, resources.get(ResourceKind.REPLICATION_CONTROLLER), resources.put(ResourceKind.REPLICATION_CONTROLLER, init(rcs)));
 	}
@@ -151,12 +140,10 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.BUILD_CONFIG);
 	}
 	
-	@Override
 	public void setBuildConfigs(Collection<IResourceUIModel> buildConfigs) {
 		firePropertyChange(PROP_BUILD_CONFIGS, resources.get(ResourceKind.BUILD_CONFIG), resources.put(ResourceKind.BUILD_CONFIG, new ArrayList<>(buildConfigs)));
 	}
 	
-	@Override
 	public void setBuildConfigResources(Collection<IResource> buildConfigs) {
 		firePropertyChange(PROP_BUILD_CONFIGS, resources.get(ResourceKind.BUILD_CONFIG), resources.put(ResourceKind.BUILD_CONFIG, init(buildConfigs)));
 	}
@@ -166,18 +153,15 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return resources.get(ResourceKind.SERVICE);
 	}
 
-	@Override
 	public void setServices(Collection<IResourceUIModel> services) {
 		firePropertyChange(PROP_SERVICES, resources.get(ResourceKind.SERVICE), resources.put(ResourceKind.SERVICE, new ArrayList<>(services)));
 	}
 
-	@Override
 	public void setServiceResources(Collection<IResource> services) {
 		firePropertyChange(PROP_SERVICES, resources.get(ResourceKind.SERVICE), resources.put(ResourceKind.SERVICE, init(services)));
 	}
 
-	@Override
-	public void add(IResource resource) {
+	protected void add(IResource resource) {
 		if(resource == null) return;
 		final String property = getProperty(resource.getKind());
 		List<IResourceUIModel> models = resources.get(resource.getKind());
@@ -190,8 +174,7 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		}
 	}
 
-	@Override
-	public void remove(IResource resource) {
+	protected void remove(IResource resource) {
 		if(resource == null) return;
 		final String property = getProperty(resource.getKind());
 		List<IResourceUIModel> models = resources.get(resource.getKind());
@@ -205,13 +188,12 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		}
 	}
 
-	@Override
-	public void update(IResource resource) {
+	protected void update(IResource resource) {
 		if(resource == null) return;
 		final String property = getProperty(resource.getKind());
-		List<IResourceUIModel> models = resources.get(resource.getKind());
+		final List<IResourceUIModel> models = resources.get(resource.getKind());
 		if(models != null) {
-			int index = indexOf(models, resource);
+			final int index = indexOf(models, resource);
 			if(index > NOT_FOUND) {
 				List<IResourceUIModel> old = new ArrayList<>(models);
 				models.set(index, new OpenShiftResourceUIModel(resource, this));

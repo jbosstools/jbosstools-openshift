@@ -36,19 +36,17 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
+import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.models.DeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IDeploymentResourceMapper;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IBuild;
-import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -357,12 +355,49 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		private Map<IService, Collection<IResource>> imageStreamTagsByService;
 
 		public ProjectImageStreamTags(IProject project, Connection connection) {
-			this.imageStreamTagsByService = createImageStreamsMap(project, connection);
+			this.imageStreamTagsByService = createImageStreamsMap(connection, project);
 		}
 		
-		private Map<IService, Collection<IResource>> createImageStreamsMap(IProject project, Connection connection) {
-			IDeploymentResourceMapper deploymentMapper = 
-					new DeploymentResourceMapper(connection, new ProjectAdapterFake((IProject) project));
+		private Map<IService, Collection<IResource>> createImageStreamsMap(final Connection connection, final IProject project) {
+			final IDeploymentResourceMapper deploymentMapper = 
+					new DeploymentResourceMapper(connection, new IProjectAdapter() {
+						
+						@Override
+						public void dispose() {
+						}
+						
+						@Override
+						public void setDeleting(boolean deleting) {
+						}
+						
+						@Override
+						public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+						}
+						
+						@Override
+						public boolean isDeleting() {
+							return false;
+						}
+						
+						@Override
+						public IProject getProject() {
+							return project;
+						}
+						
+						@Override
+						public Collection<Deployment> getDeployments() {
+							return null;
+						}
+						
+						@Override
+						public IOpenShiftConnection getConnection() {
+							return null;
+						}
+						
+						@Override
+						public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+						}
+					});
 			deploymentMapper.refresh();
 			return deploymentMapper.getAllImageStreamTags();
 		}
@@ -372,181 +407,4 @@ public class ServerSettingsViewModel extends ServiceViewModel {
 		}
 	}
 	
-	private static class ProjectAdapterFake implements IProjectAdapter {
-
-		private IProject project;
-
-		private ProjectAdapterFake(IProject project) {
-			this.project = project;
-		}
-		
-		@Override
-		public void dispose() {
-		}
-		
-		
-		@Override
-		public void setDeleting(boolean deleting) {
-		}
-
-		@Override
-		public boolean isDeleting() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getBuilds() {
-			return null;
-		}
-
-		@Override
-		public void setBuilds(Collection<IResourceUIModel> builds) {
-		}
-
-		@Override
-		public void setBuildResources(Collection<IBuild> builds) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getImageStreams() {
-			return null;
-		}
-
-		@Override
-		public void setImageStreams(Collection<IResourceUIModel> models) {
-		}
-
-		@Override
-		public void setImageStreamResources(Collection<IResource> streams) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getDeploymentConfigs() {
-			return null;
-		}
-
-		@Override
-		public void setDeploymentConfigs(Collection<IResourceUIModel> models) {
-		}
-
-		@Override
-		public void setDeploymentConfigResources(Collection<IResource> dcs) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getPods() {
-			return null;
-		}
-
-		@Override
-		public void setPods(Collection<IResourceUIModel> pods) {
-		}
-
-		@Override
-		public void setPodResources(Collection<IPod> pods) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getRoutes() {
-			return null;
-		}
-
-		@Override
-		public void setRoutes(Collection<IResourceUIModel> routes) {
-		}
-
-		@Override
-		public void setRouteResources(Collection<IResource> routes) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getReplicationControllers() {
-			return null;
-		}
-
-		@Override
-		public void setReplicationControllers(Collection<IResourceUIModel> rcs) {
-		}
-
-		@Override
-		public void setReplicationControllerResources(Collection<IResource> rcs) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getBuildConfigs() {
-			return null;
-		}
-
-		@Override
-		public void setBuildConfigs(Collection<IResourceUIModel> buildConfigs) {
-			
-		}
-
-		@Override
-		public void setBuildConfigResources(Collection<IResource> buildConfigs) {
-		}
-
-		@Override
-		public Collection<IResourceUIModel> getServices() {
-			return null;
-		}
-
-		@Override
-		public void setServices(Collection<IResourceUIModel> services) {
-		}
-
-		@Override
-		public void setServiceResources(Collection<IResource> services) {
-		}
-
-		@Override
-		public void add(IResource resource) {
-		}
-
-		@Override
-		public void update(IResource resource) {
-		}
-
-		@Override
-		public void remove(IResource resource) {
-		}
-
-		@Override
-		public Object getParent() {
-			return null;
-		}
-
-		@Override
-		public void refresh() {
-		}
-
-		@Override
-		public IProject getProject() {
-			return project;
-		}
-
-		@Override
-		public <T extends IResource> void setResources(Collection<T> resources, String kind) {
-		}
-
-		@Override
-		public Collection<Deployment> getDeployments() {
-			return null;
-		}
-
-		@Override
-		public void setDeployments(Collection<Deployment> deployment) {
-		}
-
-		@Override
-		public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-		}
-
-		@Override
-		public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-		}
-		
-	}
-
 }

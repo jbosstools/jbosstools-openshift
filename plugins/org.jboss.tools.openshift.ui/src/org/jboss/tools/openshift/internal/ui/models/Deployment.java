@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.ui.models.IResourceCache.IResourceCacheListener;
 
 import com.openshift.restclient.ResourceKind;
@@ -46,16 +47,25 @@ public class Deployment extends ResourcesUIModel
 		implements IResourceUIModel, IAdaptable, IResourceCacheListener, OpenShiftAPIAnnotations {
 
 	private final IService service;
-	private final IProject project;
-	private final Object grandParent; //connection
+	private final IProjectAdapter projectAdapter;
+	private final IOpenShiftConnection connection;
 	
-	public Deployment(IService service, IProjectAdapter parent) {
-		super(parent);
+	/**
+	 * Constructor
+	 * @param connection the OpenShift connection
+	 * @param projectAdapter the OpenShift project 
+	 * @param service the Service in the project
+	 */
+	public Deployment(final IOpenShiftConnection connection, final IProjectAdapter projectAdapter, final IService service) {
+		super(projectAdapter);
 		this.service = service;
-		this.project = parent.getProject();
-		this.grandParent = parent.getParent();
+		this.projectAdapter = projectAdapter;
+		this.connection = connection;
 	}
 	
+	/**
+	 * @return the {@link IService} associated with this {@link Deployment}.
+	 */
 	public IService getService() {
 		return this.service;
 	}
@@ -282,7 +292,6 @@ public class Deployment extends ResourcesUIModel
 					Collection<IPod> buildPods = cache.<IPod>getResourcesOf(ResourceKind.POD).stream()
 							.filter(p->isBuildPod(p) && buildNames.contains(p.getAnnotation(BUILD_NAME)))
 							.collect(Collectors.toList());
-					
 					resources.addAll(buildPods);
 				}
 			}
@@ -358,9 +367,10 @@ public class Deployment extends ResourcesUIModel
 	private void addOrUpdateResources(Collection<IResource> resources) {
 		for (IResource r : resources) {
 			if(hasModelFor(r)) {
-				update(r);
+				//this.
+				this.update(r);
 			}else {
-				add(r);
+				this.add(r);
 			}
 			
 		}
@@ -389,8 +399,8 @@ public class Deployment extends ResourcesUIModel
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((grandParent == null) ? 0 : grandParent.hashCode());
-		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		result = prime * result + ((connection == null) ? 0 : connection.hashCode());
+		result = prime * result + ((projectAdapter == null) ? 0 : projectAdapter.hashCode());
 		result = prime * result + ((service == null) ? 0 : service.hashCode());
 		return result;
 	}
@@ -404,15 +414,15 @@ public class Deployment extends ResourcesUIModel
 		if (getClass() != obj.getClass())
 			return false;
 		Deployment other = (Deployment) obj;
-		if (grandParent == null) {
-			if (other.grandParent != null)
+		if (connection == null) {
+			if (other.connection != null)
 				return false;
-		} else if (!grandParent.equals(other.grandParent))
+		} else if (!connection.equals(other.connection))
 			return false;
-		if (project == null) {
-			if (other.project != null)
+		if (projectAdapter == null) {
+			if (other.projectAdapter != null)
 				return false;
-		} else if (!project.equals(other.project))
+		} else if (!projectAdapter.equals(other.projectAdapter))
 			return false;
 		if (service == null) {
 			if (other.service != null)

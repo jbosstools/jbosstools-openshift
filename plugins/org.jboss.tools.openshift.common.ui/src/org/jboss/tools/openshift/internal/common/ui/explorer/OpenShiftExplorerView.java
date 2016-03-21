@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.internal.common.ui.explorer;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -158,11 +157,21 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 			}});
 	}
 	
+	/**
+	 * Asynchronously refreshes the given {@code element} in the Tree view
+	 * @param element the element to refresh, including its label
+	 */
+	protected void refresh(final Object element) {
+		Display.getDefault().asyncExec(() -> {
+			if (getCommonViewer().getTree() != null && !getCommonViewer().getTree().isDisposed()) {
+				getCommonViewer().refresh(element, true);
+			}
+		});
+	}
+	
 	private static class OpenShiftExplorerContextsHandler extends Contexts {
 
 		private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
-//		private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
-//		private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
 		
 		OpenShiftExplorerContextsHandler(CommonViewer viewer) {
 			viewer.getControl().addFocusListener(onFocusLost());
@@ -184,16 +193,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ISelection selection = event.getSelection();
-//					if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
-//						activate(DOMAIN_CONTEXT);
-//					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
-//						activate(APPLICATION_CONTEXT);
-//					} else if (UIUtils.isFirstElementOfType(ExpressConnection.class, selection)) {
-//						// must be checked after domain, application, adapter may convert
-//						// any resource to a connection
-						activate(CONNECTION_CONTEXT);
-//					}
+					activate(CONNECTION_CONTEXT);
 				}
 			};
 		}
@@ -282,6 +282,5 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 			return (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
 		}
 	}
-
 
 }

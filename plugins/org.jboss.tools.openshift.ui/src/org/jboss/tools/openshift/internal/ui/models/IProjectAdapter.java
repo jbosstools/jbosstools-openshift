@@ -14,14 +14,15 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
 import org.eclipse.ui.services.IDisposable;
-import org.jboss.tools.openshift.common.core.IRefreshable;
+import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
 import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IResource;
 
-public interface IProjectAdapter extends IResourcesUIModel, IRefreshable, IDisposable{
+public interface IProjectAdapter extends IDisposable {
 	
 	static final String PROP_DEPLOYMENTS = "deployments";
+	
+	IOpenShiftConnection getConnection();
 	
 	IProject getProject();
 	
@@ -36,13 +37,10 @@ public interface IProjectAdapter extends IResourcesUIModel, IRefreshable, IDispo
 	 */
 	boolean isDeleting();
 
-	<T extends IResource> void setResources(Collection<T> resources, String kind);
-	
 	Collection<Deployment> getDeployments();
-	
-	void setDeployments(Collection<Deployment> deployment);
-	
+
 	void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
 	
 	void removePropertyChangeListener(String propertyName, PropertyChangeListener listener);
+
 }

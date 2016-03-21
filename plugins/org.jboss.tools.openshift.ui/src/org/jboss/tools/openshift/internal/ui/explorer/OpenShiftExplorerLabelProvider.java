@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
+import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
@@ -51,6 +52,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	private int labelLimit;
 
+	/**
+	 * Constructor.
+	 */
 	public OpenShiftExplorerLabelProvider() {
 		setLabelLimit(DEFAULT_LABEL_LIMIT);
 	}
@@ -83,7 +87,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof Deployment) {
+		if (element instanceof IProjectAdapter) {
+			return OpenShiftImages.PROJECT_IMG;
+		} else if (element instanceof Deployment) {
 			return OpenShiftImages.SERVICE_IMG;
 		} else if(element instanceof NewProjectLinkNode) {
 			return OpenShiftImages.PROJECT_NEW_IMG;

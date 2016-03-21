@@ -41,39 +41,19 @@ public interface IResourcesUIModel extends IAncestorable {
 	};
 	
 	Collection<IResourceUIModel> getBuilds();
-	void setBuilds(Collection<IResourceUIModel> builds);
-	void setBuildResources(Collection<IBuild> builds);
 	
 	Collection<IResourceUIModel> getImageStreams();
-	void setImageStreams(Collection<IResourceUIModel> models);
-	void setImageStreamResources(Collection<IResource> streams);
 	
 	Collection<IResourceUIModel> getDeploymentConfigs();
-	void setDeploymentConfigs(Collection<IResourceUIModel> models);
-	void setDeploymentConfigResources(Collection<IResource> dcs);
 	
 	Collection<IResourceUIModel> getPods();
-	void setPods(Collection<IResourceUIModel> pods);
-	void setPodResources(Collection<IPod> pods);
 	
 	Collection<IResourceUIModel> getRoutes();
-	void setRoutes(Collection<IResourceUIModel> routes);
-	void setRouteResources(Collection<IResource> routes);
 	
 	Collection<IResourceUIModel> getReplicationControllers();
-	void setReplicationControllers(Collection<IResourceUIModel> rcs);
-	void setReplicationControllerResources(Collection<IResource> rcs);
 	
 	Collection<IResourceUIModel> getBuildConfigs();
-	void setBuildConfigs(Collection<IResourceUIModel> buildConfigs);
-	void setBuildConfigResources(Collection<IResource> buildConfigs);
 
 	Collection<IResourceUIModel> getServices();
-	void setServices(Collection<IResourceUIModel> services);
-	void setServiceResources(Collection<IResource> services);
 	
-	void add(IResource resource);
-	void update(IResource resource);
-	void remove(IResource resource);
-
 }

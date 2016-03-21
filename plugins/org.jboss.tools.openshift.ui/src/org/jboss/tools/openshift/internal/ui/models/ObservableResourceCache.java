@@ -33,6 +33,10 @@ import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.deploy.IDeploymentTrigger;
 
+/**
+ * A cache for OpenShift {@link IResource} that notifies registered
+ * {@link IResourceCacheListener} on addition, update and removal of elements.
+ */
 public class ObservableResourceCache implements IResourceCache {
 
 	private Map<String, Collection<IBuildConfig>> imageRefToBuildConfigs = new ConcurrentHashMap<>();
@@ -114,27 +118,32 @@ public class ObservableResourceCache implements IResourceCache {
 	}
 
 	/**
+	 * Adds the given {@code resource} in the cache and notifies all the
+	 * registered listeners.
 	 * 
-	 * @param resource
-	 * @return true if cached; false otherwise
+	 * @param resource the resource to add
+	 * @return <code>true</code> if added to the cache, <code>false</code> otherwise.
 	 */
-	public boolean add(IResource resource) {
-		if(resource == null) return false;
-		if(cache.containsKey(getCacheKey(resource))) {
+	public boolean add(final IResource resource) {
+		if (resource == null) {
+			return false;
+		}
+		final String cacheKey = getCacheKey(resource);
+		if (cache.containsKey(cacheKey)) {
 			Trace.debug("-->Returning early since already processed {0}", resource);
 			return false;
 		}
-		cache.put(getCacheKey(resource), resource);
-		if(ResourceKind.DEPLOYMENT_CONFIG.equals(resource.getKind())) {
+		cache.put(cacheKey, resource);
+		if (ResourceKind.DEPLOYMENT_CONFIG.equals(resource.getKind())) {
 			cacheDeploymentConfigByImageChangeTrigger((IDeploymentConfig) resource);
 		}
-		if(ResourceKind.BUILD_CONFIG.equals(resource.getKind())) {
+		if (ResourceKind.BUILD_CONFIG.equals(resource.getKind())) {
 			cacheBuildConfigByOutput((IBuildConfig) resource);
 		}
 		synchronized (listeners) {
 			try {
-				listeners.forEach(l->l.handleAddToCache(this, resource));
-			}catch(Exception e) {
+				listeners.forEach(l -> l.handleAddToCache(this, resource));
+			} catch (Exception e) {
 				Trace.error("Exception while trying to notify cache listener", e);
 			}
 		}
@@ -167,29 +176,36 @@ public class ObservableResourceCache implements IResourceCache {
 	}
 
 	/**
+	 * Removes the given {@code resource} in the cache and notifies all the
+	 * registered listeners.
 	 * 
 	 * @param resource
-	 * @return true if removed; false otherwise
+	 *            the resource to remove
+	 * @return <code>true</code> if the resource was removed, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean remove(IResource resource) {
-		if(resource == null) return false;
-		if(!cache.containsKey(getCacheKey(resource))) {
+		if (resource == null) {
+			return false;
+		}
+		final String cacheKey = getCacheKey(resource);
+		if (!cache.containsKey(cacheKey)) {
 			Trace.debug("-->Returning early since dont know about {0}", resource);
 			return false;
 		}
-		IResource old = cache.remove(getCacheKey(resource));
-		if(old != null) {
-			if(ResourceKind.DEPLOYMENT_CONFIG.equals(old.getKind())) {
-				flushCacheDeploymentConfigByImageChangeTrigger((IDeploymentConfig) old);
+		final IResource removedResource = cache.remove(cacheKey);
+		if (removedResource != null) {
+			if (ResourceKind.DEPLOYMENT_CONFIG.equals(removedResource.getKind())) {
+				flushCacheDeploymentConfigByImageChangeTrigger((IDeploymentConfig) removedResource);
 			}
-			if(ResourceKind.BUILD_CONFIG.equals(old.getKind())) {
-				flushCacheBuildConfigByOutput((IBuildConfig) old);
+			if (ResourceKind.BUILD_CONFIG.equals(removedResource.getKind())) {
+				flushCacheBuildConfigByOutput((IBuildConfig) removedResource);
 			}
 		}
 		synchronized (listeners) {
 			try {
-				listeners.forEach(l->l.handleRemoveFromCache(this, resource));
-			}catch(Exception e) {
+				listeners.forEach(l -> l.handleRemoveFromCache(this, resource));
+			} catch (Exception e) {
 				Trace.error("Exception while trying to notify cache listener", e);
 			}
 		}
@@ -233,24 +249,29 @@ public class ObservableResourceCache implements IResourceCache {
 	}
 
 	/**
+	 * Updates the given {@code resource} in the cache and notifies all the
+	 * registered listeners.
 	 * 
 	 * @param resource
-	 * @return true if updated; false otherwise
+	 *            the resource to update in the cache
+	 * @return <code>true</code> if the cache was updated, <code>false</code>
+	 *         otherwise.
 	 */
-	public boolean update(IResource resource) {
-		if(resource == null) return false;
+	public boolean update(final IResource resource) {
+		if(resource == null) {return false;}
 		if(alreadyProcessedResource(resource)) {
 			Trace.debug("-->Returning early since already have this change: {0}", resource);
 			return false;
 		}
-		IResource old = cache.put(getCacheKey(resource), resource);
-		if(old != null) {
-			if(ResourceKind.DEPLOYMENT_CONFIG.equals(old.getKind())) {
-				flushCacheDeploymentConfigByImageChangeTrigger((IDeploymentConfig) old);
+		final String cacheKey = getCacheKey(resource);
+		final IResource previousResource = cache.put(cacheKey, resource);
+		if(previousResource != null) {
+			if(ResourceKind.DEPLOYMENT_CONFIG.equals(previousResource.getKind())) {
+				flushCacheDeploymentConfigByImageChangeTrigger((IDeploymentConfig) previousResource);
 				cacheDeploymentConfigByImageChangeTrigger((IDeploymentConfig)resource);
 			}
-			if(ResourceKind.BUILD_CONFIG.equals(old.getKind())) {
-				flushCacheBuildConfigByOutput((IBuildConfig) old);
+			if(ResourceKind.BUILD_CONFIG.equals(previousResource.getKind())) {
+				flushCacheBuildConfigByOutput((IBuildConfig) previousResource);
 				cacheBuildConfigByOutput((IBuildConfig)resource);
 			}
 		}

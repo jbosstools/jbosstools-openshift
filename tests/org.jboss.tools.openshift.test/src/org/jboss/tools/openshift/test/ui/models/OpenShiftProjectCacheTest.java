@@ -152,7 +152,7 @@ public class OpenShiftProjectCacheTest {
 	private void assertAdapters(List<IProjectAdapter> adapters) {
 		assertEquals(1, adapters.size());
 		assertEquals(project, adapters.get(0).getProject());
-		assertEquals(conn, adapters.get(0).getParent());
+		assertEquals(conn, adapters.get(0).getConnection());
 	}
 	
 	public interface TestConnection extends IConnection, IOpenShiftConnection{ 

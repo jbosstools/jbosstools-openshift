@@ -96,7 +96,6 @@ public class RefreshResourceHandler extends AbstractHandler{
 	}
 	
 	private Job createRefreshRefreshableJob(final Object element) {
-		final IConnection connection = getConnection(element);
 		return new AbstractDelegatingMonitorJob(LOADING_OPEN_SHIFT_INFORMATIONS) {
 
 			@Override
@@ -105,7 +104,6 @@ public class RefreshResourceHandler extends AbstractHandler{
 					monitor.beginTask(LOADING_OPEN_SHIFT_INFORMATIONS, IProgressMonitor.UNKNOWN);
 					if (element instanceof IRefreshable) {
 						((IRefreshable) element).refresh();
-						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_REFRESH, null, element);
 					}
 				} catch (OpenShiftException e) {
 					OpenShiftCommonUIActivator.getDefault().getLogger().logError(FAILED_TO_REFRESH_ELEMENT, e);
