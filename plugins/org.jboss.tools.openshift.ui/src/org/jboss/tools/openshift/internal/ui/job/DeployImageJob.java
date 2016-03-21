@@ -56,7 +56,7 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class DeployImageJob extends AbstractDelegatingMonitorJob implements IResourcesModel{
 	
-	private static final String SELECTOR_KEY = "deploymentconfig";
+	public static final String SELECTOR_KEY = "deploymentconfig";
 	
 	private IDeployImageParameters parameters;
 	private Collection<IResource> created = Collections.emptyList();
@@ -136,7 +136,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		return resources;
 	}
 	
-	private IResource stubDeploymentConfig(IResourceFactory factory, final String name, DockerImageURI imageUri) {
+	public IResource stubDeploymentConfig(IResourceFactory factory, final String name, DockerImageURI imageUri) {
 		IDeploymentConfig dc = factory.stub(ResourceKind.DEPLOYMENT_CONFIG, name, parameters.getProject().getName());
 		dc.addLabel(SELECTOR_KEY, name);
 		dc.addTemplateLabel(SELECTOR_KEY, name);
@@ -152,8 +152,8 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
 		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) dc.addTrigger(DeploymentTriggerType.IMAGE_CHANGE);
 		imageChangeTrigger.setAutomatic(true);
-		imageChangeTrigger.setContainerName(imageUri.getName());
-		imageChangeTrigger.setFrom(new DockerImageURI(imageUri.getNameAndTag()));
+		imageChangeTrigger.setContainerName(name);
+		imageChangeTrigger.setFrom(new DockerImageURI(null, null, name, imageUri.getTag()));
 		imageChangeTrigger.setKind(ResourceKind.IMAGE_STREAM_TAG);
 		return dc;
 	}
