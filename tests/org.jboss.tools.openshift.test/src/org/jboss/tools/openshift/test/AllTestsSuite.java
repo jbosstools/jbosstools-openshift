@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.test.ui.comparators.ProjectViewerComparatorTest
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerContentProviderTest;
 import org.jboss.tools.openshift.test.ui.explorer.OpenShiftExplorerLabelProviderTest;
 import org.jboss.tools.openshift.test.ui.job.CreateApplicationFromTemplateJobTest;
+import org.jboss.tools.openshift.test.ui.job.DeployImageJobTest;
 import org.jboss.tools.openshift.test.ui.models.OpenShiftProjectCacheTest;
 import org.jboss.tools.openshift.test.ui.portforwarding.PortForwardingWizardModelTest;
 import org.jboss.tools.openshift.test.ui.property.ConnectionPropertySourceTest;
@@ -59,6 +60,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionURLTest.class,
 	CreateApplicationFromTemplateJobTest.class,
 	CreationTimestampComparatorTest.class,
+	DeployImageJobTest.class, 
 	ExtTextPropertyDescriptorTest.class,
 	LabelKeyValidatorTest.class,
 	LabelValueValidatorTest.class,
