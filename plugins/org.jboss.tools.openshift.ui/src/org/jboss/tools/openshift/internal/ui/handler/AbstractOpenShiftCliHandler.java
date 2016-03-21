@@ -69,7 +69,6 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 			dialog.open();
 			return null;
 		}
-		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
 		handleEvent(event);
 		return null;
 	}

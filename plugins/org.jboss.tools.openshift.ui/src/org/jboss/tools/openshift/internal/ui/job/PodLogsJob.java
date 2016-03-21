@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.console.IConsole;
@@ -27,6 +28,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
+import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -131,7 +133,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 		
 	}
 	
-	private class ConsoleStreamPipe implements Runnable {
+	private class ConsoleStreamPipe extends OCBinaryOperation implements Runnable {
 		
 		private IPodLogRetrieval capability;
 		private boolean running = true;
@@ -147,6 +149,11 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 		
 		@Override
 		public void run() {
+			run(null);
+		}
+
+		@Override
+		protected void runOCBinary(MultiStatus multiStatus) {
 			ConsoleUtils.registerConsoleListener(new ConsoleListener(this));
 			final MessageConsole console = showConsole();
 			final MessageConsoleStream stream = console.newMessageStream();
