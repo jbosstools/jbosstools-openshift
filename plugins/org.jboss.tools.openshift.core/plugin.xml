@@ -201,7 +201,17 @@
             serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
          
-         
+         <subsystem
+            system="modules"
+            id="modules.state.openshift.wf.fs"
+            name="OpenShift Module Controller for EAP-style Filesystem Markers"
+            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftEapModulesController">
+         </subsystem>
+         <subsystemMapping
+            id="modules.state.openshift.wf.fs"
+            mappedId="modules.state.openshift.wf.fs"
+            serverTypes="org.jboss.tools.openshift.server.type">
+         </subsystemMapping>
    	</extension>
    	
    	
@@ -214,7 +224,7 @@
        </serverProfile>
        <serverProfile id="openshift3.eap" serverTypes="org.jboss.tools.openshift.server.type">
        	  <description name="openshift3.eap" description="A profile configured to publish to a local folder and rsync to a remote OpenShift running EAP"/>
-          <subsystem system="modules" subsystem="modules.state.wf.fs"/>
+          <subsystem system="modules" subsystem="modules.state.openshift.wf.fs"/>
           <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
        </serverProfile>
    	</extension>
