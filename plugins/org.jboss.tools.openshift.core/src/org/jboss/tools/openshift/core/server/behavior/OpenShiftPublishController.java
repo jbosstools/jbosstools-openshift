@@ -34,7 +34,6 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 import com.openshift.restclient.model.IService;
 

@@ -90,7 +90,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 		};
 		String[] expected = new String[]{
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController",
-			"org.jboss.ide.eclipse.as.core.server.internal.v7.JBoss7FSModuleStateVerifier",
+			"org.jboss.tools.openshift.core.server.behavior.OpenShiftEapModulesController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController",
 			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpShutdownController",
 			"org.jboss.ide.eclipse.as.wtp.core.server.behavior.LocalFilesystemController",
