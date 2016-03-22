@@ -386,7 +386,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			client.setSSLCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
-			return retryList("Unauthorized.  Trying to reauthenticate", e, kind);
+			return retryList("Unauthorized.  Trying to reauthenticate", e, kind, namespace);
 		}
 	}
 
@@ -438,12 +438,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		throw e;
 	}
 
-	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind){
+	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind, String namespace){
 		OpenShiftCoreActivator.pluginLog().logInfo(message);
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
-			return client.list(kind);
+			return client.list(kind, namespace);
 		}
 		throw e;
 	}
