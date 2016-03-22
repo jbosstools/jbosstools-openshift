@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.concurrent.Executors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
@@ -30,11 +36,11 @@ import com.openshift.restclient.model.IService;
 
 public class RSync {
 
-	private IService service;
-	private String podPath;
-	private IServer server;
+	private final IService service;
+	private final String podPath;
+	private final IServer server;
 
-	public RSync(IService service, String podPath, IServer server) {
+	public RSync(final IService service, final String podPath, final IServer server) {
 		this.service = service;
 		this.podPath = sanitizePath(podPath);
 		this.server = server;
@@ -44,14 +50,14 @@ public class RSync {
 		if (path == null) {
 			return null;
 		}
-		if (path.endsWith("/") || path.endsWith("/.")) {
+		if (path.endsWith("/") || path.endsWith("/.")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return path;
 		}
-		return path+"/";
+		return path+"/"; //$NON-NLS-1$
 	}
 	
 	
-	public void syncPodsToDirectory(File deployFolder, MultiStatus status) {
+	public void syncPodsToDirectory(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
 		new OCBinaryOperation() {
 			protected void runOCBinary(MultiStatus multiStatus) {
 				// If our deploy folder is empty, sync all pods to this directory
@@ -60,7 +66,7 @@ public class RSync {
 				if (shouldSync) {
 					for (IPod pod : service.getPods()) {
 						try {
-							syncPodToDirectory(pod, podPath, deployFolder);
+							syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
 						} catch (IOException | OpenShiftException e) {
 							status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 						}
@@ -71,14 +77,14 @@ public class RSync {
 	}
 
 	// Sync the directory back to all pods
-	public void syncDirectoryToPods(File deployFolder, MultiStatus status) {
+	public void syncDirectoryToPods(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
 		new OCBinaryOperation() {
 			
 			@Override
 			protected void runOCBinary(MultiStatus multiStatus) {
 				for (IPod pod : service.getPods()) {
 					try {
-						syncDirectoryToPod(pod, deployFolder, podPath);
+						syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);
 					} catch (IOException | OpenShiftException e) {
 						status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 					}
@@ -87,27 +93,67 @@ public class RSync {
 		}.run(status);
 	}
 	
-	private void syncPodToDirectory(IPod pod, String podPath, File destination) throws IOException {
+	private void syncPodToDirectory(IPod pod, String podPath, File destination, final IServerConsoleWriter consoleWriter) throws IOException {
 		destination.mkdirs();
 		String destinationPath = sanitizePath(destination.getAbsolutePath());
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
+			@SuppressWarnings("resource") //$NON-NLS-1$
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
-				rsyncable.sync(new PodPeer(podPath, pod), new LocalPeer(destinationPath));
+				final InputStream syncStream = rsyncable.sync(new PodPeer(podPath, pod),
+						new LocalPeer(destinationPath));
+				asyncWriteLogs(syncStream, consoleWriter);
+				try {
+					rsyncable.await();
+				} catch (InterruptedException e) {
+					OpenShiftCoreActivator.logError("Thread interrupted while running rsync", e); //$NON-NLS-1$
+					Thread.currentThread().interrupt();
+				}
 				return rsyncable;
 			}
+
+			
 		}, null);
 	}
 
-	private void syncDirectoryToPod(IPod pod, File source, String podPath) throws IOException {
+	private void syncDirectoryToPod(final IPod pod, final File source, final String podPath, final IServerConsoleWriter consoleWriter) throws IOException {
 		String sourcePath = sanitizePath(source.getAbsolutePath());
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
-				rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod));
+				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod));
+				asyncWriteLogs(syncStream, consoleWriter);
+				try {
+					rsyncable.await();
+				} catch (InterruptedException e) {
+					OpenShiftCoreActivator.logError("Thread interrupted while running rsync", e);
+					Thread.currentThread().interrupt();
+				}
 				return rsyncable;
 			}
 		}, null);
+	}
+	
+	/**
+	 * Asynchronously writes the logs from the 'rsync' command, provided by the
+	 * given {@code syncStream} into the given {@code outputStream}.
+	 * 
+	 * @param syncStream the {@link InputStream} to read from
+	 * @param outputStream the {@link OutputStream} to write into
+	 */
+	private void asyncWriteLogs(final InputStream syncStream, final IServerConsoleWriter consoleWriter) {
+		Executors.newSingleThreadExecutor().execute(() -> {
+			try {
+			try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(syncStream));) {
+				String line;
+					while ((line = bufferedReader.readLine()) != null) {
+						consoleWriter.writeToShell(RSync.this.server.getId(), new String[]{line});
+					}
+			}
+			} catch(IOException e)  {
+				OpenShiftCoreActivator.logError("Error occurred while printing 'rsync' command output", e);
+			}
+		});
 	}
 
 }
