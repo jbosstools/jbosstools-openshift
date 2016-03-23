@@ -34,7 +34,7 @@ public class LabelKeyValidatorTest {
 	
 	@Test
 	public void nullValueShouldBeInvalid() {
-		assertFailure(null);
+		assertCancel(null);
 	}
 	
 	@Test
@@ -49,12 +49,12 @@ public class LabelKeyValidatorTest {
 	
 	@Test
 	public void emptyValueShouldBeInvalid() {
-		assertFailure("");
+		assertCancel("");
 	}
 
 	@Test
 	public void blankValueShouldBeInvalid() {
-		assertFailure("  ");
+		assertCancel("  ");
 	}
 
 	@Test

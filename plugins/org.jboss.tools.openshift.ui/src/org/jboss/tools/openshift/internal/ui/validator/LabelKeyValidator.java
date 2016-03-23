@@ -77,11 +77,11 @@ public class LabelKeyValidator extends LabelValueValidator {
 	@Override
 	public IStatus validate(Object paramObject) {
 		if(!(paramObject instanceof String)) {
-			return ValidationStatus.error(getValueIsNotAStringMessage());
+			return ValidationStatus.cancel(getValueIsNotAStringMessage());
 		}
 		String value = (String) paramObject;
 		if(StringUtils.isEmpty(value)) {
-			return ValidationStatus.error(NLS.bind("{0} is required", type));
+			return ValidationStatus.cancel(NLS.bind("{0} is required", type));
 		}
 		if(readonlykeys.contains(value)) {
 			return ValidationStatus.error("Adding a label with a key that is the same as a readonly label is not allowed");
