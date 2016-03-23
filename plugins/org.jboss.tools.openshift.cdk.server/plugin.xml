@@ -13,7 +13,7 @@
             initialState="stopped"
             launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
             launchModes="run"
-            runtime="true"
+            runtime="false"
             runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
             startBeforePublish="false"
             startTimeout="1800000"
