@@ -25,7 +25,6 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -51,7 +50,9 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			final IWizardContainer wizardContainer = getWizardContainer();
-			if(serverSettingsWizardPage == null || serverSettingsWizardPage.getModel() == null || wizardContainer == null) {
+			if(serverSettingsWizardPage == null 
+					|| serverSettingsWizardPage.getModel() == null 
+					|| wizardContainer == null) {
 				//nothing to update;
 				return;
 			}
@@ -105,7 +106,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		if(serverSettingsWizardPage != null) {
-			serverSettingsWizardPage.getModel().updateServer();
+			serverSettingsWizardPage.updateServer();
 			serverSettingsWizardPage.unhook();
 		}
 		super.performFinish(monitor); //only removes handle, it should be done after successful update only.
@@ -129,7 +130,10 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public boolean isComplete() {
-		return this.serverSettingsWizardPage != null && !this.serverSettingsWizardPage.isLoadingResources() && !this.serverSettingsWizardPage.isNeedsLoadingResources() && this.serverSettingsWizardPage.getModel().getService() != null
+		return this.serverSettingsWizardPage != null 
+				&& !this.serverSettingsWizardPage.isLoadingResources() 
+				&& !this.serverSettingsWizardPage.isNeedsLoadingResources() 
+				&& this.serverSettingsWizardPage.getModel().getService() != null
 				&& serverSettingsWizardPage.isPageComplete();
 	}
 	
@@ -137,7 +141,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	public Composite createComposite(final Composite parent, final IWizardHandle handle) {
 		this.serverSettingsWizardPage = createServerSettingsWizardPage(parent, handle);
 		updateWizardHandle(handle, this.serverSettingsWizardPage);
-		getContainer(getPage(handle)).addPageChangingListener(onPageChanging());
+		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
 		this.serverSettingsWizardPage.setDeploymentProject(UIUtils.getFirstSelectedWorkbenchProject());
 		return (Composite) this.serverSettingsWizardPage.getControl();
 	}
@@ -153,14 +157,6 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		handle.setTitle(serverSettingsWizardPage.getTitle());
 		handle.setDescription(serverSettingsWizardPage.getDescription());
 		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
-	}
-
-	private IWizardPage getPage(final IWizardHandle wizardHandle) {
-		return (IWizardPage) wizardHandle;
-	}
-	
-	private WizardDialog getContainer(final IWizardPage wizardPage) {
-		return (WizardDialog) wizardPage.getWizard().getContainer();
 	}
 
 	private IPageChangingListener onPageChanging() {
@@ -190,7 +186,9 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		private IWizardHandle wizardHandle;
 
 		private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
-			super(((IWizardPage) wizardHandle).getWizard(), OpenShiftServerTaskModelAccessor.getServer(taskModel), OpenShiftServerTaskModelAccessor.getConnection(taskModel));
+			super(((IWizardPage) wizardHandle).getWizard(), 
+					OpenShiftServerTaskModelAccessor.getServer(taskModel), 
+					OpenShiftServerTaskModelAccessor.getConnection(taskModel));
 			this.wizardHandle = wizardHandle;
 			
 		}

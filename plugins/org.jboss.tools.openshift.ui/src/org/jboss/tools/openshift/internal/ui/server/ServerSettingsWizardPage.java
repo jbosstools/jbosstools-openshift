@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.server;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -36,6 +37,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -43,6 +45,10 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -56,6 +62,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -100,6 +107,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemCo
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
@@ -110,7 +118,7 @@ import com.openshift.restclient.model.route.IRoute;
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
 	static final String IS_LOADING_SERVICES = "isLoadingServices";
 
-	protected ServerSettingsViewModel model;
+	protected ServerSettingsWizardPageModel model;
 	protected boolean needsLoadingResources = true;
 	protected boolean isLoadingResources = false;
 	protected Control uiHook = null;
@@ -135,14 +143,18 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, final IService service, final IRoute route) {
 		super("Server Settings", "Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", "Create an OpenShift 3 Server Adapter", 
 				wizard);
-		this.model = new ServerSettingsViewModel(service, route, server, connection);
+		this.model = new ServerSettingsWizardPageModel(service, route, server, connection);
 	}
 	
 	/**
-	 * @return the {@link ServerSettingsViewModel} associated with this page.
+	 * @return the {@link ServerSettingsWizardPageModel} associated with this page.
 	 */
-	public ServerSettingsViewModel getModel() {
+	ServerSettingsWizardPageModel getModel() {
 		return model;
+	}
+	
+	void updateServer() throws OpenShiftException {
+		model.updateServer();
 	}
 	
 	/**
@@ -190,7 +202,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		
 		// assuming that the wizard may be complete upon initialization 
 		setComplete(true);
-		loadResources(getWizard().getContainer());
+		loadResources(getContainer());		
 	}
 	
 	/**
@@ -226,7 +238,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	
 	private final int numColumns = 4;
 	
-	private Composite createControls(Composite parent, ServerSettingsViewModel model, DataBindingContext dbc) {
+	private Composite createControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		final Composite container = new Composite(parent, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(numColumns)
@@ -258,9 +270,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		advancedPart.createAdvancedGroup(parent, numColumns);
 	}
 	
-	private void createProjectControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
+	private void createProjectControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		IObservableValue eclipseProjectObservable = BeanProperties.value(
-				ServerSettingsViewModel.PROPERTY_DEPLOYPROJECT).observe(model);
+				ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT).observe(model);
 		new SelectProjectComponentBuilder()
 			.setTextLabel("Eclipse Project: ")
 			.setHorisontalSpan(2)
@@ -274,7 +286,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	 * 
 	 * @return
 	 */
-	private SelectionListener onBrowseProjects(ServerSettingsViewModel model, final Shell shell) {
+	private SelectionListener onBrowseProjects(ServerSettingsWizardPageModel model, final Shell shell) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -293,7 +305,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		};
 	}
 
-	private void createSourcePathControls(Composite container, ServerSettingsViewModel model,
+	private void createSourcePathControls(Composite container, ServerSettingsWizardPageModel model,
 			DataBindingContext dbc) {
 		Label sourcePathLabel = new Label(container, SWT.NONE);
 		sourcePathLabel.setText("Source Path: ");
@@ -333,7 +345,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				}
 				
 			})
-			.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_SOURCE_PATH).observe(model))
+			.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_SOURCE_PATH).observe(model))
 			.in(dbc);
 		ControlDecorationSupport.create(
 				sourcePathBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
@@ -437,45 +449,77 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		return dialog;
 	}
 
-	private void createDeploymentControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
-		Label deployPathLabel = new Label(container, SWT.NONE);
-		deployPathLabel.setText("Pod Deployment Path: ");
+	private void createDeploymentControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Button useInferredPodPathButton = new Button(container, SWT.CHECK);
+		useInferredPodPathButton.setText("&Use inferred Pod Deployment Path");
+		GridDataFactory.fillDefaults()
+			.span(4,1).align(SWT.FILL, SWT.CENTER)
+			.applyTo(useInferredPodPathButton);
+		ISWTObservableValue useInferredPodPathObservable = WidgetProperties.selection().observe(useInferredPodPathButton);
+		ValueBindingBuilder
+				.bind(useInferredPodPathObservable)
+				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_INFERRED_POD_PATH).observe(model))
+				.in(dbc);
+		
+		Label podPathLabel = new Label(container, SWT.NONE);
+		podPathLabel.setText("Pod Deployment Path: ");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(deployPathLabel);
+			.applyTo(podPathLabel);
 
-		Text deployPathText = new Text(container, SWT.BORDER);
+		Text podPathText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 			.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-			.applyTo(deployPathText);
-		Binding deployPathBinding = ValueBindingBuilder
-			.bind(WidgetProperties.text(SWT.Modify).observe(deployPathText))
-			.validatingAfterConvert(new IValidator() {
-
-				@Override
-				public IStatus validate(Object value) {
-					String path = (String) value;
-					if (StringUtils.isEmpty(value)) {
-						return ValidationStatus.cancel("Please provide a path to deploy to on the pod.");
-					}
-					if (!Path.isValidPosixPath(path)) {
-						return ValidationStatus.error("Please provide a valid path to deploy to on the pod");
-					}
-					return ValidationStatus.ok();
-				}
-				
-			})
+			.applyTo(podPathText);
+		ISWTObservableValue podPathObservable = WidgetProperties.text(SWT.Modify).observe(podPathText);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(podPathText))
+			.notUpdatingParticipant()
+			.to(useInferredPodPathObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(podPathLabel))
+			.notUpdatingParticipant()
+			.to(useInferredPodPathObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(podPathObservable)
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH).observe(model))
 			.in(dbc);
+		PodPathValidator podPathValidator = new PodPathValidator(useInferredPodPathObservable, podPathObservable);
 		ControlDecorationSupport.create(
-				deployPathBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-
-		IObservableValue podPathEditable = BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH_EDITABLE).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.editable().observe(deployPathText))
-			.notUpdating(podPathEditable).in(dbc);
+				podPathValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		dbc.addValidationStatusProvider(podPathValidator);
 	}
 
-	private void createServiceControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
+	private static class PodPathValidator extends MultiValidator {
+		
+		private IObservableValue useDefaultPodPath;
+		private IObservableValue podPath;
+
+		public PodPathValidator(IObservableValue useDefaultPodPath, IObservableValue podPath) {
+			this.useDefaultPodPath = useDefaultPodPath;
+			this.podPath = podPath;
+		}
+
+		@Override
+		protected IStatus validate() {
+			if (BooleanUtils.isFalse((Boolean) useDefaultPodPath.getValue())) {
+				if (StringUtils.isEmpty(podPath.getValue())) {
+					return ValidationStatus.cancel("Please provide a path to deploy to on the pod.");
+				}
+				if (!Path.isValidPosixPath((String) podPath.getValue())) {
+					return ValidationStatus.error("You have to choose a path on the pod that route that will be used for this server adapter.");
+				}
+			}
+			return ValidationStatus.ok();
+		}
+		
+	}
+	
+	private void createServiceControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		Group servicesGroup = new Group(container, SWT.NONE);
 		servicesGroup.setText("Services");
 		GridDataFactory.fillDefaults()
@@ -493,7 +537,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.applyTo(selectorText);
 
 		final TreeViewer servicesViewer = createServicesTreeViewer(servicesGroup, model, selectorText);
-		BeanProperties.list(ServerSettingsViewModel.PROPERTY_SERVICE_ITEMS).observe(model)
+		BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_SERVICE_ITEMS).observe(model)
 			.addListChangeListener(onServiceItemsChanged(servicesViewer));
 		GridDataFactory.fillDefaults()
 			.span(2, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 160).grab(true, true)
@@ -514,8 +558,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 						
 					}
 				})
-				.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_SERVICE).observe(model))
-				.converting(new Model2ObservableTreeItemConverter(new ServerSettingsViewModel.ServiceTreeItemsFactory()))
+				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_SERVICE).observe(model))
+				.converting(new Model2ObservableTreeItemConverter(new ServerSettingsWizardPageModel.ServiceTreeItemsFactory()))
 				.in(dbc);
 
 		// details
@@ -558,7 +602,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		
 	}
 
-	private void createRouteControls(Composite container, ServerSettingsViewModel model, DataBindingContext dbc) {
+	private void createRouteControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		Group routeGroup = new Group(container, SWT.NONE);
 		routeGroup.setText("Route");
 		GridDataFactory.fillDefaults()
@@ -595,16 +639,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		routesViewer.setContentProvider(new ObservableListContentProvider());
 		routesViewer.setLabelProvider(new RouteLabelProvider());
 		routesViewer.setInput(
-				BeanProperties.list(ServerSettingsViewModel.PROPERTY_ROUTES).observe(model));
+				BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_ROUTES).observe(model));
 
 		IObservableValue selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
 		ValueBindingBuilder.bind(selectedRouteObservable)
-				.to(BeanProperties.value(ServerSettingsViewModel.PROPERTY_ROUTE).observe(model)).in(dbc);
+				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_ROUTE).observe(model)).in(dbc);
 
 		final IObservableValue isSelectDefaultRouteObservable =
 				WidgetProperties.selection().observe(promptRouteButton);
 		final IObservableValue selectDefaultRouteModelObservable = 
-				BeanProperties.value(ServerSettingsViewModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
+				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
 		ValueBindingBuilder
 			.bind(isSelectDefaultRouteObservable)
 			.converting(new InvertingBooleanConverter())
@@ -613,6 +657,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.in(dbc);
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(routesViewer.getControl()))
+			.notUpdating(selectDefaultRouteModelObservable)
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(routeLabel))
 			.notUpdating(selectDefaultRouteModelObservable)
 			.in(dbc);
 		RouteValidator routeValidator = new RouteValidator(isSelectDefaultRouteObservable, selectedRouteObservable);
@@ -630,12 +678,12 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		};
 	}
 
-	private TreeViewer createServicesTreeViewer(Composite parent, ServerSettingsViewModel model, Text selectorText) {
+	private TreeViewer createServicesTreeViewer(Composite parent, ServerSettingsWizardPageModel model, Text selectorText) {
 		TreeViewer applicationTemplatesViewer =
 				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
 				new IListProperty[] {
-						BeanProperties.list(ServerSettingsViewModel.PROPERTY_SERVICE_ITEMS),
+						BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_SERVICE_ITEMS),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 		ObservableListTreeContentProvider contentProvider =
 				new ObservableListTreeContentProvider(childrenProperty.listFactory(), null);
@@ -707,8 +755,11 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
     @Override
 	public boolean isPageComplete() {
-        return !isLoadingResources && uiHook != null && !uiHook.isDisposed() && 
-    			!needsLoadingResources && model != null && model.getService() != null && super.isPageComplete();
+        return !isLoadingResources 
+        		&& uiHook != null && !uiHook.isDisposed() 
+    			&& !needsLoadingResources 
+    			&& model != null && model.getService() != null 
+    			&& super.isPageComplete();
     }
 
     public IServer saveServer(IProgressMonitor monitor) throws CoreException {
@@ -716,6 +767,13 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		return model.saveServer(monitor);
 	}
 	
+	@Override
+	protected void onPageWillGetDeactivated(Direction progress, PageChangingEvent event, DataBindingContext dbc) {
+		if (progress == Direction.FORWARDS) {
+			System.err.println("deactivating FORWARD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		}
+	}
+
 	class RouteValidator extends MultiValidator {
 
 		private IObservableValue useDefaultRoute;
@@ -728,7 +786,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 		@Override
 		protected IStatus validate() {
-			if (!Boolean.valueOf((Boolean) useDefaultRoute.getValue())) {
+			if (BooleanUtils.isFalse((Boolean) useDefaultRoute.getValue())) {
 				if (selectedRoute.getValue() == null) {
 					return ValidationStatus.cancel("You have to choose a route that will be used for this server adapter.");
 				}

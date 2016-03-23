@@ -83,7 +83,6 @@ public class ObservableTreeItemUtils {
 		}
 
 		return items.stream()
-			.peek(item -> System.err.println("all items: " + ((ObservableTreeItem) item).getModel())) 
 			.filter(item -> ((ObservableTreeItem) item).getModel() != null 
 						&& type.isAssignableFrom(((ObservableTreeItem) item).getModel().getClass()))
 			.map(child -> (T) ((ObservableTreeItem) child).getModel()) 
@@ -100,13 +99,14 @@ public class ObservableTreeItemUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getFirstModel(Class<? extends T> type, List<ObservableTreeItem> items) {
-		if (items == null 
-				|| items.isEmpty()) {
+		if (items == null) {
 			return null;
 		}
 		return items.stream()
 				.flatMap(ObservableTreeItemUtils::flatten)
-				.filter(item -> item.getModel() != null && item.getModel().getClass() == type)
+				.filter(item -> item.getModel() != null 
+					&& (type == null
+						|| type.isAssignableFrom(item.getModel().getClass())))
 				.map(item -> (T) item.getModel())
 				.findFirst()
 				.orElseGet(() -> null);
