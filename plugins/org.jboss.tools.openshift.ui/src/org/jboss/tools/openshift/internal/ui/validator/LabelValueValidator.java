@@ -70,7 +70,7 @@ public class LabelValueValidator implements IValidator {
 		}
 		String value = (String) paramObject;
 		if(StringUtils.isBlank(value))
-			return ValidationStatus.error(NLS.bind("{0} is required.", type));
+			return ValidationStatus.cancel(NLS.bind("{0} is required.", type));
 		if(value.length() > LABEL_MAXLENGTH) {
 			return getSizeConstraintError();
 		}

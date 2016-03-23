@@ -25,12 +25,12 @@ public class LabelValueValidatorTest extends AbstractValidatorTest{
 
 	@Test
 	public void emptyValueShouldBeInvalid() {
-		assertFailure("");
+		assertCancel("");
 	}
 
 	@Test
 	public void blankValueShouldBeInvalid() {
-		assertFailure("  ");
+		assertCancel("  ");
 	}
 
 	@Test
