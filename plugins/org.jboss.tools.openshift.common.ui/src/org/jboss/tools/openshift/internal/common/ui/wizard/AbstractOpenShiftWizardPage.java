@@ -94,22 +94,46 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
 				@Override
 				public void handlePageChanging(PageChangingEvent event) {
-					if (event.getTargetPage() == AbstractOpenShiftWizardPage.this) {
+					if (isChangingToThisPage(event)) {
 						if (event.getCurrentPage() == null
-								|| event.getCurrentPage().equals(getPreviousPage())) {
+								|| getPreviousPage() == null // in fragments
+								|| equals((IWizardPage) event.getCurrentPage(), getPreviousPage())) {
 							onPageWillGetActivated(Direction.FORWARDS, event, dbc);
 						} else {
 							onPageWillGetActivated(Direction.BACKWARDS, event, dbc);
 						}
-					} else if (event.getCurrentPage() == AbstractOpenShiftWizardPage.this){
+					} else if (isChangingFromThisPage(event)){
 						if (event.getTargetPage() == null
-								|| event.getTargetPage().equals(getNextPage())) {
+								|| getNextPage() == null // in fragments
+								|| equals((IWizardPage) event.getTargetPage(), getNextPage())) {
 							onPageWillGetDeactivated(Direction.FORWARDS, event, dbc);							
 						} else {
 							onPageWillGetDeactivated(Direction.BACKWARDS, event, dbc);
 						}
 					}
 				}
+
+				private boolean isChangingToThisPage(PageChangingEvent event) {
+					return equals((IWizardPage) event.getTargetPage(), AbstractOpenShiftWizardPage.this);
+				}
+				
+				private boolean isChangingFromThisPage(PageChangingEvent event) {
+					return equals((IWizardPage) event.getCurrentPage(), AbstractOpenShiftWizardPage.this);
+				}
+
+				private boolean equals(Object thisPage, Object thatPage) {
+					if (!(thisPage instanceof IWizardPage)) {
+						return thatPage == null;
+					}
+					
+					if (!(thatPage instanceof IWizardPage)) {
+						return false;
+					}
+					
+					return thisPage == thatPage 
+							|| ((IWizardPage) thisPage).getControl() == ((IWizardPage) thatPage).getControl();
+				}
+
 			});
 		}
 	}

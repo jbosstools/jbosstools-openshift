@@ -55,7 +55,7 @@ public class ServerSettingsWizard extends Wizard {
 	public void addPages() {
 		addPage(this.serverSettingsWizardPage);
 	}
-	
+
 	@Override
 	public boolean performFinish() {
 		try {

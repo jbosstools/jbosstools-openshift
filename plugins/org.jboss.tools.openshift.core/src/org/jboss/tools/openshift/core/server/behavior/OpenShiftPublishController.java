@@ -19,10 +19,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IPublishController;
@@ -39,6 +42,8 @@ import com.openshift.restclient.model.IService;
 
 public class OpenShiftPublishController extends StandardFileSystemPublishController implements IPublishController {
 
+	private RSync rsync = null;
+	
 	public void publishStart(final IProgressMonitor monitor) 
 			throws CoreException {
 		final IProject deployProject = getMagicProject(getServer());
@@ -49,7 +54,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 							getServer().getName(), deployProject.getName())));
 		}
 		
-		final RSync rsync = OCBinaryOperation.createRSync(getServer());
+		rsync = OpenShiftServerUtils.createRSync(getServer());
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
 				NLS.bind("Could not sync all pods to folder {0}", localDeploymentDirectory.getAbsolutePath()), null);
@@ -113,18 +118,52 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
-		super.publishFinish(monitor);
-		final RSync rsync = OCBinaryOperation.createRSync(getServer());
-		final File deployFolder = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final IService service = OpenShiftServerUtils.getService(getServer());
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Could not sync {0} to all pods running the service {1}", deployFolder, service.getName()),
-				null);
-		rsync.syncDirectoryToPods(deployFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
-
-		// Remove all *.dodeploy files from this folder.
-		Stream.of(deployFolder.listFiles()).filter(p -> p.getName().endsWith(".dodeploy")).forEach(p -> p.delete());
+		if( rsync != null ) {
+			super.publishFinish(monitor);
+			final File deployFolder = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
+			final IService service = OpenShiftServerUtils.getService(getServer());
+			final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
+					NLS.bind("Could not sync {0} to all pods running the service {1}", deployFolder, service.getName()),
+					null);
+			rsync.syncDirectoryToPods(deployFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
+	
+			// Remove all *.dodeploy files from this folder.
+			Stream.of(deployFolder.listFiles()).filter(p -> p.getName().endsWith(".dodeploy")).forEach(p -> p.delete());
+			
+			
+			// If the pod path is not set on the project yet, we can do that now 
+			// to make future fetches faster
+			String podPath = OpenShiftServerUtils.getPodPath(getServer());
+			if (StringUtils.isEmpty(podPath)) {
+				// Pod path is empty
+				podPath = OpenShiftServerUtils.loadPodPath(service, getServer());
+				if( !StringUtils.isEmpty(podPath)) {
+					fireUpdatePodPath(getServer(), podPath);
+				}
+			}
+			
+		}
 	}
+	
+	private void fireUpdatePodPath(final IServer server, final String podPath) {
+		new Job("Updating Pod Path") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				OpenShiftServerUtils.setProjectAttribute(
+						OpenShiftServerUtils.ATTR_POD_PATH, podPath, OpenShiftServerUtils.getDeployProject(getServer()));
+				IServerWorkingCopy wc = server.createWorkingCopy();
+				wc.setAttribute(OpenShiftServerUtils.ATTR_POD_PATH, podPath);
+				try {
+					wc.save(true, new NullProgressMonitor());
+				} catch(CoreException ce) {
+					return ce.getStatus();
+				}
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+
+	}
+	
 	
 	@Override
 	protected boolean supportsJBoss7Markers() {

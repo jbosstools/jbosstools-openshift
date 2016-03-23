@@ -20,6 +20,8 @@ import org.eclipse.wst.server.core.IServerAttributes;
 import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * @author Andre Dietisheim
@@ -58,9 +60,21 @@ public class ServerUtils {
 	}
 
 	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project) {
+		setProjectAttribute(name, value, nodeQualifier, project, false);
+	}
+	
+	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project, boolean sync) {
 		IEclipsePreferences node = getProjectNode(nodeQualifier, project);
 		node.put(name, value);
+		if( sync ) {
+			try {
+				node.sync();
+			} catch(BackingStoreException bse) {
+				OpenShiftCommonCoreActivator.pluginLog().logError("Error saving project setting", bse);
+			}
+		}
 	}
+
 	
 	public static String getServerAttribute(String name, String defaultValue, IServerAttributes attributes) {
 		if (attributes == null) {

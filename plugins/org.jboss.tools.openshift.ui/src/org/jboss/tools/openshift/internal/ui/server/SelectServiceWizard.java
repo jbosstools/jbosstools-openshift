@@ -140,7 +140,7 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 						}
 					})
 					.to(BeanProperties.value(ServiceViewModel.PROPERTY_SERVICE).observe(getModel()))
-					.converting(new Model2ObservableTreeItemConverter(new ServerSettingsViewModel.ServiceTreeItemsFactory()))
+					.converting(new Model2ObservableTreeItemConverter(new ServerSettingsWizardPageModel.ServiceTreeItemsFactory()))
 					.in(dbc);
 
 			// details
@@ -181,7 +181,7 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 					new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 			IListProperty childrenProperty = new MultiListProperty(
 					new IListProperty[] {
-							BeanProperties.list(ServerSettingsViewModel.PROPERTY_SERVICE_ITEMS),
+							BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_SERVICE_ITEMS),
 							BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 			ObservableListTreeContentProvider contentProvider =
 					new ObservableListTreeContentProvider(childrenProperty.listFactory(), null);
