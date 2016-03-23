@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
+import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
@@ -48,6 +48,22 @@ public class VagrantLaunchUtility {
 	}
 	
 	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
+		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		String user = cdkServer.getUsername();
+		String pass = null;
+		try {
+			pass = cdkServer.getPassword();
+		} catch(UsernameChangedException uce) {
+			pass = uce.getPassword();
+			user = uce.getUser();
+		}
+		return setupLaunch(s, args, launchConfigName, startupConfig, user, pass);
+	}
+	
+	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, 
+			String launchConfigName, ILaunchConfiguration startupConfig,
+			String userName, String pass) throws CoreException {
+
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 
 		ILaunchConfigurationWorkingCopy wc = findLaunchConfig(s, launchConfigName);
@@ -64,7 +80,6 @@ public class VagrantLaunchUtility {
     			existingEnvironment = new HashMap<String,String>();
     		}
     		
-    		String userName = cdkServer.getUsername();
     		if( userName == null ) {
     			// This is an error situation and the user should be made aware
     			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, 
@@ -73,8 +88,10 @@ public class VagrantLaunchUtility {
     		}
     		
     		HashMap<String,String> env = new HashMap<String,String>(existingEnvironment);
+    		String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+    		env.put(userKey, userName);
+    		
     		String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
-    		String pass = cdkServer.getPassword();
     		if( pass == null ) {
     			// This is an error situation and the user should be made aware
     			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, 

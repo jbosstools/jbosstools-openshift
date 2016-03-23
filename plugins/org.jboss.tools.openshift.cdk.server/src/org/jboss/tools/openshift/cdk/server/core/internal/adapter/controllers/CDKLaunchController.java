@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,26 +28,20 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.tm.internal.terminal.control.impl.ITerminalControlForText;
-import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
-import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
-import org.jboss.ide.eclipse.as.core.util.PollThreadUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
+import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
-import org.jboss.tools.openshift.cdk.server.ui.internal.util.TerminalUtility;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class CDKLaunchController extends AbstractSubsystemController implements ILaunchServerController, IExternalLaunchConstants {
@@ -157,11 +149,28 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 		
 		CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		String password = cdkServer.getPassword();
-		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, password);
+    	String pass = null;
+    	String user = cdkServer.getUsername();
+    	try {
+    		pass = cdkServer.getPassword();
+    	} catch(UsernameChangedException uce) {
+    		pass = uce.getPassword();
+    		user = uce.getUser();
+    	}
+    	
+    	if( user == null ) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no username associated with it. Please open the server editor and configure the credentials."));
+    	}
 
-		
-		
+    	if( pass == null ) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no password associated with it. Please open the server editor and configure the credentials."));
+    	}
+
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
+
 		// Poll the server once more 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
 		if( stat.isOK()) {
@@ -238,89 +247,6 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	
 	private String getStartupLaunchName(IServer s) {
 		return "Start " + s.getName();
-	}
-	
-	public void launchViaTerminal(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
-			throws CoreException {
-
-		final IServer s = ServerUtil.getServer(configuration);
-		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		final CDKServerBehaviour beh = (CDKServerBehaviour)s.loadAdapter(CDKServerBehaviour.class, new NullProgressMonitor());
-		beh.setServerStarting();
-		
-		final Map<String, Object> props = TerminalUtility.getPropertiesForServer(s);		
-		final CustomDone customDone = new CustomDone();
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				openView(props, customDone);
-			}
-		});
-		
-		
-		// Wait for done
-		while(customDone.getStatus() == null ) {
-			try {
-				Thread.sleep(200);
-			} catch(InterruptedException ie) {
-				// TODO
-			}
-		}
-		
-		String command2 = "vagrant up";
-    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
-		if( passCredentials ) {
-			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
-			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
-			String user = cdkServer.getUsername();
-			String pass = cdkServer.getPassword();
-			command2 = userKey + "=" + user + " " + passKey + "=" + pass + " " + command2;
-		}
-		
-		final String command = "\n" + command2 + "\n";
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				ITerminalControlForText control = TerminalUtility.findTerminalControl(props);
-				if( control != null ) {
-					OutputStream os = control.getOutputStream();
-					try {
-						os.write(command.getBytes());
-					} catch(IOException ioe) {
-						ioe.printStackTrace();
-					}
-					
-					launchPoller(beh);
-				}
-			}
-		});
-		
-	}
-	
-	
-	private void launchPoller(IControllableServerBehavior beh) {
-		// delay the launch of polling until the cmd vagrant up has been actually run. 
-		try {
-			Thread.sleep(1500);
-		} catch(InterruptedException ie) {
-			// ignore
-		}
-		PollThreadUtils.pollServer(beh.getServer(), IServerStatePoller2.SERVER_UP, new VagrantPoller());
-	}
-	
-	
-	private void openView(Map<String, Object> props, ITerminalService.Done d) {
-		TerminalUtility.openConsole(props, d);
-	}
-	
-
-	
-	private class CustomDone implements ITerminalService.Done {
-		private IStatus stat = null;
-		public void done(IStatus status) {
-			this.stat = status;
-		}
-		public IStatus getStatus() {
-			return stat;
-		}
 	}
 	
 }
