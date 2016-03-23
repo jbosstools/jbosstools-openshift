@@ -28,7 +28,7 @@ import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
-import com.openshift.restclient.model.build.ISTIBuildStrategy;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
@@ -92,9 +92,8 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		IBuildStrategy buildStrategy = config.getBuildStrategy();
 		properties.add(new ResourceProperty("strategy", buildStrategy.getType().toString()));
 		switch(buildStrategy.getType()) {
-		case BuildStrategyType.STI:
 		case BuildStrategyType.SOURCE:
-			ISTIBuildStrategy sti = (ISTIBuildStrategy) buildStrategy;
+			ISourceBuildStrategy sti = (ISourceBuildStrategy) buildStrategy;
 			properties.add(new ResourceProperty("builder image", sti.getImage().toString()));
 			break;
 		case BuildStrategyType.DOCKER:
