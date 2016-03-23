@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
@@ -25,11 +26,28 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IE
 
 public class CDKLaunchEnvironmentUtil {
 
+	public static Map<String, String> createEnvironment(IServer server) {
+		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		String pass = null;
+		try {
+			pass = cdkServer.getPassword();
+		} catch (UsernameChangedException uce) {
+			return createEnvironment(server, uce.getPassword(), uce.getUser());
+		}
+
+		return createEnvironment(server, pass);
+	}
+
 	public static Map<String, String> createEnvironment(IServer server, String password) {
+		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		return createEnvironment(server, password, cdkServer.getUsername());
+	}
+
+	public static Map<String, String> createEnvironment(IServer server, String password, String user) {
 		Map<String, String> launchEnv = null;
 		try {
 			ILaunchConfiguration wc = server.getLaunchConfiguration(false, new NullProgressMonitor());
-			launchEnv = wc.getAttribute(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY, (Map<String,String>) null);
+			launchEnv = wc.getAttribute(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
 		} catch (CoreException ce) {
 			CDKCoreActivator.pluginLog().logWarning(
 					"Unable to load environment for vagrant status call. System environment will be used instead.");
@@ -52,7 +70,7 @@ public class CDKLaunchEnvironmentUtil {
 					CDKConstants.CDK_ENV_SUB_USERNAME);
 			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR,
 					CDKConstants.CDK_ENV_SUB_PASSWORD);
-			systemEnv.put(userKey, cdkServer.getUsername());
+			systemEnv.put(userKey, user);
 			systemEnv.put(passKey, password);
 		}
 		return systemEnv;

@@ -17,10 +17,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.core.credentials.ICredentialDomain;
+import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 
 public class CDKServer extends ServerDelegate {
@@ -66,6 +68,11 @@ public class CDKServer extends ServerDelegate {
 	}
 	
 	public String getUsername() {
+		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
+		Object user2 = beh.getSharedData(CDKServerBehaviour.PROP_CACHED_USER);
+		if( user2 instanceof String )
+			return (String)user2;
+		
 		String user = getServer().getAttribute(PROP_USERNAME, (String)null);
 		if( user == null ) {
 			ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
@@ -74,7 +81,7 @@ public class CDKServer extends ServerDelegate {
 		return user;
 	}
 	
-	public String getPassword() {
+	public String getPassword() throws UsernameChangedException {
 		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 		Object pw = beh.getSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD);
 		if( pw instanceof String )
@@ -87,6 +94,21 @@ public class CDKServer extends ServerDelegate {
 				return domain.getCredentials(user);
 			} catch(StorageException se) {
 				CDKCoreActivator.getDefault().getLog().log(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, se.getMessage(), se));
+			} catch(UsernameChangedException uce) {
+				if( uce.getSaveCredentials()) {
+					// The user has changed the username and is now requesting we save the changes
+					IServerWorkingCopy wc = getServerWorkingCopy();
+					if( wc == null ) {
+						wc = getServer().createWorkingCopy();
+						wc.setAttribute(PROP_USERNAME, uce.getUser());
+						try {
+							wc.save(true, new NullProgressMonitor());
+						} catch(CoreException ce) {
+							CDKCoreActivator.pluginLog().logError("Error persisting changed username", ce);
+						}
+					}
+				}
+				throw uce;
 			}
 		}
 		return null;
