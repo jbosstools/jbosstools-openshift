@@ -22,7 +22,7 @@ import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
-import com.openshift.restclient.model.build.ISTIBuildStrategy;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConfig> {
 	
@@ -103,11 +103,11 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 				String ref = getResource().<IGitBuildSource>getBuildSource().getRef();
 				return "".equals(ref) ? "master" : ref;
 			case STI_SCRIPT_LOCATION: 
-				return getResource().<ISTIBuildStrategy>getBuildStrategy().getScriptsLocation();
+				return getResource().<ISourceBuildStrategy>getBuildStrategy().getScriptsLocation();
 			case STI_IMAGE:
-				return getResource().<ISTIBuildStrategy>getBuildStrategy().getImage();
+				return getResource().<ISourceBuildStrategy>getBuildStrategy().getImage();
 			case STI_ENV:
-				return new KeyValuePropertySource(getResource().<ISTIBuildStrategy>getBuildStrategy().getEnvironmentVariables());
+				return new KeyValuePropertySource(getResource().<ISourceBuildStrategy>getBuildStrategy().getEnvironmentVariables());
 			case TRIGGERS_IMAGE_CHANGE:
 				return new ImageChangePropertySource(getResource().getBuildTriggers());
 			case TRIGGERS_WEB:

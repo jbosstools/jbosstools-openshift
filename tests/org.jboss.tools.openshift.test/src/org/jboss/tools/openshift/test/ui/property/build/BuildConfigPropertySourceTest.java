@@ -27,7 +27,7 @@ import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
-import com.openshift.restclient.model.build.ISTIBuildStrategy;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 import org.jboss.tools.openshift.internal.ui.property.BuildConfigPropertySource;
 import org.jboss.tools.openshift.internal.ui.property.KeyValuePropertySource;
@@ -64,8 +64,8 @@ public class BuildConfigPropertySourceTest {
 		return strategy;
 	}
 	
-	private ISTIBuildStrategy givenSTIBuildStrategy(){
-		ISTIBuildStrategy strategy  = mock(ISTIBuildStrategy.class);
+	private ISourceBuildStrategy givenSTIBuildStrategy(){
+		ISourceBuildStrategy strategy  = mock(ISourceBuildStrategy.class);
 		when(strategy.getType()).thenReturn(BuildStrategyType.SOURCE);
 		when(strategy.getScriptsLocation()).thenReturn("scriptlocation");
 		when(strategy.getImage()).thenReturn(new DockerImageURI("foobar"));
@@ -103,7 +103,7 @@ public class BuildConfigPropertySourceTest {
 	}
 	@Test
 	public void getSTIPropertyValues(){
-		ISTIBuildStrategy strategy = givenSTIBuildStrategy();
+		ISourceBuildStrategy strategy = givenSTIBuildStrategy();
 		assertEquals(BuildStrategyType.SOURCE, source.getPropertyValue(BuildConfigPropertySource.Ids.Type));
 		assertEquals(strategy.getScriptsLocation(),  source.getPropertyValue(BuildConfigPropertySource.Ids.STI_SCRIPT_LOCATION));
 		assertEquals(strategy.getImage(), source.getPropertyValue(BuildConfigPropertySource.Ids.STI_IMAGE));
