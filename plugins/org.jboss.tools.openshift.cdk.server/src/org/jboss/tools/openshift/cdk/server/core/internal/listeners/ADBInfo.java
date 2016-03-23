@@ -20,6 +20,7 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
@@ -53,9 +54,8 @@ public class ADBInfo {
 	public static ADBInfo loadADBInfo(IServer server) {
 		
 		String[] args = new String[]{CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
-    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 
-    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, cdkServer.getPassword());
+    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
 

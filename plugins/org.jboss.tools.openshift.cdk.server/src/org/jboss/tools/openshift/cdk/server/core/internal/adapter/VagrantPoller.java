@@ -23,7 +23,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
@@ -72,9 +71,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	
 	private void pollerRun() {
 		setStateInternal(false, state);
-    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-    	String pass = cdkServer.getPassword();
-    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, pass);
+    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		while(aborted == null && !canceled && !done) {
 			IStatus stat = onePing(server, env);
 			int status = stat.getSeverity();
@@ -139,8 +136,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	
 	// This *could* prompt for a password, so dont use this method for repeated calls
 	private int onePing(IServer server) {
-    	CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-    	IStatus stat = onePing(server, CDKLaunchEnvironmentUtil.createEnvironment(server, cdkServer.getPassword()));
+    	IStatus stat = onePing(server, CDKLaunchEnvironmentUtil.createEnvironment(server));
     	return stat.getSeverity();
 	}
 		
