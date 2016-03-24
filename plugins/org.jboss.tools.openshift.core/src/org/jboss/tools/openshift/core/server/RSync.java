@@ -147,7 +147,7 @@ public class RSync {
 			try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(syncStream));) {
 				String line;
 					while ((line = bufferedReader.readLine()) != null) {
-						consoleWriter.writeToShell(RSync.this.server.getId(), new String[]{line});
+						consoleWriter.writeToShell(RSync.this.server.getId(), new String[]{line}, false);
 					}
 			}
 			} catch(IOException e)  {
