@@ -160,6 +160,7 @@ public class WatchManager {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
+					monitor.beginTask("Opening WebSocket connection to " + client.getBaseURL().toString(), 1);
 					connect(client);
 				}catch(Exception e) {
 					Trace.debug("Exception starting watch on project {0} and {1} kind",e,project.getName(), kind);
@@ -173,6 +174,8 @@ public class WatchManager {
 					final long delay = FIBONACCI[backoff] * BACKOFF_MILLIS;
 					Trace.debug("Delaying watch restart by {0}ms for project {1} and kind {2} ", delay, project.getName(), kind);
 					new RestartWatchJob(client).schedule(delay);
+				} finally {
+					monitor.done();
 				}
 				return Status.OK_STATUS;
 			}

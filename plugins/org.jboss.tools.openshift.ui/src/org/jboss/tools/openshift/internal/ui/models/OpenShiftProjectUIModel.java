@@ -15,13 +15,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
+import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.common.core.IRefreshable;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
-import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IBuild;
-import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
@@ -30,18 +30,23 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable, PropertyChangeListener{
-	
-	public static final String PROP_LOADING = "loading";
-	
-	private final IDeploymentResourceMapper mapper;
+public class OpenShiftProjectUIModel extends ObservableUIPojo
+		implements IResourcesUIModel, IResourceUIModel, IProjectAdapter, IRefreshable, PropertyChangeListener {
+
+	private final IOpenShiftConnection connection;
 	private final IProject project;
+	private final IDeploymentResourceMapper mapper;
 	private AtomicBoolean deleting = new AtomicBoolean(false);
 
-	public OpenShiftProjectUIModel(IOpenShiftConnection conn, IProject project) {
-		super(conn);
+	/**
+	 * Constructor.
+	 * @param connection the OpenShift connection
+	 * @param project the OpenShift project
+	 */
+	public OpenShiftProjectUIModel(final IOpenShiftConnection connection, final IProject project) {
+		this.connection = connection;
 		this.project = project;
-		this.mapper = new DeploymentResourceMapper(conn, this);
+		this.mapper = new DeploymentResourceMapper(connection, this);
 		this.mapper.addPropertyChangeListener(PROP_DEPLOYMENTS, this);
 	}
 	
@@ -62,22 +67,18 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 	}
 
 	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt  instanceof IndexedPropertyChangeEvent) {
-			fireIndexedPropertyChange(evt.getPropertyName(), ((IndexedPropertyChangeEvent)evt).getIndex(), evt.getOldValue(), evt.getNewValue());
-		}else {
-			firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+	public void propertyChange(final PropertyChangeEvent event) {
+		if (event instanceof IndexedPropertyChangeEvent) {
+			fireIndexedPropertyChange(event.getPropertyName(), ((IndexedPropertyChangeEvent) event).getIndex(),
+					event.getOldValue(), event.getNewValue());
+		} else {
+			firePropertyChange(event.getPropertyName(), event.getOldValue(), event.getNewValue());
 		}
-			
 	}
 
 	@Override
 	public Collection<Deployment> getDeployments() {
 		return mapper.getDeployments();
-	}
-
-	@Override
-	public void setDeployments(Collection<Deployment> deployment) {
 	}
 
 	@Override
@@ -90,48 +91,85 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 		return this.project;
 	}
 
-
 	@Override
 	public IResource getResource() {
 		return getProject();
 	}
 
-	public boolean isLoading() {
-		return false;
+	@Override
+	public IOpenShiftConnection getConnection() {
+		return this.connection;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends IResource> void setResources(Collection<T> resources, String kind) {
-		switch(kind) {
-		case ResourceKind.BUILD:
-			setBuildResources((Collection<IBuild>) resources);
-			break;
-		case ResourceKind.BUILD_CONFIG:
-			setBuildConfigResources((Collection<IResource>) resources);
-			break;
-		case ResourceKind.DEPLOYMENT_CONFIG:
-			setDeploymentConfigResources((Collection<IResource>) resources);
-			break;
-		case ResourceKind.IMAGE_STREAM:
-			setImageStreamResources((Collection<IResource>) resources);
-			break;
-		case ResourceKind.POD:
-			setPodResources((Collection<IPod>) resources);
-			break;
-		case ResourceKind.ROUTE:
-			setRouteResources((Collection<IResource>) resources);
-			break;
-		case ResourceKind.REPLICATION_CONTROLLER:
-			setReplicationControllerResources((Collection<IResource>) resources);
-			break;
-		case ResourceKind.SERVICE:
-			setServiceResources((Collection<IResource>) resources);
-			break;
-		default:
-		}
-
+	public String toString() {
+		return this.project.getName();
 	}
 
+	@Override
+	public Object getParent() {
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(final Class<T> adapter) {
+		if(adapter.equals(IProject.class)) {
+			return (T) this.project;
+		} else if(adapter.equals(IResource.class)) {
+				return (T) this.project;
+		} else if(adapter.equals(Connection.class)) {
+			return (T) this.connection;
+		}
+		return null;
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getBuilds() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getBuilds().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getImageStreams() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getImageStreams().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getDeploymentConfigs() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getDeploymentConfigs().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getPods() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getPods().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getRoutes() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getRoutes().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getReplicationControllers() {
+		return this.mapper.getDeployments().stream()
+				.flatMap(deployment -> deployment.getReplicationControllers().stream()).collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getBuildConfigs() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getBuildConfigs().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<IResourceUIModel> getServices() {
+		return this.mapper.getDeployments().stream().flatMap(deployment -> deployment.getServices().stream())
+				.collect(Collectors.toList());
+	}
 	
 }

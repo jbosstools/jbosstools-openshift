@@ -28,6 +28,10 @@ public interface IResourceCache extends IDisposable {
 	 */
 	<T extends IResource> T getCachedResource(String namespace, String kind, String name);
 	
+	/**
+	 * @param kind the kind of resources to return
+	 * @return the OpenShift {@link IResource} of the given {@code kind}.
+	 */
 	<T extends IResource> Collection<T> getResourcesOf(String kind);
 	
 	/**

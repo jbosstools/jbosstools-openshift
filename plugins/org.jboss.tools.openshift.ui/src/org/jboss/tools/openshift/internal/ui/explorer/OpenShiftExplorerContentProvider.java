@@ -15,7 +15,9 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.observable.Diffs;
@@ -32,6 +34,7 @@ import org.jboss.tools.openshift.internal.ui.models.IAncestorable;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IProjectCache;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.IResourcesUIModel;
 import org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectCache;
 
 import com.openshift.restclient.OpenShiftException;
@@ -50,6 +53,9 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
 	private static final IProjectCache cache = new OpenShiftProjectCache();
 	
+	/**
+	 * Constructor.
+	 */
 	public OpenShiftExplorerContentProvider() {
 		super();
 		cache.addListener(this);
@@ -125,19 +131,19 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	}
 	
 	@Override
-	public void handleAddToCache(IProjectCache cache, IProjectAdapter adapter) {
-		adapter.addPropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
-		if(adapter.getParent() instanceof Connection && cache.getProjectsFor((Connection)adapter.getParent()).size() == 1) {
-			refreshViewer(adapter.getParent());
+	public void handleAddToCache(final IProjectCache projectCache, final IProjectAdapter projectAdapter) {
+		projectAdapter.addPropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
+		if(projectCache.getProjectsFor(projectAdapter.getConnection()).size() == 1) {
+			refreshViewer(projectAdapter.getConnection());
 		}else {
-			addChildrenToViewer(adapter.getParent(), adapter);
+			addChildrenToViewer(projectAdapter.getConnection(), projectAdapter);
 		}
 	}
 
 	@Override
 	public void handleRemoveFromCache(IProjectCache cache, IProjectAdapter adapter) {
 		adapter.removePropertyChangeListener(IProjectAdapter.PROP_DEPLOYMENTS, this);
-		removeChildrenFromViewer(adapter.getParent(), adapter);
+		removeChildrenFromViewer(adapter.getConnection(), adapter);
 	}
 
 	@Override
@@ -158,12 +164,12 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 	public void propertyChange(PropertyChangeEvent event) {
 		Object oldValue = event.getOldValue();
 		Object newValue = event.getNewValue();
-		if(oldValue instanceof List && newValue instanceof List) {
-			List oldList = (List)oldValue;
-			List newList = (List)newValue;
-			ListDiff diffs = Diffs.computeListDiff(oldList, newList);
+		if(oldValue instanceof Collection && newValue instanceof Collection) {
+			final List<?> oldList = new ArrayList<>((Collection)oldValue);
+			final List<?> newList = new ArrayList<>((Collection)newValue);
+			final ListDiff diffs = Diffs.computeListDiff(oldList, newList);
 			List removed = new ArrayList();
-			List added = new ArrayList();
+			List addedElements = new ArrayList();
 			diffs.accept(new ListDiffVisitor() {
 				
 				@Override
@@ -182,11 +188,12 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 							return;
 						}						
 					}
-					added.add(element);
+					addedElements.add(element);
 				}
 				
 				
 			});
+			final Set<Object> elementsToRefresh = new HashSet<>();
 			for (Object child : removed) {
 				Object parent = getParent(child);
 				Trace.debug("Explorer remove: parent: {0} / child: {1}", parent, child);
@@ -196,38 +203,42 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				}
 				if(child instanceof IResourceUIModel && ResourceKind.ROUTE.equals(((IResourceUIModel) child).getResource().getKind())) {
 					updateChildrenFromViewer(parent);
+					elementsToRefresh.add(parent);
 				}
 			}
-			for (Object child : added) {
-				Object parent = getParent(child);
-				Trace.debug("Explorer add: parent: {0} / child: {1}", parent, child);
-				if(child instanceof Deployment) {
-					Deployment deployment = (Deployment)child;
+			for (Object addedElement : addedElements) {
+				Object parentElement = getParent(addedElement);
+				Trace.debug("Explorer add: parent: {0} / child: {1}", parentElement, addedElement);
+				if(addedElement instanceof Deployment) {
+					final Deployment deployment = (Deployment)addedElement;
 					addDeploymentListeners(deployment);
+//					elementsToRefresh.add(deployment.getParent());
+				} else if (addedElement instanceof IResourceUIModel
+						&& ResourceKind.ROUTE.equals(((IResourceUIModel) addedElement).getResource().getKind())) {
+//					elementsToRefresh.add(parentElement);
+					refreshViewer(parentElement);
 				}
-				if(child instanceof IResourceUIModel && ResourceKind.ROUTE.equals(((IResourceUIModel) child).getResource().getKind())) {
-					updateChildrenFromViewer(parent);
-				}
-				//HACK to fix JBIDE-21458
-				if(newList.size() > 0 && (parent instanceof IProjectAdapter || parent instanceof Deployment)) {
-					refreshViewer(parent);
-				}else {
-					addChildrenToViewer(parent, child);
+				//HACK to fix JBIDE-21458		
+				if(newList.size() > 0 && (parentElement instanceof IProjectAdapter || parentElement instanceof Deployment)) {		
+					refreshViewer(parentElement);		
+				}else {		
+					addChildrenToViewer(parentElement, addedElement);
 				}
 			}
+			elementsToRefresh.stream().forEach(element -> refreshViewer(element));
 		}
 	}
 	
 	private void addDeploymentListeners(Deployment deployment) {
-		deployment.addPropertyChangeListener(IProjectAdapter.PROP_PODS, this);
-		deployment.addPropertyChangeListener(IProjectAdapter.PROP_BUILDS, this);
-		deployment.addPropertyChangeListener(IProjectAdapter.PROP_ROUTES, this);
+		deployment.addPropertyChangeListener(IResourcesUIModel.PROP_PODS, this);
+		deployment.addPropertyChangeListener(IResourcesUIModel.PROP_BUILDS, this);
+		deployment.addPropertyChangeListener(IResourcesUIModel.PROP_ROUTES, this);
 	}
 
 	private void removeDeploymentListeners(Deployment deployment) {
-		deployment.removePropertyChangeListener(IProjectAdapter.PROP_PODS, this);
-		deployment.removePropertyChangeListener(IProjectAdapter.PROP_BUILDS, this);
-		deployment.removePropertyChangeListener(IProjectAdapter.PROP_ROUTES, this);
+		deployment.removePropertyChangeListener(IResourcesUIModel.PROP_PODS, this);
+		deployment.removePropertyChangeListener(IResourcesUIModel.PROP_BUILDS, this);
+		deployment.removePropertyChangeListener(IResourcesUIModel.PROP_ROUTES, this);
 	}
 
 	@Override
