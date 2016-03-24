@@ -10,10 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -186,22 +188,10 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				ServicePortAdapter port = new ServicePortAdapter();
 				List<IServicePort> servicePorts = model.getServicePorts();
 				if(!servicePorts.isEmpty()) {
-					port.setPort(Collections.max(servicePorts, new Comparator<IServicePort>() {
-						
-						@Override
-						public int compare(IServicePort first, IServicePort second) {
-							return Integer.compare(first.getPort(), second.getPort());
-						}
-						
-					}).getPort() + 1);
-					port.setTargetPort(Collections.max(servicePorts, new Comparator<IServicePort>() {
-						
-						@Override
-						public int compare(IServicePort first, IServicePort second) {
-							return first.getTargetPort().compareTo(second.getTargetPort());
-						}
-						
-					}).getPort() + 1);
+					Set<Integer> ports = servicePorts.stream().map((p) -> p.getPort()).collect(Collectors.toSet());
+					port.setPort(generateNewPort(ports));
+					ports = servicePorts.stream().map((p) -> getIntegerPort(p.getTargetPort())).collect(Collectors.toSet());
+					port.setTargetPort(generateNewPort(ports));
 				}
 				ServicePortDialog dialog = new ServicePortDialog(port, message, servicePorts);
 				if(Window.OK == dialog.open()) {
@@ -212,6 +202,31 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			}
 			
 		};
+	}
+
+	private static final Random seed = new Random();
+
+	private static int generateNewPort(Set<Integer> ports) {
+		while(true) {
+			int n = 1025 + seed.nextInt(65536 - 1025); // port should be in range [1025..65535]
+			if(!ports.contains(n)) {
+				return n;
+			}
+		}
+	}
+
+	/**
+	 * Returns integer if string value is an integer in range [0..65535], or -1.
+	 * @param stringPort
+	 * @return
+	 */
+	private static int getIntegerPort(String stringPort) {
+		if(StringUtils.isBlank(stringPort) || stringPort.length() > 5 || !StringUtils.isNumeric(stringPort)) {
+			return -1;
+		}
+		//Now, string port has only digits, and it length is no more than 5. There may be no NumberFormatException.
+		int value = Integer.parseInt(stringPort);
+		return (value > 65535) ? -1 : value;
 	}
 	
 	class EditHandler extends SelectionAdapter implements IDoubleClickListener{
