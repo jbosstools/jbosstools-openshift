@@ -54,11 +54,15 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 							getServer().getName(), deployProject.getName())));
 		}
 		
-		rsync = OpenShiftServerUtils.createRSync(getServer());
+		this.rsync = OpenShiftServerUtils.createRSync(getServer());
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
 				NLS.bind("Could not sync all pods to folder {0}", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
+		if (!status.isOK()) {
+			this.rsync = null;
+			throw new CoreException(status);
+		}
 		
 		// If the magic project is *also* a module on the server, do nothing
 		if( !modulesIncludesMagicProject(getServer(), deployProject)) {
@@ -126,7 +130,10 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 					NLS.bind("Could not sync {0} to all pods running the service {1}", deployFolder, service.getName()),
 					null);
 			rsync.syncDirectoryToPods(deployFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
-	
+			if (!status.isOK()) {
+				throw new CoreException(status);
+			}
+
 			// Remove all *.dodeploy files from this folder.
 			Stream.of(deployFolder.listFiles()).filter(p -> p.getName().endsWith(".dodeploy")).forEach(p -> p.delete());
 			
