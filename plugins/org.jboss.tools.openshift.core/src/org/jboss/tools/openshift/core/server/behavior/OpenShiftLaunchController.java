@@ -23,7 +23,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
+import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
@@ -32,6 +35,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
+import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerHotCodeReplaceListener;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -117,7 +121,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				int localPort = mapPortForwarding(debuggingContext, monitor);
 				
 				if(isJavaProject(server)) {
-					attachRemoteDebugger(server, localPort, monitor);
+					ILaunch debuggerLaunch = attachRemoteDebugger(server, localPort, monitor);
+					if( debuggerLaunch != null ) {
+						overrideHotcodeReplace(server, debuggerLaunch);
+					}
 				}					
 			}
 
@@ -247,9 +254,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return -1;
 	}
 	
-	private void attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor) throws CoreException {
+	private ILaunch attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Attaching remote debugger");
-		
+		ILaunch ret = null;
 		OpenShiftDebugUtils debugUtils = OpenShiftDebugUtils.get();
 		ILaunchConfiguration debuggerLaunchConfig = debugUtils.getRemoteDebuggerLaunchConfiguration(server);
 		ILaunchConfigurationWorkingCopy workingCopy;
@@ -257,7 +264,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			workingCopy = debugUtils.createRemoteDebuggerLaunchConfiguration(server);
 		} else {
 			if (debugUtils.isRunning(debuggerLaunchConfig, localDebugPort)) {
-				return;
+				return null;
 			}
 			workingCopy = debuggerLaunchConfig.getWorkingCopy();
 		}
@@ -275,7 +282,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		while(!launched && elapsed < maxWait) {
 			try {
 				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
-				debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
+				ret = debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
 				launched = true;
 			} catch (Exception e) {
 				if (monitor.isCanceled()) {
@@ -294,6 +301,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		
 	    monitor.worked(10);
+	    return ret;
 	}
 
 	
@@ -303,5 +311,22 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	
 	private CoreException toCoreException(String msg) {
 		return toCoreException(msg, null);
+	}
+	
+	
+	protected boolean overrideHotcodeReplace(IServer server, ILaunch launch) throws CoreException {
+		IJavaHotCodeReplaceListener l = getHotCodeReplaceListener(server, launch);
+		IDebugTarget[] targets = launch.getDebugTargets();
+		if( targets != null && l != null) {
+			for( int i = 0; i < targets.length; i++ ) {
+				if( targets[i] instanceof IJavaDebugTarget) {
+					((IJavaDebugTarget)targets[i]).addHotCodeReplaceListener(l);
+				}
+			}
+		}
+		return true;
+	}
+	protected IJavaHotCodeReplaceListener getHotCodeReplaceListener(IServer server, ILaunch launch) {
+		return new ServerHotCodeReplaceListener(server, launch);
 	}
 }
