@@ -64,7 +64,6 @@ public class DeploymentConfigListenerJob extends Job {
 			if (newValue instanceof IPod) {
 				IPod candidate = (IPod) newValue;
 				String podName = candidate.getName();
-				System.err.println("pod "+ podName);
 				if (!oldPods.contains(podName) &&
 					"Running".equals(candidate.getStatus()) &&
 					ResourceUtils.containsAll(dcSelector, candidate.getLabels())
