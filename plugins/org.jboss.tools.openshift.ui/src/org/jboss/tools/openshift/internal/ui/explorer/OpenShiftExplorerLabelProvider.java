@@ -178,7 +178,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 
 	private StyledString getStyledText(IBuild build) {
-		return style(build.getName(), String.format("%s %s","Build",build.getStatus()));
+		return style(build.getName(), build.getStatus() == null?"Build":String.format("%s %s","Build",build.getStatus()));
 	}
 
 	private StyledString getStyledText(IBuildConfig config) {
@@ -191,7 +191,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 	}
 
 	private StyledString getStyledText(IPod pod) {
-		return style(pod.getName(), String.format("%s %s","Pod",pod.getStatus()));
+		return style(pod.getName(), pod.getStatus() == null?"Pod":String.format("%s %s","Pod",pod.getStatus()));
 	}
 
 	private StyledString getStyledText(IImageStream repo) {

@@ -66,7 +66,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		IBuild build = givenAResource(IBuild.class, ResourceKind.BUILD);
 		when(build.getStatus()).thenReturn("Running");
 		
-		assertEquals(String.format("%s Running", build.getName()), provider.getStyledText(build).getString());
+		assertEquals(String.format("%s Build Running", build.getName()), provider.getStyledText(build).getString());
 	}
 	
 	@Test
@@ -93,11 +93,11 @@ public class OpenShiftExplorerLabelProviderTest {
 	@Test
 	public void getStyledTextForAPod(){
 		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
-		assertEquals(pod.getName(), provider.getStyledText(pod).getString());
+		assertEquals(String.format("%s Pod", pod.getName()), provider.getStyledText(pod).getString());
 		
 		String status = "Chilling";
 		when(pod.getStatus()).thenReturn(status);
-		String exp = String.format("%s %s", pod.getName(), status);
+		String exp = String.format("%s Pod %s", pod.getName(), status);
 		assertEquals(exp, provider.getStyledText(pod).getString());
 	}
 
@@ -108,7 +108,7 @@ public class OpenShiftExplorerLabelProviderTest {
 
 		String status = "Chilling";
 		when(pod.getStatus()).thenReturn(status);
-		String exp = "s...e C...g";
+		String exp = "s...e P...g";
 		assertEquals(exp, provider.getStyledText(pod).getString());
 	}
 	
@@ -119,7 +119,7 @@ public class OpenShiftExplorerLabelProviderTest {
 		Map<String, String> labels = new HashMap<>();
 		when(pod.getLabels()).thenReturn(labels);
 		
-		assertEquals(pod.getName(), provider.getStyledText(pod).getString());
+		assertEquals(String.format("%s Pod", pod.getName()), provider.getStyledText(pod).getString());
 	}
 	
 	@Test
