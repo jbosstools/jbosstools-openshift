@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -36,7 +37,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Messages;
-import org.eclipse.wst.server.core.internal.PublishServerJob;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
@@ -77,20 +77,25 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 		IResourceDeltaVisitor visitor = new IResourceDeltaVisitor() {
 			public boolean visit(IResourceDelta delta2) throws CoreException {
 				// has this deltaResource been changed?
-				if (delta2.getKind() == IResourceDelta.NO_CHANGE)
+				if (delta2.getKind() == IResourceDelta.NO_CHANGE) {
 					return false;
-				
-				if (delta2.getResource() instanceof IFile) {
-					if (delta2.getKind() == IResourceDelta.CHANGED
-						&& (delta2.getFlags() & IResourceDelta.CONTENT) == 0
-						&& (delta2.getFlags() & IResourceDelta.REPLACED) == 0
-						&& (delta2.getFlags() & IResourceDelta.SYNC) == 0){
+				} else if(delta2.getResource() instanceof IFolder) {
+					// by default, assume that a change on an IFolder must be taken
+					// into account.
+					changed.add(delta2.getResource());
+
+				} else if (delta2.getResource() instanceof IFile) {
+					if (delta2.getKind() == IResourceDelta.CHANGED 
+							&& (delta2.getFlags() & IResourceDelta.MARKERS) != 0
+							&& (delta2.getFlags() & IResourceDelta.CONTENT) == 0
+							&& (delta2.getFlags() & IResourceDelta.REPLACED) == 0
+							&& (delta2.getFlags() & IResourceDelta.SYNC) == 0) {
 						// this resource is effectively a no change
 						return false;
 					}
+					// Still here means delta has changes
+					changed.add(delta2.getResource());
 				}
-				// Still here means delta has changes
-				changed.add(delta2.getResource());
 				return true;
 			}
 		};
