@@ -19,7 +19,18 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public interface IRouteChooser {
 
-	public IRoute chooseRoute(List<IRoute> routes);
-	public void noRouteErrorDialog();
+	IRoute chooseRoute(List<IRoute> routes);
+
+	/**
+	 * Returns user's decision to remember the chosen route.
+	 * This method should be called after chooseRoute(List<IRoute).
+	 * 
+	 * @return
+	 */
+	default boolean isRememberChoice() {
+		return false;
+	}
+
+	void noRouteErrorDialog();
 
 }

@@ -13,7 +13,14 @@ package org.jboss.tools.openshift.internal.ui.dialog;
 import java.util.List;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -27,6 +34,9 @@ import com.openshift.restclient.model.route.IRoute;
  * @author André Dietisheim
  */
 public class SelectRouteDialog extends ElementListSelectionDialog {
+
+	private boolean rememberChoice = false;
+	private Button rememberChoiceButton = null;
 
 	public SelectRouteDialog(List<IRoute> routes, Shell shell) {
 		super(shell, new RouteLabelProvider());
@@ -68,7 +78,33 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 			return (IRoute) results[0];
 		}
 	}
-	
+
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		Composite contents = (Composite) super.createDialogArea(parent);
+
+		rememberChoiceButton = new Button(contents, SWT.CHECK);
+		rememberChoiceButton.setText("Remember selected route");
+		rememberChoiceButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		rememberChoiceButton.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				rememberChoice = rememberChoiceButton.getSelection();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		return contents;
+	}
+
+	public boolean isRememberChoice() {
+		return rememberChoice;
+	}
+
 	public static class RouteLabelProvider extends LabelProvider {
 
 		@Override

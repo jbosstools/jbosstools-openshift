@@ -12,7 +12,15 @@ package org.jboss.tools.openshift.core.server;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.wst.server.core.IServerAttributes;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.IRouteChooser;
@@ -114,10 +122,31 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		}
 		if (routes.size() > 1) {
 			route = chooser.chooseRoute(routes);
+			if(route != null && chooser.isRememberChoice()) {
+				fireUpdateRoute(server, route.getURL());
+			}
 		} else {
 			route = routes.get(0);
 		}
 		return route;
+	}
+
+	private void fireUpdateRoute(final IServerAttributes server, final String route) {
+		new Job("Updating Route") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				OpenShiftServerUtils.setProjectAttribute(
+						OpenShiftServerUtils.ATTR_ROUTE, route, OpenShiftServerUtils.getDeployProject(server));
+				IServerWorkingCopy wc = server.createWorkingCopy();
+				wc.setAttribute(OpenShiftServerUtils.ATTR_ROUTE, route);
+				try {
+					wc.save(true, new NullProgressMonitor());
+				} catch(CoreException ce) {
+					return ce.getStatus();
+				}
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 	}
 
 }
