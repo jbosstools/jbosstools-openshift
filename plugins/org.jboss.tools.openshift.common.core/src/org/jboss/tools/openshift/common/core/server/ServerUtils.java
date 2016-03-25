@@ -68,7 +68,7 @@ public class ServerUtils {
 		node.put(name, value);
 		if( sync ) {
 			try {
-				node.sync();
+				node.flush();
 			} catch(BackingStoreException bse) {
 				OpenShiftCommonCoreActivator.pluginLog().logError("Error saving project setting", bse);
 			}
