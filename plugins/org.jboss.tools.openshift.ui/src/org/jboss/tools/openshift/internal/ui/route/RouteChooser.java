@@ -28,6 +28,7 @@ public class RouteChooser implements IRouteChooser {
 	private static final String NO_ROUTE_MSG = "Could not find a route that points to an url to show in a browser.";
 
 	private Shell shell;
+	private boolean rememberChoice = false;
 
 	public RouteChooser() {
 	}
@@ -48,9 +49,15 @@ public class RouteChooser implements IRouteChooser {
 			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell);
 			if (Dialog.OK == routeDialog.open()) {
 				selectedRoute[0] = routeDialog.getSelectedRoute();
+				rememberChoice = routeDialog.isRememberChoice();
 			}
 		});
 		return selectedRoute[0];
+	}
+
+	@Override
+	public boolean isRememberChoice() {
+		return rememberChoice;
 	}
 
 	@Override

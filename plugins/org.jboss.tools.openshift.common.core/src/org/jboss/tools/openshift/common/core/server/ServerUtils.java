@@ -63,12 +63,12 @@ public class ServerUtils {
 		setProjectAttribute(name, value, nodeQualifier, project, false);
 	}
 	
-	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project, boolean sync) {
+	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project, boolean flush) {
 		IEclipsePreferences node = getProjectNode(nodeQualifier, project);
 		node.put(name, value);
-		if( sync ) {
+		if( flush ) {
 			try {
-				node.sync();
+				node.flush();
 			} catch(BackingStoreException bse) {
 				OpenShiftCommonCoreActivator.pluginLog().logError("Error saving project setting", bse);
 			}
