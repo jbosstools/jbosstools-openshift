@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
@@ -60,6 +63,10 @@ public class WatchManager {
 	
 	public static WatchManager getInstance() {
 		return Holder.instance;
+	}
+	
+	private WatchManager() {
+		ConnectionsRegistrySingleton.getInstance().addListener(new DeletedConnectionListener());
 	}
 	
 	public void stopWatch(IProject project) {
@@ -239,4 +246,21 @@ public class WatchManager {
 		
 	}
 
+	private class DeletedConnectionListener extends ConnectionsRegistryAdapter {
+		
+		@Override
+		public void connectionRemoved(IConnection connection) {
+			if(!(connection instanceof Connection)){
+				return;
+			}
+			Connection conn = (Connection)connection;
+			synchronized (watches) {
+				watches.keySet().stream()
+					.filter(p->conn.ownsResource(p))
+					.collect(Collectors.toList())
+					.forEach(p->stopWatch(p));
+			}
+		}
+		
+	}
 }
