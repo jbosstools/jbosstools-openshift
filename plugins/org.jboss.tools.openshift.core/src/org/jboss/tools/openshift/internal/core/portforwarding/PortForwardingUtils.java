@@ -20,15 +20,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.MultiStatus;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IPod;
@@ -98,7 +97,7 @@ public class PortForwardingUtils {
 		final Set<IPortForwardable.PortPair> ports = new HashSet<>();
 		final IPortForwardable forwardable = REGISTRY.get(pod);
 		if (forwardable != null && forwardable.getPortPairs() != null) {
-			Stream.of(forwardable.getPortPairs()).forEach(portPair -> ports.add(portPair));
+			ports.addAll(forwardable.getPortPairs());
 		} else if (pod.getContainerPorts() != null) {
 			pod.getContainerPorts().stream().map(containerPort -> new IPortForwardable.PortPair(containerPort))
 					.forEach(portPair -> ports.add(portPair));
@@ -117,7 +116,7 @@ public class PortForwardingUtils {
 	 *         forwarded, or <code>null</code> if port-forwarding was already
 	 *         started on the given pod.
 	 */
-	public static IPortForwardable startPortForwarding(final IPod pod, final Set<IPortForwardable.PortPair> ports) {
+	public static IPortForwardable startPortForwarding(final IPod pod, final Collection<IPortForwardable.PortPair> ports, final OpenShiftBinaryOption... options) {
 		// skip if port-forwarding is already started
 		if (isPortForwardingStarted(pod)) {
 			return null;
@@ -129,7 +128,7 @@ public class PortForwardingUtils {
 						new OCBinaryOperation() {
 							@Override
 							protected void runOCBinary(MultiStatus multiStatus) {
-								portForwarding.forwardPorts(ports.toArray(new IPortForwardable.PortPair[] {}));
+								portForwarding.forwardPorts(ports, options);
 							}
 						}.run(null);
 						return portForwarding;
@@ -152,10 +151,8 @@ public class PortForwardingUtils {
 	 *         forwarded, or <code>null</code> if port-forwarding was already
 	 *         started on the given pod.
 	 */
-	public static IPortForwardable startPortForwarding(final IPod pod, final PortPair port) {
-		final HashSet<PortPair> ports = new HashSet<>();
-		ports.add(port);
-		return startPortForwarding(pod, ports);
+	public static IPortForwardable startPortForwarding(final IPod pod, final PortPair port, final OpenShiftBinaryOption... options) {
+		return startPortForwarding(pod, Arrays.asList(port), options);
 	}
 
 	/**
@@ -177,8 +174,7 @@ public class PortForwardingUtils {
 		if (portForwarding != null) {
 			portForwarding.stop();
 		}
-		final List<PortPair> ports = Arrays.asList(portForwarding.getPortPairs());
-		waitForPortsToGetFree(ports, 5, stream);
+		waitForPortsToGetFree(portForwarding.getPortPairs(), 5, stream);
 		return portForwarding;
 	}
 
