@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -83,7 +84,7 @@ public class PortForwardingUtilsTest {
 		Mockito.when(pod.accept(Mockito.any(CapabilityVisitor.class), Mockito.any(IPortForwardable.class)))
 				.thenReturn(portForwardable);
 		Mockito.when(portForwardable.isForwarding()).thenReturn(true);
-		Mockito.when(portForwardable.getPortPairs()).thenReturn(new PortPair[]{port});
+		Mockito.when(portForwardable.getPortPairs()).thenReturn(Arrays.asList(port));
 		PortForwardingUtils.startPortForwarding(pod, port);
 		// when
 		final IPortForwardable stopPortForwarding = PortForwardingUtils.stopPortForwarding(pod, null);
@@ -100,7 +101,7 @@ public class PortForwardingUtilsTest {
 		final IPod pod = Mockito.mock(IPod.class);
 		final PortPair port = Mockito.mock(PortPair.class);
 		final IPortForwardable portForwardable = Mockito.mock(IPortForwardable.class);
-		Mockito.when(portForwardable.getPortPairs()).thenReturn(new PortPair[]{port});
+		Mockito.when(portForwardable.getPortPairs()).thenReturn(Arrays.asList(port));
 		Mockito.when(pod.accept(Mockito.any(CapabilityVisitor.class), Mockito.any(IPortForwardable.class)))
 				.thenReturn(portForwardable);
 		PortForwardingUtils.startPortForwarding(pod, port);
