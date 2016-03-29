@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IRSyncable;
 import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
 import com.openshift.restclient.capability.resources.IRSyncable.PodPeer;
@@ -77,7 +78,7 @@ public class RSync {
 	}
 
 	// Sync the directory back to all pods
-	public void syncDirectoryToPods(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
+	public void syncDirectoryToPods(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter, final OpenShiftBinaryOption... options) {
 		new OCBinaryOperation() {
 			
 			@Override
@@ -93,7 +94,8 @@ public class RSync {
 		}.run(status);
 	}
 	
-	private void syncPodToDirectory(IPod pod, String podPath, File destination, final IServerConsoleWriter consoleWriter) throws IOException {
+	private void syncPodToDirectory(IPod pod, String podPath, File destination,
+			final IServerConsoleWriter consoleWriter) throws IOException {
 		destination.mkdirs();
 		String destinationPath = sanitizePath(destination.getAbsolutePath());
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
@@ -101,7 +103,7 @@ public class RSync {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
 				final InputStream syncStream = rsyncable.sync(new PodPeer(podPath, pod),
-						new LocalPeer(destinationPath));
+						new LocalPeer(destinationPath), OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
@@ -121,7 +123,7 @@ public class RSync {
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
-				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod));
+				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod), OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
