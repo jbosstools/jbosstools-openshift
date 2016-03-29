@@ -152,7 +152,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.promptCredentialsEnabled = enable;
 	}
 	
-	public void save() {
+	private void save(String token) {
 		//not using getters here because for save there should be no reason
 		//to trigger a load from storage.
 		if(!IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())) {
@@ -160,11 +160,10 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			if(success) { //Avoid second secure storage prompt.
 				//Password is stored, token should be cleared.
 				setRememberToken(false);
-				token = null;
 				saveOrClear(SECURE_STORAGE_TOKEN, null, false, getSecureStore(getHost(), getUsername()));
 			}
 		} else {
-			boolean success = saveOrClear(SECURE_STORAGE_TOKEN, this.token, isRememberToken(), getSecureStore(getHost(), getUsername()));
+			boolean success = saveOrClear(SECURE_STORAGE_TOKEN, token, isRememberToken(), getSecureStore(getHost(), getUsername()));
 			if(success) { //Avoid second secure storage prompt.
 				//Token is stored, password should be cleared.
 				setRememberPassword(false);
@@ -224,7 +223,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(authorize()) {
-			save();
+			save(getToken());
 			return true;
 		}
 		return false;
