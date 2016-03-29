@@ -25,6 +25,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
@@ -32,6 +33,7 @@ import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPodLogRetrieval;
 import com.openshift.restclient.model.IPod;
 
@@ -158,18 +160,24 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 			final MessageConsole console = showConsole();
 			final MessageConsoleStream stream = console.newMessageStream();
 			try {
-				final InputStream logs = new BufferedInputStream(capability.getLogs(true, key.container));
+				final InputStream logs = new BufferedInputStream(capability.getLogs(true, key.container, OpenShiftBinaryOption.SKIP_TLS_VERIFY));
 				int c;
 				while(running && (c = logs.read()) != -1){
 					if(!stream.isClosed()) {
 						stream.write(c);
 					}
 				}
-			}catch (OpenShiftException e) {
+			} catch (OpenShiftException e) {
 				stream.println(e.getMessage());
 			} catch (IOException e) {
 				if(!DOCUMENT_IS_CLOSED.equals(e.getMessage())) {
 					OpenShiftCommonUIActivator.log("Exception reading pod log inputstream", e);
+				}
+			} finally {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					OpenShiftCommonUIActivator.log("Exception while closing pod log inputstream", e);
 				}
 			}
 		}

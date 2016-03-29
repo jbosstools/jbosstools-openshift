@@ -45,6 +45,7 @@ import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugUtils;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -216,7 +217,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	 * @param remotePort
 	 * @return the local debug port or -1 if port forwarding did not start or was cancelled.
 	 */
-	private int mapPortForwarding(DebuggingContext debuggingContext, IProgressMonitor monitor) {
+	private int mapPortForwarding(final DebuggingContext debuggingContext, final IProgressMonitor monitor) {
 		
 		monitor.subTask("Enabling port forwarding");
 		IPod pod = debuggingContext.getPod();
@@ -244,7 +245,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			monitor.worked(1);
 		}
 		
-		PortForwardingUtils.startPortForwarding(pod, ports);
+		PortForwardingUtils.startPortForwarding(pod, ports, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
 		
 		if (PortForwardingUtils.isPortForwardingStarted(pod)) {
 			int p = debugPort.get().getLocalPort();

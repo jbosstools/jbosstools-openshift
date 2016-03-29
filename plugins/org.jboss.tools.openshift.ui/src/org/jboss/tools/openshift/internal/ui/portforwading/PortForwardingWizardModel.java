@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.ui.portforwading;
 
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.model.IPod;
@@ -104,16 +104,19 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	 */
 	public void startPortForwarding() {
 		final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
-		MessageConsoleStream stream = console.newMessageStream();
-		ConsoleUtils.registerConsoleListener(consoleListener);
-		ConsoleUtils.displayConsoleView(console);
-		stream.println("Starting port-forwarding...");
-		final IPortForwardable portForwardable = PortForwardingUtils.startPortForwarding(this.pod, this.ports);
-		Stream.of(portForwardable.getPortPairs()).forEach(port -> stream.println(NLS.bind("{0} {1} -> {2}",
-				new Object[] { port.getName(), port.getLocalPort(), port.getRemotePort() })));
-		stream.println("done.");
-		firePropertyChange(PROPERTY_PORT_FORWARDING, false, getPortForwarding());
-		updatePortForwardingAllowed();
+		try (MessageConsoleStream stream = console.newMessageStream()) {
+			ConsoleUtils.registerConsoleListener(consoleListener);
+			ConsoleUtils.displayConsoleView(console);
+			stream.println("Starting port-forwarding...");
+			final IPortForwardable portForwardable = PortForwardingUtils.startPortForwarding(this.pod, this.ports);
+			portForwardable.getPortPairs().stream().forEach(port -> stream.println(NLS.bind("{0} {1} -> {2}",
+					new Object[] { port.getName(), port.getLocalPort(), port.getRemotePort() })));
+			stream.println("done.");
+			firePropertyChange(PROPERTY_PORT_FORWARDING, false, getPortForwarding());
+			updatePortForwardingAllowed();
+		} catch (IOException e) {
+			OpenShiftUIActivator.getDefault().getLogger().logError("Error while closing the console inputstream", e);
+		}
 	}
 	
 	
@@ -164,7 +167,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			stream.println("Stopping port-forwarding...");
 			final IPortForwardable cap = PortForwardingUtils.stopPortForwarding(pod, stream);
 			if (cap != null) {
-				Stream.of(cap.getPortPairs()).forEach(port -> stream.println(NLS.bind("{0} {1} -> {2}",
+				cap.getPortPairs().stream().forEach(port -> stream.println(NLS.bind("{0} {1} -> {2}",
 						new Object[] { port.getName(), port.getLocalPort(), port.getRemotePort() })));
 			}
 			if (!PortForwardingUtils.hasPortInUse(this.ports)) {
