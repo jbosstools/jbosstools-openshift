@@ -105,7 +105,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		Spinner replicas = new Spinner(scalingContainer, SWT.BORDER);
 		replicas.setMinimum(1);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
+			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(replicas);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(replicas))
 			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS)
