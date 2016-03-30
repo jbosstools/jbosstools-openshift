@@ -690,7 +690,24 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		applicationTemplatesViewer.setContentProvider(contentProvider);
 		applicationTemplatesViewer.setLabelProvider(new ServicesViewLabelProvider());
 		applicationTemplatesViewer.addFilter(new ServiceViewerFilter(selectorText));
-		applicationTemplatesViewer.setSorter(new ViewerSorter());
+		applicationTemplatesViewer.setSorter(new ViewerSorter() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if(e1 instanceof ObservableTreeItem 
+						&& e2 instanceof ObservableTreeItem) {
+					ObservableTreeItem item1 = (ObservableTreeItem) e1;
+					ObservableTreeItem item2 = (ObservableTreeItem) e2;
+					if(item1.getModel() instanceof IResource 
+							&& item2.getModel() instanceof IResource) {
+						String name1 = ((IResource) item1.getModel()).getName();
+						String name2 = ((IResource) item2.getModel()).getName();
+						return getComparator().compare(name1, name2);
+					}
+				}
+				return super.compare(viewer, e1, e2);
+			}
+		});
 		applicationTemplatesViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
 		applicationTemplatesViewer.setInput(model);
 		return applicationTemplatesViewer;
