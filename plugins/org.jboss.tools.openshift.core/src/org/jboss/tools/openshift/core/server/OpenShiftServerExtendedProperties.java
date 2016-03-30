@@ -26,6 +26,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.IRouteChooser;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
@@ -71,7 +72,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 
 		IProject project = service.getProject();
 		if (project != null) {
-			List<IRoute> routes = project.getResources(ResourceKind.ROUTE);
+			List<IRoute> routes = ResourceUtils.getRoutesForService(service, project.getResources(ResourceKind.ROUTE));
 			IRoute route = getRoute(OpenShiftServerUtils.getRouteURL(server), routes);
 			if (route == null) {
 				route = getRoute(routes); 
