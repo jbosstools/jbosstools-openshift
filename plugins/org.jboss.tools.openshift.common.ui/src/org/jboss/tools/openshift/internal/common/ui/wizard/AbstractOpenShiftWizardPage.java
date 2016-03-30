@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.common.ui.wizard;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
@@ -24,7 +25,11 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
@@ -176,4 +181,24 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 		return dbc;
 	}
 
+	/**
+	 * Sets the standard width to the button.
+	 * @param button
+	 */
+	protected static void setDefaultButtonWidth(Button button) {
+		if(button.getLayoutData() instanceof GridData) {
+			((GridData)button.getLayoutData()).widthHint =  convertHorizontalDLUsToPixels(button, IDialogConstants.BUTTON_WIDTH);
+		}
+	}
+	protected static int convertHorizontalDLUsToPixels(Control control, int dlus) {
+		GC gc = new GC(control);
+		gc.setFont(control.getFont());
+		int averageWidth= gc.getFontMetrics().getAverageCharWidth();
+		gc.dispose();
+	
+		double horizontalDialogUnitSize = averageWidth * 0.25;
+	
+		return (int)Math.round(dlus * horizontalDialogUnitSize);
+	}
+	
 }
