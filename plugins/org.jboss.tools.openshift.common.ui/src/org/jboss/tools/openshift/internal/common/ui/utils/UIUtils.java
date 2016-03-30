@@ -434,7 +434,7 @@ public class UIUtils {
 	 * @param button
 	 */
 	public static void setDefaultButtonWidth(Button button) {
-		Assert.isLegal(DisposeUtils.isDisposed(button));
+		Assert.isLegal(!DisposeUtils.isDisposed(button));
 		Assert.isLegal(button.getLayoutData() instanceof GridData, "the given button is not layouted with a GridLayout");
 
 		((GridData)button.getLayoutData()).widthHint =  
