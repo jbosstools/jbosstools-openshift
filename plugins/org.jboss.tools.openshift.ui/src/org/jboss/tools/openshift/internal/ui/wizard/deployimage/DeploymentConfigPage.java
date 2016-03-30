@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -81,8 +80,15 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 
 		//Env Variables Block
 		createEnvVariableControl(parent, dbc);
+
+		Label separator1 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator1);
+
 		createDataVolumeControl(parent, dbc);
 		
+		Label separator2 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator2);
+
 		//Scaling
 		Composite scalingContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -93,7 +99,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		Label lblReplicas = new Label(scalingContainer, SWT.NONE);
 		lblReplicas.setText("Replicas:");
 		lblReplicas.setToolTipText("Replicas are the number of copies of an image that will be scheduled to run on OpenShift");
-		GridDataFactory.fillDefaults()
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER)
 			.applyTo(lblReplicas);
 		
 		Spinner replicas = new Spinner(scalingContainer, SWT.BORDER);
@@ -141,6 +147,8 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		addButton.setText("Add...");
 		addButton.setToolTipText("Add an environment variable declared by the docker image.");
 		addButton.addSelectionListener(onAdd());
+		setDefaultButtonWidth(addButton);
+
 		
 		Button editExistingButton = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -154,6 +162,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
+		setDefaultButtonWidth(editExistingButton);
 		
 		Button btnReset = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -175,6 +184,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 					
 				})
 				.in(dbc);
+		setDefaultButtonWidth(btnReset);
 
 		Button btnRemove = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -196,6 +206,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 				
 			})
 			.in(dbc);
+		setDefaultButtonWidth(btnRemove);
 		
 	}
 
