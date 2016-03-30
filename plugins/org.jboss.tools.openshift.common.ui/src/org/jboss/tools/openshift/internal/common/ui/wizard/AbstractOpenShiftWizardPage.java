@@ -159,7 +159,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	 */
 	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
 	}
-	
+
 	/**
 	 * Callback that gets called when this page is going to be deactivated.
 	 *  
@@ -175,5 +175,4 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	protected DataBindingContext getDataBindingContext() {
 		return dbc;
 	}
-
 }
