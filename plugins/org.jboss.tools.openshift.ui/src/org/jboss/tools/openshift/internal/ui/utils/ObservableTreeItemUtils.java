@@ -18,11 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
-
-import com.openshift.restclient.model.IResource;
 
 /**
  * Utility class for the {@link ObservableTreeItem}
@@ -114,24 +110,5 @@ public class ObservableTreeItemUtils {
 				.map(item -> (T) item.getModel())
 				.findFirst()
 				.orElseGet(() -> null);
-	}
-
-	public static ViewerSorter createViewerSorter() {
-		return new ViewerSorter() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				if(e1 instanceof ObservableTreeItem && e2 instanceof ObservableTreeItem) {
-					ObservableTreeItem item1 = (ObservableTreeItem)e1;
-					ObservableTreeItem item2 = (ObservableTreeItem)e2;
-					if(item1.getModel() instanceof IResource && item2.getModel() instanceof IResource) {
-						String name1 = ((IResource) item1.getModel()).getName();
-						String name2 = ((IResource) item2.getModel()).getName();
-						return getComparator().compare(name1, name2);
-					}
-				}
-				return super.compare(viewer, e1, e2);
-			}
-		}
 	}
 }
