@@ -23,6 +23,7 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -34,6 +35,7 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -424,4 +426,30 @@ public class UIUtils {
 		}
 		return selection;
 	}
+	
+	/**
+	 * Sets the standard width to the given button if it's layouted via
+	 * {@code GridLayout}}.
+	 * 
+	 * @param button
+	 */
+	public static void setDefaultButtonWidth(Button button) {
+		Assert.isLegal(DisposeUtils.isDisposed(button));
+		Assert.isLegal(button.getLayoutData() instanceof GridData, "the given button is not layouted with a GridLayout");
+
+		((GridData)button.getLayoutData()).widthHint =  
+				convertHorizontalDLUsToPixels(button, IDialogConstants.BUTTON_WIDTH);
+	}
+
+	private static int convertHorizontalDLUsToPixels(Control control, int dlus) {
+		GC gc = new GC(control);
+		gc.setFont(control.getFont());
+		int averageWidth= gc.getFontMetrics().getAverageCharWidth();
+		gc.dispose();
+	
+		double horizontalDialogUnitSize = averageWidth * 0.25;
+	
+		return (int)Math.round(dlus * horizontalDialogUnitSize);
+	}
+
 }
