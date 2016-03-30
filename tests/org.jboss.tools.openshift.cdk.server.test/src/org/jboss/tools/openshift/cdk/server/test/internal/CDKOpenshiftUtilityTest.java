@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ADBInfo;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -40,7 +40,7 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	@Test
 	public void testOpenshiftConnectionCredentials() throws Exception {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		ADBInfo adb = createADB();
+		ServiceManagerEnvironment adb = createADB();
 		IServer s = mockServer("openshift33");
 		
 		createCDKFile("Basic", null, null);
@@ -65,7 +65,7 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	@Test
 	public void testOpenshiftConnectionAdded() throws Exception {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		ADBInfo adb = createADB();
+		ServiceManagerEnvironment adb = createADB();
 		IServer s = mockServer("openshift33");
 		
 		createCDKFile("Basic", null, null);
@@ -130,21 +130,21 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		return folder.toOSString();
 	}
 
-	private ADBInfo createADB() throws URISyntaxException {
+	private ServiceManagerEnvironment createADB() throws URISyntaxException {
 		return createADB("10.1.2.2");
 	}
 
-	private ADBInfo createADB(String host) throws URISyntaxException {
+	private ServiceManagerEnvironment createADB(String host) throws URISyntaxException {
 		return createADB(host, "2376");
 	}
 
-	private ADBInfo createADB(String host, String port) throws URISyntaxException {
+	private ServiceManagerEnvironment createADB(String host, String port) throws URISyntaxException {
 		HashMap<String,String> env = new HashMap<>();
 		env.put("DOCKER_HOST","tcp://" + host + ":" + port);
 		env.put("DOCKER_CERT_PATH","/cert/path/.docker");
 		env.put("DOCKER_TLS_VERIFY","1");
 		env.put("DOCKER_MACHINE_NAME","e5d7d0a");
-		return new ADBInfo(env);
+		return new ServiceManagerEnvironment(env);
 	}
 
 }

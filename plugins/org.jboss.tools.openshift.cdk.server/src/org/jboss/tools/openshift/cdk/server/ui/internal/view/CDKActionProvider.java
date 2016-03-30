@@ -44,7 +44,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.ui.WTPOveridePlugin;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ADBInfo;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKDockerUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
 
@@ -86,9 +86,9 @@ public class CDKActionProvider extends CommonActionProvider {
 
 		protected Object adaptToViewItem(IServer server) {
 			ControllableServerBehavior beh = (ControllableServerBehavior)server.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
-			ADBInfo adb = null;
+			ServiceManagerEnvironment adb = null;
 			if( beh != null ) {
-				adb = (ADBInfo)beh.getSharedData(ADBInfo.SHARED_INFO_KEY);
+				adb = (ServiceManagerEnvironment)beh.getSharedData(ServiceManagerEnvironment.SHARED_INFO_KEY);
 			}
 			if( adb != null )
 				return new CDKOpenshiftUtility().findExistingOpenshiftConnection(server, adb);
@@ -103,9 +103,9 @@ public class CDKActionProvider extends CommonActionProvider {
 
 		protected Object adaptToViewItem(IServer server) {
 			ControllableServerBehavior beh = (ControllableServerBehavior)server.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
-			ADBInfo adb = null;
+			ServiceManagerEnvironment adb = null;
 			if( beh != null ) {
-				adb = (ADBInfo)beh.getSharedData(ADBInfo.SHARED_INFO_KEY);
+				adb = (ServiceManagerEnvironment)beh.getSharedData(ServiceManagerEnvironment.SHARED_INFO_KEY);
 			}
 			if( adb != null )
 				return new CDKDockerUtility().findDockerConnection(adb);

@@ -12,6 +12,10 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -32,6 +38,13 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKLaunchEnvironmentUtil;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
+import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
+
+import com.openshift.internal.restclient.http.HttpClientException;
+import com.openshift.internal.restclient.http.UrlConnectionHttpClientBuilder;
+import com.openshift.restclient.ISSLCertificateCallback;
+import com.openshift.restclient.http.IHttpClient;
 
 public class VagrantPoller implements IServerStatePoller2 {
 	private IServer server;
@@ -59,7 +72,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 			public void run() {
 				pollerRun();
 			}
-		}, "Vagrant Poller"); //$NON-NLS-1$
+		}, "CDK Poller"); //$NON-NLS-1$
 		t.start();
 	}
 	
@@ -73,7 +86,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 		setStateInternal(false, state);
     	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		while(aborted == null && !canceled && !done) {
-			IStatus stat = onePing(server, env);
+			IStatus stat = onePingSafe(server, env);
 			int status = stat.getSeverity();
 			boolean completeUp = ( status == IStatus.OK && expectedState);
 			boolean completeDown = (status == IStatus.ERROR && !expectedState);
@@ -113,16 +126,14 @@ public class VagrantPoller implements IServerStatePoller2 {
 
 
 	public IStatus getCurrentStateSynchronous(IServer server) {
-		int b = onePing(server);
-		Status s;
-		if( b == IStatus.OK ) {
-			s = new Status(IStatus.OK, CDKCoreActivator.PLUGIN_ID, "Vagrant Instance is Up");
-		} else if( b == IStatus.ERROR){
-			s = new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Vagrant Instance is shutoff");
+    	int severity = onePingSafe(server, CDKLaunchEnvironmentUtil.createEnvironment(server)).getSeverity();
+		if( severity == IStatus.OK ) {
+			return new Status(IStatus.OK, CDKCoreActivator.PLUGIN_ID, "CDK Instance is Up");
+		} else if( severity == IStatus.ERROR){
+			return new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "CDK Instance is shutoff");
 		} else {
-			s = new Status(IStatus.INFO, CDKCoreActivator.PLUGIN_ID, "Vagrant Instance is indeterminate");
+			return new Status(IStatus.INFO, CDKCoreActivator.PLUGIN_ID, "CDK Instance is indeterminate");
 		}
-		return s;
 	}
 	
 	private File getWorkingDirectory(IServer s) throws PollingException {
@@ -132,32 +143,84 @@ public class VagrantPoller implements IServerStatePoller2 {
 		}
 		throw  new PollingException("Working Directory not found: " + str);
 	}
-	
-	
-	// This *could* prompt for a password, so dont use this method for repeated calls
-	private int onePing(IServer server) {
-    	IStatus stat = onePing(server, CDKLaunchEnvironmentUtil.createEnvironment(server));
-    	return stat.getSeverity();
-	}
 		
-	private IStatus onePing(IServer server, Map<String,String> env) {
+	
+	private IStatus onePingSafe(IServer server, Map<String,String> env) {
+	    try {
+	    	IStatus ret = onePing(server, env);
+	    	return ret;
+    	} catch(PollingException pe) {
+    		aborted = pe;
+		} catch (TimeoutException te) {
+			aborted = new PollingException(te.getMessage(), te);
+		} catch (IOException ioe) {
+			CDKCoreActivator.pluginLog().logError(ioe.getMessage(), ioe);
+		}
+		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
+	}
+	
+	private IStatus onePing(IServer server, Map<String,String> env) throws PollingException,IOException, TimeoutException {
 
 		String[] args = new String[]{CDKConstants.VAGRANT_CMD_STATUS, 
 				CDKConstants.VAGRANT_FLAG_MACHINE_READABLE, CDKConstants.VAGRANT_FLAG_NO_COLOR};
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);		
-
-	    try {
-	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
-  	        return parseOutput(lines);
-    	} catch(PollingException pe) {
-    		aborted = pe;
-    	} catch(TimeoutException te) {
-    		aborted = new PollingException(te.getMessage(), te);
-    	} catch(IOException ioe) {
-    		// TODO
-    		ioe.printStackTrace();
+    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
+		IStatus vmStatus = parseOutput(lines);
+		if (vmStatus.isOK()) {
+			checkOpenShiftHealth(server, 4000); // throws OpenShiftNotReadyPollingException
+		}
+		return vmStatus;
+	}
+	
+	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {
+		// This doesn't seem to work at all due to SSL certificate errors. 
+		// I'm commenting it out for now until I figure out how to work around this
+		//return true; 
+		
+		
+		ServiceManagerEnvironment adb = ServiceManagerEnvironment.getOrLoadServiceManagerEnvironment(server, true);
+		if( adb == null ) {
+			return false;
+		}
+		String url = adb.getOpenShiftHost() + ":" + adb.getOpenShiftPort() + "/healthz/ready";
+		return checkOpenShiftHealth(url, timeout);
+	}
+	protected boolean checkOpenShiftHealth(String url,  int timeout) throws OpenShiftNotReadyPollingException {
+		ISSLCertificateCallback sslCallback = OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback(); 
+    	UrlConnectionHttpClientBuilder builder =  new UrlConnectionHttpClientBuilder()
+                .setAcceptMediaType("*/*")
+                .setConfigTimeout(new Integer(timeout))
+                .setSSLCertificateCallback(sslCallback);
+    	
+    	Exception e = null;
+    	IHttpClient client = builder.client();
+    	try {
+    		String ret = client.get(new URL(url), timeout);
+    		if( "ok".equals(ret))
+    			return true;
+    	} catch(HttpClientException hce) {
+    		e = hce;
+    	} catch( SocketTimeoutException ste) {
+    		e = ste;
+    	} catch(MalformedURLException murle) {
+    		e = murle;
     	}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
+
+		throw new OpenShiftNotReadyPollingException(CDKCoreActivator.statusFactory().errorStatus(CDKCoreActivator.PLUGIN_ID,
+				"The CDK VM is up and running, but OpenShift is unreachable at url " + url, e,
+				OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
+	}
+	
+	public static class OpenShiftNotReadyPollingException extends PollingException {
+		public static final int OPENSHIFT_UNREACHABLE_CODE = 10001;
+		private IStatus stat;
+		public OpenShiftNotReadyPollingException( IStatus status) {
+			super(status.getMessage());
+			this.stat = status;
+		}
+		public IStatus getStatus() {
+			return stat;
+		}
 	}
 	
 	private class VagrantStatus implements CDKConstants {
@@ -263,7 +326,15 @@ public class VagrantPoller implements IServerStatePoller2 {
 		return true;
 	}
 
-
+	/**
+	 * This is a non-interface method bc the interface method getCurrentStateSynchronous
+	 * does not throw PollingException :( 
+	 * @return
+	 */
+	public PollingException getPollingException() {
+		return aborted;
+	}
+	
 	@Override
 	public void provideCredentials(Properties credentials) {
 		// TODO Auto-generated method stub
@@ -280,6 +351,5 @@ public class VagrantPoller implements IServerStatePoller2 {
 	public void setPollerType(IServerStatePollerType type) {
 		// TODO Auto-generated method stub
 		
-	}
-
+	}	
 }

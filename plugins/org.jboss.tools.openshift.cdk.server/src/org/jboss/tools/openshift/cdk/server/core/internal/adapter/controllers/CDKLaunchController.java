@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
@@ -33,6 +34,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
@@ -42,6 +44,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller.OpenShiftNotReadyPollingException;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class CDKLaunchController extends AbstractSubsystemController implements ILaunchServerController, IExternalLaunchConstants {
@@ -227,22 +230,45 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(server);
 		new Thread() {
 			public void run() {
-				try {
-					// sleep to allow vagrant to unlock queries. 
-					Thread.sleep(1000);
-				} catch( InterruptedException ie) {}
-				
-				// Poll the server once more 
-				IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
-				if( stat.isOK()) {
-					beh.setServerStarted();
-					beh.setRunMode("run");
-				} else {
-					beh.setServerStopped();
-				}	
+				handleProcessTerminated(beh);
 			}
 		}.start();
 		DebugPlugin.getDefault().removeDebugEventListener(listener);
+	}
+	
+	
+	private void handleProcessTerminated(ControllableServerBehavior beh) {
+		try {
+			// sleep to allow vagrant to unlock queries. 
+			Thread.sleep(1000);
+		} catch( InterruptedException ie) {}
+		
+		// Poll the server once more 
+		VagrantPoller vp = new VagrantPoller();
+		IStatus stat = vp.getCurrentStateSynchronous(getServer());
+		if( stat.isOK()) {
+			beh.setServerStarted();
+			beh.setRunMode("run");
+		} else {
+			// The vm is now in a confused state.  
+			if( vp.getPollingException() instanceof OpenShiftNotReadyPollingException) {
+				// The vm is running but openshift isn't available.  
+				handleOpenShiftUnavailable(beh, (OpenShiftNotReadyPollingException)vp.getPollingException());
+			} else {
+				beh.setServerStopped();
+			}
+		}
+	}
+	
+	private void handleOpenShiftUnavailable(final IControllableServerBehavior beh, final OpenShiftNotReadyPollingException osnrpe) {
+		// Log error?  Show dialog?  
+		((ControllableServerBehavior)beh).setServerStarted();
+		new Job(osnrpe.getMessage()) {
+			protected IStatus run(IProgressMonitor monitor) {
+				return CDKCoreActivator.statusFactory().errorStatus("Error contacting OpenShift", osnrpe);
+			}
+			
+		}.schedule();
 	}
 	
 	private String getStartupLaunchName(IServer s) {

@@ -30,7 +30,7 @@ public class CDKOpenshiftUtility {
 	
 
 
-	public IConnection findExistingOpenshiftConnection(IServer server, ADBInfo adb) {
+	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
 		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "test-admin";
@@ -48,11 +48,11 @@ public class CDKOpenshiftUtility {
 		return null;
 	}
 	
-	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb) {
+	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
 		return createOpenshiftConnection(server, adb, ConnectionsRegistrySingleton.getInstance());
 	}
 	
-	public IConnection createOpenshiftConnection(IServer server, ADBInfo adb, ConnectionsRegistry registry) {
+	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment adb, ConnectionsRegistry registry) {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
 		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "openshift-dev";
