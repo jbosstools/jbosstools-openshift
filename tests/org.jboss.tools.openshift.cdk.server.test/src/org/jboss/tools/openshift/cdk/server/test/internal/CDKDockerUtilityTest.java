@@ -20,7 +20,7 @@ import java.util.HashMap;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ADBInfo;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKDockerUtility;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class CDKDockerUtilityTest extends TestCase {
 	public void testDockerConnectionExists() throws Exception {
 		assertFalse(util.dockerConnectionExists(null));
 
-		ADBInfo adb = createADB();
+		ServiceManagerEnvironment adb = createADB();
 		assertFalse(util.dockerConnectionExists(adb));	
 
 		IDockerConnection existingConnection = mock(IDockerConnection.class);
@@ -52,10 +52,10 @@ public class CDKDockerUtilityTest extends TestCase {
 
 		assertTrue(util.dockerConnectionExists(adb));
 
-		ADBInfo wrongHost = createADB("10.1.2.3");
+		ServiceManagerEnvironment wrongHost = createADB("10.1.2.3");
 		assertFalse(util.dockerConnectionExists(wrongHost));
 
-		ADBInfo wrongPort = createADB("10.1.2.2", "500");
+		ServiceManagerEnvironment wrongPort = createADB("10.1.2.2", "500");
 		assertFalse(util.dockerConnectionExists(wrongPort));
 	}
 
@@ -76,7 +76,7 @@ public class CDKDockerUtilityTest extends TestCase {
 	public void testCreateDockerConnection() throws Exception {
 		String name = "foo";
 		IServer server = mockServer(name);
-		ADBInfo adb = createADB();
+		ServiceManagerEnvironment adb = createADB();
 		IDockerConnection dockerConnection = util.createDockerConnection(server, adb);
 		assertNotNull(dockerConnection);
 		verify(mgr).addConnection(dockerConnection);
@@ -86,11 +86,11 @@ public class CDKDockerUtilityTest extends TestCase {
 		assertEquals("/cert/path/.docker", dockerConnection.getTcpCertPath());
 	}
 
-	private ADBInfo createADB() throws URISyntaxException {
+	private ServiceManagerEnvironment createADB() throws URISyntaxException {
 		return createADB("10.1.2.2");
 	}
 
-	private ADBInfo createADB(String host) throws URISyntaxException {
+	private ServiceManagerEnvironment createADB(String host) throws URISyntaxException {
 		return createADB(host, "2376");
 	}
 
@@ -100,12 +100,12 @@ public class CDKDockerUtilityTest extends TestCase {
 		return server;
 	}
 
-	private ADBInfo createADB(String host, String port) throws URISyntaxException {
+	private ServiceManagerEnvironment createADB(String host, String port) throws URISyntaxException {
 		HashMap<String,String> env = new HashMap<>();
 		env.put("DOCKER_HOST","tcp://" + host + ":" + port);
 		env.put("DOCKER_CERT_PATH","/cert/path/.docker");
 		env.put("DOCKER_TLS_VERIFY","1");
 		env.put("DOCKER_MACHINE_NAME","e5d7d0a");
-		return new ADBInfo(env);
+		return new ServiceManagerEnvironment(env);
 	}
 }

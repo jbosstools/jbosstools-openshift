@@ -17,6 +17,7 @@ Bundle-ClassPath: lib/openshift-restclient-java-4.0.0.Final.jar,
  lib/commons-io-2.1.jar,
  .
 Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
+ com.openshift.internal.restclient.http,
  com.openshift.restclient,
  com.openshift.restclient.authorization,
  com.openshift.restclient.capability,

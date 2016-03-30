@@ -54,7 +54,7 @@ public class CDKDockerUtility {
 		return name;
 	}
 	
-	public IDockerConnection findDockerConnection(ADBInfo adb) {
+	public IDockerConnection findDockerConnection(ServiceManagerEnvironment adb) {
 		final String dockerHost = adb == null ? null : adb.env == null ? null : adb.env.get("DOCKER_HOST");
 		
 		if( dockerHost != null ) {
@@ -70,17 +70,17 @@ public class CDKDockerUtility {
 		return null;
 	}
 	
-	public boolean dockerConnectionExists(ADBInfo adb) {
+	public boolean dockerConnectionExists(ServiceManagerEnvironment adb) {
 		return findDockerConnection(adb) != null;
 	}
 	
-	public IDockerConnection buildDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+	public IDockerConnection buildDockerConnection(IServer server, ServiceManagerEnvironment adb) throws DockerException {
 		final String dockerHost = adb.env.get("DOCKER_HOST");
 
 		final Builder tcpConnectionBuilder = new DockerConnection.Builder()
 				.name(getNextName(server)).tcpHost(dockerHost);
 		String tlsVerifyString = adb.env.get("DOCKER_TLS_VERIFY");
-		boolean tlsVerify = (Integer.parseInt(tlsVerifyString) != 0);
+		boolean tlsVerify = tlsVerifyString == null ? false : (Integer.parseInt(tlsVerifyString) != 0);
 		if( tlsVerify ) {
 			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
 			tcpConnectionBuilder.tcpCertPath(tlsCertPath);
@@ -88,7 +88,7 @@ public class CDKDockerUtility {
 		return tcpConnectionBuilder.build();
 	}
 	
-	public IDockerConnection createDockerConnection(IServer server, ADBInfo adb) throws DockerException {
+	public IDockerConnection createDockerConnection(IServer server, ServiceManagerEnvironment adb) throws DockerException {
 		IDockerConnection con = buildDockerConnection(server, adb);
 		mgr.addConnection(con);
 		return con;
