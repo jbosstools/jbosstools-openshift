@@ -143,6 +143,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnAdd.setText("Add...");
 		btnAdd.setToolTipText("Add a port to be exposed by the service which is not explicilty declared by the image.");
 		btnAdd.addSelectionListener(onAdd());
+		UIUtils.setDefaultButtonWidth(btnAdd);
 
 		Button btnEdit = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -156,6 +157,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
 			.converting(new IsNotNull2BooleanConverter())
 			.in(dbc);
+		UIUtils.setDefaultButtonWidth(btnEdit);
 
 		Button removeButton = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -169,6 +171,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
 			.converting(new IsNotNull2BooleanConverter())
 			.in(dbc);
+		UIUtils.setDefaultButtonWidth(removeButton);
 
 		Button btnReset = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -176,6 +179,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnReset.setText("Reset");
 		btnReset.setToolTipText("Resets the list of ports to the exposed ports of the image.");
 		btnReset.addSelectionListener(onReset());
+		UIUtils.setDefaultButtonWidth(btnReset);
 		
 	}
 

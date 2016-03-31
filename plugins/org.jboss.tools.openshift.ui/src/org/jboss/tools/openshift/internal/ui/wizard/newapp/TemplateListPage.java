@@ -383,8 +383,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
 		btnBrowseFiles.setText("File system...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.align(SWT.LEFT, SWT.CENTER)
 				.applyTo(btnBrowseFiles);
+		UIUtils.setDefaultButtonWidth(btnBrowseFiles);
 
 		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
 
@@ -392,8 +393,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		Button btnBrowseWorkspaceFiles = new Button(parent, SWT.NONE);
 		btnBrowseWorkspaceFiles.setText("Workspace...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.align(SWT.LEFT, SWT.CENTER)
 				.applyTo(btnBrowseWorkspaceFiles);
+		UIUtils.setDefaultButtonWidth(btnBrowseWorkspaceFiles);
 
 		btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
 

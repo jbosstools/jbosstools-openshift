@@ -104,6 +104,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
 		addButton.setText("Add...");
 		addButton.addSelectionListener(onAdd());
+		UIUtils.setDefaultButtonWidth(addButton);
 		
 		Button editExistingButton = new Button(labelsGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -116,6 +117,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
 				.converting(new IsNotNullOrReadOnlyBooleanConverter())
 				.in(dbc);
+		UIUtils.setDefaultButtonWidth(editExistingButton);
 		
 		Button removeButton = new Button(labelsGroup, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -128,6 +130,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
 				.converting(new IsNotNullOrReadOnlyBooleanConverter())
 				.in(dbc);
+		UIUtils.setDefaultButtonWidth(removeButton);
 	}
 
 	private SelectionListener onRemove() {

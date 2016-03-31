@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.preferences.SSLCertificatesPreference.Item;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateUIHelper;
 
@@ -107,6 +108,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		GridData d = new GridData();
 		d.verticalAlignment = SWT.BEGINNING;
 		remove.setLayoutData(d);
+		UIUtils.setDefaultButtonWidth(remove);
 		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

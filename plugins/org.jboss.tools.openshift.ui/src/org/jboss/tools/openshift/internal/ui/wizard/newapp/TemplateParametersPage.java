@@ -55,6 +55,7 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerCellDecorationManager;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils.ParameterNameViewerComparator;
 
@@ -105,8 +106,9 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		// edit button
 		Button editExistingButton = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).hint(100, SWT.DEFAULT).applyTo(editExistingButton);
+				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
+		UIUtils.setDefaultButtonWidth(editExistingButton);
 		editExistingButton.addSelectionListener(onEdit());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
@@ -120,6 +122,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).applyTo(resetButton);
 		resetButton.setText("Reset");
+		UIUtils.setDefaultButtonWidth(resetButton);
 		resetButton.addSelectionListener(onReset());
 
 		// required explanation
