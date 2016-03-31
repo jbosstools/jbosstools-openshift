@@ -38,6 +38,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 public class SelectProjectComponentBuilder {
 	String textLabel = "Use existing workspace project:";
@@ -120,9 +121,9 @@ public class SelectProjectComponentBuilder {
 		browseProjectsButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER)
-				.hint(100, SWT.DEFAULT)
 				.grab(false, false)
 				.applyTo(browseProjectsButton);
+		UIUtils.setDefaultButtonWidth(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(selectionListener);
 	}
 

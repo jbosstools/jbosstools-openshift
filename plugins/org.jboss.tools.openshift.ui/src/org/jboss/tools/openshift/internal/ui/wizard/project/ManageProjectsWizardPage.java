@@ -47,6 +47,7 @@ import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICellToolTipProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
@@ -107,6 +108,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
 		newButton.setText("New...");
 		newButton.addSelectionListener(onNew());
+		UIUtils.setDefaultButtonWidth(newButton);
 
 		// remove
 		Button removeButton = new Button(group, SWT.PUSH);
@@ -120,6 +122,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				.to(viewerSingleSelection)
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
+		UIUtils.setDefaultButtonWidth(removeButton);
 
 		Composite filler = new Composite(group, SWT.None);
 		GridDataFactory.fillDefaults()
@@ -131,6 +134,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
 		refreshButton.setText("Refresh...");
 		refreshButton.addSelectionListener(onRefresh(dbc));
+		UIUtils.setDefaultButtonWidth(refreshButton);
 	}
 
 	private void loadProjects(DataBindingContext dbc) {
