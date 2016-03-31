@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.server;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -46,6 +47,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -58,6 +60,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
+import org.eclipse.wst.server.ui.editor.ServerEditorPart;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -73,6 +76,7 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.DisableAllWidgetsJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.model.IService;
 
@@ -92,9 +96,20 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		}
 	}
 
+	//A copy in super class is private, we have to do one more for our needs.
+	private ServerEditorPart editorPart;
+
+	@Override
+	public void setServerEditorPart(ServerEditorPart editor) {
+		this.editorPart = editor;
+		super.setServerEditorPart(editor);
+	}
+
 	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
+
+		disableHostName();
 
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 
@@ -120,6 +135,26 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		section.setClient(container);
 
 		loadResources(section, model);
+
+	}
+
+	/**
+	 * Since host for openshift 3 server adapter is defined by the selected route,
+	 * there is no sense in editing 'Host name' input. It should be disabled.
+	 */
+	private void disableHostName() {
+		if(editorPart == null) {
+			//Formal, should never happen.
+			return;
+		}
+		try {
+			Field f = editorPart.getClass().getDeclaredField("hostname");
+			f.setAccessible(true);
+			Control hostname = (Control)f.get(editorPart);
+			hostname.setEnabled(false);
+		} catch (Exception e) {
+			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+		}
 	}
 
 	private Composite createControls(Composite parent, OpenShiftServerEditorModel model) {
