@@ -13,17 +13,12 @@ package org.jboss.tools.openshift.test.core.server;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.IServerType;
-import org.eclipse.wst.server.core.IServerWorkingCopy;
-import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IFilesystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsController;
 import org.jboss.tools.as.core.server.controllable.systems.IModuleDeployPathController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
-import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.junit.After;
 import org.junit.Test;
 
@@ -67,7 +62,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController",
 			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpModuleController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController",
-			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpShutdownController",
+			"org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController",
 			"org.jboss.ide.eclipse.as.wtp.core.server.behavior.LocalFilesystemController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftDeploymentOptionsController",
 			"org.jboss.tools.as.core.server.controllable.subsystems.internal.ModuleDeployPathController",
@@ -92,7 +87,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftEapModulesController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController",
-			"org.jboss.tools.as.core.server.controllable.subsystems.internal.NoOpShutdownController",
+			"org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController",
 			"org.jboss.ide.eclipse.as.wtp.core.server.behavior.LocalFilesystemController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftDeploymentOptionsController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftEapDeployPathController",

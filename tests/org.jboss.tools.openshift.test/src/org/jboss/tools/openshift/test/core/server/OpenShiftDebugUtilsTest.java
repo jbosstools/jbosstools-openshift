@@ -11,14 +11,19 @@
 package org.jboss.tools.openshift.test.core.server;
 
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,9 +32,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -38,6 +40,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -212,6 +216,69 @@ public class OpenShiftDebugUtilsTest {
 		debugUtils.createRemoteDebuggerLaunchConfiguration(server);
 		
 		verify(launchConfigurationType).newInstance(null, "Remote debugger to foo");
+	}
+	
+	
+	@Test
+	public void testTerminateRemoteDebugger() throws CoreException {
+		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
+		
+		String name = "foo";
+		IServer server = mockServer(name);
+		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
+		
+		ILaunch matchingLaunch1 = mock(ILaunch.class);
+		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
+
+		ILaunch matchingLaunch2 = mock(ILaunch.class);
+		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
+		when(matchingLaunch2.canTerminate()).thenReturn(true);
+		
+		ILaunch otherLaunch1 = mock(ILaunch.class);
+		ILaunch otherLaunch2 = mock(ILaunch.class);
+		
+		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
+		
+		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{otherLaunch1, matchingLaunch1, matchingLaunch2, otherLaunch2});
+		
+		debugUtils.terminateRemoteDebugger(server);
+		
+		verify(matchingLaunch1, never()).terminate();
+		verify(matchingLaunch2).terminate();
+		verify(otherLaunch1, never()).terminate();
+		verify(otherLaunch2, never()).terminate();
+	}
+	
+	@Test
+	public void testTerminateRemoteDebuggerWithException() throws CoreException {
+		String name = "foo";
+		IServer server = mockServer(name);
+		
+		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
+		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
+		
+		ILaunch matchingLaunch1 = mock(ILaunch.class);
+		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
+		when(matchingLaunch1.canTerminate()).thenReturn(true);
+		IStatus error = new Status(IStatus.ERROR, "foo", "buuuurned!", null);
+		doThrow(new DebugException(error)).when(matchingLaunch1).terminate();
+		
+		ILaunch matchingLaunch2 = mock(ILaunch.class);
+		when(matchingLaunch2.canTerminate()).thenReturn(true);
+		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
+		
+		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
+		
+		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{matchingLaunch1, matchingLaunch2});
+		
+		
+		try {
+			debugUtils.terminateRemoteDebugger(server);
+			fail();
+		} catch (CoreException e) {
+			verify(matchingLaunch2).terminate();
+			assertEquals(error, e.getStatus().getChildren()[0]);
+		}
 	}
 	
 	private IEnvironmentVariable createVar(String key, String value) {
