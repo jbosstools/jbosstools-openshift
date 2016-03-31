@@ -100,9 +100,8 @@ public class OpenShiftServerUtils {
 		return ServerUtils.getServerName(baseName);
 	}
 
-	public static void updateServer(String serverName, String connectionUrl, IService service, String sourcePath, String podPath, IProject deployProject, String routeURL, IServerWorkingCopy server) {
+	public static void updateServer(String serverName, String host, String connectionUrl, IService service, String sourcePath, String podPath, IProject deployProject, String routeURL, IServerWorkingCopy server) {
 		String deployProjectName = ProjectUtils.getName(deployProject);
-		String host = UrlUtils.getHost(routeURL);
 		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, server);
 	}
 

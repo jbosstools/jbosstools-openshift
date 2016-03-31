@@ -23,6 +23,7 @@ import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.IRouteChooser;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -140,6 +141,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 						OpenShiftServerUtils.ATTR_ROUTE, route, OpenShiftServerUtils.getDeployProject(server));
 				IServerWorkingCopy wc = server.createWorkingCopy();
 				wc.setAttribute(OpenShiftServerUtils.ATTR_ROUTE, route);
+				wc.setHost(UrlUtils.getHost(route));
 				try {
 					wc.save(true, new NullProgressMonitor());
 				} catch(CoreException ce) {
