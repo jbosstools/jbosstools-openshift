@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +32,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	private boolean overrideProject = false;
 
 	public OpenShiftServerEditorModel(IServerWorkingCopy server, Connection connection) {
-		super(server, connection);
+		super(null, null, null, connection, server);
 	}
 
   	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
@@ -72,9 +71,11 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		return service;
 	}
 
-	@Override
-	protected List<ObservableTreeItem> loadServices(Connection connection) {
-		// don't load
-		return Collections.emptyList();
-	}	
+//	@Override
+//	protected List<ObservableTreeItem> loadServices(Connection connection) {
+//		// don't load
+//		return Collections.emptyList();
+//	}	
+
+
 }

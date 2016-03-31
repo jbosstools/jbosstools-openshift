@@ -11,6 +11,7 @@
 
 package org.jboss.tools.openshift.internal.ui.server;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.wizard.Wizard;
@@ -33,22 +34,26 @@ public class ServerSettingsWizard extends Wizard {
 	private IServer createdServer = null;
 	
 	/**
-	 * Default constructor.
+	 * Invoked from new server wizard (servers view, main menu)
+	 * 
 	 * @param server the working copy of the {@link IServer} to create
 	 * @param connection the current OpenShift {@link Connection}
 	 */
-	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection) {
-		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection);
+	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IProject deployProject) {
+		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, deployProject);
 	}
 	
 	/**
-	 * Full constructor.
+	 * Invoked when launched from explorer
+	 * 
 	 * @param server the working copy of the {@link IServer} to create
 	 * @param connection the current OpenShift {@link Connection}
 	 * @param service the selected service
 	 */
-	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IService service, final IRoute route) {
-		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, service, route);
+	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, 
+			final IService service, final IRoute route) {
+		this.serverSettingsWizardPage = 
+				new ServerSettingsWizardPage(this, server, connection, service, route);
 	}
 	
 	@Override
