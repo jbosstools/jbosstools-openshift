@@ -29,6 +29,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IPublishController;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.as.core.server.controllable.subsystems.internal.StandardFileSystemPublishController;
 import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
@@ -42,9 +43,12 @@ import com.openshift.restclient.model.IService;
 public class OpenShiftPublishController extends StandardFileSystemPublishController implements IPublishController {
 
 	private RSync rsync = null;
+	private boolean syncDownFailed = false;
+	
 	
 	public void publishStart(final IProgressMonitor monitor) 
 			throws CoreException {
+		syncDownFailed = false;
 		final IProject deployProject = OpenShiftServerUtils.getDeployProject(getServer());
 		if (!ProjectUtils.isAccessible(deployProject)) {
 			throw new CoreException(new Status(IStatus.ERROR,
@@ -56,11 +60,15 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		this.rsync = OpenShiftServerUtils.createRSync(getServer());
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
-				NLS.bind("Could not sync all pods to folder {0}", localDeploymentDirectory.getAbsolutePath()), null);
+				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}", getServer().getName(), localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
-			this.rsync = null;
-			throw new CoreException(status);
+			syncDownFailed = true;
+			if(  isSyncDownFailureCritical()) {
+				this.rsync = null;
+				throw new CoreException(status);
+			}
+			OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.", new CoreException(status));
 		}
 		
 		// If the magic project is *also* a module on the server, do nothing
@@ -78,6 +86,23 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		}
 	}
 	
+	protected boolean isSyncDownFailureCritical() {
+		return !isEapProfile();
+	}
+
+	@Override
+	protected boolean supportsJBoss7Markers() {
+		return isEapProfile();
+	}
+	
+	protected boolean isEapProfile() {
+		// quick and dirty
+		String profile = ServerProfileModel.getProfile(getServer());
+		if( "openshift3.eap".equals(profile)) {
+			return true;
+		}
+		return false;
+	}
 
 	private void publishMagicProjectSimpleCopy(IServer server, File localDeploymentDirectory) throws CoreException {
 		// TODO this is the dumb logic. If the magic project is in fact a 
@@ -163,16 +188,17 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 				return Status.OK_STATUS;
 			}
 		}.schedule();
-
 	}
 	
-	
 	@Override
-	protected boolean supportsJBoss7Markers() {
-		// TODO this is the same hack as in the wizard, and should be replaced with something better
-		IService service = OpenShiftServerUtils.getService(getServer());
-		String templateName = service.getLabels().getOrDefault("template", "");
-		return templateName.startsWith("eap");
+	public int publishModule(int kind,
+			int deltaKind, IModule[] module, IProgressMonitor monitor)
+			throws CoreException {
+		if( syncDownFailed ) {
+			return super.publishModule(IServer.PUBLISH_FULL, deltaKind, module, monitor);
+		} else {
+			return super.publishModule(kind, deltaKind, module, monitor);
+		}
 	}
 	
 	@Override
