@@ -383,9 +383,9 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 
 	private String getRoute(boolean isDefaultRoute, IRoute route) {
-		if (!isDefaultRoute || route == null) {
+		// We must return a route here, because setting the server host depends on the route
+		if( route == null )
 			return null;
-		}
 		return route.getURL();
 	}
 
