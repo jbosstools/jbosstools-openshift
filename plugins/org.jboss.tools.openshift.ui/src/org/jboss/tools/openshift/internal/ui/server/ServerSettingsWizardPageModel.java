@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -74,13 +75,11 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
 	private boolean useInferredPodPath = true;
 
-	public ServerSettingsWizardPageModel(IServerWorkingCopy server, Connection connection) {
-		this(null, null, server, connection);
-	}
-
-	public ServerSettingsWizardPageModel(IService service, IRoute route, IServerWorkingCopy server, Connection connection) {
+	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
+			Connection connection, IServerWorkingCopy server) {
 		super(service, connection);
 		this.route = route;
+		this.deployProject = deployProject;
 		this.server = server;
 	}
 
@@ -92,13 +91,13 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		update(connection, connections, service, serviceItems);
 		updateProjects(projects);
 		org.eclipse.core.resources.IProject oldDeployProject = this.deployProject;
-		org.eclipse.core.resources.IProject newDeployProject = updateDeployProject(deployProject, projects);
-		updateSourcePath(sourcePath, newDeployProject, oldDeployProject);
+		org.eclipse.core.resources.IProject newDeployProject = updateDeployProject(deployProject, projects, service);
+		sourcePath = updateSourcePath(sourcePath, newDeployProject, oldDeployProject);
 		List<IRoute> newRoutes = updateRoutes(service, routesByProject);
 		updateRoute(route, newRoutes, service);
 		updateSelectDefaultRoute(isSelectDefaultRoute);
 	}
-
+	
 	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
 		if(projects == this.projects) {
 			return; // happens when other properties are changed, avoid unnecessary work
@@ -114,13 +113,20 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		firePropertyChange(PROPERTY_PROJECTS, oldProjects, this.projects);
 	}
 
-	protected org.eclipse.core.resources.IProject updateDeployProject(org.eclipse.core.resources.IProject deployProject,
-			List<org.eclipse.core.resources.IProject> projects) {
-		firePropertyChange(PROPERTY_DEPLOYPROJECT, this.deployProject, this.deployProject = getProjectOrDefault(deployProject, projects));
+	protected org.eclipse.core.resources.IProject updateDeployProject(org.eclipse.core.resources.IProject newDeployProject, 
+			List<org.eclipse.core.resources.IProject> projects, IService service) {
+		if (newDeployProject == null
+				|| !projects.contains(newDeployProject)) {
+			newDeployProject = getDeployProject(service);
+			if (newDeployProject == null) {
+				newDeployProject =  getProjectOrDefault(newDeployProject, projects);
+			}
+		}
+		firePropertyChange(PROPERTY_DEPLOYPROJECT, this.deployProject, this.deployProject = newDeployProject);
 		return this.deployProject;
 	}
 
-	protected void updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject newDeployProject, org.eclipse.core.resources.IProject oldDeployProject) {
+	protected String updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject newDeployProject, org.eclipse.core.resources.IProject oldDeployProject) {
 		if ((StringUtils.isEmpty(sourcePath)
 				|| newDeployProject != oldDeployProject)
 				&& ProjectUtils.isAccessible(newDeployProject)) {
@@ -128,6 +134,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 			sourcePath = VariablesHelper.addWorkspacePrefix(projectPath);
 		}
 		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
+		return sourcePath;
 	}
 
 	/**
@@ -179,10 +186,13 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		firePropertyChange(PROPERTY_SELECT_DEFAULT_ROUTE, this.selectDefaultRoute, this.selectDefaultRoute = selectDefaultRoute);
 	}
 
-	public void setDeployProject(IService service, List<IBuildConfig> buildConfigs, List<org.eclipse.core.resources.IProject> workspaceProjects) {
+	protected org.eclipse.core.resources.IProject getDeployProject(IService service) {
+		if (service == null) {
+			return null;
+		}
+		List<IBuildConfig> buildConfigs = getBuildConfigs(getOpenShiftProject(service));
 		IBuildConfig buildConfig = ResourceUtils.getBuildConfigForService(service, buildConfigs);
-		org.eclipse.core.resources.IProject deployProject = ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
-		setDeployProject(deployProject);
+		return ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
 	}
 
 	protected void setDeployProject(org.eclipse.core.resources.IProject project) {
@@ -194,15 +204,11 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 
 	public org.eclipse.core.resources.IProject getDeployProject() {
-		return this.deployProject;
+		return deployProject;
 	}
 
 	protected void setProjects(List<org.eclipse.core.resources.IProject> projects) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject);
+		updateProjects(projects);
 	}
 
 	public List<org.eclipse.core.resources.IProject> getProjects() {
@@ -267,22 +273,29 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 
 	public void loadResources(Connection newConnection) {
+		boolean serviceInitialized = this.service != null;
 		this.isLoaded = false;
-		
+
 		super.loadResources(newConnection);
-		setProjects(loadProjects());
 		List<IProject> openshiftProjects = ObservableTreeItemUtils.getAllModels(IProject.class, getServiceItems());
 		setBuildConfigs(loadBuildConfigs(openshiftProjects, newConnection));
-		List<IBuildConfig> buildConfigs = getBuildConfigs(getOpenShiftProject(service));
-		setDeployProject(service, buildConfigs, getProjects());
+		setProjects(loadProjects());
 		setRoutes(loadRoutes(getServiceItems()));
 
 		this.isLoaded = true;
-		
+
+		if (serviceInitialized) {
+			// initialized via a service/route (launched via openshift explorer)
+			updateDeployProject(getDeployProject(service), projects, service);
+		} else {
+			// initialized via a project (launched via new server wizard)
+			updateService(getService(deployProject, getServiceItems()), getServiceItems());
+		}
+
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(),
+				this.service, getServiceItems(),
 				this.route, selectDefaultRoute, this.routesByProject);
 	}
 
@@ -293,6 +306,14 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return buildConfigsByProject.get(project);
 	}
 
+	protected IService getService(org.eclipse.core.resources.IProject project, List<ObservableTreeItem> services) {
+		List<IService> allServices = ObservableTreeItemUtils.getAllModels(IService.class, 
+				services.stream().flatMap(ObservableTreeItemUtils::flatten).collect(Collectors.toList()));
+		return allServices.stream()
+			.filter(service -> ObjectUtils.equals(project, getDeployProject(service)))
+			.findFirst().orElse(null);
+	}
+	
 	private Map<IProject, List<IBuildConfig>> loadBuildConfigs(List<IProject> projects, Connection connection) {
 		if (projects == null
 				|| projects.isEmpty()) {
@@ -381,13 +402,9 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 
 	protected void setRoutes(Map<IProject, List<IRoute>> routesByProject) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(),
-				this.route, this.selectDefaultRoute, routesByProject);
+		updateRoutes(service, routesByProject);
 	}
-	
+
 	public List<IRoute> getRoutes() {
 		if (getService() == null) {
 			return Collections.emptyList();

@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.core.util;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +45,7 @@ public class ResourceUtils {
 
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
+	private static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
 
 	/**
 	 * Returns <code>true</code> if the given resource contains the given text
@@ -383,7 +383,7 @@ public class ResourceUtils {
 			.filter(project -> {
 					try {
 						if (buildConfig != null 
-								&& StringUtils.isEmpty(buildConfig.getSourceURI())) {
+								&& !StringUtils.isEmpty(buildConfig.getSourceURI())) {
 							return EGitUtils.getAllRemoteURIs(project)
 									.contains(new URIish(buildConfig.getSourceURI()));
 						}
@@ -400,4 +400,18 @@ public class ResourceUtils {
 		return imageStreamImport.getImageStatus().stream()
 				.filter(s -> s.isSuccess()).findFirst().isPresent();
 	}
+	
+	public static String getDeploymentConfigNameForPods(List<IPod> pods) {
+		if (pods == null
+				|| pods.isEmpty()) {
+			return null;
+		}
+
+		return pods.stream()
+				.filter(pod -> pod.getLabels().containsKey(DEPLOYMENT_CONFIG_KEY))
+				.findFirst()
+				.map(pod -> pod.getLabels().get(DEPLOYMENT_CONFIG_KEY))
+				.orElse(null);
+	}
+
 }

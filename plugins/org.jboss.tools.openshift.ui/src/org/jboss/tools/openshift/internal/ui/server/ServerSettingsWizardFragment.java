@@ -142,7 +142,6 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		this.serverSettingsWizardPage = createServerSettingsWizardPage(parent, handle);
 		updateWizardHandle(handle, this.serverSettingsWizardPage);
 		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
-		this.serverSettingsWizardPage.setDeploymentProject(UIUtils.getFirstSelectedWorkbenchProject());
 		return (Composite) this.serverSettingsWizardPage.getControl();
 	}
 	
@@ -188,7 +187,8 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
 			super(((IWizardPage) wizardHandle).getWizard(), 
 					OpenShiftServerTaskModelAccessor.getServer(taskModel), 
-					OpenShiftServerTaskModelAccessor.getConnection(taskModel));
+					OpenShiftServerTaskModelAccessor.getConnection(taskModel),
+					UIUtils.getFirstSelectedWorkbenchProject());
 			this.wizardHandle = wizardHandle;
 			
 		}

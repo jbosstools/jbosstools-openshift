@@ -45,12 +45,12 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	
 	public void publishStart(final IProgressMonitor monitor) 
 			throws CoreException {
-		final IProject deployProject = getMagicProject(getServer());
+		final IProject deployProject = OpenShiftServerUtils.getDeployProject(getServer());
 		if (!ProjectUtils.isAccessible(deployProject)) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					OpenShiftCoreActivator.PLUGIN_ID,
 					NLS.bind("Server adapter {0} cannot publish. Required project {1} is missing or inaccessible.", 
-							getServer().getName(), deployProject.getName())));
+							getServer().getName(), OpenShiftServerUtils.getDeployProjectName(getServer()))));
 		}
 		
 		this.rsync = OpenShiftServerUtils.createRSync(getServer());
@@ -101,10 +101,6 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 						&& !filename.endsWith(".classpath");
 			}
 		});
-	}
-	
-	private IProject getMagicProject(IServer server) {
-		return ProjectUtils.getProject(OpenShiftServerUtils.getDeployProjectName(server));
 	}
 
 	private boolean modulesIncludesMagicProject(IServer server, IProject deployProject) {

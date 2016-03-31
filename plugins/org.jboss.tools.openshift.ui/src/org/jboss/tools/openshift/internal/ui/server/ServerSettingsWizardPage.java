@@ -45,9 +45,6 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IPageChangedListener;
-import org.eclipse.jface.dialogs.IPageChangingListener;
-import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -62,7 +59,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -124,26 +120,37 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	protected Control uiHook = null;
 
 	/**
-	 * Default constructor.
+	 * Invoked from new server wizard (servers view, main menu)
+	 * 
 	 * @param wizard the parent {@link IWizard} 
-	 * @param server the working copy of the {@link IServer} to create
 	 * @param connection the current OpenShift {@link Connection}
 	 */
-	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection) {
-		this(wizard, server, connection, null, null);
+	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, IProject deployProject) {
+		this(wizard, server, connection, null, null, deployProject);
 	}
 
+	
+	
 	/**
-	 * Full constructor.
+	 * Invoked from OpenShift explorer
+	 * 
 	 * @param wizard the parent {@link IWizard} 
 	 * @param server the working copy of the {@link IServer} to create
 	 * @param connection the current OpenShift {@link Connection}
 	 * @param service the selected service
 	 */
-	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, final IService service, final IRoute route) {
-		super("Server Settings", "Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", "Create an OpenShift 3 Server Adapter", 
+	protected ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, 
+			final IService service, final IRoute route) {
+		this(wizard, server, connection, service, route, null);
+	}
+
+	protected ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection, 
+			final IService service, final IRoute route, final IProject deployProject) {
+		super("Server Settings", 
+				"Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", 
+				"Create an OpenShift 3 Server Adapter", 
 				wizard);
-		this.model = new ServerSettingsWizardPageModel(service, route, server, connection);
+		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server);
 	}
 	
 	/**

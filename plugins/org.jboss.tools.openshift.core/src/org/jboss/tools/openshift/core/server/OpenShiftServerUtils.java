@@ -42,6 +42,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.restclient.ResourceKind;
@@ -52,8 +53,6 @@ import com.openshift.restclient.model.IService;
  * @author Andre Dietisheim
  */
 public class OpenShiftServerUtils {
-
-	private static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
 
 	private static final String LIVERELOAD_PORT_KEY = "port";//Key to the port # of the host the LiveReload server need to proxy
 
@@ -388,17 +387,15 @@ public class OpenShiftServerUtils {
 	
 	public static IDeploymentConfig getDeploymentConfig(IServerAttributes attributes) {
 		IService service = getService(attributes);
+		//TODO use annotations instead of labels
 		if (service == null) {
 			return null;
 		}
-		//TODO use annotations instead of labels
-		String dcName = service.getPods().stream().filter(p -> p.getLabels().containsKey(DEPLOYMENT_CONFIG_KEY))
-				.findFirst()
-				.map(p -> p.getLabels().get(DEPLOYMENT_CONFIG_KEY))
-				.orElse(null);
+		String dcName = ResourceUtils.getDeploymentConfigNameForPods(service.getPods());
 		if (dcName == null) {
 			return null;
 		}
+		
 		Connection connection = getConnection(attributes);
 		if (connection == null) {
 			return null;
