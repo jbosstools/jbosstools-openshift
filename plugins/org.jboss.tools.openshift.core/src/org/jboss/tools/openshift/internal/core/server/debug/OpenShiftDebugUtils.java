@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -27,9 +29,11 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -40,6 +44,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
@@ -253,7 +258,7 @@ public class OpenShiftDebugUtils {
 	}
 	
 	public boolean isRunning(ILaunchConfiguration launchConfiguration, int localDebugPort) {
-		boolean isRunning = Stream.of(launchManager.getLaunches())
+		boolean isRunning = getLaunches()
 				.filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration, localDebugPort))
 				.findFirst().isPresent();
 		return isRunning;
@@ -261,11 +266,39 @@ public class OpenShiftDebugUtils {
 	
 	
 	private boolean launchMatches(ILaunch l, ILaunchConfiguration launchConfiguration, int localDebugPort) {
-		return (l.getLaunchConfiguration().equals(launchConfiguration));
+		return Objects.equals(l.getLaunchConfiguration(), launchConfiguration);
 	}
 
 	public static String getRemoteDebuggerLaunchConfigurationName(IServer server) {
 		String name ="Remote debugger to "+server.getName();
 		return name;
+	}
+	
+	public void terminateRemoteDebugger(IServer server) throws CoreException {
+		ILaunchConfiguration launchConfig = getRemoteDebuggerLaunchConfiguration(server);
+		if (launchConfig == null) {
+			return;
+		}
+		List<IStatus> errors = new ArrayList<>();
+		getLaunches().filter(l -> launchConfig.equals(l.getLaunchConfiguration()))
+					 .filter(l -> l.canTerminate())
+					 .forEach(l -> terminate(l, errors));
+		
+		if (!errors.isEmpty()) {
+			MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.ERROR, errors.toArray(new IStatus[errors.size()]), "Failed to terminate remote launch configuration", null);
+			throw new CoreException(status);
+		}
+	}
+	
+	private void terminate(ILaunch launch, Collection<IStatus> errors) {
+		try {
+			launch.terminate();
+		} catch (DebugException e) {
+			errors.add(e.getStatus());
+		}
+	}
+
+	private Stream<ILaunch> getLaunches() {
+		return Stream.of(launchManager.getLaunches());
 	}
 }

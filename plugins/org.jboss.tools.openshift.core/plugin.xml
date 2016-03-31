@@ -126,9 +126,15 @@
          </subsystemMapping>
 
      <!-- Shutdown -->
+         <subsystem
+            system="shutdown"
+            id="shutdown.openshift.default"
+            name="OpenShift Shutdown Controller"
+            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController">
+         </subsystem>
          <subsystemMapping
-            id="shutdown.noop.default"
-            mappedId="shutdown.noop.default"
+            id="shutdown.openshift.default"
+            mappedId="shutdown.openshift.default"
             serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
          

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -87,14 +88,25 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		if (dc == null) {
 			throw toCoreException("No deployment config was found for "+server.getName());
 		}
-		
+		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
-		if( DEBUG_MODE.equals(mode)) {
-			startDebugging(server, dc, debugContext, monitor);
-		} else {//run, profile
-			stopDebugging(dc, debugContext, monitor);
+		try {
+			if( DEBUG_MODE.equals(mode)) {
+				startDebugging(server, dc, debugContext, monitor);
+			} else {//run, profile
+				stopDebugging(dc, debugContext, monitor);
+			}
+		} catch (CoreException e) {
+			mode = currentMode;
+			throw e;
+		} finally {
+			checkServerState(beh, mode);
 		}
 		
+	}
+
+
+	private void checkServerState(ControllableServerBehavior beh, String mode) {
 		int state = pollState();
 		if( state == IServer.STATE_STARTED) {
 			beh.setServerStarted();
@@ -146,7 +158,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			
 			public void onDebugChange(DebuggingContext debuggingContext, IProgressMonitor monitor)
 					throws CoreException {
-				//that will automatically kill the remote debugger
+				OpenShiftDebugUtils.get().terminateRemoteDebugger(getServer());
 				unMapPortForwarding(debuggingContext.getPod());
 			}
 
