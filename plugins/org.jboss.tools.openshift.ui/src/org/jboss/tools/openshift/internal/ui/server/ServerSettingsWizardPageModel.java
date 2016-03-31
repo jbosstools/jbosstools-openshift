@@ -31,6 +31,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
@@ -349,9 +350,10 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
 		String connectionUrl = getConnectionUrl(getConnection());
 		String serverName = OpenShiftServerUtils.getServerName(getService(), getConnection());
-		String routeURL = getRoute(isSelectDefaultRoute(), getRoute());
+		String host = getHost(getRoute());
+		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
 		OpenShiftServerUtils.updateServer(
-				serverName, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
+				serverName, host, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
 		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
 		
 		// Set the profile
@@ -382,13 +384,20 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
 	}
 
-	private String getRoute(boolean isDefaultRoute, IRoute route) {
+	private String getHost(IRoute route) {
+		if (route == null) {
+			return "";
+		}
+		return UrlUtils.getHost(route.getURL());
+	}
+
+	private String getRouteURL(boolean isDefaultRoute, IRoute route) {
 		if (!isDefaultRoute || route == null) {
 			return null;
 		}
 		return route.getURL();
 	}
-
+	
 	public boolean isSelectDefaultRoute() {
 		return selectDefaultRoute;
 	}
