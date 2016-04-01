@@ -10,10 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IServer;
@@ -102,6 +104,9 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 
 		@Override
 		public Object getAdapter(Class adapter) {
+			if(adapter == IWebModule.class) {
+				return new RootWebModule();
+			}
 			return null;
 		}
 
@@ -110,6 +115,45 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 			return null;
 		}
 
+	}
+	
+	private static class RootWebModule implements IWebModule {
+
+		@Override
+		public IContainer[] getResourceFolders() {
+			return null;
+		}
+
+		@Override
+		public IContainer[] getJavaOutputFolders() {
+			return null;
+		}
+
+		@Override
+		public boolean isBinary() {
+			return false;
+		}
+
+		@Override
+		public String getContextRoot() {
+			return null;
+		}
+
+		@Override
+		public String getContextRoot(IModule earModule) {
+			return null;
+		}
+
+		@Override
+		public IModule[] getModules() {
+			return null;
+		}
+
+		@Override
+		public String getURI(IModule module) {
+			return null;
+		}
+		
 	}
 
 }
