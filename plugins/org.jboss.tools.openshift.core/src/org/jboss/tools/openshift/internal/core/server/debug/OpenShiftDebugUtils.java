@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.core.server.debug;
 
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION;
+import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -252,6 +253,7 @@ public class OpenShiftDebugUtils {
 		connectMap.put("port", portString); //$NON-NLS-1$
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
+		workingCopy.setAttribute(ATTR_ALLOW_TERMINATE, true);
 		if(project != null) {
 		   workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
 		}
