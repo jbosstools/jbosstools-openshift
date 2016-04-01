@@ -642,15 +642,49 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridDataFactory.fillDefaults()
 			.span(1,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(routesViewer.getControl());
-
 		routesViewer.setContentProvider(new ObservableListContentProvider());
 		routesViewer.setLabelProvider(new RouteLabelProvider());
 		routesViewer.setInput(
 				BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_ROUTES).observe(model));
-
+//		routesViewer.setComparer(new IElementComparer() {
+//
+//			@Override
+//			public boolean equals(Object object1, Object object2) {
+//				if (object1 instanceof IRoute) {
+//					if (!(object2 instanceof IRoute)) {
+//						return false;
+//					}
+//
+//					IRoute route1 = (IRoute) object1;
+//					IRoute route2 = (IRoute) object2;
+//
+//					return Objects.equals(route1.getServiceName(), route2.getServiceName()) 
+//							&& Objects.equals(route1.getURL(), route2.getURL());
+//				} else if (object2 instanceof IRoute) {
+//					return false;
+//				} else {
+//					return Objects.equals(object1, object2);
+//				}
+//			}
+//
+//			@Override
+//			public int hashCode(Object element) {
+//				if (element instanceof IRoute) {
+//					IRoute route = (IRoute) element;
+//					return new HashCodeBuilder()
+//							.append(route.getServiceName())
+//							.append(route.getURL())
+//							.toHashCode();
+//				}
+//				return element.hashCode();
+//			}
+//		});
+		
 		IObservableValue selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
-		ValueBindingBuilder.bind(selectedRouteObservable)
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_ROUTE).observe(model)).in(dbc);
+		ValueBindingBuilder
+			.bind(selectedRouteObservable)
+			.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_ROUTE).observe(model))
+			.in(dbc);
 
 		final IObservableValue isSelectDefaultRouteObservable =
 				WidgetProperties.selection().observe(promptRouteButton);
