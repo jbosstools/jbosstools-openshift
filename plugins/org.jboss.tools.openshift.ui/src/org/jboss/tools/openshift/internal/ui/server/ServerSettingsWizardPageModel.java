@@ -72,6 +72,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private boolean selectDefaultRoute = false;
 	private IRoute route;
 	private Map<IProject, List<IRoute>> routesByProject = new HashMap<>();
+	private List<IRoute> serviceRoutes = new ArrayList<IRoute>();
 	private boolean isLoaded = false;
 	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
 	private boolean useInferredPodPath = true;
@@ -146,16 +147,23 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	 * @return 
 	 */
 	protected List<IRoute> updateRoutes(IService service, Map<IProject, List<IRoute>> routesByProject) {
-		if (this.routesByProject.equals(routesByProject)) {
-			return getAllRoutes(service);
-		}
-		
-		this.routesByProject.clear();
-		this.routesByProject.putAll(routesByProject);
+		this.routesByProject = routesByProject;
 
+		List<IRoute> oldRoutes = new ArrayList<>(this.serviceRoutes);
 		List<IRoute> routes = getAllRoutes(service);
-		firePropertyChange(PROPERTY_ROUTES, null, routes);
+		this.serviceRoutes.clear();
+		this.serviceRoutes.addAll(routes);
+		resetSelectedRoute();
+		firePropertyChange(PROPERTY_ROUTES, oldRoutes, this.serviceRoutes);
+
 		return routes;
+	}
+
+	// workaround needed for a possible (?) bug in databinding
+	private void resetSelectedRoute() {
+		if (this.route != null) {
+			firePropertyChange(PROPERTY_ROUTE, this.route, this.route = null);
+		}
 	}
 
 	/**
