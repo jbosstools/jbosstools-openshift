@@ -13,7 +13,6 @@ import java.util.List;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.core.IRouteChooser;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog;
@@ -27,26 +26,17 @@ public class RouteChooser implements IRouteChooser {
 
 	private static final String NO_ROUTE_MSG = "Could not find a route that points to an url to show in a browser.";
 
-	private Shell shell;
 	private boolean rememberChoice = false;
 
 	public RouteChooser() {
-	}
-
-	public RouteChooser(Shell shell) {
-		this.shell = shell;
 	}
 
 	@Override
 	public IRoute chooseRoute(List<IRoute> routes) {
 		final IRoute[] selectedRoute = new IRoute[1];
 		Display.getDefault().syncExec(() -> {
-			if (shell == null) {
-				shell = PlatformUI.getWorkbench()
-						.getActiveWorkbenchWindow()
-						.getShell();
-			}
-			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell);
+			SelectRouteDialog routeDialog = 
+					new SelectRouteDialog(routes, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 			if (Dialog.OK == routeDialog.open()) {
 				selectedRoute[0] = routeDialog.getSelectedRoute();
 				rememberChoice = routeDialog.isRememberChoice();
@@ -62,7 +52,10 @@ public class RouteChooser implements IRouteChooser {
 
 	@Override
 	public void noRouteErrorDialog() {
-		MessageDialog.openWarning(shell, "No route to open", NO_ROUTE_MSG);
+		Display.getDefault().syncExec(() -> {
+			MessageDialog.openWarning(
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+					"No route to open", NO_ROUTE_MSG);
+		});
 	}
-
 }
