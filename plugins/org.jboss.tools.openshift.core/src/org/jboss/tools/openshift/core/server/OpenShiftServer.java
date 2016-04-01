@@ -64,9 +64,11 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 	private String getContextRoot(IProject moduleProject, IProject deployProject) {
 		String contextRoot = null;
 		if (OpenShiftServerUtils.isIgnoresContextRoot(getServer()) 
-				&& moduleProject.equals(deployProject)) {
+				&& (moduleProject == null // case of the fake RootModule whose project is null
+				|| moduleProject.equals(deployProject))) {
 			contextRoot = "";
 		}
+		
 		return contextRoot;
 	}
 	
