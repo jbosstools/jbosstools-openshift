@@ -48,7 +48,8 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.apache.commons.collections;bundle-version="3.2.0",
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui.editors,
- org.eclipse.core.expressions;bundle-version="3.5.0"
+ org.eclipse.core.expressions;bundle-version="3.5.0",
+ org.eclipse.jst.server.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test",
