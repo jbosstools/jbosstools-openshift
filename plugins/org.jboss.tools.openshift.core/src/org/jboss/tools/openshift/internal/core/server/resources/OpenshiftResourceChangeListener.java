@@ -79,11 +79,10 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 				// has this deltaResource been changed?
 				if (delta2.getKind() == IResourceDelta.NO_CHANGE) {
 					return false;
-				} else if(delta2.getResource() instanceof IFolder) {
-					// by default, assume that a change on an IFolder must be taken
-					// into account.
+				} else if(delta2.getResource() instanceof IFolder
+						&& (delta2.getKind() == IResourceDelta.ADDED || delta2.getKind() == IResourceDelta.REMOVED)) {
+					// only take folders additions and removals into account.
 					changed.add(delta2.getResource());
-
 				} else if (delta2.getResource() instanceof IFile) {
 					if (delta2.getKind() == IResourceDelta.CHANGED 
 							&& (delta2.getFlags() & IResourceDelta.MARKERS) != 0
