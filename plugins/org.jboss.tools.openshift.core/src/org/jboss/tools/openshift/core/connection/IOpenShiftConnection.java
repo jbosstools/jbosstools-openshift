@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.core.connection;
 
 import java.util.List;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
 
 /**

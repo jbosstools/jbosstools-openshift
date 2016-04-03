@@ -8,16 +8,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.property;
 
-import static org.junit.Assert.*;
-import static org.jboss.tools.openshift.test.ui.property.Assert.*;
+import static org.jboss.tools.openshift.test.ui.property.Assert.assertPropertyDescriptorsEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.property.ConnectionPropertySource;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ConnectionPropertySourceTest {
 	

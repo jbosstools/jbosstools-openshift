@@ -8,17 +8,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.common.core.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.tools.openshift.common.core.utils.URIUtils;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.jboss.tools.openshift.common.core.utils.URIUtils;
 
 public class URIUtilsTest {
 	

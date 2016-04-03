@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.preferences;
 
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;

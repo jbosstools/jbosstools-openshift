@@ -10,9 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.util;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.*;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesForPod;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;

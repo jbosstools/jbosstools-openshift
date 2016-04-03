@@ -20,8 +20,8 @@ import java.util.HashMap;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKDockerUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -30,10 +30,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
-import com.openshift.restclient.OpenShiftContext;
-import com.openshift.restclient.capability.IBinaryCapability;
-import com.openshift.restclient.capability.resources.IPortForwardable;
-
 /**
  * 
  * @author jeff.cantrill

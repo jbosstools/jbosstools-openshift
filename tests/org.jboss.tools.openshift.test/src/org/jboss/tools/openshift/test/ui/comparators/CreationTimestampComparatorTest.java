@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.comparators;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;

@@ -10,13 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.comparators;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
-import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

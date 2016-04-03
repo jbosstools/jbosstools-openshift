@@ -8,26 +8,24 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.property;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.jboss.tools.openshift.test.ui.property.Assert.*;
+import static org.jboss.tools.openshift.test.ui.property.Assert.assertPropertyDescriptorsEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;
+import org.jboss.tools.openshift.internal.ui.property.PrefixPropertySourceKey;
+import org.jboss.tools.openshift.internal.ui.property.ResourcePropertySource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.openshift.restclient.model.IResource;
-
-import org.jboss.tools.openshift.internal.ui.property.PrefixPropertySourceKey;
-import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;
-import org.jboss.tools.openshift.internal.ui.property.ResourcePropertySource;
-import org.jboss.tools.openshift.internal.ui.property.ResourcePropertySource.Ids;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.openshift.restclient.model.IResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourcePropertySourceTest {

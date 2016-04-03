@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.security;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.junit.Before;

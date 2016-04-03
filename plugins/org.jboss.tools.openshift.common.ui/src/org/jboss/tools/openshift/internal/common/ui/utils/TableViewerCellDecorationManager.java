@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ViewerCell;

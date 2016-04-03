@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.*;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
 
 import java.util.Arrays;
 import java.util.Collection;

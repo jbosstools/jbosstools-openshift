@@ -22,7 +22,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -38,9 +37,7 @@ import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboComm
 import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComponent;
-import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComposite;
 import org.jboss.tools.foundation.ui.credentials.ICredentialCompositeListener;
-import org.jboss.tools.foundation.ui.util.FormDataUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 /*

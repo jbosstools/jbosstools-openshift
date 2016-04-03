@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.propertytester;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester;

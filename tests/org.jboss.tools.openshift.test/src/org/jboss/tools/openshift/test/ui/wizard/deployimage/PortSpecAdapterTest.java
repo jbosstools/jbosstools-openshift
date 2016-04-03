@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.wizard.deployimage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.junit.Test;

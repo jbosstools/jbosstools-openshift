@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.common.core.util;
 
-import static org.junit.Assert.*;
-
-import static org.jboss.tools.openshift.common.core.utils.UrlUtils.*;
+import static org.jboss.tools.openshift.common.core.utils.UrlUtils.getHost;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 

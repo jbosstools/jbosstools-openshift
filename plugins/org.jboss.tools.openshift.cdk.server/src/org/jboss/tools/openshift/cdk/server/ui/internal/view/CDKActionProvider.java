@@ -10,9 +10,7 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.ui.internal.view;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -41,12 +39,11 @@ import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.ui.internal.view.servers.AbstractServerAction;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
-import org.jboss.ide.eclipse.as.wtp.ui.WTPOveridePlugin;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKDockerUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 
 public class CDKActionProvider extends CommonActionProvider {
 	private ICommonActionExtensionSite actionSite;

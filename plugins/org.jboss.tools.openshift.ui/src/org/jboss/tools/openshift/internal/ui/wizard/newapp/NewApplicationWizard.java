@@ -39,8 +39,8 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
-import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;

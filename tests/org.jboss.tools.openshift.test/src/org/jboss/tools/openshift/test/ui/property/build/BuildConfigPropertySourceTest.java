@@ -8,17 +8,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.property.build;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.jboss.tools.openshift.test.ui.property.Assert.*;
+import static org.jboss.tools.openshift.test.ui.property.Assert.assertPropertyDescriptorsContains;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.jboss.tools.openshift.internal.ui.property.BuildConfigPropertySource;
+import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;
+import org.jboss.tools.openshift.internal.ui.property.KeyValuePropertySource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
@@ -28,12 +34,6 @@ import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
-
-import org.jboss.tools.openshift.internal.ui.property.BuildConfigPropertySource;
-import org.jboss.tools.openshift.internal.ui.property.KeyValuePropertySource;
-import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildConfigPropertySourceTest {

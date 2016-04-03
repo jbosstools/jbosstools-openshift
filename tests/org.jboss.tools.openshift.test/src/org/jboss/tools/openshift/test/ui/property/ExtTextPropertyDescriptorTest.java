@@ -8,7 +8,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.property;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.jboss.tools.openshift.internal.ui.property.ExtTextPropertyDescriptor;
 import org.junit.Test;

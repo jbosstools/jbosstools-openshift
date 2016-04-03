@@ -8,7 +8,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.validator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collection;

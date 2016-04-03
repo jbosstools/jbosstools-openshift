@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.test.ui.validator;
 
 import java.util.Arrays;
 
-import org.jboss.tools.openshift.internal.ui.validator.ServiceNameValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.PodPortValidator;
 import org.junit.Test;
 import org.junit.runner.RunWith;

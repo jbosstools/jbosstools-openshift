@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.List;
 
-import com.openshift.restclient.model.IPort;
-
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
+
+import com.openshift.restclient.model.IPort;
 
 /**
  * Page model for the deployment config page

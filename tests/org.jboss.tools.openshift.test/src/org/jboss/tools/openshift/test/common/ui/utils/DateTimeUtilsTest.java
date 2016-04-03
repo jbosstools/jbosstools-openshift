@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.common.ui.utils;
 
-import static org.junit.Assert.*;
+import static org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils.formatDuration;
+import static org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils.formatSince;
+import static org.junit.Assert.assertEquals;
 
 import java.util.TimeZone;
-
-import static org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils.*;
 
 import org.junit.Test;
 

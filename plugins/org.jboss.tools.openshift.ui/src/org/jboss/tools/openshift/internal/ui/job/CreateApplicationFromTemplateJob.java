@@ -9,6 +9,7 @@
 package org.jboss.tools.openshift.internal.ui.job;
 
 import static org.jboss.tools.openshift.internal.ui.job.ResourceCreationJobUtils.createErrorStatusForExistingResources;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
