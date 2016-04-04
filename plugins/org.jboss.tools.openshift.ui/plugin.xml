@@ -750,12 +750,6 @@
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
         tooltip="Refresh the resource" />
-      <command
-        commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
-        id="org.jboss.tools.openshift.ui.command.serverAdapter"
-        icon="icons/openshift-logo-white-icon.png"
-        style="push"/>
-        
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
