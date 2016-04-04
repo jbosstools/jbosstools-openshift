@@ -36,9 +36,13 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 	@Override
 	public void stop(boolean force) {
 		OpenShiftServerBehaviour behavior = getBehavior();
+
 		behavior.setServerStopping();
+
 		try {
-			OpenShiftDebugUtils.get().terminateRemoteDebugger(behavior.getServer());
+			if(OpenShiftDebugUtils.DEBUG_MODE.equals(getServer().getMode())) {
+				OpenShiftDebugUtils.get().stopDebugging(getServer(), new NullProgressMonitor());
+			}
 			behavior.setServerStopped();
 		} catch(CoreException ce) {
 			OpenShiftCoreActivator.getDefault().getLog().log(
