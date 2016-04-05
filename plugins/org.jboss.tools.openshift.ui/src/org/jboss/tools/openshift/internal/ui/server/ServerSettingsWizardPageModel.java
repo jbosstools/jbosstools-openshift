@@ -204,7 +204,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
 	}
 
-	protected void setDeployProject(org.eclipse.core.resources.IProject project) {
+	public void setDeployProject(org.eclipse.core.resources.IProject project) {
 		update(getConnection(), getConnections(), 
 				project, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
