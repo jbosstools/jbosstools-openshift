@@ -116,6 +116,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		String err = findError();
 		setComplete(err == null);
 		handle.update();
+		main.pack(true);
 		return main;
 	}
 	
