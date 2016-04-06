@@ -11,8 +11,6 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
-import java.text.ParseException;
-
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -41,6 +39,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.model.IResource;
@@ -217,17 +216,11 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	
 
 	protected ViewerSorter createCreatedBySorter() {
+		final CreationTimestampComparator comparator = new CreationTimestampComparator();
 		return new ViewerSorter() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				IResource r1 = ((IResourceUIModel)e1).getResource();
-				IResource r2 = ((IResourceUIModel)e2).getResource();
-				try {
-					return -1 * DateTimeUtils.parse(r1.getCreationTimeStamp())
-							.compareTo(DateTimeUtils.parse(r2.getCreationTimeStamp()));
-				} catch (ParseException e) {
-				}
-				return 0;
+				return comparator.compare((IResourceUIModel)e1, (IResourceUIModel)e2);
 			}
 		};
 	}

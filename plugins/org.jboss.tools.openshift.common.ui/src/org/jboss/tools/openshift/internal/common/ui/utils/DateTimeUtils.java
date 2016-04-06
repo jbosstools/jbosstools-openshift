@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
@@ -62,6 +63,10 @@ public class DateTimeUtils {
 		return value;
 	}
 	public static Date parse(String value) throws ParseException {
+		if(StringUtils.isEmpty(value)) {
+			//prevent null pointer and index out of bounds exceptions.
+			throw new ParseException("Date is not provided", 0);
+		}
 		//ref: http://www.java2s.com/Code/Java/Data-Type/ISO8601dateparsingutility.htm
 		//assume date is like: '2015-11-11T20:32:37Z' 
 		String modValue = value.substring(0, value.length()-1) + "GMT-00:00";

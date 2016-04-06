@@ -53,11 +53,17 @@ public class CreationTimestampComparatorTest {
 	}
 
 	@Test
-	public void testResourcesAreEqualOnParseException() {
+	public void testResourcesAreEqualWhenBothInvalid() {
 		when(projectTwo.getCreationTimeStamp()).thenReturn("aaa");
+		when(projectOne.getCreationTimeStamp()).thenReturn("");
 		assertEquals(EQUAL, comparator.compare(one, two));
 	}
 	
+	@Test
+	public void testResourcesAreSortedFromCorrectToInvalid() {
+		when(projectOne.getCreationTimeStamp()).thenReturn("abc");
+		assertEquals(AFTER, comparator.compare(one, two));
+	}
 
 
 }
