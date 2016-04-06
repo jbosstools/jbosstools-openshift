@@ -413,11 +413,39 @@ public class UIUtils {
 	 * @param button
 	 */
 	public static void setDefaultButtonWidth(Button button) {
-		Assert.isLegal(!DisposeUtils.isDisposed(button));
-		Assert.isLegal(button.getLayoutData() instanceof GridData, "the given button is not layouted with a GridLayout");
-
+		assertCanSetGridData(button);
 		((GridData)button.getLayoutData()).widthHint =  
 				convertHorizontalDLUsToPixels(button, IDialogConstants.BUTTON_WIDTH);
+	}
+
+	/**
+	 * Sets equal width to all buttons in the array, which is the maximum
+	 * of the standard default button width and the required (computed) button width
+	 * for the most wide of the buttons.
+	 * Throws IllegalArgumentException if a button is disposed or does not have GridData.
+	 * 
+	 * @param button
+	 */
+	public static void setEqualButtonWidth(Button... buttons) {
+		if(buttons == null || buttons.length == 0) {
+			return;
+		}
+		int width = convertHorizontalDLUsToPixels(buttons[0], IDialogConstants.BUTTON_WIDTH);
+		for (Button button: buttons) {
+			assertCanSetGridData(button);
+			int w = button.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			if(width < w) {
+				width = w;
+			}
+		}
+		for (Button button: buttons) {
+			((GridData)button.getLayoutData()).widthHint = width;
+		}
+	}
+
+	private static void assertCanSetGridData(Button button) {
+		Assert.isLegal(!DisposeUtils.isDisposed(button), "Button is disposed");
+		Assert.isLegal(button.getLayoutData() instanceof GridData, "Button " + button.getText() + " is not layouted with a GridLayout");
 	}
 
 	private static int convertHorizontalDLUsToPixels(Control control, int dlus) {
@@ -430,5 +458,6 @@ public class UIUtils {
 	
 		return (int)Math.round(dlus * horizontalDialogUnitSize);
 	}
+
 
 }
