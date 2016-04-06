@@ -12,12 +12,13 @@ package org.jboss.tools.openshift.internal.ui.comparators;
 
 import java.text.ParseException;
 import java.util.Comparator;
+import java.util.Date;
 
 import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 /**
- * Comparator for sorting display models by resource createion timestamp
+ * Comparator for sorting display models by resource creation timestamp
  * @author jeff.cantrill
  *
  */
@@ -25,12 +26,28 @@ public class CreationTimestampComparator implements Comparator<IResourceUIModel>
 
 	@Override
 	public int compare(IResourceUIModel o1, IResourceUIModel o2) {
-		try {
-			return -1 * DateTimeUtils.parse(o1.getResource().getCreationTimeStamp())
-					.compareTo(DateTimeUtils.parse(o2.getResource().getCreationTimeStamp()));
-		} catch (ParseException e) {
+		Date date1 = getDate(o1);
+		Date date2 = getDate(o2);
+		if(date1 == null || date2 == null) {
+			//invalid date goes to the end of list.
+			if(date1 != null) {
+				return -1;
+			} else if(date2 != null) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
-		return 0;
+		return -1 * date1.compareTo(date2);
+	}
+
+	private Date getDate(IResourceUIModel o1) {
+		String value = o1.getResource().getCreationTimeStamp();
+		try {
+			return DateTimeUtils.parse(value);
+		} catch (ParseException e) {
+			return null;
+		}
 	}
 
 }
