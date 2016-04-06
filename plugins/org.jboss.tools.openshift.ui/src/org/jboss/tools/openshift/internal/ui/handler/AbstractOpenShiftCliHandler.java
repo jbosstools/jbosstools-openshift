@@ -30,6 +30,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID;
+
 /**
  * 
  * @author jeff.cantrill
@@ -71,7 +73,6 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 
 	private static class OpenPreferencesListener extends SelectionAdapter {
 
-		private static final String OPEN_SHIFT_PREFERENCE_PAGE_ID = "org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage";
 		private Dialog dialog;
 
 		public OpenPreferencesListener(MessageDialog messageDialog) {

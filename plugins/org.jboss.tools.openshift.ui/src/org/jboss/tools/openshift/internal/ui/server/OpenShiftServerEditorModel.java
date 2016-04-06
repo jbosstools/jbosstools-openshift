@@ -32,7 +32,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	private boolean overrideProject = false;
 
 	public OpenShiftServerEditorModel(IServerWorkingCopy server, Connection connection) {
-		super(null, null, null, connection, server);
+		super(null, null, null, connection, server, false);
 	}
 
   	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
@@ -44,7 +44,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
   				deployProject, projects, 
   				sourcePath, podPath, isUseInferredPodPath, 
   				service, serviceItems, 
-  				route, isSelectDefaultRoute, routesByProject);
+  				route, isSelectDefaultRoute, routesByProject, isInvalidOCBinary());
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
 

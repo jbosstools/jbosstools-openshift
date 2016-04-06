@@ -22,7 +22,7 @@ public enum OCBinary {
 	OTHER("oc", new String[] {});
 	
 	private static final String OC_DEFAULTLOCATION_LINUX = "/usr/bin/oc";
-
+	
 	public static OCBinary getInstance() {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			return WINDOWS;
@@ -73,5 +73,16 @@ public enum OCBinary {
 			location = getSystemPathLocation();
 		}
 		return location;
+	}
+	
+	/**
+	 * Checks if the oc binary is compatible for rsync publishing.
+	 * 
+	 * @return true if the oc binary is compatible
+	 * @see https://issues.jboss.org/browse/JBIDE-21307
+	 * @see https://github.com/openshift/origin/issues/6109
+	 */
+	public boolean isCompatibleForPublishing() {
+	    return new OCBinaryValidator(getLocation()).isCompatibleForPublishing();
 	}
 }

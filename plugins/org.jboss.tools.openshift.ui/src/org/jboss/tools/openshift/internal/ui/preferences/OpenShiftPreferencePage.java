@@ -30,7 +30,10 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
 
 /**
  * @author jeff.cantrill
@@ -38,9 +41,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
-			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
-	
 	private CliFileEditor cliLocationEditor;
 	private OCBinary ocBinary;
 	
@@ -127,6 +127,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		if(!file.canExecute()) {
 			cliLocationEditor.setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
 			return false;
+		}
+		if (!new OCBinaryValidator(location).isCompatibleForPublishing()) {
+	        setMessage("Your Openshift 3 client executable is pre-1.1.1 and may cause rsync problems", WARNING);
 		}
 		return true;
 	}
