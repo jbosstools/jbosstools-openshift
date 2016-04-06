@@ -116,7 +116,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 				.to(selectedParameter)
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
-		
+
 		// reset button
 		Button resetButton = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -124,7 +124,13 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		resetButton.setText("Reset");
 		UIUtils.setDefaultButtonWidth(resetButton);
 		resetButton.addSelectionListener(onReset());
-
+		ValueBindingBuilder
+		.bind(WidgetProperties.enabled().observe(resetButton))
+		.notUpdatingParticipant()
+		.to(selectedParameter)
+		.converting(new IsNotNull2BooleanConverter())
+		.in(dbc);
+		
 		// required explanation
 		Label requiredExplanationLabel = new Label(container, SWT.None);
 		requiredExplanationLabel.setText("* = value required, click the 'Edit...' button or double-click on a value to edit it.");

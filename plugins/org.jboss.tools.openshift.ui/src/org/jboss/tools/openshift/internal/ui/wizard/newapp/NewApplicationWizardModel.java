@@ -284,7 +284,9 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void resetParameter(IParameter param) {
-		updateParameterValue(param, originalValueMap.get(param.getName()));
+		if (param != null) {
+			updateParameterValue(param, originalValueMap.get(param.getName()));
+		}
 	}
 
 	private void setLabels(Map<String, String> labelMap) {
