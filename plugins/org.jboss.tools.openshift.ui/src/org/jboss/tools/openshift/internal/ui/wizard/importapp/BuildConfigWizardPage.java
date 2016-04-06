@@ -18,6 +18,7 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -42,11 +43,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.server.BuildConfigDetailViews;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCellLabelProvider;
@@ -56,6 +61,7 @@ import com.openshift.restclient.model.IBuildConfig;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 
@@ -119,6 +125,41 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 		Label fillerLabel = new Label(buildConfigsGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, true).applyTo(fillerLabel);
+		
+	      // details
+        ExpandableComposite expandable = new ExpandableComposite(buildConfigsGroup, SWT.None);
+        GridDataFactory.fillDefaults()
+            .span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+            .applyTo(expandable);
+        expandable.setText("Build config Details");
+        expandable.setExpanded(true);
+        GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(0, 0).applyTo(expandable);
+        GridDataFactory.fillDefaults()
+        .span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+        .applyTo(expandable);
+	      Composite detailsContainer = new Composite(expandable, SWT.NONE);
+	        GridDataFactory.fillDefaults()
+	                .span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+	                .applyTo(detailsContainer);
+	        IObservableValue selectedService = new WritableValue();
+	        ValueBindingBuilder
+	            .bind(selectedItem)
+	            .to(selectedService)
+	            .notUpdatingParticipant()
+	            .in(dbc);
+	        new BuildConfigDetailViews(selectedService, detailsContainer, dbc).createControls();
+	        expandable.setClient(detailsContainer);
+	        expandable.addExpansionListener(new IExpansionListener() {
+	            @Override
+	            public void expansionStateChanging(ExpansionEvent e) {
+	            }
+	            
+	            @Override
+	            public void expansionStateChanged(ExpansionEvent e) {
+	                buildConfigsGroup.update();
+	                buildConfigsGroup.layout(true);
+	            }
+	        });
 		
 		loadBuildConfigs(model);
 	}
