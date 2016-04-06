@@ -10,12 +10,20 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.preferences;
 
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
+
 import java.io.File;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -24,13 +32,18 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
+import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.osgi.framework.Version;
 
 /**
  * @author jeff.cantrill
@@ -38,11 +51,12 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
-			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
-	
 	private CliFileEditor cliLocationEditor;
 	private OCBinary ocBinary;
+	private Label ocVersionLabel;
+	private Composite ocMessageComposite;
+	private Label ocMessageLabel;
+	private UIUpdatingJob versionVerificationJob;
 	
 	public OpenShiftPreferencePage() {
 		super(GRID);
@@ -52,9 +66,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	public void createFieldEditors() {
 		Link link = new Link(getFieldEditorParent(), SWT.WRAP);
-		link.setText("The OpenShift Client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
+		link.setText("The OpenShift client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
 				+ "You can find more information about how to install it from <a>here</a>.");
-		GridDataFactory.fillDefaults().span(3, 1).hint(300, SWT.DEFAULT).applyTo(link);
+		GridDataFactory.fillDefaults().span(3, 1).hint(1,60).grab(true, false).applyTo(link);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -68,6 +82,19 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		cliLocationEditor.setFileExtensions(ocBinary.getExtensions());
 		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
+		
+        ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
+        ocVersionLabel.setFont(JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT));
+        GridDataFactory.fillDefaults().span(3, 1).applyTo(ocVersionLabel);
+		ocMessageComposite = new Composite(getFieldEditorParent(), SWT.NONE);
+		GridDataFactory.fillDefaults().span(3, 1).applyTo(ocMessageComposite);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(ocMessageComposite);
+        Label label = new Label(ocMessageComposite, SWT.NONE);
+        label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+        GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(label);
+        ocMessageLabel = new Label(ocMessageComposite, SWT.NONE);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(ocMessageLabel);
+        ocMessageComposite.setVisible(false);
     }
 	
 	@Override
@@ -85,9 +112,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		getPreferenceStore().setDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, location);
 
 		if(StringUtils.isBlank(location)) {
-			String message = NLS.bind("Could not find the OpenShift Client executable \"{0}\" on your path.", ocBinary.getName());
+			String message = NLS.bind("Could not find the OpenShift client executable \"{0}\" on your path.", ocBinary.getName());
 			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
-			MessageDialog.openWarning(getShell(), "No OpenShift Client executable", message);
+			MessageDialog.openWarning(getShell(), "No OpenShift client executable", message);
 			return;
 		}
 
@@ -119,7 +146,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		File file = new File(location);
 		//Error messages have to be set to field editor, not directly to the page.
 		if(!ocBinary.getName().equals(file.getName())) {
-			cliLocationEditor.setErrorMessage(NLS.bind("{0} is not the OpenShift Client ''{1}'' executable.", file.getName(), ocBinary.getName()));
+			cliLocationEditor.setErrorMessage(NLS.bind("{0} is not the OpenShift client ''{1}'' executable.", file.getName(), ocBinary.getName()));
 			return false;
 		}
 		if(!file.exists()) {
@@ -130,10 +157,43 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 			cliLocationEditor.setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
 			return false;
 		}
+		setValid(false);
+		ocVersionLabel.setText("Checking OpenShift client version...");
+		versionVerificationJob = new UIUpdatingJob("Checking oc binary") {
+ 
+		    private Version version;
+		    
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                version = new OCBinaryValidator(location).getVersion(monitor);
+                if (monitor.isCanceled()) {
+                	return Status.CANCEL_STATUS;
+                }
+                return Status.OK_STATUS;
+            }
+
+            @Override
+            protected IStatus updateUI(IProgressMonitor monitor) {
+            	if (!getResult().isOK()) {
+            		return getResult();
+            	}
+                if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
+                    setValid(true);
+                    ocVersionLabel.setText(NLS.bind("Your OpenShift client version is {0}.{1}.{2}", new Object[] {version.getMajor(), version.getMinor(), version.getMicro()}));
+                    ocMessageLabel.setText(NLS.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
+                    ocMessageComposite.setVisible(!OCBinaryValidator.isCompatibleForPublishing(version));
+                }
+                return super.updateUI(monitor);
+            }
+        };
+        versionVerificationJob.schedule();
 		return true;
 	}
 
 	class CliFileEditor extends FileFieldEditor {
+		
+		private String lastCheckedValue = null;
+		
 		public CliFileEditor() {
 			//Validation strategy should be set in constructor, later setting it has no effect.
 			super(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC,
@@ -144,13 +204,31 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		protected boolean checkState() {
 			//We have to return the default error message that is used 
 			//by super implementation if file does not exist. 
-			setErrorMessage(JFaceResources.getString("FileFieldEditor.errorMessage"));
-			return super.checkState();
+			String newCheckedValue = getStringValue();
+			if (!Objects.equals(newCheckedValue, lastCheckedValue)) {
+				setErrorMessage(JFaceResources.getString("FileFieldEditor.errorMessage"));
+				ocVersionLabel.setText("");
+				ocMessageComposite.setVisible(false);
+				if (versionVerificationJob != null){
+					versionVerificationJob.cancel();
+				}
+			}
+			boolean state = super.checkState();
+			if (!state) {
+				lastCheckedValue = newCheckedValue;
+			}
+			return state;
 		}
 
 		@Override
 		public boolean doCheckState() {
-			return validateLocation(getStringValue());
+			String newCheckedValue = getStringValue();
+			boolean state = true;
+			if (!Objects.equals(newCheckedValue, lastCheckedValue)) {
+				state = validateLocation(newCheckedValue);
+			}
+			lastCheckedValue = getStringValue();
+			return state;
 		}
 	}
 }

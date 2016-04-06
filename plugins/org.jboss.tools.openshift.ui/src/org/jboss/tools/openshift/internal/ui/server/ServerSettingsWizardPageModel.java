@@ -62,6 +62,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	public static final String PROPERTY_SELECT_DEFAULT_ROUTE = "selectDefaultRoute";
 	public static final String PROPERTY_ROUTE = "route";
 	public static final String PROPERTY_ROUTES = "routes";
+	public static final String PROPERTY_INVALID_OC_BINARY = "invalidOCBinary";
 
 	protected org.eclipse.core.resources.IProject deployProject;
 	protected List<org.eclipse.core.resources.IProject> projects = new ArrayList<>();
@@ -76,20 +77,23 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private boolean isLoaded = false;
 	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
 	private boolean useInferredPodPath = true;
+	private boolean invalidOCBinary = false;
 
 	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
-			Connection connection, IServerWorkingCopy server) {
+			Connection connection, IServerWorkingCopy server, boolean invalidOCBinary) {
 		super(service, connection);
 		this.route = route;
 		this.deployProject = deployProject;
 		this.server = server;
+		this.invalidOCBinary = invalidOCBinary;
 	}
 
 	protected void update(Connection connection, List<Connection> connections, 
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
 			String sourcePath, String podPath, boolean useInferredPodPath,
 			IService service, List<ObservableTreeItem> serviceItems, 
-			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject) {
+			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject,
+			boolean invalidOCBinary) {
 		update(connection, connections, service, serviceItems);
 		updateProjects(projects);
 		org.eclipse.core.resources.IProject oldDeployProject = this.deployProject;
@@ -98,6 +102,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		List<IRoute> newRoutes = updateRoutes(service, routesByProject);
 		updateRoute(route, newRoutes, service);
 		updateSelectDefaultRoute(isSelectDefaultRoute);
+		updateInvalidOCBinary(invalidOCBinary);
 	}
 	
 	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
@@ -209,7 +214,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				project, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
 				getService(), getServiceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject);
+				this.route, this.selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	public org.eclipse.core.resources.IProject getDeployProject() {
@@ -229,7 +235,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				sourcePath, this.podPath, this.useInferredPodPath,
 				getService(), getServiceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject);
+				this.route, this.selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	public String getSourcePath() {
@@ -241,7 +248,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, podPath, this.useInferredPodPath,
 				getService(), getServiceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject);
+				this.route, this.selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	public String getPodPath() {
@@ -257,7 +265,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, useInferredPodPath,
 				getService(), getServiceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject);
+				this.route, this.selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	@Override
@@ -266,7 +275,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
 				service, getServiceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject);
+				this.route, this.selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 	
 	protected org.eclipse.core.resources.IProject getProjectOrDefault(org.eclipse.core.resources.IProject project, List<org.eclipse.core.resources.IProject> projects) {
@@ -306,7 +316,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
 				this.service, getServiceItems(),
-				this.route, selectDefaultRoute, this.routesByProject);
+				this.route, selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	private List<IBuildConfig> getBuildConfigs(IProject project) {
@@ -428,7 +439,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
 				getService(), getServiceItems(),
-				this.route, selectDefaultRoute, this.routesByProject);
+				this.route, selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	protected void setRoutes(Map<IProject, List<IRoute>> routesByProject) {
@@ -455,7 +467,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
 				getService(), getServiceItems(),
-				route, this.selectDefaultRoute, this.routesByProject);
+				route, this.selectDefaultRoute, this.routesByProject,
+				this.invalidOCBinary);
 	}
 
 	protected List<IRoute> getAllRoutes(IRoute route) {
@@ -501,4 +514,22 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 			throw new OpenShiftException(e, "Could not get url for connection {0}", connection.getHost());
 		}
 	}
+
+    private void updateInvalidOCBinary(boolean invalidOCBinary) {
+        firePropertyChange(PROPERTY_INVALID_OC_BINARY, this.invalidOCBinary,
+                this.invalidOCBinary = invalidOCBinary);
+    }
+
+    public boolean isInvalidOCBinary() {
+        return invalidOCBinary;
+    }
+
+    public void setInvalidOCBinary(boolean invalidOCBinary) {
+        update(getConnection(), getConnections(), 
+                this.deployProject, this.projects, 
+                this.sourcePath, this.podPath, this.useInferredPodPath,
+                getService(), getServiceItems(),
+                route, this.selectDefaultRoute, this.routesByProject,
+                invalidOCBinary);
+    }
 }
