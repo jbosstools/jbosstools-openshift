@@ -37,7 +37,7 @@ public class DeploymentConfigListenerJob extends Job {
 	private Map<String, String> dcSelector = null;
 	
 
-	public static final int TIMEOUT = Integer.getInteger(DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY,60_000);//TODO get timeout value from some settings
+	public static final int TIMEOUT = Integer.getInteger(DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY,600_000);//TODO get timeout value from some settings
 
 	private IDeploymentConfig deploymentConfig;
 	
