@@ -107,4 +107,10 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		return JobUtils.isOk(status) || JobUtils.isWarning(status);
 	}
 
+    @Override
+    public void dispose() {
+        super.dispose();
+        getModel().dispose();
+    }
+
 }
