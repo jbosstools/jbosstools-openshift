@@ -504,7 +504,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
                 }
             }, getContainer());
         } catch (InvocationTargetException | InterruptedException e) {
-            // swallow intentionnally
+            OpenShiftUIActivator.getDefault().getLogger().logError(e);
         }
     }
 }

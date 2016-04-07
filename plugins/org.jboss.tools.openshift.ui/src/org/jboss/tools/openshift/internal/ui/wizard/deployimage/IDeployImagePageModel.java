@@ -107,5 +107,5 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	/**
 	 * Free any resource
 	 */
-	void release();
+	void dispose();
 }
