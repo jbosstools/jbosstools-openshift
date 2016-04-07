@@ -15,16 +15,23 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 
 /**
  * @author Andre Dietisheim
@@ -165,6 +172,58 @@ public abstract class AbstractStackedDetailViews {
 		public boolean isViewFor(Object object) {
 			return false;
 		}
+
+		/**
+		 * Helper method that creates Label + read-only StyledText
+		 * @param labelText
+		 * @param container
+		 * @return
+		 */
+		protected StyledText createLabeledValue(String labelText, Composite container) {
+			Label label = new Label(container, SWT.NONE);
+			label.setText(labelText);
+			GridDataFactory.fillDefaults()
+				.align(SWT.LEFT, SWT.CENTER).applyTo(label);
+			return createNonEditableStyledText(container);
+		}
+
+		/**
+		 * Helper method that creates read-only StyledText for a value to display
+		 * @param container
+		 * @return
+		 */
+		protected StyledText createNonEditableStyledText(Composite container) {
+			StyledText styledText = new StyledText(container, SWT.READ_ONLY);
+			styledText.setAlwaysShowScrollBars(false);
+			StyledTextUtils.setTransparent(styledText);
+			GridDataFactory.fillDefaults()
+					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
+			styledText.addFocusListener(fl);
+			return styledText;
+		}
+
+		/**
+		 * Listener used to remove selection from read-only text widget when focus is lost.
+		 * This prevents independent selecting on several widgets. As selection is used
+		 * for copying text to the clipboard, it is not needed without focus. 
+		 */
+		protected FocusListener fl = new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(e.getSource() instanceof StyledText) {
+					((StyledText)e.getSource()).setSelection(0, 0);
+				} else if(e.getSource() instanceof Text) {
+					((Text)e.getSource()).setSelection(0, 0);
+				}
+			}
+
+		};
+
 	}
 	
 	public interface IDetailView {

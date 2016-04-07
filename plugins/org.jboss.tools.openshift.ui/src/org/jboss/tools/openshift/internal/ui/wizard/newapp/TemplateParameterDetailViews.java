@@ -58,10 +58,7 @@ public class TemplateParameterDetailViews extends AbstractStackedDetailViews {
 			GridLayoutFactory.fillDefaults().margins(8, 2).spacing(6, 2).applyTo(container);
 
 			// nameLink
-			this.nameText = new StyledText(container, SWT.READ_ONLY);
-			nameText.setAlwaysShowScrollBars(false);
-			StyledTextUtils.setTransparent(nameText);
-			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameText);
+			this.nameText = createNonEditableStyledText(container);
 
 			// descriptionText
 			this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
