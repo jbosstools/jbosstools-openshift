@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -159,7 +160,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", 
 				"Create an OpenShift 3 Server Adapter", 
 				wizard);
-		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server, !OCBinary.getInstance().isCompatibleForPublishing());
+		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server, !OCBinary.getInstance().isCompatibleForPublishing(new NullProgressMonitor()));
 	}
 	
 	/**
@@ -311,7 +312,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         Label label = new Label(composite, SWT.NONE);
         label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
         Link link = new Link(composite, SWT.WRAP);
-        link.setText("Your Openshift 3 client executable is pre-1.1.1 and may cause rsync problems. You may <a>download</a> and/or <a>configure</a> a newer version.");
+        link.setText("OpenShift client version 1.1.1 or higher is required to avoid rsync issues. You may <a>download</a> and/or <a>configure</a> a newer version.");
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -325,7 +326,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
                                                                       new String[] {OPEN_SHIFT_PREFERENCE_PAGE_ID},
                                                                       null).open();
                     if (rc == Dialog.OK) {
-                        ServerSettingsWizardPage.this.model.setInvalidOCBinary(!OCBinary.getInstance().isCompatibleForPublishing());
+                        new Job("Checking oc binary") {
+
+                            @Override
+                            protected IStatus run(IProgressMonitor monitor) {
+                                ServerSettingsWizardPage.this.model.setInvalidOCBinary(!OCBinary.getInstance().isCompatibleForPublishing(monitor));
+                                return Status.OK_STATUS;
+                            }
+                        }.schedule();
                     }
                 }
             }

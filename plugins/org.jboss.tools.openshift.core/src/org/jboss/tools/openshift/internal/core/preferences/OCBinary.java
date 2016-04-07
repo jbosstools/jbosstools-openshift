@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.core.preferences;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
@@ -78,11 +79,13 @@ public enum OCBinary {
 	/**
 	 * Checks if the oc binary is compatible for rsync publishing.
 	 * 
+	 * @param monitor the progress monitor
+	 * 
 	 * @return true if the oc binary is compatible
 	 * @see https://issues.jboss.org/browse/JBIDE-21307
 	 * @see https://github.com/openshift/origin/issues/6109
 	 */
-	public boolean isCompatibleForPublishing() {
-	    return new OCBinaryValidator(getLocation()).isCompatibleForPublishing();
+	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
+	    return new OCBinaryValidator(getLocation()).isCompatibleForPublishing(monitor);
 	}
 }
