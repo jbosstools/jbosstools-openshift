@@ -1075,6 +1075,14 @@
 			name="%openshift.command.application.deployimage">
 		</command>
 		<command
+			id="org.jboss.tools.openshift.ui.command.explorer.triggerdeploy"
+			name="%openshift.command.deploymentconfig.deploy">
+		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.deploy"
+			name="%openshift.command.deploymentconfig.deploy">
+		</command>
+		<command
 			id="org.jboss.tools.openshift.ui.command.openInWebConsole"
 			name="%openshift.command.openwebconsole">
 		</command>
