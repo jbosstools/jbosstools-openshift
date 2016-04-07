@@ -72,7 +72,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private boolean selectDefaultRoute = false;
 	private IRoute route;
 	private Map<IProject, List<IRoute>> routesByProject = new HashMap<>();
-	private List<IRoute> serviceRoutes = new ArrayList<IRoute>();
+	private List<IRoute> serviceRoutes = new ArrayList<>();
 	private boolean isLoaded = false;
 	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
 	private boolean useInferredPodPath = true;
@@ -281,6 +281,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		loadResources(getConnection());
 	}
 
+	@Override
 	public void loadResources(Connection newConnection) {
 		boolean serviceInitialized = this.service != null;
 		this.isLoaded = false;
@@ -382,11 +383,23 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 	
 	private String getProfileId() {
-		// currently supported profiles are openshift3   or   openshift3.eap
+		// currently supported profiles are openshift3 or openshift3.eap
 		// we need to determine if the current service represents an app that requires
 		// eap-style behavior or normal behavior
-		String template = getService().getLabels().get("template");
-		if( template != null && template.startsWith("eap")) {
+		boolean isEapProfile = false;
+		IService service = getService();
+		if (service != null) {
+			IProject project = getOpenShiftProject(service);
+			if (project != null) {
+				List<IBuildConfig> buildConfigs = getBuildConfigs(project);
+				if (buildConfigs != null) {
+					IBuildConfig buildConfig = ResourceUtils.getBuildConfigForService(service, buildConfigs);
+					isEapProfile = OpenShiftServerUtils.isEapStyle(buildConfig);
+				}
+			}
+		}
+
+		if(isEapProfile) {
 			return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP;
 		}
 		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
