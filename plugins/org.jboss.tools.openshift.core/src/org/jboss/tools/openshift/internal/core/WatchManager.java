@@ -96,7 +96,8 @@ public class WatchManager {
 	private static enum State {
 		STARTING,
 		CONNECTED,
-		DISCONNECTED
+		DISCONNECTED, 
+		STOPPING
 	}
 	
 	private class WatchListener implements IOpenShiftWatchListener{
@@ -150,8 +151,15 @@ public class WatchManager {
 				Trace.debug("Returning early from restart.  Already starting for project {0} and kind {1}", project.getName(), kind);
 				return;
 			}
-			Trace.debug("Rescheduling watch job for project {0} and kind {1}", project.getName(), kind);
-			startWatch(project, backoff, lastConnect, this);
+			try {
+				// TODO enhance fix to only check project once
+				conn.getResource(project);
+				Trace.debug("Rescheduling watch job for project {0} and kind {1}", project.getName(), kind);
+				startWatch(project, backoff, lastConnect, this);
+			}catch(Exception e) {
+				Trace.debug("Unable to rescheduling watch job for project {0} and kind {1}", e, project.getName(), kind);
+				stopWatch(project);
+			}
 		}
 
 
