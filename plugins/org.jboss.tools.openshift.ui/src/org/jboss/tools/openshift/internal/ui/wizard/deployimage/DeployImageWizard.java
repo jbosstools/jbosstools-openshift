@@ -99,6 +99,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		} finally {
 			UsageStats.getInstance().newV3Application( getModel().getConnection().getHost(), success);
 		}
+		getModel().dispose();
 		return success;
 	}
 	
