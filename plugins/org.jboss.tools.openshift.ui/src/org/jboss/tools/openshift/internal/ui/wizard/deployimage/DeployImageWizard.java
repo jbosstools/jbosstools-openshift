@@ -19,10 +19,14 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.common.ui.JobUtils;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
+import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.job.DeployImageJob;
@@ -48,6 +52,30 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	@Override
 	public void addPages() {
+	    if (getModel().originatedFromDockerExplorer()) {
+	        addPage(new ConnectionWizardPage(this, new IConnectionAware<IConnection>() {
+
+	            @Override
+	            public IConnection getConnection() {
+	                return getModel().getConnection();
+	            }
+
+	            @Override
+	            public boolean hasConnection() {
+	                return getModel().hasConnection();
+	            }
+
+	            @Override
+	            public void setConnection(IConnection connection) {
+	                getModel().setConnection((Connection) connection);
+	            }
+
+	            @Override
+	            public Object getContext() {
+	                return getModel().getContext();
+	            }
+	        }));
+	    }
 		addPage(new DeployImagePage(this, getModel()));
 		addPage(new DeploymentConfigPage(this, getModel()));
 		addPage(new ServicesAndRoutingPage(this,  getModel()));
