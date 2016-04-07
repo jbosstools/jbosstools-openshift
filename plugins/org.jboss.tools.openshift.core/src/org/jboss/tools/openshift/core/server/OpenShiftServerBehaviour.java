@@ -30,12 +30,20 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	public static final String PROFILE_OPENSHIFT3 = "openshift3";
 	public static final String PROFILE_OPENSHIFT3_EAP = "openshift3.eap";
 
+	
+	public static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
+	
 	@Override
 	public void setServerStarted() {
 		super.setServerStarted();
 		launchPostStartupJobs();
 	}
 
+	public void restart(String launchMode) throws CoreException {
+		putSharedData(CURRENTLY_RESTARTING, true);
+		super.restart(launchMode);
+	}
+	
 	protected void launchPostStartupJobs() {
 		try {
 			// Once the server is marked started, we want to update the deployment scanners and module publish state

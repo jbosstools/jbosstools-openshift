@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.core.server.behavior;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -29,8 +31,11 @@ import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.Server;
+import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
@@ -38,6 +43,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerHotCodeReplaceListener;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
@@ -86,6 +92,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		
 		IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
 		if (dc == null) {
+			beh.setServerStopped();
 			throw toCoreException(NLS.bind("Could not find deployment config was for {0}. "
 					+ "Your server adapter refers to an inexistant service"
 					+ ", there are no pods for it "
@@ -104,14 +111,35 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			mode = currentMode;
 			throw e;
 		} finally {
-			checkServerState(beh, mode);
+			checkServerState(beh, currentMode, mode);
 		}
 		
 	}
 
 
-	private void checkServerState(ControllableServerBehavior beh, String mode) {
+	private void checkServerState(ControllableServerBehavior beh, String oldMode, String mode) {
 		int state = pollState();
+		
+		if (!Objects.equals(oldMode, mode)) {
+			IModule[] modules = getServer().getModules();
+			for( int i = 0; i < modules.length; i++ ) {
+				((Server)getServer()).setModulePublishState(new IModule[]{modules[i]}, IServer.PUBLISH_STATE_FULL);
+			}
+			
+			if( state == IServer.STATE_STARTED && Boolean.TRUE.equals(beh.getSharedData(OpenShiftServerBehaviour.CURRENTLY_RESTARTING))) {
+				// Kick publish server job
+				Job j = new Job("Publishing server " + getServer().getName()) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						return getServer().publish(IServer.PUBLISH_INCREMENTAL, monitor);
+					}
+				};
+				j.schedule(3000);
+				beh.putSharedData(OpenShiftServerBehaviour.CURRENTLY_RESTARTING, null);
+			}
+		}
+
+		
 		if( state == IServer.STATE_STARTED) {
 			beh.setServerStarted();
 			beh.setRunMode(mode);
