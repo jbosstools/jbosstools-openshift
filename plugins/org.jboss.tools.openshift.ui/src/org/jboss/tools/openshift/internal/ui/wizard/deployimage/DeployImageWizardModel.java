@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
+import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener;
+import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener2;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.dmr.ModelNode;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -60,7 +62,7 @@ import com.openshift.restclient.model.image.IImageStreamImport;
  */
 public class DeployImageWizardModel 
 		extends ResourceLabelsPageModel 
-		implements IDeployImageParameters{
+		implements IDeployImageParameters, IDockerConnectionManagerListener2 {
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
 
@@ -93,6 +95,18 @@ public class DeployImageWizardModel
 	
 	private final List<String> imageNames = new ArrayList<>();
 	
+    private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
+
+	
+	public DeployImageWizardModel() {
+	    DockerConnectionManager.getInstance().addConnectionManagerListener(this);
+	}
+	
+	@Override
+	public void release() {
+	    DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
+	}
+	
 	public void setOriginatedFromDockerExplorer(boolean orig) {
 		this.originatedFromDockerExplorer = orig;
 	}
@@ -104,8 +118,7 @@ public class DeployImageWizardModel
 	
 	@Override
 	public List<IDockerConnection> getDockerConnections() {
-		List<IDockerConnection> all = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
-		return all;
+		return dockerConnections;
 	}
 
 	@Override
@@ -573,4 +586,14 @@ public class DeployImageWizardModel
 			return Collections.emptySet();
 		}
 	}
+
+    @Override
+    public void changeEvent(int event) {
+    }
+    @Override
+    public void changeEvent(IDockerConnection connection, int event) {
+        if ((event == ADD_EVENT) || (event == REMOVE_EVENT)) {
+            firePropertyChange(PROPERTY_DOCKER_CONNECTIONS, dockerConnections, dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections()));
+        }
+    }
 }

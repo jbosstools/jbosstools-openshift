@@ -103,4 +103,9 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return <code>true</code> if the initialization succeeded, <code>false</code> otherwise.
 	 */
 	boolean initializeContainerInfo();
+	
+	/**
+	 * Free any resource
+	 */
+	void release();
 }
