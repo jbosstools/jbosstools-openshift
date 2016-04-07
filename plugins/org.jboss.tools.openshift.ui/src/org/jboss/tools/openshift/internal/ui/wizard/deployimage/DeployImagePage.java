@@ -44,6 +44,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.ui.wizards.ImageSearch;
+import org.eclipse.linuxtools.internal.docker.ui.wizards.NewDockerConnection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -186,7 +187,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
-			.span(2, 1)
+			.span(1, 1)
 			.applyTo(connectionViewer.getControl());
 		
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
@@ -221,8 +222,15 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.observe(model))
 			.in(dbc);
 		ControlDecorationSupport.create(
-			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));	}
-
+			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		
+        StyledText newDockerConnectionLink = StyledTextUtils.emulateLinkWidget("<a>New Docker connection</a>", new StyledText(parent, SWT.WRAP));
+        GridDataFactory.fillDefaults()
+            .align(SWT.LEFT, SWT.CENTER).indent(8, 0)
+            .applyTo(newDockerConnectionLink);
+        StyledTextUtils.emulateLinkAction(newDockerConnectionLink, r->onNewDockerConnectionClicked());
+		}
+	
 	private void createProjectControl(Composite parent, DataBindingContext dbc) {
 		Label lblProject = new Label(parent, SWT.NONE);
 		lblProject.setText("OpenShift Project: ");
@@ -418,4 +426,33 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		}
 	}
 	
+    private void onNewDockerConnectionClicked() {
+        try {
+            // run in job to enforce busy cursor which doesnt work otherwise
+            WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
+
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    return Status.OK_STATUS;
+                }
+
+                @Override
+                protected IStatus updateUI(IProgressMonitor monitor) {
+                    NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
+                    int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
+                    // set docker connection to reflect changes that happened in
+                    // docker connection wizard
+                    if (Dialog.OK == result) {
+                        IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
+                        if (dockerConnection != null) {
+                            model.setDockerConnection(dockerConnection);
+                        }
+                    }
+                    return Status.OK_STATUS;
+                }
+            }, getContainer());
+        } catch (InvocationTargetException | InterruptedException e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError(e);
+        }
+    }
 }
