@@ -14,12 +14,28 @@ import static org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils.f
 import static org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils.formatSince;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DateTimeUtilsTest {
 
+	private static Locale originalLocale;
+	
+	@BeforeClass
+	public static void beforeClass() {
+		originalLocale = Locale.getDefault();
+		Locale.setDefault(Locale.ENGLISH);
+	}
+	
+	@AfterClass
+	public static void afterClass() {
+		Locale.setDefault(originalLocale);
+	}
+	
 	@Test
 	public void testFormatDurationLessThanSec() {
 		long duration = 33000000L;

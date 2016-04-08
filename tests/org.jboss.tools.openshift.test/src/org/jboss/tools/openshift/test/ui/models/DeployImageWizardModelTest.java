@@ -85,7 +85,7 @@ public class DeployImageWizardModelTest {
 		final IStatus status = Mockito.mock(IStatus.class);
 		final IImageStreamImport streamImport = Mockito.mock(IImageStreamImport.class);
 		final DockerImageURI dockerImageURI = new DockerImageURI("jboss/infinispan-server:latest");
-		when(status.getStatus()).thenReturn("Success");
+		when(status.isSuccess()).thenReturn(true);
 		when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
 		when(streamImport.getImageJsonFor(dockerImageURI))
 				.thenReturn(getImageStreamImport("jboss_infinispan-server_ImageStreamImport.json"));
@@ -103,7 +103,7 @@ public class DeployImageWizardModelTest {
 	}
 
 	private String getImageStreamImport(final String filename) throws IOException {
-		final InputStream imageStreamImport = Thread.currentThread().getContextClassLoader()
+		final InputStream imageStreamImport = getClass().getClassLoader()
 				.getResourceAsStream(filename);
 		return IOUtils.toString(imageStreamImport);
 	}

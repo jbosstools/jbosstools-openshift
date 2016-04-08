@@ -11,10 +11,23 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<name>openshift.tests</name>
 	<packaging>pom</packaging>
 	<modules>
-		<module>org.jboss.tools.openshift.egit.test</module>		
+		<module>org.jboss.tools.openshift.egit.test</module>
 		<module>org.jboss.tools.openshift.express.test</module>
 		<module>org.jboss.tools.openshift.test</module>
 		<module>org.jboss.tools.openshift.cdk.server.test</module>
 	</modules>
+
+	<build>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-surefire-plugin</artifactId>
+					<configuration>
+						<includes>
+							<include>**/*Test.java</include>
+						</includes>
+					</configuration>
+				</plugin>
+			</plugins>
+	</build>
 </project>
-	

@@ -20,11 +20,13 @@ import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStor
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @author Andre Dietisheim
  */
+@Ignore
 public class SecureStorageTest {
 
 	private IStoreKey key;
