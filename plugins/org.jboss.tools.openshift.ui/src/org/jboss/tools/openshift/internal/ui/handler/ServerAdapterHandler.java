@@ -16,6 +16,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
@@ -53,7 +54,10 @@ public class ServerAdapterHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final IWorkbenchWindow workbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
 		final ISelection selection = HandlerUtil.getCurrentSelection(event);
-		final IResourceUIModel selectedResource = UIUtils.getFirstElement(selection, IResourceUIModel.class);
+		IResourceUIModel selectedResourceModel = UIUtils.getFirstElement(selection, IResourceUIModel.class);
+		IResource selectedResource = (selectedResourceModel != null) 
+				? selectedResourceModel.getResource() 
+				: UIUtils.getFirstElement(selection, IResource.class); //Object may be selected in Properties view as IResource.
 		final IServer openShiftServer = getOpenShiftServer(selectedResource);
 		if (openShiftServer != null) {
 			openServersView(openShiftServer, workbenchWindow);
@@ -65,18 +69,17 @@ public class ServerAdapterHandler extends AbstractHandler {
 	 * Finds the OpenShift server corresponding to the selection or prompts the
 	 * user to create one.
 	 * 
-	 * @param selectedResourceModel
-	 *            the selected OpenShift {@link IResourceUIModel}
+	 * @param resource
+	 *            the selected OpenShift {@link IResource}
 	 * 
 	 * @return the matching OpenShift {@link IServer} or <code>null</code> if
 	 *         none was found or user cancelled the creation operation.
 	 */
-	private IServer getOpenShiftServer(final IResourceUIModel selectedResourceModel) {
-		if (selectedResourceModel == null) {
+	private IServer getOpenShiftServer(final IResource resource) {
+		if (resource == null) {
 			return null;
 		}
 		
-		IResource resource = selectedResourceModel.getResource();
 		if (resource instanceof IService) {
 			final IService selectedService = (IService) resource;
 			final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(selectedService);
