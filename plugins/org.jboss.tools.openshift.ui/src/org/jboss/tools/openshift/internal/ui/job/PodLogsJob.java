@@ -160,10 +160,10 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 			final MessageConsoleStream os = console.newMessageStream();
 			os.setEncoding("UTF-8");
 			try {
-				final InputStream logs = new BufferedInputStream(capability.getLogs(true, key.container, OpenShiftBinaryOption.SKIP_TLS_VERIFY));
-				byte [] data = new byte [8192];
+				final InputStream logs = capability.getLogs(true, key.container, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+				byte [] data = new byte [256];
 				int read = 0;
-				while(running && (read = logs.read(data)) != -1 && !os.isClosed()){
+				while(running && (read = readSafely(logs, data)) != -1 && !os.isClosed()){
 					os.write(data, 0, read);
 				}
 			} catch (OpenShiftException e) {
@@ -186,6 +186,36 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 					OpenShiftUIActivator.getDefault().getLogger().logError("Exception while closing pod log inputstream", e);
 				}
 			}
+		}
+	}
+
+	/**
+	 * This helper method try not to make a fuss out of closing the input stream internally.
+	 * All other failures should not be hidden.
+	 *  
+	 * @param logs
+	 * @param data
+	 * @return
+	 * @throws IOException
+	 */
+	private int readSafely(InputStream logs, byte[] data) throws IOException {
+		try {
+			if(logs.available() < 0) {
+				return -1;
+			}
+		} catch (IOException e) {
+			//InputStream.available() may throw exception if the stream is closed externally.
+			return -1;
+		}
+		try {
+			return logs.read(data);
+		} catch (IOException e) {
+			if("Stream closed".equals(e.getMessage())) {
+				//Closed externally, nothing to read. Now we can only rely on chain of input streams 
+				//having BufferedInputStream in it. Otherwise, we cannot say if stream is closed or failed. 
+				return -1;
+			}
+			throw e;
 		}
 	}
 
