@@ -28,6 +28,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
+import org.jboss.tools.openshift.internal.core.Trace;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
@@ -98,7 +99,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 	private Collection<IResource>  createResources(Connection connection, Collection<IResource> resources) {
 		Collection<IResource> created = new ArrayList<>();
 		for (IResource resource : resources) {
-			OpenShiftUIActivator.getDefault().getLogger().logInfo(NLS.bind("Trying to create resource: {0}", resource.toJson()));
+			Trace.debug("Trying to create resource: {0}", resource.toJson());
 			try {
 				created.add(connection.createResource(resource));
 			}catch(OpenShiftException e) {
