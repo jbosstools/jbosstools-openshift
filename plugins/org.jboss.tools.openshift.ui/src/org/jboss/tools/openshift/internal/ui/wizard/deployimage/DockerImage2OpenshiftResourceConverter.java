@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import com.openshift.restclient.images.DockerImageURI;
 
+import static org.jboss.tools.openshift.internal.ui.validator.ServiceNameValidator.MAXLENGTH;
+
 /**
  * 
  * A converter for the docker image name to Openshift resource mapping.
@@ -36,8 +38,8 @@ public class DockerImage2OpenshiftResourceConverter {
                 builder.append('-');
             }
         }
-        if (builder.length() > 24) {
-           builder.delete(24, builder.length());
+        if (builder.length() > MAXLENGTH) {
+           builder.delete(MAXLENGTH, builder.length());
         }
         return builder.toString();
     }
