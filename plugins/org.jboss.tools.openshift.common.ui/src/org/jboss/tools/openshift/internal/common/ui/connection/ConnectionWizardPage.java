@@ -84,19 +84,19 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	private StyledText userdocLink;
 	private StyledText signupLink;
 
-	public ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
+	public <C extends IConnection> ConnectionWizardPage(IWizard wizard, IConnectionAware<C> wizardModel) {
 		this(wizard, wizardModel, true);
 	}
 
-	public ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel, Class<? extends IConnection> connectionType) {
+	public <C extends IConnection> ConnectionWizardPage(IWizard wizard, IConnectionAware<C> wizardModel, Class<? extends IConnection> connectionType) {
 		this(wizard, wizardModel, connectionType, true);
 	}
 
-	protected ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel, boolean allowConnectionChange) {
+	protected <C extends IConnection> ConnectionWizardPage(IWizard wizard, IConnectionAware<C> wizardModel, boolean allowConnectionChange) {
 		this(wizard, wizardModel, null, allowConnectionChange);
 	}
 
-	protected ConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel, Class<? extends IConnection> connectionType, 
+	protected <C extends IConnection> ConnectionWizardPage(IWizard wizard, IConnectionAware<C> wizardModel, Class<? extends IConnection> connectionType, 
 			boolean allowConnectionChange) {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection", wizard);
 		this.pageModel = new ConnectionWizardPageModel(
@@ -104,7 +104,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				ConnectionsRegistrySingleton.getInstance().getAll(), 
 				connectionType, 
 				allowConnectionChange, 
-				wizardModel);
+				(IConnectionAware<IConnection>) wizardModel);
 
 		/*
 		 * JBIDE-12999: ensure EclipseAuthenticator is installed and overrides

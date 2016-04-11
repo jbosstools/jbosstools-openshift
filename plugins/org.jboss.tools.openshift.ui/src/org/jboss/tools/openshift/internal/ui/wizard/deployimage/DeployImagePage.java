@@ -152,9 +152,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
-		if (model.originatedFromDockerExplorer()) {
-			createConnectionControl(parent, dbc);
-		} else {
+		if (!model.originatedFromDockerExplorer()) {
 			createDockerConnectionControl(parent, dbc);
 		}
 		createProjectControl(parent, dbc);
@@ -226,47 +224,6 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.in(dbc);
 		ControlDecorationSupport.create(
 			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));	}
-	
-	private void createConnectionControl(Composite parent, DataBindingContext dbc) {
-		Label lblConnection = new Label(parent, SWT.NONE);
-		lblConnection.setText("OpenShift Connection: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblConnection);
-		
-		StructuredViewer connectionViewer = new ComboViewer(parent);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2,1)
-			.applyTo(connectionViewer.getControl());
-		
-		connectionViewer.setContentProvider(new ObservableListContentProvider());
-		connectionViewer.setLabelProvider(new ConnectionColumLabelProvider());
-		connectionViewer.setInput(
-				BeanProperties.list(IDeployImagePageModel.PROPERTY_CONNECTIONS).observe(model));
-		
-		IObservableValue selectedConnectionObservable = ViewerProperties.singleSelection().observe(connectionViewer);
-		Binding selectedConnectionBinding = 
-			ValueBindingBuilder.bind(selectedConnectionObservable)
-			.converting(new ObservableTreeItem2ModelConverter(Connection.class))
-			.validatingAfterConvert(new IValidator() {
-				
-				@Override
-				public IStatus validate(Object value) {
-					if (value instanceof Connection) {
-						return ValidationStatus.ok();
-					}
-					return ValidationStatus.cancel("Please choose an OpenShift connection.");
-				}
-			})
-			.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_CONNECTION)
-			.observe(model))
-			.in(dbc);
-		ControlDecorationSupport.create(
-			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
-	}
 
 	private void createProjectControl(Composite parent, DataBindingContext dbc) {
 		Label lblProject = new Label(parent, SWT.NONE);
