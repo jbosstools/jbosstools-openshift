@@ -26,7 +26,7 @@ public class ServiceNameValidator implements IValidator {
 
 	private static final String CHAR_FMT = "[a-z0-9]";
 	private static final String EXT_CHAR_FMT = "[-a-z0-9]";
-	private static final int MAXLENGTH = 24;
+	public static final int MAXLENGTH = 24;
 	private static final Pattern REGEX = Pattern.compile("^[a-z](" + EXT_CHAR_FMT + "*" + CHAR_FMT +")?$");
 
 	private final static String failureMessage = "A valid name is alphanumeric (a-z, and 0-9), "

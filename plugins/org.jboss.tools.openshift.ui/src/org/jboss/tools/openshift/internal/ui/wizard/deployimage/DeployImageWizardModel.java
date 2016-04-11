@@ -93,6 +93,8 @@ public class DeployImageWizardModel
 	
 	private final List<String> imageNames = new ArrayList<>();
 	
+	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
+	
 	@Override
 	public void setOriginatedFromDockerExplorer(boolean orig) {
 		this.originatedFromDockerExplorer = orig;
@@ -225,7 +227,7 @@ public class DeployImageWizardModel
 		}
 		firePropertyChange(PROPERTY_IMAGE_NAME, this.imageName, this.imageName = imageName);
 		final DockerImageURI uri = new DockerImageURI(imageName);
-		setResourceName(uri.getName());
+		setResourceName(dockerImage2OpenshiftResourceConverter.convert(uri));
 	}
 	
 	@Override
