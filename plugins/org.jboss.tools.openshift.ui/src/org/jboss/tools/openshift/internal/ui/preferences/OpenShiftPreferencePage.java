@@ -14,8 +14,14 @@ import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -24,13 +30,19 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
+import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
 
 /**
  * @author jeff.cantrill
@@ -38,11 +50,11 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String DOWNLOAD_INSTRUCTIONS_URL = 
-			"https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
-	
 	private CliFileEditor cliLocationEditor;
 	private OCBinary ocBinary;
+	private Label ocVersionLabel;
+	private Composite ocMessageComposite;
+	private Label ocMessageLabel;
 	
 	public OpenShiftPreferencePage() {
 		super(GRID);
@@ -68,6 +80,18 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		cliLocationEditor.setFileExtensions(ocBinary.getExtensions());
 		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
+		
+		ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
+		GridDataFactory.fillDefaults().span(3, 1).hint(300, SWT.DEFAULT).applyTo(ocVersionLabel);
+		ocMessageComposite = new Composite(getFieldEditorParent(), SWT.NONE);
+		GridDataFactory.fillDefaults().span(3, 1).applyTo(ocMessageComposite);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(ocMessageComposite);
+        Label label = new Label(ocMessageComposite, SWT.NONE);
+        label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+        GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(label);
+        ocMessageLabel = new Label(ocMessageComposite, SWT.WRAP);
+        GridDataFactory.fillDefaults().hint(300, 60).grab(true, true).applyTo(ocMessageLabel);
+        ocMessageComposite.setVisible(false);
     }
 	
 	@Override
@@ -130,6 +154,26 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 			cliLocationEditor.setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
 			return false;
 		}
+		Job job = new UIUpdatingJob("Checking oc binary") {
+ 
+		    private String version;
+		    
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                version = new OCBinaryValidator(location).getVersion(monitor);
+                return Status.OK_STATUS;
+            }
+
+            @Override
+            protected IStatus updateUI(IProgressMonitor monitor) {
+                if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
+                    ocMessageLabel.setText(NLS.bind("Your client version is {0}. OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
+                    ocMessageComposite.setVisible(!OCBinaryValidator.isCompatibleForPublishing(version));
+                }
+                return super.updateUI(monitor);
+            }
+        };
+        job.schedule();
 		return true;
 	}
 

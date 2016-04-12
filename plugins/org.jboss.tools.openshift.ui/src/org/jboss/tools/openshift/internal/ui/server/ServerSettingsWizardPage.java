@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -48,6 +49,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
@@ -71,9 +73,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -85,6 +89,7 @@ import org.jboss.ide.eclipse.as.ui.editor.DeploymentTypeUIUtil.ICompletable;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -98,6 +103,8 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -107,6 +114,9 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
+
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID;
 
 /**
  * @author Andre Dietisheim
@@ -150,7 +160,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", 
 				"Create an OpenShift 3 Server Adapter", 
 				wizard);
-		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server);
+		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server, !OCBinary.getInstance().isCompatibleForPublishing(new NullProgressMonitor()));
 	}
 	
 	/**
@@ -253,6 +263,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.margins(6, 6)
 			.applyTo(container);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+		createInfoControls(container, model, dbc);
 		createProjectControls(container, model, dbc);
 		createServiceControls(container, model, dbc);
 		createAdvancedGroup(container, dbc);
@@ -287,6 +298,48 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.setEclipseProjectObservable(eclipseProjectObservable)
 			.setSelectionListener(onBrowseProjects(model, container.getShell()))
 			.build(container, dbc);
+	}
+	
+	private void createInfoControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+        Composite composite = new Composite(container, SWT.NONE);
+        GridDataFactory.fillDefaults().span(4, 1).applyTo(composite);
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
+        
+        ValueBindingBuilder
+                .bind(WidgetProperties.visible().observe(composite))
+                .to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_INVALID_OC_BINARY).observe(model))
+                .in(dbc);
+
+        Label label = new Label(composite, SWT.NONE);
+        label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+        Link link = new Link(composite, SWT.WRAP);
+        link.setText("OpenShift client version 1.1.1 or higher is required to avoid rsync issues. You may <a>download</a> and/or <a>configure</a> a newer version.");
+        link.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if ("download".equals(e.text)) {
+                    new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL, 
+                            OpenShiftUIActivator.PLUGIN_ID, 
+                            OpenShiftUIActivator.getDefault().getLog());
+                } else {
+                    int rc = PreferencesUtil.createPreferenceDialogOn(getShell(),
+                                                                      OPEN_SHIFT_PREFERENCE_PAGE_ID,
+                                                                      new String[] {OPEN_SHIFT_PREFERENCE_PAGE_ID},
+                                                                      null).open();
+                    if (rc == Dialog.OK) {
+                        new Job("Checking oc binary") {
+
+                            @Override
+                            protected IStatus run(IProgressMonitor monitor) {
+                                ServerSettingsWizardPage.this.model.setInvalidOCBinary(!OCBinary.getInstance().isCompatibleForPublishing(monitor));
+                                return Status.OK_STATUS;
+                            }
+                        }.schedule();
+                    }
+                }
+            }
+        });
+        GridDataFactory.fillDefaults().hint(600, SWT.DEFAULT).applyTo(link);
 	}
 
 	/**
