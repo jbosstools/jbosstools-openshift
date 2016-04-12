@@ -66,6 +66,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		this.parameters = parameters;
 	}
 	
+	@Override
 	public Collection<IResource> getResources(){
 		return created;
 	}

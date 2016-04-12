@@ -49,6 +49,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		this.ocBinary = OCBinary.getInstance();
 	}
 	
+	@Override
 	public void createFieldEditors() {
 		Link link = new Link(getFieldEditorParent(), SWT.WRAP);
 		link.setText("The OpenShift Client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
@@ -69,6 +70,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		addField(cliLocationEditor);
     }
 	
+	@Override
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(OpenShiftUIActivator.getDefault().getCorePreferenceStore());
 	}

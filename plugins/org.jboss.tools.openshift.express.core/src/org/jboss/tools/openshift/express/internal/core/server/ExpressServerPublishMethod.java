@@ -162,6 +162,7 @@ public class ExpressServerPublishMethod  {
 
 	private IModulePathFilterProvider getModulePathFilterProvider() {
 		return new IModulePathFilterProvider() {
+			@Override
 			public IModulePathFilter getFilter(IServer server, IModule[] module) {
 				return ResourceModuleResourceUtil.findDefaultModuleFilter(module[module.length-1]);
 			}

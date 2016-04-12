@@ -113,6 +113,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		EGitUIUtils.ensureEgitUIIsStarted();
 	}
 
+	@Override
 	protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
 

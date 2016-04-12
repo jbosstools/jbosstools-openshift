@@ -55,6 +55,7 @@ public class EnvironmentVariableWizard extends Wizard {
 		return true;
 	}
 
+	@Override
 	public void addPages() {
 		addPage(new EnvironmentVariableWizardPage(model, this));
 	}

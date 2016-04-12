@@ -51,6 +51,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		this.pageModel = model;
 	}
 	
+	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(parent);
 		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(parent);

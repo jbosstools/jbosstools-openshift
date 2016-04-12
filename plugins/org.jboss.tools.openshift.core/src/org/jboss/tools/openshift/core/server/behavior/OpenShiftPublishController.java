@@ -46,6 +46,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	private boolean syncDownFailed = false;
 	
 	
+	@Override
 	public void publishStart(final IProgressMonitor monitor) 
 			throws CoreException {
 		syncDownFailed = false;
@@ -141,6 +142,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		return false;
 	}
 
+	@Override
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
 		if( rsync != null ) {
 			super.publishFinish(monitor);

@@ -28,6 +28,7 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 
 	private IAdaptable publishAdaptableInfo;
 
+	@Override
 	public IStatus publish(int kind, IProgressMonitor monitor) {
 		boolean shouldPublish = false;
 		if( publishAdaptableInfo != null ) {
@@ -39,6 +40,7 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 		return Status.OK_STATUS;
 	}
 	
+	@Override
 	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info) throws CoreException {
 		publishAdaptableInfo = info;
 		try {
@@ -52,11 +54,13 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 		return publishAdaptableInfo;
 	}
 	
+	@Override
 	public boolean canRestartModule(IModule[] module){
 		if( module.length == 1 ) 
 			return true;
 		return false;
 	}
+	@Override
 	public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor) throws CoreException {
 		// Do no setup
 	}

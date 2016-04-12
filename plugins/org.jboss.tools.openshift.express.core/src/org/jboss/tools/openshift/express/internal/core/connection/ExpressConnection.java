@@ -151,6 +151,7 @@ public class ExpressConnection extends AbstractConnection {
 		return UrlUtils.getScheme(super.getHost());
 	}
 
+	@Override
 	public boolean isDefaultHost() {
 		return isDefaultHost(super.getHost());
 	}
@@ -160,10 +161,12 @@ public class ExpressConnection extends AbstractConnection {
 				|| UrlUtils.cutScheme(host).isEmpty();
 	}
 	
+	@Override
 	public boolean isRememberPassword() {
 		return rememberPassword;
 	}
 
+	@Override
 	public final void setRememberPassword(boolean rememberPassword) {
 		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, this.rememberPassword, this.rememberPassword = rememberPassword);
 	}
@@ -190,6 +193,7 @@ public class ExpressConnection extends AbstractConnection {
 	 *         otherwise
 	 * @throws OpenShiftException
 	 */
+	@Override
 	public boolean connect() throws OpenShiftException {
 		if (isConnected()) {
 			save();
@@ -441,6 +445,7 @@ public class ExpressConnection extends AbstractConnection {
 		}
 	}
 
+	@Override
 	public void refresh() throws OpenShiftException {
 		isDomainLoaded = false;
 		if (connect()) {
@@ -448,6 +453,7 @@ public class ExpressConnection extends AbstractConnection {
 		}
 	}
 
+	@Override
 	public boolean isConnected() {
 		return hasUser();
 	}

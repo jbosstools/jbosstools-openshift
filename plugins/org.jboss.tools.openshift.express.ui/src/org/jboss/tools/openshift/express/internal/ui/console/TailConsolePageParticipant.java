@@ -34,6 +34,7 @@ public class TailConsolePageParticipant implements IConsolePageParticipant {
 	/** The standard Eclipse UI CloseConsoleAction.*/
 	private CloseConsoleAction closeConsoleAction;
 
+	@Override
 	public void init(IPageBookViewPage page, IConsole console) {
 		this.closeConsoleAction = new CloseConsoleAction(console);
 		this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_ELCL_REMOVE));
@@ -42,13 +43,16 @@ public class TailConsolePageParticipant implements IConsolePageParticipant {
 		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction);
 	}
 
+	@Override
 	public void dispose() {
 		this.closeConsoleAction = null;
 	}
 
+	@Override
 	public void activated() {
 	}
 
+	@Override
 	public void deactivated() {
 	}
 
@@ -57,6 +61,7 @@ public class TailConsolePageParticipant implements IConsolePageParticipant {
 	 * 
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		return null;
 	}

@@ -66,6 +66,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 	protected void launchThread() {
 		Thread t = new Thread(new Runnable(){
+			@Override
 			public void run() {
 				pollerRun();
 			}
@@ -96,21 +97,26 @@ public class VagrantPoller implements IServerStatePoller2 {
 		}
 	}
 
+	@Override
 	public synchronized boolean isComplete() throws PollingException, RequiresInfoException {
 		return done;
 	}
 
+	@Override
 	public synchronized boolean getState() throws PollingException, RequiresInfoException {
 		return state;
 	}
 
+	@Override
 	public void cleanup() {
 	}
 
+	@Override
 	public synchronized void cancel(int type) {
 		canceled = true;
 	}
 
+	@Override
 	public int getTimeoutBehavior() {
 		return TIMEOUT_BEHAVIOR_FAIL;
 	}
@@ -122,6 +128,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 
 
+	@Override
 	public IStatus getCurrentStateSynchronous(IServer server) {
     	int severity = onePingSafe(server, CDKLaunchEnvironmentUtil.createEnvironment(server)).getSeverity();
 		if( severity == IStatus.OK ) {

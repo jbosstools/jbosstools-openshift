@@ -122,6 +122,7 @@ public class OpenShiftDebugUtils {
 		
 		DeploymentConfigListenerJob deploymentListenerJob = new DeploymentConfigListenerJob(deploymentConfig);
 		deploymentListenerJob.addJobChangeListener(new JobChangeAdapter() {
+			@Override
 			public void done(IJobChangeEvent event) {
 				ConnectionsRegistrySingleton.getInstance().removeListener(deploymentListenerJob.getConnectionsRegistryListener());
 				debugContext.setPod(deploymentListenerJob.getPod());

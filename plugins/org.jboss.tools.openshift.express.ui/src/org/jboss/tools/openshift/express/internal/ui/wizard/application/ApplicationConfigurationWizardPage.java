@@ -129,6 +129,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_CONNECTION,
 				new PropertyChangeListener() {
 
+					@Override
 					public void propertyChange(PropertyChangeEvent event) {
 						// TODO: move to model
 						pageModel.setResourcesLoaded(false);

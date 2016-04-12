@@ -43,6 +43,7 @@ public class CDKServer extends ServerDelegate {
 	public CDKServer() {
 	}
 	
+	@Override
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setHost("localhost"); //$NON-NLS-1$
 		setAttribute(PROP_PASS_CREDENTIALS, true);

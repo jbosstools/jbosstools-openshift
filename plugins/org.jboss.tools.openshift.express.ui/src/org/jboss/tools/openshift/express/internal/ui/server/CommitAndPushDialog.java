@@ -35,7 +35,8 @@ public class CommitAndPushDialog extends MessageDialog {
 	public static Object[] showCommitAndPushDialog(final String title, final String message) {
 		final CommitAndPushDialog[] dialog = new CommitAndPushDialog[1];
 		Display.getDefault().syncExec(new Runnable() {
-		      public void run() {
+		      @Override
+			public void run() {
 		    	  dialog[0] = new CommitAndPushDialog(title, message);
 		    	  dialog[0].open();
 		      }
@@ -69,7 +70,8 @@ public class CommitAndPushDialog extends MessageDialog {
 		};
 	}
 	
-    protected Control createCustomArea(Composite parent) {
+    @Override
+	protected Control createCustomArea(Composite parent) {
     	Composite c = new Composite(parent, SWT.NONE);
     	c.setLayoutData(new GridData(GridData.FILL_BOTH));
     	c.setLayout(new GridLayout(1,true));
@@ -78,6 +80,7 @@ public class CommitAndPushDialog extends MessageDialog {
     	final Text t = new Text(c, SWT.MULTI | SWT.BORDER | SWT.WRAP);
     	t.setText(ExpressUIMessages.PublishDialogDefaultGitCommitMsg);
     	t.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				customizeMessageText = t.getText();
 			}

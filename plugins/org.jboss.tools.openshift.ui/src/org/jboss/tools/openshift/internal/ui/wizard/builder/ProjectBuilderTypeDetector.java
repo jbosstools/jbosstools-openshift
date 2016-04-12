@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 public class ProjectBuilderTypeDetector {
 
 	private static IProjectBuilderType UNKNOWN = new IProjectBuilderType(){
+		@Override
 		public boolean applies(IProject project) {
 			return true;
 		}

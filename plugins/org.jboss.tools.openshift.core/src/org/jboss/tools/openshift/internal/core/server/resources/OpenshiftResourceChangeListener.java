@@ -57,6 +57,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 		// search for changes to any project using a visitor
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
+				@Override
 				public boolean visit(IResourceDelta visitorDelta) {
 					IResource resource = visitorDelta.getResource();
 
@@ -75,6 +76,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 	private List<IResource> getDeltaResourceChanges(IResourceDelta delta) {
 		final ArrayList<IResource> changed = new ArrayList<>();
 		IResourceDeltaVisitor visitor = new IResourceDeltaVisitor() {
+			@Override
 			public boolean visit(IResourceDelta delta2) throws CoreException {
 				// has this deltaResource been changed?
 				if (delta2.getKind() == IResourceDelta.NO_CHANGE) {
@@ -187,6 +189,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			setRule(MultiRule.combine(rules));
 		}
 		
+		@Override
 		public boolean belongsTo(Object family) {
 			return ServerUtil.SERVER_JOB_FAMILY.equals(family);
 		}
@@ -195,6 +198,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			return openshiftServer.getServer();
 		}
 		
+		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			IServer server = openshiftServer.getServer();
 			OpenShiftServerBehaviour behaviourDelegate = (OpenShiftServerBehaviour)

@@ -97,6 +97,7 @@ public class ConnectionURL {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return url;
 	}

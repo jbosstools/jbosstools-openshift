@@ -46,34 +46,42 @@ public class ChooseServerDialog extends Dialog {
 		Composite container = (Composite) super.createDialogArea(parent);
 		final TreeViewer tv = new TreeViewer(container);
 		tv.setContentProvider(new ITreeContentProvider() {
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean hasChildren(Object element) {
 				return false;
 			}
 
+			@Override
 			public Object getParent(Object element) {
 				return null;
 			}
 
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return (IServer[]) valid.toArray(new IServer[valid.size()]);
 			}
 
+			@Override
 			public Object[] getChildren(Object parentElement) {
 				return null;
 			}
 		});
 		tv.setLabelProvider(new LabelProvider(){
+			@Override
 			public Image getImage(Object element) {
 				if( element instanceof IServer ) 
 					return ImageResource.getImage(((IServer)element).getServerType().getId());
 				return super.getImage(element);
 			}
+			@Override
 			public String getText(Object element) {
 				if( element instanceof IServer ) 
 					return ((IServer)element).getName();
@@ -84,6 +92,7 @@ public class ChooseServerDialog extends Dialog {
 		
 		
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selected = null;
 				ISelection sel = tv.getSelection();
@@ -101,6 +110,7 @@ public class ChooseServerDialog extends Dialog {
 		return container;
 	}
 
+	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
 		getButton( IDialogConstants.OK_ID).setEnabled(false);

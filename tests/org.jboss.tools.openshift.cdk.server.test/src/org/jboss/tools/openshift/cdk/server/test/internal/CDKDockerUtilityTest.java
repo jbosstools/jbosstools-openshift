@@ -32,6 +32,7 @@ public class CDKDockerUtilityTest extends TestCase {
 	private DockerConnectionManager mgr;
 	private CDKDockerUtility util;
 
+	@Override
 	@Before
 	public void setUp() {
 		mgr = mock(DockerConnectionManager.class);

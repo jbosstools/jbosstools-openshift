@@ -108,6 +108,7 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 		return connection;
 	}
 	
+	@Override
 	public void dispose() {
 		ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);
 	}

@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.ViewerCell;
  */
 public class PropertyNameCellLabelProvider extends AbstractPropertyCellLabelProvider {
 
+	@Override
 	protected void update(IProperty property, ViewerCell cell) {
 		cell.setText(property.getName());
 	}

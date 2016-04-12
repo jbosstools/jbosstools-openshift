@@ -36,10 +36,12 @@ public class EclipseLogAppender extends AppenderSkeleton {
 		}
 	}
 
+	@Override
 	public void close() {
 		trace.close();
 	}
 
+	@Override
 	public boolean requiresLayout() {
 		return true;
 	}

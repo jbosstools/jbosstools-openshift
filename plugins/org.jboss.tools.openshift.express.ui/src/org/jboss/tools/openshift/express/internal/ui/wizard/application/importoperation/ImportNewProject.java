@@ -60,6 +60,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
+	@Override
 	public IProject execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {

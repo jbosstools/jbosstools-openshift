@@ -31,6 +31,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		super(GRID);
 	}
 
+	@Override
 	public void createFieldEditors() {
 		this.clientReadTimeout =
 				new IntegerFieldEditor(
@@ -40,6 +41,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		addField(clientReadTimeout);
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		IPreferenceStore preferenceStore = ExpressUIActivator.getDefault().getCorePreferenceStore();
 		preferenceStore.setDefault(IExpressCoreConstants.CLIENT_READ_TIMEOUT, ClientSystemProperties.getReadTimeoutSeconds());

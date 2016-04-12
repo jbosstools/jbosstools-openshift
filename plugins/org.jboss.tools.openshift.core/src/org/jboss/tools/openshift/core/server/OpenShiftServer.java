@@ -36,6 +36,7 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 	
 	public static final String OPENSHIFT3_MODE_ID = "openshift3";
 
+	@Override
 	public void setDefaults(IProgressMonitor monitor) {
 		super.setDefaults(monitor);
 		setAttribute(Server.PROP_AUTO_PUBLISH_SETTING, Server.AUTO_PUBLISH_RESOURCE);

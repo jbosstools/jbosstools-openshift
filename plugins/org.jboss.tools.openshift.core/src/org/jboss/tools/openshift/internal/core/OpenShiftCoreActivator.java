@@ -115,10 +115,13 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	private IServerLifecycleListener getServerListener() {
 		if( serverListener == null ) {
 			serverListener = new IServerLifecycleListener() {
+				@Override
 				public void serverRemoved(IServer server) {
 				}
+				@Override
 				public void serverChanged(IServer server) {
 				}
+				@Override
 				public void serverAdded(IServer server) {
 					if( server != null ) {
 						String typeId = server.getServerType().getId();

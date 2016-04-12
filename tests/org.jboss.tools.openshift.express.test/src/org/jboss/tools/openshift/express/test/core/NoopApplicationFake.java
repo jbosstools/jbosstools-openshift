@@ -235,10 +235,12 @@ public class NoopApplicationFake implements IApplication {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void setSSHSession(Session session) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Session getSSHSession() {
 		throw new UnsupportedOperationException();
 	}

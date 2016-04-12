@@ -73,6 +73,7 @@ public interface IResourceLabelsPageModel {
 			this.name = name;
 		}
 
+		@Override
 		public void setValue(String value) {
 			this.value = value;
 		}

@@ -31,6 +31,7 @@ public class OpenShiftEapDeployPathController extends ModuleDeployPathController
 	
 	public static class OpenShiftModuleDeploymentPrefsUtil extends ModuleDeploymentPrefsUtil {
 		// We must override the presumed name given to the module upon publish if it is our magic project
+		@Override
 		protected String getOutputNameFromSettings(IServerAttributes server, IModule module) {
 			String ret = super.getOutputNameFromSettings(server, module);
 			if( ret == null && module.equals(findProjectModule(server))) {

@@ -35,6 +35,7 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 						super.createControl(parent);
 						if (Platform.OS_LINUX.equals(Platform.getOS())) {
 							getShell().addShellListener(new ShellAdapter() {
+								@Override
 								public void shellActivated(ShellEvent e) {
 									Point size = getShell().getSize();
 									getShell().pack(true);
@@ -55,6 +56,7 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 	
 	private EnvironmentTab createEnvironmentTab() {
 		return new EnvironmentTab() {
+			@Override
 			protected void createEnvironmentTable(Composite parent) {
 				SWTFactory.createLabel(parent, 
 						"For security purposes, passwords may not be shown in the table below.", 2);

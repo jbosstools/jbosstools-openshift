@@ -32,6 +32,7 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 	public boolean promptAndAuthenticate(final IConnection connection, final Object context) {
 		Display.getDefault().syncExec(
 				new Runnable() {
+					@Override
 					public void run() {
 						Shell shell = UIUtils.getShell();
 						if (shell == null) {

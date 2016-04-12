@@ -25,6 +25,7 @@ public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 		super(adaptable);
 	}
 
+	@Override
 	public boolean allowConvenienceEnhancements() {
 		return false;
 	}

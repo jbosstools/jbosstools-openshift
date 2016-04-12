@@ -48,11 +48,13 @@ public class CDKServerWizardFragment extends WizardFragment {
 	private ChooseCredentialComponent credentials;
 	
 	
+	@Override
 	public boolean hasComposite() {
 		return true;
 	}
 	
 
+	@Override
 	public boolean isComplete() {
 		// Only one instance created per workspace, so we need to workaround this
 		return browseButton != null && !browseButton.isDisposed() && super.isComplete();
@@ -62,6 +64,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return CDKCoreActivator.getDefault().getSharedImages().descriptor(CDKCoreActivator.CDK_WIZBAN);
 	}
 
+	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		this.handle = handle;
 		Composite main = new Composite(parent, SWT.NONE);
@@ -73,6 +76,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		
 		credentials = new ChooseCredentialComponent(new String[]{CredentialService.REDHAT_ACCESS});
 		credentials.addCredentialListener(new ICredentialCompositeListener() {
+			@Override
 			public void credentialsChanged() {
 				validate();
 			}
@@ -93,16 +97,19 @@ public class CDKServerWizardFragment extends WizardFragment {
 		
 
 		homeText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				homeDir = homeText.getText();
 				validate();
 			}
 		});
 		browseButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseHomeDirClicked();
 				validate();
@@ -191,6 +198,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	}
 	
 
+	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		exit();
 		IServer s = getServerFromTaskModel();

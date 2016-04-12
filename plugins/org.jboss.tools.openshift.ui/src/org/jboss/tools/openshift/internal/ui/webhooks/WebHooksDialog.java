@@ -39,6 +39,7 @@ public class WebHooksDialog extends Dialog {
 		this.buildConfigs = buildConfigs;
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText("Webhooks triggers");

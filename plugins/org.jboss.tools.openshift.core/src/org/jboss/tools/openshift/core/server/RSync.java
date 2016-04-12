@@ -60,6 +60,7 @@ public class RSync {
 	
 	public void syncPodsToDirectory(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
 		new OCBinaryOperation() {
+			@Override
 			protected void runOCBinary(MultiStatus multiStatus) {
 				// If our deploy folder is empty, sync all pods to this directory
 				boolean shouldSync = true;

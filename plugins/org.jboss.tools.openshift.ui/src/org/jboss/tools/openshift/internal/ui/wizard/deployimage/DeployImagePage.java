@@ -112,6 +112,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	 * @param dbc
 	 *            the current data binding context
 	 */
+	@Override
 	protected void onPageWillGetDeactivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
 		
 		/**

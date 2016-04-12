@@ -151,6 +151,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 
 	private void launchTailServerJob(final String sshUrl, final String filePattern, final MessageConsole console) {
 		new Job("Launching Tail Logs Operation") {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					final TailServerLogWorker tailServerLogWorker =

@@ -137,6 +137,7 @@ public class UIUtils {
 		contributionManager.update(true);
 		control.addDisposeListener(new DisposeListener()
 		{
+			@Override
 			public void widgetDisposed(DisposeEvent e)
 			{
 				menuService.releaseContributions((ContributionManager) contributionManager);

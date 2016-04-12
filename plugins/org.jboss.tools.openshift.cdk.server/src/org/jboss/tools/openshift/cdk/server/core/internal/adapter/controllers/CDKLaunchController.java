@@ -213,6 +213,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 
 	private IDebugEventSetListener getDebugListener(final IProcess[] processes) {
 		return new IDebugEventSetListener() { 
+			@Override
 			public void handleDebugEvents(DebugEvent[] events) {
 				if (events != null) {
 					int size = events.length;
@@ -229,6 +230,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	private void processTerminated(IServer server,IProcess process, IDebugEventSetListener listener) {
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(server);
 		new Thread() {
+			@Override
 			public void run() {
 				handleProcessTerminated(beh);
 			}
@@ -264,6 +266,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		// Log error?  Show dialog?  
 		((ControllableServerBehavior)beh).setServerStarted();
 		new Job(osnrpe.getMessage()) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				return CDKCoreActivator.statusFactory().errorStatus("Error contacting OpenShift", osnrpe);
 			}

@@ -63,6 +63,7 @@ public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVari
 				&& application.canGetEnvironmentVariables();
 	}
 	
+	@Override
 	public String getHost() {
 		if (application == null
 				|| application.getDomain() == null

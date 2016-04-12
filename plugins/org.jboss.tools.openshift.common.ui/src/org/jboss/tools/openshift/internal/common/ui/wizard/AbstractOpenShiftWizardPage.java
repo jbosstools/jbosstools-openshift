@@ -35,10 +35,12 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
 	public enum Direction {
 		FORWARDS {
+			@Override
 			public IWizardPage getFollowingPage(IWizardPage page) {
 				return page.getNextPage();
 			}
 		}, BACKWARDS {
+			@Override
 			public IWizardPage getFollowingPage(IWizardPage page) {
 				return page.getPreviousPage();
 			}

@@ -29,6 +29,7 @@ public class UserPropertySection extends AbstractPropertySection {
 
 	private Text labelText;
     
+	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		super.createControls(parent, aTabbedPropertySheetPage);
 		Composite composite = getWidgetFactory().createFlatFormComposite(parent);
@@ -50,12 +51,14 @@ public class UserPropertySection extends AbstractPropertySection {
 		labelLabel.setLayoutData(data);
 	}
 
+	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
 //		Assert.isTrue(selection instanceof IStructuredSelection);
 //		Object input = ((IStructuredSelection) selection).getFirstElement();
 	}
 
+	@Override
 	public void refresh() {
 //		labelText.removeModifyListener(listener);
 //		ButtonElementProperties properties = (ButtonElementProperties) buttonElement.getAdapter(IPropertySource.class);

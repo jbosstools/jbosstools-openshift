@@ -162,6 +162,7 @@ public abstract class AbstractStackedDetailViews {
 
 	public class EmptyView extends BaseDetailsView {
 
+		@Override
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.NONE));
 			GridLayoutFactory.fillDefaults()
@@ -169,6 +170,7 @@ public abstract class AbstractStackedDetailViews {
 			return container;
 		}
 		
+		@Override
 		public boolean isViewFor(Object object) {
 			return false;
 		}

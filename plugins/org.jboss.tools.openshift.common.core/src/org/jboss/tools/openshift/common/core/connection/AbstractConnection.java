@@ -45,14 +45,17 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 		return UrlUtils.ensureStartsWithScheme(host, scheme);
 	}
 
+	@Override
 	public String getHost() {
 		return host;
 	}
 
+	@Override
 	public String getScheme() {
 		return UrlUtils.getScheme(host);
 	}
 
+	@Override
 	public abstract boolean connect();
 	
 	public abstract boolean isConnected();

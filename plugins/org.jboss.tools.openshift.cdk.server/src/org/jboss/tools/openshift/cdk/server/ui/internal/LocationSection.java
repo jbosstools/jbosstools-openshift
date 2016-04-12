@@ -45,11 +45,13 @@ public class LocationSection extends ServerEditorSection {
 	public LocationSection() {
 		// TODO Auto-generated constructor stub
 	}
+	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
 		helper = new ServerAttributeHelper(server.getOriginal(), server);
 	}
 
+	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
 		createUI(parent);
@@ -95,9 +97,11 @@ public class LocationSection extends ServerEditorSection {
 
 	protected void addListeners() {
 		browseListener = new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseHomeDirClicked();
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		};
@@ -105,6 +109,7 @@ public class LocationSection extends ServerEditorSection {
 
 		
 		locationListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				execute(new SetLocationPropertyCommand(server));
 			}

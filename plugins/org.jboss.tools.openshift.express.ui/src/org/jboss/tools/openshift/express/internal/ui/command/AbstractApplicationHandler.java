@@ -31,6 +31,7 @@ import com.openshift.internal.client.utils.StringUtils;
  */
 public abstract class AbstractApplicationHandler extends AbstractHandler {
 
+	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
 		Shell shell = HandlerUtil.getActiveShell(event);

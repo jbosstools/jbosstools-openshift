@@ -143,6 +143,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		final IObservableValue skipCloneModelObservable = BeanProperties.value(
 				IGitCloningPageModel.PROPERTY_SKIP_CLONE_ONLY_IMPORT).observe(model);
 		skipCloneOnlyImportButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				model.setSkipClone(skipCloneOnlyImportButton.getSelection());
 			}
@@ -177,6 +178,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		repoPathValidator.forceRevalidate();
 	}

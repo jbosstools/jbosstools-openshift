@@ -162,6 +162,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 				return true;
 			}
 			
+			@Override
 			public void addPages() {
 				addPage(page);
 			}

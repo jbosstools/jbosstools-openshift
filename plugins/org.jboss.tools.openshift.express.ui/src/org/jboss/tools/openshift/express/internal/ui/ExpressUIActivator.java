@@ -43,6 +43,7 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 		this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ExpressCoreActivator.PLUGIN_ID);
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -59,6 +60,7 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 		ExpressCoreUIIntegration.getDefault().setSSLCertificateAuthorization(new SSLCertificateCallback());
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// TODO: implement connection saving
 		// ConnectionsRegistrySingleton.getInstance().save();

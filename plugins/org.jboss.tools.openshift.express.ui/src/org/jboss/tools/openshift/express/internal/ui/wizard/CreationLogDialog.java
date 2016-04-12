@@ -87,6 +87,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 
 	private Listener onLinkClicked(final StyledText logText) {
 		return new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				try {
 					int offset = logText.getOffsetAtLocation(new Point(event.x, event.y));
@@ -289,6 +290,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 			this.url = url;
 		}
 
+		@Override
 		public void execute() {
 			if (url == null 
 					|| url.length() == 0) {

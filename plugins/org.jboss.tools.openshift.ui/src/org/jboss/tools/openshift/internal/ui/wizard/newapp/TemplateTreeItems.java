@@ -32,6 +32,7 @@ public class TemplateTreeItems implements IModelFactory {
 
 	public static final TemplateTreeItems INSTANCE = new TemplateTreeItems();
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> List<T> createChildren(Object parent) {
 		if (parent instanceof Connection) {
@@ -66,6 +67,7 @@ public class TemplateTreeItems implements IModelFactory {
 		return items;
 	}
 
+	@Override
 	public ObservableTreeItem create(Object object) {
 		return new ObservableTreeItem(object, this);
 	}

@@ -372,12 +372,14 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				.align(SWT.FILL, SWT.FILL).applyTo(progressBar);
 			
 			ProgressListener progressListener = new ProgressListener() {
+				@Override
 				public void changed(ProgressEvent event) {
 					if (event.total <= 0) return;
 					int ratio = event.current * 100 / event.total;
 					progressBar.setSelection(ratio);;
 				}
 
+				@Override
 				public void completed(ProgressEvent event) {
 					progressBar.setSelection(0);
 				}

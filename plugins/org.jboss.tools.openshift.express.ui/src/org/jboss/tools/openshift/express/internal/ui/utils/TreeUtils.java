@@ -94,6 +94,7 @@ public class TreeUtils {
 	{
 		tree.addListener( SWT.MeasureItem, new Listener()
 		{
+			@Override
 			public void handleEvent( Event event )
 			{
 				event.height = height;

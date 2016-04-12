@@ -55,10 +55,12 @@ public class CDKCredentialSection extends ServerEditorSection {
 		// TODO Auto-generated constructor stub
 	}
 	
+	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
 	}
 	
+	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
 		CDKServer cdkServer = (CDKServer)server.getOriginal().loadAdapter(CDKServer.class, new NullProgressMonitor());
@@ -75,6 +77,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 		passCredentialsButton = toolkit.createButton(composite, "Pass credentials to environment", SWT.CHECK);
 		passCredentialsButton.setSelection(cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false));
 		passCredentialsListener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				execute(new SetPassCredentialsCommand(server));
 			}
@@ -84,6 +87,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 		
 		credentialComposite = createChooseCredentialComponent(composite);
 		credentialComposite.addCredentialListener(new ICredentialCompositeListener() {
+			@Override
 			public void credentialsChanged() {
 				execute(new SetUsernameCommand(server));
 			}
@@ -98,6 +102,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 		envPassText = toolkit.createText(composite, server.getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKServer.SUB_PASSWORD));
 		
 		envUserListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				execute(new SetUsernameVariableCommand(server));
 			}
@@ -105,6 +110,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 		envUserText.addModifyListener(envUserListener);
 		
 		envPassListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				execute(new SetPasswordVariableCommand(server));
 			}
@@ -160,6 +166,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 			super(server, "Pass credentials to server", passCredentialsButton, passCredentialsButton.getSelection(), 
 					CDKServer.PROP_PASS_CREDENTIALS, passCredentialsListener);
 		}
+		@Override
 		protected void postOp(int type) {
 			boolean pass = wc.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, true);
 			envUserText.setEnabled(pass);

@@ -173,6 +173,7 @@ public class CommitDialog extends TitleAreaDialog {
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return false;
 		}
@@ -248,10 +249,12 @@ public class CommitDialog extends TitleAreaDialog {
 
 	static class CommitPathLabelProvider extends ColumnLabelProvider {
 
+		@Override
 		public String getText(Object obj) {
 			return ((CommitItem) obj).path;
 		}
 
+		@Override
 		public String getToolTipText(Object element) {
 			return ((CommitItem) element).status.getText();
 		}

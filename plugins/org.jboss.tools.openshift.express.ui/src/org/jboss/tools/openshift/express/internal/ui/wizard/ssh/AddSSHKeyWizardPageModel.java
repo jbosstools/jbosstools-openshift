@@ -39,6 +39,7 @@ public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return keyPath;
 	}
 
+	@Override
 	public File getPublicKey() {
 		return new File(keyPath);
 	}
@@ -47,10 +48,12 @@ public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		firePropertyChange(PROPERTY_PUBLICKEY_PATH, this.keyPath, this.keyPath = keyPath);
 	}
 
+	@Override
 	public boolean hasPublicKey(String publicKeyContent) {
 		return getConnection().hasSSHPublicKey(publicKeyContent);
 	}	
 	
+	@Override
 	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
 		return this.key = getConnection().putSSHKey(getName(), new SSHPublicKey(getPublicKey()));
 	}

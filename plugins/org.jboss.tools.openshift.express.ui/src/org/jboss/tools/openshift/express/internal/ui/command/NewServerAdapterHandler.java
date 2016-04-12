@@ -81,6 +81,7 @@ public class NewServerAdapterHandler extends AbstractHandler {
 		public NewServerWizard(final String serverType) {
 			super(Messages.wizNewServerWizardTitle,
 					new WizardFragment() {
+						@Override
 						protected void createChildFragments(List<WizardFragment> list) {
 							list.add(new NewServerWizardFragment(null, serverType));
 
@@ -97,6 +98,7 @@ public class NewServerAdapterHandler extends AbstractHandler {
 					});
 		}
 
+		@Override
 		public void init(IWorkbench newWorkbench, IStructuredSelection newSelection) {
 			// do nothing
 		}

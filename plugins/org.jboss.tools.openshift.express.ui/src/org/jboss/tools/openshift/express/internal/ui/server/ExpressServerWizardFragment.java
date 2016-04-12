@@ -54,6 +54,7 @@ public class ExpressServerWizardFragment extends WizardFragment implements IComp
 		handle.setDescription("Create an OpenShift 2 Server Adapter by choosing your connection, application and deploy project.");
 		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
 		IServerModeUICallback callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
+			@Override
 			public void executeLongRunning(Job j) {
 				// depends on COMMON, DAMN
 				IWizardContainer container = ((WizardPage)handle).getWizard().getContainer();

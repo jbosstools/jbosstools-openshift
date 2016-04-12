@@ -33,10 +33,12 @@ public class StringElement extends ContainerElement {
 		this.isLink = isLink;
 	}
 
+	@Override
 	public final String getValue() {
 		return value;
 	}
 
+	@Override
 	public boolean isLink() {
 		return isLink;
 	}

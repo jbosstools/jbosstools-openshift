@@ -286,6 +286,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
+	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		enableWidgets(pageModel.isNewProject());
 		repoPathValidator.forceRevalidate();

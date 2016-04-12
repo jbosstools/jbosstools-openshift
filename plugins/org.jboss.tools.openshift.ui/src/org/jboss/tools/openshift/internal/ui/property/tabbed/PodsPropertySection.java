@@ -29,6 +29,7 @@ public class PodsPropertySection extends OpenShiftResourcePropertySection {
 		super("popup:org.jboss.tools.openshift.ui.properties.tab.PodsTab");
 	}
 
+	@Override
 	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
 		addNameColumn(tableViewerBuilder);
 		tableViewerBuilder.column((IResourceUIModel model) -> {

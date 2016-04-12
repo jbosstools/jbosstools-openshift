@@ -29,12 +29,14 @@ import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
  */
 public class ExplorerViewTabbedPropertyAdapterFactory implements IAdapterFactory {
 	
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == IPropertySheetPage.class) {
 			IWorkbenchPart found = findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
 			if (found != null) {
 				ITabbedPropertySheetPageContributor contrib = new ITabbedPropertySheetPageContributor() {
+					@Override
 					public String getContributorId() {
 						return OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID;
 					}

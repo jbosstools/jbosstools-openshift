@@ -750,6 +750,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					WizardUtils.close(getWizard());
 				} else {
 				Display.getDefault().asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						WizardUtils.close(getWizard());
 					}

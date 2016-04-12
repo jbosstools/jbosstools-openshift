@@ -66,6 +66,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 
 	private IModuleType getModuleType(final String version, final String id) {
 		return new IModuleType() {
+			@Override
 			public String getVersion() {
 				return version;
 			}
@@ -85,6 +86,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 	// Create a utility that 'finds' the module for the project listed on the server
 	private OpenShiftModuleDeploymentPrefsUtil2 getUtilForModule(final IModule m) {
 		OpenShiftModuleDeploymentPrefsUtil2 util = new OpenShiftModuleDeploymentPrefsUtil2() {
+			@Override
 			protected IModule findProjectModule(IServerAttributes server) {
 				return m;
 			}
@@ -99,6 +101,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 		}
 	}
 
+	@Override
 	@After
 	public void tearDown() {
 		OpenShiftServerTestUtility.cleanup();

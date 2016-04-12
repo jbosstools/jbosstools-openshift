@@ -77,6 +77,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_CONNECTION,
 				new PropertyChangeListener() {
 
+					@Override
 					public void propertyChange(PropertyChangeEvent event) {
 						setResourcesLoaded(false);
 					}
@@ -84,6 +85,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_DOMAIN,
 				new PropertyChangeListener() {
 
+					@Override
 					@SuppressWarnings("unchecked")
 					public void propertyChange(PropertyChangeEvent event) {
 						Object newValue = event.getNewValue();

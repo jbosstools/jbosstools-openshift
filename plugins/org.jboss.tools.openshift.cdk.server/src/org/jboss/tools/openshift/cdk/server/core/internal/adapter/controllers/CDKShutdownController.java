@@ -109,6 +109,7 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 	
 	private IDebugEventSetListener getDebugListener(final IProcess[] processes) {
 		return new IDebugEventSetListener() { 
+			@Override
 			public void handleDebugEvents(DebugEvent[] events) {
 				if (events != null) {
 					int size = events.length;
@@ -125,6 +126,7 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 	private void processTerminated(IServer server,IProcess process, IDebugEventSetListener listener) {
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(server);
 		new Thread() {
+			@Override
 			public void run() {
 				try {
 					// sleep to allow vagrant to unlock queries. 

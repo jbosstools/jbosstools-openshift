@@ -178,6 +178,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		return isLoadingResources;
 	}
 	
+	@Override
 	public void setComplete(final boolean complete) {
 		setPageComplete(complete);
 	}

@@ -74,11 +74,13 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 	protected Button verifyButton, browseDestButton, overrideProjectSettings;
 	protected Group projectSettingGroup;
 
+	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
 		this.input = input;
 	}
 
+	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
@@ -240,6 +242,7 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 
 	protected void addListeners() {
 		deployProjectListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				int ind = deployProjectCombo.getSelectionIndex();
 				String newVal = ind == -1 ? null : deployProjectCombo.getItem(ind);
@@ -249,6 +252,7 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		};
 		deployProjectCombo.addModifyListener(deployProjectListener);
 		overrideListener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				((ServerEditorPartInput) input).getServerCommandManager().execute(new SetOverrideCommand(server));
 			}
@@ -256,12 +260,14 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		overrideProjectSettings.addSelectionListener(overrideListener);
 
 		remoteModifyListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				((ServerEditorPartInput) input).getServerCommandManager().execute(new SetRemoteCommand(server));
 			}
 		};
 		remoteText.addModifyListener(remoteModifyListener);
 		deployDestinationModifyListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				((ServerEditorPartInput) input).getServerCommandManager().execute(new SetDeployFolderCommand(server));
 			}
@@ -269,6 +275,7 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		deployFolderText.addModifyListener(deployDestinationModifyListener);
 
 		browseDestButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browsePressed();
 			}

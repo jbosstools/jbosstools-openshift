@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class ConfigureDependentFrameworksListener extends UnitedServerListener {
+	@Override
 	public void serverChanged(final ServerEvent event) {
 		if( serverSwitchesToState(event, IServer.STATE_STARTED) && canHandleServer(event.getServer())) {
 			new Job("Loading service-manager to configure additional frameworks that CDK depends on.") {
@@ -51,6 +52,7 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	}
 	
 
+	@Override
 	public boolean canHandleServer(IServer server) {
 		if( server.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE)) 
 			return true;

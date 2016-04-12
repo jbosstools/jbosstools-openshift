@@ -41,6 +41,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 		return null;
 	}
 	
+	@Override
 	public boolean initializeRuntime(RuntimeDefinition runtimeDefinition) throws CoreException {
 		if( !exists(runtimeDefinition) && validate(runtimeDefinition.getLocation())) {
 			IServerType st = ServerCore.findServerType(CDKServer.CDK_SERVER_TYPE);
@@ -78,6 +79,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 		return false;
 	}
 	
+	@Override
 	public boolean exists(RuntimeDefinition runtimeDefinition) {
 		if( validate(runtimeDefinition.getLocation()) ) {
 			IServer[] all = ServerCore.getServers();

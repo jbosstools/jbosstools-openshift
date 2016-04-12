@@ -29,6 +29,7 @@ public class ViewUtils {
 		final IViewPart[] ret = new IViewPart[1];
 		ret[0] = null;
 		Display.getDefault().syncExec(new Runnable() {
+			@Override
 			public void run() {
 				ret[0] = openTerminalViewUI();
 			}

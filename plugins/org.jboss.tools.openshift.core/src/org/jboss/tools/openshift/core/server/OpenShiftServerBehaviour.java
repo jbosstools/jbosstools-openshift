@@ -39,6 +39,7 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 		launchPostStartupJobs();
 	}
 
+	@Override
 	public void restart(String launchMode) throws CoreException {
 		putSharedData(CURRENTLY_RESTARTING, true);
 		super.restart(launchMode);

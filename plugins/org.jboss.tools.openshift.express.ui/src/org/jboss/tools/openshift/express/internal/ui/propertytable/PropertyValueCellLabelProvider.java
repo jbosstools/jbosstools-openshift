@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  */
 public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelProvider {
 
+	@Override
 	protected void update(IProperty property, ViewerCell cell) {
 		if (property.isLink()) {
 			// tree editor takes some time to display, show text in the meantime

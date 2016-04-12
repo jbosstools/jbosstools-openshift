@@ -40,6 +40,7 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 		this.connection = connection;
 		this.input = resource;
 		this.storage = new IStorage() {
+			@Override
 			public InputStream getContents() throws CoreException {
 				try {
 					return IOUtils.toBufferedInputStream(IOUtils.toInputStream(input.toJson(), "UTF-8"));
@@ -48,17 +49,20 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 				}
 			}
 
+			@Override
 			public IPath getFullPath() {
 				return new Path(input.getNamespace())
 						.append(input.getKind())
 						.append(input.getName()+".json");
 			}
 
+			@Override
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public Object getAdapter(Class adapter) {
 				return null;
 			}
 
+			@Override
 			public String getName() {
 				StringBuilder sb = new StringBuilder()
 						.append("[").append(input.getNamespace()).append("] ")
@@ -69,36 +73,44 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 				return sb.toString();
 			}
 
+			@Override
 			public boolean isReadOnly() {
 				return false;
 			}
 		};
 	}
 
+	@Override
 	public boolean exists() {
 		return false;
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON;
 	}
 
+	@Override
 	public String getName() {
 		return storage.getName();
 	}
 
+	@Override
 	public IPersistableElement getPersistable() {
 		return null;
 	}
 
+	@Override
 	public IStorage getStorage() {
 		return storage;
 	}
 
+	@Override
 	public String getToolTipText() {
 		return storage.getName();
 	}
 
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(Class adapter) {
 		return null;

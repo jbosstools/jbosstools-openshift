@@ -32,6 +32,7 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	protected int getRootModuleState(IServer server, IModule root,
 			String deploymentName, IProgressMonitor monitor) throws Exception {
 		// do rsync, remote to local, then...
@@ -39,6 +40,7 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		return super.getRootModuleState(server, root, deploymentName, monitor);
 	}
 	
+	@Override
 	public int changeModuleStateTo(IModule[] module, int state, IProgressMonitor monitor) throws CoreException {
 		syncDown(monitor);
 		super.changeModuleStateTo(module, state, monitor);

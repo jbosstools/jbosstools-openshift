@@ -33,6 +33,7 @@ import junit.framework.TestCase;
  */
 public class OpenShiftSubsystemTest extends TestCase {
 
+	@Override
 	@After
 	public void tearDown() {
 		OpenShiftServerTestUtility.cleanup();

@@ -132,6 +132,7 @@ public class LaunchCDKServerHandler extends AbstractHandler {
 	 */
 	public static IServer showNewServerWizard(Shell shell, final String serverTypeId) {
 		WizardFragment fragment = new WizardFragment() {
+			@Override
 			protected void createChildFragments(List<WizardFragment> list) {
 				list.add(new NewServerWizardFragment(null, serverTypeId));
 				

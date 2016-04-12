@@ -118,6 +118,7 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	private void loadRemoteDetails(final ExpressConnection connection) throws OpenShiftException {
 		IRunnableWithProgress longRunning = new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InterruptedException {
 				monitor.beginTask("Loading OpenShift 2 connection details", 200);
 				try {

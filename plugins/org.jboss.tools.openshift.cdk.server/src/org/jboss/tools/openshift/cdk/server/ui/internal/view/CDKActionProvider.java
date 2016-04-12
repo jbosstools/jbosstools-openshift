@@ -57,6 +57,7 @@ public class CDKActionProvider extends CommonActionProvider {
 		super();
 	}
 	
+	@Override
 	public void init(ICommonActionExtensionSite aSite) {
 		super.init(aSite);
 		this.actionSite = aSite;
@@ -81,6 +82,7 @@ public class CDKActionProvider extends CommonActionProvider {
 			super(sp, viewId);
 		}
 
+		@Override
 		protected Object adaptToViewItem(IServer server) {
 			ControllableServerBehavior beh = (ControllableServerBehavior)server.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 			ServiceManagerEnvironment adb = null;
@@ -98,6 +100,7 @@ public class CDKActionProvider extends CommonActionProvider {
 			super(sp, viewId);
 		}
 
+		@Override
 		protected Object adaptToViewItem(IServer server) {
 			ControllableServerBehavior beh = (ControllableServerBehavior)server.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 			ServiceManagerEnvironment adb = null;
@@ -112,6 +115,7 @@ public class CDKActionProvider extends CommonActionProvider {
 	}
 
 	
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		ICommonViewerSite site = actionSite.getViewSite();
 		IStructuredSelection selection = null;
@@ -155,12 +159,14 @@ public class CDKActionProvider extends CommonActionProvider {
 			setText(desc.getLabel());
 			setImageDescriptor(desc.getImageDescriptor());
 			serverListener = new IServerListener() {
+				@Override
 				public void serverChanged(final ServerEvent event) {
 					// If this is the server that was / is selected
 					if( previousSelection != null && previousSelection.size() > 0 
 							&& previousSelection.getFirstElement().equals(event.getServer())) {
 						// and it switches state, update enablement
 						Display.getDefault().asyncExec(new Runnable() {
+							@Override
 							public void run() {
 								if( UnitedServerListener.serverSwitchesToState(event, IServer.STATE_STARTED)) {
 									setEnabled(true);
@@ -180,6 +186,7 @@ public class CDKActionProvider extends CommonActionProvider {
 			return null;
 		}
 		
+		@Override
 		public boolean accept(IServer server) {
 			boolean preconditions = (server.getServerType() != null && 
 					adaptToViewItem(server) != null
@@ -187,6 +194,7 @@ public class CDKActionProvider extends CommonActionProvider {
 			return preconditions;
 		}
 		
+		@Override
 		public void selectionChanged(IStructuredSelection sel) {
 			if( sel.size() != 1 ) {
 				setEnabled(false);
@@ -213,6 +221,7 @@ public class CDKActionProvider extends CommonActionProvider {
 			}
 		}
 		
+		@Override
 		public void perform(final IServer server) {
 			// Only run in UI thread
 			

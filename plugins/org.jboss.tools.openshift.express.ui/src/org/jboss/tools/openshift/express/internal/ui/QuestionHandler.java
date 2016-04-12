@@ -25,6 +25,7 @@ public class QuestionHandler implements IQuestionHandler {
 	public boolean openQuestion(final String title, final String message, final boolean defaultAnswer) {
 		final boolean[] answer = new boolean[1];
 		Display.getDefault().syncExec(new Runnable() {
+			@Override
 			public void run() {
 				
 				Shell shell = Display.getCurrent().getActiveShell();

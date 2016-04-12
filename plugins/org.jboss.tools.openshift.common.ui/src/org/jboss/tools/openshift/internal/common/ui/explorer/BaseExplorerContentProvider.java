@@ -193,6 +193,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	
 	protected void addChildrenToViewer(final Object parent, final Object ... objects) {
 		asyncViewerRefresh(new Runnable() {
+			@Override
 			public void run() {
 				synchronized (viewer) {
 					viewer.add(parent,objects);
@@ -203,6 +204,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 
 	protected void removeChildrenFromViewer(final Object parent, final Object ... objects) {
 		asyncViewerRefresh(new Runnable() {
+			@Override
 			public void run() {
 				synchronized (viewer) {
 					viewer.remove(parent, objects);
@@ -212,6 +214,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	}
 	protected void updateChildrenFromViewer(final Object ... objects) {
 		asyncViewerRefresh(new Runnable() {
+			@Override
 			public void run() {
 				synchronized (viewer) {
 					viewer.update(objects, null);
@@ -222,6 +225,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 
 	protected void refreshViewer(final Object object) {
 		asyncViewerRefresh(new Runnable() {
+			@Override
 			public void run() {
 				synchronized (viewer) {
 					if(object != null) {

@@ -67,6 +67,7 @@ public class GeneralProjectImportOperation extends AbstractProjectImportOperatio
 		final boolean[] overwrite = new boolean[1];
 		Display.getDefault().syncExec(new Runnable() {
 
+			@Override
 			public void run() {
 				overwrite[0] = MessageDialog.openQuestion(
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),

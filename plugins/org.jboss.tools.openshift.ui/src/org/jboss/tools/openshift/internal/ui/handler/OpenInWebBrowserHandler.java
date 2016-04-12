@@ -119,6 +119,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 			this.shell = shell;
 		}
 
+		@Override
 		protected IStatus updateUI(IProgressMonitor monitor) {
 			if (routes == null || routes.isEmpty()) {
 				return nothingToOpenDialog(shell);

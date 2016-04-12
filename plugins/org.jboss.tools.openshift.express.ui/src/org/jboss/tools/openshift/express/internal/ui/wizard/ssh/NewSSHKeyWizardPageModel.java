@@ -113,10 +113,12 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		firePropertyChange(PROPERTY_SSH2_HOME, this.ssh2Home, this.ssh2Home = ssh2Home);
 	}
 
+	@Override
 	public File getPublicKey() {
 		return new File(ssh2Home, publicKeyName);
 	}
 
+	@Override
 	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
 		SSHKeyPair keyPair = createSSHKey();
 		SSHUtils.addToPrivateKeysPreferences(new File(keyPair.getPrivateKeyPath()));

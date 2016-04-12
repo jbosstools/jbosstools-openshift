@@ -26,6 +26,7 @@ public class EGitCoreActivator implements BundleActivator {
 		return context;
 	}
 
+	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		EGitCoreActivator.context = bundleContext;
 		//DelegatingJBoss7ServerBehavior.addDelegateMapping(EgitBehaviourDelegate.ID, EgitBehaviourDelegate.class);
@@ -33,6 +34,7 @@ public class EGitCoreActivator implements BundleActivator {
 	}
 
 
+	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		EGitCoreActivator.context = null;
 	}

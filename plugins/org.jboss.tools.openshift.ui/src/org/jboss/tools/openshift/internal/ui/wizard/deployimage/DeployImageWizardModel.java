@@ -93,6 +93,7 @@ public class DeployImageWizardModel
 	
 	private final List<String> imageNames = new ArrayList<>();
 	
+	@Override
 	public void setOriginatedFromDockerExplorer(boolean orig) {
 		this.originatedFromDockerExplorer = orig;
 	}

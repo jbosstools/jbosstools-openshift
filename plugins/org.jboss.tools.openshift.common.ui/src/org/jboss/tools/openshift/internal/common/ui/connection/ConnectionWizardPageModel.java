@@ -462,6 +462,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return connectionsFactory.getAll(connectionType);
 	}
 
+	@Override
 	public void dispose() {
 		connectionsFactory.close();
 	}

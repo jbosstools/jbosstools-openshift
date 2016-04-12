@@ -62,6 +62,7 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 		this.pageModel = pageModel;
 	}
 
+	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 

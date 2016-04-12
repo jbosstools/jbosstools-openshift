@@ -310,6 +310,7 @@ public class ExpressServerWizardComposite {
 
 	protected ModifyListener onModifyDeployFolder() {
 		return new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				deployFolder = deployFolderText.getText();
 			}
@@ -318,6 +319,7 @@ public class ExpressServerWizardComposite {
 
 	protected ModifyListener onModifyRemote() {
 		return new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				remote = remoteText.getText();
 			}
@@ -326,6 +328,7 @@ public class ExpressServerWizardComposite {
 
 	protected SelectionAdapter onClickCreateOrImport() {
 		return new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ExpressApplicationWizard wizard = null;
 				if(application != null){

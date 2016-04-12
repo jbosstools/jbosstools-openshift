@@ -45,6 +45,7 @@ public class KeyValueItem implements IKeyValueItem {
 		this.value = value;
 	}
 	
+	@Override
 	public KeyValueItem clone() {
 		return new KeyValueItem(getKey(), getValue());
 	}

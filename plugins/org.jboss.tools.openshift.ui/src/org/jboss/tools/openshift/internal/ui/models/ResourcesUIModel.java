@@ -97,6 +97,7 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		firePropertyChange(PROP_BUILDS, resources.get(ResourceKind.BUILD), resources.put(ResourceKind.BUILD, new ArrayList<>(builds)));
 	}
 	
+	@Override
 	public void setBuildResources(Collection<IBuild> builds) {
 		firePropertyChange(PROP_BUILDS, resources.get(ResourceKind.BUILD), resources.put(ResourceKind.BUILD, init(builds)));
 	}

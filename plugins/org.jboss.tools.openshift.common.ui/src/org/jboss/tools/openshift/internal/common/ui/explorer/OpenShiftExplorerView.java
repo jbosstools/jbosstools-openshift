@@ -87,6 +87,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	
 	private void asyncShowConnectionsOrExplanations() {
 		Display.getDefault().asyncExec(new Runnable() { 
+			@Override
 			public void run() {
 				showConnectionsOrExplanations(connectionsPane, explanationsPane);
 			}
@@ -130,6 +131,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 
 	private SelectionAdapter onExplanationClicked(final Control connectionsPane, final Control explanationPane) {
 		return new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ConnectionWizard wizard = new ConnectionWizard();
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getModalDialogShellProvider()

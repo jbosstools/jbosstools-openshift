@@ -41,18 +41,22 @@ public class ContainerElement implements IProperty {
 			children.add(child);
 		}
 
+		@Override
 		public final Object[] getChildren() {
 			return children.toArray();
 		}
 
+		@Override
 		public boolean hasChildren() {
 			return !children.isEmpty();
 		}
 
+		@Override
 		public final ContainerElement getParent() {
 			return parent;
 		}
 
+		@Override
 		public boolean isLink() {
 			return false;
 		}

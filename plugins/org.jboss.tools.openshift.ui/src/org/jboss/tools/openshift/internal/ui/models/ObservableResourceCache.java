@@ -118,6 +118,7 @@ public class ObservableResourceCache implements IResourceCache {
 	 * @param resource
 	 * @return true if cached; false otherwise
 	 */
+	@Override
 	public boolean add(IResource resource) {
 		if(resource == null) return false;
 		if(cache.containsKey(getCacheKey(resource))) {
@@ -171,6 +172,7 @@ public class ObservableResourceCache implements IResourceCache {
 	 * @param resource
 	 * @return true if removed; false otherwise
 	 */
+	@Override
 	public boolean remove(IResource resource) {
 		if(resource == null) return false;
 		if(!cache.containsKey(getCacheKey(resource))) {
@@ -237,6 +239,7 @@ public class ObservableResourceCache implements IResourceCache {
 	 * @param resource
 	 * @return true if updated; false otherwise
 	 */
+	@Override
 	public boolean update(IResource resource) {
 		if(resource == null) return false;
 		if(alreadyProcessedResource(resource)) {

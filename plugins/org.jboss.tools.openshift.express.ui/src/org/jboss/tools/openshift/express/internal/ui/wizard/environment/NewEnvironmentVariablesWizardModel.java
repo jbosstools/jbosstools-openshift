@@ -30,6 +30,7 @@ public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVaria
 		this.domain = domain;
 	}
 
+	@Override
 	public void refreshEnvironmentVariables() {
 		loadEnvironmentVariables();
 	}
@@ -57,6 +58,7 @@ public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVaria
 				&& domain.canCreateApplicationWithEnvironmentVariables();
 	}
 	
+	@Override
 	public String getHost() {
 		if (domain == null
 				|| domain.getUser() == null) {
